@@ -14,7 +14,7 @@ import { ButtonModule } from 'primeng-lts/button';
 import { MessageService } from 'primeng-lts/api';
 import { ToastModule } from 'primeng-lts/toast';
 import { PrimengPluginModule, ProfiloComponent } from '@bds/primeng-plugin';
-import { UnitaDocumentaria, Registro, DocumentoRegistro } from '@bds/ng-internauta-model';
+import { Documento, Registro, DocumentoRegistro } from '@bds/ng-internauta-model';
 import { NtJwtLoginComponent, NtJwtLoginModule } from '@bds/nt-jwt-login';
 import { loginModuleConfig } from './config/module-config';
 import { RouterModule } from '@angular/router';

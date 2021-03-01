@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { promise } from 'protractor';
-import { UnitaDocumentaria, Registro, DocumentoRegistro } from '@bds/ng-internauta-model';
+import { Documento, Registro, DocumentoRegistro } from '@bds/ng-internauta-model';
 import { RegistrationServiceService } from './registration-service.service';
 import { registerLocaleData } from '@angular/common';
 import { resolve } from 'dns';
 import { async } from '@angular/core/testing';
+import { UserServiceService } from './user-service.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,9 +14,9 @@ import { async } from '@angular/core/testing';
 export class DocumentServiceService {
   private propostaNumberForTest = Math.round(Math.random() * 100);
 
-  constructor(private registrationService: RegistrationServiceService) { }
+  constructor(private registrationService: RegistrationServiceService, private userService: UserServiceService) { }
 
-  public loadDocumentDataById(id: number): Promise<UnitaDocumentaria>{
+  public loadDocumentDataById(id: number): Promise<Documento>{
     // per test
     // const doc = this.getFakeUD();
 
@@ -25,15 +26,16 @@ export class DocumentServiceService {
     return new Promise((resolve) => resolve(this.getFakeUD()));
   }
 
-  private getFakeUD(): UnitaDocumentaria{
-    const doc: UnitaDocumentaria = new UnitaDocumentaria();
+  private getFakeUD(): Documento{
+    const doc: Documento = new Documento();
     doc.dataCreazione = new Date();
     // doc.idUtenteCreazione.idPersona.descrizione = 'Campa Rosanna';
-    doc.numeroProposta = '2021-' + this.propostaNumberForTest; ;
+    doc.numeroProposta = '2021-' + this.propostaNumberForTest;
+    doc.idUtenteCreazione = this.userService.getUtenteConnesso();
     return doc;
   }
 
-  public registerDocument(doc: UnitaDocumentaria, codiceRegistro: string): Promise<UnitaDocumentaria>{
+  public registerDocument(doc: Documento, codiceRegistro: string): Promise<Documento>{
     const documentoRegistro = this.registrationService.getNewDocumentoRegistro(doc, codiceRegistro);
     doc.dataRegistrazione = documentoRegistro.dataRegistrazione;
     if (!doc.registriList) {
@@ -45,7 +47,7 @@ export class DocumentServiceService {
     return new Promise((resolve) => resolve(doc) );
   }
 
-  public async protocollaIn(doc: UnitaDocumentaria): Promise<UnitaDocumentaria> {
+  public async protocollaIn(doc: Documento): Promise<Documento> {
       const res = await this.registerDocument(doc, 'PG_IN');
       console.log('Ho aspettato la Res', res);
 

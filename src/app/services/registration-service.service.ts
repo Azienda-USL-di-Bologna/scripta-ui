@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { UnitaDocumentaria, Registro, DocumentoRegistro } from '@bds/ng-internauta-model';
+import { Documento, Registro, DocumentoRegistro } from '@bds/ng-internauta-model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +12,7 @@ export class RegistrationServiceService {
     return this.registerNumberForTest++;
   }
 
-  getNewDocumentoRegistro(doc: UnitaDocumentaria, codiceRegistro: string): DocumentoRegistro{
+  getNewDocumentoRegistro(doc: Documento, codiceRegistro: string): DocumentoRegistro{
     const r = new Registro();
     r.codiceRegistro = codiceRegistro;
     r.nomeRegistro = 'Protocollo';

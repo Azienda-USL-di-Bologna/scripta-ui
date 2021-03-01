@@ -32,7 +32,7 @@
     <span>
       Creato il {{document?.dataCreazione | date : 'dd/MM/yyyy HH:mm'}}
       <br>
-      da: CICCIO PASTICCIO
+      da: {{document?.idUtenteCreazione?.idPersona?.descrizione}}
     </span>
   </h4>
   <textarea pInputTextarea (ngModelChange)="ngOnChanges($event)" placeholder="Inserisci l'oggetto"

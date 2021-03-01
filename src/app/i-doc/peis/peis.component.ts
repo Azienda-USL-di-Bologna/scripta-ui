@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
-import { UnitaDocumentaria } from '@bds/ng-internauta-model';
+import { Documento } from '@bds/ng-internauta-model';
 
 
 
@@ -9,7 +9,7 @@ import { UnitaDocumentaria } from '@bds/ng-internauta-model';
   styleUrls: ['./peis.component.scss']
 })
 export class PeisComponent implements OnInit, OnChanges {
-  @Input() document: UnitaDocumentaria | undefined;
+  @Input() document: Documento | undefined;
   @Output() save = new EventEmitter<any>();
   @Output() protocolla = new EventEmitter<any>();
 

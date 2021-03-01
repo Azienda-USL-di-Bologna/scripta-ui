@@ -13,7 +13,7 @@ import { APPLICATION, LOGIN_ROUTE } from 'src/environments/app-constants';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  title = 'FlowDoc';
+  title = 'Scripta';
   public headerFeaturesConfig: HeaderFeaturesConfig  = new HeaderFeaturesConfig();
   private subscriptions: Subscription[] = [];
   public utenteConnesso: UtenteUtilities | undefined;

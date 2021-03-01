@@ -24,7 +24,7 @@ export const IDOCX_ROUTE = 'i-docx';
 // export const BABORG_ROUTE = 'baborg';
 export const LOGGED_OUT_ROUTE = 'logged-out';
 export const BABELMAN_URL = 'https://babelman-auslbo.avec.emr.it/';
-export const APPLICATION = 'flowdoc';
+export const APPLICATION = 'scripta';
 
 export enum BaseUrlType {
   Baborg,
