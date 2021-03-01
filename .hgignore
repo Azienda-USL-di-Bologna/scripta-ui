@@ -1,0 +1,58 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# compiled output
+dist
+tmp
+out-tsc
+
+# dependencies
+node_modules
+
+# IDEs and editors
+.idea
+.project
+.classpath
+.c9/*
+#*.launch
+.settings/
+#*.sublime-workspace
+.editorconfig
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+.sass-cache
+connect.lock
+coverage
+libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+typings
+
+# System Files
+.DS_Store
+Thumbs.db
+
+#git files
+.git/*
+syntax: glob
+projects/bds/primeng-plugin/package-lock.json
+yarn.lock
+package-lock.json
+projects/bds/ng-internauta-model/package.json.orig
+projects/bds/ng-internauta-model/src/lib/entities/baborg/PecAzienda.ts.orig
+projects/bds/ng-internauta-model/ng-package.dev.json
+projects/bds/common-components/ng-package.dev.json
+projects/bds/primeng-plugin/ng-package.dev.json
+projects/bds/nt-communicator/ng-package.dev.json
+projects/bds/nt-jwt-login/ng-package.dev.json
+
+#other
+e2e
+.browserslistrc

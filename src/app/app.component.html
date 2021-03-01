@@ -1,0 +1,7 @@
+
+<prp-header [addToRight]="headerTemplate" [appName]="'Baborg'" [logoPath]="'assets/images/logo.png'"></prp-header>
+<ng-template #headerTemplate >
+  <prp-header-features [params]="headerFeaturesConfig"></prp-header-features>
+</ng-template>
+
+<router-outlet></router-outlet>

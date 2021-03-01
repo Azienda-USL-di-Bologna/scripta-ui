@@ -1,0 +1,38 @@
+/* You can add global styles to this file, and also import other style files */
+
+body {margin: 0;}
+
+::ng-deep .buttonbar-header .buttonbar {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    padding: 0 1em;
+    &:before, &:after {
+        content: none;
+    }
+}
+
+button {
+    margin-right: .25em;
+    margin-top: 0.571em;
+    margin-bottom: 0.571em;
+}
+.my-button {
+    width: auto;
+    white-space: nowrap;
+    ::ng-deep .ui-button-text {
+        margin-left: 16px;
+    }
+}
+.custom-primary-button {
+    border: 1px solid #203244 !important;
+    background: #2e4a65 !important;
+}
+.custom-primary-button:hover {
+    border-color: #2e4a65 !important;
+    background: #406284 !important;
+    color: #ffffff !important;
+    font-weight: normal !important;
+}
+

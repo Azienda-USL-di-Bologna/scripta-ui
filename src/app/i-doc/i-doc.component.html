@@ -1,0 +1,4 @@
+<peis *ngIf="unitaDocumentaria" [document]="unitaDocumentaria"
+    (save)="onDoSave($event)" (protocolla)="onDoProtocolla($event)" ></peis>
+
+<p-toast position="center" (onClose)="clearMessages()"></p-toast>

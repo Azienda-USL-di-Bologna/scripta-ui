@@ -1,0 +1,41 @@
+<div *ngIf="document" style="max-width: 1000px; margin:0 auto">
+  <header class="buttonbar-header">
+    <div class="buttonbar">
+      <button pButton type="button" label="Salva" icon="material-icons save"
+        (click)="doButtonSave()" class="my-button custom-primary-button">
+      </button>
+      
+      <button pButton type="button" label="Protocolla" icon="material-icons-outlined person_add"
+        (click)="doButtonProtocolla()" class="my-button custom-primary-button" 
+        [disabled]="document.dataRegistrazione || !document.oggetto">
+      </button>
+  
+      <button pButton type="button" label="Note" 
+        (click)="doButtonNote()" class="my-button custom-primary-button">
+      </button>
+    </div>
+  </header>
+
+  <h4 style="display: flex; justify-content:space-between;">
+    <span *ngIf="!document?.registriList; then proposta else protocollo"></span>
+    <ng-template #proposta><span>Proposta {{document?.numeroProposta}}</span></ng-template>
+    <ng-template #protocollo>
+      <ng-template  ngFor let-documentoRegistro [ngForOf]="document.registriList" let-i="index">
+      <span *ngIf="documentoRegistro">
+        <span><h3>{{documentoRegistro.idRegistro.codiceRegistro}} {{documentoRegistro.numero}}</h3>
+          {{documentoRegistro.idRegistro.nomeRegistro}} del {{documentoRegistro.dataRegistrazione | date : 'dd/MM/yyyy HH:mm'}}
+        </span>
+      </span>
+      </ng-template>
+    </ng-template>
+    
+    <span>
+      Creato il {{document?.dataCreazione | date : 'dd/MM/yyyy HH:mm'}}
+      <br>
+      da: CICCIO PASTICCIO
+    </span>
+  </h4>
+  <textarea pInputTextarea (ngModelChange)="ngOnChanges($event)" placeholder="Inserisci l'oggetto"
+    style="width: 100%;" rows="5" cols="30"
+    [(ngModel)]="document!.oggetto"></textarea>
+</div>
