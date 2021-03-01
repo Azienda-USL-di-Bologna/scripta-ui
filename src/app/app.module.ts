@@ -5,6 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { PeisComponent } from './i-doc/peis/peis.component';
 import { InputTextareaModule } from 'primeng-lts/inputtextarea';
+import {InputTextModule} from 'primeng-lts/inputtext';
 import { FormsModule } from '@angular/forms';
 import { MittenteComponent } from './mittente/mittente.component';
 import { DestinatariComponent } from './destinatari/destinatari.component';
