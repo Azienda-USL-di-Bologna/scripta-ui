@@ -37,5 +37,12 @@
   </h4>
   <textarea pInputTextarea (ngModelChange)="ngOnChanges($event)" placeholder="Inserisci l'oggetto"
     style="width: 100%;" rows="5" cols="30"
+    [disabled]="document.dataRegistrazione != null" 
     [(ngModel)]="document!.oggetto"></textarea>
+  <br>
+  <h3>Protocollato da 
+    <input type="text" pInputText [disabled]="document.dataRegistrazione != null" 
+    style="width: 50%;" class="p-inputtext-lg"
+    [(ngModel)]="descrizioneUtenteRegistrante">
+  </h3>
 </div>

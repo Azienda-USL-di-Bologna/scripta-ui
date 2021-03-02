@@ -14,11 +14,13 @@ export class PeisComponent implements OnInit, OnChanges {
   @Output() protocolla = new EventEmitter<any>();
 
   public autoResize: Boolean = true;
+  public descrizioneUtenteRegistrante: String | undefined;
+
   constructor() { }
 
   ngOnInit(): void {
     console.log('DOCUMENT', this.document);
-
+    this.descrizioneUtenteRegistrante = this.document?.idUtenteCreazione?.idPersona.descrizione;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
