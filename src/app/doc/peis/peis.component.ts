@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
+/* import { Component, OnInit, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { UnitaDocumentaria } from '@bds/ng-internauta-model';
 
 
@@ -41,3 +41,4 @@ export class PeisComponent implements OnInit, OnChanges {
   }
 
 }
+ */
