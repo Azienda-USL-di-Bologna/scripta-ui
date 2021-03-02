@@ -12,6 +12,7 @@ import { switchMap } from "rxjs/operators";
 })
 export class DocComponent implements OnInit {
   private subscriptions: Subscription[] = [];
+  private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public doc: Doc = new Doc();
 
   constructor(
@@ -44,6 +45,18 @@ export class DocComponent implements OnInit {
       id,
       ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithIdAziendaAndIdPersonaCreazione);
   }
+
+  /**
+   * Parte un timeout al termine del quale viene salvato il campo della firma specificato
+   * @param doc 
+   * @param field 
+   */
+  /* public timeOutAndSaveDoc(doc: Doc, field: string) {
+    if (this.savingTimeout) clearTimeout(this.savingTimeout);
+    this.savingTimeout = setTimeout(() => {
+      this.updateDoc(rowData, field);
+    }, 300);
+  } */
 
   public onDoSave(event: any): void{
     console.log("Emittend event", event);

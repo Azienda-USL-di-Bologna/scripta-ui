@@ -17,6 +17,13 @@ import { ToolbarModule } from "primeng-lts/toolbar";
     DialogModule,
     ToolbarModule
   ],
+  exports: [
+    ButtonModule,
+    InputTextareaModule,
+    ToastModule,
+    DialogModule,
+    ToolbarModule
+  ],
   providers: [MessageService, DialogService]
 })
 export class PrimeNgModule { }

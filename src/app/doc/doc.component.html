@@ -4,22 +4,21 @@
 <p-toast position="center" (onClose)="clearMessages()"></p-toast>
 
 <div *ngIf="doc" style="max-width: 1000px; margin:0 auto">
-  <div>
-    <div class="buttonbar">
-      <button pButton type="button" label="Salva" icon="material-icons save"
-        (click)="doButtonSave()" class="my-button custom-primary-button">
-      </button>
-      
-      <!-- <button pButton type="button" label="Protocolla" icon="material-icons-outlined person_add"
-        (click)="doButtonProtocolla()" class="my-button custom-primary-button" 
-        [disabled]="doc.dataRegistrazione || !document.oggetto">
-      </button> -->
-  
-      <button pButton type="button" label="Note" 
-        (click)="doButtonNote()" class="my-button custom-primary-button">
-      </button>
-    </div>
-  </div>
+
+  <p-toolbar class="buttonbar">
+    <button pButton type="button" label="Salva" icon="material-icons save"
+      (click)="doButtonSave()" class="my-button custom-primary-button">
+    </button>
+    
+    <button pButton type="button" label="Protocolla" icon="material-icons-outlined person_add"
+      (click)="doButtonProtocolla()" class="my-button custom-primary-button" 
+      ><!-- [disabled]="doc?.dataRegistrazione || !document.oggetto" -->
+    </button>
+
+    <button pButton type="button" label="Note" 
+      (click)="doButtonNote()" class="my-button custom-primary-button">
+    </button>
+  </p-toolbar>
   
     <h4 style="display: flex; justify-content:space-between;">
       <!-- <span *ngIf="!document?.registriList; then proposta else protocollo"></span>
@@ -44,6 +43,7 @@
       pInputTextarea 
       placeholder="Inserisci l'oggetto"
       style="width: 100%;" rows="5" cols="30"
-      [(ngModel)]="doc!.oggetto"></textarea>
+      [(ngModel)]="doc!.oggetto">
+    </textarea>
   </div>
   
