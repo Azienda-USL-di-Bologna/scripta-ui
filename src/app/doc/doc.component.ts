@@ -1,27 +1,38 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
-import { Doc, DocService, ENTITIES_STRUCTURE } from "@bds/ng-internauta-model";
+import { Doc, ENTITIES_STRUCTURE } from "@bds/ng-internauta-model";
+import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { MessageService } from "primeng-lts/api";
 import { Observable, Subscription } from "rxjs";
 import { switchMap } from "rxjs/operators";
+import { ExtendedDocService } from "./extended-doc.service";
 
 @Component({
   selector: "doc",
   templateUrl: "./doc.component.html",
   styleUrls: ["./doc.component.scss"]
 })
-export class DocComponent implements OnInit {
+export class DocComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public doc: Doc = new Doc();
+  public descrizioneUtenteRegistrante: string | undefined;
 
   constructor(
-    private docService: DocService,
-    private router: Router,
+    private extendedDocService: ExtendedDocService,
+    private loginService: NtJwtLoginService,
     private messageService: MessageService,
     private route: ActivatedRoute) { }
 
   ngOnInit(): void {
+    this.subscriptions.push(
+      this.loginService.loggedUser$.subscribe(
+        (utenteUtilities: UtenteUtilities) => {
+          this.descrizioneUtenteRegistrante = utenteUtilities.getUtente().idPersona.descrizione;
+        }
+      )
+    );
+
     this.subscriptions.push(
       this.route.paramMap.pipe(
         switchMap((params: ParamMap) =>
@@ -41,27 +52,31 @@ export class DocComponent implements OnInit {
   }
 
   private loadDocument(id: number): Observable<Doc> {
-    return this.docService.getByIdHttpCall(
+    return this.extendedDocService.getByIdHttpCall(
       id,
       ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithIdAziendaAndIdPersonaCreazione);
   }
 
   /**
    * Parte un timeout al termine del quale viene salvato il campo della firma specificato
-   * @param doc 
-   * @param field 
+   * @param doc
+   * @param field
    */
-  /* public timeOutAndSaveDoc(doc: Doc, field: string) {
-    if (this.savingTimeout) clearTimeout(this.savingTimeout);
+  public timeOutAndSaveDoc(doc: Doc, field: keyof Doc) {
+    console.log("timeOutAndSaveDoc");
+    if (this.savingTimeout) {
+      clearTimeout(this.savingTimeout);
+    }
     this.savingTimeout = setTimeout(() => {
-      this.updateDoc(rowData, field);
+      this.subscriptions.push(this.extendedDocService.updateDoc(doc, [field]).subscribe(res => this.doc.version = res.version));
     }, 300);
-  } */
+  }
+
 
   public onDoSave(event: any): void{
     console.log("Emittend event", event);
   }
-  
+
   public onDoProtocolla(event: any): void{
     console.log("Emittend event", event);
     /* this.docService.protocollaIn(event).then(res => {
@@ -85,5 +100,14 @@ export class DocComponent implements OnInit {
   }
   public doButtonNote(): void {
     console.log("nothing");
+  }
+
+  public ngOnDestroy() {
+    if (this.subscriptions) {
+      this.subscriptions.forEach(
+        s => s.unsubscribe()
+      );
+    }
+    this.subscriptions = [];
   }
 }

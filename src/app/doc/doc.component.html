@@ -3,47 +3,76 @@
  -->
 <p-toast position="center" (onClose)="clearMessages()"></p-toast>
 
-<div *ngIf="doc" style="max-width: 1000px; margin:0 auto">
-
-  <p-toolbar class="buttonbar">
-    <button pButton type="button" label="Salva" icon="material-icons save"
-      (click)="doButtonSave()" class="my-button custom-primary-button">
-    </button>
-    
-    <button pButton type="button" label="Protocolla" icon="material-icons-outlined person_add"
-      (click)="doButtonProtocolla()" class="my-button custom-primary-button" 
-      ><!-- [disabled]="doc?.dataRegistrazione || !document.oggetto" -->
-    </button>
-
-    <button pButton type="button" label="Note" 
-      (click)="doButtonNote()" class="my-button custom-primary-button">
-    </button>
-  </p-toolbar>
+<p-toolbar>
+  <button pButton type="button" label="Salva" icon="material-icons save"
+    (click)="doButtonSave()" class="my-button custom-primary-button">
+  </button>
   
-    <h4 style="display: flex; justify-content:space-between;">
-      <!-- <span *ngIf="!document?.registriList; then proposta else protocollo"></span>
-      <ng-template #proposta><span>Proposta {{document?.numeroProposta}}</span></ng-template>
-      <ng-template #protocollo>
-        <ng-template  ngFor let-documentoRegistro [ngForOf]="document.registriList" let-i="index">
-        <span *ngIf="documentoRegistro">
-          <span><h3>{{documentoRegistro.idRegistro.codiceRegistro}} {{documentoRegistro.numero}}</h3>
-            {{documentoRegistro.idRegistro.nomeRegistro}} del {{documentoRegistro.dataRegistrazione | date : 'dd/MM/yyyy HH:mm'}}
-          </span>
+  <button pButton type="button" label="Protocolla" icon="material-icons-outlined person_add"
+    (click)="doButtonProtocolla()" class="my-button custom-primary-button" 
+    ><!-- [disabled]="doc?.dataRegistrazione || !document.oggetto" -->
+  </button>
+
+  <button pButton type="button" label="Note" 
+    (click)="doButtonNote()" class="my-button custom-primary-button">
+  </button>
+</p-toolbar>
+<main>
+  <section class="info-documento">
+    <!-- <span *ngIf="!document?.registriList; then proposta else protocollo"></span>
+    <ng-template #proposta><span>Proposta {{document?.numeroProposta}}</span></ng-template>
+    <ng-template #protocollo>
+      <ng-template  ngFor let-documentoRegistro [ngForOf]="document.registriList" let-i="index">
+      <span *ngIf="documentoRegistro">
+        <span><h3>{{documentoRegistro.idRegistro.codiceRegistro}} {{documentoRegistro.numero}}</h3>
+          {{documentoRegistro.idRegistro.nomeRegistro}} del {{documentoRegistro.dataRegistrazione | date : 'dd/MM/yyyy HH:mm'}}
         </span>
-        </ng-template>
-      </ng-template> -->
+      </span>
+      </ng-template>
+    </ng-template> -->
       
+    <span class="dati-creazione">
+      <span>
+      Proposta n° 6 del 2021
+      </span>
       <span>
         Creato il giorno {{ removeZoneFromTime(doc?.dataCreazione?.toString()) | date: 'EE d MMM y, H:mm' | titlecase}}
-        <br>
         da: {{doc?.idPersonaCreazione?.descrizione}}
       </span>
-    </h4>
-    <textarea 
+    </span>
+    <label for="oggetto" class="label-oggetto">Oggetto</label>
+    <textarea  #oggetto
+      class="oggetto"
       pInputTextarea 
       placeholder="Inserisci l'oggetto"
-      style="width: 100%;" rows="5" cols="30"
+      rows="5" 
+      cols="30"
+      (keyup)="timeOutAndSaveDoc(doc, 'oggetto')"
       [(ngModel)]="doc!.oggetto">
     </textarea>
-  </div>
-  
+    <div class="protocollato-da-box">
+      <label for="protocollatoda">Protocollato da</label>
+      <input #protocollatoda
+        pInputText 
+        type="text" 
+        [disabled]="false"
+        class=""
+        [(ngModel)]="descrizioneUtenteRegistrante">
+    </div>
+  </section>
+  <p-accordion>
+    <p-accordionTab header="Mittente" [selected]="true">
+        componente mittente
+    </p-accordionTab>
+    <p-accordionTab header="Destinatari">
+      <ng-template pTemplate="content">
+        componente destinatari in Lazy Load
+      </ng-template>
+    </p-accordionTab>
+    <p-accordionTab header="Allegati">
+      <ng-template pTemplate="content">
+        componente allegati in Lazy Load
+      </ng-template>
+    </p-accordionTab>
+  </p-accordion>
+</main>

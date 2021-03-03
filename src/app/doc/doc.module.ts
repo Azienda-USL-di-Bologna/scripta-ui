@@ -4,6 +4,7 @@ import { DocRoutingModule } from "./doc-routings.module";
 import { DocComponent } from "./doc.component";
 import { PrimeNgModule } from "../primeng.module";
 import { ScriptaCommonModule } from "../scripta-common.module";
+import { ExtendedDocService } from "./extended-doc.service";
 
 @NgModule({
   imports: [
@@ -12,6 +13,7 @@ import { ScriptaCommonModule } from "../scripta-common.module";
     PrimeNgModule,
     ScriptaCommonModule
   ],
-  declarations: [DocComponent]
+  declarations: [DocComponent],
+  providers: [ExtendedDocService]
 })
 export class DocModule { }

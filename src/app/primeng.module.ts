@@ -6,6 +6,8 @@ import { ToastModule } from "primeng-lts/toast";
 import { DialogService } from "primeng-lts/dynamicdialog";
 import { DialogModule } from "primeng-lts/dialog";
 import { ToolbarModule } from "primeng-lts/toolbar";
+import { InputTextModule } from "primeng-lts/inputtext";
+import { AccordionModule } from 'primeng-lts/accordion';
 
 @NgModule({
   declarations: [
@@ -15,14 +17,18 @@ import { ToolbarModule } from "primeng-lts/toolbar";
     InputTextareaModule,
     ToastModule,
     DialogModule,
-    ToolbarModule
+    ToolbarModule,
+    InputTextModule,
+    AccordionModule
   ],
   exports: [
     ButtonModule,
     InputTextareaModule,
     ToastModule,
     DialogModule,
-    ToolbarModule
+    ToolbarModule,
+    InputTextModule,
+    AccordionModule
   ],
   providers: [MessageService, DialogService]
 })

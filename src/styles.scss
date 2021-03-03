@@ -11,3 +11,18 @@ body{
     margin: 0;
     overflow: hidden;
 }
+* {
+    font-family: "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+
+.custom-primary-button {
+    border: 1px solid #203244 !important;
+    background: #2e4a65 !important;
+}
+.custom-primary-button:hover {
+    border-color: #2e4a65 !important;
+    background: #406284 !important;
+    color: #ffffff !important;
+    font-weight: normal !important;
+}

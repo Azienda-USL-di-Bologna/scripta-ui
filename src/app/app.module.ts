@@ -4,9 +4,9 @@ import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 
-import { MittenteComponent } from "./mittente/mittente.component";
-import { DestinatariComponent } from "./destinatari/destinatari.component";
-import { AllegatiComponent } from "./allegati/allegati.component";
+import { MittenteComponent } from "./doc/mittente/mittente.component";
+import { DestinatariComponent } from "./doc/destinatari/destinatari.component";
+import { AllegatiComponent } from "./doc/allegati/allegati.component";
 import { PrimengPluginModule, ProfiloComponent } from "@bds/primeng-plugin";
 import { NtJwtLoginModule } from "@bds/nt-jwt-login";
 import { loginModuleConfig } from "./config/module-config";
