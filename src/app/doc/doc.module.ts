@@ -5,15 +5,20 @@ import { DocComponent } from "./doc.component";
 import { PrimeNgModule } from "../primeng.module";
 import { ScriptaCommonModule } from "../scripta-common.module";
 import { ExtendedDocService } from "./extended-doc.service";
+import {MittenteComponent} from "./mittente/mittente.component";
+
 
 @NgModule({
-  imports: [
-    CommonModule,
-    DocRoutingModule,
-    PrimeNgModule,
-    ScriptaCommonModule
+    imports: [
+        CommonModule,
+        DocRoutingModule,
+        PrimeNgModule,
+        ScriptaCommonModule
+    ],
+  declarations: [
+      DocComponent,
+      MittenteComponent
   ],
-  declarations: [DocComponent],
   providers: [ExtendedDocService]
 })
 export class DocModule { }

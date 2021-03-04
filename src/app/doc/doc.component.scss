@@ -10,11 +10,7 @@ main {
     height: 100%;
     display: flex;
     flex-direction: column;
-    label {
-        font-weight: bold;
-        color: #333333;
-        padding-right: 10px;
-    }
+
     p-toolbar {
 
     }
@@ -38,4 +34,8 @@ main {
     .protocollato-da-box {
         padding: 10px 0;
     }
+
 }
+    label {
+        align-self: baseline;
+    }

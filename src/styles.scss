@@ -14,7 +14,15 @@ body{
 * {
     font-family: "Open Sans", "Helvetica Neue", sans-serif;
 }
-
+label {
+    font-weight: bold;
+    color: #333333;
+    padding-right: 10px;
+    align-self: center;
+}
+input {
+    width: 100%;
+}
 
 .custom-primary-button {
     border: 1px solid #203244 !important;

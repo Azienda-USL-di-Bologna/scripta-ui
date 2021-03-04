@@ -4,7 +4,6 @@ import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 
-import { MittenteComponent } from "./doc/mittente/mittente.component";
 import { DestinatariComponent } from "./doc/destinatari/destinatari.component";
 import { AllegatiComponent } from "./doc/allegati/allegati.component";
 import { PrimengPluginModule, ProfiloComponent } from "@bds/primeng-plugin";
@@ -24,12 +23,13 @@ import { PrimeNgModule } from "./primeng.module";
 import { ScriptaCommonModule } from "./scripta-common.module";
 
 
+
+
 registerLocaleData(localeIt, "it-IT", localeItExtra);
 
 @NgModule({
   declarations: [
     AppComponent,
-    MittenteComponent,
     DestinatariComponent,
     AllegatiComponent,
     HomeComponent
@@ -44,8 +44,14 @@ registerLocaleData(localeIt, "it-IT", localeItExtra);
     ScriptaCommonModule,
     NtCommunicatorModule
   ],
-  providers: [DatePipe, { provide: LOCALE_ID, useValue: "it-IT" }, ],
+  providers: [
+    DatePipe,
+
+    {provide: LOCALE_ID, useValue: "it-IT"},
+  ],
   bootstrap: [AppComponent],
+  exports: []
+  ,
   entryComponents: [ProfiloComponent]
 })
 export class AppModule { }
