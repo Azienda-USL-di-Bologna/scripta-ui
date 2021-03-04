@@ -73,11 +73,11 @@ export class DocComponent implements OnInit, OnDestroy {
   }
 
 
-  public onDoSave(event: any): void{
+  public onDoSave(event: any): void {
     console.log("Emittend event", event);
   }
 
-  public onDoProtocolla(event: any): void{
+  public onDoProtocolla(event: any): void {
     console.log("Emittend event", event);
     /* this.docService.protocollaIn(event).then(res => {
       console.log('Res di onProtocolla', res);
@@ -88,7 +88,7 @@ export class DocComponent implements OnInit, OnDestroy {
     }); */
   }
 
-  public clearMessages(): void{
+  public clearMessages(): void {
     this.messageService.clear();
   }
 

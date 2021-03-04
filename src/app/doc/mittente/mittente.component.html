@@ -1,1 +1,76 @@
-<p>mittente works!</p>
+<div class="mittente-box p-grid">
+    <label class="p-col-3" for="mittente">Mittente</label>
+<!--    <p-autoComplete id="mittente"-->
+<!--            [(ngModel)]="selectedMittente"-->
+<!--            [suggestions]="filteredMittente"-->
+<!--            (completeMethod)="searchMittente($event)"-->
+<!--            field="name"-->
+<!--            appendTo="body"-->
+<!--            class="p-col">-->
+<!--    </p-autoComplete>-->
+    <div  class="p-col">
+        <input id="mittente"
+               type="text"
+               pInputText
+               [(ngModel)]="mittente">
+    </div>
+</div>
+<div class="mittente-box p-grid">
+    <label class="p-col-3" for="origine">Origine</label>
+    <p-autoComplete id="Origine"
+            [(ngModel)]="selectedTipo"
+            [suggestions]="filteredTipo"
+            (completeMethod)="searchTipo($event)"
+            field="name"
+            [dropdown]="true"
+            appendTo="body"
+            class="p-col">
+    </p-autoComplete>
+    <label class="p-col-2" for="mezzo">Mezzo</label>
+    <p-autoComplete id="mezzo"
+            [(ngModel)]="selectedMezzo"
+            [suggestions]="filteredMezzo"
+            (completeMethod)="searchMezzo($event)"
+            field="name"
+            [dropdown]="true"
+            appendTo="body"
+            class="p-col">
+    </p-autoComplete>
+</div>
+<div class="mittente-box p-grid">
+    <label class="p-col-3" for="dataArrivo">Data di arrivo</label>
+    <p-calendar
+            id="dataArrivo"
+            [(ngModel)]="dataDiArrivo"
+            dateFormat="dd.mm.yy"
+            [showIcon]="true"
+            inputId="icon"
+            appendTo="body"
+            class="p-col-3">
+    </p-calendar>
+    <p-button
+            label="pec di origine"
+            styleClass="p-button-link"
+            class="p-col">
+
+    </p-button>
+</div>
+<div class="mittente-box p-grid">
+    <label class="p-col-3" for="datiProtocolloEsterno">Dati protocollo Esterno</label>
+    <p-inputNumber
+            id="datiProtocolloEsterno"
+            inputId="integeronly"
+            [(ngModel)]="DatiProtocolloEsterno"
+            class="p-col">
+    </p-inputNumber>
+    <label class="p-col-2" for="dataProtocollazione">Del</label>
+    <p-calendar
+            id="dataProtocollazione"
+            [(ngModel)]="dataProtocollazione"
+            dateFormat="dd.mm.yy"
+            [showIcon]="true"
+            inputId="icon"
+            appendTo="body"
+            class="p-col">
+    </p-calendar>
+</div>

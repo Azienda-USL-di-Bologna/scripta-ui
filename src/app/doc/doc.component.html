@@ -19,18 +19,6 @@
 </p-toolbar>
 <main>
   <section class="info-documento">
-    <!-- <span *ngIf="!document?.registriList; then proposta else protocollo"></span>
-    <ng-template #proposta><span>Proposta {{document?.numeroProposta}}</span></ng-template>
-    <ng-template #protocollo>
-      <ng-template  ngFor let-documentoRegistro [ngForOf]="document.registriList" let-i="index">
-      <span *ngIf="documentoRegistro">
-        <span><h3>{{documentoRegistro.idRegistro.codiceRegistro}} {{documentoRegistro.numero}}</h3>
-          {{documentoRegistro.idRegistro.nomeRegistro}} del {{documentoRegistro.dataRegistrazione | date : 'dd/MM/yyyy HH:mm'}}
-        </span>
-      </span>
-      </ng-template>
-    </ng-template> -->
-      
     <span class="dati-creazione">
       <span>
       Proposta n° 6 del 2021
@@ -41,7 +29,7 @@
       </span>
     </span>
     <label for="oggetto" class="label-oggetto">Oggetto</label>
-    <textarea  #oggetto
+    <textarea  id="oggetto"
       class="oggetto"
       pInputTextarea 
       placeholder="Inserisci l'oggetto"
@@ -52,7 +40,7 @@
     </textarea>
     <div class="protocollato-da-box">
       <label for="protocollatoda">Protocollato da</label>
-      <input #protocollatoda
+      <input id="protocollatoda"
         pInputText 
         type="text" 
         [disabled]="false"
@@ -62,7 +50,7 @@
   </section>
   <p-accordion>
     <p-accordionTab header="Mittente" [selected]="true">
-        componente mittente
+      <mittente></mittente>
     </p-accordionTab>
     <p-accordionTab header="Destinatari">
       <ng-template pTemplate="content">

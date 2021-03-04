@@ -4,10 +4,12 @@ import { RefreshLoggedUserGuard, LoginGuard, NoLoginGuard, NtJwtLoginComponent, 
 import { HomeComponent } from "./home/home.component";
 import { LOGIN_ROUTE, LOGGED_OUT_ROUTE, DOC_ROUTE, HOME_ROUTE } from "src/environments/app-constants";
 import { PageNotFoundComponent } from "@bds/common-components";
+import { MittenteComponent } from "./doc/mittente/mittente.component";
 
 const routes: Routes = [
     {path: "", redirectTo: HOME_ROUTE, pathMatch: "full"},
-    {path: HOME_ROUTE, component: HomeComponent},
+  { path: HOME_ROUTE, component: HomeComponent },
+  { path: "mittente", component: MittenteComponent },//da togliere e mettere per bene
     {path: LOGIN_ROUTE, component: NtJwtLoginComponent, canActivate: [NoLoginGuard], data: {}},
     {path: LOGGED_OUT_ROUTE, component: LoggedOutPageComponent},
     {path: DOC_ROUTE, loadChildren: () => import("./doc/doc.module").then(m => m.DocModule), canActivate: [RefreshLoggedUserGuard, LoginGuard]},

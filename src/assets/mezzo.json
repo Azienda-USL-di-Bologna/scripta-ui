@@ -1,0 +1,9 @@
+{
+  "data": [
+    {"name": "Pec", "code": "Pec"},
+    {"name": "Mail", "code": "Mail"},
+    {"name": "Fax", "code": "fax"},
+    {"name": "Indirizzo fisico", "code": "Indirizzo_fisico"},
+    {"name": "Balel", "code": "Babel"}
+  ]
+}
