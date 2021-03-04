@@ -1,0 +1,41 @@
+:host {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+main {
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    label {
+        font-weight: bold;
+        color: #333333;
+        padding-right: 10px;
+    }
+    p-toolbar {
+
+    }
+    .info-documento {
+        display: flex; 
+        flex-direction: column;
+        justify-content:space-between;
+        padding: 10px;
+        .dati-creazione {
+            display: flex;
+            justify-content:space-between;
+        }
+    }
+    .oggetto {
+        width: 100%;
+        resize: none;
+    }
+    .label-oggetto {
+        padding: 10px 0;
+    }
+    .protocollato-da-box {
+        padding: 10px 0;
+    }
+}
