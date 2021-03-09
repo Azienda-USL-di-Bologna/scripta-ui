@@ -22,10 +22,11 @@
 <div class="mittente-box p-grid">
     <label class="p-col-3" for="origine">Origine</label>
     <p-autoComplete id="Origine"
-            [(ngModel)]="selectedTipo"
-            [suggestions]="filteredTipo"
+            [(ngModel)]="selectedOrigine"
+            [suggestions]="filteredOrigine"
             (completeMethod)="searchTipo($event)"
             [dropdown]="true"
+             field="name"
             appendTo="body"
             class="p-col">
     </p-autoComplete>
@@ -34,7 +35,7 @@
             [(ngModel)]="selectedMezzo"
             [suggestions]="filteredMezzo"
             (completeMethod)="searchMezzo($event)"
-            field="name"
+            field="descrizione"
             [dropdown]="true"
             appendTo="body"
             class="p-col">

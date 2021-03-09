@@ -44,18 +44,19 @@ export class MittenteComponent implements OnInit, OnDestroy {
 
 
   selectedMittente: Related | undefined | null;
-  selectedTipo: string = "";
+  selectedOrigine: string = "";
   selectedMezzo: string = "";
   private _doc: Doc | undefined;
   public _mittenti: Related[] | undefined;
 
   suggeretionsMittente: DettaglioContatto[] = [];
-  public suggeretionsTipo: string[] = Object.values(TipoRelated);
+  public suggeretionsOrigine: any[] = Object.values(OrigineRelated);
+
   // suggeretionsMezzo: Mezzo[] = [];
   suggeretionsMezzo: any[] = [];
 
   filteredMittente: DettaglioContatto[] = [];
-  filteredTipo: any[] = [];
+  filteredOrigine: any[] = [];
   filteredMezzo: any[] = [];
 
   dataDiArrivo: Date = new Date();
@@ -167,24 +168,22 @@ export class MittenteComponent implements OnInit, OnDestroy {
   }
 
   searchTipo(event: any) {
-    console.log(this.suggeretionsTipo);
+    console.log(this.suggeretionsOrigine);
     const filteredTipo: any[] = [];
     const query = event.query;
-    this.suggeretionsTipo.forEach(currentSuggeretion => {
-      if (currentSuggeretion.toLowerCase().indexOf(query.toLowerCase()) === 0) {
+    this.suggeretionsOrigine.forEach(currentSuggeretion => {
+      if (currentSuggeretion.name.toLowerCase().indexOf(query.toLowerCase()) === 0) {
         filteredTipo.push(currentSuggeretion);
       }
     });
-    this.filteredTipo = filteredTipo;
+    this.filteredOrigine = filteredTipo;
   }
 
   searchMezzo(event: any) {
     const filteredMezzo: any[] = [];
     const query = event.query;
-
-
     this.suggeretionsMezzo.forEach(currentSuggeretion => {
-      if (currentSuggeretion.name.toLowerCase().indexOf(query.toLowerCase()) === 0) {
+      if (currentSuggeretion.descrizione.toLowerCase().indexOf(query.toLowerCase()) === 0) {
         filteredMezzo.push(currentSuggeretion);
       }
     });
@@ -210,7 +209,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
     });
 
     this.mittenteService.getSuggeretionTipo().then(suggeretionsTipo => {
-      this.suggeretionsTipo = suggeretionsTipo;
+      this.suggeretionsOrigine = suggeretionsTipo;
       console.log(suggeretionsTipo);
     });
 
