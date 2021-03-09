@@ -48,13 +48,33 @@
         [(ngModel)]="descrizioneUtenteRegistrante">
     </div>
   </section>
-  <p-accordion>
+  <div class="protocollo-esterno-box p-grid">
+    <label class="p-col-3" for="datiProtocolloEsterno">Dati protocollo Esterno</label>
+    <p-inputNumber
+            id="datiProtocolloEsterno"
+            inputId="integeronly"
+            [(ngModel)]="DatiProtocolloEsterno"
+            class="p-col">
+    </p-inputNumber>
+    <label class="p-col-2" for="dataProtocollazione">Del</label>
+    <p-calendar
+            id="dataProtocollazione"
+            [(ngModel)]="dataProtocollazione"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            inputId="icon"
+            appendTo="body"
+            class="p-col">
+    </p-calendar>
+  </div>
+
+  <p-accordion class="accodion-box">
     <p-accordionTab header="Mittente" [selected]="true">
-      <mittente></mittente>
+      <mittente [doc]="doc" (saveMittenteEvent)="saveDoc($event,'mittenti')"></mittente>
     </p-accordionTab>
     <p-accordionTab header="Destinatari">
       <ng-template pTemplate="content">
-        componente destinatari in Lazy Load
+        <destinatari> </destinatari>
       </ng-template>
     </p-accordionTab>
     <p-accordionTab header="Allegati">

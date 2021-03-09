@@ -6,6 +6,10 @@ import { PrimeNgModule } from "../primeng.module";
 import { ScriptaCommonModule } from "../scripta-common.module";
 import { ExtendedDocService } from "./extended-doc.service";
 import {MittenteComponent} from "./mittente/mittente.component";
+import {DestinatariComponent} from "./destinatari/destinatari.component";
+import {AllegatiComponent} from "./allegati/allegati.component";
+import {ExtendedDestinatariService} from "./destinatari/extended-destinatari.service";
+import {ExtendedMittenteService} from "./mittente/extended-mittente.service";
 
 
 @NgModule({
@@ -17,8 +21,14 @@ import {MittenteComponent} from "./mittente/mittente.component";
     ],
   declarations: [
       DocComponent,
-      MittenteComponent
+      MittenteComponent,
+      DestinatariComponent,
+      AllegatiComponent
   ],
-  providers: [ExtendedDocService]
+  providers: [
+      ExtendedDocService,
+      ExtendedDestinatariService,
+      ExtendedMittenteService
+  ]
 })
 export class DocModule { }

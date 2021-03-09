@@ -26,6 +26,7 @@
     "@bds/nt-communicator": "1.0.1-beta",
     "@bds/nt-jwt-login": "1.0.1-beta",
     "@bds/primeng-plugin": "1.0.1-beta",
+    "@js-joda/core": "^3.2.0",
     "@nfa/core": "3.0.0-beta",
     "@nfa/next-sdr": "3.0.0-beta",
     "@nfa/ref": "3.0.0-beta",

@@ -1,1 +1,43 @@
-<p>destinatari works!</p>
+<div class="p-grid">
+    <label class="p-col-2" for="competenti">Competenti</label>
+    <p-autoComplete id="competenti"
+                    [(ngModel)]="selectedTipo"
+                    [suggestions]="filteredTipo"
+                    (completeMethod)="searchTipo($event)"
+                    field="name"
+                    [dropdown]="true"
+                    appendTo="body"
+                    class="p-col">
+    </p-autoComplete>
+</div>
+<div class="p-grid">
+    <label class="p-col-2" for="coinvolti">Coinvolti</label>
+    <p-autoComplete id="coinvolti"
+                    [(ngModel)]="selectedMezzo"
+                    [suggestions]="filteredMezzo"
+                    (completeMethod)="searchMezzo($event)"
+                    field="name"
+                    [dropdown]="true"
+                    appendTo="body"
+                    class="p-col">
+    </p-autoComplete>
+</div>
+
+<!--<p-table [columns]="columnCoinvolti" [value]="descrizioneCoinvolti" styleClass="p-datatable-responsive-demo">-->
+<!--    <ng-template pTemplate="header" let-columns>-->
+<!--        <tr>-->
+<!--            <th *ngFor="let col of columns">-->
+<!--                {{col.header}}-->
+<!--            </th>-->
+<!--        </tr>-->
+<!--    </ng-template>-->
+<!--    <ng-template pTemplate="body" let-rowData let-columns="columns">-->
+<!--        <tr>-->
+<!--            <td *ngFor="let col of columns">-->
+<!--                <span class="p-column-title">{{col.header}}</span>-->
+<!--                {{rowData[col.field]}}-->
+<!--            </td>-->
+
+<!--        </tr>-->
+<!--    </ng-template>-->
+<!--</p-table>-->
