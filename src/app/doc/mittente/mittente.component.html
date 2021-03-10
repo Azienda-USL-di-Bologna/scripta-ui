@@ -5,6 +5,7 @@
              (onSelect)="saveMittente($event)"
             [suggestions]="filteredMittente"
             (completeMethod)="searchMittente($event)"
+                    ariaLabel="descrizione del mittente"
             field="descrizione"
             appendTo="body"
             class="p-col">
@@ -22,6 +23,7 @@
 <div class="mittente-box p-grid">
     <label class="p-col-3" for="origine">Origine</label>
     <p-autoComplete id="Origine"
+                    ariaLabel="origine"
             [(ngModel)]="selectedOrigine"
             [suggestions]="filteredOrigine"
             (completeMethod)="searchTipo($event)"
@@ -45,6 +47,7 @@
     <label class="p-col-3" for="dataArrivo">Data di arrivo</label>
     <p-calendar
             id="dataArrivo"
+            aria-label="data di arrivo"
             [(ngModel)]="dataDiArrivo"
             dateFormat="dd/mm/yy"
             [showIcon]="true"
