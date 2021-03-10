@@ -7,11 +7,11 @@ import {DialogModule} from "primeng-lts/dialog";
 import {DialogService} from "primeng-lts/dynamicdialog";
 import {ToastModule} from "primeng-lts/toast";
 import {MessageService} from "primeng-lts/api";
-
 import {InputNumberModule} from "primeng-lts/inputnumber";
 import {AccordionModule} from "primeng-lts/accordion";
 import {CalendarModule} from "primeng-lts/calendar";
 import {AutoCompleteModule} from "primeng-lts/autocomplete";
+import { TableModule } from "primeng-lts/table";
 
 
 
@@ -30,7 +30,8 @@ import {AutoCompleteModule} from "primeng-lts/autocomplete";
     CalendarModule,
     ButtonModule,
     InputTextModule,
-    AccordionModule
+    AccordionModule,
+    TableModule
   ],
   exports: [
     ButtonModule,
@@ -44,7 +45,8 @@ import {AutoCompleteModule} from "primeng-lts/autocomplete";
     CalendarModule,
     ButtonModule,
     InputTextModule,
-    AccordionModule
+    AccordionModule,
+    TableModule
   ],
   providers: [MessageService, DialogService]
 })

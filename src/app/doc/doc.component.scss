@@ -39,3 +39,15 @@ main {
     label {
         align-self: baseline;
     }
+.protocollo-esterno-box{
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    label {
+        align-self: center;
+        padding: 10px;
+    }
+}
+.accodion-box{
+    padding: 10px;
+}

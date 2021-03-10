@@ -17,7 +17,9 @@ export class DocComponent implements OnInit, OnDestroy {
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public doc: Doc = new Doc();
   public descrizioneUtenteRegistrante: string | undefined;
-
+  public DatiProtocolloEsterno: Number = 33;
+  public dataProtocollazione: Date = new Date();
+  private projection: string = ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithDestinatariAndIdAziendaAndIdPersonaCreazioneAndMittentiCustom;
   constructor(
     private extendedDocService: ExtendedDocService,
     private loginService: NtJwtLoginService,
@@ -54,7 +56,7 @@ export class DocComponent implements OnInit, OnDestroy {
   private loadDocument(id: number): Observable<Doc> {
     return this.extendedDocService.getByIdHttpCall(
       id,
-      ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithIdAziendaAndIdPersonaCreazione);
+      this.projection);
   }
 
   /**
@@ -68,13 +70,17 @@ export class DocComponent implements OnInit, OnDestroy {
       clearTimeout(this.savingTimeout);
     }
     this.savingTimeout = setTimeout(() => {
-      this.subscriptions.push(this.extendedDocService.updateDoc(doc, [field]).subscribe(res => this.doc.version = res.version));
+      this.subscriptions.push(this.extendedDocService.updateDoc(doc, [field], this.projection).subscribe(res => this.doc.version = res.version));
     }, 300);
   }
 
 
-  public onDoSave(event: any): void {
-    console.log("Emittend event", event);
+  public saveDoc(doc: any, field: keyof Doc): void {
+    this.subscriptions.push(this.extendedDocService.updateDoc(doc, [field], this.projection).subscribe(res => {
+     this.doc.mittenti = res.mittenti;
+     this.doc.version = res.version;
+    }
+  ));
   }
 
   public onDoProtocolla(event: any): void {

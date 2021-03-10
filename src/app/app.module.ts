@@ -4,8 +4,7 @@ import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 
-import { DestinatariComponent } from "./doc/destinatari/destinatari.component";
-import { AllegatiComponent } from "./doc/allegati/allegati.component";
+
 import { PrimengPluginModule, ProfiloComponent } from "@bds/primeng-plugin";
 import { NtJwtLoginModule } from "@bds/nt-jwt-login";
 import { loginModuleConfig } from "./config/module-config";
@@ -30,8 +29,6 @@ registerLocaleData(localeIt, "it-IT", localeItExtra);
 @NgModule({
   declarations: [
     AppComponent,
-    DestinatariComponent,
-    AllegatiComponent,
     HomeComponent
   ],
   imports: [
@@ -50,8 +47,7 @@ registerLocaleData(localeIt, "it-IT", localeItExtra);
     {provide: LOCALE_ID, useValue: "it-IT"},
   ],
   bootstrap: [AppComponent],
-  exports: []
-  ,
+    exports: [],
   entryComponents: [ProfiloComponent]
 })
 export class AppModule { }
