@@ -1,6 +1,20 @@
-.column-icon {
-    width: 60px;
-}
-.icon {
-    cursor: pointer;
+/* :host {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    
+} */
+
+::ng-deep .coinvolti-table {
+    //flex: 1 1 0;
+    .row {
+        border: 1px solid #c8c8c8;
+        td, th {
+            border: none !important;
+        }
+        .column-icon {
+            width: 60px;
+        }
+    }
 }

@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
-import { CategoriaContatto, Contatto, ContattoService, DettaglioContatto, Doc, ENTITIES_STRUCTURE, MezzoService, OrigineRelated, Related, TipoContatto, TipoDettaglio, TipoRelated } from "@bds/ng-internauta-model";
+import { CategoriaContatto, Contatto, ContattoService, DettaglioContatto, Doc, ENTITIES_STRUCTURE, OrigineRelated, Related, TipoContatto, TipoRelated } from "@bds/ng-internauta-model";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
-import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES } from "@nfa/next-sdr";
+import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from "@nfa/next-sdr";
 import { Subscription } from "rxjs";
 import { ExtendedDocService } from "../extended-doc.service";
 
@@ -16,24 +16,12 @@ export class DestinatariComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private loggedUtenteUtilities: UtenteUtilities;
 
-  selectedTipo: string = "";
-  selectedMezzo: string = "";
-  suggeretionsTipo: any[] = [];
-  // suggeretionsMezzo: Mezzo[] = [];
-  suggeretionsMezzo: any[] = [];
-  filteredTipo: any[] = [];
-  filteredMezzo: any[] = [];
   public columnCoinvolti: any[] = [];
-  descrizioneCoinvolti: any[]  = [];
-
   public _doc: Doc;
   public selectedCompetente: Related;
   public selectedCoinvolto: Related;
-
   public filteredCompetenti: DettaglioContatto[];
   public filteredCoinvolti: DettaglioContatto[];
-
-
 
   @Input() set doc(value: Doc) {
     this._doc = value;
@@ -48,13 +36,12 @@ export class DestinatariComponent implements OnInit, OnDestroy {
   @Output() saveMittenteEvent = new EventEmitter<Doc>();
 
   constructor(private destinatariService: ExtendedDestinatariService,
-    private mezzoService: MezzoService,
     private loginService: NtJwtLoginService,
     private contattoService: ContattoService,
     private extendedDocService: ExtendedDocService
     ) {
       this.columnCoinvolti = [
-        { field: "descrizione", header: "Nome struttura" },
+        { field: "descrizione", header: "Struttura" },
       ];
   }
 
@@ -65,7 +52,7 @@ export class DestinatariComponent implements OnInit, OnDestroy {
     );
   }
 
-  searchDestinatario(event: any, modalita: string) {
+  public searchDestinatario(event: any, modalita: string) {
     const query = event.query;
     const projection = ENTITIES_STRUCTURE.rubrica.contatto.standardProjections.ContattoWithIdPersonaAndIdPersonaCreazioneAndIdStruttura;
     const filtersAndSorts: FiltersAndSorts = new FiltersAndSorts();
@@ -82,7 +69,7 @@ export class DestinatariComponent implements OnInit, OnDestroy {
           if (res) {
             res.results.forEach((contatto: Contatto) => {
               // @ts-ignore
-              contatto["descrizioneCustom"] = contatto.descrizione + " [ " + contatto.descrizione + " ]";
+              contatto["descrizioneCustom"] = contatto.descrizione;
             });
             switch (modalita) {
               case "competente":
@@ -127,8 +114,8 @@ export class DestinatariComponent implements OnInit, OnDestroy {
     return destinatario;
   }
 
-  onDeleteRelated(related: Related) {
-
+  public onDeleteRelated(related: Related) {
+    console.log("calcneoiujncsdaijb")
   }
 
   public ngOnDestroy() {

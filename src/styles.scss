@@ -4,6 +4,8 @@
 @import '../node_modules/primeflex/primeflex.css';
 @import '../node_modules/@bds/common-components/assets/bds-styles/primeng.scss';
 @import '../node_modules/@bds/common-components/assets/bds-styles/material-icons.scss';
+@import '../node_modules/@bds/common-components/assets/bds-styles/custom-classes.scss';
+@import '../node_modules/@bds/common-components/assets/bds-styles/basic.scss';
 
 html,
 body{
@@ -14,7 +16,7 @@ body{
 * {
     font-family: "Open Sans", "Helvetica Neue", sans-serif;
 }
-label {
+/* label {
     font-weight: bold;
     color: #333333;
     padding-right: 10px;
@@ -22,7 +24,7 @@ label {
 }
 input {
     width: 100%;
-}
+} */
 
 .custom-primary-button {
     border: 1px solid #203244 !important;
@@ -33,4 +35,15 @@ input {
     background: #406284 !important;
     color: #ffffff !important;
     font-weight: normal !important;
+}
+
+.p-button {
+    border: 1px solid #203244 !important;
+    background: #2e4a65 !important;
+    &:hover {
+        border-color: #2e4a65 !important;
+        background: #406284 !important;
+        color: #ffffff !important;
+        font-weight: normal !important;
+    }
 }

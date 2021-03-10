@@ -34,7 +34,7 @@
       class="oggetto"
       pInputTextarea 
       placeholder="Inserisci l'oggetto"
-      rows="5" 
+      rows="2" 
       cols="30"
       (keyup)="timeOutAndSaveDoc(doc, 'oggetto')"
       [(ngModel)]="doc!.oggetto">
@@ -85,7 +85,7 @@
     </p-accordionTab>
     <p-accordionTab header="Allegati">
       <ng-template pTemplate="content">
-        componente allegati in Lazy Load
+        <allegati></allegati>
       </ng-template>
     </p-accordionTab>
   </p-accordion>

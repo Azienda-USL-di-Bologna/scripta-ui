@@ -12,7 +12,7 @@ import {AccordionModule} from "primeng-lts/accordion";
 import {CalendarModule} from "primeng-lts/calendar";
 import {AutoCompleteModule} from "primeng-lts/autocomplete";
 import { TableModule } from "primeng-lts/table";
-
+import {FileUploadModule} from 'primeng-lts/fileupload';
 
 
 @NgModule({
@@ -31,7 +31,8 @@ import { TableModule } from "primeng-lts/table";
     ButtonModule,
     InputTextModule,
     AccordionModule,
-    TableModule
+    TableModule,
+    FileUploadModule
   ],
   exports: [
     ButtonModule,
@@ -46,7 +47,8 @@ import { TableModule } from "primeng-lts/table";
     ButtonModule,
     InputTextModule,
     AccordionModule,
-    TableModule
+    TableModule,
+    FileUploadModule
   ],
   providers: [MessageService, DialogService]
 })

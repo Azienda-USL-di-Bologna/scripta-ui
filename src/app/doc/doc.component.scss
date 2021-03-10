@@ -32,7 +32,12 @@ main {
         padding: 10px 0;
     }
     .protocollato-da-box {
+        display: flex;
         padding: 10px 0;
+        label {
+            align-self: center;
+            width: 144px;
+        }
     }
 
 }
@@ -40,7 +45,7 @@ main {
         align-self: baseline;
     }
 .protocollo-esterno-box{
-    padding: 10px;
+    padding: 0 10px;
     display: flex;
     justify-content: space-between;
     label {

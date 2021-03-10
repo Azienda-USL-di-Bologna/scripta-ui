@@ -1,1 +1,17 @@
-<p>allegati works!</p>
+<p-fileUpload 
+  name="demo[]" 
+  url="./upload.php" 
+  (onUpload)="onUpload($event)"
+  multiple="multiple"
+  maxFileSize="1000000"
+  chooseLabel="Sfoglia"
+  uploadLabel="Carica"
+  cancelLabel="Cancella">
+  <ng-template pTemplate="content">
+    <ul *ngIf="uploadedFiles.length">
+      <li *ngFor="let file of uploadedFiles">
+        {{file.name}}
+      </li>
+    </ul>
+  </ng-template>
+</p-fileUpload>
