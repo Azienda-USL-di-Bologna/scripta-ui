@@ -36,12 +36,13 @@ export class DestinatariComponent implements OnInit, OnDestroy {
 
 
   @Input() set doc(value: Doc) {
-    if ( value && value.competenti && value.competenti.length > 0 ) {
-      this.selectedCompetente = value.competenti[0];
-      this._doc = value;
-    } else {
-      this.selectedCompetente = null;
-    }
+    this._doc = value;
+    // if ( value && value.competenti && value.competenti.length > 0 ) {
+    //   this.selectedCompetente = value.competenti[0];
+    //   this._doc = value;
+    // } else {
+    //   this.selectedCompetente = null;
+    // }
   }
 
   @Output() saveMittenteEvent = new EventEmitter<Doc>();
