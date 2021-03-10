@@ -2,7 +2,7 @@
     <label class="p-col-3" for="mittente">Mittente</label>
     <p-autoComplete id="mittente"
             [(ngModel)]="selectedMittente"
-            (onSelect)="saveMittente($event)"
+             (onSelect)="saveMittente($event)"
             [suggestions]="filteredMittente"
             (completeMethod)="searchMittente($event)"
             field="descrizione"

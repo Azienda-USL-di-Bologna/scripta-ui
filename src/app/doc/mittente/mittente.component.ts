@@ -63,7 +63,38 @@ export class MittenteComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private loggedUtenteUtilities: UtenteUtilities | undefined | null;
 
+  constructor(private mittenteService: ExtendedMittenteService,
+    private mezzoService: MezzoService,
+    private loginService: NtJwtLoginService,
+    private dettaglioContattoService: DettaglioContattoService,
+    private extendedDocService: ExtendedDocService
+    ) { }
 
+    ngOnInit(): void {
+      this.subscriptions.push(this.loginService.loggedUser$.subscribe((utenteUtilities: UtenteUtilities) => {
+            this.loggedUtenteUtilities = utenteUtilities;
+          })
+      );
+      this.mittenteService.getSuggeretionMittente().then(suggeretionsMittente => {
+        this.suggeretionsMittente = suggeretionsMittente;
+        console.log(suggeretionsMittente);
+      });
+
+      this.mittenteService.getSuggeretionTipo().then(suggeretionsTipo => {
+        this.suggeretionsOrigine = suggeretionsTipo;
+        console.log(suggeretionsTipo);
+      });
+
+      this.mezzoService.getData().subscribe((data: any) => {
+        if (data && data.results) {
+          this.suggeretionsMezzo = data.results;
+          // this.suggeretionsMezzo.push("crea contatto estemporaneo");
+        } else {
+          this.suggeretionsMezzo = [];
+        }
+
+      });
+    }
 
   searchMittente(event: any) {
     const filteredMittente: any[] = [];
@@ -188,40 +219,6 @@ export class MittenteComponent implements OnInit, OnDestroy {
       }
     });
     this.filteredMezzo = filteredMezzo;
-  }
-
-  constructor(private mittenteService: ExtendedMittenteService,
-              private mezzoService: MezzoService,
-              private loginService: NtJwtLoginService,
-              private dettaglioContattoService: DettaglioContattoService,
-              private extendedDocService: ExtendedDocService
-              ) { }
-
-
-  ngOnInit(): void {
-    this.subscriptions.push(this.loginService.loggedUser$.subscribe((utenteUtilities: UtenteUtilities) => {
-          this.loggedUtenteUtilities = utenteUtilities;
-        })
-    );
-    this.mittenteService.getSuggeretionMittente().then(suggeretionsMittente => {
-      this.suggeretionsMittente = suggeretionsMittente;
-      console.log(suggeretionsMittente);
-    });
-
-    this.mittenteService.getSuggeretionTipo().then(suggeretionsTipo => {
-      this.suggeretionsOrigine = suggeretionsTipo;
-      console.log(suggeretionsTipo);
-    });
-
-    this.mezzoService.getData().subscribe((data: any) => {
-      if (data && data.results) {
-        this.suggeretionsMezzo = data.results;
-        // this.suggeretionsMezzo.push("crea contatto estemporaneo");
-      } else {
-        this.suggeretionsMezzo = [];
-      }
-
-    });
   }
 
   public timeOutAndSaveDoc(doc: Doc, field: keyof Doc) {
