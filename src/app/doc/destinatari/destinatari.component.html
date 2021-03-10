@@ -2,6 +2,7 @@
     <label class="p-col-2" for="competenti">Competenti</label>
     <p-autoComplete id="competenti"
         [(ngModel)]="_doc.competenti[0]"
+        ariaLabel="competenti"
         (onSelect)="saveDestinatario($event, 'competente')"
         [suggestions]="filteredCompetenti"
         (completeMethod)="searchDestinatario($event, 'competente')"
@@ -15,7 +16,8 @@
 </div>
 <div class="p-grid">
     <label class="p-col-2" for="coinvolti">Coinvolti</label>
-    <p-autoComplete id="competenti"
+    <p-autoComplete id="coinvolti"
+                    ariaLabel="coinvolti"
         [(ngModel)]="selectedCoinvolto"
         (onSelect)="saveDestinatario($event, 'coinvolto')"
         [suggestions]="filteredCoinvolti"

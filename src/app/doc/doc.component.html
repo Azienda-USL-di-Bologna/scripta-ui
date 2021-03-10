@@ -21,7 +21,7 @@
   <section class="info-documento">
     <span class="dati-creazione">
       <span>
-      Proposta n° 6 del 2021
+      Proposta numero 6 del 2021
       </span>
       <span>
         Creato il giorno {{ removeZoneFromTime(doc?.dataCreazione?.toString()) | date: 'EE d MMM y, H:mm' | titlecase}}
@@ -30,6 +30,7 @@
     </span>
     <label for="oggetto" class="label-oggetto">Oggetto</label>
     <textarea  id="oggetto"
+      aria-label="oggetto"
       class="oggetto"
       pInputTextarea 
       placeholder="Inserisci l'oggetto"
@@ -41,16 +42,19 @@
     <div class="protocollato-da-box">
       <label for="protocollatoda">Protocollato da</label>
       <input id="protocollatoda"
+             aria-label="protocollato da"
+             disabled="true"
         pInputText 
         type="text" 
         [disabled]="false"
-        class=""
         [(ngModel)]="descrizioneUtenteRegistrante">
     </div>
   </section>
   <div class="protocollo-esterno-box p-grid">
     <label class="p-col-3" for="datiProtocolloEsterno">Dati protocollo Esterno</label>
     <p-inputNumber
+            aria-label="numero protocollo esterno"
+            disabled="true"
             id="datiProtocolloEsterno"
             inputId="integeronly"
             [(ngModel)]="DatiProtocolloEsterno"
@@ -58,7 +62,9 @@
     </p-inputNumber>
     <label class="p-col-2" for="dataProtocollazione">Del</label>
     <p-calendar
+            disabled="true"
             id="dataProtocollazione"
+            aria-label="data di protocollazione"
             [(ngModel)]="dataProtocollazione"
             dateFormat="dd/mm/yy"
             [showIcon]="true"
