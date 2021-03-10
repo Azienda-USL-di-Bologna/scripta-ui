@@ -1,7 +1,7 @@
 <div class="p-grid">
     <label class="p-col-2" for="competenti">Competenti</label>
     <p-autoComplete id="competenti"
-        [(ngModel)]="selectedCompetente"
+        [(ngModel)]="_doc.competenti[0]"
         (onSelect)="saveDestinatario($event, 'competente')"
         [suggestions]="filteredCompetenti"
         (completeMethod)="searchDestinatario($event, 'competente')"
@@ -29,21 +29,34 @@
     </p-autoComplete>
 </div>
 
-<!--<p-table [columns]="columnCoinvolti" [value]="descrizioneCoinvolti" styleClass="p-datatable-responsive-demo">-->
-<!--    <ng-template pTemplate="header" let-columns>-->
-<!--        <tr>-->
-<!--            <th *ngFor="let col of columns">-->
-<!--                {{col.header}}-->
-<!--            </th>-->
-<!--        </tr>-->
-<!--    </ng-template>-->
-<!--    <ng-template pTemplate="body" let-rowData let-columns="columns">-->
-<!--        <tr>-->
-<!--            <td *ngFor="let col of columns">-->
-<!--                <span class="p-column-title">{{col.header}}</span>-->
-<!--                {{rowData[col.field]}}-->
-<!--            </td>-->
-
-<!--        </tr>-->
-<!--    </ng-template>-->
-<!--</p-table>-->
+<p-table 
+    [columns]="columnCoinvolti" 
+    [value]="_doc.coinvolti" 
+   
+    styleClass="p-datatable-responsive-demo">
+    <!--  scrollHeight="100%"
+    [scrollable]="true" -->
+    <ng-template pTemplate="header" let-columns>
+        <tr>
+            <th *ngFor="let col of columns">
+                {{col.header}}
+            </th>
+            <th class="column-icon"></th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr>
+            <td>
+                {{rowData.descrizione}}
+            </td>
+            <td class="column-icon">
+                <i class="material-icons-outlined icon icon-delete"
+					pTooltip="Elimina" 
+                    tooltipPosition="top" 
+                    (click)="onDeleteRelated(rowData)">
+                    delete
+                </i>
+            </td>
+        </tr>
+    </ng-template>
+</p-table> 

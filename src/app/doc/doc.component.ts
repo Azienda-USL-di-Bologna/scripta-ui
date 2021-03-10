@@ -19,7 +19,7 @@ export class DocComponent implements OnInit, OnDestroy {
   public descrizioneUtenteRegistrante: string | undefined;
   public DatiProtocolloEsterno: Number = 33;
   public dataProtocollazione: Date = new Date();
-  private projection: string = ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithDestinatariAndIdAziendaAndIdPersonaCreazioneAndMittenti;
+  private projection: string = ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithDestinatariAndIdAziendaAndIdPersonaCreazioneAndMittentiCustom;
   constructor(
     private extendedDocService: ExtendedDocService,
     private loginService: NtJwtLoginService,

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
-import { CategoriaContatto, Contatto, ContattoService, DettaglioContatto, Doc, ENTITIES_STRUCTURE, MezzoService, Related, TipoContatto, TipoDettaglio } from "@bds/ng-internauta-model";
+import { CategoriaContatto, Contatto, ContattoService, DettaglioContatto, Doc, ENTITIES_STRUCTURE, MezzoService, OrigineRelated, Related, TipoContatto, TipoDettaglio, TipoRelated } from "@bds/ng-internauta-model";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES } from "@nfa/next-sdr";
 import { Subscription } from "rxjs";
@@ -23,22 +23,25 @@ export class DestinatariComponent implements OnInit, OnDestroy {
   suggeretionsMezzo: any[] = [];
   filteredTipo: any[] = [];
   filteredMezzo: any[] = [];
-  columnCoinvolti: any[] = [];
+  public columnCoinvolti: any[] = [];
   descrizioneCoinvolti: any[]  = [];
 
+  public _doc: Doc;
   public selectedCompetente: Related;
   public selectedCoinvolto: Related;
 
   public filteredCompetenti: DettaglioContatto[];
   public filteredCoinvolti: DettaglioContatto[];
 
+
+
   @Input() set doc(value: Doc) {
-    // if ( value && value.mittenti && value.mittenti.length > 0 ) {
-    //   this.selectedMittente = value.mittenti[0];
-    //   this._doc = value;
-    // } else {
-    //   this.selectedMittente = null;
-    // }
+    if ( value && value.competenti && value.competenti.length > 0 ) {
+      this.selectedCompetente = value.competenti[0];
+      this._doc = value;
+    } else {
+      this.selectedCompetente = null;
+    }
   }
 
   @Output() saveMittenteEvent = new EventEmitter<Doc>();
@@ -48,7 +51,11 @@ export class DestinatariComponent implements OnInit, OnDestroy {
     private loginService: NtJwtLoginService,
     private contattoService: ContattoService,
     private extendedDocService: ExtendedDocService
-    ) { }
+    ) {
+      this.columnCoinvolti = [
+        { field: "descrizione", header: "Nome struttura" },
+      ];
+  }
 
   ngOnInit(): void {
     this.subscriptions.push(this.loginService.loggedUser$.subscribe((utenteUtilities: UtenteUtilities) => {
@@ -96,10 +103,34 @@ export class DestinatariComponent implements OnInit, OnDestroy {
     );
   }
 
-  saveDestinatario(event: any, modalita: string) {
+  public saveDestinatario(contatto: Contatto, modalita: string) {
+    switch (modalita) {
+      case "competente":
+        this._doc.competenti = [];
+        this._doc.competenti.push(this.contattoToRelated(contatto, TipoRelated.A));
+      break;
+      case "coinvolto":
+        this._doc.coinvolti.push(this.contattoToRelated(contatto, TipoRelated.CC));
+      break;
+    }
   }
 
-  ngOnDestroy() {
+  private contattoToRelated(contatto: Contatto, tipo: TipoRelated): Related {
+    const destinatario: Related = new Related();
+    destinatario.idContatto = contatto;
+    destinatario.descrizione = contatto.descrizione;
+    destinatario.tipo = tipo;
+    destinatario.idPersonaInserente = this.loggedUtenteUtilities ? this.loggedUtenteUtilities.getUtente().idPersona : null;
+    destinatario.origine = OrigineRelated.INTERNO;
+    // destinatario.spedizioneList = [this.buildSpedizione(dettaglioContatto)];
+    return destinatario;
+  }
+
+  onDeleteRelated(related: Related) {
+
+  }
+
+  public ngOnDestroy() {
     if (this.subscriptions && this.subscriptions.length > 0 ) {
       this.subscriptions.forEach(s => s.unsubscribe());
       this.subscriptions = [];

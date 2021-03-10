@@ -74,7 +74,7 @@
     </p-accordionTab>
     <p-accordionTab header="Destinatari">
       <ng-template pTemplate="content">
-        <destinatari> </destinatari>
+        <destinatari [doc]="doc" (saveDestinatariEvent)="saveDoc($event,'destinatari')"> </destinatari>
       </ng-template>
     </p-accordionTab>
     <p-accordionTab header="Allegati">

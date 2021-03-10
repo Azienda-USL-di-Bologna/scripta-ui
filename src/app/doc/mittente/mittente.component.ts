@@ -154,7 +154,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
     }
     mittenteRelated.spedizioneList = [this.buildSpedizione(dettaglioContatto)];
     return mittenteRelated;
-}
+  }
 
   private buildSpedizione(dettaglioContatto: DettaglioContatto): Spedizione {
     const spedizione: Spedizione = new Spedizione();
