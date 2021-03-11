@@ -51,24 +51,26 @@
     </div>
   </section>
   <div class="protocollo-esterno-box p-grid">
-    <label class="p-col-3" for="datiProtocolloEsterno">Dati protocollo Esterno</label>
+    <label class="p-col-3" id="datiProtocolloEsterno">Dati protocollo Esterno</label>
     <p-inputNumber
-            aria-label="numero protocollo esterno"
-            disabled="true"
-            id="datiProtocolloEsterno"
-            inputId="integeronly"
+            ariaLabel="numero protocollo esterno"
+            [disabled]="false"
+            id="p-datiProtocolloEsterno"
+            inputId="datiProtocolloEsterno"
             [(ngModel)]="DatiProtocolloEsterno"
             class="p-col">
     </p-inputNumber>
-    <label class="p-col-2" for="dataProtocollazione">Del</label>
+    <label class="p-col-2" for="c-dataProtocollazione">del</label>
+    <span class="p-col-2" id="dataProtocollazione" style ="display:none;" >data di protocollazione esterna</span>
     <p-calendar
-            disabled="true"
-            id="dataProtocollazione"
-            aria-label="data di protocollazione"
-            [(ngModel)]="dataProtocollazione"
+            #CdataProtocolloEsterno
+            id="c-dataProtocollazione"
+            attr.aria-labelledby="dataProtocollazione"
+            [ariaLabelledBy]="'dataProtocollazione'"
+            [(ngModel)]="dataProtocolloEsterno"
             dateFormat="dd/mm/yy"
             [showIcon]="true"
-            inputId="icon"
+            inputId="dataProtocollazione"
             appendTo="body"
             class="p-col">
     </p-calendar>
@@ -81,7 +83,7 @@
     <p-accordionTab header="Destinatari">
       <ng-template pTemplate="content">
         <destinatari [doc]="doc" (saveDestinatariEvent)="saveDoc($event,'destinatari')"> </destinatari>
-      </ng-template>
+      </ng-template>    
     </p-accordionTab>
     <p-accordionTab header="Allegati">
       <ng-template pTemplate="content">
