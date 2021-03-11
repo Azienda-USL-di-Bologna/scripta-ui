@@ -17,8 +17,8 @@ export class DocComponent implements OnInit, OnDestroy {
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public doc: Doc = new Doc();
   public descrizioneUtenteRegistrante: string | undefined;
-  public DatiProtocolloEsterno: Number = 33;
-  public dataProtocollazione: Date = new Date();
+  public DatiProtocolloEsterno: Number;
+  public dataProtocolloEsterno: Date;
   private projection: string = ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithDestinatariAndIdAziendaAndIdPersonaCreazioneAndMittentiCustom;
   constructor(
     private extendedDocService: ExtendedDocService,
