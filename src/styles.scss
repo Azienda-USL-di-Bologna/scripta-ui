@@ -30,8 +30,12 @@
 }
 
 // Misura temporanea per far andare la accordion dei destinatari.
+p-accordion {
+    flex: 1 1 0;
+}
 .p-accordion {
-    height: 100%
+    height: 100%;
+    
 }
 
 // prova
