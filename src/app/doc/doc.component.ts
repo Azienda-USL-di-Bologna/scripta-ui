@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
 import { Doc, ENTITIES_STRUCTURE } from "@bds/ng-internauta-model";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
@@ -12,9 +12,10 @@ import { ExtendedDocService } from "./extended-doc.service";
   templateUrl: "./doc.component.html",
   styleUrls: ["./doc.component.scss"]
 })
-export class DocComponent implements OnInit, OnDestroy {
+export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   private subscriptions: Subscription[] = [];
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
+  @ViewChild("pageStart") public pageStart: any;
   public doc: Doc = new Doc();
   public descrizioneUtenteRegistrante: string | undefined;
   public DatiProtocolloEsterno: Number;
@@ -27,6 +28,10 @@ export class DocComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute) { }
 
   ngOnInit(): void {
+    // setTimeout(() => {
+    //   // window.scrollTo(0, 0);
+    //   this.pageStart.nativeElement.focus();
+    // }, 0);
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -44,6 +49,16 @@ export class DocComponent implements OnInit, OnDestroy {
         this.doc = res;
       })
     );
+  }
+
+  ngAfterViewInit() {
+    //this.pageStart.nativeElement.focus();
+   
+    setTimeout(() => {
+      //window.scrollTo(0, 0);
+      this.pageStart.nativeElement.focus();
+    }, 0);
+    
   }
 
   public removeZoneFromTime(date: string | undefined): string | null {

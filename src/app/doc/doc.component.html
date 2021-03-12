@@ -1,11 +1,12 @@
 <!-- <peis *ngIf="unitaDocumentaria" [document]="unitaDocumentaria"
     (save)="onDoSave($event)" (protocolla)="onDoProtocolla($event)" ></peis>
  -->
-<p-toast position="center" (onClose)="clearMessages()"></p-toast>
+<!-- <button #pageStart aria-hidden="true" style="height: 0; width: 0;"></button> -->
+<p-toast #pageStart position="center" (onClose)="clearMessages()"></p-toast>
 
 <p-toolbar>
-  <button pButton type="button" label="Salva" icon="material-icons save"
-    (click)="doButtonSave()" class="my-button custom-primary-button">
+  <button pButton  aria-hidden="false" type="button" label="Salva" icon="material-icons save"
+    (click)="doButtonSave()" class="my-button custom-primary-button" #salva>
   </button>
   
   <button pButton type="button" label="Protocolla" icon="material-icons-outlined person_add"
@@ -17,7 +18,7 @@
     (click)="doButtonNote()" class="my-button custom-primary-button">
   </button>
 </p-toolbar>
-<main>
+<main aria-level="2">
   <section class="info-documento">
     <span class="dati-creazione">
       <span>
