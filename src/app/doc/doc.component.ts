@@ -21,6 +21,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public DatiProtocolloEsterno: Number;
   public dataProtocolloEsterno: Date;
   private projection: string = ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithDestinatariAndIdAziendaAndIdPersonaCreazioneAndMittentiCustom;
+
   constructor(
     private extendedDocService: ExtendedDocService,
     private loginService: NtJwtLoginService,
@@ -114,6 +115,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   public doButtonSave(): void {
+    this.messageService.add({severity:'success', summary:'Documento', detail:'Documeto salvato con successo'});
     console.log("nothing");
   }
   public doButtonProtocolla(): void {

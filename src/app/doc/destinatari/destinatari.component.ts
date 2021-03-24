@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angu
 import { CategoriaContatto, Contatto, ContattoService, DettaglioContatto, Doc, ENTITIES_STRUCTURE, OrigineRelated, Related, TipoContatto, TipoRelated } from "@bds/ng-internauta-model";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from "@nfa/next-sdr";
+import { MessageService } from 'primeng-lts/api';
 import { Subscription } from "rxjs";
 import { ExtendedDocService } from "../extended-doc.service";
 
@@ -38,7 +39,8 @@ export class DestinatariComponent implements OnInit, OnDestroy {
   constructor(private destinatariService: ExtendedDestinatariService,
     private loginService: NtJwtLoginService,
     private contattoService: ContattoService,
-    private extendedDocService: ExtendedDocService
+    private extendedDocService: ExtendedDocService,
+    private messageService: MessageService,
     ) {
       this.columnCoinvolti = [
         { field: "descrizione", header: "Struttura" },
@@ -115,6 +117,7 @@ export class DestinatariComponent implements OnInit, OnDestroy {
   }
 
   public onDeleteRelated(related: Related) {
+    this.messageService.add({severity:'success', summary:'Struttura destinatari', detail:'Struttura destinataria eliminata con successo'});
     console.log("calcneoiujncsdaijb")
   }
 
