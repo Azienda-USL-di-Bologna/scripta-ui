@@ -43,7 +43,7 @@ export class AllegatiComponent implements OnInit {
   
   onUpload(event: any) {
     console.log("formDataformDataformData", event);
-    let formData: FormData = this.buildFormData(this.buildAllegati(event));
+    let formData: FormData = this.buildFormData(event);
     this.utilityService.uploadAllegato(formData).subscribe((event: HttpEvent<any>) => {
       switch (event.type) {
         case HttpEventType.Sent:
@@ -96,33 +96,15 @@ export class AllegatiComponent implements OnInit {
     this.messageService.add({ severity: 'info', summary: 'File Uploaded', detail: '' });
   }
 
-  private buildFormData(allegati: Allegato[]) : FormData {
+  private buildFormData(event:any): FormData {
+    this.uploadedFiles = event.files;
     const formData: FormData = new FormData();
-    formData.append("codiceAzienda", this._doc.idAzienda.codice);
-    formData.append("idAzienda", this._doc.idAzienda.id.toString());
-    formData.append('allegati', JSON.stringify(allegati));
+    formData.append("idDoc", this._doc.id.toString());
     formData.append("numeroProposta", "6");
     this.uploadedFiles.forEach((file: File) => {
-      formData.append("file", file);
+      formData.append("files", file);
     });
     return formData;
-  }
-
-  private buildAllegati(event: any): Allegato[] {
-    let allegati: Allegato[] = [];
-    event.files.forEach((element:File) => {
-      let allegato: Allegato = new Allegato();
-      allegato.idDoc = this._doc;
-      allegato.nome = element.name;
-      allegato.tipo = TipoAllegato.ALLEGATO;
-      allegato.dimensioneByte = element.size;
-      allegato.principale = false;
-      allegato.dataInserimento = new Date();
-      allegato.mimeType = element.type;
-      allegati.push(allegato);
-    });
-    this.uploadedFiles = event.files;
-    return allegati;
   }
 
   setProgressBarWidth(progress: number) {
