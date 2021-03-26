@@ -3,6 +3,12 @@
     display: flex;
     flex-direction: column;
 }
+.classe-temporanea {
+    width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+}
 main {
     max-width: 1000px;
     width: 100%;

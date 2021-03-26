@@ -1,27 +1,11 @@
 import {Component, Input, OnDestroy, OnInit, Output, EventEmitter} from "@angular/core";
 import {ExtendedMittenteService} from "./extended-mittente.service";
-import {
-  CodiceMezzo,
-  DettaglioContatto,
-  DettaglioContattoService,
-  Doc,
-  DocService,
-  ENTITIES_STRUCTURE,
-  IndirizzoSpedizione,
-  Mezzo,
-  MezzoService,
-  OrigineRelated,
-  Related,
-  Spedizione,
-  TipoDettaglio,
-  TipoRelated
-} from "@bds/ng-internauta-model";
+import {CodiceMezzo, DettaglioContatto, DettaglioContattoService, Doc, ENTITIES_STRUCTURE, IndirizzoSpedizione, MezzoService, OrigineRelated, Related, Spedizione, TipoDettaglio, TipoRelated} from "@bds/ng-internauta-model";
 import {AdditionalDataDefinition, FILTER_TYPES, FilterDefinition, FiltersAndSorts} from "@nfa/next-sdr";
 import {Subscription} from "rxjs";
 import {NtJwtLoginService, UtenteUtilities} from "@bds/nt-jwt-login";
 import {ExtendedDocService} from "../extended-doc.service";
-
-
+import { LOCAL_IT } from "@bds/nt-communicator";
 
 @Component({
   selector: "mittente",
@@ -31,6 +15,25 @@ import {ExtendedDocService} from "../extended-doc.service";
 })
 export class MittenteComponent implements OnInit, OnDestroy {
 
+  private subscriptions: Subscription[] = [];
+  private loggedUtenteUtilities: UtenteUtilities | undefined | null;
+  private _doc: Doc | undefined;
+  public localIt = LOCAL_IT;
+
+  public _mittenti: Related[] | undefined;
+  public dataDiArrivo: Date = new Date();
+
+  // Variabili per le autocomplete
+  public selectedMittente: Related | undefined | null;
+  public selectedOrigine: string = "";
+  public selectedMezzo: string = "";
+  public suggeretionsMittente: DettaglioContatto[] = [];
+  public suggeretionsOrigine: any[] = Object.values(OrigineRelated);
+  public suggeretionsMezzo: any[] = [];
+  public filteredMittente: DettaglioContatto[] = [];
+  public filteredOrigine: any[] = [];
+  public filteredMezzo: any[] = [];
+
   @Input() set doc(value: Doc) {
     if ( value && value.mittenti && value.mittenti.length > 0 ) {
       this.selectedMittente = value.mittenti[0];
@@ -39,31 +42,10 @@ export class MittenteComponent implements OnInit, OnDestroy {
       this.selectedMittente = null;
     }
   }
-
   @Output() saveMittenteEvent = new EventEmitter<Doc>();
 
-
-  selectedMittente: Related | undefined | null;
-  selectedOrigine: string = "";
-  selectedMezzo: string = "";
-  private _doc: Doc | undefined;
-  public _mittenti: Related[] | undefined;
-
-  suggeretionsMittente: DettaglioContatto[] = [];
-  public suggeretionsOrigine: any[] = Object.values(OrigineRelated);
-
-  // suggeretionsMezzo: Mezzo[] = [];
-  suggeretionsMezzo: any[] = [];
-
-  filteredMittente: DettaglioContatto[] = [];
-  filteredOrigine: any[] = [];
-  filteredMezzo: any[] = [];
-
-  dataDiArrivo: Date = new Date();
-  private subscriptions: Subscription[] = [];
-  private loggedUtenteUtilities: UtenteUtilities | undefined | null;
-
-  constructor(private mittenteService: ExtendedMittenteService,
+  constructor(
+    private mittenteService: ExtendedMittenteService,
     private mezzoService: MezzoService,
     private loginService: NtJwtLoginService,
     private dettaglioContattoService: DettaglioContattoService,
@@ -97,7 +79,6 @@ export class MittenteComponent implements OnInit, OnDestroy {
     }
 
   searchMittente(event: any) {
-    const filteredMittente: any[] = [];
     const query = event.query;
     const projection = ENTITIES_STRUCTURE.rubrica.dettagliocontatto.standardProjections.DettaglioContattoWithEmailAndIdContattoAndIndirizzoAndTelefono;
     const filtersAndSorts: FiltersAndSorts = new FiltersAndSorts();
@@ -110,29 +91,29 @@ export class MittenteComponent implements OnInit, OnDestroy {
     filtersAndSorts.addFilter(new FilterDefinition("tipo", FILTER_TYPES.not_string.equals, TipoDettaglio.TELEFONO));
     filtersAndSorts.addFilter(new FilterDefinition("tipo", FILTER_TYPES.not_string.equals, TipoDettaglio.EMAIL));
     this.subscriptions.push(
-        this.dettaglioContattoService.getData(projection, filtersAndSorts).subscribe(res => {
-          if (res) {
-            res.results.forEach((dettaglioContatto: DettaglioContatto) => {
-              // @ts-ignore
-              dettaglioContatto["descrizioneCustom"] = dettaglioContatto.descrizione + " [ " + dettaglioContatto.idContatto.descrizione + " ]";
-            });
-            this.filteredMittente = res.results;
-          }
-        }, err => {
-          console.log("error");
-          // this.messageService.add({
-          //   severity: "error",
-          //   summary: "Errore nel backend",
-          //   detail: "Non è stato possibile fare la ricerca."
-          // });
-        })
+      this.dettaglioContattoService.getData(projection, filtersAndSorts).subscribe(res => {
+        if (res) {
+          res.results.forEach((dettaglioContatto: DettaglioContatto) => {
+            // @ts-ignore
+            dettaglioContatto["descrizioneCustom"] = dettaglioContatto.descrizione + " [ " + dettaglioContatto.idContatto.descrizione + " ]";
+          });
+          this.filteredMittente = res.results;
+        }
+      }, err => {
+        console.log("error");
+        // this.messageService.add({
+        //   severity: "error",
+        //   summary: "Errore nel backend",
+        //   detail: "Non è stato possibile fare la ricerca."
+        // });
+      })
     );
   }
-  saveMittente(event: DettaglioContatto) {
+
+  public saveMittente(event: DettaglioContatto) {
     this.selectedMittente = this.dettaglioContattoToRelated(event);
     this._doc.mittenti = [this.selectedMittente];
     this.saveMittenteEvent.emit(this._doc);
-
   }
 
   private dettaglioContattoToRelated(dettaglioContatto: DettaglioContatto): Related {
@@ -198,7 +179,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
     return spedizione;
   }
 
-  searchTipo(event: any) {
+  public searchTipo(event: any): void {
     console.log(this.suggeretionsOrigine);
     const filteredTipo: any[] = [];
     const query = event.query;
@@ -210,7 +191,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
     this.filteredOrigine = filteredTipo;
   }
 
-  searchMezzo(event: any) {
+  public searchMezzo(event: any): void {
     const filteredMezzo: any[] = [];
     const query = event.query;
     this.suggeretionsMezzo.forEach(currentSuggeretion => {

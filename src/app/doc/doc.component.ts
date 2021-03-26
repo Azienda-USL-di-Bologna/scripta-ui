@@ -29,10 +29,6 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    // setTimeout(() => {
-    //   // window.scrollTo(0, 0);
-    //   this.pageStart.nativeElement.focus();
-    // }, 0);
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -53,12 +49,6 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    //this.pageStart.nativeElement.focus();
-   
-    setTimeout(() => {
-      //window.scrollTo(0, 0);
-      this.pageStart.nativeElement.focus();
-    }, 0);
     
   }
 

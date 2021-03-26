@@ -13,22 +13,22 @@ import {ExtendedMittenteService} from "./mittente/extended-mittente.service";
 
 
 @NgModule({
-    imports: [
-        CommonModule,
-        DocRoutingModule,
-        PrimeNgModule,
-        ScriptaCommonModule
-    ],
+  imports: [
+    CommonModule,
+    DocRoutingModule,
+    PrimeNgModule,
+    ScriptaCommonModule
+  ],
   declarations: [
-      DocComponent,
-      MittenteComponent,
-      DestinatariComponent,
-      AllegatiComponent
+    DocComponent,
+    MittenteComponent,
+    DestinatariComponent,
+    AllegatiComponent
   ],
   providers: [
-      ExtendedDocService,
-      ExtendedDestinatariService,
-      ExtendedMittenteService
+    ExtendedDocService,
+    ExtendedDestinatariService,
+    ExtendedMittenteService
   ]
 })
 export class DocModule { }
