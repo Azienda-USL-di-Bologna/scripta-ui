@@ -1,64 +1,60 @@
 <div class="mittente-box p-grid">
-    <label class="p-col-3" for="mittente">Mittente</label>
-    <p-autoComplete id="mittente"
-            [(ngModel)]="selectedMittente"
-             (onSelect)="saveMittente($event)"
-            [suggestions]="filteredMittente"
-            (completeMethod)="searchMittente($event)"
-                    ariaLabel="descrizione del mittente"
-            field="descrizione"
-            appendTo="body"
-            class="p-col">
-        <ng-template let-contatto pTemplate="item">
-            <div>{{contatto.descrizioneCustom}}</div>
-        </ng-template>
-    </p-autoComplete>
-<!--    <div  class="p-col">-->
-<!--        <input id="mittente"-->
-<!--               type="text"-->
-<!--               pInputText-->
-<!--               [(ngModel)]="mittente">-->
-<!--    </div>-->
+  <label class="p-col-3" for="mittente">Mittente</label>
+  <p-autoComplete 
+    id="mittente"
+    [(ngModel)]="selectedMittente"
+    (onSelect)="saveMittente($event)"
+    [suggestions]="filteredMittente"
+    (completeMethod)="searchMittente($event)"
+    ariaLabel="descrizione del mittente"
+    field="descrizione"
+    appendTo="body"
+    class="p-col">
+    <ng-template let-contatto pTemplate="item">
+      <div>{{contatto.descrizioneCustom}}</div>
+    </ng-template>
+  </p-autoComplete>
 </div>
 <div class="mittente-box p-grid">
-    <label class="p-col-3" for="origine">Origine</label>
-    <p-autoComplete id="Origine"
-                    ariaLabel="origine"
-            [(ngModel)]="selectedOrigine"
-            [suggestions]="filteredOrigine"
-            (completeMethod)="searchTipo($event)"
-            [dropdown]="true"
-             field="name"
-            appendTo="body"
-            class="p-col">
-    </p-autoComplete>
-    <label class="p-col-2" for="mezzo">Mezzo</label>
-    <p-autoComplete id="mezzo"
-            [(ngModel)]="selectedMezzo"
-            [suggestions]="filteredMezzo"
-            (completeMethod)="searchMezzo($event)"
-            field="descrizione"
-            [dropdown]="true"
-            appendTo="body"
-            class="p-col">
-    </p-autoComplete>
+  <label class="p-col-3" for="origine">Origine</label>
+  <p-autoComplete id="Origine"
+    ariaLabel="origine"
+    [(ngModel)]="selectedOrigine"
+    [suggestions]="filteredOrigine"
+    (completeMethod)="searchTipo($event)"
+    [dropdown]="true"
+    field="name"
+    appendTo="body"
+    class="p-col">
+  </p-autoComplete>
+  <label class="p-col-2" for="mezzo">Mezzo</label>
+  <p-autoComplete id="mezzo"
+    [(ngModel)]="selectedMezzo"
+    [suggestions]="filteredMezzo"
+    (completeMethod)="searchMezzo($event)"
+    field="descrizione"
+    [dropdown]="true"
+    appendTo="body"
+    class="p-col">
+  </p-autoComplete>
 </div>
 <div class="mittente-box p-grid">
-    <label class="p-col-3" for="dataArrivo">Data di arrivo</label>
-    <p-calendar
-            id="dataArrivo"
-            aria-label="data di arrivo"
-            [(ngModel)]="dataDiArrivo"
-            dateFormat="dd/mm/yy"
-            [showIcon]="true"
-            inputId="icon"
-            appendTo="body"
-            class="p-col-3">
-    </p-calendar>
-    <p-button
-            label="pec di origine"
-            styleClass="p-button-link"
-            class="p-col">
-    </p-button>
+  <label class="p-col-3" for="dataArrivo">Data di arrivo</label>
+  <p-calendar
+    id="dataArrivo"
+    aria-label="data di arrivo"
+    [(ngModel)]="dataDiArrivo"
+    dateFormat="dd/mm/yy"
+    [locale]="localIt"
+    [showIcon]="true"
+    inputId="icon"
+    appendTo="body"
+    class="p-col-3">
+  </p-calendar>
+  <p-button
+    label="pec di origine"
+    styleClass="p-button-link"
+    class="p-col">
+  </p-button>
 </div>
 

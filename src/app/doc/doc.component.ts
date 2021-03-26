@@ -21,6 +21,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public DatiProtocolloEsterno: Number;
   public dataProtocolloEsterno: Date;
   private projection: string = ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithAll;
+
   constructor(
     private extendedDocService: ExtendedDocService,
     private loginService: NtJwtLoginService,
@@ -28,10 +29,6 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    // setTimeout(() => {
-    //   // window.scrollTo(0, 0);
-    //   this.pageStart.nativeElement.focus();
-    // }, 0);
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -52,12 +49,6 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    //this.pageStart.nativeElement.focus();
-   
-    setTimeout(() => {
-      //window.scrollTo(0, 0);
-      //this.pageStart.nativeElement.focus();
-    }, 0);
     
   }
 
@@ -115,6 +106,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   public doButtonSave(): void {
+    this.messageService.add({severity:'success', summary:'Documento', detail:'Documeto salvato con successo'});
     console.log("nothing");
   }
   public doButtonProtocolla(): void {

@@ -5,18 +5,20 @@
 <p-toast #pageStart position="center" (onClose)="clearMessages()"></p-toast>
 
 <p-toolbar>
-  <button pButton  aria-hidden="false" type="button" label="Salva" icon="material-icons save"
-    (click)="doButtonSave()" class="my-button custom-primary-button" #salva>
-  </button>
-  
-  <button pButton type="button" label="Protocolla" icon="material-icons-outlined person_add"
-    (click)="doButtonProtocolla()" class="my-button custom-primary-button" 
-    ><!-- [disabled]="doc?.dataRegistrazione || !document.oggetto" -->
-  </button>
+  <div class="classe-temporanea">
+    <button pButton  aria-hidden="false" type="button" label="Salva" icon="material-icons save"
+      (click)="doButtonSave()" class="my-button custom-primary-button" #salva>
+    </button>
+    
+    <button pButton type="button" label="Protocolla" icon="material-icons-outlined person_add"
+      (click)="doButtonProtocolla()" class="my-button custom-primary-button" 
+      ><!-- [disabled]="doc?.dataRegistrazione || !document.oggetto" -->
+    </button>
 
-  <button pButton type="button" label="Note" 
-    (click)="doButtonNote()" class="my-button custom-primary-button">
-  </button>
+    <button pButton type="button" label="Note" 
+      (click)="doButtonNote()" class="my-button custom-primary-button">
+    </button>
+  </div>
 </p-toolbar>
 <main aria-level="2">
   <section class="info-documento">
