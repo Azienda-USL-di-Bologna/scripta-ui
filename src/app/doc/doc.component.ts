@@ -20,7 +20,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public descrizioneUtenteRegistrante: string | undefined;
   public DatiProtocolloEsterno: Number;
   public dataProtocolloEsterno: Date;
-  private projection: string = ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithDestinatariAndIdAziendaAndIdPersonaCreazioneAndMittentiCustom;
+  private projection: string = ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithAll;
   constructor(
     private extendedDocService: ExtendedDocService,
     private loginService: NtJwtLoginService,
@@ -56,7 +56,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
    
     setTimeout(() => {
       //window.scrollTo(0, 0);
-      this.pageStart.nativeElement.focus();
+      //this.pageStart.nativeElement.focus();
     }, 0);
     
   }
@@ -91,6 +91,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   public saveDoc(doc: any, field: keyof Doc): void {
+
     this.subscriptions.push(this.extendedDocService.updateDoc(doc, [field], this.projection).subscribe(res => {
      this.doc.mittenti = res.mittenti;
      this.doc.version = res.version;

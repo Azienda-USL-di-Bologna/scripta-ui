@@ -7,3 +7,7 @@ export const DOC_ROUTE = "doc/:id";
 export const LOGGED_OUT_ROUTE = "logged-out";
 export const BABELMAN_URL = "https://babelman-auslbo.avec.emr.it/";
 export const APPLICATION = "scripta";
+
+export const CUSTOM_SERVER_METHODS = {
+  saveAllegato: "saveAllegato"
+};
