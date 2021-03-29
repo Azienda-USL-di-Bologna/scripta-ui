@@ -7,6 +7,7 @@ import { FileUpload } from 'primeng-lts/fileupload';
 import { UtilityService } from 'src/app/services/utility.service';
 
 
+
 @Component({
   selector: 'allegati',
   templateUrl: './allegati.component.html',
@@ -68,7 +69,8 @@ export class AllegatiComponent implements OnInit {
           break;
         case HttpEventType.Response:
           // console.log("backend response event is: ", event);
-          const res: ImportazioniOrganigramma = event.body;
+          const res: Allegato[] = event.body;
+          this.allegati = res;
           this.progress = this.progress + 10;
           this.setProgressBarWidth(this.progress);
           // console.log("Response from the backend, progress is: ", this.progress);
@@ -76,15 +78,7 @@ export class AllegatiComponent implements OnInit {
           setTimeout(() => {
             this.progress = 0;
             this.setProgressBarWidth(this.progress);
-            this.onCloseFileUploadDialog();
-            // console.log("Response from the backend, progress is: ", this.progress);
-
-            const endString = (res.version as unknown as string).substr(0, res.dataInserimentoRiga.toString().length);
-            const endTime = new Date(endString).getTime();
-            const startTime = new Date(res.dataInserimentoRiga).getTime();
-            const executionTime = endTime - startTime;
-            const showTime = this.msToTime(executionTime);
-          
+            this.onCloseFileUploadDialog();          
           this.refreshTable = false;
         }, 7000);
     }});
@@ -96,10 +90,10 @@ export class AllegatiComponent implements OnInit {
     this.messageService.add({ severity: 'info', summary: 'File Uploaded', detail: '' });
   }
 
-  private buildFormData(event:any): FormData {
+  private buildFormData(event :any ): FormData {
     this.uploadedFiles = event.files;
     const formData: FormData = new FormData();
-    formData.append("idDoc", this._doc.id.toString());
+    formData.append("idDoc",this._doc.id.toString());
     formData.append("numeroProposta", "6");
     this.uploadedFiles.forEach((file: File) => {
       formData.append("files", file);
