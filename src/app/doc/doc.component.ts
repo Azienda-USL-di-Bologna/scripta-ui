@@ -106,7 +106,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   public doButtonSave(): void {
-    this.messageService.add({severity:'success', summary:'Documento', detail:'Documeto salvato con successo'});
+    this.messageService.add({severity:'success', summary:'Documento', detail:'Documento salvato con successo'});
     console.log("nothing");
   }
   public doButtonProtocolla(): void {
