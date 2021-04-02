@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
 import { Doc, ENTITIES_STRUCTURE } from "@bds/ng-internauta-model";
+import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { MessageService } from "primeng-lts/api";
 import { Observable, Subscription } from "rxjs";
@@ -15,8 +16,9 @@ import { ExtendedDocService } from "./extended-doc.service";
 export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   private subscriptions: Subscription[] = [];
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
+  public localIt = LOCAL_IT;
   @ViewChild("pageStart") public pageStart: any;
-  public doc: Doc = new Doc();
+  public doc: Doc;
   public descrizioneUtenteRegistrante: string | undefined;
   public DatiProtocolloEsterno: Number;
   public dataProtocolloEsterno: Date;
@@ -106,7 +108,11 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   public doButtonSave(): void {
-    this.messageService.add({severity:'success', summary:'Documento', detail:'Documento salvato con successo'});
+    this.messageService.add({
+      severity:'success', 
+      summary:'Documento', 
+      detail:'Documento salvato con successo'
+    });
     console.log("nothing");
   }
   public doButtonProtocolla(): void {

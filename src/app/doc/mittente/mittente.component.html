@@ -2,22 +2,32 @@
   <label class="p-col-3" for="mittente">Mittente</label>
   <p-autoComplete 
     id="mittente"
-    [(ngModel)]="selectedMittente"
+    [(ngModel)]="_doc.mittenti[0]"
     (onSelect)="saveMittente($event)"
     [suggestions]="filteredMittente"
     (completeMethod)="searchMittente($event)"
     ariaLabel="descrizione del mittente"
-    field="descrizione"
+    field="descrizioneCustom"
     appendTo="body"
-    class="p-col">
+    class="p-col"
+    type="search">
     <ng-template let-contatto pTemplate="item">
-      <div>{{contatto.descrizioneCustom}}</div>
+      <span>{{contatto.descrizioneCustom}}</span>
     </ng-template>
   </p-autoComplete>
 </div>
 <div class="mittente-box p-grid">
   <label class="p-col-3" for="origine">Origine</label>
-  <p-autoComplete id="Origine"
+  <span class="p-col">
+    <input id="Origine"
+      ariaLabel="origine"
+      type="text" 
+      pInputText 
+      [(ngModel)]="enumOrigine[_doc.mittenti[0].origine]"
+      [disabled]="true"
+      > 
+    </span>
+  <!-- <p-autoComplete id="Origine"
     ariaLabel="origine"
     [(ngModel)]="selectedOrigine"
     [suggestions]="filteredOrigine"
@@ -26,10 +36,10 @@
     field="name"
     appendTo="body"
     class="p-col">
-  </p-autoComplete>
-  <label class="p-col-2" for="mezzo">Mezzo</label>
+  </p-autoComplete> -->
+  <label class="p-col-2" for="mezzo">Mezzo</label><!-- _doc.mittenti[0].spedizioneList[0].idMezzo -->
   <p-autoComplete id="mezzo"
-    [(ngModel)]="selectedMezzo"
+    [(ngModel)]="actualMezzo"
     [suggestions]="filteredMezzo"
     (completeMethod)="searchMezzo($event)"
     field="descrizione"
@@ -43,7 +53,7 @@
   <p-calendar
     id="dataArrivo"
     aria-label="data di arrivo"
-    [(ngModel)]="dataDiArrivo"
+    [(ngModel)]="actualDataDiArrivo"
     dateFormat="dd/mm/yy"
     [locale]="localIt"
     [showIcon]="true"
