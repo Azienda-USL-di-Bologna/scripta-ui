@@ -11,7 +11,7 @@ export class ExtendedMittenteService extends RelatedService {
     super(_http, _datepipe);
   }
 
-  getSuggeretionMittente() {
+ /*  getSuggestionMittente() {
     return this.http.get<any>("assets/countries.json")
                 .toPromise()
                 .then(resMit => <any[]>resMit.data)
@@ -30,5 +30,5 @@ export class ExtendedMittenteService extends RelatedService {
         .toPromise()
         .then(resMezzo => <any[]>resMezzo.data)
         .then(dataMezzo => dataMezzo);
-  }
+  } */
 }

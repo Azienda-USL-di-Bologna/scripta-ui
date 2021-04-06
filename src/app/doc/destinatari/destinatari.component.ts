@@ -1,9 +1,10 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
-import { CategoriaContatto, Contatto, ContattoService, DettaglioContatto, Doc, ENTITIES_STRUCTURE, OrigineRelated, Related, TipoContatto, TipoRelated } from "@bds/ng-internauta-model";
+import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from "@angular/core";
+import { BaseUrls, BaseUrlType, CategoriaContatto, Contatto, ContattoService, DettaglioContatto, Doc, ENTITIES_STRUCTURE, OrigineRelated, Persona, Related, TipoContatto, TipoRelated } from "@bds/ng-internauta-model";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from "@nfa/next-sdr";
+import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity } from "@nfa/next-sdr";
+import { MessageService } from 'primeng-lts/api';
+import { AutoComplete } from "primeng-lts/autocomplete";
 import { Subscription } from "rxjs";
-import { ExtendedDocService } from "../extended-doc.service";
 
 import {ExtendedDestinatariService} from "./extended-destinatari.service";
 
@@ -12,19 +13,27 @@ import {ExtendedDestinatariService} from "./extended-destinatari.service";
   templateUrl: "./destinatari.component.html",
   styleUrls: ["./destinatari.component.scss"]
 })
-export class DestinatariComponent implements OnInit, OnDestroy {
+export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private loggedUtenteUtilities: UtenteUtilities;
+  private actualCompetente: Related;
 
   public columnCoinvolti: any[] = [];
   public _doc: Doc;
-  public selectedCompetente: Related;
+  //public selectedCompetente: Related;
   public selectedCoinvolto: Related;
   public filteredCompetenti: DettaglioContatto[];
   public filteredCoinvolti: DettaglioContatto[];
 
+  @ViewChild('autocompleteCompetenti') autocompleteCompetenti: AutoComplete;
+  @ViewChild('autocompleteCoinvolti') autocompleteCoinvolti: AutoComplete;
+
+
   @Input() set doc(value: Doc) {
     this._doc = value;
+    if (this._doc.competenti.length > 0) {
+      this.actualCompetente = this._doc.competenti[0];
+    }
     // if ( value && value.competenti && value.competenti.length > 0 ) {
     //   this.selectedCompetente = value.competenti[0];
     //   this._doc = value;
@@ -33,12 +42,14 @@ export class DestinatariComponent implements OnInit, OnDestroy {
     // }
   }
 
-  @Output() saveMittenteEvent = new EventEmitter<Doc>();
+  // @Output() saveMittenteEvent = new EventEmitter<Doc>();
 
-  constructor(private destinatariService: ExtendedDestinatariService,
+  constructor(
+    private destinatariService: ExtendedDestinatariService,
     private loginService: NtJwtLoginService,
     private contattoService: ContattoService,
-    private extendedDocService: ExtendedDocService
+    /* private extendedDocService: ExtendedDocService, */
+    private messageService: MessageService,
     ) {
       this.columnCoinvolti = [
         { field: "descrizione", header: "Struttura" },
@@ -50,6 +61,18 @@ export class DestinatariComponent implements OnInit, OnDestroy {
       this.loggedUtenteUtilities = utenteUtilities;
       })
     );
+  }
+
+  ngAfterViewInit(): void {
+    /* 
+      Questo codice da completare servirebbe nel caso si voglia cancellare il dato del competente quando l'utente clicca sulla x.
+      Il dubbio che ho è che non vogliano la x del type="search"
+      this.autocompleteCompetenti.el.nativeElement.onsearch = (event: any) => {
+      console.log(event);
+      if (event.srcElement.value === "") {
+
+      }
+    }; */
   }
 
   public searchDestinatario(event: any, modalita: string) {
@@ -91,33 +114,107 @@ export class DestinatariComponent implements OnInit, OnDestroy {
     );
   }
 
+  /**
+   * Chiamato dal frontend per salvare il destinatario passato
+   * @param contatto 
+   * @param modalita 
+   */
   public saveDestinatario(contatto: Contatto, modalita: string) {
     switch (modalita) {
       case "competente":
-        this._doc.competenti = [];
-        this._doc.competenti.push(this.contattoToRelated(contatto, TipoRelated.A));
+        // this._doc.competenti = [];
+        this.insertRelated(this.contattoToRelated(contatto, TipoRelated.A), modalita);
       break;
       case "coinvolto":
-        this._doc.coinvolti.push(this.contattoToRelated(contatto, TipoRelated.CC));
+        this.insertRelated(this.contattoToRelated(contatto, TipoRelated.CC), modalita);
       break;
     }
   }
+  
+  /**
+   * Esegue la save sul db del related passato, nel caso del competente elimina il vecchio.
+   * @param relatedToCreate 
+   * @param modalita 
+   */
+  private insertRelated(relatedToCreate: Related, modalita: string): void {
+    const batchOperations: BatchOperation[] = [];
+    if (modalita === "competente" && this.actualCompetente) {
+      batchOperations.push({
+        id: this.actualCompetente.id,
+        operation: BatchOperationTypes.DELETE,
+        entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.related.path,
+        entityBody: {
+          id: this.actualCompetente.id,
+          version: this.actualCompetente.version
+        } as NextSdrEntity,
+      } as BatchOperation);
+    } 
+    batchOperations.push({
+      operation: BatchOperationTypes.INSERT,
+      entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.related.path,
+      entityBody: relatedToCreate as NextSdrEntity,
+    } as BatchOperation);
+    this.subscriptions.push(
+      this.destinatariService.batchHttpCall(batchOperations).subscribe(
+        (res: BatchOperation[]) => {
+          const related = res.find(f => f.operation === BatchOperationTypes.INSERT).entityBody as Related;
+          switch (modalita) {
+            case "competente":
+              this._doc.competenti = [];
+              this._doc.competenti.push(related);
+              this.actualCompetente = related;
+            break;
+            case "coinvolto":
+              this._doc.coinvolti.push(related);
+              this.autocompleteCoinvolti.writeValue(null);
+            break;
+          }
+          this.messageService.add({
+            severity:'success', 
+            summary:'Struttura destinataria', 
+            detail: `Destinatario ${modalita} inserito con successo`
+          });
+      })
+    );
+  }
 
+  /**
+   * Questo metodo converte un Contatto della rubrica in un Related di scripta
+   * @param contatto 
+   * @param tipo 
+   * @returns 
+   */
   private contattoToRelated(contatto: Contatto, tipo: TipoRelated): Related {
     const destinatario: Related = new Related();
-    destinatario.idContatto = contatto;
+    destinatario.idContatto = {id: contatto.id} as Contatto;
     destinatario.descrizione = contatto.descrizione;
     destinatario.tipo = tipo;
-    destinatario.idPersonaInserente = this.loggedUtenteUtilities ? this.loggedUtenteUtilities.getUtente().idPersona : null;
+    destinatario.idPersonaInserente = {id: this.loggedUtenteUtilities.getUtente().idPersona.id} as Persona;
     destinatario.origine = OrigineRelated.INTERNO;
-    // destinatario.spedizioneList = [this.buildSpedizione(dettaglioContatto)];
+    destinatario.idDoc = {id: this._doc.id} as Doc;
     return destinatario;
   }
 
-  public onDeleteRelated(related: Related) {
-    console.log("calcneoiujncsdaijb")
+  /**
+   * Metodo chiamato dall'html per cancellare un destinatario.
+   * @param related 
+   */
+  public onDeleteRelated(related: Related, rowIndex: number): void {
+    this.destinatariService.deleteHttpCall(related.id).subscribe(
+      res => {
+        this.messageService.add({
+          severity:'success', 
+          summary:'Struttura destinatari', 
+          detail:'Struttura destinataria eliminata con successo'
+        });
+        this._doc.coinvolti.splice(rowIndex, 1);
+      }
+    );
   }
 
+  /**
+   * Alla distruzione del componente mi disottoscrivo da tutto
+   */
   public ngOnDestroy() {
     if (this.subscriptions && this.subscriptions.length > 0 ) {
       this.subscriptions.forEach(s => s.unsubscribe());

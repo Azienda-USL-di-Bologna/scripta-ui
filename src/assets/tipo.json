@@ -1,7 +1,0 @@
-{
-  "data": [
-    {"name": "Interno", "code": "INTERNO"},
-    {"name": "Esterno", "code": "ESTERNO"},
-    {"name": "Gruppo", "code": "VARIO"}
-  ]
-}

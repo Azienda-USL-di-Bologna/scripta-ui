@@ -2,23 +2,25 @@
     (save)="onDoSave($event)" (protocolla)="onDoProtocolla($event)" ></peis>
  -->
 <!-- <button #pageStart aria-hidden="true" style="height: 0; width: 0;"></button> -->
-<p-toast #pageStart position="center" (onClose)="clearMessages()"></p-toast>
+<p-toast #pageStart position="top-right" (onClose)="clearMessages()"></p-toast>
 
 <p-toolbar>
-  <button pButton  aria-hidden="false" type="button" label="Salva" icon="material-icons save"
-    (click)="doButtonSave()" class="my-button custom-primary-button" #salva>
-  </button>
-  
-  <button pButton type="button" label="Protocolla" icon="material-icons-outlined person_add"
-    (click)="doButtonProtocolla()" class="my-button custom-primary-button" 
-    ><!-- [disabled]="doc?.dataRegistrazione || !document.oggetto" -->
-  </button>
+  <div class="classe-temporanea">
+    <button pButton  aria-hidden="false" type="button" label="Salva" icon="material-icons save"
+      (click)="doButtonSave()" class="my-button custom-primary-button" #salva>
+    </button>
+    
+    <button pButton type="button" label="Protocolla" icon="material-icons-outlined person_add"
+      (click)="doButtonProtocolla()" class="my-button custom-primary-button" 
+      ><!-- [disabled]="doc?.dataRegistrazione || !document.oggetto" -->
+    </button>
 
-  <button pButton type="button" label="Note" 
-    (click)="doButtonNote()" class="my-button custom-primary-button">
-  </button>
+    <button pButton type="button" label="Note" 
+      (click)="doButtonNote()" class="my-button custom-primary-button">
+    </button>
+  </div>
 </p-toolbar>
-<main aria-level="2">
+<main aria-level="2" *ngIf="doc">
   <section class="info-documento">
     <span class="dati-creazione">
       <span>
@@ -70,6 +72,7 @@
             [ariaLabelledBy]="'dataProtocollazione'"
             [(ngModel)]="dataProtocolloEsterno"
             dateFormat="dd/mm/yy"
+            [locale]="localIt"
             [showIcon]="true"
             inputId="dataProtocollazione"
             appendTo="body"
@@ -83,12 +86,12 @@
     </p-accordionTab>
     <p-accordionTab header="Destinatari">
       <ng-template pTemplate="content">
-        <destinatari [doc]="doc" (saveDestinatariEvent)="saveDoc($event,'destinatari')"> </destinatari>
+        <destinatari [doc]="doc" (saveDestinatariEvent)="saveDoc($event, 'destinatari')"> </destinatari>
       </ng-template>    
     </p-accordionTab>
     <p-accordionTab header="Allegati">
       <ng-template pTemplate="content">
-        <allegati></allegati>
+        <allegati [doc]="doc"></allegati>
       </ng-template>
     </p-accordionTab>
   </p-accordion>

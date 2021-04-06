@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
 import { Doc, ENTITIES_STRUCTURE } from "@bds/ng-internauta-model";
+import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { MessageService } from "primeng-lts/api";
 import { Observable, Subscription } from "rxjs";
@@ -15,12 +16,14 @@ import { ExtendedDocService } from "./extended-doc.service";
 export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   private subscriptions: Subscription[] = [];
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
+  public localIt = LOCAL_IT;
   @ViewChild("pageStart") public pageStart: any;
-  public doc: Doc = new Doc();
+  public doc: Doc;
   public descrizioneUtenteRegistrante: string | undefined;
   public DatiProtocolloEsterno: Number;
   public dataProtocolloEsterno: Date;
-  private projection: string = ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithDestinatariAndIdAziendaAndIdPersonaCreazioneAndMittentiCustom;
+  private projection: string = ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithAll;
+
   constructor(
     private extendedDocService: ExtendedDocService,
     private loginService: NtJwtLoginService,
@@ -28,10 +31,6 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    // setTimeout(() => {
-    //   // window.scrollTo(0, 0);
-    //   this.pageStart.nativeElement.focus();
-    // }, 0);
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -52,12 +51,6 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    //this.pageStart.nativeElement.focus();
-   
-    setTimeout(() => {
-      //window.scrollTo(0, 0);
-      this.pageStart.nativeElement.focus();
-    }, 0);
     
   }
 
@@ -91,6 +84,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   public saveDoc(doc: any, field: keyof Doc): void {
+
     this.subscriptions.push(this.extendedDocService.updateDoc(doc, [field], this.projection).subscribe(res => {
      this.doc.mittenti = res.mittenti;
      this.doc.version = res.version;
@@ -114,6 +108,11 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   public doButtonSave(): void {
+    this.messageService.add({
+      severity:'success', 
+      summary:'Documento', 
+      detail:'Documento salvato con successo'
+    });
     console.log("nothing");
   }
   public doButtonProtocolla(): void {
