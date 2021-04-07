@@ -5,11 +5,12 @@ import { DocComponent } from "./doc.component";
 import { PrimeNgModule } from "../primeng.module";
 import { ScriptaCommonModule } from "../scripta-common.module";
 import { ExtendedDocService } from "./extended-doc.service";
-import {MittenteComponent} from "./mittente/mittente.component";
-import {DestinatariComponent} from "./destinatari/destinatari.component";
-import {AllegatiComponent} from "./allegati/allegati.component";
-import {ExtendedDestinatariService} from "./destinatari/extended-destinatari.service";
-import {ExtendedMittenteService} from "./mittente/extended-mittente.service";
+import { MittenteComponent} from "./mittente/mittente.component";
+import { DestinatariComponent } from "./destinatari/destinatari.component";
+import { AllegatiComponent } from "./allegati/allegati.component";
+import { ExtendedDestinatariService } from "./destinatari/extended-destinatari.service";
+import { ExtendedMittenteService } from "./mittente/extended-mittente.service";
+import { ExtendedAllegatoService } from "./allegati/extended-allegato.service";
 
 
 @NgModule({
@@ -28,7 +29,8 @@ import {ExtendedMittenteService} from "./mittente/extended-mittente.service";
   providers: [
     ExtendedDocService,
     ExtendedDestinatariService,
-    ExtendedMittenteService
+    ExtendedMittenteService,
+    ExtendedAllegatoService
   ]
 })
 export class DocModule { }

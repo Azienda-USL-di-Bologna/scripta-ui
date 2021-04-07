@@ -17,20 +17,60 @@
     </ul>
   </ng-template> -->
 </p-fileUpload>
-<p-table [value]="allegati" selectionMode="single" [(selection)]="selectedAllegato" dataKey="id">
-  <ng-template pTemplate="header">
-      <tr>
-          <th>Nome</th>
-          <th>Estensione</th>
-          <th>Descrizione</th>
-      </tr>
+<p-table
+  [value]="_doc.allegati" 
+  selectionMode="single" 
+  [(selection)]="selectedAllegato" 
+  dataKey="id"
+  styleClass="allegati-table"
+  (onRowSelect)="onRowSelect($event)"
+  (onRowUnselect)="onRowUnselect()">
+  <ng-template pTemplate="caption" >
+    <p-button 
+      *ngIf="_doc.allegati && _doc.allegati.length > 1"
+      label="Scarica allegati su zip"
+      icon="pi pi-download" 
+      (click)="downloadAllAttachments()">
+    </p-button>
   </ng-template>
-  <ng-template pTemplate="body" let-allegato>
-      <tr [pSelectableRow]="allegato">
-          <td>{{allegato.nome}}</td>
-          <td>{{allegato.estensione}}</td>
-          <td>{{allegato.tipo}}</td>
-      </tr>
+  <ng-template pTemplate="header">
+    <tr class="row">
+      <th class="colonna-principale"></th>
+      <!-- <th class="colonna-numero"></th> -->
+      <th class="colonna-nome">Nome</th>
+      <th class="colonna-estensione">Estensione</th>
+      <th class="colonna-download"></th>
+      <th class="colonna-elimina"></th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-allegato let-rowIndex="rowIndex">
+    <tr class="row">
+      <td class="colonna-principale">
+        <p-tableRadioButton 
+          [value]="allegato" 
+          ariaLabel="Setta l'allegato come principale">
+        </p-tableRadioButton>
+      </td>
+      <!-- <td class="colonna-numero">{{allegato.numeroAllegato}}</td> -->
+      <td class="colonna-nome">{{allegato.nome}}</td>
+      <td class="colonna-estensione">{{allegato.estensione}}</td>
+      <td class="colonna-download">
+        <i class="pi pi-download bds-icon-btn"
+          ariaLabel="Download allegato"
+          pTooltip="Download" 
+          tooltipPosition="top"
+          (click)="onDownloadAttachment(allegato)">
+        </i>
+      </td>
+      <td class="colonna-elimina">
+        <i class="material-icons-outlined bds-icon-btn"
+          ariaLabel="Elimina allegato"
+          pTooltip="Elimina" 
+          tooltipPosition="top" 
+          (click)="onDeleteAttachment(allegato, rowIndex)">
+          delete
+        </i>
+      </td>
+    </tr>
   </ng-template>
 </p-table>
-

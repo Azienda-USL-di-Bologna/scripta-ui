@@ -1,0 +1,35 @@
+::ng-deep .allegati-table {
+  .row {
+    border: 1px solid #c8c8c8;
+    td, th {
+      border: none !important;
+    }
+    .colonna-principale {
+      width: 50px;
+      min-width: 50px;
+    }
+    .colonna-nome {
+      min-width: 140px;
+    }
+    .colonna-estensione {
+      width: 120px;
+      min-width: 120px;
+      text-align: center;
+    }
+    .colonna-download {
+      width: 60px;
+      min-width: 60px;
+      i {
+        vertical-align: middle;
+        font-weight: bolder;
+      }
+    }
+    .colonna-elimina {
+      width: 60px;
+      min-width: 60px;
+      i {
+        vertical-align: middle;
+      }
+    }
+  }
+}

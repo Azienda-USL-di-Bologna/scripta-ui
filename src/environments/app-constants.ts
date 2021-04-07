@@ -9,5 +9,7 @@ export const BABELMAN_URL = "https://babelman-auslbo.avec.emr.it/";
 export const APPLICATION = "scripta";
 
 export const CUSTOM_SERVER_METHODS = {
-  saveAllegato: "saveAllegato"
+  saveAllegato: "saveAllegato",
+  downloadAttachment: "downloadAttachment",
+  downloadAllAttachments: "downloadAllAttachments"
 };
