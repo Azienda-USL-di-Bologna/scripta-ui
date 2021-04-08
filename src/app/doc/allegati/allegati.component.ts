@@ -2,7 +2,7 @@ import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import { Doc, Allegato, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE } from '@bds/ng-internauta-model';
 import { UtilityFunctions } from '@bds/nt-communicator';
-import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity } from '@nfa/next-sdr';
+import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
 import { MessageService } from 'primeng-lts/api';
 import { FileUpload } from 'primeng-lts/fileupload';
 import { Subscription } from 'rxjs';
@@ -165,6 +165,7 @@ export class AllegatiComponent implements OnInit {
   private loadAllegati() {
     const filters: FiltersAndSorts = new FiltersAndSorts();
     filters.addFilter(new FilterDefinition("idDoc", FILTER_TYPES.not_string.equals, this._doc.id));
+    filters.addSort(new SortDefinition("numeroAllegato", SORT_MODES.asc));
     this.allegatoService.getData(null, filters, null, null).subscribe(
       (res: any) => {
         this._doc.allegati = [...res.results];
