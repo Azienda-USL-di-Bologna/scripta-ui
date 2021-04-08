@@ -143,7 +143,7 @@ export class AllegatiComponent implements OnInit {
   public onDownloadAttachment(allegato: Allegato): void {
     this.allegatoService.downloadAttachment(allegato).subscribe(
       response =>
-        UtilityFunctions.downLoadFile(response, allegato.mimeType, allegato.nome, false)
+        UtilityFunctions.downLoadFile(response, allegato.mimeType, allegato.nome + "." + allegato.estensione, false)
     );
   }
 
