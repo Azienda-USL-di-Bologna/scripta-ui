@@ -1,8 +1,9 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
-import { Doc, ENTITIES_STRUCTURE } from "@bds/ng-internauta-model";
+import { Doc, ENTITIES_STRUCTURE, Persona } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
+import { AdditionalDataDefinition } from "@nfa/next-sdr";
 import { MessageService } from "primeng-lts/api";
 import { Observable, Subscription } from "rxjs";
 import { switchMap } from "rxjs/operators";
@@ -20,6 +21,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild("pageStart") public pageStart: any;
   public doc: Doc;
   public descrizioneUtenteRegistrante: string | undefined;
+  public utenteUtilitiesLogin: UtenteUtilities;
   public DatiProtocolloEsterno: Number;
   public dataProtocolloEsterno: Date;
   private projection: string = ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithAll;
@@ -34,15 +36,28 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
+          this.utenteUtilitiesLogin = utenteUtilities;
           this.descrizioneUtenteRegistrante = utenteUtilities.getUtente().idPersona.descrizione;
         }
       )
     );
 
+    // this.subscriptions.push(
+    //   this.route.paramMap.pipe(
+    //     switchMap((params: ParamMap) =>
+    //       //this.loadDocument(Number(params.get("id")))
+    //       this.handleCommand(params)
+    //   )).subscribe((res: Doc) => {
+    //     console.log("res", res);
+    //     this.doc = res;
+    //   })
+    // );
+
     this.subscriptions.push(
-      this.route.paramMap.pipe(
+      this.route.queryParamMap.pipe(
         switchMap((params: ParamMap) =>
-          this.loadDocument(Number(params.get("id")))
+          //this.loadDocument(Number(params.get("id")))
+          this.handleCommand(params)
       )).subscribe((res: Doc) => {
         console.log("res", res);
         this.doc = res;
@@ -59,6 +74,30 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
       return date.replace(/\[\w+\/\w+\]$/, "");
     }
     return null;
+  }
+
+  private handleCommand(params: ParamMap): Observable<Doc> {
+    const command = params.get("command");
+    let res: Observable<Doc>;
+    switch(command) {
+      case "NEW": 
+        const doc: Doc = new Doc();
+        doc.idPersonaCreazione = {id: this.utenteUtilitiesLogin.getUtente().idPersona.id} as Persona
+        if(params.get("pec")){
+          const idPec: string = params.get("pec");
+          const additionalData: AdditionalDataDefinition = new AdditionalDataDefinition("idPec", idPec);
+          res = this.extendedDocService.postHttpCall(doc, this.projection, [additionalData]);
+        }
+        else {
+          res = this.extendedDocService.postHttpCall(doc, this.projection);
+        }
+      break;
+      case "OPEN":
+        res = this.extendedDocService.getByIdHttpCall(
+          params.get("id"),
+          this.projection);
+    }
+    return res;
   }
 
   private loadDocument(id: number): Observable<Doc> {
