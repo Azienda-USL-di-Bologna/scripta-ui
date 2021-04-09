@@ -15,6 +15,14 @@
       <span>{{contatto.descrizioneCustom}}</span>
     </ng-template>
   </p-autoComplete>
+  <span class="p-col">
+    <input id="Indirizzo"
+      ariaLabel="indirizzo"
+      type="text" 
+      pInputText 
+      [(ngModel)]="indirizzo"
+      [disabled]="true"> 
+    </span>
 </div>
 <div class="mittente-box p-grid">
   <label class="p-col-3" for="origine">Origine</label>
