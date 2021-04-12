@@ -164,7 +164,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
    */
   private setDescrizioneCustomMittente(mittente: Related) {
     // @ts-ignore
-    mittente["descrizioneCustom"] = this.actualMittente.descrizione ;
+    mittente["descrizioneCustom"] = this.actualMittente.descrizione + "[" + this.actualMittente.spedizioneList[0].indirizzo.completo +"]";
   }
 
   /**
