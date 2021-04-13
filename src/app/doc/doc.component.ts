@@ -76,6 +76,11 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     return null;
   }
 
+/**
+ * Gestisce le due diverse richieste da url: 
+ * 'NEW' documento (proviene dalla protocollazione da pec) ----> viene passato come parametro l'idpec e viene usato come additionalData 
+ * 'OPEN' documento ( apre un documento già esistente con l'id) 
+ */
   private handleCommand(params: ParamMap): Observable<Doc> {
     const command = params.get("command");
     let res: Observable<Doc>;
