@@ -1,5 +1,5 @@
 import { HttpEvent, HttpEventType } from '@angular/common/http';
-import { Component, OnInit, Input, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, OnDestroy } from '@angular/core';
 import { Doc, Allegato, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE } from '@bds/ng-internauta-model';
 import { UtilityFunctions } from '@bds/nt-communicator';
 import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
@@ -13,7 +13,7 @@ import { ExtendedAllegatoService } from './extended-allegato.service';
   templateUrl: './allegati.component.html',
   styleUrls: ['./allegati.component.scss']
 })
-export class AllegatiComponent implements OnInit {
+export class AllegatiComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private actualPrincipale: Allegato;
   
@@ -41,6 +41,9 @@ export class AllegatiComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  /**
+   * Assegna il valore ad alcune proprietà chiave della classe
+   */
   private setInitialData(): void {
     if (this._doc.allegati.length > 0) {
       this.actualPrincipale = this._doc.allegati.find(a => a.principale);
@@ -48,10 +51,14 @@ export class AllegatiComponent implements OnInit {
     }
   }
   
+  /**
+   * Funzione che gestisce l'upload degli allegati
+   * @param event 
+   */
   public onUpload(event: any): void {
     console.log("formDataformDataformData", event);
     let formData: FormData = this.buildFormData(event);
-    this.allegatoService.uploadAllegato(formData).subscribe((event: HttpEvent<any>) => {
+    this.subscriptions.push(this.allegatoService.uploadAllegato(formData).subscribe((event: HttpEvent<any>) => {
       switch (event.type) {
         case HttpEventType.Sent:
           this.progress = 5;
@@ -92,11 +99,7 @@ export class AllegatiComponent implements OnInit {
             this.onCloseFileUploadDialog();          
           this.refreshTable = false;
         }, 7000);
-    }});
-            
-      // for(let file of event.files) {
-      //     this.uploadedFiles.push(file);
-      // }
+    }}));
 
     this.messageService.add({ severity: 'info', summary: 'File Uploaded', detail: '' });
   }
@@ -198,7 +201,6 @@ export class AllegatiComponent implements OnInit {
    */
   public onRowSelect(event: any): void {
     const batchOperations: BatchOperation[] = [];
-    console.log("sass",event);
     if (this.selectedAllegato) {
       batchOperations.push({
         operation: BatchOperationTypes.UPDATE,
@@ -220,31 +222,31 @@ export class AllegatiComponent implements OnInit {
           } as NextSdrEntity,
         } as BatchOperation);
       } 
-    }
-    this.subscriptions.push(
-      this.allegatoService.batchHttpCall(batchOperations).subscribe(
-        (res: BatchOperation[]) => {
-          this.messageService.add({
-            severity:'success', 
-            summary:'Allegato', 
-            detail:'Allegato principale impostato con successo'
-          });
-          // Aggiorno i campi su vecchio principale
-          if (this.actualPrincipale) {
-            this.actualPrincipale.principale = false;
-            this.actualPrincipale.version = (res.find(b => 
-              (b.entityBody as Allegato).id === this.actualPrincipale.id
+      this.subscriptions.push(
+        this.allegatoService.batchHttpCall(batchOperations).subscribe(
+          (res: BatchOperation[]) => {
+            this.messageService.add({
+              severity:'success', 
+              summary:'Allegato', 
+              detail:'Allegato principale impostato con successo'
+            });
+            // Aggiorno i campi su vecchio principale
+            if (this.actualPrincipale) {
+              this.actualPrincipale.principale = false;
+              this.actualPrincipale.version = (res.find(b => 
+                (b.entityBody as Allegato).id === this.actualPrincipale.id
+                ).entityBody as Allegato).version;
+            }
+            // Aggiorno i campi sul nuovo principale
+            this.selectedAllegato.principale = true;
+            this.selectedAllegato.version = (res.find(b => 
+              (b.entityBody as Allegato).id === this.selectedAllegato.id
               ).entityBody as Allegato).version;
-          }
-          // Aggiorno i campi sul nuovo principale
-          this.selectedAllegato.principale = true;
-          this.selectedAllegato.version = (res.find(b => 
-            (b.entityBody as Allegato).id === this.selectedAllegato.id
-            ).entityBody as Allegato).version;
-          // Setto l'actualPrincipale al nuovo principale
-          this.actualPrincipale = this.selectedAllegato;
-      })
-    );
+            // Setto l'actualPrincipale al nuovo principale
+            this.actualPrincipale = this.selectedAllegato;
+        })
+      );
+    }
   }
 
   /**
@@ -270,5 +272,13 @@ export class AllegatiComponent implements OnInit {
         )
       );
     }
+  }
+
+  /**
+   * Mi desottoscrivo dalla varie sottoscrizioni
+   */
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((s: Subscription) => s.unsubscribe());
+    this.subscriptions = [];
   }
 }
