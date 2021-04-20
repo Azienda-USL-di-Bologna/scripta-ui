@@ -42,21 +42,9 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
       )
     );
 
-    // this.subscriptions.push(
-    //   this.route.paramMap.pipe(
-    //     switchMap((params: ParamMap) =>
-    //       //this.loadDocument(Number(params.get("id")))
-    //       this.handleCommand(params)
-    //   )).subscribe((res: Doc) => {
-    //     console.log("res", res);
-    //     this.doc = res;
-    //   })
-    // );
-
     this.subscriptions.push(
       this.route.queryParamMap.pipe(
         switchMap((params: ParamMap) =>
-          //this.loadDocument(Number(params.get("id")))
           this.handleCommand(params)
       )).subscribe((res: Doc) => {
         console.log("res", res);
@@ -88,19 +76,20 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
       case "NEW": 
         const doc: Doc = new Doc();
         doc.idPersonaCreazione = {id: this.utenteUtilitiesLogin.getUtente().idPersona.id} as Persona
-        if(params.get("pec")){
-          const idPec: string = params.get("pec");
-          const additionalData: AdditionalDataDefinition = new AdditionalDataDefinition("idPec", idPec);
-          res = this.extendedDocService.postHttpCall(doc, this.projection, [additionalData]);
+        if (params.get("idMessage") && params.get("azienda")) {
+          const idMessage: string = params.get("message");
+          const codiceAzienda: string = params.get("azienda");
+          const additionalDataOperationRequested: AdditionalDataDefinition = new AdditionalDataDefinition("OperationRequested", "CreateDocPerMessageRegistration");
+          const additionalDataIdMessage: AdditionalDataDefinition = new AdditionalDataDefinition("idMessage", idMessage);
+          const additionalDataCodiceAzienda: AdditionalDataDefinition = new AdditionalDataDefinition("codiceAzienda", codiceAzienda);
+          res = this.extendedDocService.postHttpCall(doc, this.projection, [additionalDataOperationRequested, additionalDataIdMessage, additionalDataCodiceAzienda]);
         }
         else {
           res = this.extendedDocService.postHttpCall(doc, this.projection);
         }
       break;
       case "OPEN":
-        res = this.extendedDocService.getByIdHttpCall(
-          params.get("id"),
-          this.projection);
+        res = this.loadDocument(+params.get("id"));
     }
     return res;
   }
