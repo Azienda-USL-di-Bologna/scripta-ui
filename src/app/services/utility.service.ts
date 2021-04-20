@@ -14,13 +14,6 @@ export class UtilityService {
 
   constructor(protected _http: HttpClient) { }
 
-  uploadAllegato(formData: FormData){
-    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + CUSTOM_SERVER_METHODS.saveAllegato;
-    console.log(apiUrl);
-    return this._http.post(apiUrl, formData, { reportProgress: true, observe: "events" })
-        .pipe(catchError(this.errorMgmt));
-  }
-
   errorMgmt(error: HttpErrorResponse) {
     let errorMessage = "";
     if (error.error instanceof ErrorEvent) {

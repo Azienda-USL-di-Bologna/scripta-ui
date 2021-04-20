@@ -7,14 +7,17 @@
 } */
 
 ::ng-deep .coinvolti-table {
-    //flex: 1 1 0;
-    .row {
-        border: 1px solid #c8c8c8;
-        td, th {
-            border: none !important;
-        }
-        .column-icon {
-            width: 60px;
-        }
+  //flex: 1 1 0;
+  .row {
+    border: 1px solid #c8c8c8;
+    td, th {
+      border: none !important;
     }
+    .column-icon {
+      width: 60px;
+      i {
+        vertical-align: middle;
+      }
+    }
+  }
 }

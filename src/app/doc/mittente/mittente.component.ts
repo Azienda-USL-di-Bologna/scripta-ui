@@ -31,6 +31,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
   // Variabili per le autocomplete
   //public selectedMittente: Related | undefined | null;
   //public selectedOrigine: string = "";
+  public indirizzo: string;
   public actualMezzo: Mezzo;
   public actualDataDiArrivo: Date;
   //public suggestionsOrigine: any[] = Object.values(OrigineRelated);
@@ -45,6 +46,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
       this.actualMittente = this._doc.mittenti[0];
       this.setDescrizioneCustomMittente(this._doc.mittenti[0]);
       this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
+      this.indirizzo = this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
       //this.actualDataDiArrivo = this._doc.mittenti[0].spedizioneList[0].data
     }
   }
@@ -145,6 +147,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
           this.actualMittente = related;
           this.setDescrizioneCustomMittente(this._doc.mittenti[0]);
           this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
+          this.indirizzo=  this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
           this.messageService.add({
             severity:'success', 
             summary:'Mittente', 
@@ -161,7 +164,9 @@ export class MittenteComponent implements OnInit, OnDestroy {
    */
   private setDescrizioneCustomMittente(mittente: Related) {
     // @ts-ignore
-    mittente["descrizioneCustom"] = this.actualMittente.descrizione + " [ " + this.actualMittente.spedizioneList[0].indirizzo.completo + " ]";
+    //mittente["descrizioneCustom"] = this.actualMittente.descrizione + "[" + this.actualMittente.spedizioneList[0].indirizzo.completo +"]";
+    //avendo aggiunto l'altro campo con l'indirizzo, c'è solo la descrizione per evitare ridondanze.
+    mittente["descrizioneCustom"] = this.actualMittente.descrizione ;
   }
 
   /**
