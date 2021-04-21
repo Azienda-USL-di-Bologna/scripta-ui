@@ -3,7 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { Allegato, AllegatoService, BaseUrlType, Doc, getInternautaUrl } from "@bds/ng-internauta-model";
 import { DatePipe } from "@angular/common";
 import { catchError } from "rxjs/operators";
-import { UtilityService } from "src/app/services/utility.service";
+import { ErrorManager } from "src/app/utilities/error-manager";
 import { CUSTOM_SERVER_METHODS } from "src/environments/app-constants";
 import { Observable } from "rxjs";
 
@@ -11,8 +11,7 @@ import { Observable } from "rxjs";
 @Injectable()
 export class ExtendedAllegatoService extends AllegatoService {
 
-  constructor(protected _http: HttpClient, protected _datepipe: DatePipe,
-    private utilityService: UtilityService) {
+  constructor(protected _http: HttpClient, protected _datepipe: DatePipe) {
     super(_http, _datepipe);
   }
 
@@ -20,7 +19,7 @@ export class ExtendedAllegatoService extends AllegatoService {
     const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + CUSTOM_SERVER_METHODS.saveAllegato;
     console.log(apiUrl);
     return this._http.post(apiUrl, formData, { reportProgress: true, observe: "events" })
-        .pipe(catchError(this.utilityService.errorMgmt));
+        .pipe(catchError(ErrorManager.errorMgmt));
   }
 
   /**
