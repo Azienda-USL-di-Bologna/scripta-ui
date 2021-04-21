@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Allegato, AllegatoService, BaseUrlType, Doc, getInternautaUrl } from "@bds/ng-internauta-model";
+import { Allegato, AllegatoService, BaseUrlType, DettaglioAllegato, Doc, getInternautaUrl } from "@bds/ng-internauta-model";
 import { DatePipe } from "@angular/common";
 import { catchError } from "rxjs/operators";
 import { UtilityService } from "src/app/services/utility.service";
@@ -27,8 +27,8 @@ export class ExtendedAllegatoService extends AllegatoService {
    * Ritorna un Observable il cui risultato è il blob dell'allegato richiesto.
    * @param allegato L'allegato che si vuole.
    */
-   public downloadAttachment(allegato: Allegato): Observable<any> {
-    const url = getInternautaUrl(BaseUrlType.Scripta) + "/" + CUSTOM_SERVER_METHODS.downloadAttachment + "/" + allegato.id;
+   public downloadAttachment(dettaglioAllegato: DettaglioAllegato): Observable<any> {
+    const url = getInternautaUrl(BaseUrlType.Scripta) + "/" + CUSTOM_SERVER_METHODS.downloadAttachment + "/" + dettaglioAllegato.id;
      return this._http.get(url, {responseType: "blob"});
   }
 

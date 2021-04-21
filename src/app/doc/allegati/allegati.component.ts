@@ -131,9 +131,10 @@ export class AllegatiComponent implements OnInit, OnDestroy {
    * Metodo che si occupa di far partire lo scaricamento di un allegato
    */
   public onDownloadAttachment(allegato: Allegato): void {
-    this.allegatoService.downloadAttachment(allegato).subscribe(
+    let dettaglioAllegato : DettaglioAllegato = this.getDettaglioByTipoDettaglioAllegato(allegato, "ORIGINALE");
+    this.allegatoService.downloadAttachment(dettaglioAllegato).subscribe(
       response =>
-        UtilityFunctions.downLoadFile(response, allegato.getDettaglioByTipoDettaglioAllegato(TipoDettaglioAllegato.ORIGINALE).mimeType, allegato.nome + "." + allegato.getDettaglioByTipoDettaglioAllegato(TipoDettaglioAllegato.ORIGINALE).estensione, false)
+        UtilityFunctions.downLoadFile(response, dettaglioAllegato.mimeType, dettaglioAllegato.nome + "." + dettaglioAllegato.estensione, false)
     );
   }
 
