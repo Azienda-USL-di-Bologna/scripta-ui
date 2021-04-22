@@ -11,5 +11,6 @@ export const APPLICATION = "scripta";
 export const CUSTOM_SERVER_METHODS = {
   saveAllegato: "saveAllegato",
   downloadAttachment: "downloadAttachment",
-  downloadAllAttachments: "downloadAllAttachments"
+  downloadAllAttachments: "downloadAllAttachments",
+  dettaglioallegato:"dettaglioallegato"
 };
