@@ -156,8 +156,8 @@ export class AllegatiComponent implements OnInit, OnDestroy {
   private loadAllegati() {
     const filters: FiltersAndSorts = new FiltersAndSorts();
     filters.addFilter(new FilterDefinition("idDoc", FILTER_TYPES.not_string.equals, this._doc.id));
-    filters.addSort(new SortDefinition("numeroAllegato", SORT_MODES.asc));
-    this.allegatoService.getData(null, filters, null, null).subscribe(
+    filters.addSort(new SortDefinition("ordinale", SORT_MODES.asc));
+    this.allegatoService.getData(ENTITIES_STRUCTURE.scripta.allegato.standardProjections.AllegatoWithDettagliAllegatiListAndIdAllegatoPadre, filters, null, null).subscribe(
       (res: any) => {
         this._doc.allegati = [...res.results];
         this.setInitialData();
@@ -177,6 +177,7 @@ export class AllegatiComponent implements OnInit, OnDestroy {
           detail:'Allegato eliminato con successo'
         });
         // La delete può far scattare la rinumerazione degli allegati e quindi ricarico l'intera lista.
+        
         this.loadAllegati();
       }
     );

@@ -27,7 +27,7 @@ export class ExtendedAllegatoService extends AllegatoService {
    * @param allegato L'allegato che si vuole.
    */
    public downloadAttachment(dettaglioAllegato: DettaglioAllegato): Observable<any> {
-    const url = getInternautaUrl(BaseUrlType.Scripta) + "/" + CUSTOM_SERVER_METHODS.downloadAttachment + "/" + dettaglioAllegato.id;
+    const url = getInternautaUrl(BaseUrlType.Scripta) + "/" + CUSTOM_SERVER_METHODS.dettaglioallegato + "/" + dettaglioAllegato.id +"/download";
      return this._http.get(url, {responseType: "blob"});
   }
 
