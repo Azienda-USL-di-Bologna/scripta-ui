@@ -15,12 +15,12 @@ export class ExtendedDocService extends DocService {
     super(_http, _datepipe);
   }
 
-  public protocollaDoc(doc: Doc): Observable<any>{
+  public protocollaDoc(doc: Doc): Observable<Object>{
     const url = getInternautaUrl(BaseUrlType.Scripta) + "/" + CUSTOM_SERVER_METHODS.createPE
     console.log(url);
     let formData: FormData = new FormData();
     formData.append("id_doc", doc.id.toString());
-    return this.http.post(url, formData)
+    return this._http.post(url, formData);
   }
 
   public updateDoc<K extends keyof Doc>(doc: Doc, fields: K[], projection?: string, additionalData?: AdditionalDataDefinition[]): Observable<Doc> {

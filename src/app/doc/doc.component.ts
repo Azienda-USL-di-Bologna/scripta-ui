@@ -219,11 +219,10 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     else{
         this.extendedDocService.protocollaDoc(this.doc).subscribe(res => {
           console.log("RES", res);
-          const protocollo = res.protocollo;
           this.messageService.add({
             severity:'success', 
             summary:'Documento', 
-            detail:'Documento protocollato con successo: numero registro ' + protocollo
+            detail:'Documento protocollato con successo'
           });
         }, err => {
           console.log("ERRR", err);

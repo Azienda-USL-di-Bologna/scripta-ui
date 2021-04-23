@@ -12,6 +12,5 @@ export const CUSTOM_SERVER_METHODS = {
   saveAllegato: "saveAllegato",
   downloadAttachment: "downloadAttachment",
   downloadAllAttachments: "downloadAllAttachments",
-  dettaglioallegato:"dettaglioallegato",
-  createPE: "createPE"
+  dettaglioallegato:"dettaglioallegato"
 };
