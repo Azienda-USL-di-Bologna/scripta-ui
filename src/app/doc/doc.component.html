@@ -20,6 +20,10 @@
     </button>
   </div>
 </p-toolbar>
+<p-progressBar *ngIf="inProtocollazione" mode="indeterminate"></p-progressBar>
+<p-blockUI [blocked]="blockedDocument">
+  <i class="pi pi-lock" style="font-size: 3rem"></i>
+</p-blockUI>
 <main aria-level="2" *ngIf="doc">
   <section class="info-documento">
     <span class="dati-creazione">

@@ -10,12 +10,16 @@ import { switchMap } from "rxjs/operators";
 import { AppService } from "../app.service";
 import { ExtendedDocService } from "./extended-doc.service";
 
+
+
 @Component({
   selector: "doc",
   templateUrl: "./doc.component.html",
   styleUrls: ["./doc.component.scss"]
 })
 export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
+  public inProtocollazione: boolean = false;
+  public blockedDocument: boolean = false;
   private subscriptions: Subscription[] = [];
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public localIt = LOCAL_IT;
@@ -203,6 +207,11 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  private setFreezeDocumento(val: boolean){
+      this.inProtocollazione = val;
+      this.blockedDocument = val;
+  }
+
   public doButtonSave(): void {
     this.appService.aziendaDiLavoroSelection(null);
     this.messageService.add({
@@ -218,7 +227,9 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
       this.manageMessageNonPossoProtocollare();
     }
     else{
-        this.extendedDocService.protocollaDoc(this.doc).subscribe(res => {
+      this.setFreezeDocumento(true);
+      this.extendedDocService.protocollaDoc(this.doc).subscribe(res => {
+        this.setFreezeDocumento(false);
           console.log("RES", res);
           const protocollo = res.protocollo;
           this.messageService.add({
@@ -227,6 +238,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
             detail:'Documento protocollato con successo: numero protocollo generato ' + protocollo
           });
         }, err => {
+          this.setFreezeDocumento(false);
           console.log("ERRR", err);
           
           this.messageService.add({
