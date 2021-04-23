@@ -216,7 +216,24 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     if(!this.possoProtocollare()){
       this.manageMessageNonPossoProtocollare();
     }
-    console.log("nothing");
+    else{
+        this.extendedDocService.protocollaDoc(this.doc).subscribe(res => {
+          console.log("RES", res);
+          this.messageService.add({
+            severity:'success', 
+            summary:'Documento', 
+            detail:'Documento protocollato con successo'
+          });
+        }, err => {
+          console.log("ERRR", err);
+          
+          this.messageService.add({
+            severity:'error', 
+            summary:'Documento', 
+            detail:'Errore nel protocollare il documento'
+          });
+        })
+    }
   }
   public doButtonNote(): void {
     console.log("nothing");
