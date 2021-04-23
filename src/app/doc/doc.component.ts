@@ -25,7 +25,8 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public utenteUtilitiesLogin: UtenteUtilities;
   public DatiProtocolloEsterno: Number;
   public dataProtocolloEsterno: Date;
-  private projection: string = ENTITIES_STRUCTURE.scripta.doc.customProjections.DocWithAll;
+  // private projection: string = ENTITIES_STRUCTURE.scripta.doc.customProjections.DocWithAll; //  PERCHE'??? QUESTE A ME DANNO ERRORE...
+  private projection: string = ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithAll;
 
   constructor(
     private extendedDocService: ExtendedDocService,
@@ -219,10 +220,11 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     else{
         this.extendedDocService.protocollaDoc(this.doc).subscribe(res => {
           console.log("RES", res);
+          const protocollo = res.protocollo;
           this.messageService.add({
             severity:'success', 
             summary:'Documento', 
-            detail:'Documento protocollato con successo'
+            detail:'Documento protocollato con successo: numero protocollo generato ' + protocollo
           });
         }, err => {
           console.log("ERRR", err);

@@ -15,7 +15,7 @@ export class ExtendedDocService extends DocService {
     super(_http, _datepipe);
   }
 
-  public protocollaDoc(doc: Doc): Observable<Object>{
+  public protocollaDoc(doc: Doc): Observable<any>{
     const url = getInternautaUrl(BaseUrlType.Scripta) + "/" + CUSTOM_SERVER_METHODS.createPE
     console.log(url);
     let formData: FormData = new FormData();
