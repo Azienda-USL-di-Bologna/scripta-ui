@@ -28,13 +28,14 @@
   <section class="info-documento">
     <span class="dati-creazione">
       <span>
-      Proposta numero 6 del 2021
+      Proposta numero {{doc?.id}} del 2021
       </span>
       <span>
         Creato il giorno {{ removeZoneFromTime(doc?.dataCreazione?.toString()) | date: 'EE d MMM y, H:mm' | titlecase}}
         da: {{doc?.idPersonaCreazione?.descrizione}}
       </span>
     </span>
+    <span *ngIf="protocolloTempData"> Protocollo n. {{protocolloTempData}}</span>
     <label for="oggetto" class="label-oggetto">Oggetto</label>
     <textarea  id="oggetto"
       aria-label="oggetto"
