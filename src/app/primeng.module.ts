@@ -14,7 +14,7 @@ import {AutoCompleteModule} from "primeng-lts/autocomplete";
 import { TableModule } from "primeng-lts/table";
 import {FileUploadModule} from 'primeng-lts/fileupload';
 import {TooltipModule} from 'primeng-lts/tooltip';
-
+import {BlockUIModule} from 'primeng-lts/blockui';
 
 
 @NgModule({
@@ -35,7 +35,8 @@ import {TooltipModule} from 'primeng-lts/tooltip';
     AccordionModule,
     TableModule,
     FileUploadModule,
-    TooltipModule
+    TooltipModule,
+    BlockUIModule
   ],
   exports: [
     ButtonModule,
@@ -52,7 +53,8 @@ import {TooltipModule} from 'primeng-lts/tooltip';
     AccordionModule,
     TableModule,
     FileUploadModule,
-    TooltipModule
+    TooltipModule,
+    BlockUIModule
   ],
   providers: [MessageService, DialogService]
 })

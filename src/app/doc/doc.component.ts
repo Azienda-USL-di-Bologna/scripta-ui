@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
-import { Doc, ENTITIES_STRUCTURE, Persona } from "@bds/ng-internauta-model";
+import { Doc, ENTITIES_STRUCTURE, Persona, Allegato } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { AdditionalDataDefinition } from "@nfa/next-sdr";
@@ -10,12 +10,17 @@ import { switchMap } from "rxjs/operators";
 import { AppService } from "../app.service";
 import { ExtendedDocService } from "./extended-doc.service";
 
+
+
 @Component({
   selector: "doc",
   templateUrl: "./doc.component.html",
   styleUrls: ["./doc.component.scss"]
 })
 export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
+  public inProtocollazione: boolean = false;
+  public blockedDocument: boolean = false;
+  public protocolloTempData: string = null;   //!!    QUESTO DATO SERVE MOMENTANEAMENTE PER FAR VEDERE UNA VOLTA PROTOCOLLATO IL NUMERO
   private subscriptions: Subscription[] = [];
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public localIt = LOCAL_IT;
@@ -25,6 +30,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public utenteUtilitiesLogin: UtenteUtilities;
   public DatiProtocolloEsterno: Number;
   public dataProtocolloEsterno: Date;
+  // private projection: string = ENTITIES_STRUCTURE.scripta.doc.customProjections.DocWithAll; //  PERCHE'??? QUESTE A ME DANNO ERRORE...
   private projection: string = ENTITIES_STRUCTURE.scripta.doc.customProjections.DocWithAll;
 
   constructor(
@@ -97,6 +103,8 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private loadDocument(id: number): Observable<Doc> {
+    console.log("LOAD DOCUMENT", id);
+    
     return this.extendedDocService.getByIdHttpCall(
       id,
       this.projection);
@@ -142,6 +150,69 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     this.messageService.clear();
   }
 
+
+  private hasAllegatoPrincipale(): boolean{
+    console.log("hasPrincipale",this.doc.allegati);
+    let hasPrincipale = false;
+    this.doc.allegati.forEach(allegato => {
+      if(allegato.principale)
+        hasPrincipale = true;
+    })
+    console.log("has principale returns",  hasPrincipale);
+    return hasPrincipale;
+  }
+
+  private hasMittente(): boolean {
+    console.log("hasMittente", this.doc.mittenti);
+    return this.doc.mittenti && this.doc.mittenti.length > 0;
+  }
+
+  private hasOggetto(): boolean{
+    console.log("hasOggetto", this.doc.oggetto);
+    return this.doc.oggetto && this.doc.oggetto !== "";
+  }
+
+  private hasCompetente(): boolean{
+    console.log("hasCompetente", this.doc.competenti);
+    return this.doc.competenti && this.doc.competenti.length > 0;
+  }
+
+  public possoProtocollare(): boolean{
+    if(this.hasOggetto() && this.hasMittente() && this.hasCompetente() && this.hasAllegatoPrincipale())
+      return true;
+    else
+      return false;
+  }
+
+
+  private addWarnMessage(messaggio: string){
+    this.messageService.add({
+      severity: 'warn', 
+      summary: 'Documento', 
+      detail: messaggio
+    });
+  }
+
+  private manageMessageNonPossoProtocollare(){
+    if(!this.hasOggetto()){
+      this.addWarnMessage('Non puoi protocollare perché manca l\'oggetto');
+    }
+    if(!this.hasMittente()){
+      this.addWarnMessage('Non puoi protocollare perché manca il mittente');
+    }
+    if(!this.hasCompetente()){
+      this.addWarnMessage('Non puoi protocollare perché manca il destinatario competente');
+    }
+    if(!this.hasAllegatoPrincipale()){
+      this.addWarnMessage('Non puoi protocollare perché manca l\'allegato principale');
+    }
+  }
+
+  private setFreezeDocumento(val: boolean){
+      this.inProtocollazione = val;
+      this.blockedDocument = val;
+  }
+
   public doButtonSave(): void {
     this.appService.aziendaDiLavoroSelection(null);
     this.messageService.add({
@@ -152,7 +223,33 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log("nothing");
   }
   public doButtonProtocolla(): void {
-    console.log("nothing");
+    console.log("CAN PROTOCOL", this.possoProtocollare());
+    if(!this.possoProtocollare()){
+      this.manageMessageNonPossoProtocollare();
+    }
+    else{
+      this.setFreezeDocumento(true);
+      this.extendedDocService.protocollaDoc(this.doc).subscribe(res => {
+        this.setFreezeDocumento(false);
+          console.log("RES", res);
+          const protocollo = res.protocollo;
+          this.protocolloTempData = protocollo;
+          this.messageService.add({
+            severity:'success', 
+            summary:'Documento', 
+            detail:'Documento protocollato con successo: numero protocollo generato ' + protocollo
+          });
+        }, err => {
+          this.setFreezeDocumento(false);
+          console.log("ERRR", err);
+          
+          this.messageService.add({
+            severity:'error', 
+            summary:'Documento', 
+            detail:'Errore nel protocollare il documento'
+          });
+        })
+    }
   }
   public doButtonNote(): void {
     console.log("nothing");
