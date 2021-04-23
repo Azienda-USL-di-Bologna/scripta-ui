@@ -31,7 +31,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public DatiProtocolloEsterno: Number;
   public dataProtocolloEsterno: Date;
   // private projection: string = ENTITIES_STRUCTURE.scripta.doc.customProjections.DocWithAll; //  PERCHE'??? QUESTE A ME DANNO ERRORE...
-  private projection: string = ENTITIES_STRUCTURE.scripta.doc.standardProjections.DocWithAll;
+  private projection: string = ENTITIES_STRUCTURE.scripta.doc.customProjections.DocWithAll;
 
   constructor(
     private extendedDocService: ExtendedDocService,
