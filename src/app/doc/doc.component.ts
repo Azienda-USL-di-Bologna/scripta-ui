@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
-import { Doc, ENTITIES_STRUCTURE, Persona } from "@bds/ng-internauta-model";
+import { Doc, ENTITIES_STRUCTURE, Persona, Allegato } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { AdditionalDataDefinition } from "@nfa/next-sdr";
@@ -97,6 +97,8 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private loadDocument(id: number): Observable<Doc> {
+    console.log("LOAD DOCUMENT", id);
+    
     return this.extendedDocService.getByIdHttpCall(
       id,
       this.projection);
@@ -142,6 +144,64 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     this.messageService.clear();
   }
 
+
+  private hasAllegatoPrincipale(): boolean{
+    console.log("hasPrincipale",this.doc.allegati);
+    let hasPrincipale = false;
+    this.doc.allegati.forEach(allegato => {
+      if(allegato.principale)
+        hasPrincipale = true;
+    })
+    console.log("has principale returns",  hasPrincipale);
+    return hasPrincipale;
+  }
+
+  private hasMittente(): boolean {
+    console.log("hasMittente", this.doc.mittenti);
+    return this.doc.mittenti && this.doc.mittenti.length > 0;
+  }
+
+  private hasOggetto(): boolean{
+    console.log("hasOggetto", this.doc.oggetto);
+    return this.doc.oggetto && this.doc.oggetto !== "";
+  }
+
+  private hasCompetente(): boolean{
+    console.log("hasCompetente", this.doc.competenti);
+    return this.doc.competenti && this.doc.competenti.length > 0;
+  }
+
+  public possoProtocollare(): boolean{
+    if(this.hasOggetto() && this.hasMittente() && this.hasCompetente() && this.hasAllegatoPrincipale())
+      return true;
+    else
+      return false;
+  }
+
+
+  private addWarnMessage(messaggio: string){
+    this.messageService.add({
+      severity: 'warn', 
+      summary: 'Documento', 
+      detail: messaggio
+    });
+  }
+
+  private manageMessageNonPossoProtocollare(){
+    if(!this.hasOggetto()){
+      this.addWarnMessage('Non puoi protocollare perché manca l\'oggetto');
+    }
+    if(!this.hasMittente()){
+      this.addWarnMessage('Non puoi protocollare perché manca il mittente');
+    }
+    if(!this.hasCompetente()){
+      this.addWarnMessage('Non puoi protocollare perché manca il destinatario competente');
+    }
+    if(!this.hasAllegatoPrincipale()){
+      this.addWarnMessage('Non puoi protocollare perché manca l\'allegato principale');
+    }
+  }
+
   public doButtonSave(): void {
     this.appService.aziendaDiLavoroSelection(null);
     this.messageService.add({
@@ -152,6 +212,10 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log("nothing");
   }
   public doButtonProtocolla(): void {
+    console.log("CAN PROTOCOL", this.possoProtocollare());
+    if(!this.possoProtocollare()){
+      this.manageMessageNonPossoProtocollare();
+    }
     console.log("nothing");
   }
   public doButtonNote(): void {
