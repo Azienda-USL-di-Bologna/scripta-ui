@@ -62,6 +62,7 @@
     id="dataArrivo"
     aria-label="data di arrivo"
     [(ngModel)]="actualDataDiArrivo"
+    (onSelect)="dateSelected($event)"
     dateFormat="dd/mm/yy"
     [locale]="localIt"
     [showIcon]="true"
