@@ -1,6 +1,6 @@
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { Component, OnInit, Input, ViewChild, OnDestroy } from '@angular/core';
-import { Doc, Allegato, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE } from '@bds/ng-internauta-model';
+import { Doc, Allegato, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, TipoDettaglioAllegato, DettaglioAllegato } from '@bds/ng-internauta-model';
 import { UtilityFunctions } from '@bds/nt-communicator';
 import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
 import { MessageService } from 'primeng-lts/api';
@@ -127,26 +127,14 @@ export class AllegatiComponent implements OnInit, OnDestroy {
     this.fileUploadInput.clear();
   }
 
-  private msToTime(duration:any): string {
-    const milliseconds = duration < 1000 ? duration :  Math.floor((duration % 1000) / 100),
-      seconds = Math.floor((duration / 1000) % 60),
-      minutes = Math.floor((duration / (1000 * 60)) % 60),
-      hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
-
-    const h = (hours < 10) ? "0" + hours : hours,
-    m = (minutes < 10) ? "0" + minutes : minutes,
-    s = (seconds < 10) ? "0" + seconds : seconds;
-
-    return h + ":" + m + ":" + s + "." + milliseconds;
-  }
-
   /**
    * Metodo che si occupa di far partire lo scaricamento di un allegato
    */
   public onDownloadAttachment(allegato: Allegato): void {
-    this.allegatoService.downloadAttachment(allegato).subscribe(
+    let dettaglioAllegato : DettaglioAllegato = this.getDettaglioByTipoDettaglioAllegato(allegato, "ORIGINALE");
+    this.allegatoService.downloadAttachment(dettaglioAllegato).subscribe(
       response =>
-        UtilityFunctions.downLoadFile(response, allegato.mimeType, allegato.nome + "." + allegato.estensione, false)
+        UtilityFunctions.downLoadFile(response, dettaglioAllegato.mimeType, dettaglioAllegato.nome + "." + dettaglioAllegato.estensione, false)
     );
   }
 
@@ -168,8 +156,8 @@ export class AllegatiComponent implements OnInit, OnDestroy {
   private loadAllegati() {
     const filters: FiltersAndSorts = new FiltersAndSorts();
     filters.addFilter(new FilterDefinition("idDoc", FILTER_TYPES.not_string.equals, this._doc.id));
-    filters.addSort(new SortDefinition("numeroAllegato", SORT_MODES.asc));
-    this.allegatoService.getData(null, filters, null, null).subscribe(
+    filters.addSort(new SortDefinition("ordinale", SORT_MODES.asc));
+    this.allegatoService.getData(ENTITIES_STRUCTURE.scripta.allegato.standardProjections.AllegatoWithDettagliAllegatiListAndIdAllegatoPadre, filters, null, null).subscribe(
       (res: any) => {
         this._doc.allegati = [...res.results];
         this.setInitialData();
@@ -189,6 +177,7 @@ export class AllegatiComponent implements OnInit, OnDestroy {
           detail:'Allegato eliminato con successo'
         });
         // La delete può far scattare la rinumerazione degli allegati e quindi ricarico l'intera lista.
+        
         this.loadAllegati();
       }
     );
@@ -281,4 +270,8 @@ export class AllegatiComponent implements OnInit, OnDestroy {
     this.subscriptions.forEach((s: Subscription) => s.unsubscribe());
     this.subscriptions = [];
   }
+
+  public getDettaglioByTipoDettaglioAllegato(allegato:Allegato, tipo : string ): DettaglioAllegato {
+       return allegato.dettagliAllegatiList.find(dettaglioAllegato => (dettaglioAllegato.caratteristica == tipo));
+     }
 }

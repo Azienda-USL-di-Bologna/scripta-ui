@@ -7,6 +7,8 @@ import {NtJwtLoginService, UtenteUtilities} from "@bds/nt-jwt-login";
 import { LOCAL_IT } from "@bds/nt-communicator";
 import { MessageService } from "primeng-lts/api";
 import { enumOrigine } from "./mittente-constants";
+import * as moment from "moment-timezone";
+import { DatePipe } from "@angular/common";
 
 @Component({
   selector: "mittente",
@@ -23,7 +25,6 @@ export class MittenteComponent implements OnInit, OnDestroy {
 
   public _doc: Doc | undefined;
   public _mittenti: Related[] | undefined;
-  
 
 
   public enumOrigine: any = enumOrigine;
@@ -47,8 +48,40 @@ export class MittenteComponent implements OnInit, OnDestroy {
       this.setDescrizioneCustomMittente(this._doc.mittenti[0]);
       this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
       this.indirizzo = this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
-      //this.actualDataDiArrivo = this._doc.mittenti[0].spedizioneList[0].data
+      this.actualDataDiArrivo = new Date(this._doc.mittenti[0].spedizioneList[0].data.toString().replace(/\[.+\/.+\]/gm, ""));
+      // if (this._doc.mittenti[0].spedizioneList[0].data) {
+      //   this.actualDataDiArrivo = this._doc.mittenti[0].spedizioneList[0].data.replace(/\[.+\/.+\]/gm, "");
+      // }
+      console.log("data di arrivo", this.actualDataDiArrivo);
+      //this.actualDataDiArrivo = new Date("2021-04-09T17:50:18+02:00");
+
+      
+      // let date = moment.tz("2020-02-08 10:58:00", "Europe/Berlin");
+      // let localDate = moment.tz("2020-02-08 10:58:00", "Europe/Berlin").local();
+
+      // console.log('Europe/Berlin', date.format());
+      // console.log('Local', localDate.format());
+
+      // let a = new Intl.DateTimeFormat("Europe/Berlin").format(new Date("2021-04-09T17:50:18"));
+      // console.log(b);
     }
+  }
+
+  public dateSelected(value: any) {
+    console.log(value);
+    console.log(this.actualDataDiArrivo);
+    const mittente: Related = {
+      spedizioneList: [
+        {
+          data: value,
+          version: this._doc.mittenti[0].spedizioneList[0].version
+        } as Spedizione
+      ],
+      version: this._doc.mittenti[0].version
+    } as Related;
+    this.mittenteService.patchHttpCall(mittente, this._doc.mittenti[0].id).subscribe(res => {
+      console.log("res", res);
+    });
   }
 
   constructor(
@@ -57,6 +90,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
     private loginService: NtJwtLoginService,
     private dettaglioContattoService: DettaglioContattoService,
     private messageService: MessageService,
+    private datePipe: DatePipe
   ) { }
 
   /**
@@ -65,6 +99,13 @@ export class MittenteComponent implements OnInit, OnDestroy {
    * 2- Elenco mezzi
    */
   ngOnInit(): void {
+    //const a = this.datePipe.transform(this.actualDataDiArrivo, "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX'['VV']'");
+
+      //let a = moment.tz("2021-04-09T17:50:18.000000+02:00[Europe/Berlin]");
+      // let b = moment.tz("2021-04-09T17:50:18.000000", "Europe/Berlin");
+      // let c = moment.tz("2021-04-09T17:50:18.000000", "America/Toronto");
+      // let d = moment.tz("2021-04-09T17:50:18.000000+02:00", "[Europe/Berlin]");
+      //console.log(a);
     this.subscriptions.push(this.loginService.loggedUser$.subscribe((utenteUtilities: UtenteUtilities) => {
           this.loggedUtenteUtilities = utenteUtilities;
         })

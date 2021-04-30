@@ -1,22 +1,8 @@
 
-<prp-header [addToRight]="headerTemplate" [appName]="'Scripta'" [logoPath]="'assets/images/logo.png'"></prp-header>
+<prp-header [addToRight]="headerTemplate" [appName]="appName" [logoPath]="'assets/images/logo.png'"></prp-header>
 <ng-template #headerTemplate >
   <prp-header-features [params]="headerFeaturesConfig"></prp-header-features>
 </ng-template>
 <div class="content">
   <router-outlet></router-outlet>
 </div>
-
-
-
-<!-- 
-<div class="d-flex flex-direction-column page-wrapper p-nogutter">
-    <prp-header [addToRight]="headerTemplate" [appName]="'Baborg'" [logoPath]="'assets/images/logo.png'"></prp-header>
-    <ng-template #headerTemplate>
-      <prp-header-features [params]="headerFeaturesConfig"></prp-header-features>
-    </ng-template>
-  <div class="d-flex flex-flow-column padding-general content-wrapper ui-fluid">
-    <router-outlet></router-outlet>
-  </div>
-</div> -->
-

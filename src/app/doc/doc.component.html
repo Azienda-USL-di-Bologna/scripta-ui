@@ -6,6 +6,7 @@
 <p-toolbar>
   <div class="classe-temporanea">
     <button pButton  aria-hidden="false" type="button" label="Salva" icon="material-icons save"
+      
       (click)="doButtonSave()" class="my-button custom-primary-button" #salva>
     </button>
     
@@ -19,17 +20,22 @@
     </button>
   </div>
 </p-toolbar>
+<p-progressBar *ngIf="inProtocollazione" mode="indeterminate"></p-progressBar>
+<p-blockUI [blocked]="blockedDocument">
+  <i class="pi pi-lock" style="font-size: 3rem"></i>
+</p-blockUI>
 <main aria-level="2" *ngIf="doc">
   <section class="info-documento">
     <span class="dati-creazione">
       <span>
-      Proposta numero 6 del 2021
+      Proposta numero {{doc?.id}} del 2021
       </span>
       <span>
         Creato il giorno {{ removeZoneFromTime(doc?.dataCreazione?.toString()) | date: 'EE d MMM y, H:mm' | titlecase}}
         da: {{doc?.idPersonaCreazione?.descrizione}}
       </span>
     </span>
+    <span *ngIf="protocolloTempData"> Protocollo n. {{protocolloTempData}}</span>
     <label for="oggetto" class="label-oggetto">Oggetto</label>
     <textarea  id="oggetto"
       aria-label="oggetto"
@@ -52,7 +58,7 @@
         [(ngModel)]="descrizioneUtenteRegistrante">
     </div>
   </section>
-  <div class="protocollo-esterno-box p-grid">
+  <!-- <div class="protocollo-esterno-box p-grid">
     <label class="p-col-3" id="datiProtocolloEsterno">Dati protocollo Esterno</label>
     <p-inputNumber
             ariaLabel="numero protocollo esterno"
@@ -77,7 +83,7 @@
             appendTo="body"
             class="p-col">
     </p-calendar>
-  </div>
+  </div> -->
 
   <p-accordion class="accodion-box">
     <p-accordionTab header="Mittente" [selected]="true">

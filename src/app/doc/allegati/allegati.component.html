@@ -2,8 +2,8 @@
   name="demo[]" 
   accept=".csv, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .pdf, .txt" 
   (uploadHandler)="onUpload($event)"
-  multiple="multiple"
-  maxFileSize="1000000"
+  multiple = true
+  maxFileSize=1000000
   chooseLabel="Sfoglia"
   uploadLabel="Carica"
   cancelLabel="Cancella"
@@ -52,8 +52,8 @@
         </p-tableRadioButton>
       </td>
       <!-- <td class="colonna-numero">{{allegato.numeroAllegato}}</td> -->
-      <td class="colonna-nome">{{allegato.nome}}</td>
-      <td class="colonna-estensione">{{allegato.estensione}}</td>
+      <td class="colonna-nome">{{getDettaglioByTipoDettaglioAllegato(allegato,"ORIGINALE").nome}}</td>
+      <td class="colonna-estensione">{{getDettaglioByTipoDettaglioAllegato(allegato,"ORIGINALE").estensione}}</td>
       <td class="colonna-download">
         <i class="pi pi-download bds-icon-btn"
           ariaLabel="Download allegato"
