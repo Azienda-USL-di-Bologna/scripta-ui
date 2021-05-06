@@ -55,6 +55,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
         switchMap((params: ParamMap) =>
           this.handleCommand(params)
       )).subscribe((res: Doc) => {
+        this.setFreezeDocumento(false);
         console.log("res", res);
         this.doc = res;
         this.appService.aziendaDiLavoroSelection(this.doc.idAzienda);
@@ -80,6 +81,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
  */
   private handleCommand(params: ParamMap): Observable<Doc> {
     const command = params.get("command");
+    this.setFreezeDocumento(true);
     let res: Observable<Doc>;
     switch(command) {
       case "NEW": 
