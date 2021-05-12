@@ -44,7 +44,7 @@
     <th *ngFor="let col of columns">
       {{col.header}}
     </th>
-    <th class="column-icon"></th>
+    <th class="column-icon"><span class="sr-only">Elimina</span></th>
   </tr>
   </ng-template>
   <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
@@ -55,7 +55,7 @@
       <td class="column-icon">
         <i class="material-icons-outlined bds-icon-btn"
           role="button"
-          ariaLabel="Elimina destinatario coinvolto"
+          aria-label="Elimina destinatario coinvolto"
           pTooltip="Elimina" 
           tooltipPosition="top" 
           (click)="onDeleteRelated(rowData, rowIndex)">

@@ -6,7 +6,7 @@
     (onSelect)="saveMittente($event)"
     [suggestions]="filteredMittente"
     (completeMethod)="searchMittente($event)"
-    ariaLabel="descrizione del mittente"
+    ariaLabel="Descrizione del mittente"
     field="descrizioneCustom"
     appendTo="body"
     class="p-col"
@@ -17,7 +17,7 @@
   </p-autoComplete>
   <span class="p-col">
     <input id="Indirizzo"
-      ariaLabel="indirizzo"
+      aria-label="indirizzo"
       type="text" 
       pInputText 
       [(ngModel)]="indirizzo"
@@ -28,7 +28,7 @@
   <label class="p-col-3" for="origine">Origine</label>
   <span class="p-col">
     <input id="Origine"
-      ariaLabel="origine"
+      aria-label="Origine"
       type="text" 
       pInputText 
       [(ngModel)]="enumOrigine[_doc.mittenti[0].origine]"
@@ -70,6 +70,7 @@
     appendTo="body"
     class="p-col-3">
   </p-calendar>
+  <span  class="p-col"></span>
   <!-- Per il momento la funzione non è implementata quindi lo teniamo nascosto
     <p-button
     label="pec di origine"
