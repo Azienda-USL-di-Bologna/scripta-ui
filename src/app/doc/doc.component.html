@@ -1,22 +1,12 @@
-<!-- <peis *ngIf="unitaDocumentaria" [document]="unitaDocumentaria"
-    (save)="onDoSave($event)" (protocolla)="onDoProtocolla($event)" ></peis>
- -->
-<!-- <button #pageStart aria-hidden="true" style="height: 0; width: 0;"></button> -->
 <p-toast #pageStart position="top-right" (onClose)="clearMessages()"></p-toast>
 <p-toolbar>
   <div class="classe-temporanea">
-    <button pButton  aria-hidden="false" type="button" label="Salva" icon="material-icons save"
-      
-      (click)="doButtonSave()" class="my-button custom-primary-button" #salva>
-    </button>
-    
-    <button pButton type="button" label="Protocolla" icon="material-icons-outlined person_add"
-      (click)="doButtonProtocolla()" class="my-button custom-primary-button" 
+    <button pButton 
+      type="button" 
+      label="Protocolla" 
+      icon="material-icons-outlined person_add"
+      (click)="doButtonProtocolla()"
       ><!-- [disabled]="doc?.dataRegistrazione || !document.oggetto" -->
-    </button>
-
-    <button pButton type="button" label="Note" 
-      (click)="doButtonNote()" class="my-button custom-primary-button">
     </button>
   </div>
 </p-toolbar>
@@ -58,7 +48,9 @@
         [(ngModel)]="descrizioneUtenteRegistrante">
     </div>
   </section>
-  <!-- <div class="protocollo-esterno-box p-grid">
+  <!-- 
+    Commento da non cancellare. Sono campi che in futuro potremmo voler utilizzare
+    <div class="protocollo-esterno-box p-grid">
     <label class="p-col-3" id="datiProtocolloEsterno">Dati protocollo Esterno</label>
     <p-inputNumber
             ariaLabel="numero protocollo esterno"
@@ -84,7 +76,6 @@
             class="p-col">
     </p-calendar>
   </div> -->
-
   <p-accordion class="accodion-box">
     <p-accordionTab header="Mittente" [selected]="true">
       <mittente [doc]="doc" (saveMittenteEvent)="saveDoc($event,'mittenti')"></mittente>
