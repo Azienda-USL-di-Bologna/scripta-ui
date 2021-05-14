@@ -35,12 +35,12 @@
   </ng-template>
   <ng-template pTemplate="header">
     <tr class="row">
-      <th class="colonna-principale"></th>
+      <th class="colonna-principale"><span class="sr-only">Principale</span></th>
       <!-- <th class="colonna-numero"></th> -->
       <th class="colonna-nome">Nome</th>
       <th class="colonna-estensione">Estensione</th>
-      <th class="colonna-download"></th>
-      <th class="colonna-elimina"></th>
+      <th class="colonna-download"><span class="sr-only">Download</span></th>
+      <th class="colonna-elimina"><span class="sr-only">Elimina</span></th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-allegato let-rowIndex="rowIndex">
@@ -56,7 +56,8 @@
       <td class="colonna-estensione">{{getDettaglioByTipoDettaglioAllegato(allegato,"ORIGINALE").estensione}}</td>
       <td class="colonna-download">
         <i class="pi pi-download bds-icon-btn"
-          ariaLabel="Download allegato"
+          role="button"
+          aria-label="Download allegato"
           pTooltip="Download" 
           tooltipPosition="top"
           (click)="onDownloadAttachment(allegato)">
@@ -64,7 +65,8 @@
       </td>
       <td class="colonna-elimina">
         <i class="material-icons-outlined bds-icon-btn"
-          ariaLabel="Elimina allegato"
+          role="button"
+          aria-label="Elimina allegato"
           pTooltip="Elimina" 
           tooltipPosition="top" 
           (click)="onDeleteAttachment(allegato, rowIndex)">
