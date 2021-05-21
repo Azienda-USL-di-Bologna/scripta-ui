@@ -7,7 +7,6 @@ import {NtJwtLoginService, UtenteUtilities} from "@bds/nt-jwt-login";
 import { LOCAL_IT } from "@bds/nt-communicator";
 import { MessageService } from "primeng-lts/api";
 import { enumOrigine } from "./mittente-constants";
-import * as moment from "moment-timezone";
 import { DatePipe } from "@angular/common";
 
 @Component({
@@ -45,7 +44,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
     this._doc = value;
     if (this._doc.mittenti.length > 0) {
       this.actualMittente = this._doc.mittenti[0];
-      this.setDescrizioneCustomMittente(this._doc.mittenti[0]);
+      //this.setDescrizioneCustomMittente(this._doc.mittenti[0]);
       this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
       this.indirizzo = this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
       // this.actualDataDiArrivo = new Date(this._doc.mittenti[0].spedizioneList[0].data.toString().replace(/\[.+\/.+\]/gm, ""));
@@ -79,8 +78,14 @@ export class MittenteComponent implements OnInit, OnDestroy {
     mittente.spedizioneList = [spedizione];
     mittente.version = this._doc.mittenti[0].version;
 
-    this.subscriptions.push(this.mittenteService.patchHttpCall(mittente, this._doc.mittenti[0].id).subscribe(res => {
-      console.log("res", res);
+    this.subscriptions.push(this.mittenteService.patchHttpCall(mittente, this._doc.mittenti[0].id, ENTITIES_STRUCTURE.scripta.related.standardProjections.RelatedWithSpedizioneList)
+    .subscribe((res: Related) => {
+      console.log(this._doc.mittenti[0]);
+      console.log(res);
+      this._doc.mittenti[0] = res;
+      //this._doc.mittenti.splice(1, 0, res);
+      //this._doc.mittenti.splice(0, 1, res);
+      //this._doc.mittenti[0].spedizioneList.splice(0, res.spedizioneList.length, ...res.spedizioneList);
     }));
   }
 
@@ -186,7 +191,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
           this._doc.mittenti = [];
           this._doc.mittenti.push(related);
           this.actualMittente = related;
-          this.setDescrizioneCustomMittente(this._doc.mittenti[0]);
+          //this.setDescrizioneCustomMittente(this._doc.mittenti[0]);
           this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
           this.indirizzo=  this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
           this.messageService.add({
@@ -196,18 +201,6 @@ export class MittenteComponent implements OnInit, OnDestroy {
           });
       })
     );
-  }
-
-  /**
-   * Setta una descrizione custom al related passato.
-   * Mette la descriizone del Related e l'indirizzo completo della spezione.
-   * @param mittente 
-   */
-  private setDescrizioneCustomMittente(mittente: Related) {
-    // @ts-ignore
-    //mittente["descrizioneCustom"] = this.actualMittente.descrizione + "[" + this.actualMittente.spedizioneList[0].indirizzo.completo +"]";
-    //avendo aggiunto l'altro campo con l'indirizzo, c'è solo la descrizione per evitare ridondanze.
-    mittente["descrizioneCustom"] = this.actualMittente.descrizione ;
   }
 
   /**
