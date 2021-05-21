@@ -48,7 +48,8 @@ export class MittenteComponent implements OnInit, OnDestroy {
       this.setDescrizioneCustomMittente(this._doc.mittenti[0]);
       this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
       this.indirizzo = this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
-      this.actualDataDiArrivo = new Date(this._doc.mittenti[0].spedizioneList[0].data.toString().replace(/\[.+\/.+\]/gm, ""));
+      // this.actualDataDiArrivo = new Date(this._doc.mittenti[0].spedizioneList[0].data.toString().replace(/\[.+\/.+\]/gm, ""));
+      this.actualDataDiArrivo = new Date(this._doc.mittenti[0].spedizioneList[0].data);
       // if (this._doc.mittenti[0].spedizioneList[0].data) {
       //   this.actualDataDiArrivo = this._doc.mittenti[0].spedizioneList[0].data.replace(/\[.+\/.+\]/gm, "");
       // }
@@ -68,20 +69,19 @@ export class MittenteComponent implements OnInit, OnDestroy {
   }
 
   public dateSelected(value: any) {
-    console.log(value);
-    console.log(this.actualDataDiArrivo);
-    const mittente: Related = {
-      spedizioneList: [
-        {
-          data: value,
-          version: this._doc.mittenti[0].spedizioneList[0].version
-        } as Spedizione
-      ],
-      version: this._doc.mittenti[0].version
-    } as Related;
-    this.mittenteService.patchHttpCall(mittente, this._doc.mittenti[0].id).subscribe(res => {
+    const spedizione: Spedizione = new Spedizione();
+    spedizione.id = this._doc.mittenti[0].spedizioneList[0].id;
+    spedizione.data = value;
+    spedizione.version = this._doc.mittenti[0].spedizioneList[0].version;
+
+    const mittente: Related = new Related();
+    mittente.id = this._doc.mittenti[0].id;
+    mittente.spedizioneList = [spedizione];
+    mittente.version = this._doc.mittenti[0].version;
+
+    this.subscriptions.push(this.mittenteService.patchHttpCall(mittente, this._doc.mittenti[0].id).subscribe(res => {
       console.log("res", res);
-    });
+    }));
   }
 
   constructor(
@@ -238,8 +238,8 @@ export class MittenteComponent implements OnInit, OnDestroy {
 
   /**
    * A partire da un dettaglio contatto creo un oggetto Spedizione
-   * @param dettaglioContatto 
-   * @returns 
+   * @param dettaglioContatto
+   * @returns
    */
   private buildSpedizione(dettaglioContatto: DettaglioContatto): Spedizione {
     const spedizione: Spedizione = new Spedizione();
