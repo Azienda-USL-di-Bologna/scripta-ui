@@ -58,7 +58,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
       //   this.actualDataDiArrivo = this._doc.mittenti[0].spedizioneList[0].data.replace(/\[.+\/.+\]/gm, "");
       // }
       this.actualOrigine = this._doc.mittenti[0].origine
-      console.log("data di arrivo", this.actualDataDiArrivo);
+
       //this.actualDataDiArrivo = new Date("2021-04-09T17:50:18+02:00");
 
       
@@ -75,7 +75,8 @@ export class MittenteComponent implements OnInit, OnDestroy {
       this.selectedMittente = null;
       this.actualMezzo = null;
       this.indirizzo = "";
-      this.actualOrigine= enumOrigine["ESTERNO"];
+      this.actualDataDiArrivo = null;
+      this.actualOrigine= null;
 
     }
     
@@ -166,9 +167,6 @@ export class MittenteComponent implements OnInit, OnDestroy {
           });
           this.filteredMittente = res.results;
         }
-        else {
-          console.log("blabla")
-        }
       }, err => {
         this.messageService.add({
           severity: "error",
@@ -219,7 +217,6 @@ export class MittenteComponent implements OnInit, OnDestroy {
             summary:'Mittente', 
             detail: `Mittente inserito con successo`
           });
-          
       })
     );
   }
@@ -333,7 +330,8 @@ export class MittenteComponent implements OnInit, OnDestroy {
       this.actualMittente= null;
       this.actualMezzo = null;
       this.indirizzo = "";
-      this.actualOrigine= enumOrigine["ESTERNO"];
+      // this.actualDataDiArrivo = null;
+      this.actualOrigine= null;
     }
 
   /**
