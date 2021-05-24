@@ -2,10 +2,11 @@
   <label class="p-col-3" for="mittente">Mittente</label>
   <p-autoComplete 
     id="mittente"
-    [(ngModel)]="_doc.mittenti[0]"
+    [(ngModel)]="selectedMittente"
     (onSelect)="saveMittente($event)"
     [suggestions]="filteredMittente"
     (completeMethod)="searchMittente($event)"
+    (onClear)= "onDeleteMittente()"
     ariaLabel="Descrizione del mittente"
     field="descrizione"
     appendTo="body"
@@ -31,7 +32,7 @@
       aria-label="Origine"
       type="text" 
       pInputText 
-      [(ngModel)]="enumOrigine[_doc.mittenti[0].origine]"
+      [(ngModel)]="actualOrigine"
       [disabled]="true"
       > 
     </span>

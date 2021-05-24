@@ -29,6 +29,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
   public enumOrigine: any = enumOrigine;
 
   // Variabili per le autocomplete
+  public selectedMittente: Related;
   //public selectedMittente: Related | undefined | null;
   //public selectedOrigine: string = "";
   public indirizzo: string;
@@ -40,10 +41,14 @@ export class MittenteComponent implements OnInit, OnDestroy {
   //public filteredOrigine: any[] = [];
   public filteredMezzo: any[] = [];
 
+  public actualOrigine: string ;
+
+
   @Input() set doc(value: Doc) {
     this._doc = value;
-    if (this._doc.mittenti.length > 0) {
+    if (this._doc.mittenti != null && this._doc.mittenti.length > 0) {
       this.actualMittente = this._doc.mittenti[0];
+      this.selectedMittente = this._doc.mittenti[0];
       //this.setDescrizioneCustomMittente(this._doc.mittenti[0]);
       this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
       this.indirizzo = this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
@@ -52,6 +57,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
       // if (this._doc.mittenti[0].spedizioneList[0].data) {
       //   this.actualDataDiArrivo = this._doc.mittenti[0].spedizioneList[0].data.replace(/\[.+\/.+\]/gm, "");
       // }
+      this.actualOrigine = this._doc.mittenti[0].origine
       console.log("data di arrivo", this.actualDataDiArrivo);
       //this.actualDataDiArrivo = new Date("2021-04-09T17:50:18+02:00");
 
@@ -65,6 +71,14 @@ export class MittenteComponent implements OnInit, OnDestroy {
       // let a = new Intl.DateTimeFormat("Europe/Berlin").format(new Date("2021-04-09T17:50:18"));
       // console.log(b);
     }
+    else {
+      this.selectedMittente = null;
+      this.actualMezzo = null;
+      this.indirizzo = "";
+      this.actualOrigine= enumOrigine["ESTERNO"];
+
+    }
+    
   }
 
   public dateSelected(value: any) {
@@ -122,6 +136,8 @@ export class MittenteComponent implements OnInit, OnDestroy {
         this.suggestionsMezzo = [];
       }
     }));
+
+    
   }
 
   /**
@@ -149,6 +165,9 @@ export class MittenteComponent implements OnInit, OnDestroy {
             dettaglioContatto["descrizioneCustom"] = dettaglioContatto.idContatto.descrizione + " [ " + dettaglioContatto.descrizione + " ]";
           });
           this.filteredMittente = res.results;
+        }
+        else {
+          console.log("blabla")
         }
       }, err => {
         this.messageService.add({
@@ -192,6 +211,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
           this._doc.mittenti.push(related);
           this.actualMittente = related;
           //this.setDescrizioneCustomMittente(this._doc.mittenti[0]);
+          this.selectedMittente = related;
           this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
           this.indirizzo=  this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
           this.messageService.add({
@@ -199,6 +219,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
             summary:'Mittente', 
             detail: `Mittente inserito con successo`
           });
+          
       })
     );
   }
@@ -277,9 +298,9 @@ export class MittenteComponent implements OnInit, OnDestroy {
     return spedizione;
   }
 
-  public getIdMezzo(): Mezzo {
-    return this._doc.mittenti[0].spedizioneList[0].idMezzo;
-  }
+  // public getIdMezzo(): Mezzo {
+  //   return this._doc.mittenti[0].spedizioneList[0].idMezzo;
+  // }
 
   /* public searchTipo(event: any): void {
     console.log(this.suggestionsOrigine);
@@ -292,6 +313,28 @@ export class MittenteComponent implements OnInit, OnDestroy {
     });
     this.filteredOrigine = filteredTipo;
   } */
+
+  /**
+   * Metodo chiamato dall'html per cancellare un mittente.
+   * 
+   */
+    public onDeleteMittente(): void{
+      this.mittenteService.deleteHttpCall(this.actualMittente.id).subscribe(
+        res => {
+          this.messageService.add({
+            severity:'success',
+            summary:'Mittente',
+            detail:'Mittente eliminato con successo'
+          });
+          this._doc.mittenti.splice(0, 1);
+
+        }
+      )
+      this.actualMittente= null;
+      this.actualMezzo = null;
+      this.indirizzo = "";
+      this.actualOrigine= enumOrigine["ESTERNO"];
+    }
 
   /**
    * Suggerisco all'utente il mezzo in base a cosa sta scrivendo

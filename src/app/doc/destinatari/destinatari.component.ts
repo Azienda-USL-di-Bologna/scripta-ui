@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from "@angular/core";
 import { BaseUrls, BaseUrlType, CategoriaContatto, Contatto, ContattoService, DettaglioContatto, Doc, ENTITIES_STRUCTURE, OrigineRelated, Persona, Related, TipoContatto, TipoRelated } from "@bds/ng-internauta-model";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
-import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity } from "@nfa/next-sdr";
+import { AdditionalDataDefinition, BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity } from "@nfa/next-sdr";
 import { MessageService } from 'primeng-lts/api';
 import { AutoComplete } from "primeng-lts/autocomplete";
 import { Subscription } from "rxjs";
@@ -20,8 +20,9 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public columnCoinvolti: any[] = [];
   public _doc: Doc;
-  //public selectedCompetente: Related;
+  public selectedCompetente: Related;
   public selectedCoinvolto: Related;
+  
   public filteredCompetenti: DettaglioContatto[];
   public filteredCoinvolti: DettaglioContatto[];
 
@@ -33,6 +34,7 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
     this._doc = value;
     if (this._doc.competenti.length > 0) {
       this.actualCompetente = this._doc.competenti[0];
+      this.selectedCompetente = this._doc.competenti[0];
     }
     // if ( value && value.competenti && value.competenti.length > 0 ) {
     //   this.selectedCompetente = value.competenti[0];
@@ -90,15 +92,16 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
     this.subscriptions.push(
         this.contattoService.getData(projection, filtersAndSorts).subscribe(res => {
           if (res) {
+            console.log(res.results)
             res.results.forEach((contatto: Contatto) => {
               // @ts-ignore
               contatto["descrizioneCustom"] = contatto.descrizione;
             });
             switch (modalita) {
-              case "competente":
+              case 'competente':
                 this.filteredCompetenti = res.results;
               break;
-              case "coinvolto":
+              case 'coinvolto':
                 this.filteredCoinvolti = res.results;
               break;
             }
@@ -210,6 +213,24 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
         this._doc.coinvolti.splice(rowIndex, 1);
       }
     );
+  }
+
+  /**
+   * Metodo chiamato dall'html per cancellare un destinatario competente.
+   * 
+   */
+   public onDeleteCompetente(): void{
+    this.destinatariService.deleteHttpCall(this.actualCompetente.id).subscribe(
+      res => {
+        this.messageService.add({
+          severity:'success',
+          summary:'Competente',
+          detail:'Competente eliminato con successo'
+        });
+        this._doc.competenti.splice(0, 1)
+      }
+    )
+    this.actualCompetente = null;
   }
 
   /**

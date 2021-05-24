@@ -1,11 +1,12 @@
 <div class="p-grid">
   <label class="p-col-2" for="competenti">Competente</label>
   <p-autoComplete id="competenti" #autocompleteCompetenti
-    [(ngModel)]="_doc.competenti[0]"
+    [(ngModel)]="selectedCompetente"
     ariaLabel="competenti"
     (onSelect)="saveDestinatario($event, 'competente')"
     [suggestions]="filteredCompetenti"
     (completeMethod)="searchDestinatario($event, 'competente')"
+    (onClear)= "onDeleteCompetente()"
     field="descrizione"
     appendTo="body"
     class="p-col"
