@@ -32,6 +32,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   private projection: string = ENTITIES_STRUCTURE.scripta.doc.customProjections.DocWithAll;
 
   constructor(
+    private router: Router,
     private extendedDocService: ExtendedDocService,
     private loginService: NtJwtLoginService,
     private messageService: MessageService,
@@ -57,6 +58,22 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
         console.log("res", res);
         this.doc = res;
         this.appService.aziendaDiLavoroSelection(this.doc.idAzienda);
+        this.router.navigate(
+          [], 
+          {
+            relativeTo: this.route,
+            queryParams: { command: 'OPEN', id: this.doc.id }
+          });
+      },  error => {
+        this.setFreezeDocumento(false);
+        
+        console.log("errore", error);
+
+        this.messageService.add({
+          severity:'error', 
+          summary:'Creazione proposta', 
+          detail:'Errore nell\'avviare la proposta di protocollazione. Contattare Babelcare'
+        });
       })
     );
   }
