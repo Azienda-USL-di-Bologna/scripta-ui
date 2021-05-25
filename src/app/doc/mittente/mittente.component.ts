@@ -1,6 +1,7 @@
 import {Component, Input, OnDestroy, OnInit, Output, EventEmitter} from "@angular/core";
 import {ExtendedMittenteService} from "./extended-mittente.service";
-import {BaseUrls, BaseUrlType, CodiceMezzo, Contatto, DettaglioContatto, DettaglioContattoService, Doc, ENTITIES_STRUCTURE, IndirizzoSpedizione, Mezzo, MezzoService, OrigineRelated, Persona, Related, Spedizione, TipoDettaglio, TipoRelated} from "@bds/ng-internauta-model";
+import {BaseUrls, BaseUrlType, CodiceMezzo, Contatto, DettaglioContatto, DettaglioContattoService, Doc, ENTITIES_STRUCTURE, 
+  IndirizzoSpedizione, Mezzo, MezzoService, OrigineRelated, Persona, Related, Spedizione, TipoDettaglio, TipoRelated} from "@bds/ng-internauta-model";
 import {AdditionalDataDefinition, FILTER_TYPES, FilterDefinition, FiltersAndSorts, BatchOperationTypes, NextSdrEntity, BatchOperation} from "@nfa/next-sdr";
 import {Subscription} from "rxjs";
 import {NtJwtLoginService, UtenteUtilities} from "@bds/nt-jwt-login";
@@ -30,15 +31,12 @@ export class MittenteComponent implements OnInit, OnDestroy {
 
   // Variabili per le autocomplete
   public selectedMittente: Related;
-  //public selectedMittente: Related | undefined | null;
-  //public selectedOrigine: string = "";
+
   public indirizzo: string;
   public actualMezzo: Mezzo;
   public actualDataDiArrivo: Date;
-  //public suggestionsOrigine: any[] = Object.values(OrigineRelated);
   public suggestionsMezzo: any[] = [];
   public filteredMittente: DettaglioContatto[] = [];
-  //public filteredOrigine: any[] = [];
   public filteredMezzo: any[] = [];
 
   public actualOrigine: string ;
@@ -49,43 +47,26 @@ export class MittenteComponent implements OnInit, OnDestroy {
     if (this._doc.mittenti != null && this._doc.mittenti.length > 0) {
       this.actualMittente = this._doc.mittenti[0];
       this.selectedMittente = this._doc.mittenti[0];
-      //this.setDescrizioneCustomMittente(this._doc.mittenti[0]);
       this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
       this.indirizzo = this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
-      // this.actualDataDiArrivo = new Date(this._doc.mittenti[0].spedizioneList[0].data.toString().replace(/\[.+\/.+\]/gm, ""));
       this.actualDataDiArrivo = new Date(this._doc.mittenti[0].spedizioneList[0].data);
-      // if (this._doc.mittenti[0].spedizioneList[0].data) {
-      //   this.actualDataDiArrivo = this._doc.mittenti[0].spedizioneList[0].data.replace(/\[.+\/.+\]/gm, "");
-      // }
-      this.actualOrigine = this._doc.mittenti[0].origine
 
-      //this.actualDataDiArrivo = new Date("2021-04-09T17:50:18+02:00");
+      this.actualOrigine = this._doc.mittenti[0].origine;
 
-      
-      // let date = moment.tz("2020-02-08 10:58:00", "Europe/Berlin");
-      // let localDate = moment.tz("2020-02-08 10:58:00", "Europe/Berlin").local();
-
-      // console.log('Europe/Berlin', date.format());
-      // console.log('Local', localDate.format());
-
-      // let a = new Intl.DateTimeFormat("Europe/Berlin").format(new Date("2021-04-09T17:50:18"));
-      // console.log(b);
-    }
-    else {
+    } else {
       this.selectedMittente = null;
       this.actualMezzo = null;
       this.indirizzo = "";
       this.actualDataDiArrivo = null;
-      this.actualOrigine= null;
+      this.actualOrigine = null;
 
     }
-    
   }
 
-  public dateSelected(value: any) {
+  public saveSpedizione<K extends keyof Spedizione>(field: K, value: any) {
     const spedizione: Spedizione = new Spedizione();
     spedizione.id = this._doc.mittenti[0].spedizioneList[0].id;
-    spedizione.data = value;
+    spedizione[field] = value;
     spedizione.version = this._doc.mittenti[0].spedizioneList[0].version;
 
     const mittente: Related = new Related();
@@ -98,10 +79,16 @@ export class MittenteComponent implements OnInit, OnDestroy {
       console.log(this._doc.mittenti[0]);
       console.log(res);
       this._doc.mittenti[0] = res;
-      //this._doc.mittenti.splice(1, 0, res);
-      //this._doc.mittenti.splice(0, 1, res);
-      //this._doc.mittenti[0].spedizioneList.splice(0, res.spedizioneList.length, ...res.spedizioneList);
     }));
+  }
+
+  public saveMezzo(value: Mezzo) {
+    this.saveSpedizione("idMezzo", value);
+
+  }
+
+  public dateSelected(value: Date) {
+    this.saveSpedizione("data", value);
   }
 
   constructor(
@@ -119,13 +106,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
    * 2- Elenco mezzi
    */
   ngOnInit(): void {
-    //const a = this.datePipe.transform(this.actualDataDiArrivo, "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX'['VV']'");
 
-      //let a = moment.tz("2021-04-09T17:50:18.000000+02:00[Europe/Berlin]");
-      // let b = moment.tz("2021-04-09T17:50:18.000000", "Europe/Berlin");
-      // let c = moment.tz("2021-04-09T17:50:18.000000", "America/Toronto");
-      // let d = moment.tz("2021-04-09T17:50:18.000000+02:00", "[Europe/Berlin]");
-      //console.log(a);
     this.subscriptions.push(this.loginService.loggedUser$.subscribe((utenteUtilities: UtenteUtilities) => {
           this.loggedUtenteUtilities = utenteUtilities;
         })
@@ -137,8 +118,6 @@ export class MittenteComponent implements OnInit, OnDestroy {
         this.suggestionsMezzo = [];
       }
     }));
-
-    
   }
 
   /**
@@ -167,7 +146,8 @@ export class MittenteComponent implements OnInit, OnDestroy {
           });
           this.filteredMittente = res.results;
         }
-      }, err => {
+      }, (err: any) => {
+        console.log(err);
         this.messageService.add({
           severity: "error",
           summary: "Errore",
@@ -179,7 +159,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
 
   /**
    * Salvo il nuovo mittente eventualmente cancellando il vecchio
-   * @param event 
+   * @param event
    */
   public saveMittente(event: DettaglioContatto) {
     const mittenteToCreate: Related = this.dettaglioContattoToRelated(event);
@@ -213,8 +193,8 @@ export class MittenteComponent implements OnInit, OnDestroy {
           this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
           this.indirizzo=  this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
           this.messageService.add({
-            severity:'success', 
-            summary:'Mittente', 
+            severity: "success",
+            summary: "Mittente",
             detail: `Mittente inserito con successo`
           });
       })
@@ -313,15 +293,15 @@ export class MittenteComponent implements OnInit, OnDestroy {
 
   /**
    * Metodo chiamato dall'html per cancellare un mittente.
-   * 
+   *
    */
     public onDeleteMittente(): void{
       this.mittenteService.deleteHttpCall(this.actualMittente.id).subscribe(
         res => {
           this.messageService.add({
-            severity:'success',
-            summary:'Mittente',
-            detail:'Mittente eliminato con successo'
+            severity:"success",
+            summary:"Mittente",
+            detail:"Mittente eliminato con successo"
           });
           this._doc.mittenti.splice(0, 1);
 

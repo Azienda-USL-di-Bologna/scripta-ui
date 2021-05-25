@@ -49,6 +49,7 @@
   <label class="p-col-2" for="mezzo">Mezzo</label><!-- _doc.mittenti[0].spedizioneList[0].idMezzo -->
   <p-autoComplete id="mezzo"
     [(ngModel)]="actualMezzo"
+    (onSelect)="saveMezzo($event)"
     [suggestions]="filteredMezzo"
     (completeMethod)="searchMezzo($event)"
     field="descrizione"
