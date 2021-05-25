@@ -78,43 +78,46 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public searchDestinatario(event: any, modalita: string) {
-    const query = event.query;
-    const projection = ENTITIES_STRUCTURE.rubrica.contatto.standardProjections.ContattoWithIdPersonaAndIdPersonaCreazioneAndIdStruttura;
-    const filtersAndSorts: FiltersAndSorts = new FiltersAndSorts();
-    // filtersAndSorts.addAdditionalData(new AdditionalDataDefinition("CercaAncheInContatto", query));
-    // filtersAndSorts.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "CercaAncheInContatto"));
-    filtersAndSorts.addFilter(new FilterDefinition("tscol", FILTER_TYPES.not_string.equals, query));
-    filtersAndSorts.addFilter(new FilterDefinition("eliminato", FILTER_TYPES.not_string.equals, false));
-    filtersAndSorts.addFilter(new FilterDefinition("protocontatto", FILTER_TYPES.not_string.equals, false));
-    filtersAndSorts.addFilter(new FilterDefinition("eliminato", FILTER_TYPES.not_string.equals, false));
-    filtersAndSorts.addFilter(new FilterDefinition("tipo", FILTER_TYPES.not_string.equals, TipoContatto.ORGANIGRAMMA));
-    filtersAndSorts.addFilter(new FilterDefinition("categoria", FILTER_TYPES.not_string.equals, CategoriaContatto.STRUTTURA));
-    this.subscriptions.push(
-        this.contattoService.getData(projection, filtersAndSorts).subscribe(res => {
-          if (res) {
+    if (this._doc) {
+      const query = event.query;
+      const projection = ENTITIES_STRUCTURE.rubrica.contatto.standardProjections.ContattoWithIdPersonaAndIdPersonaCreazioneAndIdStruttura;
+      const filtersAndSorts: FiltersAndSorts = new FiltersAndSorts();
+      // filtersAndSorts.addAdditionalData(new AdditionalDataDefinition("CercaAncheInContatto", query));
+      // filtersAndSorts.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "CercaAncheInContatto"));
+      filtersAndSorts.addFilter(new FilterDefinition("tscol", FILTER_TYPES.not_string.equals, query));
+      filtersAndSorts.addFilter(new FilterDefinition("eliminato", FILTER_TYPES.not_string.equals, false));
+      filtersAndSorts.addFilter(new FilterDefinition("protocontatto", FILTER_TYPES.not_string.equals, false));
+      filtersAndSorts.addFilter(new FilterDefinition("eliminato", FILTER_TYPES.not_string.equals, false));
+      filtersAndSorts.addFilter(new FilterDefinition("tipo", FILTER_TYPES.not_string.equals, TipoContatto.ORGANIGRAMMA));
+      filtersAndSorts.addFilter(new FilterDefinition("categoria", FILTER_TYPES.not_string.equals, CategoriaContatto.STRUTTURA));
+      filtersAndSorts.addFilter(new FilterDefinition("idStruttura.idAzienda.id", FILTER_TYPES.not_string.equals, this._doc.idAzienda.id));
+      this.subscriptions.push(
+          this.contattoService.getData(projection, filtersAndSorts).subscribe(res => {
+            if (res) {
             console.log(res.results)
-            res.results.forEach((contatto: Contatto) => {
-              // @ts-ignore
-              contatto["descrizioneCustom"] = contatto.descrizione;
-            });
-            switch (modalita) {
-              case 'competente':
-                this.filteredCompetenti = res.results;
-              break;
-              case 'coinvolto':
-                this.filteredCoinvolti = res.results;
-              break;
+              res.results.forEach((contatto: Contatto) => {
+                // @ts-ignore
+                contatto["descrizioneCustom"] = contatto.descrizione;
+              });
+              switch (modalita) {
+                case "competente":
+                  this.filteredCompetenti = res.results;
+                break;
+                case "coinvolto":
+                  this.filteredCoinvolti = res.results;
+                break;
+              }
             }
-          }
-        }, err => {
-          console.log("error");
-          // this.messageService.add({
-          //   severity: "error",
-          //   summary: "Errore nel backend",
-          //   detail: "Non è stato possibile fare la ricerca."
-          // });
-        })
-    );
+          }, err => {
+            console.log("error");
+            // this.messageService.add({
+            //   severity: "error",
+            //   summary: "Errore nel backend",
+            //   detail: "Non è stato possibile fare la ricerca."
+            // });
+          })
+      );
+    }
   }
 
   /**

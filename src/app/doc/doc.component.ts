@@ -10,8 +10,6 @@ import { switchMap } from "rxjs/operators";
 import { AppService } from "../app.service";
 import { ExtendedDocService } from "./extended-doc.service";
 
-
-
 @Component({
   selector: "doc",
   templateUrl: "./doc.component.html",
