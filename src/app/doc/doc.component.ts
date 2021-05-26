@@ -60,7 +60,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
         this.setFreezeDocumento(false);
         console.log("res", res);
         this.doc = res;
-        if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)) {
+        if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG).length > 0) {
           this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
         }
         this.appService.aziendaDiLavoroSelection(this.doc.idAzienda);
