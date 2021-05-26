@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from "@angular/core";
 import { BaseUrls, BaseUrlType, CategoriaContatto, Contatto, ContattoService, DettaglioContatto, Doc, ENTITIES_STRUCTURE, OrigineRelated, Persona, Related, TipoContatto, TipoRelated } from "@bds/ng-internauta-model";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
-import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity } from "@nfa/next-sdr";
+import { AdditionalDataDefinition, BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity } from "@nfa/next-sdr";
 import { MessageService } from 'primeng-lts/api';
 import { AutoComplete } from "primeng-lts/autocomplete";
 import { Subscription } from "rxjs";
@@ -20,8 +20,9 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public columnCoinvolti: any[] = [];
   public _doc: Doc;
-  //public selectedCompetente: Related;
+  public selectedCompetente: Related;
   public selectedCoinvolto: Related;
+  
   public filteredCompetenti: DettaglioContatto[];
   public filteredCoinvolti: DettaglioContatto[];
 
@@ -33,6 +34,7 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
     this._doc = value;
     if (this._doc.competenti.length > 0) {
       this.actualCompetente = this._doc.competenti[0];
+      this.selectedCompetente = this._doc.competenti[0];
     }
     // if ( value && value.competenti && value.competenti.length > 0 ) {
     //   this.selectedCompetente = value.competenti[0];
@@ -76,42 +78,46 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public searchDestinatario(event: any, modalita: string) {
-    const query = event.query;
-    const projection = ENTITIES_STRUCTURE.rubrica.contatto.standardProjections.ContattoWithIdPersonaAndIdPersonaCreazioneAndIdStruttura;
-    const filtersAndSorts: FiltersAndSorts = new FiltersAndSorts();
-    // filtersAndSorts.addAdditionalData(new AdditionalDataDefinition("CercaAncheInContatto", query));
-    // filtersAndSorts.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "CercaAncheInContatto"));
-    filtersAndSorts.addFilter(new FilterDefinition("tscol", FILTER_TYPES.not_string.equals, query));
-    filtersAndSorts.addFilter(new FilterDefinition("eliminato", FILTER_TYPES.not_string.equals, false));
-    filtersAndSorts.addFilter(new FilterDefinition("protocontatto", FILTER_TYPES.not_string.equals, false));
-    filtersAndSorts.addFilter(new FilterDefinition("eliminato", FILTER_TYPES.not_string.equals, false));
-    filtersAndSorts.addFilter(new FilterDefinition("tipo", FILTER_TYPES.not_string.equals, TipoContatto.ORGANIGRAMMA));
-    filtersAndSorts.addFilter(new FilterDefinition("categoria", FILTER_TYPES.not_string.equals, CategoriaContatto.STRUTTURA));
-    this.subscriptions.push(
-        this.contattoService.getData(projection, filtersAndSorts).subscribe(res => {
-          if (res) {
-            res.results.forEach((contatto: Contatto) => {
-              // @ts-ignore
-              contatto["descrizioneCustom"] = contatto.descrizione;
-            });
-            switch (modalita) {
-              case "competente":
-                this.filteredCompetenti = res.results;
-              break;
-              case "coinvolto":
-                this.filteredCoinvolti = res.results;
-              break;
+    if (this._doc) {
+      const query = event.query;
+      const projection = ENTITIES_STRUCTURE.rubrica.contatto.standardProjections.ContattoWithIdPersonaAndIdPersonaCreazioneAndIdStruttura;
+      const filtersAndSorts: FiltersAndSorts = new FiltersAndSorts();
+      // filtersAndSorts.addAdditionalData(new AdditionalDataDefinition("CercaAncheInContatto", query));
+      // filtersAndSorts.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "CercaAncheInContatto"));
+      filtersAndSorts.addFilter(new FilterDefinition("tscol", FILTER_TYPES.not_string.equals, query));
+      filtersAndSorts.addFilter(new FilterDefinition("eliminato", FILTER_TYPES.not_string.equals, false));
+      filtersAndSorts.addFilter(new FilterDefinition("protocontatto", FILTER_TYPES.not_string.equals, false));
+      filtersAndSorts.addFilter(new FilterDefinition("eliminato", FILTER_TYPES.not_string.equals, false));
+      filtersAndSorts.addFilter(new FilterDefinition("tipo", FILTER_TYPES.not_string.equals, TipoContatto.ORGANIGRAMMA));
+      filtersAndSorts.addFilter(new FilterDefinition("categoria", FILTER_TYPES.not_string.equals, CategoriaContatto.STRUTTURA));
+      filtersAndSorts.addFilter(new FilterDefinition("idStruttura.idAzienda.id", FILTER_TYPES.not_string.equals, this._doc.idAzienda.id));
+      this.subscriptions.push(
+          this.contattoService.getData(projection, filtersAndSorts).subscribe(res => {
+            if (res) {
+            console.log(res.results)
+              res.results.forEach((contatto: Contatto) => {
+                // @ts-ignore
+                contatto["descrizioneCustom"] = contatto.descrizione;
+              });
+              switch (modalita) {
+                case "competente":
+                  this.filteredCompetenti = res.results;
+                break;
+                case "coinvolto":
+                  this.filteredCoinvolti = res.results;
+                break;
+              }
             }
-          }
-        }, err => {
-          console.log("error");
-          // this.messageService.add({
-          //   severity: "error",
-          //   summary: "Errore nel backend",
-          //   detail: "Non è stato possibile fare la ricerca."
-          // });
-        })
-    );
+          }, err => {
+            console.log("error");
+            // this.messageService.add({
+            //   severity: "error",
+            //   summary: "Errore nel backend",
+            //   detail: "Non è stato possibile fare la ricerca."
+            // });
+          })
+      );
+    }
   }
 
   /**
@@ -210,6 +216,24 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
         this._doc.coinvolti.splice(rowIndex, 1);
       }
     );
+  }
+
+  /**
+   * Metodo chiamato dall'html per cancellare un destinatario competente.
+   * 
+   */
+   public onDeleteCompetente(): void{
+    this.destinatariService.deleteHttpCall(this.actualCompetente.id).subscribe(
+      res => {
+        this.messageService.add({
+          severity:'success',
+          summary:'Competente',
+          detail:'Competente eliminato con successo'
+        });
+        this._doc.competenti.splice(0, 1)
+      }
+    )
+    this.actualCompetente = null;
   }
 
   /**

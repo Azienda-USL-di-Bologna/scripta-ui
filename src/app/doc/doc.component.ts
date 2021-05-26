@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
-import { Doc, ENTITIES_STRUCTURE, Persona, Allegato } from "@bds/ng-internauta-model";
+import { Doc, ENTITIES_STRUCTURE, Persona, Allegato, CODICI_REGISTRO } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { AdditionalDataDefinition } from "@nfa/next-sdr";
@@ -10,8 +10,6 @@ import { switchMap } from "rxjs/operators";
 import { AppService } from "../app.service";
 import { ExtendedDocService } from "./extended-doc.service";
 
-
-
 @Component({
   selector: "doc",
   templateUrl: "./doc.component.html",
@@ -20,7 +18,7 @@ import { ExtendedDocService } from "./extended-doc.service";
 export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public inProtocollazione: boolean = false;
   public blockedDocument: boolean = false;
-  public protocolloTempData: string = null;   //!!    QUESTO DATO SERVE MOMENTANEAMENTE PER FAR VEDERE UNA VOLTA PROTOCOLLATO IL NUMERO
+  //public protocolloTempData: string = null;   //!!    QUESTO DATO SERVE MOMENTANEAMENTE PER FAR VEDERE UNA VOLTA PROTOCOLLATO IL NUMERO
   private subscriptions: Subscription[] = [];
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public localIt = LOCAL_IT;
@@ -30,10 +28,11 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public utenteUtilitiesLogin: UtenteUtilities;
   public DatiProtocolloEsterno: Number;
   public dataProtocolloEsterno: Date;
-  // private projection: string = ENTITIES_STRUCTURE.scripta.doc.customProjections.DocWithAll; //  PERCHE'??? QUESTE A ME DANNO ERRORE...
+  public numeroVisualizzazione: string;
   private projection: string = ENTITIES_STRUCTURE.scripta.doc.customProjections.DocWithAll;
 
   constructor(
+    private router: Router,
     private extendedDocService: ExtendedDocService,
     private loginService: NtJwtLoginService,
     private messageService: MessageService,
@@ -50,6 +49,9 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
       )
     );
 
+    /**
+     * Questa sottoscrizione serve a popolare this.doc
+     */
     this.subscriptions.push(
       this.route.queryParamMap.pipe(
         switchMap((params: ParamMap) =>
@@ -58,7 +60,26 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
         this.setFreezeDocumento(false);
         console.log("res", res);
         this.doc = res;
+        if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG).length > 0) {
+          this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
+        }
         this.appService.aziendaDiLavoroSelection(this.doc.idAzienda);
+        this.router.navigate(
+          [], 
+          {
+            relativeTo: this.route,
+            queryParams: { command: 'OPEN', id: this.doc.id }
+          });
+        },  error => {
+        this.setFreezeDocumento(false);
+        
+        console.log("errore", error);
+
+        this.messageService.add({
+          severity:'error', 
+          summary:'Creazione proposta', 
+          detail:'Errore nell\'avviare la proposta di protocollazione. Contattare Babelcare'
+        });
       })
     );
   }
@@ -76,7 +97,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
 
 /**
  * Gestisce le due diverse richieste da url: 
- * 'NEW' documento (proviene dalla protocollazione da pec) ----> viene passato come parametro l'idpec e viene usato come additionalData 
+ * 'NEW' documento (proviene dalla protocollazione da pec) ----> viene passato come parametro l'idMessage e viene usato come additionalData 
  * 'OPEN' documento ( apre un documento già esistente con l'id) 
  */
   private handleCommand(params: ParamMap): Observable<Doc> {
@@ -104,9 +125,12 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     return res;
   }
 
+  /**
+   * Crea e torna l'observable per il caricamento del Doc tramite il suo id.
+   * @param id 
+   * @returns 
+   */
   private loadDocument(id: number): Observable<Doc> {
-    console.log("LOAD DOCUMENT", id);
-    
     return this.extendedDocService.getByIdHttpCall(
       id,
       this.projection);
@@ -224,37 +248,42 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     });
     console.log("nothing");
   }
+
+  /**
+   * Prima controlla se è possibile protocollare poi se si,
+   * Effettua la chiamata al backend che avvia la protocollazione.
+   * In caso di successo viene ricaricato il documento.
+   */
   public doButtonProtocolla(): void {
     console.log("CAN PROTOCOL", this.possoProtocollare());
-    if(!this.possoProtocollare()){
+    if (!this.possoProtocollare()) {
       this.manageMessageNonPossoProtocollare();
-    }
-    else{
+    } else {
       this.setFreezeDocumento(true);
       this.extendedDocService.protocollaDoc(this.doc).subscribe(res => {
-        this.setFreezeDocumento(false);
-          console.log("RES", res);
-          const protocollo = res.protocollo;
-          this.protocolloTempData = protocollo;
+        console.log("RES", res);
+        this.loadDocument(this.doc.id).subscribe((res: Doc) => {
+          this.setFreezeDocumento(false);
+          console.log("res", res);
+          this.doc = res;
+          this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
           this.messageService.add({
             severity:'success', 
             summary:'Documento', 
-            detail:'Documento protocollato con successo: numero protocollo generato ' + protocollo
+            detail: "Documento protocollato con successo: numero protocollo generato " + this.numeroVisualizzazione
           });
-        }, err => {
-          this.setFreezeDocumento(false);
-          console.log("ERRR", err);
-          
-          this.messageService.add({
-            severity:'error', 
-            summary:'Documento', 
-            detail:'Errore nel protocollare il documento'
-          });
-        })
+        });
+      }, err => {
+        this.setFreezeDocumento(false);
+        console.log("ERRR", err);
+        
+        this.messageService.add({
+          severity:'error', 
+          summary:'Documento', 
+          detail:'Errore nel protocollare il documento'
+        });
+      });
     }
-  }
-  public doButtonNote(): void {
-    console.log("nothing");
   }
 
   public ngOnDestroy() {
