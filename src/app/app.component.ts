@@ -17,7 +17,7 @@ export class AppComponent implements OnInit {
   public headerFeaturesConfig: HeaderFeaturesConfig  = new HeaderFeaturesConfig();
   private subscriptions: Subscription[] = [];
   public utenteConnesso: UtenteUtilities | undefined;
-  public appName = "Scripta";
+  public appName = "PEIS";
   private aziendaDiLavoro: Azienda = null;
 
   constructor(
@@ -62,9 +62,9 @@ export class AppComponent implements OnInit {
     this.subscriptions.push(this.appService.aziendaDiLavoroEvent.subscribe((azienda: Azienda) => {
       this.aziendaDiLavoro = azienda;
       if (azienda) {
-        this.appName = "Scripta - " + azienda.descrizione;
+        this.appName = "PEIS - " + azienda.descrizione;
       } else {
-        this.appName = "Scripta";
+        this.appName = "PEIS";
       }
     }));
   }
