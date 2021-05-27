@@ -243,11 +243,14 @@ export class AllegatiComponent implements OnInit, OnDestroy {
    */
   public onRowUnselect(): void {
     if (this.actualPrincipale) {
+
+      const allegatoToSave = new Allegato();
+      allegatoToSave.version = this.actualPrincipale.version;
+      allegatoToSave.principale = false;
+
       this.subscriptions.push(
-        this.allegatoService.patchHttpCall({
-          version: this.actualPrincipale.version,
-          principale: false
-        }, this.actualPrincipale.id, null, null).subscribe(
+        this.allegatoService.patchHttpCall(allegatoToSave, this.actualPrincipale.id, null, null)
+        .subscribe(
           (allegato: Allegato) => {
             this.actualPrincipale.version = allegato.version;
             this.actualPrincipale.principale = false;
