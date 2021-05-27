@@ -1,0 +1,93 @@
+<p-toast #pageStart position="top-right" (onClose)="clearMessages()"></p-toast>
+<p-toolbar>
+  <div class="classe-temporanea">
+    <button pButton 
+      type="button" 
+      label="Protocolla" 
+      icon="material-icons-outlined person_add"
+      (click)="doButtonProtocolla()"
+      ><!-- [disabled]="doc?.dataRegistrazione || !document.oggetto" -->
+    </button>
+  </div>
+</p-toolbar>
+<p-progressBar *ngIf="inProtocollazione" mode="indeterminate"></p-progressBar>
+<p-blockUI [blocked]="blockedDocument">
+  <i class="pi pi-lock" style="font-size: 3rem"></i>
+</p-blockUI>
+<main aria-level="2" *ngIf="doc">
+  <section class="info-documento">
+    <span class="dati-creazione">
+      <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del 2021</span>
+      <span *ngIf="numeroVisualizzazione">{{numeroVisualizzazione}}</span>
+      <span>
+        Creato il giorno {{ removeZoneFromTime(doc?.dataCreazione?.toString()) | date: 'EE d MMM y, H:mm' | titlecase}}
+        da: {{doc?.idPersonaCreazione?.descrizione}}
+      </span>
+    </span>
+    <span *ngIf="protocolloTempData"> Protocollo n. {{protocolloTempData}}</span>
+    <label for="oggetto" class="label-oggetto">Oggetto</label>
+    <textarea  id="oggetto"
+      aria-label="oggetto"
+      class="oggetto"
+      pInputTextarea 
+      placeholder="Inserisci l'oggetto"
+      rows="2" 
+      cols="30"
+      (keyup)="timeOutAndSaveDoc(doc, 'oggetto')"
+      [(ngModel)]="doc!.oggetto">
+    </textarea>
+    <div class="protocollato-da-box">
+      <label for="protocollatoda">Protocollato da</label>
+      <input id="protocollatoda"
+             aria-label="protocollato da"
+             disabled="true"
+        pInputText 
+        type="text" 
+        [disabled]="false"
+        [(ngModel)]="descrizioneUtenteRegistrante">
+    </div>
+  </section>
+  <!-- 
+    Commento da non cancellare. Sono campi che in futuro potremmo voler utilizzare
+    <div class="protocollo-esterno-box p-grid">
+    <label class="p-col-3" id="datiProtocolloEsterno">Dati protocollo Esterno</label>
+    <p-inputNumber
+            ariaLabel="numero protocollo esterno"
+            [disabled]="false"
+            id="p-datiProtocolloEsterno"
+            inputId="datiProtocolloEsterno"
+            [(ngModel)]="DatiProtocolloEsterno"
+            class="p-col">
+    </p-inputNumber>
+    <label class="p-col-2" for="c-dataProtocollazione">del</label>
+    <span class="p-col-2" id="dataProtocollazione" style ="display:none;" >data di protocollazione esterna</span>
+    <p-calendar
+            #CdataProtocolloEsterno
+            id="c-dataProtocollazione"
+            attr.aria-labelledby="dataProtocollazione"
+            [ariaLabelledBy]="'dataProtocollazione'"
+            [(ngModel)]="dataProtocolloEsterno"
+            dateFormat="dd/mm/yy"
+            [locale]="localIt"
+            [showIcon]="true"
+            inputId="dataProtocollazione"
+            appendTo="body"
+            class="p-col">
+    </p-calendar>
+  </div> -->
+  <p-accordion class="accodion-box">
+    <p-accordionTab header="Mittente" [selected]="true">
+      <mittente [doc]="doc" (saveMittenteEvent)="saveDoc($event,'mittenti')"></mittente>
+    </p-accordionTab>
+    <p-accordionTab header="Destinatari">
+      <ng-template pTemplate="content">
+        <destinatari [doc]="doc" (saveDestinatariEvent)="saveDoc($event, 'destinatari')"> </destinatari>
+      </ng-template>    
+    </p-accordionTab>
+    <p-accordionTab header="Allegati">
+      <ng-template pTemplate="content">
+        <allegati [doc]="doc"></allegati>
+      </ng-template>
+    </p-accordionTab>
+  </p-accordion>
+</main>

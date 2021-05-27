@@ -1,7 +1,8 @@
 
-<prp-header [addToRight]="headerTemplate" [appName]="'Baborg'" [logoPath]="'assets/images/logo.png'"></prp-header>
+<prp-header [addToRight]="headerTemplate" [appName]="appName" [logoPath]="'assets/images/logo.png'"></prp-header>
 <ng-template #headerTemplate >
   <prp-header-features [params]="headerFeaturesConfig"></prp-header-features>
 </ng-template>
-
-<router-outlet></router-outlet>
+<div class="content">
+  <router-outlet></router-outlet>
+</div>

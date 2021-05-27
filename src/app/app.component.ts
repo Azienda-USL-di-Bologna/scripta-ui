@@ -3,9 +3,10 @@ import { HeaderFeaturesConfig } from '@bds/primeng-plugin';
 import { NtJwtLoginService, UtenteUtilities, UtilityFunctions } from '@bds/nt-jwt-login';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { IntimusClientService } from '@bds/nt-communicator';
-import { getInternautaUrl, BaseUrlType } from '@bds/ng-internauta-model';
+import { getInternautaUrl, BaseUrlType, Azienda } from '@bds/ng-internauta-model';
 import { Subscription } from 'rxjs';
 import { APPLICATION, LOGIN_ROUTE } from 'src/environments/app-constants';
+import { AppService } from './app.service';
 
 @Component({
   selector: 'app-root',
@@ -13,19 +14,21 @@ import { APPLICATION, LOGIN_ROUTE } from 'src/environments/app-constants';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  title = 'FlowDoc';
   public headerFeaturesConfig: HeaderFeaturesConfig  = new HeaderFeaturesConfig();
   private subscriptions: Subscription[] = [];
   public utenteConnesso: UtenteUtilities | undefined;
+  public appName = "Scripta";
+  private aziendaDiLavoro: Azienda = null;
 
-  constructor(public loginService: NtJwtLoginService,
-              private route: ActivatedRoute,
-              private router: Router,
-              private intimusClient: IntimusClientService){
-
+  constructor(
+    public loginService: NtJwtLoginService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private intimusClient: IntimusClientService,
+    private appService: AppService) {
   }
 
-  ngOnInit(){
+  ngOnInit () {
     this.headerFeaturesConfig = new HeaderFeaturesConfig();
     this.headerFeaturesConfig.showCambioUtente = true;
     this.headerFeaturesConfig.showLogOut = true;
@@ -52,8 +55,17 @@ export class AppComponent implements OnInit {
           this.utenteConnesso.getUtente().aziende.map(a => a.id));
       }
     }));
-    this.route.queryParams.subscribe(
+    this.subscriptions.push(this.route.queryParams.subscribe(
       (params: Params) => UtilityFunctions.manageChangeUserLogin(
-        params, this.loginService, this.router, '/' + LOGIN_ROUTE));
+        params, this.loginService, this.router, '/' + LOGIN_ROUTE)));
+    
+    this.subscriptions.push(this.appService.aziendaDiLavoroEvent.subscribe((azienda: Azienda) => {
+      this.aziendaDiLavoro = azienda;
+      if (azienda) {
+        this.appName = "Scripta - " + azienda.descrizione;
+      } else {
+        this.appName = "Scripta";
+      }
+    }));
   }
 }

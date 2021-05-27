@@ -1,1 +1,6 @@
-<p>home works!</p>
+<p>Benvenuto, clicca uno dei seguenti pulsanti per accedere alla demo</p>
+<main>
+    <button routerLink="/doc" [queryParams]= "{command: 'OPEN', id:'1'}" routerLinkActive="active">Vai al documento di prova 1</button>
+    <br/>
+    <button routerLink="/doc" [queryParams]= "{command: 'OPEN', id:'2'}" routerLinkActive="active">Vai al documento di prova 2</button>    
+</main>
