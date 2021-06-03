@@ -38,7 +38,6 @@ export class MittenteComponent implements OnInit, OnDestroy {
   public suggestionsMezzo: any[] = [];
   public filteredMittente: DettaglioContatto[] = [];
   public filteredMezzo: any[] = [];
-
   public actualOrigine: string ;
 
 
@@ -50,16 +49,13 @@ export class MittenteComponent implements OnInit, OnDestroy {
       this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
       this.indirizzo = this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
       this.actualDataDiArrivo = new Date(this._doc.mittenti[0].spedizioneList[0].data);
-
       this.actualOrigine = this._doc.mittenti[0].origine;
-
     } else {
       this.selectedMittente = null;
       this.actualMezzo = null;
       this.indirizzo = "";
       this.actualDataDiArrivo = null;
       this.actualOrigine = null;
-
     }
   }
 
@@ -188,7 +184,6 @@ export class MittenteComponent implements OnInit, OnDestroy {
           this._doc.mittenti = [];
           this._doc.mittenti.push(related);
           this.actualMittente = related;
-          //this.setDescrizioneCustomMittente(this._doc.mittenti[0]);
           this.selectedMittente = related;
           this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
           this.indirizzo=  this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
@@ -293,7 +288,6 @@ export class MittenteComponent implements OnInit, OnDestroy {
 
   /**
    * Metodo chiamato dall'html per cancellare un mittente.
-   *
    */
     public onDeleteMittente(): void{
       this.mittenteService.deleteHttpCall(this.actualMittente.id).subscribe(
@@ -304,13 +298,11 @@ export class MittenteComponent implements OnInit, OnDestroy {
             detail:"Mittente eliminato con successo"
           });
           this._doc.mittenti.splice(0, 1);
-
         }
       )
       this.actualMittente= null;
       this.actualMezzo = null;
       this.indirizzo = "";
-      // this.actualDataDiArrivo = null;
       this.actualOrigine= null;
     }
 

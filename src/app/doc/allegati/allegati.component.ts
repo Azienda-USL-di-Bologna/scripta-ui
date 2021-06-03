@@ -16,6 +16,7 @@ import { ExtendedAllegatoService } from './extended-allegato.service';
 export class AllegatiComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private actualPrincipale: Allegato;
+  private projectionAllegati: string = ENTITIES_STRUCTURE.scripta.allegato.standardProjections.AllegatoWithDettagliAllegatiListAndIdAllegatoPadre;
   
   public _doc: Doc;
   public selectedAllegato: Allegato;
@@ -58,49 +59,50 @@ export class AllegatiComponent implements OnInit, OnDestroy {
   public onUpload(event: any): void {
     console.log("formDataformDataformData", event);
     let formData: FormData = this.buildFormData(event);
-    this.subscriptions.push(this.allegatoService.uploadAllegato(formData).subscribe((event: HttpEvent<any>) => {
-      switch (event.type) {
-        case HttpEventType.Sent:
-          this.progress = 5;
-          this.setProgressBarWidth(this.progress);
-          // console.log("Request has been made! progress is:", this.progress);
-          break;
-        case HttpEventType.ResponseHeader:
-          this.progress = this.progress + 5;
-          this.setProgressBarWidth(this.progress);
-          // console.log("Response header has been received!  progress is: ", this.progress);
-          if (!event.ok && !(event.status === 200)) {
-            this.messageService.add({
-              severity: "error", 
-              summary: `Error code ${event.status}`, 
-              detail: "Backend Error, I dati passati per l'importazione sono assenti o non corretti."
-            });
-          }
-          break;
-        case HttpEventType.UploadProgress:
-          this.progress = this.progress + Math.round((event.loaded / event.total * 100) - 20);
-          this.setProgressBarWidth(this.progress);
-          // console.log(`Uploaded! progress is: ${this.progress}%`);
-          break;
-        case HttpEventType.Response:
-          // console.log("backend response event is: ", event);
-          const res: Allegato[] = event.body;
-          this._doc.allegati = res;
-          if (this._doc.allegati.length > 0) {
-            this.actualPrincipale = this._doc.allegati.find(a => a.principale);
-          }
-          this.progress = this.progress + 10;
-          this.setProgressBarWidth(this.progress);
-          // console.log("Response from the backend, progress is: ", this.progress);
-          this.refreshTable = true;
-          setTimeout(() => {
-            this.progress = 0;
+    this.subscriptions.push(this.allegatoService.uploadAllegato(formData)
+      .subscribe((event: HttpEvent<any>) => {
+        switch (event.type) {
+          case HttpEventType.Sent:
+            this.progress = 5;
             this.setProgressBarWidth(this.progress);
-            this.onCloseFileUploadDialog();          
-          this.refreshTable = false;
-        }, 7000);
-    }}));
-
+            // console.log("Request has been made! progress is:", this.progress);
+            break;
+          case HttpEventType.ResponseHeader:
+            this.progress = this.progress + 5;
+            this.setProgressBarWidth(this.progress);
+            // console.log("Response header has been received!  progress is: ", this.progress);
+            if (!event.ok && !(event.status === 200)) {
+              this.messageService.add({
+                severity: "error", 
+                summary: `Error code ${event.status}`, 
+                detail: "Backend Error, I dati passati per l'importazione sono assenti o non corretti."
+              });
+            }
+            break;
+          case HttpEventType.UploadProgress:
+            this.progress = this.progress + Math.round((event.loaded / event.total * 100) - 20);
+            this.setProgressBarWidth(this.progress);
+            // console.log(`Uploaded! progress is: ${this.progress}%`);
+            break;
+          case HttpEventType.Response:
+            // console.log("backend response event is: ", event);
+            const res: Allegato[] = event.body;
+            this._doc.allegati = res;
+            if (this._doc.allegati.length > 0) {
+              this.actualPrincipale = this._doc.allegati.find(a => a.principale);
+            }
+            this.progress = this.progress + 10;
+            this.setProgressBarWidth(this.progress);
+            // console.log("Response from the backend, progress is: ", this.progress);
+            this.refreshTable = true;
+            setTimeout(() => {
+              this.progress = 0;
+              this.setProgressBarWidth(this.progress);
+              this.onCloseFileUploadDialog();          
+              this.refreshTable = false;
+            }, 0);
+        }
+     }));
     this.messageService.add({ severity: 'info', summary: 'File Uploaded', detail: '' });
   }
 
@@ -157,7 +159,7 @@ export class AllegatiComponent implements OnInit, OnDestroy {
     const filters: FiltersAndSorts = new FiltersAndSorts();
     filters.addFilter(new FilterDefinition("idDoc", FILTER_TYPES.not_string.equals, this._doc.id));
     filters.addSort(new SortDefinition("ordinale", SORT_MODES.asc));
-    this.allegatoService.getData(ENTITIES_STRUCTURE.scripta.allegato.standardProjections.AllegatoWithDettagliAllegatiListAndIdAllegatoPadre, filters, null, null).subscribe(
+    this.allegatoService.getData(this.projectionAllegati, filters, null, null).subscribe(
       (res: any) => {
         this._doc.allegati = [...res.results];
         this.setInitialData();
@@ -177,7 +179,6 @@ export class AllegatiComponent implements OnInit, OnDestroy {
           detail:'Allegato eliminato con successo'
         });
         // La delete può far scattare la rinumerazione degli allegati e quindi ricarico l'intera lista.
-        
         this.loadAllegati();
       }
     );
@@ -191,48 +192,54 @@ export class AllegatiComponent implements OnInit, OnDestroy {
   public onRowSelect(event: any): void {
     const batchOperations: BatchOperation[] = [];
     if (this.selectedAllegato) {
+
+      const selectedAllegatoBody = new Allegato();
+      selectedAllegatoBody.version = this.selectedAllegato.version;
+      selectedAllegatoBody.principale = true;
+
       batchOperations.push({
         operation: BatchOperationTypes.UPDATE,
         entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.allegato.path,
         id: this.selectedAllegato.id,
-        entityBody: {
-          version: this.selectedAllegato.version,
-          principale: true
-        } as NextSdrEntity,
+        entityBody: selectedAllegatoBody as NextSdrEntity,
+        returnProjection: this.projectionAllegati
       } as BatchOperation);
       if (this.actualPrincipale) {
+
+        const actualPrincipaleBody = new Allegato();
+        actualPrincipaleBody.version = this.actualPrincipale.version;
+        actualPrincipaleBody.principale = false;
+
         batchOperations.push({
           operation: BatchOperationTypes.UPDATE,
           entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.allegato.path,
           id: this.actualPrincipale.id,
-          entityBody: {
-            version: this.actualPrincipale.version,
-            principale: false
-          } as NextSdrEntity,
+          entityBody: actualPrincipaleBody as NextSdrEntity,
+          returnProjection: this.projectionAllegati
         } as BatchOperation);
       } 
       this.subscriptions.push(
         this.allegatoService.batchHttpCall(batchOperations).subscribe(
           (res: BatchOperation[]) => {
             this.messageService.add({
-              severity:'success', 
-              summary:'Allegato', 
-              detail:'Allegato principale impostato con successo'
+              severity: 'success', 
+              summary: 'Allegato', 
+              detail: 'Allegato principale impostato con successo'
             });
             // Aggiorno i campi su vecchio principale
             if (this.actualPrincipale) {
-              this.actualPrincipale.principale = false;
-              this.actualPrincipale.version = (res.find(b => 
+              this._doc.allegati[this._doc.allegati.findIndex(a => a.id === this.actualPrincipale.id)] = res.find(b => 
                 (b.entityBody as Allegato).id === this.actualPrincipale.id
-                ).entityBody as Allegato).version;
+                ).entityBody as Allegato;
             }
             // Aggiorno i campi sul nuovo principale
-            this.selectedAllegato.principale = true;
-            this.selectedAllegato.version = (res.find(b => 
+            const indexNewPrincipale = this._doc.allegati.findIndex(a => a.id === this.selectedAllegato.id);
+            this._doc.allegati[indexNewPrincipale] = res.find(b => 
               (b.entityBody as Allegato).id === this.selectedAllegato.id
-              ).entityBody as Allegato).version;
+              ).entityBody as Allegato;
+
             // Setto l'actualPrincipale al nuovo principale
-            this.actualPrincipale = this.selectedAllegato;
+            this.actualPrincipale = this._doc.allegati[indexNewPrincipale];
         })
       );
     }
@@ -249,11 +256,10 @@ export class AllegatiComponent implements OnInit, OnDestroy {
       allegatoToSave.principale = false;
 
       this.subscriptions.push(
-        this.allegatoService.patchHttpCall(allegatoToSave, this.actualPrincipale.id, null, null)
+        this.allegatoService.patchHttpCall(allegatoToSave, this.actualPrincipale.id, this.projectionAllegati, null)
         .subscribe(
           (allegato: Allegato) => {
-            this.actualPrincipale.version = allegato.version;
-            this.actualPrincipale.principale = false;
+            this._doc.allegati[this._doc.allegati.findIndex(a => a.id === this.actualPrincipale.id)] = allegato;
             this.messageService.add({
               severity:'success', 
               summary:'Allegato', 
@@ -266,6 +272,10 @@ export class AllegatiComponent implements OnInit, OnDestroy {
     }
   }
 
+  public getDettaglioByTipoDettaglioAllegato(allegato: Allegato, tipo : string ): DettaglioAllegato {
+    return allegato.dettagliAllegatiList.find(dettaglioAllegato => (dettaglioAllegato.caratteristica === tipo));
+  }
+
   /**
    * Mi desottoscrivo dalla varie sottoscrizioni
    */
@@ -273,8 +283,4 @@ export class AllegatiComponent implements OnInit, OnDestroy {
     this.subscriptions.forEach((s: Subscription) => s.unsubscribe());
     this.subscriptions = [];
   }
-
-  public getDettaglioByTipoDettaglioAllegato(allegato:Allegato, tipo : string ): DettaglioAllegato {
-       return allegato.dettagliAllegatiList.find(dettaglioAllegato => (dettaglioAllegato.caratteristica == tipo));
-     }
 }
