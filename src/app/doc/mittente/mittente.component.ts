@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit, Output, EventEmitter} from "@angular/core";
+import {Component, Input, OnDestroy, OnInit, Output, EventEmitter, ViewChild} from "@angular/core";
 import {ExtendedMittenteService} from "./extended-mittente.service";
 import {BaseUrls, BaseUrlType, CodiceMezzo, Contatto, DettaglioContatto, DettaglioContattoService, Doc, ENTITIES_STRUCTURE, 
   IndirizzoSpedizione, Mezzo, MezzoService, OrigineRelated, Persona, Related, Spedizione, TipoDettaglio, TipoRelated} from "@bds/ng-internauta-model";
@@ -9,6 +9,7 @@ import { LOCAL_IT } from "@bds/nt-communicator";
 import { MessageService } from "primeng-lts/api";
 import { enumOrigine } from "./mittente-constants";
 import { DatePipe } from "@angular/common";
+import { NgModel } from "@angular/forms";
 
 @Component({
   selector: "mittente",
@@ -20,7 +21,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
 
   private subscriptions: Subscription[] = [];
   private loggedUtenteUtilities: UtenteUtilities | undefined | null;
-  private actualMittente: Related;
+  public actualMittente: Related;
   public localIt = LOCAL_IT;
 
   public _doc: Doc | undefined;
@@ -304,6 +305,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
       this.actualMezzo = null;
       this.indirizzo = "";
       this.actualOrigine= null;
+      this.selectedMittente= null;
     }
 
   /**
