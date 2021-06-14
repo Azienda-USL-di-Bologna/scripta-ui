@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit, Output, EventEmitter} from "@angular/core";
+import {Component, Input, OnDestroy, OnInit, Output, EventEmitter, ViewChild} from "@angular/core";
 import {ExtendedMittenteService} from "./extended-mittente.service";
 import {BaseUrls, BaseUrlType, CodiceMezzo, Contatto, DettaglioContatto, DettaglioContattoService, Doc, ENTITIES_STRUCTURE, 
   IndirizzoSpedizione, Mezzo, MezzoService, OrigineRelated, Persona, Related, Spedizione, TipoDettaglio, TipoRelated} from "@bds/ng-internauta-model";
@@ -9,6 +9,7 @@ import { LOCAL_IT } from "@bds/nt-communicator";
 import { MessageService } from "primeng-lts/api";
 import { enumOrigine } from "./mittente-constants";
 import { DatePipe } from "@angular/common";
+import { NgModel } from "@angular/forms";
 
 @Component({
   selector: "mittente",
@@ -20,7 +21,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
 
   private subscriptions: Subscription[] = [];
   private loggedUtenteUtilities: UtenteUtilities | undefined | null;
-  private actualMittente: Related;
+  public actualMittente: Related;
   public localIt = LOCAL_IT;
 
   public _doc: Doc | undefined;
@@ -38,7 +39,6 @@ export class MittenteComponent implements OnInit, OnDestroy {
   public suggestionsMezzo: any[] = [];
   public filteredMittente: DettaglioContatto[] = [];
   public filteredMezzo: any[] = [];
-
   public actualOrigine: string ;
 
 
@@ -50,16 +50,13 @@ export class MittenteComponent implements OnInit, OnDestroy {
       this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
       this.indirizzo = this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
       this.actualDataDiArrivo = new Date(this._doc.mittenti[0].spedizioneList[0].data);
-
       this.actualOrigine = this._doc.mittenti[0].origine;
-
     } else {
       this.selectedMittente = null;
       this.actualMezzo = null;
       this.indirizzo = "";
       this.actualDataDiArrivo = null;
       this.actualOrigine = null;
-
     }
   }
 
@@ -188,7 +185,6 @@ export class MittenteComponent implements OnInit, OnDestroy {
           this._doc.mittenti = [];
           this._doc.mittenti.push(related);
           this.actualMittente = related;
-          //this.setDescrizioneCustomMittente(this._doc.mittenti[0]);
           this.selectedMittente = related;
           this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
           this.indirizzo=  this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
@@ -293,7 +289,6 @@ export class MittenteComponent implements OnInit, OnDestroy {
 
   /**
    * Metodo chiamato dall'html per cancellare un mittente.
-   *
    */
     public onDeleteMittente(): void{
       this.mittenteService.deleteHttpCall(this.actualMittente.id).subscribe(
@@ -304,14 +299,13 @@ export class MittenteComponent implements OnInit, OnDestroy {
             detail:"Mittente eliminato con successo"
           });
           this._doc.mittenti.splice(0, 1);
-
         }
       )
       this.actualMittente= null;
       this.actualMezzo = null;
       this.indirizzo = "";
-      // this.actualDataDiArrivo = null;
       this.actualOrigine= null;
+      this.selectedMittente= null;
     }
 
   /**

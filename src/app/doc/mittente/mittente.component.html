@@ -1,21 +1,27 @@
 <div class="mittente-box p-grid">
   <label class="p-col-3" for="mittente">Mittente</label>
-  <p-autoComplete 
-    id="mittente"
-    [(ngModel)]="selectedMittente"
-    (onSelect)="saveMittente($event)"
-    [suggestions]="filteredMittente"
-    (completeMethod)="searchMittente($event)"
-    (onClear)= "onDeleteMittente()"
-    ariaLabel="Descrizione del mittente"
-    field="descrizione"
-    appendTo="body"
-    class="p-col"
-    type="search">
-    <ng-template let-contatto pTemplate="item">
-      <span>{{contatto.descrizioneCustom}}</span>
-    </ng-template>
-  </p-autoComplete>
+  <form class="box">
+    <p-autoComplete 
+      id="mittente"
+      [(ngModel)]="selectedMittente"
+      (onSelect)="saveMittente($event)"
+      [suggestions]="filteredMittente"
+      (completeMethod)="searchMittente($event)"
+      ariaLabel="Descrizione del mittente"
+      field="descrizione"
+      appendTo="body"
+      class="p-col input"
+      required
+      type="text"
+      [ngModelOptions]="{standalone: true}"
+      (onClear)="onDeleteMittente()">
+      <ng-template let-contatto pTemplate="item">
+        <span>{{contatto.descrizioneCustom}}</span>
+      </ng-template>
+    </p-autoComplete>
+    <button class="material-icons close-icon" type="reset" aria-label= "Cancella ricerca" (click)="onDeleteMittente()"
+    *ngIf="actualMittente != null">close</button>
+  </form> 
   <span class="p-col">
     <input id="Indirizzo"
       aria-label="indirizzo"
@@ -55,8 +61,7 @@
     field="descrizione"
     [dropdown]="true"
     appendTo="body"
-    class="p-col"
-    [disabled]="true">
+    class="p-col">
   </p-autoComplete>
 </div>
 <div class="mittente-box p-grid">

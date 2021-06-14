@@ -16,7 +16,7 @@ import {ExtendedDestinatariService} from "./extended-destinatari.service";
 export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private loggedUtenteUtilities: UtenteUtilities;
-  private actualCompetente: Related;
+  public actualCompetente: Related;
 
   public columnCoinvolti: any[] = [];
   public _doc: Doc;
@@ -234,6 +234,7 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     )
     this.actualCompetente = null;
+    this.selectedCompetente = null;
   }
 
   /**
