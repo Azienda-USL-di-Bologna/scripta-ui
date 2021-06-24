@@ -21,3 +21,38 @@
     }
   }
 }
+.input,.close-icon,.box {
+	position: relative;
+}
+.box{
+  width: 100%;
+  display:flex;
+  .input{
+    width: 100%;
+  }
+  .close-icon {
+    align-self: center;
+    font-size: 15px;
+    border:1px solid transparent;
+    background-color: #fff;
+    display: inline-block;
+    outline: 0;
+    cursor: pointer;
+    display: block;
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    z-index:1;
+    right: 20px;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    text-align: center;
+    color: #203142;
+  }
+}
+.competente-box{
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+}

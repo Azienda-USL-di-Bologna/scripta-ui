@@ -1,20 +1,26 @@
-<div class="p-grid">
+<div class="p-grid competente-box">
   <label class="p-col-2" for="competenti">Competente</label>
-  <p-autoComplete id="competenti" #autocompleteCompetenti
-    [(ngModel)]="selectedCompetente"
-    ariaLabel="competenti"
-    (onSelect)="saveDestinatario($event, 'competente')"
-    [suggestions]="filteredCompetenti"
-    (completeMethod)="searchDestinatario($event, 'competente')"
-    (onClear)= "onDeleteCompetente()"
-    field="descrizione"
-    appendTo="body"
-    class="p-col"
-    type="search">
-    <ng-template let-contatto pTemplate="item">
-      <div>{{contatto.descrizioneCustom}}</div>
-    </ng-template>
-  </p-autoComplete>
+  <form class="box">
+    <p-autoComplete id="competenti" #autocompleteCompetenti
+      [(ngModel)]="selectedCompetente"
+      ariaLabel="competenti"
+      (onSelect)="saveDestinatario($event, 'competente')"
+      [suggestions]="filteredCompetenti"
+      (completeMethod)="searchDestinatario($event, 'competente')"
+      (onClear)= "onDeleteCompetente()"
+      field="descrizione"
+      appendTo="body"
+      class="p-col input"
+      [ngModelOptions]="{standalone: true}"
+      required
+      type="text">
+      <ng-template let-contatto pTemplate="item">
+        <div>{{contatto.descrizioneCustom}}</div>
+      </ng-template>
+    </p-autoComplete>
+    <button class="material-icons close-icon" type="reset" aria-label= "Cancella ricerca" (click)="onDeleteCompetente()"
+      *ngIf="actualCompetente != null">close</button>
+  </form>
 </div>
 <div class="p-grid">
   <label class="p-col-2" for="coinvolti">Coinvolti</label>
