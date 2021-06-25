@@ -1,9 +1,9 @@
 <p-fileUpload #fubauto
   name="demo[]" 
-  accept=".csv, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .pdf, .txt" 
+  accept=".csv, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .pdf, .txt, .eml, .zip" 
   (uploadHandler)="onUpload($event)"
   multiple = true
-  maxFileSize=1000000
+  maxFileSize=100000000
   chooseLabel="Sfoglia"
   uploadLabel="Carica"
   cancelLabel="Cancella"
