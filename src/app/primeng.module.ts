@@ -1,20 +1,20 @@
 import { NgModule } from "@angular/core";
-import {ButtonModule} from "primeng-lts/button";
-import {InputTextareaModule} from "primeng-lts/inputtextarea";
-import {ToolbarModule} from "primeng-lts/toolbar";
-import { InputTextModule } from "primeng-lts/inputtext";
-import {DialogModule} from "primeng-lts/dialog";
-import {DialogService} from "primeng-lts/dynamicdialog";
-import {ToastModule} from "primeng-lts/toast";
-import {MessageService} from "primeng-lts/api";
-import {InputNumberModule} from "primeng-lts/inputnumber";
-import {AccordionModule} from "primeng-lts/accordion";
-import {CalendarModule} from "primeng-lts/calendar";
-import {AutoCompleteModule} from "primeng-lts/autocomplete";
-import { TableModule } from "primeng-lts/table";
-import {FileUploadModule} from 'primeng-lts/fileupload';
-import {TooltipModule} from 'primeng-lts/tooltip';
-import {BlockUIModule} from 'primeng-lts/blockui';
+import {ButtonModule} from "primeng/button";
+import {InputTextareaModule} from "primeng/inputtextarea";
+import {ToolbarModule} from "primeng/toolbar";
+import { InputTextModule } from "primeng/inputtext";
+import {DialogModule} from "primeng/dialog";
+import {DialogService} from "primeng/dynamicdialog";
+import {ToastModule} from "primeng/toast";
+import {MessageService} from "primeng/api";
+import {InputNumberModule} from "primeng/inputnumber";
+import {AccordionModule} from "primeng/accordion";
+import {CalendarModule} from "primeng/calendar";
+import {AutoCompleteModule} from "primeng/autocomplete";
+import { TableModule } from "primeng/table";
+import {FileUploadModule} from 'primeng/fileupload';
+import {TooltipModule} from 'primeng/tooltip';
+import {BlockUIModule} from 'primeng/blockui';
 
 
 @NgModule({

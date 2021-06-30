@@ -24,7 +24,6 @@
         da: {{doc?.idPersonaCreazione?.descrizione}}
       </span>
     </span>
-    <span *ngIf="protocolloTempData"> Protocollo n. {{protocolloTempData}}</span>
     <label for="oggetto" class="label-oggetto">Oggetto</label>
     <textarea  id="oggetto"
       aria-label="oggetto"
@@ -81,7 +80,7 @@
     </p-accordionTab>
     <p-accordionTab header="Destinatari">
       <ng-template pTemplate="content">
-        <destinatari [doc]="doc" (saveDestinatariEvent)="saveDoc($event, 'destinatari')"> </destinatari>
+        <destinatari [doc]="doc"> </destinatari>
       </ng-template>    
     </p-accordionTab>
     <p-accordionTab header="Allegati">

@@ -6,7 +6,7 @@ import {AdditionalDataDefinition, FILTER_TYPES, FilterDefinition, FiltersAndSort
 import {Subscription} from "rxjs";
 import {NtJwtLoginService, UtenteUtilities} from "@bds/nt-jwt-login";
 import { LOCAL_IT } from "@bds/nt-communicator";
-import { MessageService } from "primeng-lts/api";
+import { MessageService } from "primeng/api";
 import { enumOrigine } from "./mittente-constants";
 import { DatePipe } from "@angular/common";
 import { NgModel } from "@angular/forms";

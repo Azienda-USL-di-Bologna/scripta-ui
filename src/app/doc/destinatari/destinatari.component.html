@@ -12,7 +12,7 @@
       appendTo="body"
       class="p-col input"
       [ngModelOptions]="{standalone: true}"
-      required
+      [required]="true"
       type="text">
       <ng-template let-contatto pTemplate="item">
         <div>{{contatto.descrizioneCustom}}</div>
