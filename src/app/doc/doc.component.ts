@@ -18,7 +18,6 @@ import { ExtendedDocService } from "./extended-doc.service";
 export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public inProtocollazione: boolean = false;
   public blockedDocument: boolean = false;
-  //public protocolloTempData: string = null;   //!!    QUESTO DATO SERVE MOMENTANEAMENTE PER FAR VEDERE UNA VOLTA PROTOCOLLATO IL NUMERO
   private subscriptions: Subscription[] = [];
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public localIt = LOCAL_IT;

@@ -11,7 +11,7 @@
       field="descrizione"
       appendTo="body"
       class="p-col input"
-      required
+      [required]="true"
       type="text"
       [ngModelOptions]="{standalone: true}"
       (onClear)="onDeleteMittente()">
