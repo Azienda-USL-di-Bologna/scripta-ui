@@ -1,0 +1,163 @@
+<p-table #dt
+  ariaLabel="Tabella elenco documenti"
+  [value]="docs" 
+  dataKey="id" 
+  [columns]="selectedColumns"
+  [rows]="rowsNumber" 
+  scrollHeight="100%" 
+  [scrollable]="true" 
+  [virtualScroll]="true" 
+  [virtualScrollDelay]="150"
+  [virtualRowHeight]="53" 
+  [lazy]="true"
+  [totalRecords]="totalRecords" 
+  (onLazyLoad)="onLazyLoad($event)"
+  styleClass="p-table-scripta-docs-list"
+  tableStyleClass="altraclassedacercare">
+  <ng-template pTemplate="caption">
+    <div class="caption-row">
+      <div class="left-content">
+        <p-multiSelect 
+          [options]="cols" 
+          [(ngModel)]="selectedColumns" 
+          optionLabel="header"
+          selectedItemsLabel="{0} colonne selezionate" 
+          [style]="{minWidth: '250px', maxWidth: '250px'}" 
+          placeholder="Scegli le colonne da visualizzare">
+        </p-multiSelect>
+      </div>
+      <div class="right-content">
+        <div class="p-field-checkbox">
+          <p-checkbox [(ngModel)]="mieiDocumenti" [binary]="true" inputId="mieiDocumenti"></p-checkbox>
+          <label for="binary">mieiDocumenti</label>
+        </div>
+        <div class="p-d-flex">
+            <span class="p-input-icon-left p-ml-auto">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text" (input)="dt.filterGlobal($event.target, 'equals')" placeholder="Ricerca.. " />
+            </span>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="header" let-columns>
+    <!-- HEADER & ORDINAMENTO -->
+    <tr style="height: 47px;" > 
+      <th *ngFor="let col of columns" 
+        [ngSwitch]="col.field" 
+        [ngClass]="col.headerClass"
+        [pSortableColumn]="col.sortField">
+        {{col.header}}<p-sortIcon *ngIf="col.sortField" [field]="col.sortField"></p-sortIcon>
+        <!-- <div *ngSwitchCase="'idAzienda.nome'" [pSortableColumn]="col.sortField">
+          {{col.header}}<p-sortIcon [field]="col.sortField"></p-sortIcon>
+        </div>
+        <div *ngSwitchCase="'tipologia'">
+          {{col.header}}
+        </div>
+        <div *ngSwitchCase="'registrazione'">
+          {{col.header}}<p-sortIcon field="registrazione"></p-sortIcon>
+        </div>
+        <div *ngSwitchCase="'proposta'">
+          {{col.header}}
+        </div>
+        <div *ngSwitchCase="'dataCreazione'">
+          {{col.header}}
+        </div>
+        <div *ngSwitchCase="'dataRegistrazione'">
+          {{col.header}}
+        </div>
+        <div *ngSwitchCase="'oggetto'">
+          {{col.header}}
+        </div>
+        <div *ngSwitchCase="'stato'">
+          {{col.header}}s
+        </div>
+        <div *ngSwitchCase="'fascicolazioni'">
+          {{col.header}}
+        </div> -->
+      </th>
+    </tr>
+    <!-- FILTRI -->
+    <tr style="height: 64px;">
+      <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
+        <div *ngSwitchCase="'idAzienda.nome'">
+          <p-columnFilter field="idAzienda.id" matchMode="in" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-multiSelect 
+                [ngModel]="value" 
+                [options]="aziendeAttivePersonaConnessa" 
+                placeholder="Filtra per azienda" 
+                optionValue="id"
+                optionLabel="nome"
+                (onChange)="filter($event.value)"
+                appendTo="body">
+                <ng-template let-option pTemplate="item">
+                  <div class="p-multiselect-representative-option">
+                    <span class="p-ml-1">{{option.nome}}</span>
+                  </div>
+                </ng-template>
+              </p-multiSelect>
+            </ng-template>
+          </p-columnFilter>
+        </div>
+        <div *ngSwitchCase="'tipologia'">
+        </div>
+        <div *ngSwitchCase="'registrazione'">
+        </div>
+        <div *ngSwitchCase="'proposta'">
+        </div>
+        <div *ngSwitchCase="'dataCreazione'">
+        </div>
+        <div *ngSwitchCase="'dataRegistrazione'">
+        </div>
+        <div *ngSwitchCase="'oggetto'">
+        </div>
+        <div *ngSwitchCase="'stato'">
+        </div>
+        <div *ngSwitchCase="'fascicolazioni'">
+        </div>
+      </th>
+    </tr>
+  </ng-template>
+  <!-- BODY -->
+  <ng-template pTemplate="body" let-rowData let-columns="columns">
+    <tr class="row-height">
+      <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
+        <div *ngSwitchCase="'idAzienda.nome'">
+          {{rowData.idAzienda.nome}}
+        </div>
+        <div *ngSwitchCase="'tipologia'">
+          {{rowData.tipologiaVisualizzazione}}
+        </div>
+        <div *ngSwitchCase="'registrazione'">
+          {{rowData.registrazioneVisualizzazione}}
+        </div>
+        <div *ngSwitchCase="'proposta'">
+          {{rowData.propostaVisualizzazione}}
+        </div>
+        <div *ngSwitchCase="'dataCreazione'">
+          {{rowData.dataCreazione | date:'dd/MM/yyyy'}}
+        </div>
+        <div *ngSwitchCase="'dataRegistrazione'">
+          {{rowData.dataRegistrazione | date:'dd/MM/yyyy'}}
+        </div>
+        <div *ngSwitchCase="'oggetto'">
+          {{rowData.oggetto}}
+        </div>
+        <div *ngSwitchCase="'stato'">
+          {{rowData.statoVisualizzazione}}
+        </div>
+        <div *ngSwitchCase="'fascicolazioni'" class="row-height">
+          {{rowData.fascicolazioniVisualizzazione}}
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="loadingbody" let-columns="columns">
+    <tr class="row-height">
+      <td *ngFor="let col of columns">
+        <div class="loading-text"></div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

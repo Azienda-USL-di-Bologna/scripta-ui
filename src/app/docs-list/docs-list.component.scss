@@ -1,0 +1,68 @@
+:host {
+  height: 100%;
+}
+::ng-deep .p-table-scripta-docs-list {
+  .p-datatable-scrollable-header {
+    overflow: initial !important;
+  }
+  .caption-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .left-content {
+
+    }
+    .right-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      .p-field-checkbox {
+        margin-bottom: 0 !important;
+      }
+    }
+  }
+  .scrollable-column {
+    overflow-y: hidden;
+    &:hover {
+      overflow-y: overlay;
+    }
+  }
+  .row-height {
+    height: 53px;
+  }
+}
+
+.loading-text {
+  display: block;
+  background-color: #f1f1f1;
+  min-height: 19px;
+  animation: pulse 1s infinite ease-in-out;
+  text-indent: -99999px;
+  overflow: hidden;
+}
+
+
+
+
+
+
+
+
+
+
+.country-item-value {
+  padding: .25rem .5rem;
+  border-radius: 3px;
+  display: inline-flex;
+  margin-right: .5rem;
+  background-color: var(--primary-color);
+  color: var(--primary-color-text);
+
+  img.flag {
+      width: 17px;
+  }
+}
+
+.country-placeholder {
+  padding: 0.25rem;
+}
