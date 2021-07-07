@@ -1,4 +1,5 @@
 import { DocList, Fascicolazione, TipologiaDoc } from "@bds/ng-internauta-model";
+import { StatoDocTraduzioneVisualizzazione } from "./docs-list-constants";
 
 export class ExtendedDocList extends DocList {
   private _tipologiaVisualizzazione: string;
@@ -44,7 +45,7 @@ export class ExtendedDocList extends DocList {
   }
 
   public set statoVisualizzazione(statoVisualizzazione: string) {
-    this._statoVisualizzazione = statoVisualizzazione.charAt(0) + statoVisualizzazione.substring(1).toLowerCase();;
+    this._statoVisualizzazione = StatoDocTraduzioneVisualizzazione.find(e => e.value === statoVisualizzazione).nome;
   }
 
   public get codiceRegistro(): string {
@@ -66,7 +67,7 @@ export class ExtendedDocList extends DocList {
         this.codiceRegistro = "PG";
         break;
       case TipologiaDoc.PROTOCOLLO_IN_ENTRATA:
-        this.tipologiaVisualizzazione = "Protocollo in uscita";
+        this.tipologiaVisualizzazione = "Protocollo in entrata";
         this.codiceRegistro = "PG";
         break;
       case TipologiaDoc.DETERMINA:

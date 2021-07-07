@@ -29,6 +29,34 @@
         color: #ffffff !important;
         font-weight: normal !important;
     }
+    &.p-button-text {
+        color: white;
+    }
+}
+
+// -----------CUSTOM SCROLLBAR----------------- //
+// CHROME
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+ ::-webkit-scrollbar-thumb {
+    background: #88888857;
+}
+ ::-webkit-scrollbar-thumb:hover {
+    background: #8888889c;
+}
+// FIREFOX
+* {
+    scrollbar-color: #88888857 #f1f1f1;
+    scrollbar-width: thin;
+}
+*:hover {
+    scrollbar-color: #8888889c #f1f1f1;
 }
 
 // Misura temporanea per far andare la accordion dei destinatari.
