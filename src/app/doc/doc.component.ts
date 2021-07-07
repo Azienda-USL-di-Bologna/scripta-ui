@@ -62,7 +62,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
         if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG).length > 0) {
           this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
         }
-        this.appService.aziendaDiLavoroSelection(this.doc.idAzienda);
+        this.appService.appNameSelection("PEIS - " + this.doc.idAzienda.descrizione);
         this.router.navigate(
           [], 
           {
@@ -239,7 +239,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   public doButtonSave(): void {
-    this.appService.aziendaDiLavoroSelection(null);
+    this.appService.appNameSelection("PEIS - " + this.doc.idAzienda.descrizione);
     this.messageService.add({
       severity:'success', 
       summary:'Documento', 

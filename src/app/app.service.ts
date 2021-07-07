@@ -6,19 +6,19 @@ import { Observable, Subject } from "rxjs";
   providedIn: "root"
 })
 export class AppService {
-  private _aziendaDiLavoro = new Subject<Azienda>();
+  private _appName = new Subject<string>();
   
   /******************************************************************
    * GETTER DEGLI OBSERVABLE
    */
-  public get aziendaDiLavoroEvent(): Observable<Azienda> {
-    return this._aziendaDiLavoro.asObservable();
+  public get appNameEvent(): Observable<string> {
+    return this._appName.asObservable();
   }
 
   /******************************************************************
    * SETTER DEGLI OBSERVABLE
    */
-  public aziendaDiLavoroSelection(azienda: Azienda) {
-    this._aziendaDiLavoro.next(azienda);
+  public appNameSelection(appName: string) {
+    this._appName.next(appName);
   }
 }

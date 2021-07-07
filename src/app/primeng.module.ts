@@ -15,6 +15,8 @@ import { TableModule } from "primeng/table";
 import {FileUploadModule} from 'primeng/fileupload';
 import {TooltipModule} from 'primeng/tooltip';
 import {BlockUIModule} from 'primeng/blockui';
+import {MultiSelectModule} from 'primeng/multiselect';
+import {CheckboxModule} from 'primeng/checkbox';
 
 
 @NgModule({
@@ -36,7 +38,9 @@ import {BlockUIModule} from 'primeng/blockui';
     TableModule,
     FileUploadModule,
     TooltipModule,
-    BlockUIModule
+    BlockUIModule,
+    MultiSelectModule,
+    CheckboxModule
   ],
   exports: [
     ButtonModule,
@@ -54,7 +58,9 @@ import {BlockUIModule} from 'primeng/blockui';
     TableModule,
     FileUploadModule,
     TooltipModule,
-    BlockUIModule
+    BlockUIModule,
+    MultiSelectModule,
+    CheckboxModule
   ],
   providers: [MessageService, DialogService]
 })
