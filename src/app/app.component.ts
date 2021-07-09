@@ -17,8 +17,7 @@ export class AppComponent implements OnInit {
   public headerFeaturesConfig: HeaderFeaturesConfig  = new HeaderFeaturesConfig();
   private subscriptions: Subscription[] = [];
   public utenteConnesso: UtenteUtilities | undefined;
-  public appName = "PEIS";
-  private aziendaDiLavoro: Azienda = null;
+  public appName = "";
 
   constructor(
     public loginService: NtJwtLoginService,
@@ -59,13 +58,8 @@ export class AppComponent implements OnInit {
       (params: Params) => UtilityFunctions.manageChangeUserLogin(
         params, this.loginService, this.router, '/' + LOGIN_ROUTE)));
     
-    this.subscriptions.push(this.appService.aziendaDiLavoroEvent.subscribe((azienda: Azienda) => {
-      this.aziendaDiLavoro = azienda;
-      if (azienda) {
-        this.appName = "PEIS - " + azienda.descrizione;
-      } else {
-        this.appName = "PEIS";
-      }
+    this.subscriptions.push(this.appService.appNameEvent.subscribe((appName: string) => {
+      this.appName = appName;
     }));
   }
 }

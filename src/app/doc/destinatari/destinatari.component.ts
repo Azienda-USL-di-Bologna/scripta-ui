@@ -2,8 +2,8 @@ import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Outpu
 import { BaseUrls, BaseUrlType, CategoriaContatto, Contatto, ContattoService, DettaglioContatto, Doc, ENTITIES_STRUCTURE, OrigineRelated, Persona, Related, TipoContatto, TipoRelated } from "@bds/ng-internauta-model";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { AdditionalDataDefinition, BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity } from "@nfa/next-sdr";
-import { MessageService } from 'primeng-lts/api';
-import { AutoComplete } from "primeng-lts/autocomplete";
+import { MessageService } from 'primeng/api';
+import { AutoComplete } from "primeng/autocomplete";
 import { Subscription } from "rxjs";
 
 import {ExtendedDestinatariService} from "./extended-destinatari.service";

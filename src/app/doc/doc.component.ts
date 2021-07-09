@@ -4,7 +4,7 @@ import { Doc, ENTITIES_STRUCTURE, Persona, Allegato, CODICI_REGISTRO } from "@bd
 import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { AdditionalDataDefinition } from "@nfa/next-sdr";
-import { MessageService } from "primeng-lts/api";
+import { MessageService } from "primeng/api";
 import { Observable, Subscription } from "rxjs";
 import { switchMap } from "rxjs/operators";
 import { AppService } from "../app.service";
@@ -18,7 +18,6 @@ import { ExtendedDocService } from "./extended-doc.service";
 export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public inProtocollazione: boolean = false;
   public blockedDocument: boolean = false;
-  //public protocolloTempData: string = null;   //!!    QUESTO DATO SERVE MOMENTANEAMENTE PER FAR VEDERE UNA VOLTA PROTOCOLLATO IL NUMERO
   private subscriptions: Subscription[] = [];
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public localIt = LOCAL_IT;
@@ -63,7 +62,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
         if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG).length > 0) {
           this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
         }
-        this.appService.aziendaDiLavoroSelection(this.doc.idAzienda);
+        this.appService.appNameSelection("PEIS - " + this.doc.idAzienda.descrizione);
         this.router.navigate(
           [], 
           {
@@ -240,7 +239,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   public doButtonSave(): void {
-    this.appService.aziendaDiLavoroSelection(null);
+    this.appService.appNameSelection("PEIS - " + this.doc.idAzienda.descrizione);
     this.messageService.add({
       severity:'success', 
       summary:'Documento', 
