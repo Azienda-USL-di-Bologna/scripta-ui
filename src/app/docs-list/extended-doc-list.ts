@@ -24,12 +24,15 @@ export class ExtendedDocList extends DocList {
   }
 
   public set registrazioneVisualizzazione(registrazioneVisualizzazione: string) {
-    const pad: string = "0000000";
-    this._registrazioneVisualizzazione = 
-      this.codiceRegistro + 
-      pad.substring(0, pad.length - this.numeroRegistrazione.toString().length) + this.numeroRegistrazione + 
-      "/" + 
-      this.annoRegistrazione;
+    if (this.numeroRegistrazione) {
+      const pad: string = "0000000";
+      this._registrazioneVisualizzazione = 
+        this.codiceRegistro + 
+        pad.substring(0, pad.length - this.numeroRegistrazione.toString().length) + this.numeroRegistrazione + 
+        "/" + 
+        this.annoRegistrazione;
+    }
+    
   }
 
   public get propostaVisualizzazione(): string {
@@ -45,7 +48,9 @@ export class ExtendedDocList extends DocList {
   }
 
   public set statoVisualizzazione(statoVisualizzazione: string) {
-    this._statoVisualizzazione = StatoDocTraduzioneVisualizzazione.find(e => e.value === statoVisualizzazione).nome;
+    if (statoVisualizzazione) {
+      this._statoVisualizzazione = StatoDocTraduzioneVisualizzazione.find(e => e.value === statoVisualizzazione).nome;
+    }
   }
 
   public get codiceRegistro(): string {
@@ -90,8 +95,10 @@ export class ExtendedDocList extends DocList {
 
   public set fascicolazioniVisualizzazione(notUsedButNecessary: string[]) {
     this._fascicolazioniVisualizzazione = [];
-    this.fascicolazioni.forEach(f => {
-      this._fascicolazioniVisualizzazione.push("[" + f.numerazione + "] " + f.nome);
-    });
+    if (this.fascicolazioni) {
+      this.fascicolazioni.forEach(f => {
+        this._fascicolazioniVisualizzazione.push("[" + f.numerazione + "] " + f.nome);
+      });
+    }
   }
 }

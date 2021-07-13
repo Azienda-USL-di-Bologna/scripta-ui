@@ -28,7 +28,12 @@
       </div>
       <div class="right-content">
         <div class="p-field-checkbox">
-          <p-checkbox [(ngModel)]="mieiDocumenti" [binary]="true" inputId="mieiDocumenti"></p-checkbox>
+          <p-checkbox 
+            [(ngModel)]="mieiDocumenti" 
+            [binary]="true" 
+            inputId="mieiDocumenti"
+            (onChange)="mieiDocumentiChanged()">
+          </p-checkbox>
           <label for="binary">mieiDocumenti</label>
         </div>
         <div class="p-d-flex">
@@ -125,7 +130,7 @@
         </div>
         <div *ngSwitchCase="'dataCreazione'">
           <!-- Scommentare quando lo si vuol far funzionare -->
-          <!-- <p-columnFilter [field]="col.filterField" type="date" matchMode="is" [showMenu]="false">
+          <p-columnFilter [field]="col.filterField" type="date" matchMode="is" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-calendar #calendarcreazione
                 inputId="basic" 
@@ -142,7 +147,7 @@
                 appendTo="body">
               </p-calendar>
             </ng-template>
-          </p-columnFilter> -->
+          </p-columnFilter>
         </div>
         <div *ngSwitchCase="'dataRegistrazione'">
         </div>

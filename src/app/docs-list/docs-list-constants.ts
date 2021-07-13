@@ -160,3 +160,11 @@ export const StatoDocTraduzioneVisualizzazione = [
   { value: StatoDoc.UFFICIO_ATTI, nome: "Ufficio atti"},
   { value: StatoDoc.VISTA, nome: "Vista"}
 ]
+
+export enum DocsListMode {
+  NUOVO = "NUOVO",
+  ELENCO_DOCUMENTI = "ELENCO_DOCUMENTI",
+  IFIRMARIO = "IFIRMARIO",
+  IFIRMATO = "IFIRMATO",
+  REGISTRAZIONI = "REGISTRAZIONI"
+}
