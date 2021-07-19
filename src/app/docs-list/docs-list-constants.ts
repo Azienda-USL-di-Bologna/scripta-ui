@@ -70,7 +70,7 @@ export const cols: ColonnaBds[] = [
   {
     field: "dataRegistrazione", 
     header: "Data registrazione", 
-    filterField: "", 
+    filterField: "dataRegistrazione", 
     sortField: "dataRegistrazione", 
     style: {},
     headerClass: ["header-column","data-registrazione-column"],

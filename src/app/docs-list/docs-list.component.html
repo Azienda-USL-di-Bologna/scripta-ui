@@ -129,7 +129,6 @@
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'dataCreazione'">
-          <!-- Scommentare quando lo si vuol far funzionare -->
           <p-columnFilter [field]="col.filterField" type="date" matchMode="is" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-calendar #calendarcreazione
@@ -150,6 +149,24 @@
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'dataRegistrazione'">
+          <p-columnFilter [field]="col.filterField" type="date" matchMode="is" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-calendar #calendarregistrazione
+                inputId="basic" 
+                [ngModel]="value"
+                dataType="date" 
+                dateFormat="dd/mm/yy"
+                [showIcon]="false"
+                [showButtonBar]="true"
+                [locale]="localIt"
+                selectionMode="range"
+                [readonlyInput]="true"
+                (onClickOutside)="filter(calendarregistrazione.value)"
+                (onClearClick)="filter(null)"
+                appendTo="body">
+              </p-calendar>
+            </ng-template>
+          </p-columnFilter>
         </div>
         <div *ngSwitchCase="'oggetto'">
           <p-columnFilter 

@@ -1,11 +1,12 @@
 import { DatePipe } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Azienda, DocList, PersonaVedente } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from '@bds/nt-communicator';
 import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
 import { buildLazyEventFiltersAndSorts } from '@bds/primeng-plugin';
 import { FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
 import { LazyLoadEvent } from 'primeng/api';
+import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { AppService } from '../app.service';
 import { cols, DocsListMode, StatoDocTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from './docs-list-constants';
@@ -19,10 +20,13 @@ import { ExtendedDocListService } from './extended-doc-list.service';
 })
 export class DocsListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
+  private loadDocsListSubscription: Subscription;
   private pageConf: PagingConf = { mode: "LIMIT_OFFSET", conf: { limit: 0, offset: 0 } };
   private utenteUtilitiesLogin: UtenteUtilities;
   private resetDocsArrayLenght: boolean = true;
   private storedLazyLoadEvent: LazyLoadEvent;
+
+  @ViewChild(Table) private dataTable: Table;
 
   public docsListMode: DocsListMode = DocsListMode.ELENCO_DOCUMENTI;
   public docs: ExtendedDocList[];
@@ -132,7 +136,11 @@ export class DocsListComponent implements OnInit, OnDestroy {
       limit: this.storedLazyLoadEvent.rows,
       offset: this.storedLazyLoadEvent.first
     };
-    this.subscriptions.push(this.docListService.getData(
+    if (this.loadDocsListSubscription) { 
+      this.loadDocsListSubscription.unsubscribe();
+      this.loadDocsListSubscription = null;
+    }
+    this.loadDocsListSubscription = this.docListService.getData(
 			"DocListWithIdAzienda", 
       this.buildCustomFilterAndSort(), 
       buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe), 
@@ -146,6 +154,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
           in questo modo la scrollbar sarà sufficientemente lunga per scrollare fino all'ultimo elemento
           ps:a quanto pare la proprietà totalRecords non è sufficiente. */
         this.resetDocsArrayLenght = false;
+        this.dataTable.resetScrollTop();
         this.docs = Array.from({length: this.totalRecords});
       }
 
@@ -157,7 +166,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
         Array.prototype.splice.apply(this.docs, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
       }
       this.docs = [...this.docs]; //trigger change detection
-    }));
+    });
   }
 
   /**
@@ -186,5 +195,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
       );
     }
     this.subscriptions = [];
+    if (this.loadDocsListSubscription) {
+      this.loadDocsListSubscription.unsubscribe();
+    }
   }
 }
