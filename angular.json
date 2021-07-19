@@ -23,12 +23,13 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "preserveSymlinks": true,
             "outputPath": "dist/scripta",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
-            "aot": true,
+            "aot": false,
             "assets": [
               "src/favicon.ico",
               "src/assets"
@@ -61,22 +62,28 @@
               ],
               "outputHashing": "all",
               "sourceMap": {
-                "scripts": true,
+                "scripts": false,
                 "styles": false,
-                "hidden": false,
+                "hidden": true,
                 "vendor": false
               },
               "aot": true,
-              "buildOptimizer": false,
-              "optimization": false
+              "buildOptimizer": true,
+              "optimization": true
             },
             "development": {
               "buildOptimizer": false,
               "optimization": false,
               "vendorChunk": true,
               "extractLicenses": false,
-              "sourceMap": true,
-              "namedChunks": true
+              "sourceMap": {
+                "scripts": true,
+                "styles": true,
+                "vendor": true,
+                "hidden": false
+              },
+              "namedChunks": true,
+              "aot": false
             }
           },
           "defaultConfiguration": "production"
