@@ -179,6 +179,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
     const extendedDocsList: ExtendedDocList[] = docsList as ExtendedDocList[];
     extendedDocsList.forEach((doc: ExtendedDocList) => {
       Object.setPrototypeOf(doc, ExtendedDocList.prototype);
+      doc.oggettoVisualizzazione = doc.oggetto;
       doc.tipologiaVisualizzazioneAndCodiceRegistro = doc;
       doc.registrazioneVisualizzazione = null; // Qui sto passando null. Ma è un trucco, in realtà sto settando i valori.
       doc.propostaVisualizzazione = null;

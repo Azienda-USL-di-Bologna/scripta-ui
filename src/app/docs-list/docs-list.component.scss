@@ -64,6 +64,7 @@
         div {
           overflow: hidden;
           word-wrap: break-word;
+          word-break: break-word;
           &:hover {
             overflow-y: scroll;
             overflow-y: overlay;

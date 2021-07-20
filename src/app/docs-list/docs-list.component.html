@@ -34,7 +34,7 @@
             inputId="mieiDocumenti"
             (onChange)="mieiDocumentiChanged()">
           </p-checkbox>
-          <label for="binary">mieiDocumenti</label>
+          <label for="binary">Miei documenti</label>
         </div>
         <div class="p-d-flex">
           <span class="p-input-icon-left p-ml-auto">
@@ -232,7 +232,7 @@
           {{rowData.dataRegistrazione | date:'dd/MM/yyyy'}}
         </div>
         <div *ngSwitchCase="'oggetto'">
-          {{rowData.oggetto}}
+          {{rowData.oggettoVisualizzazione}}
         </div>
         <div *ngSwitchCase="'stato'">
           {{rowData.statoVisualizzazione}}
