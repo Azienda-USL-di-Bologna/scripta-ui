@@ -84,6 +84,20 @@
               },
               "namedChunks": true,
               "aot": false
+            },
+            "stage": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": {
+                "scripts": true,
+                "styles": true,
+                "vendor": false,
+                "hidden": false
+              },
+              "namedChunks": true,
+              "aot": false
             }
           },
           "defaultConfiguration": "production"
