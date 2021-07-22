@@ -3,8 +3,8 @@ import { Component, OnInit, Input, ViewChild, OnDestroy } from '@angular/core';
 import { Doc, Allegato, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, TipoDettaglioAllegato, DettaglioAllegato } from '@bds/ng-internauta-model';
 import { UtilityFunctions } from '@bds/nt-communicator';
 import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
-import { MessageService } from 'primeng-lts/api';
-import { FileUpload } from 'primeng-lts/fileupload';
+import { MessageService } from 'primeng/api';
+import { FileUpload } from 'primeng/fileupload';
 import { Subscription } from 'rxjs';
 import { ExtendedAllegatoService } from './extended-allegato.service';
 

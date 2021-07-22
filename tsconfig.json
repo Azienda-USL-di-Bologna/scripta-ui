@@ -16,7 +16,7 @@
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "ES5",
+    "target": "es5",
     "module": "es2020",
     "lib": [
       "es2018",
@@ -27,7 +27,6 @@
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
-    "strictTemplates": true,
-    "enableIvy": false
+    "strictTemplates": true
   }
 }
