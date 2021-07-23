@@ -1,17 +1,17 @@
-import { HttpEvent, HttpEventType } from '@angular/common/http';
-import { Component, OnInit, Input, ViewChild, OnDestroy } from '@angular/core';
-import { Doc, Allegato, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, TipoDettaglioAllegato, DettaglioAllegato } from '@bds/ng-internauta-model';
-import { UtilityFunctions } from '@bds/nt-communicator';
-import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
-import { MessageService } from 'primeng/api';
-import { FileUpload } from 'primeng/fileupload';
-import { Subscription } from 'rxjs';
-import { ExtendedAllegatoService } from './extended-allegato.service';
+import { HttpEvent, HttpEventType } from "@angular/common/http";
+import { Component, OnInit, Input, ViewChild, OnDestroy } from "@angular/core";
+import { Doc, Allegato, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, TipoDettaglioAllegato, DettaglioAllegato } from "@bds/ng-internauta-model";
+import { UtilityFunctions } from "@bds/nt-communicator";
+import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity, SortDefinition, SORT_MODES } from "@nfa/next-sdr";
+import { MessageService } from "primeng/api";
+import { FileUpload } from "primeng/fileupload";
+import { Subscription } from "rxjs";
+import { ExtendedAllegatoService } from "./extended-allegato.service";
 
 @Component({
-  selector: 'allegati',
-  templateUrl: './allegati.component.html',
-  styleUrls: ['./allegati.component.scss']
+  selector: "allegati",
+  templateUrl: "./allegati.component.html",
+  styleUrls: ["./allegati.component.scss"]
 })
 export class AllegatiComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
@@ -103,7 +103,7 @@ export class AllegatiComponent implements OnInit, OnDestroy {
             }, 0);
         }
      }));
-    this.messageService.add({ severity: 'info', summary: 'File Uploaded', detail: '' });
+    this.messageService.add({ severity: "info", summary: "File Uploaded", detail: "" });
   }
 
   private buildFormData(event :any ): FormData {
@@ -174,9 +174,9 @@ export class AllegatiComponent implements OnInit, OnDestroy {
     this.allegatoService.deleteHttpCall(allegato.id).subscribe(
       res => {
         this.messageService.add({
-          severity:'success', 
-          summary:'Allegato', 
-          detail:'Allegato eliminato con successo'
+          severity:"success", 
+          summary:"Allegato", 
+          detail:"Allegato eliminato con successo"
         });
         // La delete può far scattare la rinumerazione degli allegati e quindi ricarico l'intera lista.
         this.loadAllegati();
@@ -222,9 +222,9 @@ export class AllegatiComponent implements OnInit, OnDestroy {
         this.allegatoService.batchHttpCall(batchOperations).subscribe(
           (res: BatchOperation[]) => {
             this.messageService.add({
-              severity: 'success', 
-              summary: 'Allegato', 
-              detail: 'Allegato principale impostato con successo'
+              severity: "success", 
+              summary: "Allegato", 
+              detail: "Allegato principale impostato con successo"
             });
             // Aggiorno i campi su vecchio principale
             if (this.actualPrincipale) {
@@ -261,9 +261,9 @@ export class AllegatiComponent implements OnInit, OnDestroy {
           (allegato: Allegato) => {
             this._doc.allegati[this._doc.allegati.findIndex(a => a.id === this.actualPrincipale.id)] = allegato;
             this.messageService.add({
-              severity:'success', 
-              summary:'Allegato', 
-              detail:'Allegato principale deselezionato'
+              severity:"success", 
+              summary:"Allegato", 
+              detail:"Allegato principale deselezionato"
             });
             this.actualPrincipale = null;
           }
