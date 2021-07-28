@@ -1,10 +1,11 @@
 import { DatePipe } from '@angular/common';
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Azienda, DocList, PersonaVedente } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from '@bds/nt-communicator';
 import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
 import { buildLazyEventFiltersAndSorts } from '@bds/primeng-plugin';
-import { FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
+import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
 import { LazyLoadEvent } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs';
@@ -25,11 +26,12 @@ export class DocsListComponent implements OnInit, OnDestroy {
   private utenteUtilitiesLogin: UtenteUtilities;
   private resetDocsArrayLenght: boolean = true;
   private storedLazyLoadEvent: LazyLoadEvent;
+  private docsListMode: DocsListMode;
 
   @ViewChild(Table) private dataTable: Table;
-
-  public docsListMode: DocsListMode = DocsListMode.ELENCO_DOCUMENTI;
+  
   public docs: ExtendedDocList[];
+  public enumDocsListMode = DocsListMode;
   public totalRecords: number;
   public aziendeAttivePersonaConnessa: Azienda[] = [];
   public cols: any[] = [];
@@ -44,6 +46,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
     private docListService: ExtendedDocListService,
     private loginService: NtJwtLoginService,
     private datepipe: DatePipe,
+    private route: ActivatedRoute,
     private appService: AppService
   ) { }
 
@@ -56,6 +59,15 @@ export class DocsListComponent implements OnInit, OnDestroy {
         }
       )
     );
+    
+    /* Mi sottoscrivo alla rotta per leggere la modalita dell'elenco documenti 
+      e faccio partire il caricamento. Ogni volta che la modalità cambia
+      rifaccio la loadData */
+    this.route.queryParams.subscribe(params => {
+      this.docsListMode = params['mode'];
+      this.resetAndLoadData();
+    });
+    
     this.appService.appNameSelection("Elenco documenti");
     this.cols = cols;
     this._selectedColumns = this.cols;
@@ -92,8 +104,11 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * Metodo chiamato dal frontend quando l'utente cambia valore al flag mieiDocumenti
    * Risetta la configurazione pagine e chiama la laoddata
    */
-  public mieiDocumentiChanged() {
+  public resetAndLoadData() {
     this.resetDocsArrayLenght = true;
+    if (!!!this.storedLazyLoadEvent) {
+      this.storedLazyLoadEvent = {};
+    }
     this.storedLazyLoadEvent.first = 0;
     this.storedLazyLoadEvent.rows = this.rowsNumber * 2;
     this.loadData();
@@ -101,6 +116,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
 
   /**
    * Questo metodo costruisce filtri e sorting non provenienti dalla p-table
+   * In particolare si occupa di impostare i giusti filtri a seconda
+   * del tab selezionato (docsListMode)
    * @returns 
    */
   private buildCustomFilterAndSort(): FiltersAndSorts {
@@ -116,12 +133,23 @@ export class DocsListComponent implements OnInit, OnDestroy {
         }
 
         filterAndSort.addFilter(new FilterDefinition("personeVedenti", FILTER_TYPES.not_string.equals, filtroJson.buildJsonString()));
-      break;
+        break;
+      case DocsListMode.IFIRMARIO:
+        filterAndSort.addFilter(new FilterDefinition("numeroRegistrazione", FILTER_TYPES.not_string.equals, 999999999)); // Il numero significa isNull
+        filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "FiltraPerStruttureDelSegretario"));
+        break;
+      case DocsListMode.IFIRMATO:
+        filterAndSort.addFilter(new FilterDefinition("numeroRegistrazione", FILTER_TYPES.not_string.equals, 999999998)); // Il numero significa isNotNull
+        filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "FiltraPerStruttureDelSegretario"));
+        break;
+      case DocsListMode.REGISTRAZIONI:
+        filterAndSort.addFilter(new FilterDefinition("numeroRegistrazione", FILTER_TYPES.not_string.equals, 999999998)); // Il numero significa isNotNull
+        break;
     }
     
     // Ordinamento standard
-    filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.asc));
-    filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.asc));
+    //filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.desc));
+    filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
 
     return filterAndSort;
   }

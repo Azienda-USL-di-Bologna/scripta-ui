@@ -27,7 +27,7 @@ export class AppComponent implements OnInit {
     private appService: AppService) {
   }
 
-  ngOnInit () {
+  ngOnInit(): void {
     this.headerFeaturesConfig = new HeaderFeaturesConfig();
     this.headerFeaturesConfig.showCambioUtente = true;
     this.headerFeaturesConfig.showLogOut = true;

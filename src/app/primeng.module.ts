@@ -17,7 +17,7 @@ import {TooltipModule} from 'primeng/tooltip';
 import {BlockUIModule} from 'primeng/blockui';
 import {MultiSelectModule} from 'primeng/multiselect';
 import {CheckboxModule} from 'primeng/checkbox';
-
+import {TabMenuModule} from 'primeng/tabmenu';
 
 @NgModule({
   declarations: [
@@ -40,7 +40,8 @@ import {CheckboxModule} from 'primeng/checkbox';
     TooltipModule,
     BlockUIModule,
     MultiSelectModule,
-    CheckboxModule
+    CheckboxModule,
+    TabMenuModule
   ],
   exports: [
     ButtonModule,
@@ -60,7 +61,8 @@ import {CheckboxModule} from 'primeng/checkbox';
     TooltipModule,
     BlockUIModule,
     MultiSelectModule,
-    CheckboxModule
+    CheckboxModule,
+    TabMenuModule
   ],
   providers: [MessageService, DialogService]
 })

@@ -134,6 +134,9 @@
       font-size: 13px;
       border-radius: 3px;
       word-break: break-word;
+      &:hover {
+        border: 1px solid #936;
+      }
     }
   }
   /* .scrollbar-overlay-placeholder-column {

@@ -10,6 +10,7 @@
   [virtualScrollDelay]="150"
   [virtualRowHeight]="54" 
   [lazy]="true"
+  [lazyLoadOnInit]="false"
   [totalRecords]="totalRecords" 
   (onLazyLoad)="onLazyLoad($event)"
   styleClass="p-table-scripta-docs-list"
@@ -27,12 +28,12 @@
         </p-multiSelect>
       </div>
       <div class="right-content">
-        <div class="p-field-checkbox">
+        <div class="p-field-checkbox" *ngIf="docsListMode === enumDocsListMode.ELENCO_DOCUMENTI">
           <p-checkbox 
             [(ngModel)]="mieiDocumenti" 
             [binary]="true" 
             inputId="mieiDocumenti"
-            (onChange)="mieiDocumentiChanged()">
+            (onChange)="resetAndLoadData()">
           </p-checkbox>
           <label for="binary">Miei documenti</label>
         </div>

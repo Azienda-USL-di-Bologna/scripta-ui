@@ -158,7 +158,14 @@ export const StatoDocTraduzioneVisualizzazione = [
   { value: StatoDoc.SMISTAMENTO, nome: "Smistamento"},
   { value: StatoDoc.SPEDIZIONE, nome: "Spedizione"},
   { value: StatoDoc.UFFICIO_ATTI, nome: "Ufficio atti"},
-  { value: StatoDoc.VISTA, nome: "Vista"}
+  { value: StatoDoc.VISTA, nome: "Vista"},
+  { value: StatoDoc.NUMERAZIONE, nome: "Numerazione"},
+  { value: StatoDoc.REGISTRAZIONE_PROTOCOLLO, nome: "Registrazione protocollo"},
+  { value: StatoDoc.AVVIA_SPEDIZIONI, nome: "Avvia spedizioni"},
+  { value: StatoDoc.ASPETTA_SPEDIZIONI, nome: "Aspetto spedizioni"},
+  { value: StatoDoc.ATTENDI_JOBS, nome: "Attendi jobs"},
+  { value: StatoDoc.CONTROLLO_SEGRETERIA, nome: "Controllo segreteria"},
+  { value: StatoDoc.SPEDIZIONE_MANUALE, nome: "Spedizione manuale"},
 ]
 
 export enum DocsListMode {
