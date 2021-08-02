@@ -5,6 +5,7 @@ import { Subscription } from "rxjs";
 import { DocsListMode } from "../docs-list/docs-list-constants";
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
 import { ActivatedRoute, Router } from "@angular/router";
+import { CODICI_RUOLO } from "@bds/ng-internauta-model";
 
 @Component({
   selector: "navigation-tabs",
@@ -31,59 +32,54 @@ export class NavigationTabsComponent implements OnInit {
         (utenteUtilities: UtenteUtilities) => {
           this.utenteUtilitiesLogin = utenteUtilities;
           this.isSegretario = this.utenteUtilitiesLogin.getUtente().struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
+
+          this.items = [
+            {
+              label: "Nuovo", 
+              icon: "pi pi-fw pi-plus", 
+              routerLink: ["./"]
+            },
+            {
+              label: "Tutti documenti", 
+              icon: "pi pi-fw pi-list", 
+              routerLink: ["./" + DOCS_LIST_ROUTE], 
+              queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI}
+            }
+          ];
+
           if (this.isSegretario) {
-            this.items = [
-              {
-                label: "Nuovo", 
-                icon: "pi pi-fw pi-plus", 
-                routerLink: ["./"]
-              },
-              {
-                label: "Elenco documenti", 
-                icon: "pi pi-fw pi-list", 
-                routerLink: ["./" + DOCS_LIST_ROUTE], 
-                queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI}
-              },
-              {
-                label: "IFirmario", 
+            this.items.push({
+                label: "Firmario", 
+                title: "Le proposte in scrivania dei responsabili",
                 icon: "pi pi-fw pi-user-edit", 
                 routerLink: ["./" + DOCS_LIST_ROUTE], 
                 queryParams: {"mode": DocsListMode.IFIRMARIO}
-              },
-              {
-                label: "IFirmato", 
-                icon: "pi pi-fw pi-user-edit", 
-                routerLink: ["./" + DOCS_LIST_ROUTE], 
-                queryParams: {"mode": DocsListMode.IFIRMATO}
-              },
-              {
-                label: "Registrazioni", 
-                icon: "pi pi-fw pi-list", 
-                routerLink: ["./" + DOCS_LIST_ROUTE], 
-                queryParams: {"mode": DocsListMode.REGISTRAZIONI}
-              },
-            ];
-          } else {
-            this.items = [
-              {
-                label: "Nuovo", 
-                icon: "pi pi-fw pi-plus", 
-                routerLink: ["./"]
-              },
-              {
-                label: "Elenco documenti", 
-                icon: "pi pi-fw pi-list", 
-                routerLink: ["./" + DOCS_LIST_ROUTE], 
-                queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI}
-              },
-              {
-                label: "Registrazioni", 
-                icon: "pi pi-fw pi-list", 
-                routerLink: ["./" + DOCS_LIST_ROUTE], 
-                queryParams: {"mode": DocsListMode.REGISTRAZIONI}
-              },
-            ];
+            });
+            this.items.push({
+              label: "Firmato", 
+              title: "Registrati dai responsabili",
+              icon: "pi pi-fw pi-user-edit", 
+              routerLink: ["./" + DOCS_LIST_ROUTE], 
+              queryParams: {"mode": DocsListMode.IFIRMATO}
+            });
           }
+
+          if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD)
+              || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.OS)
+              || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.MOS)) {
+            this.items.push({
+              label: "Registrazioni", 
+              icon: "pi pi-fw pi-list", 
+              routerLink: ["./" + DOCS_LIST_ROUTE], 
+              queryParams: {"mode": DocsListMode.REGISTRAZIONI}
+            });
+          }
+
+          this.items.push({
+            label: "Ricerca avazata", 
+            icon: "pi pi-fw pi-search", 
+            routerLink: ["./"]
+          });
           const docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode;
           if (docsListMode) {
             this.activeItem = this.items.find(i => i.queryParams && i.queryParams.mode === docsListMode);

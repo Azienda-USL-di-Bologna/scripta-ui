@@ -26,6 +26,7 @@
           [style]="{minWidth: '250px', maxWidth: '250px'}" 
           placeholder="Scegli le colonne da visualizzare">
         </p-multiSelect>
+        <span class="doc-trovati-info">{{totalRecords}} documenti trovati</span>
       </div>
       <div class="right-content">
         <div class="p-field-checkbox" *ngIf="docsListMode === enumDocsListMode.ELENCO_DOCUMENTI">
@@ -35,7 +36,7 @@
             inputId="mieiDocumenti"
             (onChange)="resetAndLoadData()">
           </p-checkbox>
-          <label for="binary">Miei documenti</label>
+          <label for="binary">Di cui sono attore</label>
         </div>
         <div class="p-d-flex">
           <span class="p-input-icon-left p-ml-auto">
@@ -70,11 +71,11 @@
     <tr style="height: 64px;">
       <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
         <div *ngSwitchCase="'idAzienda.nome'">
-          <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
+          <p-columnFilter #columnFilterAzienda [field]="col.filterField" matchMode="in" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-multiSelect 
+              <p-multiSelect #multiSelectAzienda
                 [ngModel]="value" 
-                [options]="aziendeAttivePersonaConnessa" 
+                [options]="aziendeFiltrabili" 
                 placeholder="" 
                 optionValue="id"
                 optionLabel="nome"
@@ -134,6 +135,8 @@
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-calendar #calendarcreazione
                 inputId="basic" 
+                [yearNavigator]="true"
+                yearRange="2000:2030"
                 [ngModel]="value"
                 dataType="date" 
                 dateFormat="dd/mm/yy"
@@ -155,6 +158,8 @@
               <p-calendar #calendarregistrazione
                 inputId="basic" 
                 [ngModel]="value"
+                [yearNavigator]="true"
+                yearRange="2000:2030"
                 dataType="date" 
                 dateFormat="dd/mm/yy"
                 [showIcon]="false"

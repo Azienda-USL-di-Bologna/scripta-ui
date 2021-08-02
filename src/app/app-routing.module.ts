@@ -8,7 +8,7 @@ import { PageNotFoundComponent } from "@bds/common-components";
 
 const routes: Routes = [
   { path: "", redirectTo: NAVIGATION_TABS_ROUTE, pathMatch: "full" },
-  { path: HOME_ROUTE, component: HomeComponent },
+  { path: HOME_ROUTE, redirectTo: NAVIGATION_TABS_ROUTE },
   { path: LOGIN_ROUTE, component: NtJwtLoginComponent, canActivate: [NoLoginGuard], data: {} },
   { path: LOGGED_OUT_ROUTE, component: LoggedOutPageComponent},
   { path: DOC_ROUTE, loadChildren: () => import("./doc/doc.module").then(m => m.DocModule), canActivate: [RefreshLoggedUserGuard, LoginGuard] },

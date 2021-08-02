@@ -1,13 +1,14 @@
 import { DatePipe } from '@angular/common';
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Azienda, DocList, PersonaVedente } from "@bds/ng-internauta-model";
+import { Azienda, CODICI_RUOLO, DocList, PersonaVedente, StatoDoc } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from '@bds/nt-communicator';
 import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
 import { buildLazyEventFiltersAndSorts } from '@bds/primeng-plugin';
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
 import { LazyLoadEvent } from 'primeng/api';
-import { Table } from 'primeng/table';
+import { MultiSelect } from 'primeng/multiselect';
+import { ColumnFilter, Table } from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { AppService } from '../app.service';
 import { cols, DocsListMode, StatoDocTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from './docs-list-constants';
@@ -28,12 +29,14 @@ export class DocsListComponent implements OnInit, OnDestroy {
   private storedLazyLoadEvent: LazyLoadEvent;
   private docsListMode: DocsListMode;
 
-  @ViewChild(Table) private dataTable: Table;
-  
+  @ViewChild("dt") private dataTable: Table;
+  @ViewChild("multiSelectAzienda") private multiSelectAzienda: MultiSelect;
+  @ViewChild("columnFilterAzienda") private columnFilterAzienda: ColumnFilter;
+
   public docs: ExtendedDocList[];
   public enumDocsListMode = DocsListMode;
   public totalRecords: number;
-  public aziendeAttivePersonaConnessa: Azienda[] = [];
+  public aziendeFiltrabili: Azienda[] = [];
   public cols: any[] = [];
   public _selectedColumns: any[];
   public rowsNumber: number = 20;
@@ -55,7 +58,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
           this.utenteUtilitiesLogin = utenteUtilities;
-          this.aziendeAttivePersonaConnessa = this.utenteUtilitiesLogin.getUtente().aziendeAttive;
+          if (this.docsListMode) this.calcolaAziendeFiltrabili();
+          // this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive;
         }
       )
     );
@@ -65,6 +69,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
       rifaccio la loadData */
     this.route.queryParams.subscribe(params => {
       this.docsListMode = params['mode'];
+      if (this.utenteUtilitiesLogin) this.calcolaAziendeFiltrabili();
       this.resetAndLoadData();
     });
     
@@ -80,6 +85,39 @@ export class DocsListComponent implements OnInit, OnDestroy {
   set selectedColumns(val: any[]) {
     // restore original order
     this._selectedColumns = this.cols.filter(col => val.includes(col));
+  }
+
+  /**
+   * Questo metodo si occupa di riempire l'array delle aziende filtrabili
+   * Nel caso del tab Registrazioni il filtro si fa stringente se l'utente 
+   * non è SD o CI ma è solo OS o MOS.
+   */
+  private calcolaAziendeFiltrabili() {
+    this.aziendeFiltrabili = [];
+    if (this.docsListMode !== DocsListMode.REGISTRAZIONI
+        || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD)) {
+      this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive;
+    } else if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.OS)
+        || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.MOS)) {
+      /* Se entro qui allora sono nel tab registrazioni e non sono SD ma
+          sono OS/MOS e quindi ho diritto di vedere comunque il tab.
+          In particolare le aziende che posso vedere in questo tab sono solo quelle dove sono
+          OS/MOS. Questo di cui parlo è un filtro solo frontend.
+      */
+      let codiceAziendeOSMOS: string[] = [];
+      if (this.utenteUtilitiesLogin.getUtente().ruoliUtentiPersona[CODICI_RUOLO.OS]) {
+        codiceAziendeOSMOS = codiceAziendeOSMOS.concat(this.utenteUtilitiesLogin.getUtente().ruoliUtentiPersona[CODICI_RUOLO.OS]["GENERALE"]);
+      }
+      if (this.utenteUtilitiesLogin.getUtente().ruoliUtentiPersona[CODICI_RUOLO.MOS]) {
+        codiceAziendeOSMOS = codiceAziendeOSMOS.concat(this.utenteUtilitiesLogin.getUtente().ruoliUtentiPersona[CODICI_RUOLO.MOS]["GENERALE"]);
+      }
+      this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive.filter(a => codiceAziendeOSMOS.indexOf(a.codice) != -1);
+      // Svuoto l'eventuale filtro nel caso fosse stato usato
+      if (this.multiSelectAzienda && this.columnFilterAzienda) {
+        this.multiSelectAzienda.value = [];
+        this.columnFilterAzienda.clearFilter();
+      }
+    }
   }
 
   /**
@@ -133,23 +171,21 @@ export class DocsListComponent implements OnInit, OnDestroy {
         }
 
         filterAndSort.addFilter(new FilterDefinition("personeVedenti", FILTER_TYPES.not_string.equals, filtroJson.buildJsonString()));
+        filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
         break;
       case DocsListMode.IFIRMARIO:
-        filterAndSort.addFilter(new FilterDefinition("numeroRegistrazione", FILTER_TYPES.not_string.equals, 999999999)); // Il numero significa isNull
-        filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "FiltraPerStruttureDelSegretario"));
+        filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
+        filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
         break;
       case DocsListMode.IFIRMATO:
-        filterAndSort.addFilter(new FilterDefinition("numeroRegistrazione", FILTER_TYPES.not_string.equals, 999999998)); // Il numero significa isNotNull
-        filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "FiltraPerStruttureDelSegretario"));
+        filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmato"));
+        filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.desc));
         break;
       case DocsListMode.REGISTRAZIONI:
-        filterAndSort.addFilter(new FilterDefinition("numeroRegistrazione", FILTER_TYPES.not_string.equals, 999999998)); // Il numero significa isNotNull
+        filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRegistrazioni"));
+        filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.desc));
         break;
     }
-    
-    // Ordinamento standard
-    //filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.desc));
-    filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
 
     return filterAndSort;
   }
