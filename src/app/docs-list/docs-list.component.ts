@@ -1,12 +1,12 @@
 import { DatePipe } from '@angular/common';
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Azienda, CODICI_RUOLO, DocList, PersonaVedente, StatoDoc } from "@bds/ng-internauta-model";
+import { Azienda, CODICI_RUOLO, DocList, PersonaVedente, StatoDoc, TipologiaDoc } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from '@bds/nt-communicator';
 import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
 import { buildLazyEventFiltersAndSorts } from '@bds/primeng-plugin';
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
-import { LazyLoadEvent } from 'primeng/api';
+import { LazyLoadEvent, MessageService } from 'primeng/api';
 import { MultiSelect } from 'primeng/multiselect';
 import { ColumnFilter, Table } from 'primeng/table';
 import { Subscription } from 'rxjs';
@@ -46,6 +46,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   public mieiDocumenti: boolean = true;
   
   constructor(
+    private messageService: MessageService,
     private docListService: ExtendedDocListService,
     private loginService: NtJwtLoginService,
     private datepipe: DatePipe,
@@ -85,6 +86,29 @@ export class DocsListComponent implements OnInit, OnDestroy {
   set selectedColumns(val: any[]) {
     // restore original order
     this._selectedColumns = this.cols.filter(col => val.includes(col));
+  }
+
+  /**
+   * L'utente ha cliccato per aprire un documento.
+   * Gestisco l'evento
+   * @param doc 
+   */
+  public openDoc(doc: DocList) {
+    const isPersonaVedente = doc.personeVedenti.some(p => p.idPersona === this.utenteUtilitiesLogin.getUtente().idPersona.id);
+    if (isPersonaVedente) {
+      const encodeParams = false;
+      const addRichiestaParam = true;
+      const addPassToken = true;
+      this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
+        console.log("urlAperto:", url);
+      });
+    } else {
+      this.messageService.add({
+        severity: 'info', 
+        summary: 'Attenzione', 
+        detail: `Apertura del documento non consentita`
+      });
+    }
   }
 
   /**

@@ -237,7 +237,7 @@
         <div *ngSwitchCase="'dataRegistrazione'">
           {{rowData.dataRegistrazione | date:'dd/MM/yyyy'}}
         </div>
-        <div *ngSwitchCase="'oggetto'">
+        <div *ngSwitchCase="'oggetto'" (click)="openDoc(rowData)">
           {{rowData.oggettoVisualizzazione}}
         </div>
         <div *ngSwitchCase="'stato'">
