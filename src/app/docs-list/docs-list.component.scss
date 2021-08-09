@@ -64,6 +64,7 @@
         div {
           overflow: hidden;
           word-wrap: break-word;
+          word-break: break-word;
           &:hover {
             overflow-y: scroll;
             overflow-y: overlay;
@@ -128,10 +129,11 @@
       margin-bottom: 2px;
       cursor: pointer;
       border: 1px solid #203244;
-      background: #2e4a65;
-      color: #ffffff;
+      /* background: #2e4a65;
+      color: #ffffff; */
       font-size: 13px;
       border-radius: 3px;
+      word-break: break-word;
     }
   }
   /* .scrollbar-overlay-placeholder-column {

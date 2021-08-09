@@ -70,7 +70,7 @@ export const cols: ColonnaBds[] = [
   {
     field: "dataRegistrazione", 
     header: "Data registrazione", 
-    filterField: "", 
+    filterField: "dataRegistrazione", 
     sortField: "dataRegistrazione", 
     style: {},
     headerClass: ["header-column","data-registrazione-column"],
@@ -160,3 +160,11 @@ export const StatoDocTraduzioneVisualizzazione = [
   { value: StatoDoc.UFFICIO_ATTI, nome: "Ufficio atti"},
   { value: StatoDoc.VISTA, nome: "Vista"}
 ]
+
+export enum DocsListMode {
+  NUOVO = "NUOVO",
+  ELENCO_DOCUMENTI = "ELENCO_DOCUMENTI",
+  IFIRMARIO = "IFIRMARIO",
+  IFIRMATO = "IFIRMATO",
+  REGISTRAZIONI = "REGISTRAZIONI"
+}
