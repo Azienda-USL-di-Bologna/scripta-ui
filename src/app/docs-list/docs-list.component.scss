@@ -19,6 +19,9 @@
       .p-field-checkbox {
         margin-bottom: 0 !important;
       }
+      .p-button.p-button-outlined {
+        color: white;
+      }
     }
   }
   .p-datatable-scrollable-header {
@@ -109,9 +112,10 @@
     max-width: 132px;
   }
   .data-creazione-column,
-  .data-registrazione-column {
-    min-width: 196px;
-    max-width: 196px;
+  .data-registrazione-column,
+  .data-pubblicazione-column {
+    min-width: 203px;
+    max-width: 203px;
   }
   .stato-column {
     min-width: 134px;
@@ -121,6 +125,8 @@
     width: 100%;
     min-width: 200px;
     cursor: pointer;
+    font-weight: 600;
+    color: #993366;
   }
   .fascicolazioni-column {
     min-width: 230px;
@@ -133,6 +139,58 @@
       border: 1px solid #203244;
       /* background: #2e4a65;
       color: #ffffff; */
+      font-size: 13px;
+      border-radius: 3px;
+      word-break: break-word;
+      &:hover {
+        border: 1px solid #936;
+      }
+    }
+  }
+  .stato-ufficio-atti-column {
+    min-width: 184px;
+    max-width: 184px;
+  }
+  .responsabile-column {
+    min-width: 204px;
+    max-width: 204px;
+  }
+  .redattore-column {
+    min-width: 204px;
+    max-width: 204px;
+  }
+  .adottato-da-column {
+    min-width: 204px;
+    max-width: 204px;
+  }
+  .mittente-column {
+    min-width: 204px;
+    max-width: 204px;
+  }
+  .destinatari-column {
+    min-width: 230px;
+    max-width: 230px;
+    .destinatari-item {
+      display: inline-block;
+      padding: 3px 5px;
+      margin-bottom: 2px;
+      border: 1px solid #203244;
+      font-size: 13px;
+      border-radius: 3px;
+      word-break: break-word;
+      &:hover {
+        border: 1px solid #936;
+      }
+    }
+  }
+  .firmatari-column {
+    min-width: 230px;
+    max-width: 230px;
+    .firmatari-item {
+      display: inline-block;
+      padding: 3px 5px;
+      margin-bottom: 2px;
+      border: 1px solid #203244;
       font-size: 13px;
       border-radius: 3px;
       word-break: break-word;

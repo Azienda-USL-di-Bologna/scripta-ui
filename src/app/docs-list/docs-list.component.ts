@@ -1,17 +1,18 @@
 import { DatePipe } from '@angular/common';
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Azienda, CODICI_RUOLO, DocList, PersonaVedente, StatoDoc, TipologiaDoc } from "@bds/ng-internauta-model";
+import { Azienda, CODICI_RUOLO, DocList, Firmatario, Persona, PersonaService, PersonaVedente, Struttura, StrutturaService, UrlsGenerationStrategy } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from '@bds/nt-communicator';
 import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
 import { buildLazyEventFiltersAndSorts } from '@bds/primeng-plugin';
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
 import { LazyLoadEvent, MessageService } from 'primeng/api';
+import { AutoComplete } from 'primeng/autocomplete';
 import { MultiSelect } from 'primeng/multiselect';
 import { ColumnFilter, Table } from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { AppService } from '../app.service';
-import { cols, DocsListMode, StatoDocTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from './docs-list-constants';
+import { cols, DocsListMode, StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from './docs-list-constants';
 import { ExtendedDocList } from './extended-doc-list';
 import { ExtendedDocListService } from './extended-doc-list.service';
 
@@ -32,6 +33,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
   @ViewChild("dt") private dataTable: Table;
   @ViewChild("multiSelectAzienda") private multiSelectAzienda: MultiSelect;
   @ViewChild("columnFilterAzienda") private columnFilterAzienda: ColumnFilter;
+  @ViewChild("autocompleteIdPersonaRedattrice") private autocompleteIdPersonaRedattrice: AutoComplete;
+  @ViewChild("autocompleteidPersonaResponsabileProcedimento") private autocompleteidPersonaResponsabileProcedimento: AutoComplete;
+  @ViewChild("autocompleteIdStrutturaRegistrazione") private autocompleteIdStrutturaRegistrazione: AutoComplete;
+  @ViewChild("autocompleteFirmatari") private autocompleteFirmatari: AutoComplete;
 
   public docs: ExtendedDocList[];
   public enumDocsListMode = DocsListMode;
@@ -42,12 +47,18 @@ export class DocsListComponent implements OnInit, OnDestroy {
   public rowsNumber: number = 20;
   public tipologiaVisualizzazioneObj = TipologiaDocTraduzioneVisualizzazione;
   public statoVisualizzazioneObj = StatoDocTraduzioneVisualizzazione;
+  public statoUfficioAttiVisualizzazioneObj = StatoUfficioAttiTraduzioneVisualizzazione;
   public localIt = LOCAL_IT;
   public mieiDocumenti: boolean = true;
+  public filteredPersone: Persona[] = [];
+  public filteredStrutture: Struttura[] = [];
+  public loading: boolean = false;
   
   constructor(
     private messageService: MessageService,
     private docListService: ExtendedDocListService,
+    private personaService: PersonaService,
+    private strutturaService: StrutturaService,
     private loginService: NtJwtLoginService,
     private datepipe: DatePipe,
     private route: ActivatedRoute,
@@ -59,8 +70,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
           this.utenteUtilitiesLogin = utenteUtilities;
-          if (this.docsListMode) this.calcolaAziendeFiltrabili();
-          // this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive;
+          if (this.docsListMode) {
+            this.calcolaAziendeFiltrabili();
+          }
+          this.loadConfigurationAndSetItUp();
         }
       )
     );
@@ -75,8 +88,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
     });
     
     this.appService.appNameSelection("Elenco documenti");
-    this.cols = cols;
-    this._selectedColumns = this.cols;
+    
   }
 
   @Input() get selectedColumns(): any[] {
@@ -89,6 +101,25 @@ export class DocsListComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Questa funzione si occupa di caricare la configurazione personale
+   * dell'utente per il componente.
+   * Sulla base di questo vengono poi settate le colonne visualizzate
+   * ed il filtro "miei documenti"
+   */
+  private loadConfigurationAndSetItUp(): void {
+    const thereIsConfiguration = false;
+    
+    if (thereIsConfiguration) {
+      // TODO: In altro rm la configurazione sarà davvero caricata e dunque usata.
+    } else {
+      // Configurazione non presente. Uso quella di default.
+    }
+    this.cols = cols;
+    this._selectedColumns = this.cols.filter(c => c.default);
+
+  }
+
+  /**
    * L'utente ha cliccato per aprire un documento.
    * Gestisco l'evento
    * @param doc 
@@ -96,7 +127,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
   public openDoc(doc: DocList) {
     const isPersonaVedente = doc.personeVedenti.some(p => p.idPersona === this.utenteUtilitiesLogin.getUtente().idPersona.id);
     if (isPersonaVedente) {
-      const encodeParams = false;
+      const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
+        doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
       const addRichiestaParam = true;
       const addPassToken = true;
       this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
@@ -220,6 +252,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * @param event 
    */
   private loadData(): void {
+    this.loading = true;
     this.pageConf.conf = {
       limit: this.storedLazyLoadEvent.rows,
       offset: this.storedLazyLoadEvent.first
@@ -229,13 +262,14 @@ export class DocsListComponent implements OnInit, OnDestroy {
       this.loadDocsListSubscription = null;
     }
     this.loadDocsListSubscription = this.docListService.getData(
-			"DocListWithIdAzienda", 
+			"DocListWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione", 
       this.buildCustomFilterAndSort(), 
       buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe), 
       this.pageConf
 		).subscribe((data: any) => {
       console.log(data);
       this.totalRecords = data.page.totalElements;
+      this.loading = false;
 
       if (this.resetDocsArrayLenght) {
         /* Ho bisogno di far capire alla tabella quanto l'array docs è virtualmente grande
@@ -273,10 +307,103 @@ export class DocsListComponent implements OnInit, OnDestroy {
       doc.propostaVisualizzazione = null;
       doc.statoVisualizzazione = doc.stato;
       doc.fascicolazioniVisualizzazione = null;
+      doc.statoUfficioAttiVisualizzazione = doc.statoUfficioAtti;
+      doc.idPersonaResponsabileProcedimentoVisualizzazione = null;
+      doc.idPersonaRedattriceVisualizzazione = null;
     });
     return extendedDocsList;
   }
+  
+  /**
+   * Funzione chiamata tipicamente dall'autocomplete per riempire la
+   * variabile di opzioni: filteredPersone con le persone che 
+   * corrispondono al filtro utente. Viene aggiunta la condizione che la persona 
+   * deve avere un utente nelle aziende visualizzabili dall'utente connesso.
+   * NB: Non mi interessa che persone o i suoi utenti non siano attivi.
+   * Li cerco lo stesso perché l'utente potrebbe proprio cercare la roba fatta
+   * da utenti spenti.
+   * @param event 
+   */
+  public filterPersone(event: any) {
+    const filtersAndSorts = new FiltersAndSorts();
+    filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.containsIgnoreCase, event.query));
+    this.aziendeFiltrabili.forEach(a => {
+      filtersAndSorts.addFilter(new FilterDefinition("utenteList.idAzienda.id", FILTER_TYPES.not_string.equals, a.id));
+    });
+    this.personaService.getData(null, filtersAndSorts, null)
+      .subscribe(res => {
+        if (res && res.results) {
+          res.results.forEach((persona: any) => {
+            persona["descrizioneVisualizzazione"] = persona.descrizione + (persona.idSecondario ? " (" + persona.idSecondario + ")" : "");
+          });
+          this.filteredPersone = res.results;
+        } else {
+          this.filteredPersone = [];
+        }
+    });
+  }
 
+
+  public buildJsonValueForFilterPersone(idPersona: number): string {
+    if (idPersona) {
+      const filtroJson: FilterJsonDefinition<Firmatario> = new FilterJsonDefinition(true);
+      filtroJson.add("idPersona", idPersona);
+      return filtroJson.buildJsonString();
+    }
+    return null; 
+  }
+
+  /**
+   * Funzione chiamata tipicamente dall'autocomplete per riempire la
+   * variabile di opzioni: filteredStrutture con le strutture che 
+   * corrispondono al filtro utente. Viene aggiunta la condizione che la struttura 
+   * deve appartenere alle aziende visualizzabili dall'utente connesso.
+   * NB: Non mi interessa che la struttura non sia attiva
+   * @param event 
+   */
+  public filterStrutture(event: any) {
+    const filtersAndSorts = new FiltersAndSorts();
+    filtersAndSorts.addFilter(new FilterDefinition("nome", FILTER_TYPES.string.containsIgnoreCase, event.query));
+    this.aziendeFiltrabili.forEach(a => {
+      filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, a.id));
+    });
+    this.strutturaService.getData("StrutturaWithIdAzienda", filtersAndSorts, null)
+      .subscribe(res => {
+        if (res && res.results) {
+          res.results.forEach((struttura: any) => {
+            struttura["descrizioneVisualizzazione"] = 
+              (!struttura.attiva ? "(disattiva) " : "")
+              + struttura.nome 
+              + (struttura.idCasella ? " (" + struttura.idCasella + ")" : "")
+              + (struttura.idCasellaPadre ? " [" + struttura.idCasellaPadre + "]" : "")
+              + " - " + struttura.idAzienda.nome;
+          });
+          this.filteredStrutture = res.results;
+        } else {
+          this.filteredStrutture = [];
+        }
+    });
+  }
+
+  /**
+   * Funzione che si occupa di fare il clear di tutti i filtri della tabella.
+   * @param table 
+   */
+  public clear(table: Table): void {
+    table.clear();
+    //this.autocompleteIdPersonaRedattrice.selectItem(null, false);
+    if (this.autocompleteIdPersonaRedattrice) this.autocompleteIdPersonaRedattrice.writeValue(null);
+    if (this.autocompleteidPersonaResponsabileProcedimento) this.autocompleteidPersonaResponsabileProcedimento.writeValue(null);
+    if (this.autocompleteIdStrutturaRegistrazione) this.autocompleteIdStrutturaRegistrazione.writeValue(null);
+    if (this.autocompleteFirmatari) this.autocompleteFirmatari.writeValue(null);
+  }
+
+  /**
+   * Oltre desottoscrivermi dalle singole sottoscrizioni, mi 
+   * desottoscrivo anche dalla specifica loadDocsListSubscription
+   * Che appositamente è separata in quanto viene spesso desottoscritta
+   * e risottroscritta.
+   */
   public ngOnDestroy(): void {
     if (this.subscriptions) {
       this.subscriptions.forEach(

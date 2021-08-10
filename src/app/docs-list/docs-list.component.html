@@ -13,6 +13,7 @@
   [lazyLoadOnInit]="false"
   [totalRecords]="totalRecords" 
   (onLazyLoad)="onLazyLoad($event)"
+  [loading]="loading"
   styleClass="p-table-scripta-docs-list"
   tableStyleClass="docslist-table-body">
   <ng-template pTemplate="caption">
@@ -41,9 +42,10 @@
         <div class="p-d-flex">
           <span class="p-input-icon-left p-ml-auto">
             <i class="pi pi-search"></i>
-            <input pInputText type="text" (input)="dt.filterGlobal($event.target, 'equals')" placeholder="Ricerca.. " />
+            <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'equals')" placeholder="Ricerca.. " />
           </span>
         </div>
+        <button pButton label="Pulisci" class="p-button-outlined" icon="pi pi-filter-slash" (click)="clear(dt)"></button>
       </div>
     </div>
   </ng-template>
@@ -59,7 +61,7 @@
         [ngSwitch]="col.field" 
         [ngClass]="col.headerClass"
         [pSortableColumn]="col.sortField">
-        <span class="header-box">
+        <span class="header-box" [pTooltip]="col.sortField ? null : 'Colonna non ordinabile'">
           {{col.header}}
           <p-sortIcon *ngIf="col.sortField" 
             [field]="col.sortField">
@@ -70,7 +72,7 @@
     <!-- FILTRI -->
     <tr style="height: 64px;">
       <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
-        <div *ngSwitchCase="'idAzienda.nome'">
+        <div *ngSwitchCase="'idAzienda'">
           <p-columnFilter #columnFilterAzienda [field]="col.filterField" matchMode="in" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-multiSelect #multiSelectAzienda
@@ -174,6 +176,28 @@
             </ng-template>
           </p-columnFilter>
         </div>
+        <div *ngSwitchCase="'dataPubblicazione'">
+          <p-columnFilter [field]="col.filterField" type="date" matchMode="is" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-calendar #calendarpubblicazione
+                inputId="basic" 
+                [ngModel]="value"
+                [yearNavigator]="true"
+                yearRange="2000:2030"
+                dataType="date" 
+                dateFormat="dd/mm/yy"
+                [showIcon]="false"
+                [showButtonBar]="true"
+                [locale]="localIt"
+                selectionMode="range"
+                [readonlyInput]="true"
+                (onClickOutside)="filter(calendarpubblicazione.value)"
+                (onClearClick)="filter(null)"
+                appendTo="body">
+              </p-calendar>
+            </ng-template>
+          </p-columnFilter>
+        </div>
         <div *ngSwitchCase="'oggetto'">
           <p-columnFilter 
             type="text" 
@@ -212,6 +236,116 @@
             placeholder="">
           </p-columnFilter>
         </div>
+        <div *ngSwitchCase="'statoUfficioAtti'">
+          <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-multiSelect 
+                [ngModel]="value" 
+                [options]="statoUfficioAttiVisualizzazioneObj" 
+                placeholder="" 
+                optionValue="value"
+                optionLabel="nome"
+                (onChange)="filter($event.value)"
+                appendTo="body">
+                <ng-template let-option pTemplate="item">
+                  <div class="p-multiselect-representative-option">
+                    <span class="p-ml-1">{{option.nome}}</span>
+                  </div>
+                </ng-template>
+              </p-multiSelect>
+            </ng-template>
+          </p-columnFilter>
+        </div>
+        <div *ngSwitchCase="'idPersonaResponsabileProcedimento'">
+          <p-columnFilter [field]="col.filterField" matchMode="equals" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-autoComplete
+              #autocompleteidPersonaResponsabileProcedimento
+                [showEmptyMessage]="true"
+                emptyMessage="Nessun utente trovato"
+                [suggestions]="filteredPersone"
+                (completeMethod)="filterPersone($event)"
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter($event?.id)"
+                (onClear)="filter(null)"
+                type="search"
+                appendTo="body">
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+        </div>
+        <div *ngSwitchCase="'idPersonaRedattrice'">
+          <p-columnFilter [field]="col.filterField" matchMode="equals" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-autoComplete
+                #autocompleteIdPersonaRedattrice
+                [showEmptyMessage]="true"
+                emptyMessage="Nessun utente trovato"
+                [suggestions]="filteredPersone"
+                (completeMethod)="filterPersone($event)"
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter($event?.id)"
+                (onClear)="filter(null)"
+                type="search"
+                appendTo="body">
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+        </div>
+        <div *ngSwitchCase="'idStrutturaRegistrazione'">
+          <p-columnFilter [field]="col.filterField" matchMode="equals" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-autoComplete
+                #autocompleteIdStrutturaRegistrazione
+                [showEmptyMessage]="true"
+                emptyMessage="Nessuna struttura trovata"
+                [suggestions]="filteredStrutture"
+                (completeMethod)="filterStrutture($event)"
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter($event?.id)"
+                (onClear)="filter(null)"
+                type="search"
+                appendTo="body">
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+        </div>
+        <div *ngSwitchCase="'mittente'">
+          <p-columnFilter 
+            type="text" 
+            [field]="col.filterField" 
+            [matchMode]="col.filterMatchMode" 
+            [showMenu]="false"
+            placeholder="">
+          </p-columnFilter>
+        </div>
+        <div *ngSwitchCase="'destinatari'">
+          <p-columnFilter 
+            type="text" 
+            [field]="col.filterField" 
+            [matchMode]="col.filterMatchMode" 
+            [showMenu]="false"
+            placeholder="">
+          </p-columnFilter>
+        </div>
+        <div *ngSwitchCase="'firmatari'">
+          <p-columnFilter [field]="col.filterField" matchMode="" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-autoComplete
+                #autocompleteFirmatari
+                [showEmptyMessage]="true"
+                emptyMessage="Nessun utente trovato"
+                [suggestions]="filteredPersone"
+                (completeMethod)="filterPersone($event)"
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter(buildJsonValueForFilterPersone($event?.id))"
+                (onClear)="filter(null)"
+                type="search"
+                appendTo="body">
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+        </div>
       </th>
     </tr>
   </ng-template>
@@ -219,7 +353,7 @@
   <ng-template pTemplate="body" let-rowData let-columns="columns">
     <tr class="row-height">
       <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
-        <div *ngSwitchCase="'idAzienda.nome'">
+        <div *ngSwitchCase="'idAzienda'">
           {{rowData.idAzienda.nome}}
         </div>
         <div *ngSwitchCase="'tipologia'">
@@ -237,7 +371,12 @@
         <div *ngSwitchCase="'dataRegistrazione'">
           {{rowData.dataRegistrazione | date:'dd/MM/yyyy'}}
         </div>
+        <div *ngSwitchCase="'dataPubblicazione'">
+          {{rowData.dataPubblicazione | date:'dd/MM/yyyy'}}
+        </div>
         <div *ngSwitchCase="'oggetto'" (click)="openDoc(rowData)">
+          <i *ngIf="rowData.visibilitaLimitata && !rowData.riservato" class="pi pi-eye"></i>
+          <i *ngIf="rowData.riservato" class="pi pi-eye-slash"></i>
           {{rowData.oggettoVisualizzazione}}
         </div>
         <div *ngSwitchCase="'stato'">
@@ -247,6 +386,31 @@
           <!-- {{rowData.fascicolazioniVisualizzazione}} -->
           <span *ngFor="let f of rowData.fascicolazioni" class="fascicolazione-item">
             {{"[" + f.numerazione + "] " + f.nome}}
+          </span>
+        </div>
+        <div *ngSwitchCase="'statoUfficioAtti'">
+          {{rowData.statoUfficioAttiVisualizzazione}}
+        </div>
+        <div *ngSwitchCase="'idPersonaResponsabileProcedimento'">
+          {{rowData.idPersonaResponsabileProcedimentoVisualizzazione}}
+        </div>
+        <div *ngSwitchCase="'idPersonaRedattrice'">
+          {{rowData.idPersonaRedattriceVisualizzazione}}
+        </div>
+        <div *ngSwitchCase="'idStrutturaRegistrazione'">
+          {{rowData.idStrutturaRegistrazione?.nome}}
+        </div>
+        <div *ngSwitchCase="'mittente'">
+          {{rowData.mittente}}
+        </div>
+        <div *ngSwitchCase="'destinatari'">
+          <span *ngFor="let d of rowData.destinatari" class="destinatari-item">
+            {{d.nome}}
+          </span>
+        </div>
+        <div *ngSwitchCase="'firmatari'">
+          <span *ngFor="let d of rowData.firmatari" class="firmatari-item">
+            {{d.descrizione}}
           </span>
         </div>
       </td>

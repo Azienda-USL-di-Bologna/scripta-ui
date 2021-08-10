@@ -1,5 +1,5 @@
-import { DocList, Fascicolazione, TipologiaDoc } from "@bds/ng-internauta-model";
-import { StatoDocTraduzioneVisualizzazione } from "./docs-list-constants";
+import { DocList, Fascicolazione, Persona, TipologiaDoc } from "@bds/ng-internauta-model";
+import { StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione } from "./docs-list-constants";
 
 export class ExtendedDocList extends DocList {
   private _oggettoVisualizzazione: string;
@@ -7,8 +7,11 @@ export class ExtendedDocList extends DocList {
   private _registrazioneVisualizzazione: string;
   private _propostaVisualizzazione: string;
   private _statoVisualizzazione: string;
+  private _statoUfficioAttiVisualizzazione: string;
   private _codiceRegistro: string;
   private _fascicolazioniVisualizzazione: string[];
+  private _idPersonaResponsabileProcedimentoVisualizzazione: string;
+  private _idPersonaRedattriceVisualizzazione: string;
 
   constructor() {super();}
 
@@ -71,6 +74,16 @@ export class ExtendedDocList extends DocList {
     }
   }
 
+  public get statoUfficioAttiVisualizzazione(): string {
+    return this._statoUfficioAttiVisualizzazione;
+  }
+
+  public set statoUfficioAttiVisualizzazione(statoUfficioAttiVisualizzazione: string) {
+    if (statoUfficioAttiVisualizzazione) {
+      this._statoUfficioAttiVisualizzazione = StatoUfficioAttiTraduzioneVisualizzazione.find(e => e.value === statoUfficioAttiVisualizzazione).nome;
+    }
+  }
+
   public get codiceRegistro(): string {
     return this._codiceRegistro;
   }
@@ -118,5 +131,29 @@ export class ExtendedDocList extends DocList {
         this._fascicolazioniVisualizzazione.push("[" + f.numerazione + "] " + f.nome);
       });
     }
+  }
+
+  public get idPersonaResponsabileProcedimentoVisualizzazione(): string {
+    return this._idPersonaResponsabileProcedimentoVisualizzazione;
+  }
+
+  public set idPersonaResponsabileProcedimentoVisualizzazione(idPersonaResponsabileProcedimentoVisualizzazione: string) {
+    if (this.idPersonaResponsabileProcedimento) {
+      this._idPersonaResponsabileProcedimentoVisualizzazione = this.calcDescrizioneVisualizzazionePerPersona(this.idPersonaResponsabileProcedimento);
+    }
+  }
+
+  public get idPersonaRedattriceVisualizzazione(): string {
+    return this._idPersonaRedattriceVisualizzazione;
+  }
+
+  public set idPersonaRedattriceVisualizzazione(idPersonaRedattriceVisualizzazione: string) {
+    if (this.idPersonaRedattrice) {
+      this._idPersonaRedattriceVisualizzazione = this.calcDescrizioneVisualizzazionePerPersona(this.idPersonaRedattrice);
+    }
+  }
+
+  private calcDescrizioneVisualizzazionePerPersona(persona: Persona): string {
+    return persona.descrizione + (persona.idSecondario ? " (" + persona.idSecondario + ")" : "");
   }
 }
