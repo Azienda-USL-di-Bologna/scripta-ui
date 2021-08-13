@@ -191,7 +191,7 @@ export const cols: ColonnaBds[] = [
     field: "idStrutturaRegistrazione", 
     header: "Adottato da", 
     filterField: "idStrutturaRegistrazione.id", 
-    sortField: "idStrutturaRegistrazione.descrizione", 
+    sortField: "idStrutturaRegistrazione.nome", 
     style: {},
     headerClass: ["header-column","adottato-da-column"],
     filterClass: ["filter-column","adottato-da-column"],
