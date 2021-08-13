@@ -239,7 +239,7 @@ export const cols: ColonnaBds[] = [
     style: {},
     headerClass: ["header-column","firmatari-column"],
     filterClass: ["filter-column","firmatari-column"],
-    bodyClass: ["firmatari-column"],
+    bodyClass: ["scrollable-column", "firmatari-column"],
     fieldType: "object",
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: true,
