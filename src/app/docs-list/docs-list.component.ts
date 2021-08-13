@@ -344,6 +344,13 @@ export class DocsListComponent implements OnInit, OnDestroy {
   }
 
 
+  /**
+   * Usato per generare la stringa json che serve a filtrare
+   * per l'appunto, una colonna json. In questo caso è una persona.
+   * NB: Se ne servissero altri (oltre la persona) si può rendere più generica qeusta funzione.
+   * @param idPersona 
+   * @returns 
+   */
   public buildJsonValueForFilterPersone(idPersona: number): string {
     if (idPersona) {
       const filtroJson: FilterJsonDefinition<Firmatario> = new FilterJsonDefinition(true);
@@ -387,6 +394,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
 
   /**
    * Funzione che si occupa di fare il clear di tutti i filtri della tabella.
+   * In particolare quelli delle autocomplete che sono "separati" dal semplice
+   * table.clear() vengono fatti a patto che quell'autocomplete esista.
    * @param table 
    */
   public clear(table: Table): void {

@@ -47,7 +47,29 @@
         }
       }
     }
-    
+    .search-wrapper {
+      display: flex;
+      background-color: white;
+      border: 1px solid #a6a6a6;
+      border-radius: 3px;
+      p-columnfilter {
+        width: 100%;
+        .p-inputtext {
+          border: none !important;
+        }
+      }
+      
+      .close-icon {
+        align-self: center;
+        font-size: 15px;
+        border: 1px solid transparent;
+        background-color: white;
+        display: inline-block;
+        vertical-align: middle;
+        outline: 0;
+        cursor: pointer;
+      }
+    }
   }
   
   /* BODY */
@@ -225,3 +247,23 @@ and (not (-ms-ime-align:auto)) and (not (-moz-appearance:none)) {
     overflow: hidden;
   }
 }
+
+/* ::ng-deep .search-wrapper{
+  display: flex;
+  background-color: white;
+  border: 1px solid #a6a6a6;
+  border-radius: 3px;
+  .p-inputtext {
+    border: none !important;
+  }
+  .close-icon {
+    align-self: center;
+    font-size: 15px;
+    border: 1px solid transparent;
+    background-color: white;
+    display: inline-block;
+    vertical-align: middle;
+    outline: 0;
+    cursor: pointer;
+  }
+} */

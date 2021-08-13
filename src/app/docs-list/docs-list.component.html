@@ -112,8 +112,8 @@
             </ng-template>
           </p-columnFilter>
         </div>
-        <div *ngSwitchCase="'registrazione'">
-          <p-columnFilter 
+        <div *ngSwitchCase="'registrazione'" class="search-wrapper">
+          <p-columnFilter #colfilterregistrazione
             type="numeric" 
             [field]="col.filterField" 
             [matchMode]="col.filterMatchMode" 
@@ -121,9 +121,15 @@
             [useGrouping]="false"
             placeholder="">
           </p-columnFilter>
+          <button *ngIf="colfilterregistrazione.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilterregistrazione.clearFilter()">
+            close
+          </button>
         </div>
-        <div *ngSwitchCase="'proposta'">
-          <p-columnFilter 
+        <div *ngSwitchCase="'proposta'" class="search-wrapper">
+          <p-columnFilter #colfilterproposta
             type="numeric" 
             [field]="col.filterField" 
             [matchMode]="col.filterMatchMode" 
@@ -131,6 +137,12 @@
             [useGrouping]="false"
             placeholder="">
           </p-columnFilter>
+          <button  *ngIf="colfilterproposta.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilterproposta.clearFilter()">
+            close
+          </button>
         </div>
         <div *ngSwitchCase="'dataCreazione'">
           <p-columnFilter [field]="col.filterField" type="date" matchMode="is" [showMenu]="false">
@@ -198,14 +210,20 @@
             </ng-template>
           </p-columnFilter>
         </div>
-        <div *ngSwitchCase="'oggetto'">
-          <p-columnFilter 
+        <div *ngSwitchCase="'oggetto'" class="search-wrapper">
+          <p-columnFilter #colfilteroggetto
             type="text" 
             [field]="col.filterField" 
             [matchMode]="col.filterMatchMode" 
             [showMenu]="false"
             placeholder="">
           </p-columnFilter>
+          <button  *ngIf="colfilteroggetto.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilteroggetto.clearFilter()">
+            close
+          </button>
         </div>
         <div *ngSwitchCase="'stato'">
           <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
@@ -227,14 +245,20 @@
             </ng-template>
           </p-columnFilter>
         </div>
-        <div *ngSwitchCase="'fascicolazioni'">
-          <p-columnFilter 
+        <div *ngSwitchCase="'fascicolazioni'" class="search-wrapper">
+          <p-columnFilter #colfilterfascicolazioni
             type="text" 
             [field]="col.filterField" 
             [matchMode]="col.filterMatchMode" 
             [showMenu]="false"
             placeholder="">
           </p-columnFilter>
+          <button  *ngIf="colfilterfascicolazioni.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilterfascicolazioni.clearFilter()">
+            close
+          </button>
         </div>
         <div *ngSwitchCase="'statoUfficioAtti'">
           <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
@@ -256,8 +280,9 @@
             </ng-template>
           </p-columnFilter>
         </div>
-        <div *ngSwitchCase="'idPersonaResponsabileProcedimento'">
-          <p-columnFilter [field]="col.filterField" matchMode="equals" [showMenu]="false">
+        <div *ngSwitchCase="'idPersonaResponsabileProcedimento'" class="search-wrapper">
+          <p-columnFilter #colfilteridPersonaResponsabileProcedimento
+            [field]="col.filterField" matchMode="equals" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-autoComplete
               #autocompleteidPersonaResponsabileProcedimento
@@ -273,9 +298,16 @@
               </p-autoComplete>
             </ng-template>
           </p-columnFilter>
+          <button *ngIf="colfilteridPersonaResponsabileProcedimento.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilteridPersonaResponsabileProcedimento.clearFilter(); autocompleteidPersonaResponsabileProcedimento.writeValue(null)">
+            close
+          </button>
         </div>
-        <div *ngSwitchCase="'idPersonaRedattrice'">
-          <p-columnFilter [field]="col.filterField" matchMode="equals" [showMenu]="false">
+        <div *ngSwitchCase="'idPersonaRedattrice'" class="search-wrapper">
+          <p-columnFilter #colfilteridPersonaRedattrice
+            [field]="col.filterField" matchMode="equals" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-autoComplete
                 #autocompleteIdPersonaRedattrice
@@ -291,9 +323,16 @@
               </p-autoComplete>
             </ng-template>
           </p-columnFilter>
+          <button *ngIf="colfilteridPersonaRedattrice.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilteridPersonaRedattrice.clearFilter(); autocompleteIdPersonaRedattrice.writeValue(null)">
+            close
+          </button>
         </div>
-        <div *ngSwitchCase="'idStrutturaRegistrazione'">
-          <p-columnFilter [field]="col.filterField" matchMode="equals" [showMenu]="false">
+        <div *ngSwitchCase="'idStrutturaRegistrazione'" class="search-wrapper">
+          <p-columnFilter #colfilteridStrutturaRegistrazione
+            [field]="col.filterField" matchMode="equals" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-autoComplete
                 #autocompleteIdStrutturaRegistrazione
@@ -304,32 +343,50 @@
                 field="descrizioneVisualizzazione"
                 (onSelect)="filter($event?.id)"
                 (onClear)="filter(null)"
-                type="search"
                 appendTo="body">
               </p-autoComplete>
             </ng-template>
           </p-columnFilter>
+          <button  *ngIf="colfilteridStrutturaRegistrazione.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilteridStrutturaRegistrazione.clearFilter(); autocompleteIdStrutturaRegistrazione.writeValue(null)">
+            close
+          </button>
         </div>
-        <div *ngSwitchCase="'mittente'">
-          <p-columnFilter 
+        <div *ngSwitchCase="'mittente'" class="search-wrapper">
+          <p-columnFilter #colfiltermittente
             type="text" 
             [field]="col.filterField" 
             [matchMode]="col.filterMatchMode" 
             [showMenu]="false"
             placeholder="">
           </p-columnFilter>
+          <button  *ngIf="colfiltermittente.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfiltermittente.clearFilter()">
+            close
+          </button>
         </div>
-        <div *ngSwitchCase="'destinatari'">
-          <p-columnFilter 
+        <div *ngSwitchCase="'destinatari'" class="search-wrapper">
+          <p-columnFilter #colfilterdestinatari
             type="text" 
             [field]="col.filterField" 
             [matchMode]="col.filterMatchMode" 
             [showMenu]="false"
             placeholder="">
           </p-columnFilter>
+          <button  *ngIf="colfilterdestinatari.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilterdestinatari.clearFilter()">
+            close
+          </button>
         </div>
-        <div *ngSwitchCase="'firmatari'">
-          <p-columnFilter [field]="col.filterField" matchMode="" [showMenu]="false">
+        <div *ngSwitchCase="'firmatari'" class="search-wrapper">
+          <p-columnFilter #colfilterfirmatari
+            [field]="col.filterField" matchMode="" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-autoComplete
                 #autocompleteFirmatari
@@ -340,11 +397,16 @@
                 field="descrizioneVisualizzazione"
                 (onSelect)="filter(buildJsonValueForFilterPersone($event?.id))"
                 (onClear)="filter(null)"
-                type="search"
                 appendTo="body">
               </p-autoComplete>
             </ng-template>
           </p-columnFilter>
+          <button *ngIf="colfilterfirmatari.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilterfirmatari.clearFilter(); autocompleteFirmatari.writeValue(null)">
+            close
+          </button>
         </div>
       </th>
     </tr>

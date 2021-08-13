@@ -195,7 +195,7 @@ export const cols: ColonnaBds[] = [
     style: {},
     headerClass: ["header-column","adottato-da-column"],
     filterClass: ["filter-column","adottato-da-column"],
-    bodyClass: ["adottato-da-column"],
+    bodyClass: ["scrollable-column", "adottato-da-column"],
     fieldType: "object",
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: true,
@@ -243,7 +243,7 @@ export const cols: ColonnaBds[] = [
     fieldType: "object",
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: true,
-    default: true
+    default: false
   }
 ];
 
