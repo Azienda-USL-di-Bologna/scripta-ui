@@ -42,10 +42,10 @@
         <div class="p-d-flex">
           <span class="p-input-icon-left p-ml-auto">
             <i class="pi pi-search"></i>
-            <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'equals')" placeholder="Ricerca.. " />
+            <input #inputGobalFilter pInputText type="text" (input)="applyFilterGlobal($event, 'equals')" placeholder="Ricerca.. " />
           </span>
         </div>
-        <button pButton label="Pulisci" class="p-button-outlined" icon="pi pi-filter-slash" (click)="clear(dt)"></button>
+        <button pButton label="Pulisci" class="p-button-outlined" icon="pi pi-filter-slash" (click)="clear()"></button>
       </div>
     </div>
   </ng-template>
@@ -119,7 +119,8 @@
             [matchMode]="col.filterMatchMode" 
             [showMenu]="false"
             [useGrouping]="false"
-            placeholder="">
+            placeholder=""
+            pTooltip="Inserire solo numeri">
           </p-columnFilter>
           <button *ngIf="colfilterregistrazione.hasFilter()"
             class="material-icons close-icon" 
@@ -135,7 +136,8 @@
             [matchMode]="col.filterMatchMode" 
             [showMenu]="false"
             [useGrouping]="false"
-            placeholder="">
+            placeholder=""
+            pTooltip="Inserire solo numeri">
           </p-columnFilter>
           <button  *ngIf="colfilterproposta.hasFilter()"
             class="material-icons close-icon" 
@@ -217,11 +219,23 @@
             [matchMode]="col.filterMatchMode" 
             [showMenu]="false"
             placeholder="">
+            <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
+              <input #inputOggetto type="text" pInputText [value]="value" 
+                    (keydown.enter)="resetSort(); filterMethod(inputOggetto.value)">
+            </ng-template>
           </p-columnFilter>
+
+          <!-- <p-columnFilter #colfilteroggetto
+            type="text" 
+            [field]="col.filterField" 
+            [matchMode]="col.filterMatchMode" 
+            [showMenu]="false"
+            placeholder="">
+          </p-columnFilter> -->
           <button  *ngIf="colfilteroggetto.hasFilter()"
             class="material-icons close-icon" 
             type="reset"
-            (click)="colfilteroggetto.clearFilter()">
+            (click)="colfilteroggetto.clearFilter();">
             close
           </button>
         </div>
@@ -247,12 +261,16 @@
         </div>
         <div *ngSwitchCase="'fascicolazioni'" class="search-wrapper">
           <p-columnFilter #colfilterfascicolazioni
-            type="text" 
-            [field]="col.filterField" 
-            [matchMode]="col.filterMatchMode" 
-            [showMenu]="false"
-            placeholder="">
-          </p-columnFilter>
+          type="text" 
+          [field]="col.filterField" 
+          [matchMode]="col.filterMatchMode" 
+          [showMenu]="false"
+          placeholder="">
+          <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
+            <input #inputFascicolazioni type="text" pInputText [value]="value" 
+                  (keydown.enter)="resetSort(); filterMethod(inputFascicolazioni.value)">
+          </ng-template>
+        </p-columnFilter>
           <button  *ngIf="colfilterfascicolazioni.hasFilter()"
             class="material-icons close-icon" 
             type="reset"
@@ -356,12 +374,16 @@
         </div>
         <div *ngSwitchCase="'mittente'" class="search-wrapper">
           <p-columnFilter #colfiltermittente
-            type="text" 
-            [field]="col.filterField" 
-            [matchMode]="col.filterMatchMode" 
-            [showMenu]="false"
-            placeholder="">
-          </p-columnFilter>
+          type="text" 
+          [field]="col.filterField" 
+          [matchMode]="col.filterMatchMode" 
+          [showMenu]="false"
+          placeholder="">
+          <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
+            <input #inputMittente type="text" pInputText [value]="value" 
+                  (keydown.enter)="resetSort(); filterMethod(inputMittente.value)">
+          </ng-template>
+        </p-columnFilter>
           <button  *ngIf="colfiltermittente.hasFilter()"
             class="material-icons close-icon" 
             type="reset"
@@ -371,11 +393,15 @@
         </div>
         <div *ngSwitchCase="'destinatari'" class="search-wrapper">
           <p-columnFilter #colfilterdestinatari
-            type="text" 
-            [field]="col.filterField" 
-            [matchMode]="col.filterMatchMode" 
-            [showMenu]="false"
-            placeholder="">
+          type="text" 
+          [field]="col.filterField" 
+          [matchMode]="col.filterMatchMode" 
+          [showMenu]="false"
+          placeholder="">
+            <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
+              <input #inputDestinatari type="text" pInputText [value]="value" 
+                    (keydown.enter)="resetSort(); filterMethod(inputDestinatari.value)">
+            </ng-template>
           </p-columnFilter>
           <button  *ngIf="colfilterdestinatari.hasFilter()"
             class="material-icons close-icon" 

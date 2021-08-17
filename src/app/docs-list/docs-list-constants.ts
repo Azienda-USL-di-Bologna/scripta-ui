@@ -3,13 +3,13 @@ import { FILTER_TYPES, NextSDRDateTypes } from "@nfa/next-sdr";
 
 export const cols: ColonnaBds[] = [
   {
-    field: "idAzienda", 
-    header: "Ente", 
-    filterField: "idAzienda.id", 
-    sortField: "idAzienda.nome", 
+    field: "idAzienda",
+    header: "Ente",
+    filterField: "idAzienda.id",
+    sortField: "idAzienda.nome",
     style: {},
-    headerClass: ["header-column","ente-column"],
-    filterClass: ["filter-column","ente-column"],
+    headerClass: ["header-column", "ente-column"],
+    filterClass: ["filter-column", "ente-column"],
     bodyClass: ["ente-column"],
     fieldType: "object",
     filterMatchMode: FILTER_TYPES.not_string.equals,
@@ -17,13 +17,13 @@ export const cols: ColonnaBds[] = [
     default: true
   },
   {
-    field: "tipologia", 
-    header: "Tipologia", 
-    filterField: "tipologia", 
-    sortField: "tipologia", 
+    field: "tipologia",
+    header: "Tipologia",
+    filterField: "tipologia",
+    sortField: "tipologia",
     style: {},
-    headerClass: ["header-column","tipologia-column"],
-    filterClass: ["filter-column","tipologia-column"],
+    headerClass: ["header-column", "tipologia-column"],
+    filterClass: ["filter-column", "tipologia-column"],
     bodyClass: ["tipologia-column"],
     fieldType: "string",
     filterMatchMode: FILTER_TYPES.not_string.equals,
@@ -31,13 +31,13 @@ export const cols: ColonnaBds[] = [
     default: true
   },
   {
-    field: "registrazione", 
-    header: "Registrazione", 
-    filterField: "numeroRegistrazione", 
-    sortField: ["annoRegistrazione","numeroRegistrazione"], 
+    field: "registrazione",
+    header: "Registrazione",
+    filterField: "numeroRegistrazione",
+    sortField: ["annoRegistrazione", "numeroRegistrazione"],
     style: {},
-    headerClass: ["header-column","registrazione-column"],
-    filterClass: ["filter-column","registrazione-column"],
+    headerClass: ["header-column", "registrazione-column"],
+    filterClass: ["filter-column", "registrazione-column"],
     bodyClass: ["registrazione-column"],
     fieldType: "number",
     filterMatchMode: FILTER_TYPES.not_string.equals,
@@ -45,13 +45,13 @@ export const cols: ColonnaBds[] = [
     default: true
   },
   {
-    field: "proposta", 
-    header: "Proposta", 
-    filterField: "numeroProposta", 
-    sortField: ["annoProposta","numeroProposta"],
+    field: "proposta",
+    header: "Proposta",
+    filterField: "numeroProposta",
+    sortField: ["annoProposta", "numeroProposta"],
     style: {},
-    headerClass: ["header-column","proposta-column"],
-    filterClass: ["filter-column","proposta-column"],
+    headerClass: ["header-column", "proposta-column"],
+    filterClass: ["filter-column", "proposta-column"],
     bodyClass: ["proposta-column"],
     fieldType: "",
     filterMatchMode: FILTER_TYPES.not_string.equals,
@@ -59,13 +59,13 @@ export const cols: ColonnaBds[] = [
     default: true
   },
   {
-    field: "dataCreazione", 
-    header: "Data creazione", 
-    filterField: "dataCreazione", 
-    sortField: "dataCreazione", 
+    field: "dataCreazione",
+    header: "Data creazione",
+    filterField: "dataCreazione",
+    sortField: "dataCreazione",
     style: {},
-    headerClass: ["header-column","data-creazione-column"],
-    filterClass: ["filter-column","data-creazione-column"],
+    headerClass: ["header-column", "data-creazione-column"],
+    filterClass: ["filter-column", "data-creazione-column"],
     bodyClass: ["data-creazione-column"],
     fieldType: NextSDRDateTypes.ZonedDateTime,
     filterMatchMode: FILTER_TYPES.not_string.equals,
@@ -73,13 +73,13 @@ export const cols: ColonnaBds[] = [
     default: true
   },
   {
-    field: "dataRegistrazione", 
-    header: "Data registrazione", 
-    filterField: "dataRegistrazione", 
-    sortField: "dataRegistrazione", 
+    field: "dataRegistrazione",
+    header: "Data registrazione",
+    filterField: "dataRegistrazione",
+    sortField: "dataRegistrazione",
     style: {},
-    headerClass: ["header-column","data-registrazione-column"],
-    filterClass: ["filter-column","data-registrazione-column"],
+    headerClass: ["header-column", "data-registrazione-column"],
+    filterClass: ["filter-column", "data-registrazione-column"],
     bodyClass: ["data-registrazione-column"],
     fieldType: NextSDRDateTypes.ZonedDateTime,
     filterMatchMode: FILTER_TYPES.not_string.equals,
@@ -87,13 +87,13 @@ export const cols: ColonnaBds[] = [
     default: true
   },
   {
-    field: "dataPubblicazione", 
-    header: "Data pubblicazione", 
-    filterField: "dataPubblicazione", 
-    sortField: "dataPubblicazione", 
+    field: "dataPubblicazione",
+    header: "Data pubblicazione",
+    filterField: "dataPubblicazione",
+    sortField: "dataPubblicazione",
     style: {},
-    headerClass: ["header-column","data-pubblicazione-column"],
-    filterClass: ["filter-column","data-pubblicazione-column"],
+    headerClass: ["header-column", "data-pubblicazione-column"],
+    filterClass: ["filter-column", "data-pubblicazione-column"],
     bodyClass: ["data-pubblicazione-column"],
     fieldType: NextSDRDateTypes.ZonedDateTime,
     filterMatchMode: FILTER_TYPES.not_string.equals,
@@ -101,11 +101,11 @@ export const cols: ColonnaBds[] = [
     default: false
   },
   {
-    field: "oggetto", 
-    header: "Oggetto", 
-    filterField: "oggettoTscol", 
-    sortField: "rankingOggetto", 
-    autoSorting: true,
+    field: "oggetto",
+    header: "Oggetto",
+    filterField: "oggettoTscol",
+    sortField: "oggetto",
+    autoSortingField: "rankingOggetto",
     style: {},
     headerClass: ["header-column", "oggetto-column"],
     filterClass: ["filter-column", "oggetto-column"],
@@ -116,10 +116,10 @@ export const cols: ColonnaBds[] = [
     default: true
   },
   {
-    field: "stato", 
-    header: "Stato", 
-    filterField: "stato", 
-    sortField: "stato", 
+    field: "stato",
+    header: "Stato",
+    filterField: "stato",
+    sortField: "stato",
     style: {},
     headerClass: ["header-column", "stato-column"],
     filterClass: ["filter-column", "stato-column"],
@@ -130,11 +130,11 @@ export const cols: ColonnaBds[] = [
     default: true
   },
   {
-    field: "fascicolazioni", 
-    header: "Fascicolazioni", 
-    filterField: "fascicolazioniTscol", 
-    sortField: "rankingFascicolazioni", 
-    autoSorting: true,
+    field: "fascicolazioni",
+    header: "Fascicolazioni",
+    filterField: "fascicolazioniTscol",
+    // sortField: "rankingFascicolazioni",
+    autoSortingField: "rankingFascicolazioni",
     style: {},
     headerClass: ["header-column", "fascicolazioni-column"],
     filterClass: ["filter-column", "fascicolazioni-column"],
@@ -145,11 +145,10 @@ export const cols: ColonnaBds[] = [
     default: true
   },
   {
-    field: "statoUfficioAtti", 
-    header: "Stato ufficio atti", 
-    filterField: "statoUfficioAtti", 
-    sortField: "statoUfficioAtti", 
-    autoSorting: false,
+    field: "statoUfficioAtti",
+    header: "Stato ufficio atti",
+    filterField: "statoUfficioAtti",
+    sortField: "statoUfficioAtti",
     style: {},
     headerClass: ["header-column", "stato-ufficio-atti-column"],
     filterClass: ["filter-column", "stato-ufficio-atti-column"],
@@ -160,13 +159,13 @@ export const cols: ColonnaBds[] = [
     default: false
   },
   {
-    field: "idPersonaResponsabileProcedimento", 
-    header: "Responsabile", 
-    filterField: "idPersonaResponsabileProcedimento.id", 
-    sortField: "idPersonaResponsabileProcedimento.descrizione", 
+    field: "idPersonaResponsabileProcedimento",
+    header: "Responsabile",
+    filterField: "idPersonaResponsabileProcedimento.id",
+    sortField: "idPersonaResponsabileProcedimento.descrizione",
     style: {},
-    headerClass: ["header-column","responsabile-column"],
-    filterClass: ["filter-column","responsabile-column"],
+    headerClass: ["header-column", "responsabile-column"],
+    filterClass: ["filter-column", "responsabile-column"],
     bodyClass: ["responsabile-column"],
     fieldType: "object",
     filterMatchMode: FILTER_TYPES.not_string.equals,
@@ -174,13 +173,13 @@ export const cols: ColonnaBds[] = [
     default: false
   },
   {
-    field: "idPersonaRedattrice", 
-    header: "Redattore", 
-    filterField: "idPersonaRedattrice.id", 
-    sortField: "idPersonaRedattrice.descrizione", 
+    field: "idPersonaRedattrice",
+    header: "Redattore",
+    filterField: "idPersonaRedattrice.id",
+    sortField: "idPersonaRedattrice.descrizione",
     style: {},
-    headerClass: ["header-column","redattore-column"],
-    filterClass: ["filter-column","redattore-column"],
+    headerClass: ["header-column", "redattore-column"],
+    filterClass: ["filter-column", "redattore-column"],
     bodyClass: ["redattore-column"],
     fieldType: "object",
     filterMatchMode: FILTER_TYPES.not_string.equals,
@@ -188,13 +187,13 @@ export const cols: ColonnaBds[] = [
     default: false
   },
   {
-    field: "idStrutturaRegistrazione", 
-    header: "Adottato da", 
-    filterField: "idStrutturaRegistrazione.id", 
-    sortField: "idStrutturaRegistrazione.nome", 
+    field: "idStrutturaRegistrazione",
+    header: "Adottato da",
+    filterField: "idStrutturaRegistrazione.id",
+    sortField: "idStrutturaRegistrazione.nome",
     style: {},
-    headerClass: ["header-column","adottato-da-column"],
-    filterClass: ["filter-column","adottato-da-column"],
+    headerClass: ["header-column", "adottato-da-column"],
+    filterClass: ["filter-column", "adottato-da-column"],
     bodyClass: ["scrollable-column", "adottato-da-column"],
     fieldType: "object",
     filterMatchMode: FILTER_TYPES.not_string.equals,
@@ -202,11 +201,11 @@ export const cols: ColonnaBds[] = [
     default: false
   },
   {
-    field: "mittente", 
-    header: "Mittente", 
-    filterField: "mittenteTscol", 
-    sortField: "rankingMittente", 
-    autoSorting: true,
+    field: "mittente",
+    header: "Mittente",
+    filterField: "mittenteTscol",
+    sortField: "mittente",
+    autoSortingField: "rankingMittente",
     style: {},
     headerClass: ["header-column", "mittente-column"],
     filterClass: ["filter-column", "mittente-column"],
@@ -217,11 +216,11 @@ export const cols: ColonnaBds[] = [
     default: false
   },
   {
-    field: "destinatari", 
-    header: "Destinatari", 
-    filterField: "destinatariTscol", 
-    sortField: "rankingDestinatari", 
-    autoSorting: true,
+    field: "destinatari",
+    header: "Destinatari",
+    filterField: "destinatariTscol",
+    // sortField: "destinatari",
+    autoSortingField: "rankingDestinatari",
     style: {},
     headerClass: ["header-column", "destinatari-column"],
     filterClass: ["filter-column", "destinatari-column"],
@@ -232,13 +231,13 @@ export const cols: ColonnaBds[] = [
     default: false
   },
   {
-    field: "firmatari", 
-    header: "Firmatari", 
-    filterField: "firmatari", 
-    sortField: "", 
+    field: "firmatari",
+    header: "Firmatari",
+    filterField: "firmatari",
+    // sortField: "",
     style: {},
-    headerClass: ["header-column","firmatari-column"],
-    filterClass: ["filter-column","firmatari-column"],
+    headerClass: ["header-column", "firmatari-column"],
+    filterClass: ["filter-column", "firmatari-column"],
     bodyClass: ["scrollable-column", "firmatari-column"],
     fieldType: "object",
     filterMatchMode: FILTER_TYPES.not_string.equals,
@@ -251,9 +250,9 @@ export interface ColonnaBds {
   field: string;
   header: string;
   filterField: string;
-  sortField: any;
-  autoSorting?: boolean;
-  style: any,
+  sortField?: string | string[];
+  autoSortingField?: string;
+  style: any;
   headerClass: string[];
   filterClass: string[];
   bodyClass: string[];
@@ -261,6 +260,7 @@ export interface ColonnaBds {
   filterMatchMode: string;
   useFilterMatchMode: boolean;
   default: boolean;
+  additionalData?: any;
 }
 
 export const TipologiaDocTraduzioneVisualizzazione = [
