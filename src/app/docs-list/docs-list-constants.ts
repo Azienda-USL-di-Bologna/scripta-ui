@@ -291,6 +291,7 @@ export const StatoDocTraduzioneVisualizzazione = [
   { value: StatoDoc.ATTENDI_JOBS, nome: "Attendi jobs"},
   { value: StatoDoc.CONTROLLO_SEGRETERIA, nome: "Controllo segreteria"},
   { value: StatoDoc.SPEDIZIONE_MANUALE, nome: "Spedizione manuale"},
+  { value: StatoDoc.APPROVAZIONE, nome: "Approvazione"},
 ]
 
 export const StatoUfficioAttiTraduzioneVisualizzazione = [

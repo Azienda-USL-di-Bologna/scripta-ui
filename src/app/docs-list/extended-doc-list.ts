@@ -108,11 +108,11 @@ export class ExtendedDocList extends DocList {
         break;
       case TipologiaDoc.DETERMINA:
         this.tipologiaVisualizzazione = "Determina";
-        this.codiceRegistro = "DELI";
+        this.codiceRegistro = "DETE";
         break;
       case TipologiaDoc.DELIBERA:
         this.tipologiaVisualizzazione = "Delibera";
-        this.codiceRegistro = "DETE";
+        this.codiceRegistro = "DELI";
         break;
       default:
         this.tipologiaVisualizzazione = "Errore";
