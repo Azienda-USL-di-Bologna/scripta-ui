@@ -1,5 +1,7 @@
 import { StatoDoc, StatoUfficioAtti, TipologiaDoc } from "@bds/ng-internauta-model";
 import { FILTER_TYPES, NextSDRDateTypes } from "@nfa/next-sdr";
+import { Utils } from "../utilities/utils";
+import { ExtendedDocList } from "./extended-doc-list";
 
 export const cols: ColonnaBds[] = [
   {
@@ -307,3 +309,138 @@ export enum DocsListMode {
   IFIRMATO = "IFIRMATO",
   REGISTRAZIONI = "REGISTRAZIONI"
 }
+
+export const colsCSV: any[] = [
+  {
+    field: "idAzienda.nome",
+    header: "Ente",
+    fieldType: "object",
+    fieldId: "idAzienda"
+  },
+  {
+    field: "tipologiaVisualizzazione",
+    header: "Tipologia",
+    fieldType: "string",
+    fieldId: "tipologia"
+  },
+  {
+    field: "registrazioneVisualizzazione",
+    header: "Registrazione",
+    fieldType: "string",
+    fieldId: "registrazione"
+  },
+  {
+    field: "propostaVisualizzazione",
+    header: "Proposta",
+    fieldType: "string",
+    fieldId: "proposta"
+  },
+  {
+    field: (doc: ExtendedDocList) => {
+      return doc.dataCreazione ? Utils.dateFormatter(doc.dataCreazione) : "";
+    },
+    header: "Data creazione",
+    fieldType: "date",
+    fieldId: "dataCreazione"
+  },
+  {
+    field: (doc: ExtendedDocList) => {
+      return doc.dataRegistrazione ? Utils.dateFormatter(doc.dataRegistrazione) : "";
+    },
+    header: "Data registrazione",
+    fieldType: "date",
+    fieldId: "dataRegistrazione"
+  },
+  {
+    field: (doc: ExtendedDocList) => {
+      return doc.dataPubblicazione ? Utils.dateFormatter(doc.dataPubblicazione) : "";
+    },
+    header: "Data pubblicazione",
+    fieldType: "date",
+    fieldId: "dataPubblicazione"
+  },
+  {
+    field: "oggettoVisualizzazione",
+    header: "Oggetto",
+    fieldType: "string",
+    fieldId: "oggetto"
+  },
+  {
+    field: "statoVisualizzazione",
+    header: "Stato",
+    fieldType: "string",
+    fieldId: "stato"
+  },
+  {
+    field: (doc: ExtendedDocList) => {
+      let fascicolazioniString = "";
+      if (doc.fascicolazioni) {
+        doc.fascicolazioni.forEach(fascicolazione => {
+          fascicolazioniString += "[" + fascicolazione.numerazione + "] " + fascicolazione.nome + ", ";
+        });
+      }
+      return fascicolazioniString !== "" ? fascicolazioniString.substr(0, fascicolazioniString.length - 2) : "";
+    },
+    header: "Fascicolazioni",
+    fieldType: "date",
+    fieldId: "fascicolazioni"
+  },
+  {
+    field: "statoUfficioAttiVisualizzazione",
+    header: "Stato ufficio atti",
+    fieldType: "string",
+    fieldId: "statoUfficioAtti"
+  },
+  {
+    field: "idPersonaResponsabileProcedimentoVisualizzazione",
+    header: "Responsabile",
+    fieldType: "date",
+    fieldId: "idPersonaResponsabileProcedimento"
+  },
+  {
+    field: "idPersonaRedattriceVisualizzazione",
+    header: "Redattore",
+    fieldType: "date",
+    fieldId: "idPersonaRedattrice"
+  },
+  {
+    field: "idStrutturaRegistrazione.nome",
+    header: "Adottato da",
+    fieldType: "object",
+    fieldId: "idStrutturaRegistrazione"
+  },
+  {
+    field: "mittente",
+    header: "Mittente",
+    fieldType: "string",
+    fieldId: "mittente"
+  },
+  {
+    field: (doc: ExtendedDocList) => {
+      let destinatariString = "";
+      if (doc.destinatari) {
+        doc.destinatari.forEach(destinatario => {
+          destinatariString += destinatario.nome + ", ";
+        });
+      }
+      return destinatariString !== "" ? destinatariString.substr(0, destinatariString.length - 2) : "";
+    },
+    header: "Destinatari",
+    fieldType: "object",
+    fieldId: "destinatari"
+  },
+  {
+    field: (doc: ExtendedDocList) => {
+      let firmatariString = "";
+      if (doc.firmatari) {
+        doc.firmatari.forEach(firmatario => {
+          firmatariString += firmatario.descrizione + ", ";
+        });
+      }
+      return firmatariString !== "" ? firmatariString.substr(0, firmatariString.length - 2) : "";
+    },
+    header: "Firmatari",
+    fieldType: "object",
+    fieldId: "firmatari"
+  }
+]

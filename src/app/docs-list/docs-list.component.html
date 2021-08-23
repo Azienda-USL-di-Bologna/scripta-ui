@@ -19,6 +19,24 @@
   <ng-template pTemplate="caption">
     <div class="caption-row">
       <div class="left-content">
+        <span *ngIf="exportCsvInProgress">
+          <p-progressSpinner 
+            [style]="{width: '2em', height: '2em', marginRight: '7px'}"
+            strokeWidth="8" 
+            fill="#FFFFFF" 
+            animationDuration=".5s">
+          </p-progressSpinner>
+        </span>
+        <button 
+          type="button" 
+          pButton 
+          pRipple 
+          icon="pi pi-file-o" 
+          (click)="exportCSV(dt)" 
+          class="p-mr-2" 
+          pTooltip="CSV" 
+          tooltipPosition="bottom">
+        </button>
         <p-multiSelect 
           [options]="cols" 
           [(ngModel)]="selectedColumns" 

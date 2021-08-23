@@ -9,7 +9,7 @@ export class ExtendedDocList extends DocList {
   private _statoVisualizzazione: string;
   private _statoUfficioAttiVisualizzazione: string;
   private _codiceRegistro: string;
-  private _fascicolazioniVisualizzazione: string[];
+  // private _fascicolazioniVisualizzazione: string[];
   private _idPersonaResponsabileProcedimentoVisualizzazione: string;
   private _idPersonaRedattriceVisualizzazione: string;
 
@@ -20,6 +20,7 @@ export class ExtendedDocList extends DocList {
   }
 
   public set oggettoVisualizzazione(oggettoVisualizzazione: string) {
+    this._oggettoVisualizzazione = "";
     if (this.annullato) {
       if (oggettoVisualizzazione && oggettoVisualizzazione != "") {
         this._oggettoVisualizzazione = "ANNULLATO - " + oggettoVisualizzazione;
@@ -45,6 +46,7 @@ export class ExtendedDocList extends DocList {
   }
 
   public set registrazioneVisualizzazione(registrazioneVisualizzazione: string) {
+    this._registrazioneVisualizzazione = "";
     if (this.numeroRegistrazione) {
       const pad: string = "0000000";
       this._registrazioneVisualizzazione = 
@@ -53,7 +55,6 @@ export class ExtendedDocList extends DocList {
         "/" + 
         this.annoRegistrazione;
     }
-    
   }
 
   public get propostaVisualizzazione(): string {
@@ -61,7 +62,10 @@ export class ExtendedDocList extends DocList {
   }
 
   public set propostaVisualizzazione(propostaVisualizzazione: string) {
-    this._propostaVisualizzazione = this.annoProposta + "-" + this.numeroProposta;
+    this._propostaVisualizzazione = "";
+    if (this.numeroProposta) {
+      this._propostaVisualizzazione = this.annoProposta + "-" + this.numeroProposta;
+    }
   }
 
   public get statoVisualizzazione(): string {
@@ -69,6 +73,7 @@ export class ExtendedDocList extends DocList {
   }
 
   public set statoVisualizzazione(statoVisualizzazione: string) {
+    this._statoVisualizzazione = "";
     if (statoVisualizzazione) {
       this._statoVisualizzazione = StatoDocTraduzioneVisualizzazione.find(e => e.value === statoVisualizzazione).nome;
     }
@@ -79,6 +84,7 @@ export class ExtendedDocList extends DocList {
   }
 
   public set statoUfficioAttiVisualizzazione(statoUfficioAttiVisualizzazione: string) {
+    this._statoUfficioAttiVisualizzazione = "";
     if (statoUfficioAttiVisualizzazione) {
       this._statoUfficioAttiVisualizzazione = StatoUfficioAttiTraduzioneVisualizzazione.find(e => e.value === statoUfficioAttiVisualizzazione).nome;
     }
@@ -120,7 +126,7 @@ export class ExtendedDocList extends DocList {
     }
   }
 
-  public get fascicolazioniVisualizzazione(): string[] {
+  /* public get fascicolazioniVisualizzazione(): string[] {
     return this._fascicolazioniVisualizzazione;
   }
 
@@ -131,13 +137,14 @@ export class ExtendedDocList extends DocList {
         this._fascicolazioniVisualizzazione.push("[" + f.numerazione + "] " + f.nome);
       });
     }
-  }
+  } */
 
   public get idPersonaResponsabileProcedimentoVisualizzazione(): string {
     return this._idPersonaResponsabileProcedimentoVisualizzazione;
   }
 
   public set idPersonaResponsabileProcedimentoVisualizzazione(idPersonaResponsabileProcedimentoVisualizzazione: string) {
+    this._idPersonaResponsabileProcedimentoVisualizzazione = "";
     if (this.idPersonaResponsabileProcedimento) {
       this._idPersonaResponsabileProcedimentoVisualizzazione = this.calcDescrizioneVisualizzazionePerPersona(this.idPersonaResponsabileProcedimento);
     }
@@ -148,6 +155,7 @@ export class ExtendedDocList extends DocList {
   }
 
   public set idPersonaRedattriceVisualizzazione(idPersonaRedattriceVisualizzazione: string) {
+    this._idPersonaRedattriceVisualizzazione = "";
     if (this.idPersonaRedattrice) {
       this._idPersonaRedattriceVisualizzazione = this.calcDescrizioneVisualizzazionePerPersona(this.idPersonaRedattrice);
     }

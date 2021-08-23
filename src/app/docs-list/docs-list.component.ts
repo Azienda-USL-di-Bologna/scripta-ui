@@ -4,7 +4,7 @@ import { ActivatedRoute } from "@angular/router";
 import { Azienda, CODICI_RUOLO, DocList, Firmatario, Persona, PersonaService, PersonaVedente, Struttura, StrutturaService, UrlsGenerationStrategy } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
-import { buildLazyEventFiltersAndSorts } from "@bds/primeng-plugin";
+import { buildLazyEventFiltersAndSorts, CsvExtractor } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from "@nfa/next-sdr";
 import { LazyLoadEvent, MessageService } from "primeng/api";
 import { AutoComplete } from "primeng/autocomplete";
@@ -12,7 +12,7 @@ import { MultiSelect } from "primeng/multiselect";
 import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
 import { AppService } from "../app.service";
-import { cols, DocsListMode, StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
+import { cols, colsCSV, DocsListMode, StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocList } from "./extended-doc-list";
 import { ExtendedDocListService } from "./extended-doc-list.service";
 
@@ -55,6 +55,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   public filteredPersone: Persona[] = [];
   public filteredStrutture: Struttura[] = [];
   public loading: boolean = false;
+  public exportCsvInProgress: boolean = false;
 
   constructor(
     private messageService: MessageService,
@@ -313,7 +314,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
       doc.registrazioneVisualizzazione = null; // Qui sto passando null. Ma è un trucco, in realtà sto settando i valori.
       doc.propostaVisualizzazione = null;
       doc.statoVisualizzazione = doc.stato;
-      doc.fascicolazioniVisualizzazione = null;
+      // doc.fascicolazioniVisualizzazione = null;
       doc.statoUfficioAttiVisualizzazione = doc.statoUfficioAtti;
       doc.idPersonaResponsabileProcedimentoVisualizzazione = null;
       doc.idPersonaRedattriceVisualizzazione = null;
@@ -422,6 +423,44 @@ export class DocsListComponent implements OnInit, OnDestroy {
 
   public applyFilterGlobal(event: Event, matchMode: string) {
     this.dataTable.filterGlobal((event.target as HTMLInputElement).value, matchMode);
+  }
+
+  /**
+   * Questo metodo si occupa di esportare la docList in CSV.
+   * Vengono rispettati i filtri.
+   * La PageConf è senza limite
+   */
+  public exportCSV(table: Table) {
+    this.exportCsvInProgress = true;
+    const tableTemp = {} as Table;
+    Object.assign(tableTemp, table);
+    const pageConfNoLimit: PagingConf = {
+      conf: {
+        page: 0,
+        size: 999999
+      },
+      mode: "PAGE"
+    };
+    this.docListService.getData(
+      "DocListWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione",
+      this.buildCustomFilterAndSort(),
+      buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
+      pageConfNoLimit)
+      .subscribe(
+        res => {
+          if (res && res.results) {
+            tableTemp.value = this.setCustomProperties(res.results);
+            tableTemp.columns = colsCSV.filter(c => this.selectedColumns.some(e => e.field === c.fieldId));
+            const extractor = new CsvExtractor();
+            extractor.exportCsv(tableTemp);
+          }
+          
+          this.exportCsvInProgress = false;
+        },
+        err => {
+          this.exportCsvInProgress = false;
+        }
+    );
   }
 
   /**

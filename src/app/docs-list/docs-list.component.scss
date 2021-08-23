@@ -8,6 +8,11 @@
     justify-content: space-between;
     align-items: center;
     .left-content {
+      .p-progress-spinner {
+        height: 21px !important;
+        width: 21px !important;
+        vertical-align: sub;
+      }
       .doc-trovati-info {
         margin-left: 20px;
       }
