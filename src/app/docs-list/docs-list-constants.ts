@@ -1,6 +1,6 @@
 import { StatoDoc, StatoUfficioAtti, TipologiaDoc } from "@bds/ng-internauta-model";
 import { FILTER_TYPES, NextSDRDateTypes } from "@nfa/next-sdr";
-import { Utils } from "../utilities/utils";
+import { Utils } from "src/app/utilities/utils";
 import { ExtendedDocList } from "./extended-doc-list";
 
 export const cols: ColonnaBds[] = [
