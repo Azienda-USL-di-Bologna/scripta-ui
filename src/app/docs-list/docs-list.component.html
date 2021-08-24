@@ -53,7 +53,7 @@
             [(ngModel)]="mieiDocumenti" 
             [binary]="true" 
             inputId="mieiDocumenti"
-            (onChange)="resetAndLoadData()">
+            (onChange)="resetAndLoadData(); saveConfiguration()">
           </p-checkbox>
           <label for="binary">Di cui sono attore</label>
         </div>
