@@ -134,7 +134,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * Salva la configurazione colonne e la configurazione del flag mieiDocumenti
    */
   public saveConfiguration() {
-    const impostazioniVisualizzazione = this.utenteUtilitiesLogin.getImpostazioniApplicazione().impostazioniVisualizzazione;
+    const impostazioniVisualizzazione = this.utenteUtilitiesLogin.getImpostazioniApplicazione() ? this.utenteUtilitiesLogin.getImpostazioniApplicazione().impostazioniVisualizzazione : null;
     let impostazioniVisualizzazioneObj: Impostazioni;
     if (impostazioniVisualizzazione && impostazioniVisualizzazione !== "") {
       impostazioniVisualizzazioneObj = JSON.parse(impostazioniVisualizzazione) as Impostazioni;
