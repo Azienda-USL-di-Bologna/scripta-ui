@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { Azienda, CODICI_RUOLO, DocList, Firmatario, Persona, PersonaService, PersonaVedente, Struttura, StrutturaService, UrlsGenerationStrategy } from "@bds/ng-internauta-model";
+import { Azienda, CODICI_RUOLO, DocList, Firmatario, Persona, PersonaService, PersonaVedente, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { buildLazyEventFiltersAndSorts, CsvExtractor } from "@bds/primeng-plugin";
@@ -36,6 +36,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   @ViewChild("autocompleteidPersonaResponsabileProcedimento") public autocompleteidPersonaResponsabileProcedimento: AutoComplete;
   @ViewChild("autocompleteIdStrutturaRegistrazione") public autocompleteIdStrutturaRegistrazione: AutoComplete;
   @ViewChild("autocompleteFirmatari") public autocompleteFirmatari: AutoComplete;
+  @ViewChild("autocompleteSullaScrivaniaDi") public autocompleteSullaScrivaniaDi: AutoComplete;
   @ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
 
 
@@ -362,7 +363,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
    */
   public buildJsonValueForFilterPersone(idPersona: number): string {
     if (idPersona) {
-      const filtroJson: FilterJsonDefinition<Firmatario> = new FilterJsonDefinition(true);
+      const filtroJson: FilterJsonDefinition<PersonaUsante> = new FilterJsonDefinition(true);
       filtroJson.add("idPersona", idPersona);
       return filtroJson.buildJsonString();
     }
@@ -418,6 +419,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
     if (this.autocompleteidPersonaResponsabileProcedimento) this.autocompleteidPersonaResponsabileProcedimento.writeValue(null);
     if (this.autocompleteIdStrutturaRegistrazione) this.autocompleteIdStrutturaRegistrazione.writeValue(null);
     if (this.autocompleteFirmatari) this.autocompleteFirmatari.writeValue(null);
+    if (this.autocompleteSullaScrivaniaDi) this.autocompleteSullaScrivaniaDi.writeValue(null);
     this.dataTable.reset();
   }
 

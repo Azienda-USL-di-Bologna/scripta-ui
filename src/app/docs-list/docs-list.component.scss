@@ -226,6 +226,22 @@
       }
     }
   }
+  .sulla-scrivania-di-column {
+    min-width: 230px;
+    max-width: 230px;
+    .sulla-scrivania-di-item {
+      display: inline-block;
+      padding: 3px 5px;
+      margin-bottom: 2px;
+      border: 1px solid #203244;
+      font-size: 13px;
+      border-radius: 3px;
+      word-break: break-word;
+      &:hover {
+        border: 1px solid #936;
+      }
+    }
+  }
   /* .scrollbar-overlay-placeholder-column {
     padding: 5px !important;
     border: none !important;

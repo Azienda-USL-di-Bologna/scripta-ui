@@ -452,6 +452,30 @@
             close
           </button>
         </div>
+        <div *ngSwitchCase="'sullaScrivaniaDi'" class="search-wrapper">
+          <p-columnFilter #colfiltersullascrivaniadi
+            [field]="col.filterField" matchMode="" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-autoComplete
+                #autocompleteSullaScrivaniaDi
+                [showEmptyMessage]="true"
+                emptyMessage="Nessun utente trovato"
+                [suggestions]="filteredPersone"
+                (completeMethod)="filterPersone($event)"
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter(buildJsonValueForFilterPersone($event?.id))"
+                (onClear)="filter(null)"
+                appendTo="body">
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+          <button *ngIf="colfiltersullascrivaniadi.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfiltersullascrivaniadi.clearFilter(); autocompleteSullaScrivaniaDi.writeValue(null)">
+            close
+          </button>
+        </div>
       </th>
     </tr>
   </ng-template>
@@ -516,6 +540,11 @@
         </div>
         <div *ngSwitchCase="'firmatari'">
           <span *ngFor="let d of rowData.firmatari" class="firmatari-item">
+            {{d.descrizione}}
+          </span>
+        </div>
+        <div *ngSwitchCase="'sullaScrivaniaDi'">
+          <span *ngFor="let d of rowData.sullaScrivaniaDi" class="sulla-scrivania-di-item">
             {{d.descrizione}}
           </span>
         </div>

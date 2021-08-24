@@ -245,6 +245,20 @@ export const cols: ColonnaBds[] = [
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: true,
     default: false
+  },
+  {
+    field: "sullaScrivaniaDi",
+    header: "Sulla scrivania di",
+    filterField: "sullaScrivaniaDi",
+    // sortField: "sullaScrivaniaDi.descrizione",
+    style: {},
+    headerClass: ["header-column", "sulla-scrivania-di-column"],
+    filterClass: ["filter-column", "sulla-scrivania-di-column"],
+    bodyClass: ["scrollable-column", "sulla-scrivania-di-column"],
+    fieldType: "object",
+    filterMatchMode: FILTER_TYPES.not_string.equals,
+    useFilterMatchMode: true,
+    default: true
   }
 ];
 
@@ -442,5 +456,19 @@ export const colsCSV: any[] = [
     header: "Firmatari",
     fieldType: "object",
     fieldId: "firmatari"
+  },
+  {
+    field: (doc: ExtendedDocList) => {
+      let sullaScrivaniaDiString = "";
+      if (doc.sullaScrivaniaDi) {
+        doc.sullaScrivaniaDi.forEach(usante => {
+          sullaScrivaniaDiString += usante.descrizione + ", ";
+        });
+      }
+      return sullaScrivaniaDiString !== "" ? sullaScrivaniaDiString.substr(0, sullaScrivaniaDiString.length - 2) : "";
+    },
+    header: "Sulla scrivania di",
+    fieldType: "object",
+    fieldId: "sullaScrivaniaDi"
   }
 ]
