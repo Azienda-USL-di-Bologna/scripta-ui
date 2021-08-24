@@ -125,7 +125,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
     }
 
     // Configurazione non presente o errata. Uso quella di default.
-    if (this._selectedColumns && this._selectedColumns.length === 0) {
+    if (!this._selectedColumns || this._selectedColumns.length === 0) {
       this._selectedColumns = this.cols.filter(c => c.default);
     }
   }
