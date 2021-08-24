@@ -12,7 +12,8 @@ import { MultiSelect } from "primeng/multiselect";
 import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
 import { AppService } from "../app.service";
-import { cols, colsCSV, DocsListMode, StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
+import { Impostazioni } from "../utilities/utils";
+import { ColonnaBds, cols, colsCSV, DocsListMode, StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocList } from "./extended-doc-list";
 import { ExtendedDocListService } from "./extended-doc-list.service";
 
@@ -39,13 +40,12 @@ export class DocsListComponent implements OnInit, OnDestroy {
   @ViewChild("autocompleteSullaScrivaniaDi") public autocompleteSullaScrivaniaDi: AutoComplete;
   @ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
 
-
   public docsListMode: DocsListMode;
   public docs: ExtendedDocList[];
   public enumDocsListMode = DocsListMode;
   public totalRecords: number;
   public aziendeFiltrabili: Azienda[] = [];
-  public cols: any[] = [];
+  public cols: ColonnaBds[] = [];
   public _selectedColumns: any[];
   public rowsNumber: number = 20;
   public tipologiaVisualizzazioneObj = TipologiaDocTraduzioneVisualizzazione;
@@ -102,6 +102,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   set selectedColumns(val: any[]) {
     // restore original order
     this._selectedColumns = this.cols.filter(col => val.includes(col));
+    this.saveConfiguration();
   }
 
   /**
@@ -111,16 +112,40 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * ed il filtro "miei documenti"
    */
   private loadConfigurationAndSetItUp(): void {
-    const thereIsConfiguration = false;
-
-    if (thereIsConfiguration) {
-      // TODO: In altro rm la configurazione sarà davvero caricata e dunque usata.
-    } else {
-      // Configurazione non presente. Uso quella di default.
-    }
     this.cols = cols;
-    this._selectedColumns = this.cols.filter(c => c.default);
+    const impostazioni = this.utenteUtilitiesLogin.getImpostazioniApplicazione();
+    console.log("sa,",this.utenteUtilitiesLogin.getImpostazioniApplicazione());
 
+    if (impostazioni && impostazioni.impostazioniVisualizzazione && impostazioni.impostazioniVisualizzazione !== "") {
+      const settings: Impostazioni = JSON.parse(impostazioni.impostazioniVisualizzazione) as Impostazioni;
+      if (settings["scripta.docList"]) {
+        this.mieiDocumenti = settings["scripta.docList"].mieiDocumenti;
+        this._selectedColumns = this.cols.filter(c => settings["scripta.docList"].selectedColumn.some(e => e === c.field));
+      }
+    }
+
+    // Configurazione non presente o errata. Uso quella di default.
+    if (this._selectedColumns && this._selectedColumns.length === 0) {
+      this._selectedColumns = this.cols.filter(c => c.default);
+    }
+  }
+
+  /**
+   * Salva la configurazione colonne e la configurazione del flag mieiDocumenti
+   */
+  public saveConfiguration() {
+    const impostazioniVisualizzazione = this.utenteUtilitiesLogin.getImpostazioniApplicazione().impostazioniVisualizzazione;
+    let impostazioniVisualizzazioneObj: Impostazioni;
+    if (impostazioniVisualizzazione && impostazioniVisualizzazione !== "") {
+      impostazioniVisualizzazioneObj = JSON.parse(impostazioniVisualizzazione) as Impostazioni;
+    } else {
+      impostazioniVisualizzazioneObj = {
+        "scripta.docList": {}
+      } as Impostazioni;
+    }
+    impostazioniVisualizzazioneObj["scripta.docList"].mieiDocumenti = this.mieiDocumenti;
+    impostazioniVisualizzazioneObj["scripta.docList"].selectedColumn = this.selectedColumns.map(c => c.field);
+    this.utenteUtilitiesLogin.setImpostazioniApplicazione(this.loginService, impostazioniVisualizzazioneObj);
   }
 
   /**
@@ -198,6 +223,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
     this.loadData();
   }
 
+  /**
+   * Metodo che toglie il sort dalle colonne della tabella.
+   * In particolare è usata dagli input dei campi che quando usati ordinano per ranking
+   */
   public resetSort() {
     this.dataTable.sortField = null;
     this.dataTable.sortOrder = null;
@@ -334,7 +363,6 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * @param event
    */
   public filterPersone(event: any ) {
-
     const filtersAndSorts = new FiltersAndSorts();
     filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.containsIgnoreCase, event.query));
     this.aziendeFiltrabili.forEach(a => {
@@ -405,7 +433,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   /**
    * Funzione che si occupa di fare il clear di tutti i filtri della tabella.
    * In particolare quelli delle autocomplete che sono "separati" dal semplice
-   * table.clear() vengono fatti a patto che quell'autocomplete esista.
+   * table.reset() vengono fatti a patto che quell'autocomplete esista.
    * @param table
    */
   public clear(): void {
@@ -423,6 +451,12 @@ export class DocsListComponent implements OnInit, OnDestroy {
     this.dataTable.reset();
   }
 
+  /**
+   * Metodo che intercetta la ricerca globale. E' solo un passa carte.
+   * Di fatto poi scatta l'onLazyLoad
+   * @param event 
+   * @param matchMode 
+   */
   public applyFilterGlobal(event: Event, matchMode: string) {
     this.dataTable.filterGlobal((event.target as HTMLInputElement).value, matchMode);
   }
