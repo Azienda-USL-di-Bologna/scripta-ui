@@ -34,11 +34,11 @@ export class NavigationTabsComponent implements OnInit {
           this.isSegretario = this.utenteUtilitiesLogin.getUtente().struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
 
           this.items = [
-            {
+            /* {
               label: "Nuovo", 
               icon: "pi pi-fw pi-plus", 
               routerLink: ["./"]
-            },
+            }, */
             {
               label: "Tutti documenti", 
               icon: "pi pi-fw pi-list", 
