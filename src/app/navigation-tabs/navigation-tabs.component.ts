@@ -75,11 +75,11 @@ export class NavigationTabsComponent implements OnInit {
             });
           }
 
-          this.items.push({
+          /* this.items.push({
             label: "Ricerca avazata", 
             icon: "pi pi-fw pi-search", 
             routerLink: ["./"]
-          });
+          }); */
           const docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode;
           if (docsListMode) {
             this.activeItem = this.items.find(i => i.queryParams && i.queryParams.mode === docsListMode);
