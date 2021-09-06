@@ -39,7 +39,8 @@
         </button>
         <p-multiSelect 
           [options]="cols" 
-          [(ngModel)]="selectedColumns" 
+          [(ngModel)]="selectedColumns"
+          (onChange)="onChangeSelectedColumns($event)"
           optionLabel="header"
           selectedItemsLabel="{0} colonne selezionate" 
           [style]="{minWidth: '250px', maxWidth: '250px'}" 
@@ -157,7 +158,7 @@
             placeholder=""
             pTooltip="Inserire solo numeri">
           </p-columnFilter>
-          <button  *ngIf="colfilterproposta.hasFilter()"
+          <button *ngIf="colfilterproposta.hasFilter()"
             class="material-icons close-icon" 
             type="reset"
             (click)="colfilterproposta.clearFilter()">
@@ -238,8 +239,11 @@
             [showMenu]="false"
             placeholder="">
             <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
-              <input #inputOggetto type="text" pInputText [value]="value" 
-                    (keydown.enter)="resetSort(); filterMethod(inputOggetto.value)">
+              <input #inputOggetto 
+                type="text" 
+                pInputText 
+                [value]="value" 
+                (keydown.enter)="resetSort(); filterMethod(inputOggetto.value)">
             </ng-template>
           </p-columnFilter>
 

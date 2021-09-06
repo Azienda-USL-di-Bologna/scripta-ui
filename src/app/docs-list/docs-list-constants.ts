@@ -258,7 +258,7 @@ export const cols: ColonnaBds[] = [
     fieldType: "object",
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: true,
-    default: true
+    default: false
   }
 ];
 
