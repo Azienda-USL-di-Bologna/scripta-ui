@@ -7,122 +7,137 @@
 @import '../node_modules/@bds/common-components/assets/bds-styles/custom-classes.scss';
 @import '../node_modules/@bds/common-components/assets/bds-styles/basic.scss';
 
+prp-header {
+  div {
+    height: 42px !important;
+    .logo {
+      height: 36px !important;
+    }
+  }
+}
+.p-datatable-header {
+  padding: 5px 10px !important;
+}
+.p-menuitem-link {
+  padding: 10px 17px !important;
+}
+
 .custom-primary-button {
-    border: 1px solid #203244 !important;
-    background: #2e4a65 !important;
+  border: 1px solid #203244 !important;
+  background: #2e4a65 !important;
 }
 .custom-primary-button:hover {
-    border-color: #2e4a65 !important;
-    background: #406284 !important;
-    color: #ffffff !important;
-    font-weight: normal !important;
+  border-color: #2e4a65 !important;
+  background: #406284 !important;
+  color: #ffffff !important;
+  font-weight: normal !important;
 }
 
 
 
 .p-button {
-    border: 1px solid #203244 !important;
-    background: #2e4a65 !important;
-    &:hover {
-        border-color: #2e4a65 !important;
-        background: #406284 !important;
-        color: #ffffff !important;
-        font-weight: normal !important;
-    }
-    &.p-button-text {
-        color: white;
-    }
+  border: 1px solid #203244 !important;
+  background: #2e4a65 !important;
+  &:hover {
+    border-color: #2e4a65 !important;
+    background: #406284 !important;
+    color: #ffffff !important;
+    font-weight: normal !important;
+  }
+  &.p-button-text {
+    color: white;
+  }
 }
 
 .p-inputtext:enabled:focus {
-    box-shadow: none !important;
+  box-shadow: none !important;
 }
 
 // -----------CUSTOM SCROLLBAR----------------- //
 // CHROME
 
 ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+  width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+  background: #f1f1f1;
 }
  ::-webkit-scrollbar-thumb {
-    background: #88888857;
+  background: #88888857;
 }
  ::-webkit-scrollbar-thumb:hover {
-    background: #8888889c;
+  background: #8888889c;
 }
 // FIREFOX
 * {
-    scrollbar-color: #88888857 #f1f1f1;
-    scrollbar-width: thin;
+  scrollbar-color: #88888857 #f1f1f1;
+  scrollbar-width: thin;
 }
 *:hover {
-    scrollbar-color: #8888889c #f1f1f1;
+  scrollbar-color: #8888889c #f1f1f1;
 }
 
 // Misura temporanea per far andare la accordion dei destinatari.
 p-accordion {
-    flex: 1 1 0;
+  flex: 1 1 0;
 }
 .p-accordion {
-    height: 100%;
+  height: 100%;
     
 }
 
 // prova
 prova-p-accordiontab {
-    flex: 1 1 0;
-    .p-accordion-tab-active {
-        .p-toggleable-content {
-            flex: 1 1 0;
-            .p-accordion-content {
-                /* overflow: hidden;
-                max-height: 100%;
-                flex: 1 1 0; */
-                height: 100%;
-                destinatari {
-                    /* overflow: hidden; */
-                    height: 100%;
-                    display: flex;
-                    flex-direction: column;
-                    /* p-table {
+  flex: 1 1 0;
+  .p-accordion-tab-active {
+    .p-toggleable-content {
+      flex: 1 1 0;
+      .p-accordion-content {
+        /* overflow: hidden;
+        max-height: 100%;
+        flex: 1 1 0; */
+        height: 100%;
+        destinatari {
+            /* overflow: hidden; */
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            /* p-table {
+                overflow: hidden;
+                flex: 1 1 0;
+                .coinvolti-table {
+                    overflow: hidden;
+                    flex: 1 1 0;
+                    .p-datatable-wrapper {
                         overflow: hidden;
+                        max-height: 100%;
+                        height: 100%;
+                        overflow: hidden;
+                        max-height: 100%;
                         flex: 1 1 0;
-                        .coinvolti-table {
+                        height: 100%;
+                        table {
                             overflow: hidden;
+                            max-height: 100%;
                             flex: 1 1 0;
-                            .p-datatable-wrapper {
-                                overflow: hidden;
-                                max-height: 100%;
-                                height: 100%;
-                                overflow: hidden;
-                                max-height: 100%;
-                                flex: 1 1 0;
-                                height: 100%;
-                                table {
-                                    overflow: hidden;
-                                    max-height: 100%;
-                                    flex: 1 1 0;
-                                    height: 100%;
-                                    height: 100%;
-                                    display: flex;
-                                    flex-direction: column;
-                                    .p-datatable-tbody {
-                                        overflow-y: scroll;
-                                    }
-                                }
+                            height: 100%;
+                            height: 100%;
+                            display: flex;
+                            flex-direction: column;
+                            .p-datatable-tbody {
+                                overflow-y: scroll;
                             }
                         }
-                    } */
+                    }
                 }
-            }
+            } */
         }
+      }
     }
+  }
 }
 
 ::-webkit-search-cancel-button {
-    cursor: pointer;
+  cursor: pointer;
 }

@@ -75,7 +75,7 @@
   </ng-template>
   <ng-template pTemplate="header" let-columns>
     <!-- HEADER & ORDINAMENTO -->
-    <tr style="height: 47px;" > 
+    <tr class="header-row"> 
       <th *ngFor="let col of columns" 
         [ngSwitch]="col.field" 
         [ngClass]="col.headerClass"
@@ -89,7 +89,7 @@
       </th>
     </tr>
     <!-- FILTRI -->
-    <tr style="height: 64px;">
+    <tr class="filter-row">
       <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
         <div *ngSwitchCase="'idAzienda'">
           <p-columnFilter #columnFilterAzienda [field]="col.filterField" matchMode="in" [showMenu]="false">
