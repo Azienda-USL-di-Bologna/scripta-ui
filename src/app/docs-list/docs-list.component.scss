@@ -32,23 +32,31 @@
   .p-datatable-scrollable-header {
     overflow: initial !important;
     /* HEADER */
-    .header-column {
-      .header-box {
-        display: flex;
-        justify-content: space-between;
+    .header-row {
+      height: 41px;
+      .header-column {
+        padding: 2px 13px;
+        .header-box {
+          display: flex;
+          justify-content: space-between;
+        }
       }
     }
     /* FILTER */
-    .filter-column {
-      .p-inputnumber-buttons-stacked .p-inputnumber-input {
-        border-radius: 3px;
-      }
-      .p-inputnumber-button-group {
-        display: none;
-      }
-      .p-calendar {
-        input {
-          font-size: 14px;
+    .filter-row {
+      .filter-column {
+        padding: 1px;
+        border: transparent;
+        .p-inputnumber-buttons-stacked .p-inputnumber-input {
+          border-radius: 3px;
+        }
+        .p-inputnumber-button-group {
+          display: none;
+        }
+        .p-calendar {
+          input {
+            font-size: 14px;
+          }
         }
       }
     }

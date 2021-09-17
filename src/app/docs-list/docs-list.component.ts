@@ -1,5 +1,5 @@
 import { DatePipe } from "@angular/common";
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component, ElementRef, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { Azienda, CODICI_RUOLO, DocList, Firmatario, Persona, PersonaService, PersonaVedente, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from "@bds/nt-communicator";
@@ -39,6 +39,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
   @ViewChild("autocompleteFirmatari") public autocompleteFirmatari: AutoComplete;
   @ViewChild("autocompleteSullaScrivaniaDi") public autocompleteSullaScrivaniaDi: AutoComplete;
   @ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
+
+  @ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>
 
   public docsListMode: DocsListMode;
   public docs: ExtendedDocList[];
@@ -103,6 +105,21 @@ export class DocsListComponent implements OnInit, OnDestroy {
     // restore original order
     this._selectedColumns = this.cols.filter(col => val.includes(col));
     this.saveConfiguration();
+  }
+
+  /**
+   * Gestisco l'evento di cambiamento delle colonne visualizzate.
+   * In particolare se ho tolto una colonna che era filtrata, tolgo quel filtro.
+   * @param event 
+   */
+  public onChangeSelectedColumns(event: any): void {
+    if (!event.value.some((e: ColonnaBds) => e.field === event.itemValue.field)) {
+      // Se itemValue non è dentro l'elenco value allora ho tolto la spunta e quella colonna non è più visibile
+      const col = this.filterColumns.find((e: ColumnFilter) => e.field === event.itemValue.filterField);
+      if (col.hasFilter()) {
+        col.clearFilter();
+      }
+    }
   }
 
   /**

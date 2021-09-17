@@ -40,7 +40,7 @@ registerLocaleData(localeIt, "it-IT", localeItExtra);
     {provide: LOCALE_ID, useValue: "it-IT"},
   ],
   bootstrap: [AppComponent],
-    exports: [],
+  exports: [],
   entryComponents: [ProfiloComponent]
 })
 export class AppModule { }
