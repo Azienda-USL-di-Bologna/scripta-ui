@@ -8,7 +8,14 @@
     justify-content: space-between;
     align-items: center;
     .left-content {
-
+      .p-progress-spinner {
+        height: 21px !important;
+        width: 21px !important;
+        vertical-align: sub;
+      }
+      .doc-trovati-info {
+        margin-left: 20px;
+      }
     }
     .right-content {
       display: flex;
@@ -17,32 +24,65 @@
       .p-field-checkbox {
         margin-bottom: 0 !important;
       }
+      .p-button.p-button-outlined {
+        color: white;
+      }
     }
   }
   .p-datatable-scrollable-header {
     overflow: initial !important;
     /* HEADER */
-    .header-column {
-      .header-box {
-        display: flex;
-        justify-content: space-between;
-      }
-    }
-    /* FILTER */
-    .filter-column {
-      .p-inputnumber-buttons-stacked .p-inputnumber-input {
-        border-radius: 3px;
-      }
-      .p-inputnumber-button-group {
-        display: none;
-      }
-      .p-calendar {
-        input {
-          font-size: 14px;
+    .header-row {
+      height: 41px;
+      .header-column {
+        padding: 2px 13px;
+        .header-box {
+          display: flex;
+          justify-content: space-between;
         }
       }
     }
-    
+    /* FILTER */
+    .filter-row {
+      .filter-column {
+        padding: 1px;
+        border: transparent;
+        .p-inputnumber-buttons-stacked .p-inputnumber-input {
+          border-radius: 3px;
+        }
+        .p-inputnumber-button-group {
+          display: none;
+        }
+        .p-calendar {
+          input {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+    .search-wrapper {
+      display: flex;
+      background-color: white;
+      border: 1px solid #a6a6a6;
+      border-radius: 3px;
+      p-columnfilter {
+        width: 100%;
+        .p-inputtext {
+          border: none !important;
+        }
+      }
+      
+      .close-icon {
+        align-self: center;
+        font-size: 15px;
+        border: 1px solid transparent;
+        background-color: white;
+        display: inline-block;
+        vertical-align: middle;
+        outline: 0;
+        cursor: pointer;
+      }
+    }
   }
   
   /* BODY */
@@ -107,9 +147,10 @@
     max-width: 132px;
   }
   .data-creazione-column,
-  .data-registrazione-column {
-    min-width: 196px;
-    max-width: 196px;
+  .data-registrazione-column,
+  .data-pubblicazione-column {
+    min-width: 203px;
+    max-width: 203px;
   }
   .stato-column {
     min-width: 134px;
@@ -119,6 +160,8 @@
     width: 100%;
     min-width: 200px;
     cursor: pointer;
+    font-weight: 600;
+    color: #993366;
   }
   .fascicolazioni-column {
     min-width: 230px;
@@ -134,6 +177,77 @@
       font-size: 13px;
       border-radius: 3px;
       word-break: break-word;
+      &:hover {
+        border: 1px solid #936;
+      }
+    }
+  }
+  .stato-ufficio-atti-column {
+    min-width: 184px;
+    max-width: 184px;
+  }
+  .responsabile-column {
+    min-width: 204px;
+    max-width: 204px;
+  }
+  .redattore-column {
+    min-width: 204px;
+    max-width: 204px;
+  }
+  .adottato-da-column {
+    min-width: 204px;
+    max-width: 204px;
+  }
+  .mittente-column {
+    min-width: 204px;
+    max-width: 204px;
+  }
+  .destinatari-column {
+    min-width: 230px;
+    max-width: 230px;
+    .destinatari-item {
+      display: inline-block;
+      padding: 3px 5px;
+      margin-bottom: 2px;
+      border: 1px solid #203244;
+      font-size: 13px;
+      border-radius: 3px;
+      word-break: break-word;
+      &:hover {
+        border: 1px solid #936;
+      }
+    }
+  }
+  .firmatari-column {
+    min-width: 230px;
+    max-width: 230px;
+    .firmatari-item {
+      display: inline-block;
+      padding: 3px 5px;
+      margin-bottom: 2px;
+      border: 1px solid #203244;
+      font-size: 13px;
+      border-radius: 3px;
+      word-break: break-word;
+      &:hover {
+        border: 1px solid #936;
+      }
+    }
+  }
+  .sulla-scrivania-di-column {
+    min-width: 230px;
+    max-width: 230px;
+    .sulla-scrivania-di-item {
+      display: inline-block;
+      padding: 3px 5px;
+      margin-bottom: 2px;
+      border: 1px solid #203244;
+      font-size: 13px;
+      border-radius: 3px;
+      word-break: break-word;
+      &:hover {
+        border: 1px solid #936;
+      }
     }
   }
   /* .scrollbar-overlay-placeholder-column {
@@ -162,3 +276,23 @@ and (not (-ms-ime-align:auto)) and (not (-moz-appearance:none)) {
     overflow: hidden;
   }
 }
+
+/* ::ng-deep .search-wrapper{
+  display: flex;
+  background-color: white;
+  border: 1px solid #a6a6a6;
+  border-radius: 3px;
+  .p-inputtext {
+    border: none !important;
+  }
+  .close-icon {
+    align-self: center;
+    font-size: 15px;
+    border: 1px solid transparent;
+    background-color: white;
+    display: inline-block;
+    vertical-align: middle;
+    outline: 0;
+    cursor: pointer;
+  }
+} */
