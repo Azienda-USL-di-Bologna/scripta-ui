@@ -40,7 +40,7 @@ export class NavigationTabsComponent implements OnInit {
               routerLink: ["./"]
             }, */
             {
-              label: "Tutti documenti", 
+              label: "Documenti visibili", 
               icon: "pi pi-fw pi-list", 
               routerLink: ["./" + DOCS_LIST_ROUTE], 
               queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI}
@@ -56,7 +56,7 @@ export class NavigationTabsComponent implements OnInit {
                 queryParams: {"mode": DocsListMode.IFIRMARIO}
             });
             this.items.push({
-              label: "Firmato", 
+              label: "Firmati", 
               title: "Registrati dai responsabili",
               icon: "pi pi-fw pi-user-edit", 
               routerLink: ["./" + DOCS_LIST_ROUTE], 
