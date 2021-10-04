@@ -508,7 +508,11 @@
         <div *ngSwitchCase="'dataPubblicazione'">
           {{rowData.dataPubblicazione | date:'dd/MM/yyyy'}}
         </div>
-        <div *ngSwitchCase="'oggetto'" (click)="openDoc(rowData)">
+        <div *ngSwitchCase="'oggetto'" 
+          (click)="openDoc(rowData)" 
+          class="oggetto-content" 
+          [pTooltip]="rowData.oggettoVisualizzazione"
+          tooltipPosition="top">
           <i *ngIf="rowData.visibilitaLimitata && !rowData.riservato" class="pi pi-eye"></i>
           <i *ngIf="rowData.riservato" class="pi pi-eye-slash"></i>
           {{rowData.oggettoVisualizzazione}}
@@ -516,8 +520,9 @@
         <div *ngSwitchCase="'stato'">
           {{rowData.statoVisualizzazione}}
         </div>
-        <div *ngSwitchCase="'fascicolazioni'">
-          <!-- {{rowData.fascicolazioniVisualizzazione}} -->
+        <div *ngSwitchCase="'fascicolazioni'"
+          [pTooltip]="rowData.fascicolazioniVisualizzazione"
+          tooltipPosition="top">
           <span *ngFor="let f of rowData.fascicolazioni" class="fascicolazione-item">
             {{"[" + f.numerazione + "] " + f.nome}}
           </span>
@@ -531,23 +536,33 @@
         <div *ngSwitchCase="'idPersonaRedattrice'">
           {{rowData.idPersonaRedattriceVisualizzazione}}
         </div>
-        <div *ngSwitchCase="'idStrutturaRegistrazione'">
+        <div *ngSwitchCase="'idStrutturaRegistrazione'"
+          [pTooltip]="rowData.idStrutturaRegistrazione?.nome"
+          tooltipPosition="top">
           {{rowData.idStrutturaRegistrazione?.nome}}
         </div>
-        <div *ngSwitchCase="'mittente'">
+        <div *ngSwitchCase="'mittente'"
+          [pTooltip]="rowData.mittente"
+          tooltipPosition="top">
           {{rowData.mittente}}
         </div>
-        <div *ngSwitchCase="'destinatari'">
+        <div *ngSwitchCase="'destinatari'"
+          [pTooltip]="rowData.destinatariVisualizzazione"
+          tooltipPosition="top">
           <span *ngFor="let d of rowData.destinatari" class="destinatari-item">
             {{d.nome}}
           </span>
         </div>
-        <div *ngSwitchCase="'firmatari'">
+        <div *ngSwitchCase="'firmatari'"
+          [pTooltip]="rowData.firmatariVisualizzazione"
+          tooltipPosition="top">
           <span *ngFor="let d of rowData.firmatari" class="firmatari-item">
             {{d.descrizione}}
           </span>
         </div>
-        <div *ngSwitchCase="'sullaScrivaniaDi'">
+        <div *ngSwitchCase="'sullaScrivaniaDi'"
+          [pTooltip]="rowData.sullaScrivaniaDiVisualizzazione"
+          tooltipPosition="top">
           <span *ngFor="let d of rowData.sullaScrivaniaDi" class="sulla-scrivania-di-item">
             {{d.descrizione}}
           </span>

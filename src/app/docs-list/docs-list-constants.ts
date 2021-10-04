@@ -34,7 +34,7 @@ export const cols: ColonnaBds[] = [
   },
   {
     field: "registrazione",
-    header: "Registrazione",
+    header: "N° registrazione",
     filterField: "numeroRegistrazione",
     sortField: ["annoRegistrazione", "numeroRegistrazione"],
     style: {},
@@ -62,7 +62,7 @@ export const cols: ColonnaBds[] = [
   },
   {
     field: "dataCreazione",
-    header: "Data creazione",
+    header: "Creazione",
     filterField: "dataCreazione",
     sortField: "dataCreazione",
     style: {},
@@ -76,7 +76,7 @@ export const cols: ColonnaBds[] = [
   },
   {
     field: "dataRegistrazione",
-    header: "Data registrazione",
+    header: "Registrazione",
     filterField: "dataRegistrazione",
     sortField: "dataRegistrazione",
     style: {},
@@ -90,7 +90,7 @@ export const cols: ColonnaBds[] = [
   },
   {
     field: "dataPubblicazione",
-    header: "Data pubblicazione",
+    header: "Pubblicazione",
     filterField: "dataPubblicazione",
     sortField: "dataPubblicazione",
     style: {},
@@ -339,7 +339,7 @@ export const colsCSV: any[] = [
   },
   {
     field: "registrazioneVisualizzazione",
-    header: "Registrazione",
+    header: "N° Registrazione",
     fieldType: "string",
     fieldId: "registrazione"
   },
@@ -353,7 +353,7 @@ export const colsCSV: any[] = [
     field: (doc: ExtendedDocList) => {
       return doc.dataCreazione ? Utils.dateFormatter(doc.dataCreazione) : "";
     },
-    header: "Data creazione",
+    header: "Creazione",
     fieldType: "date",
     fieldId: "dataCreazione"
   },
@@ -361,7 +361,7 @@ export const colsCSV: any[] = [
     field: (doc: ExtendedDocList) => {
       return doc.dataRegistrazione ? Utils.dateFormatter(doc.dataRegistrazione) : "";
     },
-    header: "Data registrazione",
+    header: "Registrazione",
     fieldType: "date",
     fieldId: "dataRegistrazione"
   },
@@ -369,7 +369,7 @@ export const colsCSV: any[] = [
     field: (doc: ExtendedDocList) => {
       return doc.dataPubblicazione ? Utils.dateFormatter(doc.dataPubblicazione) : "";
     },
-    header: "Data pubblicazione",
+    header: "Pubblicazione",
     fieldType: "date",
     fieldId: "dataPubblicazione"
   },

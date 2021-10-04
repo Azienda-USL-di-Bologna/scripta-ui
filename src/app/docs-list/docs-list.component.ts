@@ -361,10 +361,13 @@ export class DocsListComponent implements OnInit, OnDestroy {
       doc.registrazioneVisualizzazione = null; // Qui sto passando null. Ma è un trucco, in realtà sto settando i valori.
       doc.propostaVisualizzazione = null;
       doc.statoVisualizzazione = doc.stato;
-      // doc.fascicolazioniVisualizzazione = null;
       doc.statoUfficioAttiVisualizzazione = doc.statoUfficioAtti;
       doc.idPersonaResponsabileProcedimentoVisualizzazione = null;
       doc.idPersonaRedattriceVisualizzazione = null;
+      doc.fascicolazioniVisualizzazione = null;
+      doc.destinatariVisualizzazione = null;
+      doc.firmatariVisualizzazione = null;
+      doc.sullaScrivaniaDiVisualizzazione = null;
     });
     return extendedDocsList;
   }
