@@ -58,6 +58,7 @@
             font-size: 13px;
           }
         }
+
       }
     }
     .search-wrapper {
@@ -284,6 +285,12 @@ and (not (-ms-ime-align:auto)) and (not (-moz-appearance:none)) {
     text-indent: -99999px;
     overflow: hidden;
   }
+}
+
+
+div.calendar-filter-footer-button-container.ng-star-inserted {
+  display: flex;
+  justify-content: space-around;
 }
 
 /* ::ng-deep .search-wrapper{
