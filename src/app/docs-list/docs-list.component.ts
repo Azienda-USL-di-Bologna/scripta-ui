@@ -40,7 +40,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   @ViewChild("autocompleteSullaScrivaniaDi") public autocompleteSullaScrivaniaDi: AutoComplete;
   @ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
 
-  @ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>
+  @ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>;
 
   public docsListMode: DocsListMode;
   public docs: ExtendedDocList[];
@@ -53,12 +53,13 @@ export class DocsListComponent implements OnInit, OnDestroy {
   public tipologiaVisualizzazioneObj = TipologiaDocTraduzioneVisualizzazione;
   public statoVisualizzazioneObj = StatoDocTraduzioneVisualizzazione;
   public statoUfficioAttiVisualizzazioneObj = StatoUfficioAttiTraduzioneVisualizzazione;
-  public localIt = LOCAL_IT;
+  public localIt: any = LOCAL_IT;
   public mieiDocumenti: boolean = true;
   public filteredPersone: Persona[] = [];
   public filteredStrutture: Struttura[] = [];
   public loading: boolean = false;
   public exportCsvInProgress: boolean = false;
+  public calendarcreazione: any;
 
   constructor(
     private messageService: MessageService,
@@ -95,6 +96,9 @@ export class DocsListComponent implements OnInit, OnDestroy {
 
     this.appService.appNameSelection("Elenco documenti");
 
+    console.log("LOCALIT", this.localIt);
+
+
   }
 
   @Input() get selectedColumns(): any[] {
@@ -110,7 +114,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   /**
    * Gestisco l'evento di cambiamento delle colonne visualizzate.
    * In particolare se ho tolto una colonna che era filtrata, tolgo quel filtro.
-   * @param event 
+   * @param event
    */
   public onChangeSelectedColumns(event: any): void {
     if (!event.value.some((e: ColonnaBds) => e.field === event.itemValue.field)) {
@@ -131,7 +135,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   private loadConfigurationAndSetItUp(): void {
     this.cols = cols;
     const impostazioni = this.utenteUtilitiesLogin.getImpostazioniApplicazione();
-    console.log("sa,",this.utenteUtilitiesLogin.getImpostazioniApplicazione());
+    console.log("sa,", this.utenteUtilitiesLogin.getImpostazioniApplicazione());
 
     if (impostazioni && impostazioni.impostazioniVisualizzazione && impostazioni.impostazioniVisualizzazione !== "") {
       const settings: Impostazioni = JSON.parse(impostazioni.impostazioniVisualizzazione) as Impostazioni;
@@ -197,10 +201,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
   private calcolaAziendeFiltrabili() {
     this.aziendeFiltrabili = [];
     if (this.docsListMode !== DocsListMode.REGISTRAZIONI
-        || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD)) {
+      || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD)) {
       this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive;
     } else if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.OS)
-        || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.MOS)) {
+      || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.MOS)) {
       /* Se entro qui allora sono nel tab registrazioni e non sono SD ma
           sono OS/MOS e quindi ho diritto di vedere comunque il tab.
           In particolare le aziende che posso vedere in questo tab sono solo quelle dove sono
@@ -318,10 +322,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
       this.loadDocsListSubscription = null;
     }
     this.loadDocsListSubscription = this.docListService.getData(
-        "DocListWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione",
-        this.buildCustomFilterAndSort(),
-        buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
-        this.pageConf).subscribe((data: any) => {
+      "DocListWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione",
+      this.buildCustomFilterAndSort(),
+      buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
+      this.pageConf).subscribe((data: any) => {
         console.log(data);
         this.totalRecords = data.page.totalElements;
         this.loading = false;
@@ -332,7 +336,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
             ps:a quanto pare la proprietà totalRecords non è sufficiente. */
           this.resetDocsArrayLenght = false;
           this.dataTable.resetScrollTop();
-          this.docs = Array.from({length: this.totalRecords});
+          this.docs = Array.from({ length: this.totalRecords });
         }
 
         if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
@@ -382,7 +386,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * da utenti spenti.
    * @param event
    */
-  public filterPersone(event: any ) {
+  public filterPersone(event: any) {
     const filtersAndSorts = new FiltersAndSorts();
     filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.containsIgnoreCase, event.query));
     this.aziendeFiltrabili.forEach(a => {
@@ -398,7 +402,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
         } else {
           this.filteredPersone = [];
         }
-    });
+      });
   }
 
 
@@ -447,7 +451,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
         } else {
           this.filteredStrutture = [];
         }
-    });
+      });
   }
 
   /**
@@ -474,8 +478,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
   /**
    * Metodo che intercetta la ricerca globale. E' solo un passa carte.
    * Di fatto poi scatta l'onLazyLoad
-   * @param event 
-   * @param matchMode 
+   * @param event
+   * @param matchMode
    */
   public applyFilterGlobal(event: Event, matchMode: string) {
     this.dataTable.filterGlobal((event.target as HTMLInputElement).value, matchMode);
@@ -510,14 +514,43 @@ export class DocsListComponent implements OnInit, OnDestroy {
             const extractor = new CsvExtractor();
             extractor.exportCsv(tableTemp);
           }
-          
+
           this.exportCsvInProgress = false;
         },
         err => {
           this.exportCsvInProgress = false;
         }
-    );
+      );
   }
+
+
+  public onShowDatePicker(calendar: any) {
+    console.log("onShowDatePicker", calendar);
+    console.log("calendar.value", calendar.value);
+  }
+
+
+  public handleCalendarButtonEvent(calendar: any, command: any, event: Event) {
+    console.log("handleCalendarButtonEvent", calendar);
+    console.log("calandar", calendar.value);
+
+    if (command === "doFilter") { // pulsante OK
+      if (calendar.value)
+        calendar.onClickOutside.emit(calendar.value);
+      calendar.hideOverlay();
+    } else if (command === "setToday") { // pulsante OGGI
+      const date: Date = new Date();
+      const dateMeta = { day: date.getDate(), month: date.getMonth(), year: date.getFullYear(), otherMonth: date.getMonth() !== calendar.currentMonth || date.getFullYear() !== calendar.currentYear, today: true, selectable: true };
+      calendar.onDateSelect(event, dateMeta);
+    } else if (command === "clear") { // pulsante
+      if (calendar.value)
+        calendar.onClearButtonClick(event);
+      else
+        calendar.hideOverlay();
+    }
+
+  }
+
 
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
