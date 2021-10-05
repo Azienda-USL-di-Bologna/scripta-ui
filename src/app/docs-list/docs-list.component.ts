@@ -95,10 +95,6 @@ export class DocsListComponent implements OnInit, OnDestroy {
     });
 
     this.appService.appNameSelection("Elenco documenti");
-
-    console.log("LOCALIT", this.localIt);
-
-
   }
 
   @Input() get selectedColumns(): any[] {
