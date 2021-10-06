@@ -8,6 +8,7 @@
     justify-content: space-between;
     align-items: center;
     .p-button.p-button-outlined.p-button-icon-only.p-component {
+      border:1px solid #9da3a9 !important;
       color: white;
       &:hover {
         background-color: #7e7e7e !important;
@@ -20,9 +21,9 @@
       .p-selectbutton {
         flex-wrap: nowrap;
         .p-button {
+          border: 1px solid #9da3a9 !important;;
           color: #333333;
           background-color: #f4f4f4 !important;
-          border-color: #ffffff;
           &:hover {
             color: #333333;
             background-color: #993366 !important;
@@ -79,7 +80,12 @@
       .p-field-checkbox {
         margin-bottom: 0 !important;
       }
-
+      .p-button{
+        &:hover {
+          background-color: #7e7e7e !important;
+          border-color: #aeaaac !important;
+        }
+      }
       
     }
   }
