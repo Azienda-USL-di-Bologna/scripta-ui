@@ -1,6 +1,6 @@
 import { DatePipe } from "@angular/common";
 import { Component, ElementRef, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { Azienda, CODICI_RUOLO, DocList, Firmatario, Persona, PersonaService, PersonaVedente, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
@@ -11,6 +11,7 @@ import { AutoComplete } from "primeng/autocomplete";
 import { MultiSelect } from "primeng/multiselect";
 import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
+import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
 import { AppService } from "../app.service";
 import { Impostazioni } from "../utilities/utils";
 import { ColonnaBds, cols, colsCSV, DocsListMode, StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
@@ -40,6 +41,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   @ViewChild("autocompleteSullaScrivaniaDi") public autocompleteSullaScrivaniaDi: AutoComplete;
   @ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
 
+
   @ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>
 
   public docsListMode: DocsListMode;
@@ -59,6 +61,15 @@ export class DocsListComponent implements OnInit, OnDestroy {
   public filteredStrutture: Struttura[] = [];
   public loading: boolean = false;
   public exportCsvInProgress: boolean = false;
+  public docListModeItem: DocListModeItem[];
+  public selectedDocListMode: DocListModeItem = {
+    title: "",
+    label: "Miei  documenti", 
+    // icon: "pi pi-fw pi-list", 
+    routerLink: ["./" + DOCS_LIST_ROUTE], 
+    queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI}
+  };
+  public isSegretario: boolean = false;
 
   constructor(
     private messageService: MessageService,
@@ -68,17 +79,27 @@ export class DocsListComponent implements OnInit, OnDestroy {
     private loginService: NtJwtLoginService,
     private datepipe: DatePipe,
     private route: ActivatedRoute,
+    private router: Router,
     private appService: AppService
   ) { }
 
   ngOnInit(): void {
+    this.docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode || DocsListMode.ELENCO_DOCUMENTI;
+    this.router.navigate([], { relativeTo: this.route, queryParams: { mode: this.docsListMode } });
+    //todo fare per bene
+    //this.selectedDocListMode = this.docsListMode;
+    
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
           this.utenteUtilitiesLogin = utenteUtilities;
+          this.isSegretario = this.utenteUtilitiesLogin.getUtente().struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
+          this.calcDocListModeItem();
+          this.selectedDocListMode = this.docListModeItem.filter(element => element.queryParams.mode === this.docsListMode)[0];
           if (this.docsListMode) {
             this.calcolaAziendeFiltrabili();
           }
+
           this.loadConfigurationAndSetItUp();
         }
       )
@@ -88,13 +109,76 @@ export class DocsListComponent implements OnInit, OnDestroy {
       e faccio partire il caricamento. Ogni volta che la modalità cambia
       rifaccio la loadData */
     this.route.queryParams.subscribe(params => {
-      this.docsListMode = params["mode"];
+      //this.docsListMode = params["mode"];
       if (this.utenteUtilitiesLogin) this.calcolaAziendeFiltrabili();
       this.resetAndLoadData();
     });
-
+    
     this.appService.appNameSelection("Elenco documenti");
 
+  }
+
+  /**
+   * todo
+   */
+  public calcDocListModeItem(): void {
+    this.docListModeItem = [];
+    this.docListModeItem.push(
+      {
+        title: "Tutti i documenti che posso vedere",
+        label: "Visibili", 
+        // icon: "pi pi-fw pi-list", 
+        routerLink: ["./" + DOCS_LIST_ROUTE], 
+        queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI_VISIBILI}
+      },
+      {
+        title: "",
+        label: "Miei  documenti", 
+        // icon: "pi pi-fw pi-list", 
+        routerLink: ["./" + DOCS_LIST_ROUTE], 
+        queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI}
+      },
+    )
+    
+    if (this.isSegretario) {
+      this.docListModeItem.push({
+          label: "Firmario", 
+          title: "Le proposte in scrivania dei responsabili",
+          // icon: "pi pi-fw pi-user-edit", 
+          routerLink: ["./" + DOCS_LIST_ROUTE], 
+          queryParams: {"mode": DocsListMode.IFIRMARIO}
+      });
+      this.docListModeItem.push({
+        label: "Firmato", 
+        title: "Registrati dai responsabili",
+        // icon: "pi pi-fw pi-user-edit", 
+        routerLink: ["./" + DOCS_LIST_ROUTE], 
+        queryParams: {"mode": DocsListMode.IFIRMATO}
+      });
+    }
+
+    if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD)
+        || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.OS)
+        || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.MOS)) {
+      this.docListModeItem.push({
+        title: "",
+        label: "Registrazioni", 
+        // icon: "pi pi-fw pi-list", 
+        routerLink: ["./" + DOCS_LIST_ROUTE], 
+        queryParams: {"mode": DocsListMode.REGISTRAZIONI}
+      }); 
+    }
+  }
+  /**
+   * 
+   */
+  public onChangeDocListMode(event: any): void {
+    //debugger;
+    
+    this.docsListMode = event.option.queryParams.mode;
+    this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
+    /* this.calcolaAziendeFiltrabili();
+    this.resetAndLoadData(); */
   }
 
   @Input() get selectedColumns(): any[] {
@@ -533,4 +617,22 @@ export class DocsListComponent implements OnInit, OnDestroy {
       this.loadDocsListSubscription.unsubscribe();
     }
   }
+}
+
+
+export interface DocListModeItem {
+  label: string;
+  title: string;
+  // icon: string;
+  routerLink: string[];
+  queryParams: any;
+  
+          
+            // {
+            //       label: "Firmario", 
+            //       title: "Le proposte in scrivania dei responsabili",
+            //       icon: "pi pi-fw pi-user-edit", 
+            //       routerLink: ["./" + DOCS_LIST_ROUTE], 
+            //       queryParams: {"mode": DocsListMode.IFIRMARIO}
+            //   }
 }
