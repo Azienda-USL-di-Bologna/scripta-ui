@@ -270,6 +270,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
       this.messageService.add({
         severity: "info",
         summary: "Attenzione",
+        key: "docsListToast",
         detail: `Apertura del documento non consentita`
       });
     }
@@ -621,9 +622,12 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * (questo controllo viene fatto anche lato inDE)
    * 
    */
-  checkIfSullaMiaScrivania(doc: ExtendedDocList): boolean{
-    const isOnMyScriviania = doc.sullaScrivaniaDi.some(p => p.idPersona === this.utenteUtilitiesLogin.getUtente().idPersona.id);
-    return isOnMyScriviania
+  public checkIfSullaMiaScrivania(doc: ExtendedDocList): boolean{
+    if (!doc.sullaScrivaniaDi) {
+      return false;
+    }
+    let isOnMyScriviania = doc.sullaScrivaniaDi.some(p => p.idPersona === this.utenteUtilitiesLogin.getUtente().idPersona.id);
+    return isOnMyScriviania;
   }
 
   /**
@@ -635,6 +639,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
       message: "Stai eliminando questa proposta e i suoi eventuali allegati, vuoi proseguire?",
       accept: () => { this.docListService.eliminaProposta(doc).subscribe(res => {
           this.cancellaDaElenco(doc);
+          console.log(res);
         },
         err => {
           this.messageService.add({
