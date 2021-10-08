@@ -6,11 +6,12 @@ import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { buildLazyEventFiltersAndSorts, CsvExtractor } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from "@nfa/next-sdr";
-import { LazyLoadEvent, MessageService } from "primeng/api";
+import { Confirmation, ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
 import { AutoComplete } from "primeng/autocomplete";
 import { MultiSelect } from "primeng/multiselect";
 import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
+import { filter } from "rxjs/operators";
 import { AppService } from "../app.service";
 import { Impostazioni } from "../utilities/utils";
 import { ColonnaBds, cols, colsCSV, DocsListMode, StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
@@ -68,7 +69,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
     private loginService: NtJwtLoginService,
     private datepipe: DatePipe,
     private route: ActivatedRoute,
-    private appService: AppService
+    private appService: AppService,
+    private confirmationService: ConfirmationService
   ) { }
 
   ngOnInit(): void {
@@ -137,7 +139,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
       const settings: Impostazioni = JSON.parse(impostazioni.impostazioniVisualizzazione) as Impostazioni;
       if (settings["scripta.docList"]) {
         this.mieiDocumenti = settings["scripta.docList"].mieiDocumenti;
-        this._selectedColumns = this.cols.filter(c => settings["scripta.docList"].selectedColumn.some(e => e === c.field));
+        this._selectedColumns = this.cols.filter(c => settings["scripta.docList"].selectedColumn.some(e => e === c.field)|| c.field == 'eliminabile');
       }
     }
 
@@ -365,6 +367,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
       doc.statoUfficioAttiVisualizzazione = doc.statoUfficioAtti;
       doc.idPersonaResponsabileProcedimentoVisualizzazione = null;
       doc.idPersonaRedattriceVisualizzazione = null;
+      doc.eliminabile = null;
     });
     return extendedDocsList;
   }
@@ -514,6 +517,78 @@ export class DocsListComponent implements OnInit, OnDestroy {
           this.exportCsvInProgress = false;
         }
     );
+  }
+
+  /**
+   * Serve a rimuovere colonne dal multiselect che non devono poter essere selezionate,
+   * come per esempio la colonna eliminabile
+   */
+  removeColumn(): ColonnaBds[] {
+    var columnsWithoutEliminabile: ColonnaBds[];
+    columnsWithoutEliminabile = cols.filter(e => e.field !== "eliminabile")
+    return columnsWithoutEliminabile;
+  }
+
+  /**
+   * Questo serve per vedere se è sulla scrivania dell'utente in modo da potergliela far eliminare 
+   * (questo controllo viene fatto anche lato inDE)
+   * 
+   */
+  checkIfSullaMiaScrivania(doc: ExtendedDocList): boolean{
+    const isOnMyScriviania = doc.sullaScrivaniaDi.some(p => p.idPersona === this.utenteUtilitiesLogin.getUtente().idPersona.id);
+    return isOnMyScriviania
+  }
+
+  /**
+   * Chiede la conferma dell'eliminazione della proposta
+   */
+  public confermaEliminaProposta(doc: ExtendedDocList): void{
+    setTimeout(() => {
+    this.confirmationService.confirm({
+      message: "Stai eliminando questa proposta e i suoi eventuali allegati, vuoi proseguire?",
+      accept: () => { this.docListService.eliminaProposta(doc).subscribe(res => {
+          this.cancellaDaElenco(doc);
+        },
+        err => {
+          this.messageService.add({
+            severity: "info",
+            key : "docsListToast",
+            summary: "Attenzione",
+            detail: `Si è verificato un errore nell'eliminazione della proposta, contattare Babelcare`
+          });
+        });
+      }
+    }); 
+  });
+  }
+
+  /**
+   * La chiamo per poter rimuovere dall'elenco documenti la proposta che ho 
+   * cancellato, senza necessariamente dover ricaricare la pagina
+   */
+  public cancellaDaElenco(docToDelete: ExtendedDocList){
+    const filterAndSort = new FiltersAndSorts();
+      filterAndSort.addFilter(new FilterDefinition("ExtendedDocList.id", FILTER_TYPES.not_string.equals, docToDelete.id))
+    this.loadDocsListSubscription = this.docListService.getData(
+        "DocListWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione",
+        filterAndSort, null).subscribe((data: any) => {
+        console.log(data);
+        this.totalRecords = data.page.totalElements - 1;
+        if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
+          /* Questo meccanismo serve per cancellare i risultati di troppo della tranche precedente.
+          Se entro qui probabilmente ho fatto una ricerca */
+          Array.prototype.splice.apply(this.docs, [0, this.docs.length, ...this.setCustomProperties(data.results)]);
+        } else {
+          Array.prototype.splice.apply(this.docs, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
+        }
+        this.docs = [...this.docs]; // trigger change detection
+      });
+
+      this.messageService.add({
+        severity: "success",
+        key: "docsListToast",
+        detail: `Proposta eliminata con successo`
+      });
   }
 
   /**

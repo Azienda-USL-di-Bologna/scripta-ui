@@ -38,7 +38,7 @@
           tooltipPosition="bottom">
         </button>
         <p-multiSelect 
-          [options]="cols" 
+          [options]="removeColumn()" 
           [(ngModel)]="selectedColumns"
           (onChange)="onChangeSelectedColumns($event)"
           optionLabel="header"
@@ -91,6 +91,12 @@
     <!-- FILTRI -->
     <tr class="filter-row">
       <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
+        <div *ngSwitchCase="'eliminabile'">
+          <p-columnFilter #columnFilterAzienda [field]="col.filterField" matchMode="in" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+            </ng-template>
+          </p-columnFilter>
+        </div>
         <div *ngSwitchCase="'idAzienda'">
           <p-columnFilter #columnFilterAzienda [field]="col.filterField" matchMode="in" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
@@ -487,6 +493,11 @@
   <ng-template pTemplate="body" let-rowData let-columns="columns">
     <tr class="row-height">
       <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
+        <div *ngSwitchCase="'eliminabile'">
+          <span *ngIf= "rowData.eliminabile && checkIfSullaMiaScrivania(rowData)"  class="material-icons delete_outline-icon" pTooltip="Elimina proposta"  (click)="confermaEliminaProposta(rowData)">
+            close
+          </span>
+        </div>
         <div *ngSwitchCase="'idAzienda'">
           {{rowData.idAzienda.nome}}
         </div>
@@ -565,3 +576,4 @@
   </ng-template>
 </p-table>
 <p-toast key="docsListToast"></p-toast>
+<p-confirmDialog  [baseZIndex]="10000" ></p-confirmDialog>
