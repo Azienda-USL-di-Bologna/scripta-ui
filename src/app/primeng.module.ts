@@ -46,7 +46,7 @@ import { ConfirmDialogModule } from "primeng/confirmdialog";
     CheckboxModule,
     TabMenuModule,
     ProgressSpinnerModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
     SelectButtonModule
   ],
   exports: [
@@ -70,7 +70,7 @@ import { ConfirmDialogModule } from "primeng/confirmdialog";
     CheckboxModule,
     TabMenuModule,
     ProgressSpinnerModule,
-    SelectButtonModule
+    SelectButtonModule,
     ConfirmDialogModule
   ],
   providers: [MessageService, DialogService]
