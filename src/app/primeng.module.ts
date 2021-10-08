@@ -20,6 +20,7 @@ import {CheckboxModule} from 'primeng/checkbox';
 import {TabMenuModule} from 'primeng/tabmenu';
 import { ProgressSpinnerModule } from "primeng/progressspinner";
 import {SelectButtonModule} from 'primeng/selectbutton';
+import { ConfirmDialogModule } from "primeng/confirmdialog";
 
 @NgModule({
   declarations: [
@@ -45,6 +46,7 @@ import {SelectButtonModule} from 'primeng/selectbutton';
     CheckboxModule,
     TabMenuModule,
     ProgressSpinnerModule,
+    ConfirmDialogModule
     SelectButtonModule
   ],
   exports: [
@@ -69,6 +71,7 @@ import {SelectButtonModule} from 'primeng/selectbutton';
     TabMenuModule,
     ProgressSpinnerModule,
     SelectButtonModule
+    ConfirmDialogModule
   ],
   providers: [MessageService, DialogService]
 })

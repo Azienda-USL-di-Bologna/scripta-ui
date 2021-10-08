@@ -1,9 +1,23 @@
 import { StatoDoc, StatoUfficioAtti, TipologiaDoc } from "@bds/ng-internauta-model";
+import { UtenteUtilities } from "@bds/nt-jwt-login";
 import { FILTER_TYPES, NextSDRDateTypes } from "@nfa/next-sdr";
 import { Utils } from "src/app/utilities/utils";
 import { ExtendedDocList } from "./extended-doc-list";
 
 export const cols: ColonnaBds[] = [
+  {
+    field: "eliminabile",
+    header: "",
+    filterField: "eliminabile",
+    style: {},
+    headerClass: ["header-column", "eliminabile-column"],
+    filterClass: ["filter-column", "eliminabile-column"],
+    bodyClass: ["eliminabile-column"],
+    fieldType: "boolean",
+    filterMatchMode: FILTER_TYPES.not_string.equals,
+    useFilterMatchMode: false,
+    default: true
+  },
   {
     field: "idAzienda",
     header: "Ente",
@@ -326,6 +340,12 @@ export enum DocsListMode {
 }
 
 export const colsCSV: any[] = [
+  {
+    field: "eliminabile",
+    header: "",
+    fieldType: "boolean",
+    fieldId: "eliminabile"
+  },
   {
     field: "idAzienda.nome",
     header: "Ente",

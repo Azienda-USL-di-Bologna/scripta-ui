@@ -331,6 +331,16 @@
       }
     }
   }
+  .eliminabile-column{
+    min-width: 50px;
+    max-width: 50px;
+    .delete_outline-icon{
+      color: #203244;
+      &:hover {
+        color:#936;
+      }
+    }
+  }
   /* .scrollbar-overlay-placeholder-column {
     padding: 5px !important;
     border: none !important;

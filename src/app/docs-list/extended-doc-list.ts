@@ -15,6 +15,7 @@ export class ExtendedDocList extends DocList {
   private _sullaScrivaniaDiVisualizzazione: string[];
   private _idPersonaResponsabileProcedimentoVisualizzazione: string;
   private _idPersonaRedattriceVisualizzazione: string;
+  private _eliminabile: boolean;
 
   constructor() {super();}
 
@@ -202,6 +203,19 @@ export class ExtendedDocList extends DocList {
       this._idPersonaRedattriceVisualizzazione = this.calcDescrizioneVisualizzazionePerPersona(this.idPersonaRedattrice);
     }
   }
+
+  public get eliminabile(): boolean {
+    return this._eliminabile;
+  }
+
+  public set eliminabile(eliminabile: boolean) {
+    if(this.numeroRegistrazione){
+      this._eliminabile = false;
+    }else{
+      this._eliminabile = true;
+    }
+  }
+
 
   private calcDescrizioneVisualizzazionePerPersona(persona: Persona): string {
     return persona.descrizione + (persona.idSecondario ? " (" + persona.idSecondario + ")" : "");
