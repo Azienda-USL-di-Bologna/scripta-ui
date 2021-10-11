@@ -331,7 +331,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * Metodo che toglie il sort dalle colonne della tabella.
    * In particolare è usata dagli input dei campi che quando usati ordinano per ranking
    */
-  public resetSort() {
+  public resetSort(): void {
     this.dataTable.sortField = null;
     this.dataTable.sortOrder = null;
     this.dataTable.tableService.onSort(null);
@@ -341,7 +341,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * Metodo chiamato dal frontend quando l'utente cambia valore al flag mieiDocumenti
    * Risetta la configurazione pagine e chiama la laoddata
    */
-  public resetAndLoadData() {
+  public resetAndLoadData(): void {
     this.resetDocsArrayLenght = true;
     if (!!!this.storedLazyLoadEvent) {
       this.storedLazyLoadEvent = {};
@@ -611,9 +611,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * Serve a rimuovere colonne dal multiselect che non devono poter essere selezionate,
    * come per esempio la colonna eliminabile
    */
-  removeColumn(): ColonnaBds[] {
-    var columnsWithoutEliminabile: ColonnaBds[];
-    columnsWithoutEliminabile = cols.filter(e => e.field !== "eliminabile")
+  private removeColumn(): ColonnaBds[] {
+    const columnsWithoutEliminabile: ColonnaBds[] = cols.filter(e => e.field !== "eliminabile")
     return columnsWithoutEliminabile;
   }
 
@@ -633,48 +632,50 @@ export class DocsListComponent implements OnInit, OnDestroy {
   /**
    * Chiede la conferma dell'eliminazione della proposta
    */
-  public confermaEliminaProposta(doc: ExtendedDocList): void{
-    setTimeout(() => {
+  public confermaEliminaProposta(doc: ExtendedDocList): void {
     this.confirmationService.confirm({
       message: "Stai eliminando questa proposta e i suoi eventuali allegati, vuoi proseguire?",
-      accept: () => { this.docListService.eliminaProposta(doc).subscribe(res => {
-          this.cancellaDaElenco(doc);
-          console.log(res);
-        },
-        err => {
-          this.messageService.add({
-            severity: "info",
-            key : "docsListToast",
-            summary: "Attenzione",
-            detail: `Si è verificato un errore nell'eliminazione della proposta, contattare Babelcare`
-          });
-        });
+      accept: () => {
+        this.loading = true;
+        this.docListService.eliminaProposta(doc).subscribe(
+          res => {
+            this.cancellaDaElenco(doc);
+            console.log(res);
+          },
+          err => {
+            this.messageService.add({
+              severity: "info",
+              key : "docsListToast",
+              summary: "Attenzione",
+              detail: `Si è verificato un errore nell'eliminazione della proposta, contattare Babelcare`
+            });
+          }
+        );
       }
-    }); 
-  });
+    });
   }
 
   /**
    * La chiamo per poter rimuovere dall'elenco documenti la proposta che ho 
    * cancellato, senza necessariamente dover ricaricare la pagina
    */
-  public cancellaDaElenco(docToDelete: ExtendedDocList){
-    const filterAndSort = new FiltersAndSorts();
+  public cancellaDaElenco(docToDelete: ExtendedDocList): void {
+    this.resetAndLoadData();
+    /* const filterAndSort = new FiltersAndSorts();
       filterAndSort.addFilter(new FilterDefinition("ExtendedDocList.id", FILTER_TYPES.not_string.equals, docToDelete.id))
     this.loadDocsListSubscription = this.docListService.getData(
         "DocListWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione",
-        filterAndSort, null).subscribe((data: any) => {
+        filterAndSort, 
+        null).subscribe((data: any) => {
         console.log(data);
         this.totalRecords = data.page.totalElements - 1;
         if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
-          /* Questo meccanismo serve per cancellare i risultati di troppo della tranche precedente.
-          Se entro qui probabilmente ho fatto una ricerca */
           Array.prototype.splice.apply(this.docs, [0, this.docs.length, ...this.setCustomProperties(data.results)]);
         } else {
           Array.prototype.splice.apply(this.docs, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
         }
         this.docs = [...this.docs]; // trigger change detection
-      });
+      }); */
 
       this.messageService.add({
         severity: "success",
