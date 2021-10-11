@@ -552,7 +552,10 @@
     <tr class="row-height">
       <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
         <div *ngSwitchCase="'eliminabile'">
-          <span *ngIf= "rowData.eliminabile && checkIfSullaMiaScrivania(rowData)"  class="material-icons delete_outline-icon" pTooltip="Elimina proposta"  (click)="confermaEliminaProposta(rowData)">
+          <span *ngIf="rowData.eliminabile && checkIfSullaMiaScrivania(rowData)" 
+            class="material-icons delete_outline-icon" 
+            pTooltip="Elimina proposta" 
+            (click)="confermaEliminaProposta(rowData)">
             close
           </span>
         </div>
@@ -636,4 +639,4 @@
   </ng-template>
 </p-table>
 <p-toast key="docsListToast"></p-toast>
-<p-confirmDialog  [baseZIndex]="10000" ></p-confirmDialog>
+<p-confirmDialog [baseZIndex]="10000" acceptLabel="Sì"></p-confirmDialog>
