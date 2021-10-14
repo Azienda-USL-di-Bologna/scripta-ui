@@ -430,6 +430,14 @@ export class DocsListComponent implements OnInit, OnDestroy {
           Array.prototype.splice.apply(this.docs, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
         }
         this.docs = [...this.docs]; // trigger change detection
+      },
+        err => {
+          this.messageService.add({
+            severity: "warn",
+            key : "docsListToast",
+            summary: "Attenzione",
+            detail: `Si è verificato un errore nel caricamento, contattare Babelcare`
+          });
       });
   }
 
@@ -644,7 +652,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
           },
           err => {
             this.messageService.add({
-              severity: "info",
+              severity: "warn",
               key : "docsListToast",
               summary: "Attenzione",
               detail: `Si è verificato un errore nell'eliminazione della proposta, contattare Babelcare`

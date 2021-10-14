@@ -14,6 +14,7 @@
         background-color: #7e7e7e !important;
         border-color: #aeaaac !important;
       }
+      
     }
     .p-buttonselect {
       margin-left: 0.5vw;
@@ -84,6 +85,9 @@
         &:hover {
           background-color: #7e7e7e !important;
           border-color: #aeaaac !important;
+        }
+        &:target{
+          outline: none !important;
         }
       }
       
