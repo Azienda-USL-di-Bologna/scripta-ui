@@ -1,16 +1,18 @@
 import { DatePipe } from "@angular/common";
 import { Component, ElementRef, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { Azienda, CODICI_RUOLO, DocList, Firmatario, Persona, PersonaService, PersonaVedente, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { buildLazyEventFiltersAndSorts, CsvExtractor } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from "@nfa/next-sdr";
-import { LazyLoadEvent, MessageService } from "primeng/api";
+import { Confirmation, ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
 import { AutoComplete } from "primeng/autocomplete";
 import { MultiSelect } from "primeng/multiselect";
 import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
+import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
+import { filter } from "rxjs/operators";
 import { AppService } from "../app.service";
 import { Impostazioni } from "../utilities/utils";
 import { ColonnaBds, cols, colsCSV, DocsListMode, StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
@@ -40,7 +42,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   @ViewChild("autocompleteSullaScrivaniaDi") public autocompleteSullaScrivaniaDi: AutoComplete;
   @ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
 
-  @ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>
+  @ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>;
 
   public docsListMode: DocsListMode;
   public docs: ExtendedDocList[];
@@ -53,12 +55,22 @@ export class DocsListComponent implements OnInit, OnDestroy {
   public tipologiaVisualizzazioneObj = TipologiaDocTraduzioneVisualizzazione;
   public statoVisualizzazioneObj = StatoDocTraduzioneVisualizzazione;
   public statoUfficioAttiVisualizzazioneObj = StatoUfficioAttiTraduzioneVisualizzazione;
-  public localIt = LOCAL_IT;
+  public localIt: any = LOCAL_IT;
   public mieiDocumenti: boolean = true;
   public filteredPersone: Persona[] = [];
   public filteredStrutture: Struttura[] = [];
   public loading: boolean = false;
   public exportCsvInProgress: boolean = false;
+  public docListModeItem: DocListModeItem[];
+  public calendarcreazione: any;
+  public selectedDocListMode: DocListModeItem = {
+    title: "",
+    label: "Miei  documenti", 
+    // icon: "pi pi-fw pi-list", 
+    routerLink: ["./" + DOCS_LIST_ROUTE], 
+    queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI}
+  };
+  public isSegretario: boolean = false;
 
   constructor(
     private messageService: MessageService,
@@ -68,17 +80,28 @@ export class DocsListComponent implements OnInit, OnDestroy {
     private loginService: NtJwtLoginService,
     private datepipe: DatePipe,
     private route: ActivatedRoute,
-    private appService: AppService
+    private router: Router,
+    private appService: AppService,
+    private confirmationService: ConfirmationService
   ) { }
 
   ngOnInit(): void {
+    this.docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode || DocsListMode.ELENCO_DOCUMENTI;
+    this.router.navigate([], { relativeTo: this.route, queryParams: { mode: this.docsListMode } });
+    //todo fare per bene
+    //this.selectedDocListMode = this.docsListMode;
+    
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
           this.utenteUtilitiesLogin = utenteUtilities;
+          this.isSegretario = this.utenteUtilitiesLogin.getUtente().struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
+          this.calcDocListModeItem();
+          this.selectedDocListMode = this.docListModeItem.filter(element => element.queryParams.mode === this.docsListMode)[0];
           if (this.docsListMode) {
             this.calcolaAziendeFiltrabili();
           }
+
           this.loadConfigurationAndSetItUp();
         }
       )
@@ -88,13 +111,76 @@ export class DocsListComponent implements OnInit, OnDestroy {
       e faccio partire il caricamento. Ogni volta che la modalità cambia
       rifaccio la loadData */
     this.route.queryParams.subscribe(params => {
-      this.docsListMode = params["mode"];
+      //this.docsListMode = params["mode"];
       if (this.utenteUtilitiesLogin) this.calcolaAziendeFiltrabili();
       this.resetAndLoadData();
     });
-
+    
     this.appService.appNameSelection("Elenco documenti");
 
+  }
+
+  /**
+   * todo
+   */
+  public calcDocListModeItem(): void {
+    this.docListModeItem = [];
+    this.docListModeItem.push(
+      {
+        title: "Tutti i documenti che posso vedere",
+        label: "Visibili", 
+        // icon: "pi pi-fw pi-list", 
+        routerLink: ["./" + DOCS_LIST_ROUTE], 
+        queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI_VISIBILI}
+      },
+      {
+        title: "",
+        label: "Miei  documenti", 
+        // icon: "pi pi-fw pi-list", 
+        routerLink: ["./" + DOCS_LIST_ROUTE], 
+        queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI}
+      },
+    )
+    
+    if (this.isSegretario) {
+      this.docListModeItem.push({
+          label: "Firmario", 
+          title: "Le proposte in scrivania dei responsabili",
+          // icon: "pi pi-fw pi-user-edit", 
+          routerLink: ["./" + DOCS_LIST_ROUTE], 
+          queryParams: {"mode": DocsListMode.IFIRMARIO}
+      });
+      this.docListModeItem.push({
+        label: "Firmato", 
+        title: "Registrati dai responsabili",
+        // icon: "pi pi-fw pi-user-edit", 
+        routerLink: ["./" + DOCS_LIST_ROUTE], 
+        queryParams: {"mode": DocsListMode.IFIRMATO}
+      });
+    }
+
+    if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD)
+        || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.OS)
+        || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.MOS)) {
+      this.docListModeItem.push({
+        title: "",
+        label: "Registrazioni", 
+        // icon: "pi pi-fw pi-list", 
+        routerLink: ["./" + DOCS_LIST_ROUTE], 
+        queryParams: {"mode": DocsListMode.REGISTRAZIONI}
+      }); 
+    }
+  }
+  /**
+   * 
+   */
+  public onChangeDocListMode(event: any): void {
+    //debugger;
+    
+    this.docsListMode = event.option.queryParams.mode;
+    this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
+    /* this.calcolaAziendeFiltrabili();
+    this.resetAndLoadData(); */
   }
 
   @Input() get selectedColumns(): any[] {
@@ -110,7 +196,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   /**
    * Gestisco l'evento di cambiamento delle colonne visualizzate.
    * In particolare se ho tolto una colonna che era filtrata, tolgo quel filtro.
-   * @param event 
+   * @param event
    */
   public onChangeSelectedColumns(event: any): void {
     if (!event.value.some((e: ColonnaBds) => e.field === event.itemValue.field)) {
@@ -131,13 +217,13 @@ export class DocsListComponent implements OnInit, OnDestroy {
   private loadConfigurationAndSetItUp(): void {
     this.cols = cols;
     const impostazioni = this.utenteUtilitiesLogin.getImpostazioniApplicazione();
-    console.log("sa,",this.utenteUtilitiesLogin.getImpostazioniApplicazione());
+    console.log("sa,", this.utenteUtilitiesLogin.getImpostazioniApplicazione());
 
     if (impostazioni && impostazioni.impostazioniVisualizzazione && impostazioni.impostazioniVisualizzazione !== "") {
       const settings: Impostazioni = JSON.parse(impostazioni.impostazioniVisualizzazione) as Impostazioni;
       if (settings["scripta.docList"]) {
         this.mieiDocumenti = settings["scripta.docList"].mieiDocumenti;
-        this._selectedColumns = this.cols.filter(c => settings["scripta.docList"].selectedColumn.some(e => e === c.field));
+        this._selectedColumns = this.cols.filter(c => settings["scripta.docList"].selectedColumn.some(e => e === c.field)|| c.field == 'eliminabile');
       }
     }
 
@@ -184,6 +270,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
       this.messageService.add({
         severity: "info",
         summary: "Attenzione",
+        key: "docsListToast",
         detail: `Apertura del documento non consentita`
       });
     }
@@ -197,10 +284,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
   private calcolaAziendeFiltrabili() {
     this.aziendeFiltrabili = [];
     if (this.docsListMode !== DocsListMode.REGISTRAZIONI
-        || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD)) {
+      || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD)) {
       this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive;
     } else if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.OS)
-        || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.MOS)) {
+      || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.MOS)) {
       /* Se entro qui allora sono nel tab registrazioni e non sono SD ma
           sono OS/MOS e quindi ho diritto di vedere comunque il tab.
           In particolare le aziende che posso vedere in questo tab sono solo quelle dove sono
@@ -244,7 +331,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * Metodo che toglie il sort dalle colonne della tabella.
    * In particolare è usata dagli input dei campi che quando usati ordinano per ranking
    */
-  public resetSort() {
+  public resetSort(): void {
     this.dataTable.sortField = null;
     this.dataTable.sortOrder = null;
     this.dataTable.tableService.onSort(null);
@@ -254,7 +341,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * Metodo chiamato dal frontend quando l'utente cambia valore al flag mieiDocumenti
    * Risetta la configurazione pagine e chiama la laoddata
    */
-  public resetAndLoadData() {
+  public resetAndLoadData(): void {
     this.resetDocsArrayLenght = true;
     if (!!!this.storedLazyLoadEvent) {
       this.storedLazyLoadEvent = {};
@@ -318,10 +405,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
       this.loadDocsListSubscription = null;
     }
     this.loadDocsListSubscription = this.docListService.getData(
-        "DocListWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione",
-        this.buildCustomFilterAndSort(),
-        buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
-        this.pageConf).subscribe((data: any) => {
+      "DocListWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione",
+      this.buildCustomFilterAndSort(),
+      buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
+      this.pageConf).subscribe((data: any) => {
         console.log(data);
         this.totalRecords = data.page.totalElements;
         this.loading = false;
@@ -332,7 +419,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
             ps:a quanto pare la proprietà totalRecords non è sufficiente. */
           this.resetDocsArrayLenght = false;
           this.dataTable.resetScrollTop();
-          this.docs = Array.from({length: this.totalRecords});
+          this.docs = Array.from({ length: this.totalRecords });
         }
 
         if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
@@ -343,6 +430,14 @@ export class DocsListComponent implements OnInit, OnDestroy {
           Array.prototype.splice.apply(this.docs, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
         }
         this.docs = [...this.docs]; // trigger change detection
+      },
+        err => {
+          this.messageService.add({
+            severity: "warn",
+            key : "docsListToast",
+            summary: "Attenzione",
+            detail: `Si è verificato un errore nel caricamento, contattare Babelcare`
+          });
       });
   }
 
@@ -361,10 +456,14 @@ export class DocsListComponent implements OnInit, OnDestroy {
       doc.registrazioneVisualizzazione = null; // Qui sto passando null. Ma è un trucco, in realtà sto settando i valori.
       doc.propostaVisualizzazione = null;
       doc.statoVisualizzazione = doc.stato;
-      // doc.fascicolazioniVisualizzazione = null;
       doc.statoUfficioAttiVisualizzazione = doc.statoUfficioAtti;
       doc.idPersonaResponsabileProcedimentoVisualizzazione = null;
       doc.idPersonaRedattriceVisualizzazione = null;
+      doc.fascicolazioniVisualizzazione = null;
+      doc.eliminabile = null;
+      doc.destinatariVisualizzazione = null;
+      doc.firmatariVisualizzazione = null;
+      doc.sullaScrivaniaDiVisualizzazione = null;
     });
     return extendedDocsList;
   }
@@ -379,7 +478,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * da utenti spenti.
    * @param event
    */
-  public filterPersone(event: any ) {
+  public filterPersone(event: any) {
     const filtersAndSorts = new FiltersAndSorts();
     filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.containsIgnoreCase, event.query));
     this.aziendeFiltrabili.forEach(a => {
@@ -395,7 +494,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
         } else {
           this.filteredPersone = [];
         }
-    });
+      });
   }
 
 
@@ -444,7 +543,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
         } else {
           this.filteredStrutture = [];
         }
-    });
+      });
   }
 
   /**
@@ -471,8 +570,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
   /**
    * Metodo che intercetta la ricerca globale. E' solo un passa carte.
    * Di fatto poi scatta l'onLazyLoad
-   * @param event 
-   * @param matchMode 
+   * @param event
+   * @param matchMode
    */
   public applyFilterGlobal(event: Event, matchMode: string) {
     this.dataTable.filterGlobal((event.target as HTMLInputElement).value, matchMode);
@@ -507,14 +606,120 @@ export class DocsListComponent implements OnInit, OnDestroy {
             const extractor = new CsvExtractor();
             extractor.exportCsv(tableTemp);
           }
-          
+
           this.exportCsvInProgress = false;
         },
         err => {
           this.exportCsvInProgress = false;
         }
-    );
+      );
   }
+
+  /**
+   * Serve a rimuovere colonne dal multiselect che non devono poter essere selezionate,
+   * come per esempio la colonna eliminabile
+   */
+  private removeColumn(): ColonnaBds[] {
+    const columnsWithoutEliminabile: ColonnaBds[] = cols.filter(e => e.field !== "eliminabile")
+    return columnsWithoutEliminabile;
+  }
+
+  /**
+   * Questo serve per vedere se è sulla scrivania dell'utente in modo da potergliela far eliminare 
+   * (questo controllo viene fatto anche lato inDE)
+   * 
+   */
+  public checkIfSullaMiaScrivania(doc: ExtendedDocList): boolean{
+    if (!doc.sullaScrivaniaDi) {
+      return false;
+    }
+    let isOnMyScriviania = doc.sullaScrivaniaDi.some(p => p.idPersona === this.utenteUtilitiesLogin.getUtente().idPersona.id);
+    return isOnMyScriviania;
+  }
+
+  /**
+   * Chiede la conferma dell'eliminazione della proposta
+   */
+  public confermaEliminaProposta(doc: ExtendedDocList): void {
+    this.confirmationService.confirm({
+      message: "Stai eliminando questa proposta e i suoi eventuali allegati, vuoi proseguire?",
+      accept: () => {
+        this.loading = true;
+        this.docListService.eliminaProposta(doc).subscribe(
+          res => {
+            this.cancellaDaElenco(doc);
+            console.log(res);
+          },
+          err => {
+            this.messageService.add({
+              severity: "warn",
+              key : "docsListToast",
+              summary: "Attenzione",
+              detail: `Si è verificato un errore nell'eliminazione della proposta, contattare Babelcare`
+            });
+          }
+        );
+      }
+    });
+  }
+
+  /**
+   * La chiamo per poter rimuovere dall'elenco documenti la proposta che ho 
+   * cancellato, senza necessariamente dover ricaricare la pagina
+   */
+  public cancellaDaElenco(docToDelete: ExtendedDocList): void {
+    this.resetAndLoadData();
+    /* const filterAndSort = new FiltersAndSorts();
+      filterAndSort.addFilter(new FilterDefinition("ExtendedDocList.id", FILTER_TYPES.not_string.equals, docToDelete.id))
+    this.loadDocsListSubscription = this.docListService.getData(
+        "DocListWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione",
+        filterAndSort, 
+        null).subscribe((data: any) => {
+        console.log(data);
+        this.totalRecords = data.page.totalElements - 1;
+        if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
+          Array.prototype.splice.apply(this.docs, [0, this.docs.length, ...this.setCustomProperties(data.results)]);
+        } else {
+          Array.prototype.splice.apply(this.docs, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
+        }
+        this.docs = [...this.docs]; // trigger change detection
+      }); */
+
+      this.messageService.add({
+        severity: "success",
+        key: "docsListToast",
+        detail: `Proposta eliminata con successo`
+      });
+  }
+
+
+  public onShowDatePicker(calendar: any) {
+    console.log("onShowDatePicker", calendar);
+    console.log("calendar.value", calendar.value);
+  }
+
+
+  public handleCalendarButtonEvent(calendar: any, command: any, event: Event) {
+    console.log("handleCalendarButtonEvent", calendar);
+    console.log("calandar", calendar.value);
+
+    if (command === "doFilter") { // pulsante OK
+      if (calendar.value)
+        calendar.onClickOutside.emit(calendar.value);
+      calendar.hideOverlay();
+    } else if (command === "setToday") { // pulsante OGGI
+      const date: Date = new Date();
+      const dateMeta = { day: date.getDate(), month: date.getMonth(), year: date.getFullYear(), otherMonth: date.getMonth() !== calendar.currentMonth || date.getFullYear() !== calendar.currentYear, today: true, selectable: true };
+      calendar.onDateSelect(event, dateMeta);
+    } else if (command === "clear") { // pulsante
+      if (calendar.value)
+        calendar.onClearButtonClick(event);
+      else
+        calendar.hideOverlay();
+    }
+
+  }
+
 
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
@@ -533,4 +738,22 @@ export class DocsListComponent implements OnInit, OnDestroy {
       this.loadDocsListSubscription.unsubscribe();
     }
   }
+}
+
+
+export interface DocListModeItem {
+  label: string;
+  title: string;
+  // icon: string;
+  routerLink: string[];
+  queryParams: any;
+  
+          
+            // {
+            //       label: "Firmario", 
+            //       title: "Le proposte in scrivania dei responsabili",
+            //       icon: "pi pi-fw pi-user-edit", 
+            //       routerLink: ["./" + DOCS_LIST_ROUTE], 
+            //       queryParams: {"mode": DocsListMode.IFIRMARIO}
+            //   }
 }

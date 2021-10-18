@@ -9,9 +9,13 @@ export class ExtendedDocList extends DocList {
   private _statoVisualizzazione: string;
   private _statoUfficioAttiVisualizzazione: string;
   private _codiceRegistro: string;
-  // private _fascicolazioniVisualizzazione: string[];
+  private _fascicolazioniVisualizzazione: string[];
+  private _destinatariVisualizzazione: string[];
+  private _firmatariVisualizzazione: string[];
+  private _sullaScrivaniaDiVisualizzazione: string[];
   private _idPersonaResponsabileProcedimentoVisualizzazione: string;
   private _idPersonaRedattriceVisualizzazione: string;
+  private _eliminabile: boolean;
 
   constructor() {super();}
 
@@ -126,7 +130,7 @@ export class ExtendedDocList extends DocList {
     }
   }
 
-  /* public get fascicolazioniVisualizzazione(): string[] {
+  public get fascicolazioniVisualizzazione(): string[] {
     return this._fascicolazioniVisualizzazione;
   }
 
@@ -137,7 +141,46 @@ export class ExtendedDocList extends DocList {
         this._fascicolazioniVisualizzazione.push("[" + f.numerazione + "] " + f.nome);
       });
     }
-  } */
+  }
+
+  public get destinatariVisualizzazione(): string[] {
+    return this._destinatariVisualizzazione;
+  }
+
+  public set destinatariVisualizzazione(notUsedButNecessary: string[]) {
+    this._destinatariVisualizzazione = [];
+    if (this.destinatari) {
+      this.destinatari.forEach(f => {
+        this._destinatariVisualizzazione.push(f.nome);
+      });
+    }
+  }
+
+  public get firmatariVisualizzazione(): string[] {
+    return this._firmatariVisualizzazione;
+  }
+
+  public set firmatariVisualizzazione(notUsedButNecessary: string[]) {
+    this._firmatariVisualizzazione = [];
+    if (this.firmatari) {
+      this.firmatari.forEach(f => {
+        this._firmatariVisualizzazione.push(f.descrizione);
+      });
+    }
+  }
+
+  public get sullaScrivaniaDiVisualizzazione(): string[] {
+    return this._sullaScrivaniaDiVisualizzazione;
+  }
+
+  public set sullaScrivaniaDiVisualizzazione(notUsedButNecessary: string[]) {
+    this._sullaScrivaniaDiVisualizzazione = [];
+    if (this.sullaScrivaniaDi) {
+      this.sullaScrivaniaDi.forEach(f => {
+        this._sullaScrivaniaDiVisualizzazione.push(f.descrizione);
+      });
+    }
+  }
 
   public get idPersonaResponsabileProcedimentoVisualizzazione(): string {
     return this._idPersonaResponsabileProcedimentoVisualizzazione;
@@ -160,6 +203,19 @@ export class ExtendedDocList extends DocList {
       this._idPersonaRedattriceVisualizzazione = this.calcDescrizioneVisualizzazionePerPersona(this.idPersonaRedattrice);
     }
   }
+
+  public get eliminabile(): boolean {
+    return this._eliminabile;
+  }
+
+  public set eliminabile(eliminabile: boolean) {
+    if(this.numeroRegistrazione){
+      this._eliminabile = false;
+    }else{
+      this._eliminabile = true;
+    }
+  }
+
 
   private calcDescrizioneVisualizzazionePerPersona(persona: Persona): string {
     return persona.descrizione + (persona.idSecondario ? " (" + persona.idSecondario + ")" : "");

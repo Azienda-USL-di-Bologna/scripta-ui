@@ -1,5 +1,5 @@
-<p-table #dt
-  ariaLabel="Tabella elenco documenti"
+<p-table #dt 
+  ariaLabel="Tabella elenco documenti" 
   [value]="docs" 
   dataKey="id" 
   [columns]="selectedColumns"
@@ -9,16 +9,34 @@
   [virtualScroll]="true" 
   [virtualScrollDelay]="150"
   [virtualRowHeight]="54" 
-  [lazy]="true"
-  [lazyLoadOnInit]="false"
-  [totalRecords]="totalRecords" 
-  (onLazyLoad)="onLazyLoad($event)"
-  [loading]="loading"
+  [lazy]="true" 
+  [lazyLoadOnInit]="false" 
+  [totalRecords]="totalRecords"
+  (onLazyLoad)="onLazyLoad($event)" 
+  [loading]="loading" 
   styleClass="p-table-scripta-docs-list"
   tableStyleClass="docslist-table-body">
   <ng-template pTemplate="caption">
     <div class="caption-row">
       <div class="left-content">
+        <div class="p-d-flex">
+          <span class="p-input-icon-left p-ml-auto">
+            <i class="pi pi-search"></i>
+            <input #inputGobalFilter pInputText type="text" (input)="applyFilterGlobal($event, 'equals')" placeholder="Ricerca.. " />
+          </span>
+          <button pButton class="p-button-outlined" icon="pi pi-filter-slash" (click)="clear()"></button>
+          <p-selectButton class="p-buttonselect"
+            [options]="docListModeItem" 
+            [(ngModel)]="selectedDocListMode" 
+            optionLabel="label"
+            (onOptionClick)="onChangeDocListMode($event)">
+          </p-selectButton>
+        </div>
+      </div>
+      <div class="center-content">
+        <span class="doc-trovati-info">{{totalRecords}} documenti trovati</span>
+      </div>
+      <div class="right-content">
         <span *ngIf="exportCsvInProgress">
           <p-progressSpinner 
             [style]="{width: '2em', height: '2em', marginRight: '7px'}"
@@ -34,22 +52,19 @@
           icon="pi pi-file-o" 
           (click)="exportCSV(dt)" 
           class="p-mr-2" 
-          pTooltip="CSV" 
+          pTooltip="CSV"
           tooltipPosition="bottom">
         </button>
         <p-multiSelect 
-          [options]="cols" 
-          [(ngModel)]="selectedColumns"
+          [options]="removeColumn()" 
+          [(ngModel)]="selectedColumns" 
           (onChange)="onChangeSelectedColumns($event)"
-          optionLabel="header"
-          selectedItemsLabel="{0} colonne selezionate" 
+          optionLabel="header" 
+          selectedItemsLabel="{0} colonne selezionate"
           [style]="{minWidth: '250px', maxWidth: '250px'}" 
           placeholder="Scegli le colonne da visualizzare">
         </p-multiSelect>
-        <span class="doc-trovati-info">{{totalRecords}} documenti trovati</span>
-      </div>
-      <div class="right-content">
-        <div class="p-field-checkbox" *ngIf="docsListMode === enumDocsListMode.ELENCO_DOCUMENTI">
+        <!-- <div class="p-field-checkbox" *ngIf="docsListMode === enumDocsListMode.ELENCO_DOCUMENTI">
           <p-checkbox 
             [(ngModel)]="mieiDocumenti" 
             [binary]="true" 
@@ -57,14 +72,7 @@
             (onChange)="resetAndLoadData(); saveConfiguration()">
           </p-checkbox>
           <label for="binary">Di cui sono attore</label>
-        </div>
-        <div class="p-d-flex">
-          <span class="p-input-icon-left p-ml-auto">
-            <i class="pi pi-search"></i>
-            <input #inputGobalFilter pInputText type="text" (input)="applyFilterGlobal($event, 'equals')" placeholder="Ricerca.. " />
-          </span>
-        </div>
-        <button pButton label="Pulisci" class="p-button-outlined" icon="pi pi-filter-slash" (click)="clear()"></button>
+        </div> -->
       </div>
     </div>
   </ng-template>
@@ -91,16 +99,22 @@
     <!-- FILTRI -->
     <tr class="filter-row">
       <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
+        <div *ngSwitchCase="'eliminabile'">
+          <p-columnFilter #columnFilterAzienda [field]="col.filterField" matchMode="in" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+            </ng-template>
+          </p-columnFilter>
+        </div>
         <div *ngSwitchCase="'idAzienda'">
           <p-columnFilter #columnFilterAzienda [field]="col.filterField" matchMode="in" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-multiSelect #multiSelectAzienda
+              <p-multiSelect #multiSelectAzienda 
                 [ngModel]="value" 
                 [options]="aziendeFiltrabili" 
-                placeholder="" 
-                optionValue="id"
-                optionLabel="nome"
-                (onChange)="filter($event.value)"
+                
+                optionValue="id" 
+                optionLabel="nome" 
+                (onChange)="filter($event.value)" 
                 appendTo="body">
                 <ng-template let-option pTemplate="item">
                   <div class="p-multiselect-representative-option">
@@ -117,10 +131,10 @@
               <p-multiSelect 
                 [ngModel]="value" 
                 [options]="tipologiaVisualizzazioneObj" 
-                placeholder="" 
-                optionValue="value"
-                optionLabel="nome"
-                (onChange)="filter($event.value)"
+                
+                optionValue="value" 
+                optionLabel="nome" 
+                (onChange)="filter($event.value)" 
                 appendTo="body">
                 <ng-template let-option pTemplate="item">
                   <div class="p-multiselect-representative-option">
@@ -132,13 +146,13 @@
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'registrazione'" class="search-wrapper">
-          <p-columnFilter #colfilterregistrazione
+          <p-columnFilter #colfilterregistrazione 
             type="numeric" 
-            [field]="col.filterField" 
+            [field]="col.filterField"
             [matchMode]="col.filterMatchMode" 
-            [showMenu]="false"
-            [useGrouping]="false"
-            placeholder=""
+            [showMenu]="false" 
+            [useGrouping]="false" 
+            
             pTooltip="Inserire solo numeri">
           </p-columnFilter>
           <button *ngIf="colfilterregistrazione.hasFilter()"
@@ -166,45 +180,78 @@
           </button>
         </div>
         <div *ngSwitchCase="'dataCreazione'">
-          <p-columnFilter [field]="col.filterField" type="date" matchMode="is" [showMenu]="false">
+          <p-columnFilter 
+            [field]="col.filterField" 
+            type="date" matchMode="is" 
+            [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-calendar #calendarcreazione
-                inputId="basic" 
-                [yearNavigator]="true"
-                yearRange="2000:2030"
-                [ngModel]="value"
+              <p-calendar #calendarcreazione 
+                inputId="range" 
+                [yearNavigator]="true" 
+                yearRange="2000:2099"
+                [ngModel]="value" 
                 dataType="date" 
                 dateFormat="dd/mm/yy"
                 [showIcon]="false"
-                [showButtonBar]="true"
+                [showButtonBar]="false"
                 [locale]="localIt"
                 selectionMode="range"
                 [readonlyInput]="true"
                 (onClickOutside)="filter(calendarcreazione.value)"
                 (onClearClick)="filter(null)"
+                (onShow)="onShowDatePicker(calendarcreazione)"
+                (onClickOutside)="calendarcreazione.value ? filter(calendarcreazione.value) : handleCalendarButtonEvent(calendarcreazione, 'doFilter', $event)"
                 appendTo="body">
+                <ng-template pTemplate="footer" class="calendar-filter-footer-button">
+                  <div class="calendar-filter-footer-button-container">
+                    <p-button (click)="handleCalendarButtonEvent(calendarcreazione, 'doFilter', $event)">Conferma
+                    </p-button>
+                    <p-button (click)="handleCalendarButtonEvent(calendarcreazione, 'setToday', $event)">Oggi
+                    </p-button>
+                    <p-button (click)="handleCalendarButtonEvent(calendarcreazione, 'clear', $event)">Cancella
+                    </p-button>
+                  </div>
+                </ng-template>
               </p-calendar>
             </ng-template>
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'dataRegistrazione'">
-          <p-columnFilter [field]="col.filterField" type="date" matchMode="is" [showMenu]="false">
+          
+          <p-columnFilter 
+          [field]="col.filterField" 
+          type="date" 
+          matchMode="is" 
+          [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-calendar #calendarregistrazione
                 inputId="basic" 
                 [ngModel]="value"
                 [yearNavigator]="true"
-                yearRange="2000:2030"
+                yearRange="2000:2099"
+                [ngModel]="value" 
                 dataType="date" 
                 dateFormat="dd/mm/yy"
                 [showIcon]="false"
-                [showButtonBar]="true"
+                [showButtonBar]="false"
                 [locale]="localIt"
                 selectionMode="range"
                 [readonlyInput]="true"
                 (onClickOutside)="filter(calendarregistrazione.value)"
                 (onClearClick)="filter(null)"
+                (onShow)="onShowDatePicker(calendarregistrazione)"
+                (onClickOutside)="calendarregistrazione.value ? filter(calendarregistrazione.value) : handleCalendarButtonEvent(calendarregistrazione, 'doFilter', $event)"
                 appendTo="body">
+                <ng-template pTemplate="footer" class="calendar-filter-footer-button">
+                  <div class="calendar-filter-footer-button-container">
+                    <p-button (click)="handleCalendarButtonEvent(calendarregistrazione, 'doFilter', $event)">Conferma
+                    </p-button>
+                    <p-button (click)="handleCalendarButtonEvent(calendarregistrazione, 'setToday', $event)">Oggi
+                    </p-button>
+                    <p-button (click)="handleCalendarButtonEvent(calendarregistrazione, 'clear', $event)">Cancella
+                    </p-button>
+                  </div>
+                </ng-template>
               </p-calendar>
             </ng-template>
           </p-columnFilter>
@@ -220,24 +267,36 @@
                 dataType="date" 
                 dateFormat="dd/mm/yy"
                 [showIcon]="false"
-                [showButtonBar]="true"
+                [showButtonBar]="false"
                 [locale]="localIt"
                 selectionMode="range"
                 [readonlyInput]="true"
                 (onClickOutside)="filter(calendarpubblicazione.value)"
                 (onClearClick)="filter(null)"
-                appendTo="body">
+                (onShow)="onShowDatePicker(calendarpubblicazione)"
+                (onClickOutside)="filter(calendarpubblicazione.value)" 
+                (onClickOutside)="calendarpubblicazione.value ? filter(calendarpubblicazione.value) : 
+                handleCalendarButtonEvent(calendarpubblicazione, 'doFilter', $event)" appendTo="body">
+                <ng-template pTemplate="footer" class="calendar-filter-footer-button">
+                  <div class="calendar-filter-footer-button-container">
+                    <p-button (click)="handleCalendarButtonEvent(calendarpubblicazione, 'doFilter', $event)">Conferma
+                    </p-button>
+                    <p-button (click)="handleCalendarButtonEvent(calendarpubblicazione, 'setToday', $event)">Oggi
+                    </p-button>
+                    <p-button (click)="handleCalendarButtonEvent(calendarpubblicazione, 'clear', $event)">Cancella
+                    </p-button>
+                  </div>
+                </ng-template>
               </p-calendar>
             </ng-template>
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'oggetto'" class="search-wrapper">
-          <p-columnFilter #colfilteroggetto
+          <p-columnFilter #colfilteroggetto 
             type="text" 
             [field]="col.filterField" 
-            [matchMode]="col.filterMatchMode" 
-            [showMenu]="false"
-            placeholder="">
+            [matchMode]="col.filterMatchMode"
+            [showMenu]="false" >
             <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
               <input #inputOggetto 
                 type="text" 
@@ -252,7 +311,7 @@
             [field]="col.filterField" 
             [matchMode]="col.filterMatchMode" 
             [showMenu]="false"
-            placeholder="">
+            >
           </p-columnFilter> -->
           <button  *ngIf="colfilteroggetto.hasFilter()"
             class="material-icons close-icon" 
@@ -262,15 +321,17 @@
           </button>
         </div>
         <div *ngSwitchCase="'stato'">
-          <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
+          <p-columnFilter 
+            [field]="col.filterField" 
+            matchMode="in" 
+            [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-multiSelect 
                 [ngModel]="value" 
                 [options]="statoVisualizzazioneObj" 
-                placeholder="" 
-                optionValue="value"
-                optionLabel="nome"
-                (onChange)="filter($event.value)"
+                 optionValue="value"
+                optionLabel="nome" 
+                (onChange)="filter($event.value)" 
                 appendTo="body">
                 <ng-template let-option pTemplate="item">
                   <div class="p-multiselect-representative-option">
@@ -282,34 +343,36 @@
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'fascicolazioni'" class="search-wrapper">
-          <p-columnFilter #colfilterfascicolazioni
-          type="text" 
-          [field]="col.filterField" 
-          [matchMode]="col.filterMatchMode" 
-          [showMenu]="false"
-          placeholder="">
-          <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
-            <input #inputFascicolazioni type="text" pInputText [value]="value" 
-                  (keydown.enter)="resetSort(); filterMethod(inputFascicolazioni.value)">
-          </ng-template>
-        </p-columnFilter>
-          <button  *ngIf="colfilterfascicolazioni.hasFilter()"
-            class="material-icons close-icon" 
-            type="reset"
+          <p-columnFilter #colfilterfascicolazioni 
+            type="text" 
+            [field]="col.filterField"
+            [matchMode]="col.filterMatchMode" 
+            [showMenu]="false" >
+            <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
+              <input #inputFascicolazioni 
+              type="text" 
+              pInputText 
+              [value]="value"
+              (keydown.enter)="resetSort(); filterMethod(inputFascicolazioni.value)">
+            </ng-template>
+          </p-columnFilter>
+          <button *ngIf="colfilterfascicolazioni.hasFilter()" class="material-icons close-icon" type="reset"
             (click)="colfilterfascicolazioni.clearFilter()">
             close
           </button>
         </div>
         <div *ngSwitchCase="'statoUfficioAtti'">
-          <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
+          <p-columnFilter 
+            [field]="col.filterField" 
+            matchMode="in" 
+            [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-multiSelect 
                 [ngModel]="value" 
-                [options]="statoUfficioAttiVisualizzazioneObj" 
-                placeholder="" 
-                optionValue="value"
-                optionLabel="nome"
-                (onChange)="filter($event.value)"
+                [options]="statoUfficioAttiVisualizzazioneObj"
+                optionValue="value" 
+                optionLabel="nome" 
+                (onChange)="filter($event.value)" 
                 appendTo="body">
                 <ng-template let-option pTemplate="item">
                   <div class="p-multiselect-representative-option">
@@ -321,19 +384,21 @@
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'idPersonaResponsabileProcedimento'" class="search-wrapper">
-          <p-columnFilter #colfilteridPersonaResponsabileProcedimento
-            [field]="col.filterField" matchMode="equals" [showMenu]="false">
+          <p-columnFilter #colfilteridPersonaResponsabileProcedimento 
+            [field]="col.filterField" 
+            matchMode="equals"
+            [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-autoComplete
               #autocompleteidPersonaResponsabileProcedimento
                 [showEmptyMessage]="true"
-                emptyMessage="Nessun utente trovato"
+                emptyMessage="Nessun utente trovato" 
                 [suggestions]="filteredPersone"
-                (completeMethod)="filterPersone($event)"
+                (completeMethod)="filterPersone($event)" 
                 field="descrizioneVisualizzazione"
-                (onSelect)="filter($event?.id)"
+                (onSelect)="filter($event?.id)" 
                 (onClear)="filter(null)"
-                type="search"
+                type="search" 
                 appendTo="body">
               </p-autoComplete>
             </ng-template>
@@ -346,19 +411,20 @@
           </button>
         </div>
         <div *ngSwitchCase="'idPersonaRedattrice'" class="search-wrapper">
-          <p-columnFilter #colfilteridPersonaRedattrice
-            [field]="col.filterField" matchMode="equals" [showMenu]="false">
+          <p-columnFilter #colfilteridPersonaRedattrice 
+            [field]="col.filterField" 
+            matchMode="equals" 
+            [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-autoComplete
-                #autocompleteIdPersonaRedattrice
+              <p-autoComplete #autocompleteIdPersonaRedattrice 
                 [showEmptyMessage]="true"
-                emptyMessage="Nessun utente trovato"
+                emptyMessage="Nessun utente trovato" 
                 [suggestions]="filteredPersone"
-                (completeMethod)="filterPersone($event)"
+                (completeMethod)="filterPersone($event)" 
                 field="descrizioneVisualizzazione"
-                (onSelect)="filter($event?.id)"
-                (onClear)="filter(null)"
-                type="search"
+                (onSelect)="filter($event?.id)" 
+                (onClear)="filter(null)" 
+                type="search" 
                 appendTo="body">
               </p-autoComplete>
             </ng-template>
@@ -371,23 +437,24 @@
           </button>
         </div>
         <div *ngSwitchCase="'idStrutturaRegistrazione'" class="search-wrapper">
-          <p-columnFilter #colfilteridStrutturaRegistrazione
-            [field]="col.filterField" matchMode="equals" [showMenu]="false">
+          <p-columnFilter #colfilteridStrutturaRegistrazione 
+            [field]="col.filterField" 
+            matchMode="equals"
+            [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-autoComplete
-                #autocompleteIdStrutturaRegistrazione
+              <p-autoComplete #autocompleteIdStrutturaRegistrazione 
                 [showEmptyMessage]="true"
-                emptyMessage="Nessuna struttura trovata"
+                emptyMessage="Nessuna struttura trovata" 
                 [suggestions]="filteredStrutture"
-                (completeMethod)="filterStrutture($event)"
+                (completeMethod)="filterStrutture($event)" 
                 field="descrizioneVisualizzazione"
-                (onSelect)="filter($event?.id)"
-                (onClear)="filter(null)"
+                (onSelect)="filter($event?.id)" 
+                (onClear)="filter(null)" 
                 appendTo="body">
               </p-autoComplete>
             </ng-template>
           </p-columnFilter>
-          <button  *ngIf="colfilteridStrutturaRegistrazione.hasFilter()"
+          <button *ngIf="colfilteridStrutturaRegistrazione.hasFilter()" 
             class="material-icons close-icon" 
             type="reset"
             (click)="colfilteridStrutturaRegistrazione.clearFilter(); autocompleteIdStrutturaRegistrazione.writeValue(null)">
@@ -421,8 +488,8 @@
           [showMenu]="false"
           placeholder="">
             <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
-              <input #inputDestinatari type="text" pInputText [value]="value" 
-                    (keydown.enter)="resetSort(); filterMethod(inputDestinatari.value)">
+              <input #inputDestinatari type="text" pInputText [value]="value"
+                (keydown.enter)="resetSort(); filterMethod(inputDestinatari.value)">
             </ng-template>
           </p-columnFilter>
           <button  *ngIf="colfilterdestinatari.hasFilter()"
@@ -436,15 +503,14 @@
           <p-columnFilter #colfilterfirmatari
             [field]="col.filterField" matchMode="" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-autoComplete
-                #autocompleteFirmatari
-                [showEmptyMessage]="true"
+              <p-autoComplete #autocompleteFirmatari 
+                [showEmptyMessage]="true" 
                 emptyMessage="Nessun utente trovato"
-                [suggestions]="filteredPersone"
+                [suggestions]="filteredPersone" 
                 (completeMethod)="filterPersone($event)"
-                field="descrizioneVisualizzazione"
+                field="descrizioneVisualizzazione" 
                 (onSelect)="filter(buildJsonValueForFilterPersone($event?.id))"
-                (onClear)="filter(null)"
+                (onClear)="filter(null)" 
                 appendTo="body">
               </p-autoComplete>
             </ng-template>
@@ -460,14 +526,13 @@
           <p-columnFilter #colfiltersullascrivaniadi
             [field]="col.filterField" matchMode="" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-autoComplete
-                #autocompleteSullaScrivaniaDi
+              <p-autoComplete #autocompleteSullaScrivaniaDi 
                 [showEmptyMessage]="true"
-                emptyMessage="Nessun utente trovato"
+                emptyMessage="Nessun utente trovato" 
                 [suggestions]="filteredPersone"
-                (completeMethod)="filterPersone($event)"
+                (completeMethod)="filterPersone($event)" 
                 field="descrizioneVisualizzazione"
-                (onSelect)="filter(buildJsonValueForFilterPersone($event?.id))"
+                (onSelect)="filter(buildJsonValueForFilterPersone($event?.id))" 
                 (onClear)="filter(null)"
                 appendTo="body">
               </p-autoComplete>
@@ -487,6 +552,14 @@
   <ng-template pTemplate="body" let-rowData let-columns="columns">
     <tr class="row-height">
       <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
+        <div *ngSwitchCase="'eliminabile'">
+          <span *ngIf="rowData.eliminabile && checkIfSullaMiaScrivania(rowData)" 
+            class="material-icons delete_outline-icon" 
+            pTooltip="Elimina proposta" 
+            (click)="confermaEliminaProposta(rowData)">
+            close
+          </span>
+        </div>
         <div *ngSwitchCase="'idAzienda'">
           {{rowData.idAzienda.nome}}
         </div>
@@ -508,7 +581,8 @@
         <div *ngSwitchCase="'dataPubblicazione'">
           {{rowData.dataPubblicazione | date:'dd/MM/yyyy'}}
         </div>
-        <div *ngSwitchCase="'oggetto'" (click)="openDoc(rowData)">
+        <div *ngSwitchCase="'oggetto'" (click)="openDoc(rowData)" class="oggetto-content"
+          [pTooltip]="rowData.oggettoVisualizzazione" tooltipPosition="top">
           <i *ngIf="rowData.visibilitaLimitata && !rowData.riservato" class="pi pi-eye"></i>
           <i *ngIf="rowData.riservato" class="pi pi-eye-slash"></i>
           {{rowData.oggettoVisualizzazione}}
@@ -516,8 +590,7 @@
         <div *ngSwitchCase="'stato'">
           {{rowData.statoVisualizzazione}}
         </div>
-        <div *ngSwitchCase="'fascicolazioni'">
-          <!-- {{rowData.fascicolazioniVisualizzazione}} -->
+        <div *ngSwitchCase="'fascicolazioni'" [pTooltip]="rowData.fascicolazioniVisualizzazione" tooltipPosition="top">
           <span *ngFor="let f of rowData.fascicolazioni" class="fascicolazione-item">
             {{"[" + f.numerazione + "] " + f.nome}}
           </span>
@@ -531,23 +604,25 @@
         <div *ngSwitchCase="'idPersonaRedattrice'">
           {{rowData.idPersonaRedattriceVisualizzazione}}
         </div>
-        <div *ngSwitchCase="'idStrutturaRegistrazione'">
+        <div *ngSwitchCase="'idStrutturaRegistrazione'" [pTooltip]="rowData.idStrutturaRegistrazione?.nome"
+          tooltipPosition="top">
           {{rowData.idStrutturaRegistrazione?.nome}}
         </div>
-        <div *ngSwitchCase="'mittente'">
+        <div *ngSwitchCase="'mittente'" [pTooltip]="rowData.mittente" tooltipPosition="top">
           {{rowData.mittente}}
         </div>
-        <div *ngSwitchCase="'destinatari'">
+        <div *ngSwitchCase="'destinatari'" [pTooltip]="rowData.destinatariVisualizzazione" tooltipPosition="top">
           <span *ngFor="let d of rowData.destinatari" class="destinatari-item">
             {{d.nome}}
           </span>
         </div>
-        <div *ngSwitchCase="'firmatari'">
+        <div *ngSwitchCase="'firmatari'" [pTooltip]="rowData.firmatariVisualizzazione" tooltipPosition="top">
           <span *ngFor="let d of rowData.firmatari" class="firmatari-item">
             {{d.descrizione}}
           </span>
         </div>
-        <div *ngSwitchCase="'sullaScrivaniaDi'">
+        <div *ngSwitchCase="'sullaScrivaniaDi'" [pTooltip]="rowData.sullaScrivaniaDiVisualizzazione"
+          tooltipPosition="top">
           <span *ngFor="let d of rowData.sullaScrivaniaDi" class="sulla-scrivania-di-item">
             {{d.descrizione}}
           </span>
@@ -565,3 +640,4 @@
   </ng-template>
 </p-table>
 <p-toast key="docsListToast"></p-toast>
+<p-confirmDialog [baseZIndex]="10000" acceptLabel="Sì"></p-confirmDialog>
