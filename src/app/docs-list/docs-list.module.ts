@@ -4,9 +4,8 @@ import { PrimeNgModule } from "../primeng.module";
 import { ScriptaCommonModule } from "../scripta-common.module";
 import { DocsListRoutingModule } from "./docs-list-routings.module";
 import { DocsListComponent } from "./docs-list.component";
-import { ExtendedDocListService } from "./extended-doc-list.service";
-
-
+import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
+import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 
 @NgModule({
   imports: [
@@ -19,7 +18,8 @@ import { ExtendedDocListService } from "./extended-doc-list.service";
     DocsListComponent
   ],
   providers: [
-    ExtendedDocListService
+    ExtendedDocDetailService,
+    ExtendedDocDetailViewService
   ]
 })
 export class DocsListModule { }
