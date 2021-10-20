@@ -1,7 +1,7 @@
-import { DocList, Fascicolazione, Persona, TipologiaDoc } from "@bds/ng-internauta-model";
+import { DocDetailView, Fascicolazione, Persona, TipologiaDoc } from "@bds/ng-internauta-model";
 import { StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione } from "./docs-list-constants";
 
-export class ExtendedDocList extends DocList {
+export class ExtendedDocDetailView extends DocDetailView {
   private _oggettoVisualizzazione: string;
   private _tipologiaVisualizzazione: string;
   private _registrazioneVisualizzazione: string;
@@ -103,10 +103,10 @@ export class ExtendedDocList extends DocList {
   }
 
   public get tipologiaVisualizzazioneAndCodiceRegistro() {
-    return new ExtendedDocList();
+    return new ExtendedDocDetailView();
 }
 
-  public set tipologiaVisualizzazioneAndCodiceRegistro(doc: ExtendedDocList) {
+  public set tipologiaVisualizzazioneAndCodiceRegistro(doc: ExtendedDocDetailView) {
     switch (doc.tipologia) {
       case TipologiaDoc.PROTOCOLLO_IN_USCITA:
         this.tipologiaVisualizzazione = "Protocollo in uscita";

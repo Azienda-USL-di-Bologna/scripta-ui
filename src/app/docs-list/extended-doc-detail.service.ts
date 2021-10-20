@@ -1,16 +1,16 @@
 import { DatePipe } from "@angular/common";
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { BaseUrlType, DocListService, getInternautaUrl } from "@bds/ng-internauta-model";
+import { BaseUrlType, DocDetailService, getInternautaUrl } from "@bds/ng-internauta-model";
 import { Observable } from "rxjs";
 import { CUSTOM_SERVER_METHODS } from "src/environments/app-constants";
-import { ExtendedDocList } from "./extended-doc-list";
+import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 
 
 @Injectable({
   providedIn: "root"
 })
-export class ExtendedDocListService extends DocListService {
+export class ExtendedDocDetailService extends DocDetailService {
 
   constructor(protected _http: HttpClient, protected _datepipe: DatePipe) {
     super(_http, _datepipe);
@@ -19,7 +19,7 @@ export class ExtendedDocListService extends DocListService {
   /**
    * Chiamata per l'eliminazione della proposta
    */
-     public eliminaProposta(doc: ExtendedDocList): Observable<any> {
+     public eliminaProposta(doc: ExtendedDocDetailView): Observable<any> {
       console.log(doc.guidDocumento);
       const url = getInternautaUrl(BaseUrlType.Scripta) + "/" + CUSTOM_SERVER_METHODS.eliminaProposta
       let formData: FormData = new FormData();
