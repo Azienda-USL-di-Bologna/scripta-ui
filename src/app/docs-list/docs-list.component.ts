@@ -1,11 +1,11 @@
 import { DatePipe } from "@angular/common";
 import { Component, ElementRef, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { Azienda, CODICI_RUOLO, DocDetail, Firmatario, Persona, PersonaService, PersonaVedente, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, ENTITIES_STRUCTURE } from "@bds/ng-internauta-model";
+import { Azienda, CODICI_RUOLO, DocDetail, Firmatario, Persona, PersonaService, PersonaVedente, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, ENTITIES_STRUCTURE, PersonaVedenteService } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { buildLazyEventFiltersAndSorts, CsvExtractor } from "@bds/primeng-plugin";
-import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from "@nfa/next-sdr";
+import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from "@nfa/next-sdr";
 import { Confirmation, ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
 import { AutoComplete } from "primeng/autocomplete";
 import { MultiSelect } from "primeng/multiselect";
@@ -72,11 +72,14 @@ export class DocsListComponent implements OnInit, OnDestroy {
     queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI}
   };
   public isSegretario: boolean = false;
+  private serviceForGetData: NextSDREntityProvider = null;
+  private projectionFotGetData: string = null;
 
   constructor(
     private messageService: MessageService,
     private docDetailService: ExtendedDocDetailService,
     private docDetailViewService: ExtendedDocDetailViewService,
+    private personaVedenteSerice: PersonaVedenteService,
     private personaService: PersonaService,
     private strutturaService: StrutturaService,
     private loginService: NtJwtLoginService,
@@ -259,23 +262,30 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * @param doc
    */
   public openDoc(doc: DocDetailView) {
-    const isPersonaVedente = doc.personeVedentiList.some(p => p.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id);
-    if (isPersonaVedente) {
-      const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
-        doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
-      const addRichiestaParam = true;
-      const addPassToken = true;
-      this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
-        console.log("urlAperto:", url);
+    const filtersAndSorts = new FiltersAndSorts();
+    filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+    filtersAndSorts.addFilter(new FilterDefinition("idDocDetail.id", FILTER_TYPES.not_string.equals, doc.id));
+    this.personaVedenteSerice.getData("PersonaVedenteWithPlainFields", filtersAndSorts, null)
+      .subscribe(res => {
+        if (res && res.results) {
+          if (res.results.length > 0) {
+            const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
+              doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
+            const addRichiestaParam = true;
+            const addPassToken = true;
+            this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
+              console.log("urlAperto:", url);
+            });
+          } else {
+            this.messageService.add({
+              severity: "info",
+              summary: "Attenzione",
+              key: "docsListToast",
+              detail: `Apertura del documento non consentita`
+            });
+          }
+        }
       });
-    } else {
-      this.messageService.add({
-        severity: "info",
-        summary: "Attenzione",
-        key: "docsListToast",
-        detail: `Apertura del documento non consentita`
-      });
-    }
   }
 
   /**
@@ -366,6 +376,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
       case DocsListMode.ELENCO_DOCUMENTI_VISIBILI:
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
         filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
+        this.serviceForGetData = this.docDetailViewService;
+        this.projectionFotGetData = "DocDetailViewWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
       case DocsListMode.ELENCO_DOCUMENTI:
         /* const filtroJson: FilterJsonDefinition<PersonaVedente> = new FilterJsonDefinition(true);
@@ -375,18 +387,26 @@ export class DocsListComponent implements OnInit, OnDestroy {
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
         filterAndSort.addFilter(new FilterDefinition("mioDocumento", FILTER_TYPES.not_string.equals, true));
         filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
+        this.serviceForGetData = this.docDetailViewService;
+        this.projectionFotGetData = "DocDetailViewWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
       case DocsListMode.IFIRMARIO:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
         filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
+        this.serviceForGetData = this.docDetailService;
+        this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
       case DocsListMode.IFIRMATO:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmato"));
         filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.desc));
+        this.serviceForGetData = this.docDetailService;
+        this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
       case DocsListMode.REGISTRAZIONI:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRegistrazioni"));
         filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.desc));
+        this.serviceForGetData = this.docDetailService;
+        this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
     }
 
@@ -408,9 +428,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
       this.loadDocsListSubscription.unsubscribe();
       this.loadDocsListSubscription = null;
     }
-    this.loadDocsListSubscription = this.docDetailViewService.getData(
-      ENTITIES_STRUCTURE.scripta.docdetailview.standardProjections.DocDetailViewWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazioneAndPersoneVedentiList,
-      this.buildCustomFilterAndSort(),
+    const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+    this.loadDocsListSubscription = this.serviceForGetData.getData(
+      this.projectionFotGetData,
+      filtersAndSorts,
       buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
       this.pageConf).subscribe((data: any) => {
         console.log(data);
@@ -597,9 +618,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
       },
       mode: "PAGE"
     };
-    this.docDetailViewService.getData(
-      "DocListWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione",
-      this.buildCustomFilterAndSort(),
+    const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+    this.serviceForGetData.getData(
+      this.projectionFotGetData,
+      filtersAndSorts,
       buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
       pageConfNoLimit)
       .subscribe(
