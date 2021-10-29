@@ -1,11 +1,11 @@
 import { DatePipe } from "@angular/common";
 import { Component, ElementRef, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { Azienda, CODICI_RUOLO, DocList, Firmatario, Persona, PersonaService, PersonaVedente, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy } from "@bds/ng-internauta-model";
+import { Azienda, CODICI_RUOLO, DocDetail, Firmatario, Persona, PersonaService, PersonaVedente, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, ENTITIES_STRUCTURE, PersonaVedenteService } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { buildLazyEventFiltersAndSorts, CsvExtractor } from "@bds/primeng-plugin";
-import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from "@nfa/next-sdr";
+import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from "@nfa/next-sdr";
 import { Confirmation, ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
 import { AutoComplete } from "primeng/autocomplete";
 import { MultiSelect } from "primeng/multiselect";
@@ -16,8 +16,9 @@ import { filter } from "rxjs/operators";
 import { AppService } from "../app.service";
 import { Impostazioni } from "../utilities/utils";
 import { ColonnaBds, cols, colsCSV, DocsListMode, StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
-import { ExtendedDocList } from "./extended-doc-list";
-import { ExtendedDocListService } from "./extended-doc-list.service";
+import { ExtendedDocDetailView } from "./extended-doc-detail-view";
+import { ExtendedDocDetailService } from "./extended-doc-detail.service";
+import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
 
 @Component({
   selector: "docs-list",
@@ -45,7 +46,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   @ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>;
 
   public docsListMode: DocsListMode;
-  public docs: ExtendedDocList[];
+  public docs: ExtendedDocDetailView[];
   public enumDocsListMode = DocsListMode;
   public totalRecords: number;
   public aziendeFiltrabili: Azienda[] = [];
@@ -71,10 +72,14 @@ export class DocsListComponent implements OnInit, OnDestroy {
     queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI}
   };
   public isSegretario: boolean = false;
+  private serviceForGetData: NextSDREntityProvider = null;
+  private projectionFotGetData: string = null;
 
   constructor(
     private messageService: MessageService,
-    private docListService: ExtendedDocListService,
+    private docDetailService: ExtendedDocDetailService,
+    private docDetailViewService: ExtendedDocDetailViewService,
+    private personaVedenteSerice: PersonaVedenteService,
     private personaService: PersonaService,
     private strutturaService: StrutturaService,
     private loginService: NtJwtLoginService,
@@ -256,24 +261,31 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * Gestisco l'evento
    * @param doc
    */
-  public openDoc(doc: DocList) {
-    const isPersonaVedente = doc.personeVedenti.some(p => p.idPersona === this.utenteUtilitiesLogin.getUtente().idPersona.id);
-    if (isPersonaVedente) {
-      const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
-        doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
-      const addRichiestaParam = true;
-      const addPassToken = true;
-      this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
-        console.log("urlAperto:", url);
+  public openDoc(doc: DocDetailView) {
+    const filtersAndSorts = new FiltersAndSorts();
+    filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+    filtersAndSorts.addFilter(new FilterDefinition("idDocDetail.id", FILTER_TYPES.not_string.equals, doc.id));
+    this.personaVedenteSerice.getData("PersonaVedenteWithPlainFields", filtersAndSorts, null)
+      .subscribe(res => {
+        if (res && res.results) {
+          if (res.results.length > 0) {
+            const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
+              doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
+            const addRichiestaParam = true;
+            const addPassToken = true;
+            this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
+              console.log("urlAperto:", url);
+            });
+          } else {
+            this.messageService.add({
+              severity: "info",
+              summary: "Attenzione",
+              key: "docsListToast",
+              detail: `Apertura del documento non consentita`
+            });
+          }
+        }
       });
-    } else {
-      this.messageService.add({
-        severity: "info",
-        summary: "Attenzione",
-        key: "docsListToast",
-        detail: `Apertura del documento non consentita`
-      });
-    }
   }
 
   /**
@@ -361,28 +373,40 @@ export class DocsListComponent implements OnInit, OnDestroy {
     const filterAndSort = new FiltersAndSorts();
 
     switch (this.docsListMode) {
-      case DocsListMode.ELENCO_DOCUMENTI:
-        const filtroJson: FilterJsonDefinition<PersonaVedente> = new FilterJsonDefinition(true);
-        filtroJson.add("idPersona", this.utenteUtilitiesLogin.getUtente().idPersona.id);
-
-        if (this.mieiDocumenti) {
-          filtroJson.add("mioDocumento", true);
-        }
-
-        filterAndSort.addFilter(new FilterDefinition("personeVedenti", FILTER_TYPES.not_string.equals, filtroJson.buildJsonString()));
+      case DocsListMode.ELENCO_DOCUMENTI_VISIBILI:
+        filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
         filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
+        this.serviceForGetData = this.docDetailViewService;
+        this.projectionFotGetData = "DocDetailViewWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
+        break;
+      case DocsListMode.ELENCO_DOCUMENTI:
+        /* const filtroJson: FilterJsonDefinition<PersonaVedente> = new FilterJsonDefinition(true);
+        filtroJson.add("idPersona", this.utenteUtilitiesLogin.getUtente().idPersona.id);
+        if (this.mieiDocumenti) {filtroJson.add("mioDocumento", true);} 
+        filterAndSort.addFilter(new FilterDefinition("personeVedenti", FILTER_TYPES.not_string.equals, filtroJson.buildJsonString()));*/
+        filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+        filterAndSort.addFilter(new FilterDefinition("mioDocumento", FILTER_TYPES.not_string.equals, true));
+        filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
+        this.serviceForGetData = this.docDetailViewService;
+        this.projectionFotGetData = "DocDetailViewWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
       case DocsListMode.IFIRMARIO:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
         filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
+        this.serviceForGetData = this.docDetailService;
+        this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
       case DocsListMode.IFIRMATO:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmato"));
         filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.desc));
+        this.serviceForGetData = this.docDetailService;
+        this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
       case DocsListMode.REGISTRAZIONI:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRegistrazioni"));
         filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.desc));
+        this.serviceForGetData = this.docDetailService;
+        this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
     }
 
@@ -404,9 +428,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
       this.loadDocsListSubscription.unsubscribe();
       this.loadDocsListSubscription = null;
     }
-    this.loadDocsListSubscription = this.docListService.getData(
-      "DocListWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione",
-      this.buildCustomFilterAndSort(),
+    const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+    this.loadDocsListSubscription = this.serviceForGetData.getData(
+      this.projectionFotGetData,
+      filtersAndSorts,
       buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
       this.pageConf).subscribe((data: any) => {
         console.log(data);
@@ -447,10 +472,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * @param docsList
    * @returns
    */
-  private setCustomProperties(docsList: DocList[]): ExtendedDocList[] {
-    const extendedDocsList: ExtendedDocList[] = docsList as ExtendedDocList[];
-    extendedDocsList.forEach((doc: ExtendedDocList) => {
-      Object.setPrototypeOf(doc, ExtendedDocList.prototype);
+  private setCustomProperties(docsList: DocDetailView[]): ExtendedDocDetailView[] {
+    const extendedDocsList: ExtendedDocDetailView[] = docsList as ExtendedDocDetailView[];
+    extendedDocsList.forEach((doc: ExtendedDocDetailView) => {
+      Object.setPrototypeOf(doc, ExtendedDocDetailView.prototype);
       doc.oggettoVisualizzazione = doc.oggetto;
       doc.tipologiaVisualizzazioneAndCodiceRegistro = doc;
       doc.registrazioneVisualizzazione = null; // Qui sto passando null. Ma è un trucco, in realtà sto settando i valori.
@@ -593,9 +618,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
       },
       mode: "PAGE"
     };
-    this.docListService.getData(
-      "DocListWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione",
-      this.buildCustomFilterAndSort(),
+    const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+    this.serviceForGetData.getData(
+      this.projectionFotGetData,
+      filtersAndSorts,
       buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
       pageConfNoLimit)
       .subscribe(
@@ -629,7 +655,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * (questo controllo viene fatto anche lato inDE)
    * 
    */
-  public checkIfSullaMiaScrivania(doc: ExtendedDocList): boolean{
+  public checkIfSullaMiaScrivania(doc: ExtendedDocDetailView): boolean{
     if (!doc.sullaScrivaniaDi) {
       return false;
     }
@@ -640,12 +666,12 @@ export class DocsListComponent implements OnInit, OnDestroy {
   /**
    * Chiede la conferma dell'eliminazione della proposta
    */
-  public confermaEliminaProposta(doc: ExtendedDocList): void {
+  public confermaEliminaProposta(doc: ExtendedDocDetailView): void {
     this.confirmationService.confirm({
       message: "Stai eliminando questa proposta e i suoi eventuali allegati, vuoi proseguire?",
       accept: () => {
         this.loading = true;
-        this.docListService.eliminaProposta(doc).subscribe(
+        this.docDetailService.eliminaProposta(doc).subscribe(
           res => {
             this.cancellaDaElenco(doc);
             console.log(res);
@@ -667,7 +693,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * La chiamo per poter rimuovere dall'elenco documenti la proposta che ho 
    * cancellato, senza necessariamente dover ricaricare la pagina
    */
-  public cancellaDaElenco(docToDelete: ExtendedDocList): void {
+  public cancellaDaElenco(docToDelete: ExtendedDocDetailView): void {
     this.resetAndLoadData();
     /* const filterAndSort = new FiltersAndSorts();
       filterAndSort.addFilter(new FilterDefinition("ExtendedDocList.id", FILTER_TYPES.not_string.equals, docToDelete.id))

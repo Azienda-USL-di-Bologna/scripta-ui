@@ -2,7 +2,7 @@ import { StatoDoc, StatoUfficioAtti, TipologiaDoc } from "@bds/ng-internauta-mod
 import { UtenteUtilities } from "@bds/nt-jwt-login";
 import { FILTER_TYPES, NextSDRDateTypes } from "@nfa/next-sdr";
 import { Utils } from "src/app/utilities/utils";
-import { ExtendedDocList } from "./extended-doc-list";
+import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 
 export const cols: ColonnaBds[] = [
   {
@@ -371,7 +371,7 @@ export const colsCSV: any[] = [
     fieldId: "proposta"
   },
   {
-    field: (doc: ExtendedDocList) => {
+    field: (doc: ExtendedDocDetailView) => {
       return doc.dataCreazione ? Utils.dateFormatter(doc.dataCreazione) : "";
     },
     header: "Creazione",
@@ -379,7 +379,7 @@ export const colsCSV: any[] = [
     fieldId: "dataCreazione"
   },
   {
-    field: (doc: ExtendedDocList) => {
+    field: (doc: ExtendedDocDetailView) => {
       return doc.dataRegistrazione ? Utils.dateFormatter(doc.dataRegistrazione) : "";
     },
     header: "Registrazione",
@@ -387,7 +387,7 @@ export const colsCSV: any[] = [
     fieldId: "dataRegistrazione"
   },
   {
-    field: (doc: ExtendedDocList) => {
+    field: (doc: ExtendedDocDetailView) => {
       return doc.dataPubblicazione ? Utils.dateFormatter(doc.dataPubblicazione) : "";
     },
     header: "Pubblicazione",
@@ -407,7 +407,7 @@ export const colsCSV: any[] = [
     fieldId: "stato"
   },
   {
-    field: (doc: ExtendedDocList) => {
+    field: (doc: ExtendedDocDetailView) => {
       let fascicolazioniString = "";
       if (doc.fascicolazioni) {
         doc.fascicolazioni.forEach(fascicolazione => {
@@ -451,7 +451,7 @@ export const colsCSV: any[] = [
     fieldId: "mittente"
   },
   {
-    field: (doc: ExtendedDocList) => {
+    field: (doc: ExtendedDocDetailView) => {
       let destinatariString = "";
       if (doc.destinatari) {
         doc.destinatari.forEach(destinatario => {
@@ -465,7 +465,7 @@ export const colsCSV: any[] = [
     fieldId: "destinatari"
   },
   {
-    field: (doc: ExtendedDocList) => {
+    field: (doc: ExtendedDocDetailView) => {
       let firmatariString = "";
       if (doc.firmatari) {
         doc.firmatari.forEach(firmatario => {
@@ -479,7 +479,7 @@ export const colsCSV: any[] = [
     fieldId: "firmatari"
   },
   {
-    field: (doc: ExtendedDocList) => {
+    field: (doc: ExtendedDocDetailView) => {
       let sullaScrivaniaDiString = "";
       if (doc.sullaScrivaniaDi) {
         doc.sullaScrivaniaDi.forEach(usante => {
