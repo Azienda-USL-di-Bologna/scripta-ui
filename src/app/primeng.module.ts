@@ -19,6 +19,8 @@ import {MultiSelectModule} from 'primeng/multiselect';
 import {CheckboxModule} from 'primeng/checkbox';
 import {TabMenuModule} from 'primeng/tabmenu';
 import { ProgressSpinnerModule } from "primeng/progressspinner";
+import {SelectButtonModule} from 'primeng/selectbutton';
+import { ConfirmDialogModule } from "primeng/confirmdialog";
 
 @NgModule({
   declarations: [
@@ -43,7 +45,9 @@ import { ProgressSpinnerModule } from "primeng/progressspinner";
     MultiSelectModule,
     CheckboxModule,
     TabMenuModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    ConfirmDialogModule,
+    SelectButtonModule
   ],
   exports: [
     ButtonModule,
@@ -65,7 +69,9 @@ import { ProgressSpinnerModule } from "primeng/progressspinner";
     MultiSelectModule,
     CheckboxModule,
     TabMenuModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    SelectButtonModule,
+    ConfirmDialogModule
   ],
   providers: [MessageService, DialogService]
 })

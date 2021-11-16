@@ -1,9 +1,23 @@
 import { StatoDoc, StatoUfficioAtti, TipologiaDoc } from "@bds/ng-internauta-model";
+import { UtenteUtilities } from "@bds/nt-jwt-login";
 import { FILTER_TYPES, NextSDRDateTypes } from "@nfa/next-sdr";
 import { Utils } from "src/app/utilities/utils";
-import { ExtendedDocList } from "./extended-doc-list";
+import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 
 export const cols: ColonnaBds[] = [
+  {
+    field: "eliminabile",
+    header: "",
+    filterField: "eliminabile",
+    style: {},
+    headerClass: ["header-column", "eliminabile-column"],
+    filterClass: ["filter-column", "eliminabile-column"],
+    bodyClass: ["eliminabile-column"],
+    fieldType: "boolean",
+    filterMatchMode: FILTER_TYPES.not_string.equals,
+    useFilterMatchMode: false,
+    default: true
+  },
   {
     field: "idAzienda",
     header: "Ente",
@@ -34,7 +48,7 @@ export const cols: ColonnaBds[] = [
   },
   {
     field: "registrazione",
-    header: "Registrazione",
+    header: "N° registrazione",
     filterField: "numeroRegistrazione",
     sortField: ["annoRegistrazione", "numeroRegistrazione"],
     style: {},
@@ -62,7 +76,7 @@ export const cols: ColonnaBds[] = [
   },
   {
     field: "dataCreazione",
-    header: "Data creazione",
+    header: "Creazione",
     filterField: "dataCreazione",
     sortField: "dataCreazione",
     style: {},
@@ -76,7 +90,7 @@ export const cols: ColonnaBds[] = [
   },
   {
     field: "dataRegistrazione",
-    header: "Data registrazione",
+    header: "Registrazione",
     filterField: "dataRegistrazione",
     sortField: "dataRegistrazione",
     style: {},
@@ -90,7 +104,7 @@ export const cols: ColonnaBds[] = [
   },
   {
     field: "dataPubblicazione",
-    header: "Data pubblicazione",
+    header: "Pubblicazione",
     filterField: "dataPubblicazione",
     sortField: "dataPubblicazione",
     style: {},
@@ -319,12 +333,19 @@ export const StatoUfficioAttiTraduzioneVisualizzazione = [
 export enum DocsListMode {
   NUOVO = "NUOVO",
   ELENCO_DOCUMENTI = "ELENCO_DOCUMENTI",
+  ELENCO_DOCUMENTI_VISIBILI = "ELENCO_DOCUMENTI_VISIBILI",
   IFIRMARIO = "IFIRMARIO",
   IFIRMATO = "IFIRMATO",
   REGISTRAZIONI = "REGISTRAZIONI"
 }
 
 export const colsCSV: any[] = [
+  {
+    field: "eliminabile",
+    header: "",
+    fieldType: "boolean",
+    fieldId: "eliminabile"
+  },
   {
     field: "idAzienda.nome",
     header: "Ente",
@@ -339,7 +360,7 @@ export const colsCSV: any[] = [
   },
   {
     field: "registrazioneVisualizzazione",
-    header: "Registrazione",
+    header: "N° Registrazione",
     fieldType: "string",
     fieldId: "registrazione"
   },
@@ -350,26 +371,26 @@ export const colsCSV: any[] = [
     fieldId: "proposta"
   },
   {
-    field: (doc: ExtendedDocList) => {
+    field: (doc: ExtendedDocDetailView) => {
       return doc.dataCreazione ? Utils.dateFormatter(doc.dataCreazione) : "";
     },
-    header: "Data creazione",
+    header: "Creazione",
     fieldType: "date",
     fieldId: "dataCreazione"
   },
   {
-    field: (doc: ExtendedDocList) => {
+    field: (doc: ExtendedDocDetailView) => {
       return doc.dataRegistrazione ? Utils.dateFormatter(doc.dataRegistrazione) : "";
     },
-    header: "Data registrazione",
+    header: "Registrazione",
     fieldType: "date",
     fieldId: "dataRegistrazione"
   },
   {
-    field: (doc: ExtendedDocList) => {
+    field: (doc: ExtendedDocDetailView) => {
       return doc.dataPubblicazione ? Utils.dateFormatter(doc.dataPubblicazione) : "";
     },
-    header: "Data pubblicazione",
+    header: "Pubblicazione",
     fieldType: "date",
     fieldId: "dataPubblicazione"
   },
@@ -386,7 +407,7 @@ export const colsCSV: any[] = [
     fieldId: "stato"
   },
   {
-    field: (doc: ExtendedDocList) => {
+    field: (doc: ExtendedDocDetailView) => {
       let fascicolazioniString = "";
       if (doc.fascicolazioni) {
         doc.fascicolazioni.forEach(fascicolazione => {
@@ -430,7 +451,7 @@ export const colsCSV: any[] = [
     fieldId: "mittente"
   },
   {
-    field: (doc: ExtendedDocList) => {
+    field: (doc: ExtendedDocDetailView) => {
       let destinatariString = "";
       if (doc.destinatari) {
         doc.destinatari.forEach(destinatario => {
@@ -444,7 +465,7 @@ export const colsCSV: any[] = [
     fieldId: "destinatari"
   },
   {
-    field: (doc: ExtendedDocList) => {
+    field: (doc: ExtendedDocDetailView) => {
       let firmatariString = "";
       if (doc.firmatari) {
         doc.firmatari.forEach(firmatario => {
@@ -458,7 +479,7 @@ export const colsCSV: any[] = [
     fieldId: "firmatari"
   },
   {
-    field: (doc: ExtendedDocList) => {
+    field: (doc: ExtendedDocDetailView) => {
       let sullaScrivaniaDiString = "";
       if (doc.sullaScrivaniaDi) {
         doc.sullaScrivaniaDi.forEach(usante => {

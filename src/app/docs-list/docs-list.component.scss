@@ -7,7 +7,39 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    .p-button.p-button-outlined.p-button-icon-only.p-component {
+      border:1px solid #9da3a9 !important;
+      color: white;
+      &:hover {
+        background-color: #7e7e7e !important;
+        border-color: #aeaaac !important;
+      }
+      
+    }
+    .p-buttonselect {
+      margin-left: 0.5vw;
+      align-self: center;
+      .p-selectbutton {
+        flex-wrap: nowrap;
+        .p-button {
+          border: 1px solid #9da3a9 !important;;
+          color: #333333;
+          background-color: #f4f4f4 !important;
+          &:hover {
+            color: #333333;
+            background-color: #993366 !important;
+            border-color: #993366 !important;
+          }
+        }
+        .p-highlight {
+          color: white;
+          background-color: #203244 !important;
+        }
+      }
+    }
+
     .left-content {
+      height: 33px;
       .p-progress-spinner {
         height: 21px !important;
         width: 21px !important;
@@ -16,6 +48,31 @@
       .doc-trovati-info {
         margin-left: 20px;
       }
+      .p-inputtext {
+        align-self: center;
+        height: 33.72px;
+      }
+      @media screen and (max-width: 1280px) {
+        font-size: 10pt;
+        .p-inputtext {
+          align-self: center;
+          height: 33.72px;
+          font-size: 10pt;
+          //background-color: #993366;
+        }
+        .p-buttonselect {
+          font-size: 10pt;
+          .p-selectbutton {
+            display: flex;
+            font-size: small;
+            flex-wrap: nowrap;
+            align-self: center;
+            font-size: 10pt;
+          }
+        }
+      }
+    
+      
     }
     .right-content {
       display: flex;
@@ -24,9 +81,16 @@
       .p-field-checkbox {
         margin-bottom: 0 !important;
       }
-      .p-button.p-button-outlined {
-        color: white;
+      .p-button{
+        &:hover {
+          background-color: #7e7e7e !important;
+          border-color: #aeaaac !important;
+        }
+        &:target{
+          outline: none !important;
+        }
       }
+      
     }
   }
   .p-datatable-scrollable-header {
@@ -44,6 +108,9 @@
     }
     /* FILTER */
     .filter-row {
+      @media screen and (max-width: 1280px) {
+        font-size: 11pt;
+      }
       .filter-column {
         padding: 1px;
         border: transparent;
@@ -55,11 +122,20 @@
         }
         .p-calendar {
           input {
-            font-size: 14px;
+            font-size: 12pt;
           }
+        }
+        @media screen and (max-width: 1280px) {
+          .p-calendar {
+            input {
+              font-size: 12pt;
+            }
+          }
+
         }
       }
     }
+
     .search-wrapper {
       display: flex;
       background-color: white;
@@ -139,8 +215,8 @@
     max-width: 171px;
   }
   .registrazione-column {
-    min-width: 175px;
-    max-width: 175px;
+    min-width: 180px;
+    max-width: 180px;
   }
   .proposta-column {
     min-width: 132px;
@@ -149,8 +225,8 @@
   .data-creazione-column,
   .data-registrazione-column,
   .data-pubblicazione-column {
-    min-width: 203px;
-    max-width: 203px;
+    min-width: 160px;
+    max-width: 160px;
   }
   .stato-column {
     min-width: 134px;
@@ -158,10 +234,19 @@
   }
   .oggetto-column {
     width: 100%;
-    min-width: 200px;
+    min-width: 350px;
     cursor: pointer;
     font-weight: 600;
     color: #993366;
+    .oggetto-content {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      i {
+        font-size: 28px;
+        margin-right: 7px;
+      }
+    }
   }
   .fascicolazioni-column {
     min-width: 230px;
@@ -250,6 +335,17 @@
       }
     }
   }
+  .eliminabile-column{
+    min-width: 50px;
+    max-width: 50px;
+    .delete_outline-icon{
+      color: #203244;
+      cursor: pointer;
+      &:hover {
+        color:#936;
+      }
+    }
+  }
   /* .scrollbar-overlay-placeholder-column {
     padding: 5px !important;
     border: none !important;
@@ -277,6 +373,12 @@ and (not (-ms-ime-align:auto)) and (not (-moz-appearance:none)) {
   }
 }
 
+
+div.calendar-filter-footer-button-container.ng-star-inserted {
+  display: flex;
+  justify-content: space-around;
+}
+
 /* ::ng-deep .search-wrapper{
   display: flex;
   background-color: white;
@@ -296,3 +398,4 @@ and (not (-ms-ime-align:auto)) and (not (-moz-appearance:none)) {
     cursor: pointer;
   }
 } */
+
