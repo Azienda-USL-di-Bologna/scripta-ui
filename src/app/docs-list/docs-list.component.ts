@@ -28,7 +28,7 @@ import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service
 export class DocsListComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private loadDocsListSubscription: Subscription;
-  private pageConf: PagingConf = { mode: "LIMIT_OFFSET", conf: { limit: 0, offset: 0 } };
+  private pageConf: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 0, offset: 0 } };
   private utenteUtilitiesLogin: UtenteUtilities;
   private resetDocsArrayLenght: boolean = true;
   private storedLazyLoadEvent: LazyLoadEvent;
@@ -616,7 +616,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
         page: 0,
         size: 999999
       },
-      mode: "PAGE"
+      mode: "PAGE_NO_COUNT"
     };
     const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
     this.serviceForGetData.getData(

@@ -27,7 +27,7 @@
     "@bds/nt-jwt-login": "2.0.0-alfa",
     "@bds/primeng-plugin": "2.1.8",
     "@nfa/core": "4.0.0-alfa",
-    "@nfa/next-sdr": "4.0.2",
+    "@nfa/next-sdr": "4.0.3",
     "@nfa/ref": "4.0.0-alfa",
     "@ng-idle/core": "10.0.0-beta.1",
     "@ng-idle/keepalive": "10.0.0-beta.1",
