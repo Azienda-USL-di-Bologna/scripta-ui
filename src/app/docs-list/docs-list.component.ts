@@ -61,6 +61,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   public filteredPersone: Persona[] = [];
   public filteredStrutture: Struttura[] = [];
   public loading: boolean = false;
+  public initialSortField: string = "dataCreazione";
   public exportCsvInProgress: boolean = false;
   public docListModeItem: DocListModeItem[];
   public calendarcreazione: any;
@@ -375,7 +376,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
     switch (this.docsListMode) {
       case DocsListMode.ELENCO_DOCUMENTI_VISIBILI:
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
-        filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
+        //filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
+        this.initialSortField = "dataCreazione";
         this.serviceForGetData = this.docDetailViewService;
         this.projectionFotGetData = "DocDetailViewWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
@@ -386,25 +388,29 @@ export class DocsListComponent implements OnInit, OnDestroy {
         filterAndSort.addFilter(new FilterDefinition("personeVedenti", FILTER_TYPES.not_string.equals, filtroJson.buildJsonString()));*/
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
         filterAndSort.addFilter(new FilterDefinition("mioDocumento", FILTER_TYPES.not_string.equals, true));
-        filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
+        //filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
+        this.initialSortField = "dataCreazione";
         this.serviceForGetData = this.docDetailViewService;
         this.projectionFotGetData = "DocDetailViewWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
       case DocsListMode.IFIRMARIO:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
-        filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
+        //filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
+        this.initialSortField = "dataCreazione";
         this.serviceForGetData = this.docDetailService;
         this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
       case DocsListMode.IFIRMATO:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmato"));
-        filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.desc));
+        //filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.desc));
+        this.initialSortField = "dataRegistrazione";
         this.serviceForGetData = this.docDetailService;
         this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
       case DocsListMode.REGISTRAZIONI:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRegistrazioni"));
-        filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.desc));
+        //filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.desc));
+        this.initialSortField = "dataRegistrazione";
         this.serviceForGetData = this.docDetailService;
         this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
