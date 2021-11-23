@@ -177,16 +177,21 @@ export class DocsListComponent implements OnInit, OnDestroy {
       }); 
     }
   }
+
   /**
-   * 
+   * Questa funzione gestisce il click del cambio tab
    */
   public onChangeDocListMode(event: any): void {
-    //debugger;
-    
     this.docsListMode = event.option.queryParams.mode;
-    this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
-    /* this.calcolaAziendeFiltrabili();
-    this.resetAndLoadData(); */
+
+    // TODO: Se viene velocizzato il tab ifirmato allora si può cancellare questo if e togliere il setimeout
+    if (this.docsListMode === DocsListMode.IFIRMATO) {
+      this.initialSortField = "dataCreazione";
+      //this.initialSortField = "dataRegistrazione";
+    }
+    setTimeout(() => {
+      this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
+    }, 0);
   }
 
   @Input() get selectedColumns(): any[] {
@@ -403,7 +408,15 @@ export class DocsListComponent implements OnInit, OnDestroy {
       case DocsListMode.IFIRMATO:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmato"));
         //filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.desc));
+        //this.dataTable.sortField = null;
+        /* this.dataTable.sortOrder = null;
+         */
+        //this.dataTable.tableService.onSort(null);
+        //this.dataTable.sortField = "dataRegistrazione";
+        //this.initialSortField = "dataCreazione";
+        
         this.initialSortField = "dataRegistrazione";
+        //this.dataTable.sortSingle();
         this.serviceForGetData = this.docDetailService;
         this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
