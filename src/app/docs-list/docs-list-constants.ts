@@ -328,6 +328,7 @@ export const StatoUfficioAttiTraduzioneVisualizzazione = [
   { value: StatoUfficioAtti.DA_VALUTARE, nome: "Da valutare"},
   { value: StatoUfficioAtti.ELABORATA, nome: "Elaborata"},
   { value: StatoUfficioAtti.SOSPESA, nome: "Sospesa"},
+  { value: StatoUfficioAtti.NON_RILEVANTE, nome: "Non rilevante"},
 ]
 
 export enum DocsListMode {
