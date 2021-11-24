@@ -3,6 +3,9 @@
   [value]="docs" 
   dataKey="id" 
   [columns]="selectedColumns"
+  [sortField]="initialSortField"
+  [sortOrder]="-1"
+  [defaultSortOrder]="-1"
   [rows]="rowsNumber" 
   scrollHeight="flex" 
   [scrollable]="true" 
@@ -33,9 +36,9 @@
           </p-selectButton>
         </div>
       </div>
-      <div class="center-content">
+      <!-- <div class="center-content">
         <span class="doc-trovati-info">{{totalRecords}} documenti trovati</span>
-      </div>
+      </div> -->
       <div class="right-content">
         <span *ngIf="exportCsvInProgress">
           <p-progressSpinner 
