@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HeaderFeaturesConfig } from '@bds/primeng-plugin';
+import { HeaderFeaturesConfig } from '@bds/common-components';
 import { NtJwtLoginService, UtenteUtilities, UtilityFunctions } from '@bds/nt-jwt-login';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { IntimusClientService } from '@bds/nt-communicator';
