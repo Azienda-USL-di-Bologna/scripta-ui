@@ -4,7 +4,7 @@ import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { PrimengPluginModule } from "@bds/primeng-plugin";
-import { ProfiloComponent } from "@bds/common-components";
+import { CommonComponentsModule,ProfiloComponent } from "@bds/common-components";
 import { NtJwtLoginModule } from "@bds/nt-jwt-login";
 import { loginModuleConfig } from "./config/module-config";
 import { NtCommunicatorModule } from "@bds/nt-communicator";
@@ -34,6 +34,7 @@ registerLocaleData(localeIt, "it-IT", localeItExtra);
     NtJwtLoginModule.forRoot(loginModuleConfig),
     PrimeNgModule,
     ScriptaCommonModule,
+    CommonComponentsModule,
     NtCommunicatorModule
   ],
   providers: [
@@ -41,7 +42,7 @@ registerLocaleData(localeIt, "it-IT", localeItExtra);
     {provide: LOCALE_ID, useValue: "it-IT"},
   ],
   bootstrap: [AppComponent],
-  exports: [],
+  exports: [CommonComponentsModule],
   entryComponents: [ProfiloComponent]
 })
 export class AppModule { }
