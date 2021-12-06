@@ -14,7 +14,6 @@
         background-color: #7e7e7e !important;
         border-color: #aeaaac !important;
       }
-      
     }
     .p-buttonselect {
       margin-left: 0.5vw;
@@ -44,6 +43,13 @@
         height: 21px !important;
         width: 21px !important;
         vertical-align: sub;
+      }
+      .box-yearpicker {
+        /* display: flex;
+        flex-wrap: nowrap;
+        flex-direction: row; */
+        width: 100px;
+        margin-left: 10px;
       }
       .doc-trovati-info {
         margin-left: 20px;
@@ -122,18 +128,22 @@
         }
         .p-calendar {
           input {
-            font-size: 12pt;
+            font-size: 12px;
+            text-align: center;
           }
         }
         @media screen and (max-width: 1280px) {
           .p-calendar {
             input {
-              font-size: 12pt;
+              font-size: 12px;
             }
           }
-
+        }
+        &.ente-column .p-dropdown-label {
+          font-size: 12px;
         }
       }
+      
     }
 
     .search-wrapper {
@@ -207,8 +217,8 @@
     max-height: 53px;
   }
   .ente-column {
-    min-width: 95px;
-    max-width: 95px;
+    min-width: 100px;
+    max-width: 100px;
   }
   .tipologia-column {
     min-width: 171px;
@@ -257,8 +267,6 @@
       margin-bottom: 2px;
       cursor: pointer;
       border: 1px solid #203244;
-      /* background: #2e4a65;
-      color: #ffffff; */
       font-size: 13px;
       border-radius: 3px;
       word-break: break-word;
@@ -346,10 +354,6 @@
       }
     }
   }
-  /* .scrollbar-overlay-placeholder-column {
-    padding: 5px !important;
-    border: none !important;
-  } */
 }
 
 @supports (-webkit-appearance:none) and (not (overflow:-webkit-marquee))
@@ -374,28 +378,7 @@ and (not (-ms-ime-align:auto)) and (not (-moz-appearance:none)) {
 }
 
 
-div.calendar-filter-footer-button-container.ng-star-inserted {
+.calendar-filter-footer-button-container {
   display: flex;
   justify-content: space-around;
 }
-
-/* ::ng-deep .search-wrapper{
-  display: flex;
-  background-color: white;
-  border: 1px solid #a6a6a6;
-  border-radius: 3px;
-  .p-inputtext {
-    border: none !important;
-  }
-  .close-icon {
-    align-self: center;
-    font-size: 15px;
-    border: 1px solid transparent;
-    background-color: white;
-    display: inline-block;
-    vertical-align: middle;
-    outline: 0;
-    cursor: pointer;
-  }
-} */
-
