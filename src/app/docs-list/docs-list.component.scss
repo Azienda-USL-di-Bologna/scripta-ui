@@ -126,22 +126,19 @@
         .p-inputnumber-button-group {
           display: none;
         }
-        .p-calendar {
+        .p-inputtext {
+          font-size: 12px;
+          text-align: center;
+        }
+        /* .p-calendar {
           input {
             font-size: 12px;
             text-align: center;
           }
         }
-        @media screen and (max-width: 1280px) {
-          .p-calendar {
-            input {
-              font-size: 12px;
-            }
-          }
-        }
         &.ente-column .p-dropdown-label {
           font-size: 12px;
-        }
+        } */
       }
       
     }

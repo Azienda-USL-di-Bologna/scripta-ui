@@ -336,18 +336,18 @@ export class DocsListComponent implements OnInit, OnDestroy {
           return {value: [a.id], label: a.nome} as ValueAndLabelObj;
         });
     }
+    if (this.aziendeFiltrabili.length > 1) {
+      this.aziendeFiltrabili.push({
+        value: this.aziendeFiltrabili.map(e => e.value[0]),
+        label: "Tutte"
+      } as ValueAndLabelObj);
+    }
     // Svuoto l'eventuale filtro nel caso fosse stato usato e reimposto il default
     if (this.dropdownAzienda && this.columnFilterAzienda) {
       this.dropdownAzienda.value = [];
       this.columnFilterAzienda.clearFilter();
       this.dropdownAzienda.value = this.aziendeFiltrabili[0].value;
       this.columnFilterAzienda.applyFilter();
-    }
-    if (this.aziendeFiltrabili.length > 1) {
-      this.aziendeFiltrabili.push({
-        value: this.aziendeFiltrabili.map(e => e.value[0]),
-        label: "Tutte"
-      } as ValueAndLabelObj);
     }
   }
 
@@ -370,7 +370,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
     if (this.filtriPuliti) {
       this.filtriPuliti = false;
       this.resetCalendarToInitialValues();
-        this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
+      this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
 
       if (this.dropdownAzienda) {
         this.dropdownAzienda.writeValue(this.aziendeFiltrabili[0].value);
@@ -411,6 +411,12 @@ export class DocsListComponent implements OnInit, OnDestroy {
     }
     this.storedLazyLoadEvent.first = 0;
     this.storedLazyLoadEvent.rows = this.rowsNumber * 2;
+
+    if (this.dropdownAzienda) {
+      if (this.dropdownAzienda) {
+        this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
+      }
+    }
 
     this.loadData();
   }
