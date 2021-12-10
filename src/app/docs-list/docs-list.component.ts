@@ -1,18 +1,18 @@
 import { DatePipe } from "@angular/common";
 import { Component, ElementRef, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { Azienda, CODICI_RUOLO, DocDetail, Firmatario, Persona, PersonaService, PersonaVedente, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, ENTITIES_STRUCTURE, PersonaVedenteService } from "@bds/ng-internauta-model";
+import { CODICI_RUOLO, Persona, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { buildLazyEventFiltersAndSorts, CsvExtractor } from "@bds/primeng-plugin";
-import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from "@nfa/next-sdr";
-import { Confirmation, ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
+import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from "@nfa/next-sdr";
+import { ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
 import { AutoComplete } from "primeng/autocomplete";
-import { MultiSelect } from "primeng/multiselect";
+import { Dropdown } from "primeng/dropdown";
+import { Calendar } from "primeng/calendar";
 import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
-import { filter } from "rxjs/operators";
 import { AppService } from "../app.service";
 import { Impostazioni } from "../utilities/utils";
 import { ColonnaBds, cols, colsCSV, DocsListMode, StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
@@ -34,7 +34,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   private storedLazyLoadEvent: LazyLoadEvent;
 
   @ViewChild("dt") public dataTable: Table;
-  @ViewChild("multiSelectAzienda") public multiSelectAzienda: MultiSelect;
+  @ViewChild("dropdownAzienda") public dropdownAzienda: Dropdown;
   @ViewChild("columnFilterAzienda") public columnFilterAzienda: ColumnFilter;
   @ViewChild("autocompleteIdPersonaRedattrice") public autocompleteIdPersonaRedattrice: AutoComplete;
   @ViewChild("autocompleteidPersonaResponsabileProcedimento") public autocompleteidPersonaResponsabileProcedimento: AutoComplete;
@@ -42,14 +42,19 @@ export class DocsListComponent implements OnInit, OnDestroy {
   @ViewChild("autocompleteFirmatari") public autocompleteFirmatari: AutoComplete;
   @ViewChild("autocompleteSullaScrivaniaDi") public autocompleteSullaScrivaniaDi: AutoComplete;
   @ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
+  @ViewChild("calendarcreazione") public calendarcreazione: Calendar;
+  @ViewChild("columnFilterDataCreazione") public columnFilterDataCreazione: ColumnFilter;
 
   @ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>;
 
   public docsListMode: DocsListMode;
+  public dataMinimaCreazione: Date = new Date("2000-01-01");
+  public dataMassimaCreazione: Date = new Date("2030-12-31");
+  public annoDiRicerca: Date;
   public docs: ExtendedDocDetailView[];
   public enumDocsListMode = DocsListMode;
   public totalRecords: number;
-  public aziendeFiltrabili: Azienda[] = [];
+  public aziendeFiltrabili: ValueAndLabelObj[] = [];
   public cols: ColonnaBds[] = [];
   public _selectedColumns: any[];
   public rowsNumber: number = 20;
@@ -64,17 +69,19 @@ export class DocsListComponent implements OnInit, OnDestroy {
   public initialSortField: string = "dataCreazione";
   public exportCsvInProgress: boolean = false;
   public docListModeItem: DocListModeItem[];
-  public calendarcreazione: any;
   public selectedDocListMode: DocListModeItem = {
     title: "",
-    label: "Miei  documenti", 
+    label: "Miei documenti", 
     // icon: "pi pi-fw pi-list", 
     routerLink: ["./" + DOCS_LIST_ROUTE], 
-    queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI}
+    queryParams: {"mode": DocsListMode.MIEI_DOCUMENTI}
   };
   public isSegretario: boolean = false;
   private serviceForGetData: NextSDREntityProvider = null;
   private projectionFotGetData: string = null;
+  public filtriPuliti: boolean = true;
+  private mandatoryColumns: string[] = [];
+  public selectableColumns: ColonnaBds[] = [];
 
   constructor(
     private messageService: MessageService,
@@ -92,10 +99,9 @@ export class DocsListComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    this.docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode || DocsListMode.ELENCO_DOCUMENTI;
-    this.router.navigate([], { relativeTo: this.route, queryParams: { mode: this.docsListMode } });
-    //todo fare per bene
-    //this.selectedDocListMode = this.docsListMode;
+    this.appService.appNameSelection("Elenco documenti");
+    this.docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode || DocsListMode.MIEI_DOCUMENTI;
+    this.router.navigate([], { relativeTo: this.route, queryParams: { mode: this.docsListMode } }); 
     
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
@@ -121,13 +127,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
       if (this.utenteUtilitiesLogin) this.calcolaAziendeFiltrabili();
       this.resetAndLoadData();
     });
-    
-    this.appService.appNameSelection("Elenco documenti");
-
   }
 
   /**
-   * todo
+   * Costruisco i tab per l'EDI
    */
   public calcDocListModeItem(): void {
     this.docListModeItem = [];
@@ -137,14 +140,14 @@ export class DocsListComponent implements OnInit, OnDestroy {
         label: "Visibili", 
         // icon: "pi pi-fw pi-list", 
         routerLink: ["./" + DOCS_LIST_ROUTE], 
-        queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI_VISIBILI}
+        queryParams: {"mode": DocsListMode.VISIBILI}
       },
       {
         title: "",
         label: "Miei  documenti", 
         // icon: "pi pi-fw pi-list", 
         routerLink: ["./" + DOCS_LIST_ROUTE], 
-        queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI}
+        queryParams: {"mode": DocsListMode.MIEI_DOCUMENTI}
       },
     )
     
@@ -226,6 +229,12 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * ed il filtro "miei documenti"
    */
   private loadConfigurationAndSetItUp(): void {
+    this.mandatoryColumns = ["eliminabile", "dataCreazione"];
+    if (this.aziendeFiltrabili.length > 1) {
+      this.mandatoryColumns.push("idAzienda");
+    }
+    this.selectableColumns = cols.filter(e => !this.mandatoryColumns.includes(e.field));
+
     this.cols = cols;
     const impostazioni = this.utenteUtilitiesLogin.getImpostazioniApplicazione();
     console.log("sa,", this.utenteUtilitiesLogin.getImpostazioniApplicazione());
@@ -234,7 +243,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
       const settings: Impostazioni = JSON.parse(impostazioni.impostazioniVisualizzazione) as Impostazioni;
       if (settings["scripta.docList"]) {
         this.mieiDocumenti = settings["scripta.docList"].mieiDocumenti;
-        this._selectedColumns = this.cols.filter(c => settings["scripta.docList"].selectedColumn.some(e => e === c.field)|| c.field == 'eliminabile');
+        this._selectedColumns = this.cols.filter(c => settings["scripta.docList"].selectedColumn.some(e => e === c.field) || this.mandatoryColumns.includes(c.field));
       }
     }
 
@@ -303,7 +312,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
     this.aziendeFiltrabili = [];
     if (this.docsListMode !== DocsListMode.REGISTRAZIONI
       || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD)) {
-      this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive;
+      this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive
+        .map(a => {
+          return {value: [a.id], label: a.nome} as ValueAndLabelObj;
+        });
     } else if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.OS)
       || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.MOS)) {
       /* Se entro qui allora sono nel tab registrazioni e non sono SD ma
@@ -318,12 +330,24 @@ export class DocsListComponent implements OnInit, OnDestroy {
       if (this.utenteUtilitiesLogin.getUtente().ruoliUtentiPersona[CODICI_RUOLO.MOS]) {
         codiceAziendeOSMOS = codiceAziendeOSMOS.concat(this.utenteUtilitiesLogin.getUtente().ruoliUtentiPersona[CODICI_RUOLO.MOS]["GENERALE"]);
       }
-      this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive.filter(a => codiceAziendeOSMOS.indexOf(a.codice) != -1);
-      // Svuoto l'eventuale filtro nel caso fosse stato usato
-      if (this.multiSelectAzienda && this.columnFilterAzienda) {
-        this.multiSelectAzienda.value = [];
-        this.columnFilterAzienda.clearFilter();
-      }
+      this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive
+        .filter(a => codiceAziendeOSMOS.indexOf(a.codice) != -1)
+        .map(a => {
+          return {value: [a.id], label: a.nome} as ValueAndLabelObj;
+        });
+    }
+    if (this.aziendeFiltrabili.length > 1) {
+      this.aziendeFiltrabili.push({
+        value: this.aziendeFiltrabili.map(e => e.value[0]),
+        label: "Tutte"
+      } as ValueAndLabelObj);
+    }
+    // Svuoto l'eventuale filtro nel caso fosse stato usato e reimposto il default
+    if (this.dropdownAzienda && this.columnFilterAzienda) {
+      this.dropdownAzienda.value = [];
+      this.columnFilterAzienda.clearFilter();
+      this.dropdownAzienda.value = this.aziendeFiltrabili[0].value;
+      this.columnFilterAzienda.applyFilter();
     }
   }
 
@@ -342,6 +366,18 @@ export class DocsListComponent implements OnInit, OnDestroy {
 
     console.log(`Chiedo ${this.pageConf.conf.limit} righe con offset di ${this.pageConf.conf.offset}`);
     this.storedLazyLoadEvent = event;
+
+    if (this.filtriPuliti) {
+      this.filtriPuliti = false;
+      this.resetCalendarToInitialValues();
+      this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
+
+      if (this.dropdownAzienda) {
+        this.dropdownAzienda.writeValue(this.aziendeFiltrabili[0].value);
+        this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
+      }
+    }
+
     this.loadData();
   }
 
@@ -349,14 +385,23 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * Metodo che toglie il sort dalle colonne della tabella.
    * In particolare è usata dagli input dei campi che quando usati ordinano per ranking
    */
-  public resetSort(): void {
+  public removeSort(): void {
     this.dataTable.sortField = null;
     this.dataTable.sortOrder = null;
-    this.dataTable.tableService.onSort(null);
+    this.dataTable.tableService.onSort(null); 
   }
 
   /**
-   * Metodo chiamato dal frontend quando l'utente cambia valore al flag mieiDocumenti
+   * Metodo che reimposta il sort di default. Cioè al campo definito in initialSortField
+   */
+  public resetSort(): void {
+    this.dataTable.sortField = this.initialSortField;
+    this.dataTable.sortOrder = this.dataTable.defaultSortOrder;
+    this.dataTable.sortSingle();
+  }
+
+  /**
+   * Metodo chiamato quando l'utente cambia tab
    * Risetta la configurazione pagine e chiama la laoddata
    */
   public resetAndLoadData(): void {
@@ -366,7 +411,44 @@ export class DocsListComponent implements OnInit, OnDestroy {
     }
     this.storedLazyLoadEvent.first = 0;
     this.storedLazyLoadEvent.rows = this.rowsNumber * 2;
+
+    if (this.dropdownAzienda) {
+      if (this.dropdownAzienda) {
+        this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
+      }
+    }
+
     this.loadData();
+  }
+
+  /**
+   * Questa funzione si occupa di ristabilire il filtro iniziale sulla data creazione.
+   * Questo filtro serve per usare la partizione specifica dell'anno corrente
+   */
+  private resetCalendarToInitialValues() {
+    const oggi = new Date();
+
+    switch (oggi.getMonth()) {
+      case 0:
+        // Gennaio
+        this.calendarcreazione.writeValue([
+          new Date(new Date().getFullYear() - 1, 10, 1),
+          new Date(new Date().getFullYear(), 11, 31)
+        ]);
+        break;
+      case 1:
+        // Febbrario
+        this.calendarcreazione.writeValue([
+          new Date(new Date().getFullYear() - 1, 11, 1),
+          new Date(new Date().getFullYear(), 11, 31)
+        ]);
+        break
+      default:
+        this.calendarcreazione.writeValue([
+          new Date(new Date().getFullYear(), 0, 1),
+          new Date(new Date().getFullYear(), 11, 31)
+        ]);
+    }
   }
 
   /**
@@ -379,50 +461,37 @@ export class DocsListComponent implements OnInit, OnDestroy {
     const filterAndSort = new FiltersAndSorts();
 
     switch (this.docsListMode) {
-      case DocsListMode.ELENCO_DOCUMENTI_VISIBILI:
+      case DocsListMode.VISIBILI:
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
-        //filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
         this.initialSortField = "dataCreazione";
         this.serviceForGetData = this.docDetailViewService;
         this.projectionFotGetData = "DocDetailViewWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
-      case DocsListMode.ELENCO_DOCUMENTI:
+      case DocsListMode.MIEI_DOCUMENTI:
         /* const filtroJson: FilterJsonDefinition<PersonaVedente> = new FilterJsonDefinition(true);
         filtroJson.add("idPersona", this.utenteUtilitiesLogin.getUtente().idPersona.id);
         if (this.mieiDocumenti) {filtroJson.add("mioDocumento", true);} 
         filterAndSort.addFilter(new FilterDefinition("personeVedenti", FILTER_TYPES.not_string.equals, filtroJson.buildJsonString()));*/
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
         filterAndSort.addFilter(new FilterDefinition("mioDocumento", FILTER_TYPES.not_string.equals, true));
-        //filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
         this.initialSortField = "dataCreazione";
         this.serviceForGetData = this.docDetailViewService;
         this.projectionFotGetData = "DocDetailViewWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
       case DocsListMode.IFIRMARIO:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
-        //filterAndSort.addSort(new SortDefinition("dataCreazione", SORT_MODES.desc));
         this.initialSortField = "dataCreazione";
         this.serviceForGetData = this.docDetailService;
         this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
       case DocsListMode.IFIRMATO:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmato"));
-        //filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.desc));
-        //this.dataTable.sortField = null;
-        /* this.dataTable.sortOrder = null;
-         */
-        //this.dataTable.tableService.onSort(null);
-        //this.dataTable.sortField = "dataRegistrazione";
-        //this.initialSortField = "dataCreazione";
-        
         this.initialSortField = "dataRegistrazione";
-        //this.dataTable.sortSingle();
         this.serviceForGetData = this.docDetailService;
         this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
       case DocsListMode.REGISTRAZIONI:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRegistrazioni"));
-        //filterAndSort.addSort(new SortDefinition("dataRegistrazione", SORT_MODES.desc));
         this.initialSortField = "dataRegistrazione";
         this.serviceForGetData = this.docDetailService;
         this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
@@ -526,7 +595,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
     const filtersAndSorts = new FiltersAndSorts();
     filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.containsIgnoreCase, event.query));
     this.aziendeFiltrabili.forEach(a => {
-      filtersAndSorts.addFilter(new FilterDefinition("utenteList.idAzienda.id", FILTER_TYPES.not_string.equals, a.id));
+      if ((typeof a.value) === "number")
+        filtersAndSorts.addFilter(new FilterDefinition("utenteList.idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
     });
     this.personaService.getData(null, filtersAndSorts, null)
       .subscribe(res => {
@@ -570,7 +640,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
     const filtersAndSorts = new FiltersAndSorts();
     filtersAndSorts.addFilter(new FilterDefinition("nome", FILTER_TYPES.string.containsIgnoreCase, event.query));
     this.aziendeFiltrabili.forEach(a => {
-      filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, a.id));
+      if ((typeof a.value) === "number")
+        filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
     });
     this.strutturaService.getData("StrutturaWithIdAzienda", filtersAndSorts, null)
       .subscribe(res => {
@@ -598,17 +669,40 @@ export class DocsListComponent implements OnInit, OnDestroy {
    */
   public clear(): void {
     this.inputGobalFilter.nativeElement.value = "";
-    this.dataTable.filters.global = {
+    /* this.dataTable.filters.global = {
       value: null,
       matchMode: null
-    };
+    }; */
     // this.autocompleteIdPersonaRedattrice.selectItem(null, false);
     if (this.autocompleteIdPersonaRedattrice) this.autocompleteIdPersonaRedattrice.writeValue(null);
     if (this.autocompleteidPersonaResponsabileProcedimento) this.autocompleteidPersonaResponsabileProcedimento.writeValue(null);
     if (this.autocompleteIdStrutturaRegistrazione) this.autocompleteIdStrutturaRegistrazione.writeValue(null);
     if (this.autocompleteFirmatari) this.autocompleteFirmatari.writeValue(null);
     if (this.autocompleteSullaScrivaniaDi) this.autocompleteSullaScrivaniaDi.writeValue(null);
-    this.dataTable.reset();
+    
+    this.myDatatableReset();
+    
+  }
+
+  /**
+   * this.dataTable.reset(); fa un po' troppa roba e non riesco a gestirlo.
+   * Quindi il reset me lo faccio io a mano.
+   */
+  public myDatatableReset() {
+    this.filtriPuliti = true;
+    for (const key in this.dataTable.filters) {
+      (this.dataTable.filters as any)[key]["value"] = null;
+    }
+    this.dataTable.filteredValue = null;
+    //this.dataTable.tableService.onResetChange();
+    this.dataTable.first = 0;
+    this.resetSort();
+    
+
+    
+    //this.dataTable.firstChange.emit(this.dataTable.first);
+    //this.dataTable.tableService.onResetChange();
+    //this.dataTable.sortSingle();
   }
 
   /**
@@ -661,18 +755,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Serve a rimuovere colonne dal multiselect che non devono poter essere selezionate,
-   * come per esempio la colonna eliminabile
-   */
-  private removeColumn(): ColonnaBds[] {
-    const columnsWithoutEliminabile: ColonnaBds[] = cols.filter(e => e.field !== "eliminabile")
-    return columnsWithoutEliminabile;
-  }
-
-  /**
    * Questo serve per vedere se è sulla scrivania dell'utente in modo da potergliela far eliminare 
    * (questo controllo viene fatto anche lato inDE)
-   * 
    */
   public checkIfSullaMiaScrivania(doc: ExtendedDocDetailView): boolean{
     if (!doc.sullaScrivaniaDi) {
@@ -714,40 +798,20 @@ export class DocsListComponent implements OnInit, OnDestroy {
    */
   public cancellaDaElenco(docToDelete: ExtendedDocDetailView): void {
     this.resetAndLoadData();
-    /* const filterAndSort = new FiltersAndSorts();
-      filterAndSort.addFilter(new FilterDefinition("ExtendedDocList.id", FILTER_TYPES.not_string.equals, docToDelete.id))
-    this.loadDocsListSubscription = this.docListService.getData(
-        "DocListWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione",
-        filterAndSort, 
-        null).subscribe((data: any) => {
-        console.log(data);
-        this.totalRecords = data.page.totalElements - 1;
-        if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
-          Array.prototype.splice.apply(this.docs, [0, this.docs.length, ...this.setCustomProperties(data.results)]);
-        } else {
-          Array.prototype.splice.apply(this.docs, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
-        }
-        this.docs = [...this.docs]; // trigger change detection
-      }); */
-
-      this.messageService.add({
-        severity: "success",
-        key: "docsListToast",
-        detail: `Proposta eliminata con successo`
-      });
+    this.messageService.add({
+      severity: "success",
+      key: "docsListToast",
+      detail: `Proposta eliminata con successo`
+    });
   }
 
-
-  public onShowDatePicker(calendar: any) {
-    console.log("onShowDatePicker", calendar);
-    console.log("calendar.value", calendar.value);
-  }
-
-
-  public handleCalendarButtonEvent(calendar: any, command: any, event: Event) {
-    console.log("handleCalendarButtonEvent", calendar);
-    console.log("calandar", calendar.value);
-
+  /**
+   * Questa funzione gestisce l'utilizzo dei pulsanti custom dei calendari
+   * @param calendar 
+   * @param command 
+   * @param event 
+   */
+  public handleCalendarButtonEvent(calendar: Calendar, command: any, event: Event) {
     if (command === "doFilter") { // pulsante OK
       if (calendar.value)
         calendar.onClickOutside.emit(calendar.value);
@@ -762,9 +826,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
       else
         calendar.hideOverlay();
     }
-
   }
-
 
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
@@ -785,20 +847,15 @@ export class DocsListComponent implements OnInit, OnDestroy {
   }
 }
 
-
 export interface DocListModeItem {
   label: string;
   title: string;
   // icon: string;
   routerLink: string[];
   queryParams: any;
-  
-          
-            // {
-            //       label: "Firmario", 
-            //       title: "Le proposte in scrivania dei responsabili",
-            //       icon: "pi pi-fw pi-user-edit", 
-            //       routerLink: ["./" + DOCS_LIST_ROUTE], 
-            //       queryParams: {"mode": DocsListMode.IFIRMARIO}
-            //   }
+}
+
+export interface ValueAndLabelObj {
+  value: number[];
+  label: string;
 }

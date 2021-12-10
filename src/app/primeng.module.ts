@@ -21,6 +21,8 @@ import {TabMenuModule} from 'primeng/tabmenu';
 import { ProgressSpinnerModule } from "primeng/progressspinner";
 import {SelectButtonModule} from 'primeng/selectbutton';
 import { ConfirmDialogModule } from "primeng/confirmdialog";
+import {DropdownModule} from 'primeng/dropdown';
+
 
 @NgModule({
   declarations: [
@@ -47,7 +49,8 @@ import { ConfirmDialogModule } from "primeng/confirmdialog";
     TabMenuModule,
     ProgressSpinnerModule,
     ConfirmDialogModule,
-    SelectButtonModule
+    SelectButtonModule,
+    DropdownModule
   ],
   exports: [
     ButtonModule,
@@ -71,7 +74,8 @@ import { ConfirmDialogModule } from "primeng/confirmdialog";
     TabMenuModule,
     ProgressSpinnerModule,
     SelectButtonModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    DropdownModule
   ],
   providers: [MessageService, DialogService]
 })
