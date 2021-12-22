@@ -160,7 +160,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
           queryParams: {"mode": DocsListMode.IFIRMARIO}
       });
       this.docListModeItem.push({
-        label: "Firmato", 
+        label: "Firmati", 
         title: "Registrati dai responsabili",
         // icon: "pi pi-fw pi-user-edit", 
         routerLink: ["./" + DOCS_LIST_ROUTE], 
