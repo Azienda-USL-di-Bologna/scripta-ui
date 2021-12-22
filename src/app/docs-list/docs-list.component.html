@@ -18,6 +18,7 @@
   (onLazyLoad)="onLazyLoad($event)" 
   [loading]="loading" 
   styleClass="p-table-scripta-docs-list"
+  [ngClass]="{'table-zero-rows': totalRecords === 0}"
   tableStyleClass="docslist-table-body">
   <ng-template pTemplate="caption">
     <div class="caption-row">
@@ -27,8 +28,21 @@
             <i class="pi pi-search"></i>
             <input #inputGobalFilter pInputText type="text" (input)="applyFilterGlobal($event, 'equals')" placeholder="Ricerca.. " />
           </span>
-          <button pButton class="p-button-outlined" icon="pi pi-filter-slash" (click)="clear()"></button>
-          <p-selectButton class="p-buttonselect"
+          <button pButton 
+            class="p-button-outlined refresh-button" 
+            icon="pi pi-filter" 
+            pTooltip="Applica i filtri. Aggiorna"
+            tooltipPosition="bottom"
+            (click)="resetPaginationAndLoadData()">
+          </button>
+          <button pButton 
+            class="p-button-outlined alarm-button" 
+            icon="pi pi-filter-slash" 
+            pTooltip="Svuota i filtri"
+            tooltipPosition="bottom"
+            (click)="clear()">
+          </button>
+          <p-selectButton class="tabs"
             [options]="docListModeItem" 
             [(ngModel)]="selectedDocListMode" 
             optionLabel="label"

@@ -125,7 +125,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
     this.route.queryParams.subscribe(params => {
       //this.docsListMode = params["mode"];
       if (this.utenteUtilitiesLogin) this.calcolaAziendeFiltrabili();
-      this.resetAndLoadData();
+      this.resetPaginationAndLoadData();
     });
   }
 
@@ -403,8 +403,9 @@ export class DocsListComponent implements OnInit, OnDestroy {
   /**
    * Metodo chiamato quando l'utente cambia tab
    * Risetta la configurazione pagine e chiama la laoddata
+   * Mantiene i filtri
    */
-  public resetAndLoadData(): void {
+  public resetPaginationAndLoadData(): void {
     this.resetDocsArrayLenght = true;
     if (!!!this.storedLazyLoadEvent) {
       this.storedLazyLoadEvent = {};
@@ -413,9 +414,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
     this.storedLazyLoadEvent.rows = this.rowsNumber * 2;
 
     if (this.dropdownAzienda) {
-      if (this.dropdownAzienda) {
-        this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
-      }
+      this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
     }
 
     this.loadData();
@@ -797,7 +796,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
    * cancellato, senza necessariamente dover ricaricare la pagina
    */
   public cancellaDaElenco(docToDelete: ExtendedDocDetailView): void {
-    this.resetAndLoadData();
+    this.resetPaginationAndLoadData();
     this.messageService.add({
       severity: "success",
       key: "docsListToast",
