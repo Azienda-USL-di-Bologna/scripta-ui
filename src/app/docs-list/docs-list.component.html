@@ -74,6 +74,7 @@
           [(ngModel)]="selectedColumns" 
           (onChange)="onChangeSelectedColumns($event)"
           optionLabel="header" 
+          [showHeader]="false"
           selectedItemsLabel="{0} colonne selezionate"
           [style]="{minWidth: '250px', maxWidth: '250px'}" 
           placeholder="Scegli le colonne da visualizzare">
