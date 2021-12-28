@@ -273,6 +273,20 @@ export const cols: ColonnaBds[] = [
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: true,
     default: false
+  },
+  {
+    field: "protocolloEsterno",
+    header: "Protocollo esterno",
+    filterField: "protocolloEsterno",
+    // sortField: "sullaScrivaniaDi.descrizione",
+    style: {},
+    headerClass: ["header-column", "protocollo-esterno-column"],
+    filterClass: ["filter-column", "protocollo-esterno-column"],
+    bodyClass: ["protocollo-esterno-column"],
+    fieldType: "string",
+    filterMatchMode: FILTER_TYPES.string.containsIgnoreCase,
+    useFilterMatchMode: true,
+    default: false
   }
 ];
 
@@ -492,5 +506,11 @@ export const colsCSV: any[] = [
     header: "Sulla scrivania di",
     fieldType: "object",
     fieldId: "sullaScrivaniaDi"
+  },
+  {
+    field: "protocolloEsterno",
+    header: "Protocollo esterno",
+    fieldType: "string",
+    fieldId: "protocolloEsterno"
   }
 ]

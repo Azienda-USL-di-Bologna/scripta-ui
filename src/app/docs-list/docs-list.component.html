@@ -538,6 +538,20 @@
             close
           </button>
         </div>
+        <div *ngSwitchCase="'protocolloEsterno'" class="search-wrapper">
+          <p-columnFilter #colfilterprotocolloesterno
+            [field]="col.filterField"
+            [matchMode]="col.filterMatchMode" 
+            [showMenu]="false" 
+            [useGrouping]="false" >
+          </p-columnFilter>
+          <button *ngIf="colfilterprotocolloesterno.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilterprotocolloesterno.clearFilter()">
+            close
+          </button>
+        </div>
       </th>
     </tr>
   </ng-template>
@@ -619,6 +633,9 @@
           <span *ngFor="let d of rowData.sullaScrivaniaDi" class="sulla-scrivania-di-item">
             {{d.descrizione}}
           </span>
+        </div>
+        <div *ngSwitchCase="'protocolloEsterno'">
+          {{rowData.protocolloEsterno}}
         </div>
       </td>
       <td class="scrollbar-overlay-placeholder-column"></td>
