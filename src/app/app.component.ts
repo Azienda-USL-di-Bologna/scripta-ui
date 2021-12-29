@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { HeaderFeaturesConfig } from '@bds/common-components';
 import { NtJwtLoginService, UtenteUtilities, UtilityFunctions } from '@bds/nt-jwt-login';
 import { ActivatedRoute, Router, Params } from '@angular/router';
-import { IntimusClientService } from '@bds/nt-communicator';
+import { IntimusClientService, PRIMENG_ITA_TRANSALATION } from '@bds/nt-communicator';
 import { getInternautaUrl, BaseUrlType, Azienda } from '@bds/ng-internauta-model';
 import { Subscription } from 'rxjs';
 import { APPLICATION, LOGIN_ROUTE } from 'src/environments/app-constants';
 import { AppService } from './app.service';
+import { PrimeNGConfig } from 'primeng/api';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +22,7 @@ export class AppComponent implements OnInit {
 
   constructor(
     public loginService: NtJwtLoginService,
+    private config: PrimeNGConfig,
     private route: ActivatedRoute,
     private router: Router,
     private intimusClient: IntimusClientService,
@@ -28,6 +30,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.config.setTranslation(PRIMENG_ITA_TRANSALATION);
     this.headerFeaturesConfig = new HeaderFeaturesConfig();
     this.headerFeaturesConfig.showCambioUtente = true;
     this.headerFeaturesConfig.showLogOut = true;

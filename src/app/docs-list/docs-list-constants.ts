@@ -5,7 +5,7 @@ import { Utils } from "src/app/utilities/utils";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 
 export const cols: ColonnaBds[] = [
-  {
+  /* {
     field: "eliminabile",
     header: "",
     filterField: "eliminabile",
@@ -17,7 +17,7 @@ export const cols: ColonnaBds[] = [
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: false,
     default: true
-  },
+  }, */
   {
     field: "idAzienda",
     header: "Ente",
@@ -355,12 +355,6 @@ export enum DocsListMode {
 }
 
 export const colsCSV: any[] = [
-  {
-    field: "eliminabile",
-    header: "",
-    fieldType: "boolean",
-    fieldId: "eliminabile"
-  },
   {
     field: "idAzienda.nome",
     header: "Ente",

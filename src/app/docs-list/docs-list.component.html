@@ -105,12 +105,12 @@
     <!-- FILTRI -->
     <tr class="filter-row">
       <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
-        <div *ngSwitchCase="'eliminabile'">
+        <!-- <div *ngSwitchCase="'eliminabile'">
           <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
             </ng-template>
           </p-columnFilter>
-        </div>
+        </div> -->
         <div *ngSwitchCase="'idAzienda'">
           <p-columnFilter #columnFilterAzienda [field]="col.filterField" matchMode="in" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
@@ -196,7 +196,6 @@
                 dateFormat="dd/mm/yy"
                 [showIcon]="false"
                 [showButtonBar]="false"
-                [locale]="localIt"
                 selectionMode="range"
                 [readonlyInput]="true"
                 (onClickOutside)="filter(calendarcreazione.value)"
@@ -236,7 +235,6 @@
                 dateFormat="dd/mm/yy"
                 [showIcon]="false"
                 [showButtonBar]="false"
-                [locale]="localIt"
                 selectionMode="range"
                 [readonlyInput]="true"
                 (onClickOutside)="filter(calendarregistrazione.value)"
@@ -270,7 +268,6 @@
                 dateFormat="dd/mm/yy"
                 [showIcon]="false"
                 [showButtonBar]="false"
-                [locale]="localIt"
                 selectionMode="range"
                 [readonlyInput]="true"
                 (onClickOutside)="filter(calendarpubblicazione.value)"
@@ -559,14 +556,14 @@
   <ng-template pTemplate="body" let-rowData let-columns="columns">
     <tr class="row-height">
       <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
-        <div *ngSwitchCase="'eliminabile'">
+        <!-- <div *ngSwitchCase="'eliminabile'">
           <span *ngIf="rowData.eliminabile && checkIfSullaMiaScrivania(rowData)" 
             class="material-icons delete_outline-icon" 
             pTooltip="Elimina proposta" 
             (click)="confermaEliminaProposta(rowData)">
             close
           </span>
-        </div>
+        </div> -->
         <div *ngSwitchCase="'idAzienda'">
           {{rowData.idAzienda.nome}}
         </div>
@@ -576,8 +573,20 @@
         <div *ngSwitchCase="'registrazione'">
           {{rowData.registrazioneVisualizzazione}}
         </div>
-        <div *ngSwitchCase="'proposta'">
-          {{rowData.propostaVisualizzazione}}
+        <div *ngSwitchCase="'proposta'" class="proposta-box">
+          <div *ngIf="rowData.eliminabile"
+            class="box-elimina" 
+            (click)="confermaEliminaProposta(rowData)"
+            pTooltip="Elimina proposta">
+            <span 
+              class="material-icons delete_outline-icon" 
+              >
+              close
+            </span>
+          </div>
+          <div class="box-numero-proposta">
+            {{rowData.propostaVisualizzazione}}
+          </div>
         </div>
         <div *ngSwitchCase="'dataCreazione'">
           {{rowData.dataCreazione | date:'dd/MM/yyyy'}}

@@ -61,7 +61,6 @@ export class DocsListComponent implements OnInit, OnDestroy {
   public tipologiaVisualizzazioneObj = TipologiaDocTraduzioneVisualizzazione;
   public statoVisualizzazioneObj = StatoDocTraduzioneVisualizzazione;
   public statoUfficioAttiVisualizzazioneObj = StatoUfficioAttiTraduzioneVisualizzazione;
-  public localIt: any = LOCAL_IT;
   public mieiDocumenti: boolean = true;
   public filteredPersone: Persona[] = [];
   public filteredStrutture: Struttura[] = [];
@@ -97,7 +96,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
     private appService: AppService,
     private confirmationService: ConfirmationService
   ) { }
-
+public en: any;
   ngOnInit(): void {
     this.appService.appNameSelection("Elenco documenti");
     this.docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode || DocsListMode.MIEI_DOCUMENTI;
@@ -572,7 +571,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
       doc.idPersonaResponsabileProcedimentoVisualizzazione = null;
       doc.idPersonaRedattriceVisualizzazione = null;
       doc.fascicolazioniVisualizzazione = null;
-      doc.eliminabile = null;
+      doc.eliminabile = this.isEliminabile(doc);
       doc.destinatariVisualizzazione = null;
       doc.firmatariVisualizzazione = null;
       doc.sullaScrivaniaDiVisualizzazione = null;
@@ -754,15 +753,15 @@ export class DocsListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Questo serve per vedere se è sulla scrivania dell'utente in modo da potergliela far eliminare 
+   * Questo serve per vedere se è una proposta ed è sulla scrivania dell'utente 
+   * in modo da potergliela far eliminare 
    * (questo controllo viene fatto anche lato inDE)
    */
-  public checkIfSullaMiaScrivania(doc: ExtendedDocDetailView): boolean{
-    if (!doc.sullaScrivaniaDi) {
+  public isEliminabile(doc: ExtendedDocDetailView): boolean {
+    if (doc.numeroRegistrazione || !doc.sullaScrivaniaDi) {
       return false;
     }
-    let isOnMyScriviania = doc.sullaScrivaniaDi.some(p => p.idPersona === this.utenteUtilitiesLogin.getUtente().idPersona.id);
-    return isOnMyScriviania;
+    return doc.sullaScrivaniaDi.some(p => p.idPersona === this.utenteUtilitiesLogin.getUtente().idPersona.id);
   }
 
   /**

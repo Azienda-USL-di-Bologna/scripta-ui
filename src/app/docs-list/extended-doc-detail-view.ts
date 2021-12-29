@@ -209,13 +209,8 @@ export class ExtendedDocDetailView extends DocDetailView {
   }
 
   public set eliminabile(eliminabile: boolean) {
-    if(this.numeroRegistrazione){
-      this._eliminabile = false;
-    }else{
-      this._eliminabile = true;
-    }
+    this._eliminabile = eliminabile;
   }
-
 
   private calcDescrizioneVisualizzazionePerPersona(persona: Persona): string {
     return persona.descrizione + (persona.idSecondario ? " (" + persona.idSecondario + ")" : "");
