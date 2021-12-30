@@ -6,7 +6,7 @@ import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { buildLazyEventFiltersAndSorts, CsvExtractor } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from "@nfa/next-sdr";
-import { ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
+import { Confirmation, ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
 import { AutoComplete } from "primeng/autocomplete";
 import { Dropdown } from "primeng/dropdown";
 import { Calendar } from "primeng/calendar";
@@ -32,6 +32,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
   private utenteUtilitiesLogin: UtenteUtilities;
   private resetDocsArrayLenght: boolean = true;
   private storedLazyLoadEvent: LazyLoadEvent;
+  private lastAziendaFilterValue: number[];
+  private lastDataCreazioneFilterValue: Date[];
 
   @ViewChild("dt") public dataTable: Table;
   @ViewChild("dropdownAzienda") public dropdownAzienda: Dropdown;
@@ -96,7 +98,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
     private appService: AppService,
     private confirmationService: ConfirmationService
   ) { }
-public en: any;
+
   ngOnInit(): void {
     this.appService.appNameSelection("Elenco documenti");
     this.docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode || DocsListMode.MIEI_DOCUMENTI;
@@ -117,6 +119,15 @@ public en: any;
         }
       )
     );
+
+    /* this.subscriptions.push(
+      this.confirmationService.requireConfirmation$.subscribe((confirmation: Confirmation) => {
+        if (confirmation === null) {
+          console.log(this.dropdownAzienda);
+          console.log(this.filterAzienda);
+        }
+      })
+    ); */
 
     /* Mi sottoscrivo alla rotta per leggere la modalita dell'elenco documenti
       e faccio partire il caricamento. Ogni volta che la modalità cambia
@@ -228,7 +239,7 @@ public en: any;
    * ed il filtro "miei documenti"
    */
   private loadConfigurationAndSetItUp(): void {
-    this.mandatoryColumns = ["eliminabile", "dataCreazione"];
+    this.mandatoryColumns = ["dataCreazione"];
     if (this.aziendeFiltrabili.length > 1) {
       this.mandatoryColumns.push("idAzienda");
     }
@@ -236,7 +247,6 @@ public en: any;
 
     this.cols = cols;
     const impostazioni = this.utenteUtilitiesLogin.getImpostazioniApplicazione();
-    console.log("sa,", this.utenteUtilitiesLogin.getImpostazioniApplicazione());
 
     if (impostazioni && impostazioni.impostazioniVisualizzazione && impostazioni.impostazioniVisualizzazione !== "") {
       const settings: Impostazioni = JSON.parse(impostazioni.impostazioniVisualizzazione) as Impostazioni;
@@ -306,6 +316,9 @@ public en: any;
    * Questo metodo si occupa di riempire l'array delle aziende filtrabili
    * Nel caso del tab Registrazioni il filtro si fa stringente se l'utente
    * non è SD o CI ma è solo OS o MOS.
+   * 
+   * NB: Nell'oggetto ValueAndLabelObj la proprietà value è un array
+   * Questo permette se serve di inserire la voce per tutte le aziende.
    */
   private calcolaAziendeFiltrabili() {
     this.aziendeFiltrabili = [];
@@ -342,12 +355,12 @@ public en: any;
       } as ValueAndLabelObj);
     }
     // Svuoto l'eventuale filtro nel caso fosse stato usato e reimposto il default
-    if (this.dropdownAzienda && this.columnFilterAzienda) {
+    /* if (this.dropdownAzienda && this.columnFilterAzienda) {
       this.dropdownAzienda.value = [];
       this.columnFilterAzienda.clearFilter();
-      this.dropdownAzienda.value = this.aziendeFiltrabili[0].value;
+      this.dropdownAzienda.value = this.aziendeFiltrabili.find(a => a.value[0] === this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault.id);
       this.columnFilterAzienda.applyFilter();
-    }
+    } */
   }
 
   /**
@@ -372,7 +385,9 @@ public en: any;
       this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
 
       if (this.dropdownAzienda) {
-        this.dropdownAzienda.writeValue(this.aziendeFiltrabili[0].value);
+        const value = this.aziendeFiltrabili.find(a => a.value[0] === this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault.id).value;
+        this.dropdownAzienda.writeValue(value);
+        this.lastAziendaFilterValue = value;
         this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
       }
     }
@@ -447,6 +462,7 @@ public en: any;
           new Date(new Date().getFullYear(), 11, 31)
         ]);
     }
+    this.lastDataCreazioneFilterValue = this.calendarcreazione.value;
   }
 
   /**
@@ -667,19 +683,12 @@ public en: any;
    */
   public clear(): void {
     this.inputGobalFilter.nativeElement.value = "";
-    /* this.dataTable.filters.global = {
-      value: null,
-      matchMode: null
-    }; */
-    // this.autocompleteIdPersonaRedattrice.selectItem(null, false);
     if (this.autocompleteIdPersonaRedattrice) this.autocompleteIdPersonaRedattrice.writeValue(null);
     if (this.autocompleteidPersonaResponsabileProcedimento) this.autocompleteidPersonaResponsabileProcedimento.writeValue(null);
     if (this.autocompleteIdStrutturaRegistrazione) this.autocompleteIdStrutturaRegistrazione.writeValue(null);
     if (this.autocompleteFirmatari) this.autocompleteFirmatari.writeValue(null);
-    if (this.autocompleteSullaScrivaniaDi) this.autocompleteSullaScrivaniaDi.writeValue(null);
-    
+    if (this.autocompleteSullaScrivaniaDi) this.autocompleteSullaScrivaniaDi.writeValue(null); 
     this.myDatatableReset();
-    
   }
 
   /**
@@ -692,15 +701,8 @@ public en: any;
       (this.dataTable.filters as any)[key]["value"] = null;
     }
     this.dataTable.filteredValue = null;
-    //this.dataTable.tableService.onResetChange();
     this.dataTable.first = 0;
     this.resetSort();
-    
-
-    
-    //this.dataTable.firstChange.emit(this.dataTable.first);
-    //this.dataTable.tableService.onResetChange();
-    //this.dataTable.sortSingle();
   }
 
   /**
@@ -710,7 +712,11 @@ public en: any;
    * @param matchMode
    */
   public applyFilterGlobal(event: Event, matchMode: string) {
-    this.dataTable.filterGlobal((event.target as HTMLInputElement).value, matchMode);
+    const stringa: string = (event.target as HTMLInputElement).value;
+    if (!!!stringa || stringa === "") {
+      this.resetSort();
+    }
+    this.dataTable.filterGlobal(stringa, matchMode);
   }
 
   /**
@@ -767,8 +773,10 @@ public en: any;
   /**
    * Chiede la conferma dell'eliminazione della proposta
    */
-  public confermaEliminaProposta(doc: ExtendedDocDetailView): void {
+  public confermaEliminaProposta(doc: ExtendedDocDetailView, event: Event): void {
     this.confirmationService.confirm({
+      key: "confirm-popup",
+      target: event.target,
       message: "Stai eliminando questa proposta e i suoi eventuali allegati, vuoi proseguire?",
       accept: () => {
         this.loading = true;
@@ -809,20 +817,101 @@ public en: any;
    * @param command 
    * @param event 
    */
-  public handleCalendarButtonEvent(calendar: Calendar, command: any, event: Event) {
-    if (command === "doFilter") { // pulsante OK
-      if (calendar.value)
-        calendar.onClickOutside.emit(calendar.value);
+  public handleCalendarButtonEvent(calendar: Calendar, command: string, event: Event, filterCallback: (value: Date[]) => {}) {
+    if (command === "doFilter" || command === "onClickOutside") { // pulsante OK
       calendar.hideOverlay();
     } else if (command === "setToday") { // pulsante OGGI
-      const date: Date = new Date();
-      const dateMeta = { day: date.getDate(), month: date.getMonth(), year: date.getFullYear(), otherMonth: date.getMonth() !== calendar.currentMonth || date.getFullYear() !== calendar.currentYear, today: true, selectable: true };
-      calendar.onDateSelect(event, dateMeta);
-    } else if (command === "clear") { // pulsante
-      if (calendar.value)
-        calendar.onClearButtonClick(event);
-      else
-        calendar.hideOverlay();
+      calendar.writeValue([new Date(), null]);
+      calendar.hideOverlay();
+    } else if (command === "clear") { // pulsante SVUOTA
+      calendar.onClearButtonClick(event);
+    }
+    if (calendar.inputId === "calendarcreazione") {
+      this.lastDataCreazioneFilterValue = calendar.value;
+    }
+    filterCallback(calendar.value);
+  }
+
+  /**
+   * Funzione apposita per il calendario della data creazione.
+   * Vogliamo chiedere all'utente se vuole continuare nel caso abbia scelto un
+   * intervallo di date troppo grande (> 2 anni)
+   * @param calendar 
+   * @param command 
+   * @param event 
+   */
+  public askConfirmAndHandleCalendarCreazioneEvent(calendar: Calendar, command: string, event: Event, filterCallback: (value: Date[]) => {}) {
+    if (command === "onClickOutside") {
+      calendar.writeValue(this.lastDataCreazioneFilterValue);
+      return;
+    }
+    console.log(calendar.value);
+    let needToAsk = false;
+    if (command === "clear" || !!!calendar.value || calendar.value[0] === null) {
+      // Sto cercando su tutti gli anni
+      needToAsk = true;
+    } else {
+      if (calendar.value[1] !== null && ((calendar.value[1].getYear() - calendar.value[0].getYear()) > 1)) {
+        // Se la differenza degli anni è maggiore di 1 allora sto cercando su almeno 3 anni.
+        needToAsk = true;
+      }
+    }
+    if (needToAsk) {
+      setTimeout(() => {
+        this.confirmationService.confirm({
+          key: "confirm-popup",
+          target: event.target,
+          message: "La ricerca potrebbe risultare lenta. Vuoi procedere?",
+          icon: 'pi pi-exclamation-triangle',
+          accept: () => {
+            // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
+            this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
+          },
+          reject: () => {
+            // L'utente ha cambaito idea. Non faccio nulla
+          }
+        });
+      }, 0);
+    } else {
+      this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
+    }
+  }
+
+  /**
+   * Gestione custom del filtro per azienda scelto dall'utente. In particolare devo gestire il caso
+   * in cui l'utente scelga l'opzione "Tutte le aziende" per avvisarlo di possibili rallentamenti.
+   * @param filterCallback 
+   * @param value 
+   * @param filteraziendacontainer 
+   */
+  public filterAzienda(filterCallback: (value: number[]) => {}, value: number[], filteraziendacontainer: any) {
+    if (value.length === 1) {
+      // L'utente ha scelto un unica azienda. Faccio quindi partire il filtro.
+      this.lastAziendaFilterValue = value;
+      filterCallback(value);
+    } else {
+      setTimeout(() => {
+        // Il confirm-popup non mi da l'opportunità di gestire il click "fuori" dal popup.
+        // Sarebbe come se l'utente facesse reject, ma il reject non parte.
+        // Allora innanzitutto rimetto subito il valore vecchio, e solo nel caso di accept
+        // andrò a inserire il valore nuovo.
+        this.dropdownAzienda.writeValue(this.lastAziendaFilterValue);
+        this.confirmationService.confirm({
+          key: "confirm-popup",
+          target: filteraziendacontainer,
+          message: "La ricerca potrebbe risultare lenta. Vuoi procedere?",
+          icon: 'pi pi-exclamation-triangle',
+          accept: () => {
+            // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
+            this.dropdownAzienda.writeValue(value);
+            this.lastAziendaFilterValue = value;
+            filterCallback(value);
+          },
+          reject: () => {
+            // L'utente ha cambaito idea. Non faccio nulla
+          }
+        });
+      }, 0);
     }
   }
 

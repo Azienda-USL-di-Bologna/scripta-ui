@@ -21,6 +21,7 @@ import {TabMenuModule} from 'primeng/tabmenu';
 import { ProgressSpinnerModule } from "primeng/progressspinner";
 import {SelectButtonModule} from 'primeng/selectbutton';
 import { ConfirmDialogModule } from "primeng/confirmdialog";
+import {ConfirmPopupModule} from "primeng/confirmpopup";
 import {DropdownModule} from 'primeng/dropdown';
 
 
@@ -49,6 +50,7 @@ import {DropdownModule} from 'primeng/dropdown';
     TabMenuModule,
     ProgressSpinnerModule,
     ConfirmDialogModule,
+    ConfirmPopupModule,
     SelectButtonModule,
     DropdownModule
   ],
@@ -75,6 +77,7 @@ import {DropdownModule} from 'primeng/dropdown';
     ProgressSpinnerModule,
     SelectButtonModule,
     ConfirmDialogModule,
+    ConfirmPopupModule,
     DropdownModule
   ],
   providers: [MessageService, DialogService]

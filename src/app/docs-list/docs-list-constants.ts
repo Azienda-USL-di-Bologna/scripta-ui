@@ -1,5 +1,4 @@
 import { StatoDoc, StatoUfficioAtti, TipologiaDoc } from "@bds/ng-internauta-model";
-import { UtenteUtilities } from "@bds/nt-jwt-login";
 import { FILTER_TYPES, NextSDRDateTypes } from "@nfa/next-sdr";
 import { Utils } from "src/app/utilities/utils";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
