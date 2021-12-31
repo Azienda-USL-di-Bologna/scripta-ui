@@ -304,6 +304,7 @@ export interface ColonnaBds {
   useFilterMatchMode: boolean;
   default: boolean;
   additionalData?: any;
+  selectionDisabled?: boolean;
 }
 
 export const TipologiaDocTraduzioneVisualizzazione = [
@@ -335,6 +336,7 @@ export const StatoDocTraduzioneVisualizzazione = [
   { value: StatoDoc.CONTROLLO_SEGRETERIA, nome: "Controllo segreteria"},
   { value: StatoDoc.SPEDIZIONE_MANUALE, nome: "Spedizione manuale"},
   { value: StatoDoc.APPROVAZIONE, nome: "Approvazione"},
+  { value: StatoDoc.ANNULLATO, nome: "Annullato"},
 ]
 
 export const StatoUfficioAttiTraduzioneVisualizzazione = [

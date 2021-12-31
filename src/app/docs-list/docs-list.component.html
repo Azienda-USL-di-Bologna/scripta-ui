@@ -6,6 +6,8 @@
   [sortField]="initialSortField"
   [sortOrder]="-1"
   [defaultSortOrder]="-1"
+  [reorderableColumns]="true"
+  (onColReorder)="onColReorder($event)"
   [rows]="rowsNumber" 
   scrollHeight="flex" 
   [scrollable]="true" 
@@ -77,6 +79,7 @@
           [(ngModel)]="selectedColumns" 
           (onChange)="onChangeSelectedColumns($event)"
           optionLabel="header" 
+          optionDisabled="selectionDisabled"
           [showHeader]="false"
           selectedItemsLabel="{0} colonne selezionate"
           [style]="{minWidth: '250px', maxWidth: '250px'}" 
@@ -93,7 +96,7 @@
   <ng-template pTemplate="header" let-columns>
     <!-- HEADER & ORDINAMENTO -->
     <tr class="header-row"> 
-      <th *ngFor="let col of columns" 
+      <th *ngFor="let col of columns" pReorderableColumn
         [ngSwitch]="col.field" 
         [ngClass]="col.headerClass"
         [pSortableColumn]="col.sortField">

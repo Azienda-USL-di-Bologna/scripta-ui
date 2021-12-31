@@ -58,7 +58,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   public totalRecords: number;
   public aziendeFiltrabili: ValueAndLabelObj[] = [];
   public cols: ColonnaBds[] = [];
-  public _selectedColumns: any[];
+  public _selectedColumns: ColonnaBds[];
   public rowsNumber: number = 20;
   public tipologiaVisualizzazioneObj = TipologiaDocTraduzioneVisualizzazione;
   public statoVisualizzazioneObj = StatoDocTraduzioneVisualizzazione;
@@ -211,9 +211,14 @@ export class DocsListComponent implements OnInit, OnDestroy {
     return this._selectedColumns;
   }
 
-  set selectedColumns(val: any[]) {
+  set selectedColumns(colsSelected: ColonnaBds[]) {
     // restore original order
-    this._selectedColumns = this.cols.filter(col => val.includes(col));
+    // this._selectedColumns = this.cols.filter(col => val.includes(col));
+    if (this._selectedColumns.length > colsSelected.length) {
+      this._selectedColumns = this._selectedColumns.filter(sc => colsSelected.includes(sc));
+    } else if (this._selectedColumns.length < colsSelected.length) {
+      this._selectedColumns.push(colsSelected.find(cs => !this._selectedColumns.includes(cs)));
+    }
     this.saveConfiguration();
   }
 
@@ -233,6 +238,15 @@ export class DocsListComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * L'utente ha cambiato l'ordine delle colonne.
+   * Salvo il nuovo ordine sul db.
+   * @param event 
+   */
+  public onColReorder(event: any): void {
+    this.saveConfiguration();
+  }
+
+  /**
    * Questa funzione si occupa di caricare la configurazione personale
    * dell'utente per il componente.
    * Sulla base di questo vengono poi settate le colonne visualizzate
@@ -243,7 +257,13 @@ export class DocsListComponent implements OnInit, OnDestroy {
     if (this.aziendeFiltrabili.length > 1) {
       this.mandatoryColumns.push("idAzienda");
     }
-    this.selectableColumns = cols.filter(e => !this.mandatoryColumns.includes(e.field));
+    // this.selectableColumns = cols.filter(e => !this.mandatoryColumns.includes(e.field));
+    this.selectableColumns = cols.map(e => {
+      if (this.mandatoryColumns.includes(e.field)) {
+        e.selectionDisabled = true;
+      }
+      return e;
+    });
 
     this.cols = cols;
     const impostazioni = this.utenteUtilitiesLogin.getImpostazioniApplicazione();
@@ -252,7 +272,17 @@ export class DocsListComponent implements OnInit, OnDestroy {
       const settings: Impostazioni = JSON.parse(impostazioni.impostazioniVisualizzazione) as Impostazioni;
       if (settings["scripta.docList"]) {
         this.mieiDocumenti = settings["scripta.docList"].mieiDocumenti;
-        this._selectedColumns = this.cols.filter(c => settings["scripta.docList"].selectedColumn.some(e => e === c.field) || this.mandatoryColumns.includes(c.field));
+        this._selectedColumns = [];
+        //this._selectedColumns = this.cols.filter(c => settings["scripta.docList"].selectedColumn.some(e => e === c.field) || this.mandatoryColumns.includes(c.field));
+        settings["scripta.docList"].selectedColumn.forEach(c => {
+          this._selectedColumns.push(this.cols.find(e => e.field === c));
+        });
+        // Aggiungo le colonne obbligatorie nel caso mancassero
+        this.mandatoryColumns.forEach(mc => {
+          if (!this._selectedColumns.some(sc => sc.field === mc)) {
+            this._selectedColumns.push(this.cols.find(c => c.field === mc));
+          }
+        });
       }
     }
 
