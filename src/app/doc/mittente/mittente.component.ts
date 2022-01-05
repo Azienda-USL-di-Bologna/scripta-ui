@@ -5,11 +5,9 @@ import {BaseUrls, BaseUrlType, CodiceMezzo, Contatto, DettaglioContatto, Dettagl
 import {AdditionalDataDefinition, FILTER_TYPES, FilterDefinition, FiltersAndSorts, BatchOperationTypes, NextSdrEntity, BatchOperation} from "@nfa/next-sdr";
 import {Subscription} from "rxjs";
 import {NtJwtLoginService, UtenteUtilities} from "@bds/nt-jwt-login";
-import { LOCAL_IT } from "@bds/nt-communicator";
 import { MessageService } from "primeng/api";
 import { enumOrigine } from "./mittente-constants";
 import { DatePipe } from "@angular/common";
-import { NgModel } from "@angular/forms";
 
 @Component({
   selector: "mittente",
@@ -22,7 +20,6 @@ export class MittenteComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private loggedUtenteUtilities: UtenteUtilities | undefined | null;
   public actualMittente: Related;
-  public localIt = LOCAL_IT;
 
   public _doc: Doc | undefined;
   public _mittenti: Related[] | undefined;

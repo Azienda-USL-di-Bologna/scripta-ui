@@ -1,11 +1,10 @@
 import { StatoDoc, StatoUfficioAtti, TipologiaDoc } from "@bds/ng-internauta-model";
-import { UtenteUtilities } from "@bds/nt-jwt-login";
 import { FILTER_TYPES, NextSDRDateTypes } from "@nfa/next-sdr";
 import { Utils } from "src/app/utilities/utils";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 
 export const cols: ColonnaBds[] = [
-  {
+  /* {
     field: "eliminabile",
     header: "",
     filterField: "eliminabile",
@@ -17,7 +16,7 @@ export const cols: ColonnaBds[] = [
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: false,
     default: true
-  },
+  }, */
   {
     field: "idAzienda",
     header: "Ente",
@@ -273,6 +272,20 @@ export const cols: ColonnaBds[] = [
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: true,
     default: false
+  },
+  {
+    field: "protocolloEsterno",
+    header: "Protocollo esterno",
+    filterField: "protocolloEsterno",
+    // sortField: "sullaScrivaniaDi.descrizione",
+    style: {},
+    headerClass: ["header-column", "protocollo-esterno-column"],
+    filterClass: ["filter-column", "protocollo-esterno-column"],
+    bodyClass: ["protocollo-esterno-column"],
+    fieldType: "string",
+    filterMatchMode: FILTER_TYPES.string.containsIgnoreCase,
+    useFilterMatchMode: true,
+    default: false
   }
 ];
 
@@ -291,6 +304,7 @@ export interface ColonnaBds {
   useFilterMatchMode: boolean;
   default: boolean;
   additionalData?: any;
+  selectionDisabled?: boolean;
 }
 
 export const TipologiaDocTraduzioneVisualizzazione = [
@@ -322,6 +336,7 @@ export const StatoDocTraduzioneVisualizzazione = [
   { value: StatoDoc.CONTROLLO_SEGRETERIA, nome: "Controllo segreteria"},
   { value: StatoDoc.SPEDIZIONE_MANUALE, nome: "Spedizione manuale"},
   { value: StatoDoc.APPROVAZIONE, nome: "Approvazione"},
+  { value: StatoDoc.ANNULLATO, nome: "Annullato"},
 ]
 
 export const StatoUfficioAttiTraduzioneVisualizzazione = [
@@ -341,12 +356,6 @@ export enum DocsListMode {
 }
 
 export const colsCSV: any[] = [
-  {
-    field: "eliminabile",
-    header: "",
-    fieldType: "boolean",
-    fieldId: "eliminabile"
-  },
   {
     field: "idAzienda.nome",
     header: "Ente",
@@ -492,5 +501,11 @@ export const colsCSV: any[] = [
     header: "Sulla scrivania di",
     fieldType: "object",
     fieldId: "sullaScrivaniaDi"
+  },
+  {
+    field: "protocolloEsterno",
+    header: "Protocollo esterno",
+    fieldType: "string",
+    fieldId: "protocolloEsterno"
   }
 ]
