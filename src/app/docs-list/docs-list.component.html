@@ -6,6 +6,8 @@
   [sortField]="initialSortField"
   [sortOrder]="-1"
   [defaultSortOrder]="-1"
+  [reorderableColumns]="true"
+  (onColReorder)="onColReorder($event)"
   [rows]="rowsNumber" 
   scrollHeight="flex" 
   [scrollable]="true" 
@@ -18,6 +20,7 @@
   (onLazyLoad)="onLazyLoad($event)" 
   [loading]="loading" 
   styleClass="p-table-scripta-docs-list"
+  [ngClass]="{'table-zero-rows': totalRecords === 0}"
   tableStyleClass="docslist-table-body">
   <ng-template pTemplate="caption">
     <div class="caption-row">
@@ -25,10 +28,26 @@
         <div class="p-d-flex">
           <span class="p-input-icon-left p-ml-auto">
             <i class="pi pi-search"></i>
-            <input #inputGobalFilter pInputText type="text" (input)="applyFilterGlobal($event, 'equals')" placeholder="Ricerca.. " />
+            <input #inputGobalFilter pInputText 
+              type="text" 
+              (input)="removeSort(); applyFilterGlobal($event, 'equals')" 
+              placeholder="Ricerca.. " />
           </span>
-          <button pButton class="p-button-outlined" icon="pi pi-filter-slash" (click)="clear()"></button>
-          <p-selectButton class="p-buttonselect"
+          <button pButton 
+            class="p-button-outlined refresh-button" 
+            icon="pi pi-filter" 
+            pTooltip="Applica i filtri. Aggiorna"
+            tooltipPosition="bottom"
+            (click)="resetPaginationAndLoadData()">
+          </button>
+          <button pButton 
+            class="p-button-outlined alarm-button" 
+            icon="pi pi-filter-slash" 
+            pTooltip="Svuota i filtri"
+            tooltipPosition="bottom"
+            (click)="clear()">
+          </button>
+          <p-selectButton class="tabs"
             [options]="docListModeItem" 
             [(ngModel)]="selectedDocListMode" 
             optionLabel="label"
@@ -36,9 +55,6 @@
           </p-selectButton>
         </div>
       </div>
-      <!-- <div class="center-content">
-        <span class="doc-trovati-info">{{totalRecords}} documenti trovati</span>
-      </div> -->
       <div class="right-content">
         <span *ngIf="exportCsvInProgress">
           <p-progressSpinner 
@@ -59,23 +75,16 @@
           tooltipPosition="bottom">
         </button>
         <p-multiSelect 
-          [options]="removeColumn()" 
+          [options]="selectableColumns" 
           [(ngModel)]="selectedColumns" 
           (onChange)="onChangeSelectedColumns($event)"
           optionLabel="header" 
+          optionDisabled="selectionDisabled"
+          [showHeader]="false"
           selectedItemsLabel="{0} colonne selezionate"
           [style]="{minWidth: '250px', maxWidth: '250px'}" 
           placeholder="Scegli le colonne da visualizzare">
         </p-multiSelect>
-        <!-- <div class="p-field-checkbox" *ngIf="docsListMode === enumDocsListMode.ELENCO_DOCUMENTI">
-          <p-checkbox 
-            [(ngModel)]="mieiDocumenti" 
-            [binary]="true" 
-            inputId="mieiDocumenti"
-            (onChange)="resetAndLoadData(); saveConfiguration()">
-          </p-checkbox>
-          <label for="binary">Di cui sono attore</label>
-        </div> -->
       </div>
     </div>
   </ng-template>
@@ -87,7 +96,7 @@
   <ng-template pTemplate="header" let-columns>
     <!-- HEADER & ORDINAMENTO -->
     <tr class="header-row"> 
-      <th *ngFor="let col of columns" 
+      <th *ngFor="let col of columns" pReorderableColumn
         [ngSwitch]="col.field" 
         [ngClass]="col.headerClass"
         [pSortableColumn]="col.sortField">
@@ -102,29 +111,23 @@
     <!-- FILTRI -->
     <tr class="filter-row">
       <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
-        <div *ngSwitchCase="'eliminabile'">
-          <p-columnFilter #columnFilterAzienda [field]="col.filterField" matchMode="in" [showMenu]="false">
+        <!-- <div *ngSwitchCase="'eliminabile'">
+          <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
             </ng-template>
           </p-columnFilter>
-        </div>
-        <div *ngSwitchCase="'idAzienda'">
+        </div> -->
+        <div *ngSwitchCase="'idAzienda'" #filteraziendacontainer>
           <p-columnFilter #columnFilterAzienda [field]="col.filterField" matchMode="in" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-multiSelect #multiSelectAzienda 
-                [ngModel]="value" 
+              <p-dropdown #dropdownAzienda
                 [options]="aziendeFiltrabili" 
-                
-                optionValue="id" 
-                optionLabel="nome" 
-                (onChange)="filter($event.value)" 
+                [ngModel]="value" 
+                (onChange)="filterAzienda(filter, $event.value, filteraziendacontainer)" 
+                optionValue="value"
+                optionLabel="label"
                 appendTo="body">
-                <ng-template let-option pTemplate="item">
-                  <div class="p-multiselect-representative-option">
-                    <span class="p-ml-1">{{option.nome}}</span>
-                  </div>
-                </ng-template>
-              </p-multiSelect>
+              </p-dropdown>
             </ng-template>
           </p-columnFilter>
         </div>
@@ -134,7 +137,6 @@
               <p-multiSelect 
                 [ngModel]="value" 
                 [options]="tipologiaVisualizzazioneObj" 
-                
                 optionValue="value" 
                 optionLabel="nome" 
                 (onChange)="filter($event.value)" 
@@ -154,8 +156,7 @@
             [field]="col.filterField"
             [matchMode]="col.filterMatchMode" 
             [showMenu]="false" 
-            [useGrouping]="false" 
-            
+            [useGrouping]="false"
             pTooltip="Inserire solo numeri">
           </p-columnFilter>
           <button *ngIf="colfilterregistrazione.hasFilter()"
@@ -183,35 +184,34 @@
           </button>
         </div>
         <div *ngSwitchCase="'dataCreazione'">
-          <p-columnFilter 
+          <p-columnFilter #columnFilterDataCreazione
             [field]="col.filterField" 
             type="date" matchMode="is" 
             [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-calendar #calendarcreazione 
-                inputId="range" 
-                [yearNavigator]="true" 
-                yearRange="2000:2099"
+                inputId="calendarcreazione" 
                 [ngModel]="value" 
+                [yearNavigator]="true" 
+                [monthNavigator]="true"
+                yearRange="2000:2030"
+                [minDate]="dataMinimaCreazione"
+                [maxDate]="dataMassimaCreazione"
                 dataType="date" 
                 dateFormat="dd/mm/yy"
                 [showIcon]="false"
                 [showButtonBar]="false"
-                [locale]="localIt"
                 selectionMode="range"
                 [readonlyInput]="true"
-                (onClickOutside)="filter(calendarcreazione.value)"
-                (onClearClick)="filter(null)"
-                (onShow)="onShowDatePicker(calendarcreazione)"
-                (onClickOutside)="calendarcreazione.value ? filter(calendarcreazione.value) : handleCalendarButtonEvent(calendarcreazione, 'doFilter', $event)"
+                (onClickOutside)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'onClickOutside', $event, filter)"
                 appendTo="body">
                 <ng-template pTemplate="footer" class="calendar-filter-footer-button">
                   <div class="calendar-filter-footer-button-container">
-                    <p-button (click)="handleCalendarButtonEvent(calendarcreazione, 'doFilter', $event)">Conferma
+                    <p-button (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'doFilter', $event, filter)">Conferma
                     </p-button>
-                    <p-button (click)="handleCalendarButtonEvent(calendarcreazione, 'setToday', $event)">Oggi
+                    <p-button (click)="handleCalendarButtonEvent(calendarcreazione, 'setToday', $event, filter)">Oggi
                     </p-button>
-                    <p-button (click)="handleCalendarButtonEvent(calendarcreazione, 'clear', $event)">Cancella
+                    <p-button (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'clear', $event, filter)">Svuota
                     </p-button>
                   </div>
                 </ng-template>
@@ -220,7 +220,6 @@
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'dataRegistrazione'">
-          
           <p-columnFilter 
           [field]="col.filterField" 
           type="date" 
@@ -228,30 +227,29 @@
           [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-calendar #calendarregistrazione
-                inputId="basic" 
+                inputId="calendarregistrazione" 
                 [ngModel]="value"
                 [yearNavigator]="true"
-                yearRange="2000:2099"
+                [monthNavigator]="true"
+                yearRange="2000:2030"
                 [ngModel]="value" 
                 dataType="date" 
                 dateFormat="dd/mm/yy"
                 [showIcon]="false"
                 [showButtonBar]="false"
-                [locale]="localIt"
                 selectionMode="range"
                 [readonlyInput]="true"
-                (onClickOutside)="filter(calendarregistrazione.value)"
-                (onClearClick)="filter(null)"
-                (onShow)="onShowDatePicker(calendarregistrazione)"
-                (onClickOutside)="calendarregistrazione.value ? filter(calendarregistrazione.value) : handleCalendarButtonEvent(calendarregistrazione, 'doFilter', $event)"
-                appendTo="body">
+                appendTo="body"
+                (onClickOutside)="handleCalendarButtonEvent(calendarregistrazione, 'doFilter', $event, filter)"><!-- (onClickOutside)="filter(calendarregistrazione.value)"
+                  (onClearClick)="filter(null)"
+                  (onClickOutside)="calendarregistrazione.value ? filter(calendarregistrazione.value) : handleCalendarButtonEvent(calendarregistrazione, 'doFilter', $event)" -->
                 <ng-template pTemplate="footer" class="calendar-filter-footer-button">
                   <div class="calendar-filter-footer-button-container">
-                    <p-button (click)="handleCalendarButtonEvent(calendarregistrazione, 'doFilter', $event)">Conferma
+                    <p-button (click)="handleCalendarButtonEvent(calendarregistrazione, 'doFilter', $event, filter)">Conferma
                     </p-button>
-                    <p-button (click)="handleCalendarButtonEvent(calendarregistrazione, 'setToday', $event)">Oggi
+                    <p-button (click)="handleCalendarButtonEvent(calendarregistrazione, 'setToday', $event, filter)">Oggi
                     </p-button>
-                    <p-button (click)="handleCalendarButtonEvent(calendarregistrazione, 'clear', $event)">Cancella
+                    <p-button (click)="handleCalendarButtonEvent(calendarregistrazione, 'clear', $event, filter)">Svuota
                     </p-button>
                   </div>
                 </ng-template>
@@ -263,30 +261,26 @@
           <p-columnFilter [field]="col.filterField" type="date" matchMode="is" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-calendar #calendarpubblicazione
-                inputId="basic" 
+                inputId="calendarpubblicazione" 
                 [ngModel]="value"
                 [yearNavigator]="true"
+                [monthNavigator]="true"
                 yearRange="2000:2030"
                 dataType="date" 
                 dateFormat="dd/mm/yy"
                 [showIcon]="false"
                 [showButtonBar]="false"
-                [locale]="localIt"
                 selectionMode="range"
                 [readonlyInput]="true"
-                (onClickOutside)="filter(calendarpubblicazione.value)"
-                (onClearClick)="filter(null)"
-                (onShow)="onShowDatePicker(calendarpubblicazione)"
-                (onClickOutside)="filter(calendarpubblicazione.value)" 
-                (onClickOutside)="calendarpubblicazione.value ? filter(calendarpubblicazione.value) : 
-                handleCalendarButtonEvent(calendarpubblicazione, 'doFilter', $event)" appendTo="body">
+                (onClickOutside)="handleCalendarButtonEvent(calendarpubblicazione, 'doFilter', $event, filter)" 
+                appendTo="body">
                 <ng-template pTemplate="footer" class="calendar-filter-footer-button">
                   <div class="calendar-filter-footer-button-container">
-                    <p-button (click)="handleCalendarButtonEvent(calendarpubblicazione, 'doFilter', $event)">Conferma
+                    <p-button (click)="handleCalendarButtonEvent(calendarpubblicazione, 'doFilter', $event, filter)">Conferma
                     </p-button>
-                    <p-button (click)="handleCalendarButtonEvent(calendarpubblicazione, 'setToday', $event)">Oggi
+                    <p-button (click)="handleCalendarButtonEvent(calendarpubblicazione, 'setToday', $event, filter)">Oggi
                     </p-button>
-                    <p-button (click)="handleCalendarButtonEvent(calendarpubblicazione, 'clear', $event)">Cancella
+                    <p-button (click)="handleCalendarButtonEvent(calendarpubblicazione, 'clear', $event, filter)">Svuota
                     </p-button>
                   </div>
                 </ng-template>
@@ -305,21 +299,13 @@
                 type="text" 
                 pInputText 
                 [value]="value" 
-                (keydown.enter)="resetSort(); filterMethod(inputOggetto.value)">
+                (keydown.enter)="removeSort(); filterMethod(inputOggetto.value)">
             </ng-template>
           </p-columnFilter>
-
-          <!-- <p-columnFilter #colfilteroggetto
-            type="text" 
-            [field]="col.filterField" 
-            [matchMode]="col.filterMatchMode" 
-            [showMenu]="false"
-            >
-          </p-columnFilter> -->
           <button  *ngIf="colfilteroggetto.hasFilter()"
             class="material-icons close-icon" 
             type="reset"
-            (click)="colfilteroggetto.clearFilter();">
+            (click)="colfilteroggetto.clearFilter(); resetSort()">
             close
           </button>
         </div>
@@ -356,11 +342,11 @@
               type="text" 
               pInputText 
               [value]="value"
-              (keydown.enter)="resetSort(); filterMethod(inputFascicolazioni.value)">
+              (keydown.enter)="removeSort(); filterMethod(inputFascicolazioni.value)">
             </ng-template>
           </p-columnFilter>
           <button *ngIf="colfilterfascicolazioni.hasFilter()" class="material-icons close-icon" type="reset"
-            (click)="colfilterfascicolazioni.clearFilter()">
+            (click)="colfilterfascicolazioni.clearFilter(); resetSort()">
             close
           </button>
         </div>
@@ -473,13 +459,13 @@
           placeholder="">
           <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
             <input #inputMittente type="text" pInputText [value]="value" 
-                  (keydown.enter)="resetSort(); filterMethod(inputMittente.value)">
+                  (keydown.enter)="removeSort(); filterMethod(inputMittente.value)">
           </ng-template>
         </p-columnFilter>
           <button  *ngIf="colfiltermittente.hasFilter()"
             class="material-icons close-icon" 
             type="reset"
-            (click)="colfiltermittente.clearFilter()">
+            (click)="colfiltermittente.clearFilter(); resetSort()">
             close
           </button>
         </div>
@@ -492,13 +478,13 @@
           placeholder="">
             <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
               <input #inputDestinatari type="text" pInputText [value]="value"
-                (keydown.enter)="resetSort(); filterMethod(inputDestinatari.value)">
+                (keydown.enter)="removeSort(); filterMethod(inputDestinatari.value)">
             </ng-template>
           </p-columnFilter>
           <button  *ngIf="colfilterdestinatari.hasFilter()"
             class="material-icons close-icon" 
             type="reset"
-            (click)="colfilterdestinatari.clearFilter()">
+            (click)="colfilterdestinatari.clearFilter(); resetSort()">
             close
           </button>
         </div>
@@ -548,6 +534,20 @@
             close
           </button>
         </div>
+        <div *ngSwitchCase="'protocolloEsterno'" class="search-wrapper">
+          <p-columnFilter #colfilterprotocolloesterno
+            [field]="col.filterField"
+            [matchMode]="col.filterMatchMode" 
+            [showMenu]="false" 
+            [useGrouping]="false" >
+          </p-columnFilter>
+          <button *ngIf="colfilterprotocolloesterno.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilterprotocolloesterno.clearFilter()">
+            close
+          </button>
+        </div>
       </th>
     </tr>
   </ng-template>
@@ -555,14 +555,6 @@
   <ng-template pTemplate="body" let-rowData let-columns="columns">
     <tr class="row-height">
       <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
-        <div *ngSwitchCase="'eliminabile'">
-          <span *ngIf="rowData.eliminabile && checkIfSullaMiaScrivania(rowData)" 
-            class="material-icons delete_outline-icon" 
-            pTooltip="Elimina proposta" 
-            (click)="confermaEliminaProposta(rowData)">
-            close
-          </span>
-        </div>
         <div *ngSwitchCase="'idAzienda'">
           {{rowData.idAzienda.nome}}
         </div>
@@ -572,8 +564,20 @@
         <div *ngSwitchCase="'registrazione'">
           {{rowData.registrazioneVisualizzazione}}
         </div>
-        <div *ngSwitchCase="'proposta'">
-          {{rowData.propostaVisualizzazione}}
+        <div *ngSwitchCase="'proposta'" class="proposta-box">
+          <div *ngIf="rowData.eliminabile"
+            class="box-elimina" 
+            (click)="confermaEliminaProposta(rowData, $event)"
+            pTooltip="Elimina proposta">
+            <span 
+              class="material-icons delete_outline-icon" 
+              >
+              close
+            </span>
+          </div>
+          <div class="box-numero-proposta">
+            {{rowData.propostaVisualizzazione}}
+          </div>
         </div>
         <div *ngSwitchCase="'dataCreazione'">
           {{rowData.dataCreazione | date:'dd/MM/yyyy'}}
@@ -630,6 +634,9 @@
             {{d.descrizione}}
           </span>
         </div>
+        <div *ngSwitchCase="'protocolloEsterno'">
+          {{rowData.protocolloEsterno}}
+        </div>
       </td>
       <td class="scrollbar-overlay-placeholder-column"></td>
     </tr>
@@ -644,3 +651,4 @@
 </p-table>
 <p-toast key="docsListToast"></p-toast>
 <p-confirmDialog [baseZIndex]="10000" acceptLabel="Sì"></p-confirmDialog>
+<p-confirmPopup key="confirm-popup"></p-confirmPopup>

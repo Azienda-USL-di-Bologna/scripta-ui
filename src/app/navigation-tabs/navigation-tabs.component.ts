@@ -46,7 +46,7 @@ export class NavigationTabsComponent implements OnInit {
               routerLink: ["./" + DOCS_LIST_ROUTE], 
               queryParams: {
                 // "view": NavViews.DOCUMENTI,
-                "mode": DocsListMode.ELENCO_DOCUMENTI
+                "mode": DocsListMode.MIEI_DOCUMENTI
               }
             },
             {
