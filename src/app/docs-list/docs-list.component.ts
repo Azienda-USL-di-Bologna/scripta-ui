@@ -15,10 +15,12 @@ import { Subscription } from "rxjs";
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
 import { AppService } from "../app.service";
 import { Impostazioni } from "../utilities/utils";
-import { ColonnaBds, cols, colsCSV, DocsListMode, StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
+import { ColonnaBds, cols, colsCSV, DocsListMode,StatoDocTraduzioneVisualizzazione, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
+import { MultiSelect } from "primeng/multiselect";
+import { map } from "rxjs/operators";
 
 @Component({
   selector: "docs-list",
@@ -33,10 +35,12 @@ export class DocsListComponent implements OnInit, OnDestroy {
   private resetDocsArrayLenght: boolean = true;
   private storedLazyLoadEvent: LazyLoadEvent;
   private lastAziendaFilterValue: number[];
+  private lastStatoFilterValue: string[];
   private lastDataCreazioneFilterValue: Date[];
 
   @ViewChild("dt") public dataTable: Table;
   @ViewChild("dropdownAzienda") public dropdownAzienda: Dropdown;
+  @ViewChild("multiselectStati") public multiselectStati: MultiSelect;
   @ViewChild("columnFilterAzienda") public columnFilterAzienda: ColumnFilter;
   @ViewChild("autocompleteIdPersonaRedattrice") public autocompleteIdPersonaRedattrice: AutoComplete;
   @ViewChild("autocompleteidPersonaResponsabileProcedimento") public autocompleteidPersonaResponsabileProcedimento: AutoComplete;
@@ -61,7 +65,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
   public _selectedColumns: ColonnaBds[];
   public rowsNumber: number = 20;
   public tipologiaVisualizzazioneObj = TipologiaDocTraduzioneVisualizzazione;
-  public statoVisualizzazioneObj = StatoDocTraduzioneVisualizzazione;
+  public statoVisualizzazioneObj = StatoDocDetailPerFiltro;
+  // public statoVisualizzazioneObj = StatoDocTraduzioneVisualizzazione;
   public statoUfficioAttiVisualizzazioneObj = StatoUfficioAttiTraduzioneVisualizzazione;
   public mieiDocumenti: boolean = true;
   public filteredPersone: Persona[] = [];
@@ -420,6 +425,12 @@ export class DocsListComponent implements OnInit, OnDestroy {
         this.lastAziendaFilterValue = value;
         this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
       }
+      // if (this.multiselectStati) {
+      //   const value = this.aziendeFiltrabili.find(a => a.value[0] === this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault.id).value;
+      //   this.dropdownAzienda.writeValue(value);
+      //   this.lastAziendaFilterValue = value;
+      //   this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
+      // }
     }
 
     this.loadData();
@@ -944,6 +955,24 @@ export class DocsListComponent implements OnInit, OnDestroy {
       }, 0);
     }
   }
+
+ /**
+  * Il filtro dello stato è un array di array. Questo perche
+  * vogliamo raggruppare più filtri sotto lo stesso filtro "padre"
+  * quindi una volta selezionato devo normalizzare l'array da dare 
+  * in pasto al filterCallback
+  */
+  public filterStato(filterCallback: (value: any) => {}, value: any) {
+    let array: string[] = [];
+    value.forEach((labelStato: string) => { 
+      StatoDocDetailPerFiltro.forEach((mappa: any) => {
+        if (mappa.nome === labelStato) {
+          array = array.concat(mappa.value);
+        }
+      });
+    });
+    filterCallback(array);
+ }
 
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
