@@ -20,6 +20,7 @@ import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
 import { MultiSelect } from "primeng/multiselect";
+import { map } from "rxjs/operators";
 
 @Component({
   selector: "docs-list",
@@ -64,8 +65,8 @@ export class DocsListComponent implements OnInit, OnDestroy {
   public _selectedColumns: ColonnaBds[];
   public rowsNumber: number = 20;
   public tipologiaVisualizzazioneObj = TipologiaDocTraduzioneVisualizzazione;
-  // public statoVisualizzazioneObj = StatoDocDetailPerFiltro;
-  public statoVisualizzazioneObj = StatoDocTraduzioneVisualizzazione;
+  public statoVisualizzazioneObj = StatoDocDetailPerFiltro;
+  // public statoVisualizzazioneObj = StatoDocTraduzioneVisualizzazione;
   public statoUfficioAttiVisualizzazioneObj = StatoUfficioAttiTraduzioneVisualizzazione;
   public mieiDocumenti: boolean = true;
   public filteredPersone: Persona[] = [];
@@ -954,14 +955,24 @@ export class DocsListComponent implements OnInit, OnDestroy {
       }, 0);
     }
   }
+
+ /**
+  * Il filtro dello stato è un array di array. Questo perche
+  * vogliamo raggruppare più filtri sotto lo stesso filtro "padre"
+  * quindi una volta selezionato devo normalizzare l'array da dare 
+  * in pasto al filterCallback
+  */
   public filterStato(filterCallback: (value: any) => {}, value: any) {
-    // let array: string[] = [];
-    // value.forEach((element:any) => {
-    //   array = array.concat(element)
-      
-    // });
-    // filterCallback(array);
-  }
+    let array: string[] = [];
+    value.forEach((labelStato: string) => { 
+      StatoDocDetailPerFiltro.forEach((mappa: any) => {
+        if (mappa.nome === labelStato) {
+          array = array.concat(mappa.value);
+        }
+      });
+    });
+    filterCallback(array);
+ }
 
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
