@@ -5,8 +5,9 @@ import { Subscription } from "rxjs";
 import { DocsListMode } from "../docs-list/docs-list-constants";
 import { DOCS_LIST_ROUTE, FASCICOLI_ROUTE } from "src/environments/app-constants";
 import { ActivatedRoute, Router } from "@angular/router";
-import { CODICI_RUOLO } from "@bds/ng-internauta-model";
+import { CODICI_RUOLO, ConfigurazioneService, ParametroAziende } from "@bds/ng-internauta-model";
 import { NavViews } from "./navigation-tabs-contants";
+import { connectableObservableDescriptor } from "rxjs/internal/observable/ConnectableObservable";
 
 @Component({
   selector: "navigation-tabs",
@@ -20,78 +21,78 @@ export class NavigationTabsComponent implements OnInit {
   public isSegretario: boolean = false;
   public activeItem: MenuItem;
   public items: MenuItem[];
+  public showTabFascicoli: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private loginService: NtJwtLoginService,
+    private configurazioneService: ConfigurazioneService
   ) { }
 
   ngOnInit(): void {
+    
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
           this.utenteUtilitiesLogin = utenteUtilities;
-          this.isSegretario = this.utenteUtilitiesLogin.getUtente().struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
-//TODO: SPOSTARE FascicoliListMode NEL COMPONENTE APPOSITO APPENA SI CREA
-          this.items = [
-            /* {
-              label: "Nuovo", 
-              icon: "pi pi-fw pi-plus", 
-              routerLink: ["./"]
-            }, */
-            {
-              label: "Documenti", 
-              icon: "pi pi-fw pi-list", 
-              routerLink: ["./" + DOCS_LIST_ROUTE], 
-              queryParams: {
-                // "view": NavViews.DOCUMENTI,
-                "mode": DocsListMode.MIEI_DOCUMENTI
+          // Mostrare il tab fascicoli solo se è acceso il parametro in una delle aziende dell'utente
+          let idAziendaArray: number[] = [];
+          this.utenteUtilitiesLogin.getUtente().aziende.forEach(elem => {
+            idAziendaArray.push(elem.id);
+          });
+          this.configurazioneService.getParametriAziende("tabFascicoliScriptaActive", null, idAziendaArray)
+          .subscribe((parametriAziende: ParametroAziende[]) => {
+            console.log(parametriAziende[0].valore);
+            this.showTabFascicoli = JSON.parse(parametriAziende[0].valore || false);
+            console.log("showFASCIOLI: ",this.showTabFascicoli);
+            this.isSegretario = this.utenteUtilitiesLogin.getUtente().struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
+            this.items = [
+              /* {
+                label: "Nuovo", 
+                icon: "pi pi-fw pi-plus", 
+                routerLink: ["./"]
+              }, */
+              {
+                label: "Documenti", 
+                icon: "pi pi-fw pi-list", 
+                routerLink: ["./" + DOCS_LIST_ROUTE], 
+                queryParams: {
+                  // "view": NavViews.DOCUMENTI,
+                  "mode": DocsListMode.MIEI_DOCUMENTI
+                }
+              },
+              {
+                label: "Fascicoli", 
+                icon: "pi pi-fw pi-list", 
+                routerLink: ["./" + FASCICOLI_ROUTE], 
+                queryParams: {
+                  // "view": NavViews.FASCICOLI,
+                  "mode": FascicoliListMode.ELENCO_FASCICOLI
+                },
+                visible: this.showTabFascicoli
               }
-            },
-            {
-              label: "Fascicoli", 
-              icon: "pi pi-fw pi-list", 
-              routerLink: ["./" + FASCICOLI_ROUTE], 
-              queryParams: {
-                // "view": NavViews.FASCICOLI,
-                "mode": FascicoliListMode.ELENCO_FASCICOLI
-              }
-            }
-          ];         
-
-          /* this.items.push({
-            label: "Ricerca avazata", 
-            icon: "pi pi-fw pi-search", 
-            routerLink: ["./"]
-          }); */
-          const navView = this.route.snapshot.queryParamMap.get('view') as NavViews || NavViews.DOCUMENTI;
+            ];
+            const navView = this.route.snapshot.queryParamMap.get('view') as NavViews || NavViews.DOCUMENTI;
           
-          switch (navView) {
-            case NavViews.FASCICOLI:
-              this.activeItem = this.items.find(i => i.label === "Fascicoli");
-              this.router.navigate([FASCICOLI_ROUTE], { relativeTo: this.route});
-              break;
-            case NavViews.DOCUMENTI:
-            default:
-              this.activeItem = this.items.find(i => i.label === "Documenti");
-              this.router.navigate([DOCS_LIST_ROUTE], { relativeTo: this.route});
-              break;
-          }
-
-          /* if (docsListMode) {
-            this.activeItem = this.items.find(i => i.queryParams && i.queryParams.mode === docsListMode);
-          } 
-          if (!!!this.activeItem) { // Metto questo if e non else rispetto al primo if perché così becco anche casi in cui l'utente ha nell'url qualcosa di strano
-            this.activeItem = this.items[1];
-            this.router.navigate([DOCS_LIST_ROUTE], { relativeTo: this.route, queryParams: {"mode": DocsListMode.ELENCO_DOCUMENTI} });
-          } */
+            switch (navView) {
+              case NavViews.FASCICOLI:
+                this.activeItem = this.items.find(i => i.label === "Fascicoli");
+                this.router.navigate([FASCICOLI_ROUTE], { relativeTo: this.route});
+                break;
+              case NavViews.DOCUMENTI:
+              default:
+                this.activeItem = this.items.find(i => i.label === "Documenti");
+                this.router.navigate([DOCS_LIST_ROUTE], { relativeTo: this.route});
+                break;
+            }
+          });        
         }
       )
     );
   }
 }
-
+//TODO: SPOSTARE FascicoliListMode NEL COMPONENTE APPOSITO APPENA SI CREA
 export enum FascicoliListMode{
     NUOVO = "NUOVO",
     ELENCO_FASCICOLI = "ELENCO_FASCICOLI"
