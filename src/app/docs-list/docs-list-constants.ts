@@ -139,7 +139,7 @@ export const cols: ColonnaBds[] = [
     headerClass: ["header-column", "stato-column"],
     filterClass: ["filter-column", "stato-column"],
     bodyClass: ["stato-column"],
-    fieldType: "string",
+    fieldType: "object",
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: true,
     default: true
@@ -315,28 +315,68 @@ export const TipologiaDocTraduzioneVisualizzazione = [
 ]
 
 export const StatoDocTraduzioneVisualizzazione = [
-  { value: StatoDoc.CLASSIFICAZIONE, nome: "Classificazione"},
-  { value: StatoDoc.DA, nome: "DA"},
-  { value: StatoDoc.DG, nome: "DG"},
-  { value: StatoDoc.DS, nome: "DS"},
-  { value: StatoDoc.DSC, nome: "DSC"},
-  { value: StatoDoc.FINE, nome: "Fine"},
-  { value: StatoDoc.FIRMA, nome: "Firma"},
-  { value: StatoDoc.PARERE, nome: "Parere"},
-  { value: StatoDoc.REDAZIONE, nome: "Redazione"},
-  { value: StatoDoc.SMISTAMENTO, nome: "Smistamento"},
-  { value: StatoDoc.SPEDIZIONE, nome: "Spedizione"},
-  { value: StatoDoc.UFFICIO_ATTI, nome: "Ufficio atti"},
-  { value: StatoDoc.VISTA, nome: "Vista"},
-  { value: StatoDoc.NUMERAZIONE, nome: "Numerazione"},
-  { value: StatoDoc.REGISTRAZIONE_PROTOCOLLO, nome: "Registrazione protocollo"},
-  { value: StatoDoc.AVVIA_SPEDIZIONI, nome: "Avvia spedizioni"},
-  { value: StatoDoc.ASPETTA_SPEDIZIONI, nome: "Aspetto spedizioni"},
-  { value: StatoDoc.ATTENDI_JOBS, nome: "Attendi jobs"},
-  { value: StatoDoc.CONTROLLO_SEGRETERIA, nome: "Controllo segreteria"},
-  { value: StatoDoc.SPEDIZIONE_MANUALE, nome: "Spedizione manuale"},
-  { value: StatoDoc.APPROVAZIONE, nome: "Approvazione"},
-  { value: StatoDoc.ANNULLATO, nome: "Annullato"},
+  { value: StatoDoc.CLASSIFICAZIONE, nome: "Classificazione" },
+  { value: StatoDoc.DA, nome: "DA" },
+  { value: StatoDoc.DG, nome: "DG" },
+  { value: StatoDoc.DS, nome: "DS" },
+  { value: StatoDoc.DSC, nome: "DSC" },
+  { value: StatoDoc.FINE, nome: "Fine" },
+  { value: StatoDoc.FIRMA, nome: "Firma" },
+  { value: StatoDoc.PARERE, nome: "Parere" },
+  { value: StatoDoc.REDAZIONE, nome: "Redazione" },
+  { value: StatoDoc.SMISTAMENTO, nome: "Smistamento" },
+  { value: StatoDoc.SPEDIZIONE, nome: "Spedizione" },
+  { value: StatoDoc.UFFICIO_ATTI, nome: "Ufficio atti" },
+  { value: StatoDoc.VISTA, nome: "Vista" },
+  { value: StatoDoc.NUMERAZIONE, nome: "Numerazione" },
+  { value: StatoDoc.REGISTRAZIONE_PROTOCOLLO, nome: "Registrazione protocollo" },
+  { value: StatoDoc.AVVIA_SPEDIZIONI, nome: "Avvia spedizioni" },
+  { value: StatoDoc.ASPETTA_SPEDIZIONI, nome: "Aspetto spedizioni" },
+  { value: StatoDoc.ATTENDI_JOBS, nome: "Attendi jobs" },
+  { value: StatoDoc.CONTROLLO_SEGRETERIA, nome: "Controllo segreteria" },
+  { value: StatoDoc.SPEDIZIONE_MANUALE, nome: "Spedizione manuale" },
+  { value: StatoDoc.APPROVAZIONE, nome: "Approvazione" },
+  { value: StatoDoc.ANNULLATO, nome: "Annullato" },
+]
+
+export const StatoDocDetailPerFiltro = [
+  {
+    value: [
+      StatoDoc.CLASSIFICAZIONE,
+      StatoDoc.CONTROLLO_SEGRETERIA
+    ], nome: "Classificazione"
+  },
+  {
+    value: [
+      StatoDoc.DA,
+      StatoDoc.DG,
+      StatoDoc.DS,
+      StatoDoc.DSC
+    ], nome: "Direttori"
+  },
+  {
+    value: [
+      StatoDoc.FIRMA,
+      StatoDoc.APPROVAZIONE
+    ], nome: "Firma"
+  },
+  { value: [StatoDoc.PARERE], nome: "Parere"},
+  { value: [StatoDoc.REDAZIONE], nome: "Redazione"},
+  {
+    value: [
+      StatoDoc.SMISTAMENTO,
+      StatoDoc.SPEDIZIONE_MANUALE,
+      StatoDoc.SPEDIZIONE,
+      StatoDoc.FINE,
+      StatoDoc.NUMERAZIONE,
+      StatoDoc.REGISTRAZIONE_PROTOCOLLO,
+      StatoDoc.AVVIA_SPEDIZIONI,
+      StatoDoc.ASPETTA_SPEDIZIONI
+    ], nome: "Registrati"
+  },
+  { value: [StatoDoc.UFFICIO_ATTI], nome: "Ufficio atti"},
+  { value: [StatoDoc.VISTA], nome: "Vista"},
+  { value: [StatoDoc.ANNULLATO], nome: "Annullato"}
 ]
 
 export const StatoUfficioAttiTraduzioneVisualizzazione = [
