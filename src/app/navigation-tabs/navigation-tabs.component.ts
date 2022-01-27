@@ -8,6 +8,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { CODICI_RUOLO, ConfigurazioneService, ParametroAziende } from "@bds/ng-internauta-model";
 import { NavViews } from "./navigation-tabs-contants";
 import { connectableObservableDescriptor } from "rxjs/internal/observable/ConnectableObservable";
+import { ArchiviListMode } from "../archivi-list/archivi-list-constants";
 
 @Component({
   selector: "navigation-tabs",
@@ -58,7 +59,7 @@ export class NavigationTabsComponent implements OnInit {
                 icon: "pi pi-fw pi-list", 
                 routerLink: ["./" + DOCS_LIST_ROUTE], 
                 queryParams: {
-                  // "view": NavViews.DOCUMENTI,
+                  "view": NavViews.DOCUMENTI,
                   "mode": DocsListMode.MIEI_DOCUMENTI
                 }
               },
@@ -67,23 +68,23 @@ export class NavigationTabsComponent implements OnInit {
                 icon: "pi pi-fw pi-list", 
                 routerLink: ["./" + FASCICOLI_ROUTE], 
                 queryParams: {
-                  // "view": NavViews.FASCICOLI,
-                  "mode": FascicoliListMode.ELENCO_FASCICOLI
+                  "view": NavViews.FASCICOLI,
+                  "mode": ArchiviListMode.RECENTI
                 },
                 visible: this.showTabFascicoli
               }
             ];
-            const navView = this.route.snapshot.queryParamMap.get('view') as NavViews || NavViews.DOCUMENTI;
+            const navView = this.route.snapshot.queryParamMap.get('view') as NavViews || NavViews.DOCUMENTI || NavViews.FASCICOLI;
           
             switch (navView) {
               case NavViews.FASCICOLI:
                 this.activeItem = this.items.find(i => i.label === "Fascicoli");
-                this.router.navigate([FASCICOLI_ROUTE], { relativeTo: this.route});
+                // this.router.navigate([FASCICOLI_ROUTE], { relativeTo: this.route});
                 break;
               case NavViews.DOCUMENTI:
               default:
                 this.activeItem = this.items.find(i => i.label === "Documenti");
-                this.router.navigate([DOCS_LIST_ROUTE], { relativeTo: this.route});
+                // this.router.navigate([DOCS_LIST_ROUTE], { relativeTo: this.route});
                 break;
             }
           });        
@@ -93,7 +94,7 @@ export class NavigationTabsComponent implements OnInit {
   }
 }
 //TODO: SPOSTARE FascicoliListMode NEL COMPONENTE APPOSITO APPENA SI CREA
-export enum FascicoliListMode{
-    NUOVO = "NUOVO",
-    ELENCO_FASCICOLI = "ELENCO_FASCICOLI"
-}
+// export enum FascicoliListMode{
+//     NUOVO = "NUOVO",
+//     ELENCO_FASCICOLI = "ELENCO_FASCICOLI"
+// }

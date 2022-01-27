@@ -1,7 +1,9 @@
 import { StatoDoc, StatoUfficioAtti, TipologiaDoc } from "@bds/ng-internauta-model";
+import { ColonnaBds } from "@bds/primeng-plugin";
 import { FILTER_TYPES, NextSDRDateTypes } from "@nfa/next-sdr";
 import { Utils } from "src/app/utilities/utils";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
+
 
 export const cols: ColonnaBds[] = [
   /* {
@@ -288,24 +290,24 @@ export const cols: ColonnaBds[] = [
     default: false
   }
 ];
-
-export interface ColonnaBds {
-  field: string;
-  header: string;
-  filterField: string;
-  sortField?: string | string[];
-  autoSortingField?: string;
-  style: any;
-  headerClass: string[];
-  filterClass: string[];
-  bodyClass: string[];
-  fieldType: any;
-  filterMatchMode: string;
-  useFilterMatchMode: boolean;
-  default: boolean;
-  additionalData?: any;
-  selectionDisabled?: boolean;
-}
+// SPOSTATA IN PRIMENG PLUGIN
+// export interface ColonnaBds {
+//   field: string;
+//   header: string;
+//   filterField: string;
+//   sortField?: string | string[];
+//   autoSortingField?: string;
+//   style: any;
+//   headerClass: string[];
+//   filterClass: string[];
+//   bodyClass: string[];
+//   fieldType: any;
+//   filterMatchMode: string;
+//   useFilterMatchMode: boolean;
+//   default: boolean;
+//   additionalData?: any;
+//   selectionDisabled?: boolean;
+// }
 
 export const TipologiaDocTraduzioneVisualizzazione = [
   { value: TipologiaDoc.PROTOCOLLO_IN_USCITA, nome: "Protocollo in uscita"},

@@ -9,6 +9,11 @@ export interface ImpostazioniDocList {
   mieiDocumenti: boolean;
   selectedColumn: string[];
 }
+
+export interface ImpostazioniArchiviList {
+  selectedColumn: string[];
+}
 export interface Impostazioni {
   "scripta.docList"?: ImpostazioniDocList;
+  "scripta.archiviList": ImpostazioniArchiviList;
 }
