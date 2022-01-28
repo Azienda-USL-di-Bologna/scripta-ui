@@ -3,7 +3,7 @@ import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { MenuItem } from "primeng/api";
 import { Subscription } from "rxjs";
 import { DocsListMode } from "../docs-list/docs-list-constants";
-import { DOCS_LIST_ROUTE, FASCICOLI_ROUTE } from "src/environments/app-constants";
+import { DOCS_LIST_ROUTE, ARCHIVI_LIST_ROUTE } from "src/environments/app-constants";
 import { ActivatedRoute, Router } from "@angular/router";
 import { CODICI_RUOLO, ConfigurazioneService, ParametroAziende } from "@bds/ng-internauta-model";
 import { NavViews } from "./navigation-tabs-contants";
@@ -19,20 +19,51 @@ export class NavigationTabsComponent implements OnInit {
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
 
-  public isSegretario: boolean = false;
   public activeItem: MenuItem;
   public items: MenuItem[];
-  public showTabFascicoli: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private loginService: NtJwtLoginService,
     private configurazioneService: ConfigurazioneService
-  ) { }
+  ) {
+    this.items = [
+      {
+        label: "Documenti", 
+        icon: "pi pi-fw pi-list", 
+        routerLink: ["./" + DOCS_LIST_ROUTE], 
+        queryParams: {
+          "view": NavViews.DOCUMENTI,
+          "mode": DocsListMode.MIEI_DOCUMENTI
+        }
+      },
+      {
+        label: "Fascicoli", 
+        icon: "pi pi-fw pi-list", 
+        routerLink: ["./" + ARCHIVI_LIST_ROUTE], 
+        queryParams: {
+          "view": NavViews.FASCICOLI,
+          "mode": ArchiviListMode.RECENTI
+        },
+        visible: false
+      }
+    ];
+    const navView = this.route.snapshot.queryParamMap?.get('view') as NavViews || NavViews.DOCUMENTI ;
+    switch (navView) {
+      case NavViews.FASCICOLI:
+        this.activeItem = this.items.find(i => i.label === "Fascicoli");
+        this.router.navigate([ARCHIVI_LIST_ROUTE], { relativeTo: this.route});
+        break;
+      case NavViews.DOCUMENTI:
+      default:
+        this.activeItem = this.items.find(i => i.label === "Documenti");
+        this.router.navigate([DOCS_LIST_ROUTE], { relativeTo: this.route});
+        break;
+    }
+  }
 
   ngOnInit(): void {
-    
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -45,47 +76,16 @@ export class NavigationTabsComponent implements OnInit {
           this.configurazioneService.getParametriAziende("tabFascicoliScriptaActive", null, idAziendaArray)
           .subscribe((parametriAziende: ParametroAziende[]) => {
             console.log(parametriAziende[0].valore);
-            this.showTabFascicoli = JSON.parse(parametriAziende[0].valore || false);
-            console.log("showFASCIOLI: ",this.showTabFascicoli);
-            this.isSegretario = this.utenteUtilitiesLogin.getUtente().struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
-            this.items = [
-              /* {
-                label: "Nuovo", 
-                icon: "pi pi-fw pi-plus", 
-                routerLink: ["./"]
-              }, */
-              {
-                label: "Documenti", 
-                icon: "pi pi-fw pi-list", 
-                routerLink: ["./" + DOCS_LIST_ROUTE], 
-                queryParams: {
-                  "view": NavViews.DOCUMENTI,
-                  "mode": DocsListMode.MIEI_DOCUMENTI
-                }
-              },
-              {
-                label: "Fascicoli", 
-                icon: "pi pi-fw pi-list", 
-                routerLink: ["./" + FASCICOLI_ROUTE], 
-                queryParams: {
-                  "view": NavViews.FASCICOLI,
-                  "mode": ArchiviListMode.RECENTI
-                },
-                visible: this.showTabFascicoli
-              }
-            ];
-            const navView = this.route.snapshot.queryParamMap.get('view') as NavViews || NavViews.DOCUMENTI || NavViews.FASCICOLI;
-          
-            switch (navView) {
-              case NavViews.FASCICOLI:
-                this.activeItem = this.items.find(i => i.label === "Fascicoli");
-                // this.router.navigate([FASCICOLI_ROUTE], { relativeTo: this.route});
-                break;
-              case NavViews.DOCUMENTI:
-              default:
+            const showTabFascicoli = JSON.parse(parametriAziende[0].valore || false);
+            if (showTabFascicoli) {
+              this.items[1].visible = true;
+              this.items = [...this.items];
+            } else {
+              const navView = this.route.snapshot.queryParamMap?.get('view') as NavViews || NavViews.DOCUMENTI ;
+              if (navView === NavViews.FASCICOLI) {
                 this.activeItem = this.items.find(i => i.label === "Documenti");
-                // this.router.navigate([DOCS_LIST_ROUTE], { relativeTo: this.route});
-                break;
+                this.router.navigate([DOCS_LIST_ROUTE], { relativeTo: this.route});
+              }
             }
           });        
         }
@@ -93,8 +93,3 @@ export class NavigationTabsComponent implements OnInit {
     );
   }
 }
-//TODO: SPOSTARE FascicoliListMode NEL COMPONENTE APPOSITO APPENA SI CREA
-// export enum FascicoliListMode{
-//     NUOVO = "NUOVO",
-//     ELENCO_FASCICOLI = "ELENCO_FASCICOLI"
-// }

@@ -175,22 +175,25 @@
         <div *ngSwitchCase="'numerazioneGerarchica'" class="numerazione-box">
             <div *ngIf="rowData.livello == 1"
                 class="box-livello-1" 
-                pTooltip="Fascicolo">
-                <span class="material-icons folder_outline-icon" >
+                >
+                <span class="material-icons folder_outline-icon" pTooltip="Fascicolo"
+                tooltipPosition="top" >
                 folder
                 </span>
             </div>
             <div *ngIf="rowData.livello == 2"
                 class="box-livello-2" 
-                pTooltip="Sottofascicolo">
-                <span class="material-icons folder_outline-icon" >
+                >
+                <span class="material-icons folder_outline-icon" pTooltip="Sottofascicolo"
+                tooltipPosition="top" >
                 folder
                 </span>
             </div>
             <div *ngIf="rowData.livello == 3"
                 class="box-livello-3" 
-                pTooltip="Inserto">
-                <span class="material-icons folder_outline-icon" >
+                >
+                <span class="material-icons folder_outline-icon" pTooltip="Inserto"
+                tooltipPosition="top">
                 folder
                 </span>
             </div>
@@ -235,3 +238,4 @@
     </tr>
   </ng-template>
 </p-table>
+<p-toast key="archiviListToast"></p-toast>
