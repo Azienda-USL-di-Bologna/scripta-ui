@@ -21,6 +21,7 @@ import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
 import { MultiSelect } from "primeng/multiselect";
 import { map } from "rxjs/operators";
+import { NavViews } from "../navigation-tabs/navigation-tabs-contants";
 
 @Component({
   selector: "docs-list",
@@ -107,7 +108,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.appService.appNameSelection("Elenco documenti");
     this.docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode || DocsListMode.MIEI_DOCUMENTI;
-    this.router.navigate([], { relativeTo: this.route, queryParams: { mode: this.docsListMode } }); 
+    this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.DOCUMENTI, mode: this.docsListMode } }); 
     
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(

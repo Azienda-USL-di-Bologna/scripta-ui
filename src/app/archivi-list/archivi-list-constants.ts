@@ -1,6 +1,8 @@
 import { StatoArchivio, TipoArchivio } from "@bds/ng-internauta-model";
 import { ColonnaBds } from "@bds/primeng-plugin";
 import { FILTER_TYPES, NextSDRDateTypes } from "@nfa/next-sdr";
+import { Utils } from "../utilities/utils";
+import { ExtendedArchiviView } from "./extendend-archivi-view";
 
 export enum ArchiviListMode {
     NUOVO = "NUOVO",
@@ -166,3 +168,73 @@ export const StatoArchivioTraduzioneVisualizzazione = [
   { value: StatoArchivio.APERTO, nome: "Aperto"},
   { value: StatoArchivio.CHIUSO, nome: "Chiuso"}
 ];
+
+
+
+
+export const colsCSV: any[] = [
+  {
+    field: "idAzienda.nome",
+    header: "Ente",
+    fieldType: "object",
+    fieldId: "idAzienda"
+  },
+  {
+    field: "tipoVisualizzazione",
+    header: "Tipo",
+    fieldType: "string",
+    fieldId: "tipo"
+  },
+  {
+    field: (arch: ExtendedArchiviView) => {
+      return arch.dataCreazione ? Utils.dateFormatter(arch.dataCreazione) : "";
+    },
+    header: "Creazione",
+    fieldType: "date",
+    fieldId: "dataCreazione"
+  },
+  {
+    field: "oggetto",
+    header: "Oggetto",
+    fieldType: "string",
+    fieldId: "oggetto"
+  },
+  {
+    field: "statoVisualizzazione",
+    header: "Stato",
+    fieldType: "string",
+    fieldId: "stato"
+  },
+  {
+    field: "idPersonaResponsabileVisualizzazione",
+    header: "Responsabile",
+    fieldType: "date",
+    fieldId: "idPersonaResponsabile"
+  },
+  {
+    field: "idPersonaCreazioneVisualizzazione",
+    header: "Redattore",
+    fieldType: "date",
+    fieldId: "idPersonaCreazione"
+  },
+  {
+    field: "idStruttura.nome",
+    header: "Struttura",
+    fieldType: "object",
+    fieldId: "idStruttura"
+  },
+  {
+    field: (arch: ExtendedArchiviView) => {
+      let vicariString = "";
+      if (arch.vicari) {
+        arch.vicari.forEach(vicario => {
+          vicariString += vicario.descrizione + ", ";
+        });
+      }
+      return vicariString !== "" ? vicariString.substr(0, vicariString.length - 2) : "";
+    },
+    header: "Vicari",
+    fieldType: "object",
+    fieldId: "vicari"
+  }
+]

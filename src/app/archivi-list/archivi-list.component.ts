@@ -3,8 +3,8 @@ import { ArchivioDetail, ArchivioDetailService, ArchivioDetailView, Azienda, ENT
 import { AppService } from '../app.service';
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { Subscription } from 'rxjs';
-import { FASCICOLI_ROUTE } from 'src/environments/app-constants';
-import { ArchiviListMode,  cols } from './archivi-list-constants';
+import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
+import { ArchiviListMode,  cols, colsCSV } from './archivi-list-constants';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ValueAndLabelObj } from '../docs-list/docs-list.component';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from '@nfa/next-sdr';
@@ -14,8 +14,9 @@ import { ConfirmationService, LazyLoadEvent, MessageService } from 'primeng/api'
 import { ArchiviListService } from './archivi-list.service';
 import { Calendar } from 'primeng/calendar';
 import { Dropdown } from 'primeng/dropdown';
-import { ColonnaBds } from '@bds/primeng-plugin';
+import { ColonnaBds, CsvExtractor } from '@bds/primeng-plugin';
 import { ExtendedArchiviView } from './extendend-archivi-view';
+import { NavViews } from '../navigation-tabs/navigation-tabs-contants';
 
 @Component({
   selector: 'app-archivi-list',
@@ -53,7 +54,7 @@ public j = JSON;
   public selectedArchiviListMode: ArchiviListModeItem = {
     title: "Tutti gli archivi che posso vedere",
     label: "Visibili", 
-    routerLink: ["./" + FASCICOLI_ROUTE], 
+    routerLink: ["./" + ARCHIVI_LIST_ROUTE], 
     queryParams: {"mode": ArchiviListMode.VISIBILI}
   };
   public cols: ColonnaBds[] = [];
@@ -74,7 +75,7 @@ public j = JSON;
     this.serviceForGetData = this.archiviListService;
     this.appService.appNameSelection("Elenco Fascicoli");
     this.archiviListMode = this.route.snapshot.queryParamMap.get('mode') as ArchiviListMode || ArchiviListMode.VISIBILI;
-    this.router.navigate([], { relativeTo: this.route, queryParams: { mode: this.archiviListMode } }); 
+    this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } }); 
     
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
@@ -84,7 +85,7 @@ public j = JSON;
           this.selectedArchiviListMode = {
             title: "Tutti gli archivi che posso vedere",
             label: "Visibili", 
-            routerLink: ["./" + FASCICOLI_ROUTE], 
+            routerLink: ["./" + ARCHIVI_LIST_ROUTE], 
             queryParams: {"mode": ArchiviListMode.VISIBILI}
           } ;
           // this.selectedArchiviListMode = this.archiviListModeItem.filter(element => element.queryParams.mode === this.archiviListMode)[0];
@@ -173,28 +174,28 @@ public j = JSON;
         title: "Tutti gli archivi che posso vedere",
         label: "Visibili", 
         // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + FASCICOLI_ROUTE], 
+        routerLink: ["./" + ARCHIVI_LIST_ROUTE], 
         queryParams: {"mode": ArchiviListMode.VISIBILI}
       },
       {
         title: "",
         label: "Recenti", 
         // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + FASCICOLI_ROUTE], 
+        routerLink: ["./" + ARCHIVI_LIST_ROUTE], 
         queryParams: {"mode": ArchiviListMode.RECENTI}
       },
       {
         title: "",
         label: "Preferiti", 
         // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + FASCICOLI_ROUTE], 
+        routerLink: ["./" + ARCHIVI_LIST_ROUTE], 
         queryParams: {"mode": ArchiviListMode.PREFERITI}
       },
       {
         title: "",
         label: "Frequenti", 
         // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + FASCICOLI_ROUTE], 
+        routerLink: ["./" + ARCHIVI_LIST_ROUTE], 
         queryParams: {"mode": ArchiviListMode.FREQUENTI}
       }
     )
@@ -218,17 +219,17 @@ public j = JSON;
    * Salva la configurazione colonne 
    */
   public saveConfiguration() {
-  const impostazioniVisualizzazione = this.utenteUtilitiesLogin.getImpostazioniApplicazione() ? this.utenteUtilitiesLogin.getImpostazioniApplicazione().impostazioniVisualizzazione : null;
-  let impostazioniVisualizzazioneObj: Impostazioni;
-  if (impostazioniVisualizzazione && impostazioniVisualizzazione !== "") {
-    impostazioniVisualizzazioneObj = JSON.parse(impostazioniVisualizzazione) as Impostazioni;
-  } else {
-    impostazioniVisualizzazioneObj = {
-      "scripta.archiviList": {}
-    } as Impostazioni;
-  }
-  impostazioniVisualizzazioneObj["scripta.archiviList"].selectedColumn = this.selectedColumns.map(c => c.field);
-  this.utenteUtilitiesLogin.setImpostazioniApplicazione(this.loginService, impostazioniVisualizzazioneObj);
+    const impostazioniVisualizzazione = this.utenteUtilitiesLogin.getImpostazioniApplicazione() ? this.utenteUtilitiesLogin.getImpostazioniApplicazione().impostazioniVisualizzazione : null;
+    let impostazioniVisualizzazioneObj: Impostazioni;
+    if (impostazioniVisualizzazione && impostazioniVisualizzazione !== "") {
+      impostazioniVisualizzazioneObj = JSON.parse(impostazioniVisualizzazione) as Impostazioni;
+    } else {
+      impostazioniVisualizzazioneObj = {
+        "scripta.archiviList": {}
+      } as Impostazioni;
+    }
+    impostazioniVisualizzazioneObj["scripta.archiviList"].selectedColumn = this.selectedColumns.map(c => c.field);
+    this.utenteUtilitiesLogin.setImpostazioniApplicazione(this.loginService, impostazioniVisualizzazioneObj);
   }
 
   
@@ -243,44 +244,51 @@ public j = JSON;
     }, 0);
   }
 
+
   /**
    * Questo metodo si occupa di esportare la ArchiviList in CSV.
    * Vengono rispettati i filtri.
    * La PageConf è senza limite
    */
   public exportCSV(table: Table) {
-    // this.exportCsvInProgress = true;
-    // const tableTemp = {} as Table;
-    // Object.assign(tableTemp, table);
-    // const pageConfNoLimit: PagingConf = {
-    //   conf: {
-    //     page: 0,
-    //     size: 999999
-    //   },
-    //   mode: "PAGE_NO_COUNT"
-    // };
-    // const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
-    // this.serviceForGetData.getData(
-    //   this.projectionFotGetData,
-    //   filtersAndSorts,
-    //   buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
-    //   pageConfNoLimit)
-    //   .subscribe(
-    //     res => {
-    //       if (res && res.results) {
-    //         tableTemp.value = this.setCustomProperties(res.results);
-    //         tableTemp.columns = colsCSV.filter(c => this.selectedColumns.some(e => e.field === c.fieldId));
-    //         const extractor = new CsvExtractor();
-    //         extractor.exportCsv(tableTemp);
-    //       }
+    this.exportCsvInProgress = true;
+    const tableTemp = {} as Table;
+    Object.assign(tableTemp, table);
+    const pageConfNoLimit: PagingConf = {
+      conf: {
+        page: 0,
+        size: 999999
+      },
+      mode: "PAGE_NO_COUNT"
+    };
+    this.archivioDetailService.getData(
+      "ArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura",
+      null,
+      null,
+      pageConfNoLimit)
+      .subscribe(
+        res => {
+          if (res && res.results) {
+            tableTemp.value = this.setCustomProperties(res.results);
+            tableTemp.columns = colsCSV.filter(c => this.selectedColumns.some(e => e.field === c.fieldId));
+            const extractor = new CsvExtractor();
+            extractor.exportCsv(tableTemp);
+          }
 
-    //       this.exportCsvInProgress = false;
-    //     },
-    //     err => {
-    //       this.exportCsvInProgress = false;
-    //     }
-    //   );
-   }
+          this.exportCsvInProgress = false;
+        },
+        err => {
+          this.messageService.add({
+            severity: "warn",
+            key : "archiviListToast",
+            summary: "Attenzione",
+            detail: `Si è verificato un errore nello scaricamento del csv, contattare Babelcare`
+          });
+          this.exportCsvInProgress = false;
+        }
+      );
+  }
+
 
 /**
  * Gestisco l'evento di cambiamento delle colonne visualizzate.
@@ -291,11 +299,10 @@ public j = JSON;
     if (!event.value.some((e: ColonnaBds) => e.field === event.itemValue.field)) {
       // Se itemValue non è dentro l'elenco value allora ho tolto la spunta e quella colonna non è più visibile
       const col = this.filterColumns.find((e: ColumnFilter) => e.field === event.itemValue.filterField);
-      if (col.hasFilter()) {
-        col.clearFilter();
-      }
     }
   }
+
+
   /**
    * Metodo chiamato dalla tabella.
    * Calcola il pageconf, salva i filtri e chiama la loadData
@@ -312,13 +319,13 @@ public j = JSON;
     this.loadData();
   }
 
+
   /**
    * Builda i filtri della tabella. Aggiunge eventuali altri filtri.
    * Carica i docs per la lista.
    * @param event
    */
    private loadData(): void {
-    
     this.loading = true;
     this.pageConf.conf = {
       limit: this.storedLazyLoadEvent.rows,
@@ -355,136 +362,8 @@ public j = JSON;
             detail: `Si è verificato un errore nel caricamento, contattare Babelcare`
           });
       });
-    // this.archivi = [
-    //   {
-    //     id: 1,
-    //     idAzienda: {
-    //       id: 2,
-    //       path: [
-    //           "gdml.internal.ausl.bologna.it",
-    //           "localhost"
-    //       ],
-    //       version: "2021-10-27T15:50:20.667000+02:00[Europe/Berlin]",
-    //       descrizione: "Azienda USL Bologna",
-    //       parametri: "null",
-    //       "codice": "105",
-    //       nome: "AUSLBO",
-    //       codiceRegione: "080",
-    //       ribaltaInternauta: true,
-    //       aoo: "AUSLBO",
-    //       schemaGru: "AUSLBO",
-    //       idAziendaGru: 16,
-    //       ribaltaArgo: true,
-    //       ribaltoneDaLanciareList: null,
-    //       fk_strutturaSet: null,
-    //       fk_idpEntityIdSet: null,
-    //       fk_pecSet: null,
-    //       fk_utenteSet:null,
-    //       urlCommands:null,
-    //       parametriAzienda: null,
-    //       nextSdrDateInformation:null
-    //     },
-    //     livello: 1,
-    //     stato: StatoArchivio.APERTO,
-    //     numerazioneGerarchica: "2022-1",
-    //     dataCreazione: null,
-    //     idPersonaResponsabile: null,
-    //     idPersonaCreazione: null,
-    //     idStruttura: null,
-    //     vicari: null,
-    //     tipo: TipologiaArchivio.ATTIVITA,
-    //     oggetto: "Prova prova",
-    //     oggettoTscol: null,
-    //     version: null,
-    //     tscol: null
-    //   }, {
-    //     id: 1,
-    //     idAzienda: {
-    //       id: 2,
-    //       path: [
-    //           "gdml.internal.ausl.bologna.it",
-    //           "localhost"
-    //       ],
-    //       version: "2021-10-27T15:50:20.667000+02:00[Europe/Berlin]",
-    //       descrizione: "Azienda USL Bologna",
-    //       parametri: "null",
-    //       "codice": "105",
-    //       nome: "AUSLBO",
-    //       codiceRegione: "080",
-    //       ribaltaInternauta: true,
-    //       aoo: "AUSLBO",
-    //       schemaGru: "AUSLBO",
-    //       idAziendaGru: 16,
-    //       ribaltaArgo: true,
-    //       ribaltoneDaLanciareList: null,
-    //       fk_strutturaSet: null,
-    //       fk_idpEntityIdSet: null,
-    //       fk_pecSet: null,
-    //       fk_utenteSet:null,
-    //       urlCommands:null,
-    //       parametriAzienda: null,
-    //       nextSdrDateInformation:null
-    //     },
-    //     livello: 2,
-    //     stato: StatoArchivio.APERTO,
-    //     numerazioneGerarchica: "2022-1-4",
-    //     dataCreazione: null,
-    //     idPersonaResponsabile: null,
-    //     idPersonaCreazione: null,
-    //     idStruttura: null,
-    //     vicari: null,
-    //     tipo: TipologiaArchivio.ATTIVITA,
-    //     oggetto: "Fascicolo 1",
-    //     oggettoTscol: null,
-    //     version: null,
-    //     tscol: null
-    //   } ,
-    //   {
-    //     id: 1,
-    //     idAzienda: {
-    //       id: 2,
-    //       path: [
-    //           "gdml.internal.ausl.bologna.it",
-    //           "localhost"
-    //       ],
-    //       version: "2021-10-27T15:50:20.667000+02:00[Europe/Berlin]",
-    //       descrizione: "Azienda USL Bologna",
-    //       parametri: "null",
-    //       "codice": "105",
-    //       nome: "AUSLBO",
-    //       codiceRegione: "080",
-    //       ribaltaInternauta: true,
-    //       aoo: "AUSLBO",
-    //       schemaGru: "AUSLBO",
-    //       idAziendaGru: 16,
-    //       ribaltaArgo: true,
-    //       ribaltoneDaLanciareList: null,
-    //       fk_strutturaSet: null,
-    //       fk_idpEntityIdSet: null,
-    //       fk_pecSet: null,
-    //       fk_utenteSet:null,
-    //       urlCommands:null,
-    //       parametriAzienda: null,
-    //       nextSdrDateInformation:null
-    //     },
-    //     livello: 3,
-    //     stato: StatoArchivio.APERTO,
-    //     numerazioneGerarchica: "2022-1-4-3",
-    //     dataCreazione: null,
-    //     idPersonaResponsabile: null,
-    //     idPersonaCreazione: null,
-    //     idStruttura: null,
-    //     vicari: null,
-    //     tipo: TipologiaArchivio.ATTIVITA,
-    //     oggetto: "Fascicolo 2",
-    //     oggettoTscol: null,
-    //     version: null,
-    //     tscol: null
-    //   }  
-    // ] as ExtendedArchiviView[];
-
-
   }
+
 
 /**
    * Parso DocList[] facendolo diventare ExtendedDocList[] con le
@@ -540,40 +419,9 @@ public j = JSON;
       }, 0);
     }
   }
-
-
-  /**
- * Funzione apposita per il calendario della data creazione.
- * Vogliamo chiedere all'utente se vuole continuare nel caso abbia scelto un
- * intervallo di date troppo grande (> 2 anni)
- * @param calendar 
- * @param command 
- * @param event 
- */
-    public HandleCalendarCreazioneEvent(calendar: Calendar, command: string, event: Event, filterCallback: (value: Date[]) => {}) {
-    if (command === "doFilter" || command === "onClickOutside") { // pulsante OK
-      calendar.hideOverlay();
-    } else if (command === "setToday") { // pulsante OGGI
-      calendar.writeValue([new Date(), null]);
-      calendar.hideOverlay();
-    } else if (command === "clear") { // pulsante SVUOTA
-      calendar.onClearButtonClick(event);
-    }
-    if (calendar.inputId === "calendarcreazione") {
-      this.lastDataCreazioneFilterValue = calendar.value;
-    }
-    filterCallback(calendar.value);
-  }
-
-
- 
-
-
 }
 
   
- 
-
 export interface ArchiviListModeItem {
   label: string;
   title: string;
