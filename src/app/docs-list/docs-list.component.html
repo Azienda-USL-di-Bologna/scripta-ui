@@ -37,6 +37,7 @@
             class="p-button-outlined refresh-button" 
             icon="pi pi-filter" 
             pTooltip="Applica i filtri. Aggiorna"
+            ariaLabel="Applica i filtri"
             tooltipPosition="bottom"
             (click)="resetPaginationAndLoadData()">
           </button>
@@ -44,6 +45,7 @@
             class="p-button-outlined alarm-button" 
             icon="pi pi-filter-slash" 
             pTooltip="Svuota i filtri"
+            ariaLabel="Svuota i filtri"
             tooltipPosition="bottom"
             (click)="clear()">
           </button>
@@ -72,6 +74,7 @@
           (click)="exportCSV(dt)" 
           class="p-mr-2" 
           pTooltip="CSV"
+          ariaLabel="Scarica il csv della tabella"
           tooltipPosition="bottom">
         </button>
         <p-multiSelect 
