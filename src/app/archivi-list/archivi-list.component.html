@@ -34,6 +34,7 @@
             icon="pi pi-filter" 
             pTooltip="Applica i filtri. Aggiorna"
             tooltipPosition="bottom"
+            ariaLabel="Applica i filtri" 
             >
           </button>
           <button pButton 
@@ -41,6 +42,7 @@
             icon="pi pi-filter-slash" 
             pTooltip="Svuota i filtri"
             tooltipPosition="bottom"
+            ariaLabel="Svuota i filtri"
             >
           </button>
           <p-selectButton class="tabs"
@@ -67,6 +69,7 @@
           icon="pi pi-file-o" 
           (click)="exportCSV(dt)" 
           class="p-mr-2" 
+          aria-label="Scarica il csv della tabella"
           pTooltip="CSV"
           tooltipPosition="bottom">
         </button>
@@ -79,7 +82,8 @@
           [showHeader]="false"
           selectedItemsLabel="{0} colonne selezionate"
           [style]="{minWidth: '250px', maxWidth: '250px'}" 
-          placeholder="Scegli le colonne da visualizzare">
+          placeholder="Scegli le colonne da visualizzare"
+          aria-label="Scegli le colonne da visualizzare">
         </p-multiSelect>
       </div>
     </div>
