@@ -77,7 +77,8 @@
           aria-label="Scarica il csv della tabella"
           tooltipPosition="bottom">
         </button>
-        <p-multiSelect 
+        <p-multiSelect #ms
+          *ngIf = "isAccessibile() !== true"
           [options]="selectableColumns" 
           [(ngModel)]="selectedColumns" 
           (onChange)="onChangeSelectedColumns($event)"
@@ -87,14 +88,20 @@
           selectedItemsLabel="{0} colonne selezionate"
           [style]="{minWidth: '250px', maxWidth: '250px'}" 
           placeholder="Scegli le colonne da visualizzare"
-          aria-label="Scegli le colonne da visualizzare">
+          aria-label="Scegli le colonne da visualizzare"
+          >
+          <ng-template let-column pTemplate="item"  >
+              <div class="column-item">
+                <span >{{column.header}}</span>
+              </div>
+          </ng-template>
         </p-multiSelect>
       </div>
     </div>
   </ng-template>
   <ng-template pTemplate="colgroup" let-columns>
     <colgroup>
-      <col *ngFor="let col of columns" [ngClass]="col.headerClass">
+      <col *ngFor="let col of columns" [ngClass]="col.headerClass" >
     </colgroup>
   </ng-template>
   <ng-template pTemplate="header" let-columns>
@@ -103,11 +110,12 @@
       <th *ngFor="let col of columns" pReorderableColumn
         [ngSwitch]="col.field" 
         [ngClass]="col.headerClass"
-        [pSortableColumn]="col.sortField">
-        <span class="header-box" [pTooltip]="col.sortField ? null : 'Colonna non ordinabile'">
+        [pSortableColumn]="col.sortField"
+        >
+        <span class="header-box" [pTooltip]="col.sortField ? null : 'Colonna non ordinabile'" [attr.aria-label]="col.label">
           {{col.header}}
           <p-sortIcon *ngIf="col.sortField" 
-            [field]="col.sortField">
+            [field]="col.sortField" >
           </p-sortIcon>
         </span>
       </th>
@@ -122,16 +130,29 @@
           </p-columnFilter>
         </div> -->
         <div *ngSwitchCase="'idAzienda'" #filteraziendacontainer>
-          <p-columnFilter #columnFilterAzienda [field]="col.filterField" matchMode="in" [showMenu]="false">
+          <p-columnFilter #columnFilterAzienda [field]="col.filterField"  matchMode="in" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-dropdown #dropdownAzienda
-                [options]="aziendeFiltrabili" 
-                [ngModel]="value" 
-                (onChange)="filterAzienda(filter, $event.value, filteraziendacontainer)" 
-                optionValue="value"
-                optionLabel="label"
-                appendTo="body">
-              </p-dropdown>
+                <p-dropdown #dropdownAzienda
+                *ngIf = "isAccessibile() !== true"
+                  [options]="aziendeFiltrabili" 
+                  [ngModel]="value" 
+                  (onChange)="filterAzienda(filter, $event.value, filteraziendacontainer)" 
+                  optionValue="value"
+                  optionLabel="label"
+                  appendTo="body"
+                  >
+                </p-dropdown>
+                <p-autoComplete 
+                  *ngIf = "isAccessibile() == true"
+                  [suggestions]="aziendeFiltrabiliFiltered" 
+                  (completeMethod)="filterAziendaAccessibile($event)"
+                  (onClear)="filter(null)"
+                  field = "label"
+                  type="search"
+                  appendTo="body"
+                  (onSelect)="filterAzienda(filter, $event.value, filteraziendacontainer)"
+                >
+              </p-autoComplete>
             </ng-template>
           </p-columnFilter>
         </div>
@@ -139,19 +160,32 @@
           <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-multiSelect
+                *ngIf = "isAccessibile() !== true"
                 [showHeader]="false" 
                 [ngModel]="value" 
                 [options]="tipologiaVisualizzazioneObj" 
                 optionValue="value" 
                 optionLabel="nome" 
                 (onChange)="filter($event.value)" 
-                appendTo="body">
+                appendTo="body"
+                >
                 <ng-template let-option pTemplate="item">
                   <div class="p-multiselect-representative-option">
                     <span class="p-ml-1">{{option.nome}}</span>
                   </div>
                 </ng-template>
               </p-multiSelect>
+              <p-autoComplete 
+                *ngIf = "isAccessibile() == true"
+                [suggestions]="filteredTipologia" 
+                (completeMethod)="filterTipologia($event)"
+                (onClear)="filter(null)"
+                field = "nome"
+                type="search"
+                appendTo="body"
+                (onSelect)="filter($event.value)"
+                >
+              </p-autoComplete>
             </ng-template>
           </p-columnFilter>
         </div>
@@ -322,6 +356,7 @@
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <!-- nell'ngModel ho messo il nome perchè altrimenti non venivano settati i filtri una volta cliccati -->
               <p-multiSelect 
+                *ngIf = "isAccessibile() !== true"
                 [ngModel]="nome"
                 [showHeader]="false" 
                 [options]="statoVisualizzazioneObj" 
@@ -335,6 +370,17 @@
                   </div>
                 </ng-template>
               </p-multiSelect>
+              <p-autoComplete 
+                *ngIf = "isAccessibile() == true"
+                [suggestions]="filteredStati" 
+                (completeMethod)="filterStatoAccessibile($event)"
+                (onClear)="filter(null)"
+                field = "nome"
+                type="search"
+                appendTo="body"
+                (onSelect)="filter($event.value)"
+                >
+              </p-autoComplete>
             </ng-template>
           </p-columnFilter>
         </div>
@@ -364,6 +410,7 @@
             [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-multiSelect 
+                *ngIf = "isAccessibile() !== true"
                 [showHeader]="false"
                 [ngModel]="value" 
                 [options]="statoUfficioAttiVisualizzazioneObj"
@@ -377,6 +424,17 @@
                   </div>
                 </ng-template>
               </p-multiSelect>
+              <p-autoComplete 
+                *ngIf = "isAccessibile() == true"
+                [suggestions]="filteredStatoUfficioAtti" 
+                (completeMethod)="filterStatoUfficioAtti($event)"
+                (onClear)="filter(null)"
+                field = "nome"
+                type="search"
+                appendTo="body"
+                (onSelect)="filter($event.value)"
+                >
+              </p-autoComplete>
             </ng-template>
           </p-columnFilter>
         </div>

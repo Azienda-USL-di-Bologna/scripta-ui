@@ -384,6 +384,14 @@ public j = JSON;
   return extendedArchiviList;
 }
 
+
+  /**
+  * Serve a calcolare se l'utente è accessibile 
+  * per capire cosa mostrargli nell'html
+  */
+  public isAccessibile(): boolean {
+    return this.utenteUtilitiesLogin.getUtente().idPersona.accessibilita;
+  }
   
   
   /**

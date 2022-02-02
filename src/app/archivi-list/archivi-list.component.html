@@ -74,6 +74,7 @@
           tooltipPosition="bottom">
         </button>
         <p-multiSelect 
+          *ngIf = "isAccessibile() !== true"
           [options]="selectableColumns" 
           [(ngModel)]="selectedColumns" 
           (onChange)="onChangeMultiSelectedColumns($event)"
@@ -100,7 +101,7 @@
         [ngSwitch]="col.field" 
         [ngClass]="col.headerClass"
         [pSortableColumn]="col.sortField">
-        <span class="header-box" [pTooltip]="col.sortField ? null : 'Colonna non ordinabile'">
+        <span class="header-box" [pTooltip]="col.sortField ? null : 'Colonna non ordinabile'" [attr.aria-label]="col.label">
           {{col.header}}
           <p-sortIcon *ngIf="col.sortField" 
             [field]="col.sortField">
