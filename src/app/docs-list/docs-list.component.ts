@@ -89,6 +89,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
   public filtriPuliti: boolean = true;
   private mandatoryColumns: string[] = [];
   public selectableColumns: ColonnaBds[] = [];
+  public filteredTipologia: any[];
+  public filteredStati: any[];
+  public filteredStatoUfficioAtti: any[];
+  public aziendeFiltrabiliFiltered: any[];
 
   constructor(
     private messageService: MessageService,
@@ -974,6 +978,66 @@ export class DocsListComponent implements OnInit, OnDestroy {
     });
     filterCallback(array);
  }
+
+/**
+  * Serve a calcolare se l'utente è accessibile 
+  * per capire cosa mostrargli nell'html
+  */
+ public isAccessibile(): boolean {
+  return this.utenteUtilitiesLogin.getUtente().idPersona.accessibilita;
+ }
+
+ /**
+  * Filtering per gli autocomplete della versione accessibile
+  */
+ public filterTipologia(event:any) {
+  let filtered: any[] = [];
+  let query = event.query;
+  for (let i = 0; i < this.tipologiaVisualizzazioneObj.length; i++) {
+    let tipologia = this.tipologiaVisualizzazioneObj[i];
+    if (tipologia.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+      filtered.push(tipologia);
+    }
+  }
+  this.filteredTipologia = filtered;
+}
+
+  public filterStatoAccessibile(event:any) {
+    let filtered: any[] = [];
+    let query = event.query;
+    for (let i = 0; i < this.statoVisualizzazioneObj.length; i++) {
+      let stato = this.statoVisualizzazioneObj[i];
+      if (stato.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+        filtered.push(stato);
+      }
+    }
+    this.filteredStati = filtered;
+  }
+
+  public filterStatoUfficioAtti(event:any) {
+    let filtered: any[] = [];
+    let query = event.query;
+    for (let i = 0; i < this.statoUfficioAttiVisualizzazioneObj.length; i++) {
+      let stato = this.statoUfficioAttiVisualizzazioneObj[i];
+      if (stato.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+        filtered.push(stato);
+      }
+    }
+    this.filteredStatoUfficioAtti = filtered;
+  }
+
+  public filterAziendaAccessibile(event:any) {
+    let filtered: any[] = [];
+    let query = event.query;
+    for (let i = 0; i < this.aziendeFiltrabili.length; i++) {
+      let azienda = this.aziendeFiltrabili[i];
+      if (azienda.label.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+        filtered.push(azienda);
+      }
+    }
+    this.aziendeFiltrabiliFiltered = filtered;
+  }
+
 
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
