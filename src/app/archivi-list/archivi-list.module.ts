@@ -1,15 +1,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ArchiviListComponent } from './archivi-list.component';
 import { ArchiviListRoutingModule } from "./archivi-list-routing.module";
 import { PrimeNgModule } from '../primeng.module';
 import { FormsModule } from '@angular/forms';
 
-
-
 @NgModule({
   declarations: [
-    ArchiviListComponent
+    //ArchiviListComponent
   ],
   imports: [
     FormsModule,

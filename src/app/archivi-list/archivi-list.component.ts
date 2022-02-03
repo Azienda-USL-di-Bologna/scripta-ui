@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { ArchivioDetail, ArchivioDetailService, ArchivioDetailView, Azienda, ENTITIES_STRUCTURE, Indirizzo, StatoArchivio } from '@bds/ng-internauta-model';
+import { ArchivioDetailService, ArchivioDetailView, Azienda } from '@bds/ng-internauta-model';
 import { AppService } from '../app.service';
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { Subscription } from 'rxjs';
@@ -7,7 +7,7 @@ import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
 import { ArchiviListMode,  cols, colsCSV } from './archivi-list-constants';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ValueAndLabelObj } from '../docs-list/docs-list.component';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from '@nfa/next-sdr';
+import { NextSDREntityProvider, PagingConf } from '@nfa/next-sdr';
 import { ColumnFilter, Table } from 'primeng/table';
 import { Impostazioni } from '../utilities/utils';
 import { ConfirmationService, LazyLoadEvent, MessageService } from 'primeng/api';
@@ -17,14 +17,16 @@ import { Dropdown } from 'primeng/dropdown';
 import { ColonnaBds, CsvExtractor } from '@bds/primeng-plugin';
 import { ExtendedArchiviView } from './extendend-archivi-view';
 import { NavViews } from '../navigation-tabs/navigation-tabs-contants';
+import { TabComponent } from '../navigation-tabs/tab.component';
+import { NavigationTabsService } from '../navigation-tabs/navigation-tabs.service';
 
 @Component({
   selector: 'app-archivi-list',
   templateUrl: './archivi-list.component.html',
   styleUrls: ['./archivi-list.component.scss']
 })
-export class ArchiviListComponent implements OnInit {
-
+export class ArchiviListComponent implements OnInit, TabComponent {
+  @Input() data: any;
   @ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>;
   @ViewChild("calendarcreazione") public calendarcreazione: Calendar;
   @ViewChild("dropdownAzienda") public dropdownAzienda: Dropdown;
@@ -68,13 +70,17 @@ public j = JSON;
     private messageService: MessageService,
     private archiviListService: ArchiviListService,
     private confirmationService: ConfirmationService,
-    private archivioDetailService: ArchivioDetailService
+    private archivioDetailService: ArchivioDetailService,
+    private navigationTabsService: NavigationTabsService
   ) { }
 
   ngOnInit(): void {
     this.serviceForGetData = this.archiviListService;
     this.appService.appNameSelection("Elenco Fascicoli");
     this.archiviListMode = this.route.snapshot.queryParamMap.get('mode') as ArchiviListMode || ArchiviListMode.VISIBILI;
+    if (!Object.values(ArchiviListMode).includes(this.archiviListMode)) {
+      this.archiviListMode = ArchiviListMode.VISIBILI;
+    }
     this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } }); 
     
     this.subscriptions.push(
@@ -93,7 +99,6 @@ public j = JSON;
              this.calcAziendeFiltrabili();
           }
           this.loadConfiguration();
-
         }
       )
     );
@@ -427,9 +432,19 @@ public j = JSON;
       }, 0);
     }
   }
+
+  /* 
+    L'utente ha cliccato su un archivio. Apriamolo
+    TODO: Se il fascicolo cliccato in realtà è parte dell'alberatura in cui sono allora devo soloa ggiornare il tab
+  */
+  public openArchive(archivio: ExtendedArchiviView): void {
+    this.navigationTabsService.addTab(
+      this.navigationTabsService.buildaTabArchivio(archivio.id, archivio.numerazioneGerarchica)
+    );
+    this.navigationTabsService.activeLastTab();
+  }
 }
 
-  
 export interface ArchiviListModeItem {
   label: string;
   title: string;

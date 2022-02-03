@@ -391,7 +391,7 @@ export const StatoUfficioAttiTraduzioneVisualizzazione = [
 export enum DocsListMode {
   NUOVO = "NUOVO",
   MIEI_DOCUMENTI = "MIEI_DOCUMENTI",
-  VISIBILI = "VISIBILI",
+  DOCUMENTI_VISIBILI = "DOCUMENTI_VISIBILI",
   IFIRMARIO = "IFIRMARIO",
   IFIRMATO = "IFIRMATO",
   REGISTRAZIONI = "REGISTRAZIONI"

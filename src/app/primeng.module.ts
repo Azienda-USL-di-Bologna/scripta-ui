@@ -23,6 +23,7 @@ import {SelectButtonModule} from 'primeng/selectbutton';
 import { ConfirmDialogModule } from "primeng/confirmdialog";
 import {ConfirmPopupModule} from "primeng/confirmpopup";
 import {DropdownModule} from 'primeng/dropdown';
+import {TabViewModule} from 'primeng/tabview';
 
 
 @NgModule({
@@ -52,7 +53,8 @@ import {DropdownModule} from 'primeng/dropdown';
     ConfirmDialogModule,
     ConfirmPopupModule,
     SelectButtonModule,
-    DropdownModule
+    DropdownModule,
+    TabViewModule
   ],
   exports: [
     ButtonModule,
@@ -78,7 +80,8 @@ import {DropdownModule} from 'primeng/dropdown';
     SelectButtonModule,
     ConfirmDialogModule,
     ConfirmPopupModule,
-    DropdownModule
+    DropdownModule,
+    TabViewModule
   ],
   providers: [MessageService, DialogService]
 })

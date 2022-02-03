@@ -4,6 +4,11 @@ import { PrimeNgModule } from "../primeng.module";
 import { ScriptaCommonModule } from "../scripta-common.module";
 import { NavigationTabsRoutingModule } from "./navigation-tabs-routings.module";
 import { NavigationTabsComponent } from "./navigation-tabs.component";
+import { NavigationTabsService } from "./navigation-tabs.service";
+import { TabWrapperComponent } from "./tab-wrapper.component";
+import { DocsListComponent } from "../docs-list/docs-list.component";
+import { ArchiviListComponent } from "../archivi-list/archivi-list.component";
+import { TabDirective } from "./tab.directive";
 
 @NgModule({
   imports: [
@@ -13,8 +18,18 @@ import { NavigationTabsComponent } from "./navigation-tabs.component";
     ScriptaCommonModule
   ],
   declarations: [
-    NavigationTabsComponent
+    NavigationTabsComponent,
+    TabWrapperComponent,
+    DocsListComponent,
+    ArchiviListComponent,
+    TabDirective
   ],
-  providers: []
+  entryComponents: [
+    DocsListComponent,
+    ArchiviListComponent
+  ],
+  providers: [
+    NavigationTabsService
+  ]
 })
 export class NavigationTabsModule { }

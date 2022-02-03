@@ -1,6 +1,26 @@
-:host {
+:host ::ng-deep {
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  .navigation-tabview {
+    .p-tabview-nav {
+      .p-tabview-nav-link {
+        padding: 0.657rem 1rem;
+      }
+      i, span { 
+        vertical-align: middle; 
+      } 
+      span { 
+        margin: 0 .5rem; 
+      }
+      .p-button { 
+        margin-right: .25rem;
+      }
+    }
+    .p-tabview-panels {
+      border: none;
+      padding: 0;
+    }
+  }
 }

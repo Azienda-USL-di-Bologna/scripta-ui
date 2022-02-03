@@ -15,7 +15,7 @@ import { ExtendedDocDetailService } from "./extended-doc-detail.service";
     ScriptaCommonModule
   ],
   declarations: [
-    DocsListComponent
+    //DocsListComponent
   ],
   providers: [
     ExtendedDocDetailService,
