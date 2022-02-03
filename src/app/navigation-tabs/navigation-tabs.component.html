@@ -1,24 +1,8 @@
-<!-- <p-tabMenu [model]="items" [activeItem]="activeItem">
-  <ng-template pTemplate="item" let-item let-i="index">
-    <span class="p-menuitem-icon" [ngClass]="item.icon"></span>
-    <span class="p-menuitem-text">{{item.label}}</span>
-    <button *ngIf="item.id"
-      pTooltip="Chiudi tab"
-      type="button" 
-      class="p-link close-tab-button">
-      <span class="pi pi-times"></span>
-    </button>
-  </ng-template>
-</p-tabMenu>
-
-<router-outlet></router-outlet> -->
-<!-- <div *ngFor="let item of tabItems">
-  <tab-wrapper [item]="item"></tab-wrapper>
-</div> -->
 <p-tabView 
   styleClass="navigation-tabview" 
-  [(activeIndex)]="activeTabIndex"
-  (onChange)="onChangeTab($event)">
+  [(activeIndex)]="navigationTabsService.activeTabIndex"
+  (onChange)="onChangeTab($event)"
+  (onClose)="onCloseTab($event)">
   <p-tabPanel *ngFor="let item of tabItems" [closable]="item.closable">
     <ng-template pTemplate = "header">
       <i [ngClass]="item.icon"></i>

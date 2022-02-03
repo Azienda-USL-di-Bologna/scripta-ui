@@ -99,7 +99,6 @@ public j = JSON;
              this.calcAziendeFiltrabili();
           }
           this.loadConfiguration();
-
         }
       )
     );
@@ -434,16 +433,15 @@ public j = JSON;
     }
   }
 
-  //@Output() archivioAperto = new EventEmitter<any>();
   /* 
     L'utente ha cliccato su un archivio. Apriamolo
     TODO: Se il fascicolo cliccato in realtà è parte dell'alberatura in cui sono allora devo soloa ggiornare il tab
   */
   public openArchive(archivio: ExtendedArchiviView): void {
-    //this.archivioAperto.emit(archivio);
     this.navigationTabsService.addTab(
       this.navigationTabsService.buildaTabArchivio(archivio.id, archivio.numerazioneGerarchica)
     );
+    this.navigationTabsService.activeLastTab();
   }
 }
 

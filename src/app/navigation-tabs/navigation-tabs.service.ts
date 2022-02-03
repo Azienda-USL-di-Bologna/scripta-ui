@@ -3,25 +3,28 @@ import { ArchiviListComponent } from '../archivi-list/archivi-list.component';
 import { ArchivioComponent } from '../archivio/archivio.component';
 import { DocComponent } from '../doc/doc.component';
 import { DocsListComponent } from '../docs-list/docs-list.component';
-
 import { TabItem, TabType } from './tab-item';
 
 @Injectable()
 export class NavigationTabsService {
   private tabs: TabItem[] = [];
-  private activeTabIndex = -1;
+  public activeTabIndex: number = 0;
 
   public addTab(tab: TabItem) {
     this.tabs.push(tab);
     this.setTabsInSessionStorage();
   }
 
-  public removeTab() {
-
+  public removeTab(tabIndexToRemove: number): void {
+    if (this.tabs[tabIndexToRemove].type === TabType.ARCHIVIO) {
+      this.activeTabIndex = 1; // Sto dando per scotnato che il tab degli archiviList sia il secondo.
+    }
+    this.tabs.splice(tabIndexToRemove, 1);
+    this.setTabsInSessionStorage();
   }
 
-  public updateActiveTab() {
-
+  public updateTab(tabIndex: number, field: string, value: any) {
+    // TODO: L'update servirà per modificare label e id dei tab archivio    
   }
 
   public getTabs() {
@@ -29,20 +32,18 @@ export class NavigationTabsService {
   }
 
   private setTabsInSessionStorage() {
-    /* const tabMap = this.tabs.forEach(t => {
-      return {
-        data: t.data,
-        active: false,
-        label: t.label,
-        icon: t.icon,
-
-      }
-    }); */
     sessionStorage.setItem("tabs", JSON.stringify(this.tabs));
+  }
+
+  public activeLastTab(): void {
+    setTimeout(() => {
+      this.activeTabIndex = this.tabs.length - 1; 
+    }, 0);
   }
 
   /**
    * Carico i tab dal session storage
+   * Setto il componente in base al tipo di tab
    * @returns torno false se non ho caricato nulla
    */
   public loadTabsFromSessionStorage(): boolean {

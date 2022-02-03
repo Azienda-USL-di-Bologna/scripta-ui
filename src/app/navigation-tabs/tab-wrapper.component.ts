@@ -23,10 +23,6 @@ export class TabWrapperComponent implements AfterViewInit {
 
       const componentRef = viewContainerRef.createComponent<TabComponent>(componentFactory);
       componentRef.instance.data = this.item.data;
-      /* const viewContainerRef = this.tab.viewContainerRef;
-      viewContainerRef.clear();
-      const componentRef = viewContainerRef.createComponent<TabComponent>(this.item.component);
-      componentRef.instance.data = this.item.data; */
     }, 0);
   }
 }
