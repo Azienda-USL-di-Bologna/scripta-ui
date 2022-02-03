@@ -209,8 +209,11 @@
         <div *ngSwitchCase="'dataCreazione'">
           {{rowData.dataCreazione | date:'dd/MM/yyyy'}}
         </div>
-        <div *ngSwitchCase="'oggetto'"  class="oggetto-content"
-          [pTooltip]="rowData.oggetto" tooltipPosition="top">
+        <div *ngSwitchCase="'oggetto'" 
+          class="oggetto-content"
+          [pTooltip]="rowData.oggetto" 
+          tooltipPosition="top"
+          (click)="openArchive(rowData)">
           {{rowData.oggetto}}
         </div>
         <div *ngSwitchCase="'stato'">

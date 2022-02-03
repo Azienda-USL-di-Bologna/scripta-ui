@@ -1,6 +1,44 @@
-:host {
+:host ::ng-deep {
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  .navigation-tabview { 
+    .p-tabview-panels {
+      border: none;
+      padding: 0;
+    }
+  }
+  /* .close-tab-button {
+    margin-left: 10px;
+    &:hover {
+      color: #936;
+      font-weight: bold;
+    }
+  }
+  .p-menuitem-link-active {
+    .close-tab-button {
+      color: white;
+      &:hover {
+        color: #936;
+        font-weight: bold;
+      }
+    }
+  }
+  
+  .navigation-tabview { 
+    i, span { 
+      vertical-align: middle; 
+    } 
+    span { 
+      margin: 0 .5rem; 
+    }
+    .p-button { 
+      margin-right: .25rem;
+    } 
+    .p-tabview p { 
+      line-height: 1.5; 
+      margin: 0;
+    }
+  } */
 }

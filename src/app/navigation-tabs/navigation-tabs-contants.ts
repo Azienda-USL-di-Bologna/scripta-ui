@@ -1,4 +1,6 @@
 export enum NavViews {
   DOCUMENTI = "DOCUMENTI",
-  FASCICOLI = "FASCICOLI"
+  FASCICOLI = "FASCICOLI",
+  DOC = "DOC",
+  ARCHIVIO = "ARCHIVIO"
 }

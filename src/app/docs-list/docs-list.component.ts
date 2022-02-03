@@ -22,13 +22,15 @@ import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service
 import { MultiSelect } from "primeng/multiselect";
 import { map } from "rxjs/operators";
 import { NavViews } from "../navigation-tabs/navigation-tabs-contants";
+import { TabComponent } from "../navigation-tabs/tab.component";
 
 @Component({
   selector: "docs-list",
   templateUrl: "./docs-list.component.html",
   styleUrls: ["./docs-list.component.scss"]
 })
-export class DocsListComponent implements OnInit, OnDestroy {
+export class DocsListComponent implements OnInit, OnDestroy, TabComponent {
+  @Input() data: any;
   private subscriptions: Subscription[] = [];
   private loadDocsListSubscription: Subscription;
   private pageConf: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 0, offset: 0 } };
@@ -112,6 +114,9 @@ export class DocsListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.appService.appNameSelection("Elenco documenti");
     this.docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode || DocsListMode.MIEI_DOCUMENTI;
+    if (!Object.values(DocsListMode).includes(this.docsListMode)) {
+      this.docsListMode = DocsListMode.MIEI_DOCUMENTI;
+    }
     this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.DOCUMENTI, mode: this.docsListMode } }); 
     
     this.subscriptions.push(
@@ -160,7 +165,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
         label: "Visibili", 
         // icon: "pi pi-fw pi-list", 
         routerLink: ["./" + DOCS_LIST_ROUTE], 
-        queryParams: {"mode": DocsListMode.VISIBILI}
+        queryParams: {"mode": DocsListMode.DOCUMENTI_VISIBILI}
       },
       {
         title: "",
@@ -521,7 +526,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
     const filterAndSort = new FiltersAndSorts();
 
     switch (this.docsListMode) {
-      case DocsListMode.VISIBILI:
+      case DocsListMode.DOCUMENTI_VISIBILI:
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
         this.initialSortField = "dataCreazione";
         this.serviceForGetData = this.docDetailViewService;
