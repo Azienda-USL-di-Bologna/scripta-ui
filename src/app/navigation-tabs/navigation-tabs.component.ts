@@ -44,17 +44,26 @@ export class NavigationTabsComponent implements OnInit {
             this.utenteUtilitiesLogin.getUtente().aziende.forEach(elem => {
               idAziendaArray.push(elem.id);
             });
-            this.configurazioneService.getParametriAziende("tabFascicoliScriptaActive", null, idAziendaArray)
-            .subscribe((parametriAziende: ParametroAziende[]) => {
-              console.log(parametriAziende[0].valore);
-              const showTabFascicoli = JSON.parse(parametriAziende[0].valore || false);
-              if (showTabFascicoli) {
-                this.navigationTabsService.addTab(
-                  this.navigationTabsService.buildaTabArchiviList()
-                );
-              }
-              this.setTabsAndActiveOneOfThem();
-            });     
+            this.subscriptions.push(
+              this.configurazioneService.getParametriAziende("tabFascicoliScriptaActive", null, idAziendaArray).subscribe(
+                (parametriAziende: ParametroAziende[]) => {
+                  console.log(parametriAziende[0].valore);
+                  const showTabFascicoli = JSON.parse(parametriAziende[0].valore || false);
+                  if (showTabFascicoli) {
+                    this.navigationTabsService.addTab(
+                      this.navigationTabsService.buildaTabArchiviList()
+                    );
+                  }
+                  this.setTabsAndActiveOneOfThem();
+
+                  // Tolgo subito queste due sottoscrizioni che mi disturbano quando per qualche motivo riscattano.
+                  this.subscriptions.forEach(
+                    s => s.unsubscribe()
+                  );
+                  this.subscriptions = [];
+                }
+              )  
+            );
           }
         )
       );
