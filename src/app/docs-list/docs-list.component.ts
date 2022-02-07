@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { CODICI_RUOLO, Persona, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService } from "@bds/ng-internauta-model";
 import { LOCAL_IT } from "@bds/nt-communicator";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
-import { buildLazyEventFiltersAndSorts, CsvExtractor } from "@bds/primeng-plugin";
+import { buildLazyEventFiltersAndSorts, ColonnaBds, CsvExtractor } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from "@nfa/next-sdr";
 import { Confirmation, ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
 import { AutoComplete } from "primeng/autocomplete";
@@ -15,19 +15,22 @@ import { Subscription } from "rxjs";
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
 import { AppService } from "../app.service";
 import { Impostazioni } from "../utilities/utils";
-import { ColonnaBds, cols, colsCSV, DocsListMode,StatoDocTraduzioneVisualizzazione, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
+import { cols, colsCSV, DocsListMode,StatoDocTraduzioneVisualizzazione, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
 import { MultiSelect } from "primeng/multiselect";
 import { map } from "rxjs/operators";
+import { NavViews } from "../navigation-tabs/navigation-tabs-contants";
+import { TabComponent } from "../navigation-tabs/tab.component";
 
 @Component({
   selector: "docs-list",
   templateUrl: "./docs-list.component.html",
   styleUrls: ["./docs-list.component.scss"]
 })
-export class DocsListComponent implements OnInit, OnDestroy {
+export class DocsListComponent implements OnInit, OnDestroy, TabComponent {
+  @Input() data: any;
   private subscriptions: Subscription[] = [];
   private loadDocsListSubscription: Subscription;
   private pageConf: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 0, offset: 0 } };
@@ -88,6 +91,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
   public filtriPuliti: boolean = true;
   private mandatoryColumns: string[] = [];
   public selectableColumns: ColonnaBds[] = [];
+  public filteredTipologia: any[];
+  public filteredStati: any[];
+  public filteredStatoUfficioAtti: any[];
+  public aziendeFiltrabiliFiltered: any[];
 
   constructor(
     private messageService: MessageService,
@@ -107,7 +114,10 @@ export class DocsListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.appService.appNameSelection("Elenco documenti");
     this.docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode || DocsListMode.MIEI_DOCUMENTI;
-    this.router.navigate([], { relativeTo: this.route, queryParams: { mode: this.docsListMode } }); 
+    if (!Object.values(DocsListMode).includes(this.docsListMode)) {
+      this.docsListMode = DocsListMode.MIEI_DOCUMENTI;
+    }
+    this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.DOCUMENTI, mode: this.docsListMode } }); 
     
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
@@ -155,7 +165,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
         label: "Visibili", 
         // icon: "pi pi-fw pi-list", 
         routerLink: ["./" + DOCS_LIST_ROUTE], 
-        queryParams: {"mode": DocsListMode.VISIBILI}
+        queryParams: {"mode": DocsListMode.DOCUMENTI_VISIBILI}
       },
       {
         title: "",
@@ -516,7 +526,7 @@ export class DocsListComponent implements OnInit, OnDestroy {
     const filterAndSort = new FiltersAndSorts();
 
     switch (this.docsListMode) {
-      case DocsListMode.VISIBILI:
+      case DocsListMode.DOCUMENTI_VISIBILI:
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
         this.initialSortField = "dataCreazione";
         this.serviceForGetData = this.docDetailViewService;
@@ -973,6 +983,66 @@ export class DocsListComponent implements OnInit, OnDestroy {
     });
     filterCallback(array);
  }
+
+/**
+  * Serve a calcolare se l'utente è accessibile 
+  * per capire cosa mostrargli nell'html
+  */
+ public isAccessibile(): boolean {
+  return this.utenteUtilitiesLogin.getUtente().idPersona.accessibilita;
+ }
+
+ /**
+  * Filtering per gli autocomplete della versione accessibile
+  */
+ public filterTipologia(event:any) {
+  let filtered: any[] = [];
+  let query = event.query;
+  for (let i = 0; i < this.tipologiaVisualizzazioneObj.length; i++) {
+    let tipologia = this.tipologiaVisualizzazioneObj[i];
+    if (tipologia.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+      filtered.push(tipologia);
+    }
+  }
+  this.filteredTipologia = filtered;
+}
+
+  public filterStatoAccessibile(event:any) {
+    let filtered: any[] = [];
+    let query = event.query;
+    for (let i = 0; i < this.statoVisualizzazioneObj.length; i++) {
+      let stato = this.statoVisualizzazioneObj[i];
+      if (stato.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+        filtered.push(stato);
+      }
+    }
+    this.filteredStati = filtered;
+  }
+
+  public filterStatoUfficioAtti(event:any) {
+    let filtered: any[] = [];
+    let query = event.query;
+    for (let i = 0; i < this.statoUfficioAttiVisualizzazioneObj.length; i++) {
+      let stato = this.statoUfficioAttiVisualizzazioneObj[i];
+      if (stato.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+        filtered.push(stato);
+      }
+    }
+    this.filteredStatoUfficioAtti = filtered;
+  }
+
+  public filterAziendaAccessibile(event:any) {
+    let filtered: any[] = [];
+    let query = event.query;
+    for (let i = 0; i < this.aziendeFiltrabili.length; i++) {
+      let azienda = this.aziendeFiltrabili[i];
+      if (azienda.label.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+        filtered.push(azienda);
+      }
+    }
+    this.aziendeFiltrabiliFiltered = filtered;
+  }
+
 
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
