@@ -15,7 +15,7 @@ import { PrimeNGConfig } from 'primeng/api';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  public headerFeaturesConfig: HeaderFeaturesConfig  = new HeaderFeaturesConfig();
+  public headerFeaturesConfig: HeaderFeaturesConfig = new HeaderFeaturesConfig();
   private subscriptions: Subscription[] = [];
   public utenteConnesso: UtenteUtilities | undefined;
   public appName = "";
@@ -60,7 +60,7 @@ export class AppComponent implements OnInit {
     this.subscriptions.push(this.route.queryParams.subscribe(
       (params: Params) => UtilityFunctions.manageChangeUserLogin(
         params, this.loginService, this.router, '/' + LOGIN_ROUTE)));
-    
+
     this.subscriptions.push(this.appService.appNameEvent.subscribe((appName: string) => {
       this.appName = appName;
     }));

@@ -4,7 +4,7 @@ import { AppService } from '../app.service';
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { Subscription } from 'rxjs';
 import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
-import { ArchiviListMode,  cols, colsCSV } from './archivi-list-constants';
+import { ArchiviListMode, cols, colsCSV } from './archivi-list-constants';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ValueAndLabelObj } from '../docs-list/docs-list.component';
 import { NextSDREntityProvider, PagingConf } from '@nfa/next-sdr';
@@ -31,7 +31,7 @@ export class ArchiviListComponent implements OnInit, TabComponent {
   @ViewChild("calendarcreazione") public calendarcreazione: Calendar;
   @ViewChild("dropdownAzienda") public dropdownAzienda: Dropdown;
   @ViewChild("dt") public dataTable: Table;
-public j = JSON;
+  public j = JSON;
   public archivi: ExtendedArchiviView[] = [];
   public archiviListMode: ArchiviListMode;
   private utenteUtilitiesLogin: UtenteUtilities;
@@ -42,7 +42,7 @@ public j = JSON;
   public selectableColumns: ColonnaBds[] = [];
   private mandatoryColumns: string[] = [];
   public rowsNumber: number = 20;
-  public totalRecords: number ;
+  public totalRecords: number;
   public loading: boolean = false;
   public filtriPuliti: boolean = true;
   private storedLazyLoadEvent: LazyLoadEvent;
@@ -55,9 +55,9 @@ public j = JSON;
   private pageConf: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 0, offset: 0 } };
   public selectedArchiviListMode: ArchiviListModeItem = {
     title: "Tutti gli archivi che posso vedere",
-    label: "Visibili", 
-    routerLink: ["./" + ARCHIVI_LIST_ROUTE], 
-    queryParams: {"mode": ArchiviListMode.VISIBILI}
+    label: "Visibili",
+    routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+    queryParams: { "mode": ArchiviListMode.VISIBILI }
   };
   public cols: ColonnaBds[] = [];
   public _selectedColumns: ColonnaBds[];
@@ -81,8 +81,8 @@ public j = JSON;
     if (!Object.values(ArchiviListMode).includes(this.archiviListMode)) {
       this.archiviListMode = ArchiviListMode.VISIBILI;
     }
-    this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } }); 
-    
+    this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } });
+
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -90,13 +90,13 @@ public j = JSON;
           this.calcArchiviListModeItem();
           this.selectedArchiviListMode = {
             title: "Tutti gli archivi che posso vedere",
-            label: "Visibili", 
-            routerLink: ["./" + ARCHIVI_LIST_ROUTE], 
-            queryParams: {"mode": ArchiviListMode.VISIBILI}
-          } ;
+            label: "Visibili",
+            routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+            queryParams: { "mode": ArchiviListMode.VISIBILI }
+          };
           // this.selectedArchiviListMode = this.archiviListModeItem.filter(element => element.queryParams.mode === this.archiviListMode)[0];
-          if(this.archiviListMode) {
-             this.calcAziendeFiltrabili();
+          if (this.archiviListMode) {
+            this.calcAziendeFiltrabili();
           }
           this.loadConfiguration();
         }
@@ -119,7 +119,7 @@ public j = JSON;
       this.mandatoryColumns.push("idAzienda");
     }
     this.cols = cols;
-    
+
     this.selectableColumns = cols.map(e => {
       if (this.mandatoryColumns.includes(e.field)) {
         e.selectionDisabled = true;
@@ -177,31 +177,31 @@ public j = JSON;
     this.archiviListModeItem.push(
       {
         title: "Tutti gli archivi che posso vedere",
-        label: "Visibili", 
+        label: "Visibili",
         // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + ARCHIVI_LIST_ROUTE], 
-        queryParams: {"mode": ArchiviListMode.VISIBILI}
+        routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+        queryParams: { "mode": ArchiviListMode.VISIBILI }
       },
       {
         title: "",
-        label: "Recenti", 
+        label: "Recenti",
         // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + ARCHIVI_LIST_ROUTE], 
-        queryParams: {"mode": ArchiviListMode.RECENTI}
+        routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+        queryParams: { "mode": ArchiviListMode.RECENTI }
       },
       {
         title: "",
-        label: "Preferiti", 
+        label: "Preferiti",
         // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + ARCHIVI_LIST_ROUTE], 
-        queryParams: {"mode": ArchiviListMode.PREFERITI}
+        routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+        queryParams: { "mode": ArchiviListMode.PREFERITI }
       },
       {
         title: "",
-        label: "Frequenti", 
+        label: "Frequenti",
         // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + ARCHIVI_LIST_ROUTE], 
-        queryParams: {"mode": ArchiviListMode.FREQUENTI}
+        routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+        queryParams: { "mode": ArchiviListMode.FREQUENTI }
       }
     )
   }
@@ -209,7 +209,7 @@ public j = JSON;
   private calcAziendeFiltrabili() {
     this.aziendeFiltrabili = [];
     this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive.map((azienda: Azienda) => {
-      return {value: [azienda.id], label: azienda.nome} as ValueAndLabelObj;
+      return { value: [azienda.id], label: azienda.nome } as ValueAndLabelObj;
     })
     if (this.aziendeFiltrabili.length > 1) {
       this.aziendeFiltrabili.push({
@@ -237,7 +237,7 @@ public j = JSON;
     this.utenteUtilitiesLogin.setImpostazioniApplicazione(this.loginService, impostazioniVisualizzazioneObj);
   }
 
-  
+
   /**
    * Questa funzione gestisce il click del cambio tab
   */
@@ -285,7 +285,7 @@ public j = JSON;
         err => {
           this.messageService.add({
             severity: "warn",
-            key : "archiviListToast",
+            key: "archiviListToast",
             summary: "Attenzione",
             detail: `Si è verificato un errore nello scaricamento del csv, contattare Babelcare`
           });
@@ -295,11 +295,11 @@ public j = JSON;
   }
 
 
-/**
- * Gestisco l'evento di cambiamento delle colonne visualizzate.
- * In particolare se ho tolto una colonna che era filtrata, tolgo quel filtro.
- * @param event
- */
+  /**
+   * Gestisco l'evento di cambiamento delle colonne visualizzate.
+   * In particolare se ho tolto una colonna che era filtrata, tolgo quel filtro.
+   * @param event
+   */
   public onChangeMultiSelectedColumns(event: any): void {
     if (!event.value.some((e: ColonnaBds) => e.field === event.itemValue.field)) {
       // Se itemValue non è dentro l'elenco value allora ho tolto la spunta e quella colonna non è più visibile
@@ -313,14 +313,14 @@ public j = JSON;
    * Calcola il pageconf, salva i filtri e chiama la loadData
    * @param event
    */
-   public onLazyLoad(event: LazyLoadEvent): void {
+  public onLazyLoad(event: LazyLoadEvent): void {
     if (event.first === 0 && event.rows === this.rowsNumber) {
       event.rows = event.rows * 2;
     }
 
     console.log(`Chiedo ${this.pageConf.conf.limit} righe con offset di ${this.pageConf.conf.offset}`);
     this.storedLazyLoadEvent = event;
-  
+
     this.loadData();
   }
 
@@ -330,7 +330,7 @@ public j = JSON;
    * Carica i docs per la lista.
    * @param event
    */
-   private loadData(): void {
+  private loadData(): void {
     this.loading = true;
     this.pageConf.conf = {
       limit: this.storedLazyLoadEvent.rows,
@@ -362,32 +362,32 @@ public j = JSON;
         err => {
           this.messageService.add({
             severity: "warn",
-            key : "archiviListToast",
+            key: "archiviListToast",
             summary: "Attenzione",
             detail: `Si è verificato un errore nel caricamento, contattare Babelcare`
           });
-      });
+        });
   }
 
 
-/**
-   * Parso DocList[] facendolo diventare ExtendedDocList[] con le
-   * proprietà utili alla visualizzazione popolate
-   * @param docsList
-   * @returns
-   */
- private setCustomProperties(archiviList: ArchivioDetailView[]): ExtendedArchiviView[] {
-  const extendedArchiviList: ExtendedArchiviView[] = archiviList as ExtendedArchiviView[];
-  extendedArchiviList.forEach((archivio: ExtendedArchiviView) => {
-    Object.setPrototypeOf(archivio, ExtendedArchiviView.prototype);
-    archivio.tipoVisualizzazione = archivio.tipo;
-    archivio.statoVisualizzazione = archivio.stato;
-    archivio.vicariVisualizzazione = null;
-    archivio.idPersonaResponsabileVisualizzazione = null;
-    archivio.idPersonaCreazioneVisualizzazione = null;
-  });
-  return extendedArchiviList;
-}
+  /**
+     * Parso DocList[] facendolo diventare ExtendedDocList[] con le
+     * proprietà utili alla visualizzazione popolate
+     * @param docsList
+     * @returns
+     */
+  private setCustomProperties(archiviList: ArchivioDetailView[]): ExtendedArchiviView[] {
+    const extendedArchiviList: ExtendedArchiviView[] = archiviList as ExtendedArchiviView[];
+    extendedArchiviList.forEach((archivio: ExtendedArchiviView) => {
+      Object.setPrototypeOf(archivio, ExtendedArchiviView.prototype);
+      archivio.tipoVisualizzazione = archivio.tipo;
+      archivio.statoVisualizzazione = archivio.stato;
+      archivio.vicariVisualizzazione = null;
+      archivio.idPersonaResponsabileVisualizzazione = null;
+      archivio.idPersonaCreazioneVisualizzazione = null;
+    });
+    return extendedArchiviList;
+  }
 
 
   /**
@@ -397,8 +397,8 @@ public j = JSON;
   public isAccessibile(): boolean {
     return this.utenteUtilitiesLogin.getUtente().idPersona.accessibilita;
   }
-  
-  
+
+
   /**
    * Gestione custom del filtro per azienda scelto dall'utente. In particolare devo gestire il caso
    * in cui l'utente scelga l'opzione "Tutte le aziende" per avvisarlo di possibili rallentamenti.
@@ -406,7 +406,7 @@ public j = JSON;
    * @param value 
    * @param filteraziendacontainer 
    */
-    public filterAzienda(filterCallback: (value: number[]) => {}, value: number[], filteraziendacontainer: any) {
+  public filterAzienda(filterCallback: (value: number[]) => {}, value: number[], filteraziendacontainer: any) {
     if (value.length === 1) {
       // L'utente ha scelto un unica azienda. Faccio quindi partire il filtro.
       this.lastAziendaFilterValue = value;
