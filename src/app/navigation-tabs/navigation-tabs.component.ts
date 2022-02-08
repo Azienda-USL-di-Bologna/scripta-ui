@@ -4,6 +4,7 @@ import { Subscription } from "rxjs";
 import { ConfigurazioneService, ParametroAziende } from "@bds/ng-internauta-model";
 import { NavigationTabsService } from "./navigation-tabs.service";
 import { TabItem } from "./tab-item";
+import { ActivatedRoute } from "@angular/router";
 
 @Component({
   selector: "navigation-tabs",
@@ -13,14 +14,23 @@ import { TabItem } from "./tab-item";
 export class NavigationTabsComponent implements OnInit {
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
-
+  private tabName: any;
   public tabItems: TabItem[] = [];
 
   constructor(
     private loginService: NtJwtLoginService,
     private configurazioneService: ConfigurazioneService,
-    public navigationTabsService: NavigationTabsService
+    public navigationTabsService: NavigationTabsService,
+    private route: ActivatedRoute
   ) {
+    this.route.queryParams.subscribe(params => {
+      this.tabName = params['view'];
+      if(this.tabName == 'FASCICOLI') {
+        this.navigationTabsService.activeTabIndex = 1;
+      } else {
+        this.navigationTabsService.activeTabIndex = 0;
+      }
+    });
   }
 
   ngOnInit(): void {
