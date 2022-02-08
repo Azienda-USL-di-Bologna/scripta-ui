@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { TabComponent } from '../navigation-tabs/tab.component';
 
+
+
 @Component({
   selector: 'app-archivio',
   templateUrl: './archivio.component.html',

@@ -4,7 +4,6 @@ import { PrimeNgModule } from "../primeng.module";
 import { ScriptaCommonModule } from "../scripta-common.module";
 import { ArchivioComponent } from "./archivio.component";
 import { ArchivioRoutingModule } from "./archivio-routings.module";
-import { ArchivioTreeComponent } from './archivio-tree/archivio-tree.component';
 
 @NgModule({
   imports: [
@@ -14,8 +13,7 @@ import { ArchivioTreeComponent } from './archivio-tree/archivio-tree.component';
     ScriptaCommonModule
   ],
   declarations: [
-    ArchivioComponent,
-    ArchivioTreeComponent
+    ArchivioComponent
   ],
   providers: []
 })

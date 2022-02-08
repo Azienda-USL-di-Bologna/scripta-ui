@@ -11,6 +11,7 @@ import { NtCommunicatorModule } from "@bds/nt-communicator";
 import { HomeComponent } from "./home/home.component";
 import { DatePipe } from "@angular/common";
 
+
 /* Registro la data italiana */
 import { LOCALE_ID } from "@angular/core";
 import { registerLocaleData } from "@angular/common";
