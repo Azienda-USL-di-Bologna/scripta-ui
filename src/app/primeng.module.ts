@@ -25,6 +25,9 @@ import { ConfirmPopupModule } from "primeng/confirmpopup";
 import { DropdownModule } from 'primeng/dropdown';
 import { TabViewModule } from 'primeng/tabview';
 import { SplitterModule } from 'primeng/splitter';
+import { TreeModule } from 'primeng/tree';
+
+
 
 
 
@@ -57,7 +60,8 @@ import { SplitterModule } from 'primeng/splitter';
     SelectButtonModule,
     DropdownModule,
     TabViewModule,
-    SplitterModule
+    SplitterModule,
+    TreeModule,
   ],
   exports: [
     ButtonModule,
@@ -85,7 +89,8 @@ import { SplitterModule } from 'primeng/splitter';
     ConfirmPopupModule,
     DropdownModule,
     TabViewModule,
-    SplitterModule
+    SplitterModule,
+    TreeModule,
   ],
   providers: [MessageService, DialogService]
 })
