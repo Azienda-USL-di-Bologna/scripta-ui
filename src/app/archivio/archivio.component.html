@@ -1,8 +1,9 @@
 <main class="main-element">
-    <p-splitter class="archivio-main-splitter" [panelSizes]="[30,70]">
+    <p-splitter [style]="{'height':'100%'}" [panelSizes]="[30,70]">
         <ng-template pTemplate>
             <div class="left-side-element">
-                <app-archivio-tree [data]="data"></app-archivio-tree>
+                <app-archivio-tree [data]="data">
+                </app-archivio-tree>
             </div>
         </ng-template>
         <ng-template pTemplate>
