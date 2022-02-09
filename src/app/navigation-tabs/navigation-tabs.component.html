@@ -1,3 +1,16 @@
-<p-tabMenu [model]="items" [activeItem]="activeItem"></p-tabMenu>
+<p-tabView 
+  styleClass="navigation-tabview" 
+  [(activeIndex)]="navigationTabsService.activeTabIndex"
+  (onChange)="onChangeTab($event)"
+  (onClose)="onCloseTab($event)">
+  <p-tabPanel *ngFor="let item of tabItems" [closable]="item.closable">
+    <ng-template pTemplate = "header">
+      <i [ngClass]="item.icon"></i>
+      <span>{{item.label}}</span>
+    </ng-template>
+    <ng-template pTemplate="content">
+      <tab-wrapper [item]="item"></tab-wrapper>
+    </ng-template>
+  </p-tabPanel>
+</p-tabView>
 
-<router-outlet></router-outlet>
