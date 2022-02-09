@@ -24,12 +24,12 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
 
   }
 
-  nodeRender(node: ArchivioDetail): TreeNode {
+  getRenderedTreeNode(node: ArchivioDetail): TreeNode {
     const newNode: TreeNode = {};
     newNode.data = node;
     newNode.label = node.numerazioneGerarchica
     node.archiviFigliList?.forEach(
-      archivioFiglio => newNode.children.push(this.nodeRender(archivioFiglio))
+      archivioFiglio => newNode.children.push(this.getRenderedTreeNode(archivioFiglio))
     )
     return newNode;
   }
@@ -40,14 +40,11 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
     let filter: FiltersAndSorts = new FiltersAndSorts();
     filter.addFilter(new FilterDefinition('id', FILTER_TYPES.not_string.equals, this.data['id']));
 
-    this.archivioService.getData(
-      "ArchivioDetailWithPlainFields",
-      filter, null, null
-    ).subscribe(
+    this.archivioService.getData("ArchivioDetailWithPlainFields", filter, null, null).subscribe(
       (res: { results: any[]; }) => {
-        console.log("RES", res);
+        //console.log("RES", res);
         res.results.forEach((archive: ArchivioDetail) => {
-          const node = this.nodeRender(archive)
+          const node = this.getRenderedTreeNode(archive)
           loadedElements.push(node);
         });
         console.log("FINAL loadedElements", loadedElements);
