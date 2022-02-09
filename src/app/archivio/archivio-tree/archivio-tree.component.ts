@@ -28,6 +28,7 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
     const newNode: TreeNode = {};
     newNode.data = node;
     newNode.label = node.numerazioneGerarchica
+    newNode.children = [];
     node.archiviFigliList?.forEach(
       archivioFiglio => newNode.children.push(this.getRenderedTreeNode(archivioFiglio))
     )
@@ -40,9 +41,9 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
     let filter: FiltersAndSorts = new FiltersAndSorts();
     filter.addFilter(new FilterDefinition('id', FILTER_TYPES.not_string.equals, this.data['id']));
 
-    this.archivioService.getData("ArchivioDetailWithPlainFields", filter, null, null).subscribe(
+    this.archivioService.getData("ArchivioDetailWithArchiviFigliListAndArchiviNipotiList", filter, null, null).subscribe(
       (res: { results: any[]; }) => {
-        //console.log("RES", res);
+        console.log("RES", res);
         res.results.forEach((archive: ArchivioDetail) => {
           const node = this.getRenderedTreeNode(archive)
           loadedElements.push(node);
