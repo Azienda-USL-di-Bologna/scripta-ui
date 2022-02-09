@@ -1,6 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { TabComponent } from 'src/app/navigation-tabs/tab.component';
 import { TreeNode } from 'primeng/api';
+import { ArchivioService } from '../archivio.service';
+import { Archivio, ArchivioDetail, ENTITIES_STRUCTURE } from '@bds/ng-internauta-model';
+import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@nfa/next-sdr';
 
 
 @Component({
@@ -10,13 +13,47 @@ import { TreeNode } from 'primeng/api';
 })
 export class ArchivioTreeComponent implements OnInit, TabComponent {
   @Input() data: any;
+  public elements: any[] = [];
 
-  constructor() { }
+  constructor(private archivioService: ArchivioService) { }
 
   ngOnInit(): void {
     console.log("ArchivioTreeComponent.ngOnInit()", this.data);
-    this.fakeDataConstructor()
+    this.loadDataByIdArchivio()
+    //this.fakeDataConstructor()
 
+  }
+
+  nodeRender(node: ArchivioDetail): TreeNode {
+    const newNode: TreeNode = {};
+    newNode.data = node;
+    newNode.label = node.numerazioneGerarchica
+    node.archiviFigliList?.forEach(
+      archivioFiglio => newNode.children.push(this.nodeRender(archivioFiglio))
+    )
+    return newNode;
+  }
+
+  loadDataByIdArchivio(): void {
+    console.log("data", this.data);
+    let loadedElements: any[] = [];
+    let filter: FiltersAndSorts = new FiltersAndSorts();
+    filter.addFilter(new FilterDefinition('id', FILTER_TYPES.not_string.equals, this.data['id']));
+
+    this.archivioService.getData(
+      "ArchivioDetailWithPlainFields",
+      filter, null, null
+    ).subscribe(
+      (res: { results: any[]; }) => {
+        console.log("RES", res);
+        res.results.forEach((archive: ArchivioDetail) => {
+          const node = this.nodeRender(archive)
+          loadedElements.push(node);
+        });
+        console.log("FINAL loadedElements", loadedElements);
+        this.elements = loadedElements
+      }
+    );
   }
 
   fakeDataConstructor(): void {

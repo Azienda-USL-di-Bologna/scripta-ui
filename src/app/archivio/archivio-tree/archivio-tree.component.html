@@ -1,4 +1,6 @@
 <main>
     <p>archivio-tree works!</p>
-    <p-tree [value]='data'></p-tree>
+    <div *ngIf="data && elements">
+        <p-tree [value]='elements'></p-tree>
+    </div>
 </main>
