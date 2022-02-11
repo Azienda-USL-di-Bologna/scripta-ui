@@ -38,7 +38,7 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
     newNode.data = node;
     newNode.collapsedIcon = "pi pi-folder"
     newNode.expandedIcon = "pi pi-folder-open"
-    newNode.label = node.numerazioneGerarchica + ' ' + node.oggetto
+    newNode.label = node.numerazioneGerarchica + '/' + node.anno + ' ' + node.oggetto
     newNode.children = [];
     newNode.expanded = true;
     /*     if (node.idArchivioPadre) {
