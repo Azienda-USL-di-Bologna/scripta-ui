@@ -30,6 +30,8 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log("STAMPA DI LOG")
+    debugger;
     this.config.setTranslation(PRIMENG_ITA_TRANSALATION);
     this.headerFeaturesConfig = new HeaderFeaturesConfig();
     this.headerFeaturesConfig.showCambioUtente = true;
@@ -39,6 +41,7 @@ export class AppComponent implements OnInit {
     this.headerFeaturesConfig.showManuale = true;
     this.headerFeaturesConfig.showProfilo = true;
     this.headerFeaturesConfig.logoutIconPath = 'assets/images/signout.svg';
+    
 
     // configurazione login
     this.loginService.setLoginUrl(getInternautaUrl(BaseUrlType.Login));
