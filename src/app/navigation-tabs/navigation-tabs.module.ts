@@ -9,6 +9,8 @@ import { TabWrapperComponent } from "./tab-wrapper.component";
 import { DocsListComponent } from "../docs-list/docs-list.component";
 import { ArchiviListComponent } from "../archivi-list/archivi-list.component";
 import { TabDirective } from "./tab.directive";
+import { ArchivioComponent } from "../archivio/archivio.component";
+import { ArchivioTreeComponent } from "../archivio/archivio-tree/archivio-tree.component";
 
 @NgModule({
   imports: [
@@ -22,11 +24,14 @@ import { TabDirective } from "./tab.directive";
     TabWrapperComponent,
     DocsListComponent,
     ArchiviListComponent,
+    ArchivioComponent,
+    ArchivioTreeComponent,
     TabDirective
   ],
   entryComponents: [
     DocsListComponent,
-    ArchiviListComponent
+    ArchiviListComponent,
+    ArchivioComponent
   ],
   providers: [
     NavigationTabsService
