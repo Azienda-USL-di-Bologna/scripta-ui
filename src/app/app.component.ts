@@ -5,7 +5,7 @@ import { ActivatedRoute, Router, Params } from '@angular/router';
 import { IntimusClientService, PRIMENG_ITA_TRANSALATION } from '@bds/nt-communicator';
 import { getInternautaUrl, BaseUrlType, Azienda } from '@bds/ng-internauta-model';
 import { Subscription } from 'rxjs';
-import { APPLICATION, LOGIN_ROUTE } from 'src/environments/app-constants';
+import { APPLICATION, LOGIN_ROUTE, SCRIPTA_ROUTE } from 'src/environments/app-constants';
 import { AppService } from './app.service';
 import { PrimeNGConfig } from 'primeng/api';
 
@@ -30,8 +30,6 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log("STAMPA DI LOG")
-    debugger;
     this.config.setTranslation(PRIMENG_ITA_TRANSALATION);
     this.headerFeaturesConfig = new HeaderFeaturesConfig();
     this.headerFeaturesConfig.showCambioUtente = true;
@@ -40,6 +38,7 @@ export class AppComponent implements OnInit {
     this.headerFeaturesConfig.showUserMenu = true;
     this.headerFeaturesConfig.showManuale = true;
     this.headerFeaturesConfig.showProfilo = true;
+    this.headerFeaturesConfig.logoutRedirectRoute = "/" + SCRIPTA_ROUTE;
     this.headerFeaturesConfig.logoutIconPath = 'assets/images/signout.svg';
     
 
