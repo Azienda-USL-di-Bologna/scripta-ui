@@ -1,16 +1,16 @@
 import { Component, Input, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { ArchivioDetailService, ArchivioDetailView, Azienda, BaseUrlType, getInternautaUrl } from '@bds/ng-internauta-model';
+import { ArchivioDetailService, ArchivioDetailView, Azienda } from '@bds/ng-internauta-model';
 import { AppService } from '../app.service';
-import { NtJwtLoginService, UtenteUtilities, UtilityFunctions } from "@bds/nt-jwt-login";
+import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { Subscription } from 'rxjs';
-import { APPLICATION, ARCHIVI_LIST_ROUTE, LOGIN_ROUTE, SCRIPTA_ROUTE } from 'src/environments/app-constants';
+import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
 import { ArchiviListMode,  cols, colsCSV } from './archivi-list-constants';
-import { ActivatedRoute, Params, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ValueAndLabelObj } from '../docs-list/docs-list.component';
 import { NextSDREntityProvider, PagingConf} from '@nfa/next-sdr';
 import { ColumnFilter, Table } from 'primeng/table';
 import { Impostazioni } from '../utilities/utils';
-import { ConfirmationService, LazyLoadEvent, MessageService, PrimeNGConfig } from 'primeng/api';
+import { ConfirmationService, LazyLoadEvent, MessageService } from 'primeng/api';
 import { ArchiviListService } from './archivi-list.service';
 import { Calendar } from 'primeng/calendar';
 import { Dropdown } from 'primeng/dropdown';
@@ -19,7 +19,6 @@ import { ExtendedArchiviView } from './extendend-archivi-view';
 import { NavViews } from '../navigation-tabs/navigation-tabs-contants';
 import { TabComponent } from '../navigation-tabs/tab.component';
 import { NavigationTabsService } from '../navigation-tabs/navigation-tabs.service';
-import { IntimusClientService, PRIMENG_ITA_TRANSALATION } from '@bds/nt-communicator';
 import { HeaderFeaturesConfig } from '@bds/common-components';
 
 @Component({
@@ -64,9 +63,6 @@ public j = JSON;
   public cols: ColonnaBds[] = [];
   public _selectedColumns: ColonnaBds[];
  
-  public headerFeaturesConfig: HeaderFeaturesConfig  = new HeaderFeaturesConfig();
-  public utenteConnesso: UtenteUtilities | undefined;
-  public appName = "";
 
   constructor(
     private appService: AppService,
@@ -77,56 +73,10 @@ public j = JSON;
     private archiviListService: ArchiviListService,
     private confirmationService: ConfirmationService,
     private archivioDetailService: ArchivioDetailService,
-    private navigationTabsService: NavigationTabsService,
-    private config: PrimeNGConfig,
-    private intimusClient: IntimusClientService
+    private navigationTabsService: NavigationTabsService
   ) { }
 
   ngOnInit(): void {
-    this.config.setTranslation(PRIMENG_ITA_TRANSALATION);
-    this.headerFeaturesConfig = new HeaderFeaturesConfig();
-    this.headerFeaturesConfig.showCambioUtente = true;
-    this.headerFeaturesConfig.showLogOut = true;
-    this.headerFeaturesConfig.showUserFullName = true;
-    this.headerFeaturesConfig.showUserMenu = true;
-    this.headerFeaturesConfig.showManuale = true;
-    this.headerFeaturesConfig.showProfilo = true;
-    this.headerFeaturesConfig.logoutRedirectRoute = "/" + SCRIPTA_ROUTE;
-    this.headerFeaturesConfig.logoutIconPath = 'assets/images/signout.svg';
-    
-
-    // configurazione login
-    this.loginService.setLoginUrl(getInternautaUrl(BaseUrlType.Login));
-    this.loginService.setImpostazioniApplicazioniUrl(getInternautaUrl(BaseUrlType.ConfigurazioneImpostazioniApplicazioni));
-    this.loginService.setPassTokenGeneratorURL(getInternautaUrl(BaseUrlType.PassTokenGenerator));
-
-    this.subscriptions.push(this.loginService.loggedUser$.subscribe((utente: UtenteUtilities) => {
-      if (utente) {
-        this.utenteConnesso = utente;
-        const intimusUrl = getInternautaUrl(BaseUrlType.Intimus);
-        this.intimusClient.start(
-          intimusUrl,
-          APPLICATION,
-          this.utenteConnesso.getUtente().idPersona.id,
-          this.utenteConnesso.getUtente().aziendaLogin.id,
-          this.utenteConnesso.getUtente().aziende.map(a => a.id));
-      }
-    }));
-    this.subscriptions.push(this.route.queryParams.subscribe(
-      (params: Params) => UtilityFunctions.manageChangeUserLogin(
-        params, this.loginService, this.router, '/' + LOGIN_ROUTE)));
-    
-    this.subscriptions.push(this.appService.appNameEvent.subscribe((appName: string) => {
-      this.appName = appName;
-    }));
-
-
-
-
-
-
-
-
     this.serviceForGetData = this.archiviListService;
     this.appService.appNameSelection("Elenco Fascicoli");
     this.archiviListMode = this.route.snapshot.queryParamMap.get('mode') as ArchiviListMode || ArchiviListMode.VISIBILI;
