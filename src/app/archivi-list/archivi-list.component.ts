@@ -7,7 +7,7 @@ import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
 import { ArchiviListMode, cols, colsCSV } from './archivi-list-constants';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ValueAndLabelObj } from '../docs-list/docs-list.component';
-import { NextSDREntityProvider, PagingConf } from '@nfa/next-sdr';
+import { NextSDREntityProvider, PagingConf} from '@nfa/next-sdr';
 import { ColumnFilter, Table } from 'primeng/table';
 import { Impostazioni } from '../utilities/utils';
 import { ConfirmationService, LazyLoadEvent, MessageService } from 'primeng/api';
@@ -19,6 +19,7 @@ import { ExtendedArchiviView } from './extendend-archivi-view';
 import { NavViews } from '../navigation-tabs/navigation-tabs-contants';
 import { TabComponent } from '../navigation-tabs/tab.component';
 import { NavigationTabsService } from '../navigation-tabs/navigation-tabs.service';
+import { HeaderFeaturesConfig } from '@bds/common-components';
 
 @Component({
   selector: 'app-archivi-list',
@@ -61,6 +62,7 @@ export class ArchiviListComponent implements OnInit, TabComponent {
   };
   public cols: ColonnaBds[] = [];
   public _selectedColumns: ColonnaBds[];
+ 
 
   constructor(
     private appService: AppService,
