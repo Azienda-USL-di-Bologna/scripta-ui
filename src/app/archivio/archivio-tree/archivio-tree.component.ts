@@ -5,6 +5,7 @@ import { ArchivioService } from '../archivio.service';
 import { Archivio, ArchivioDetail, ENTITIES_STRUCTURE } from '@bds/ng-internauta-model';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@nfa/next-sdr';
 import { Observable, of } from 'rxjs';
+import { flushMicrotasks } from '@angular/core/testing';
 
 
 @Component({
@@ -28,28 +29,52 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
   }
 
   getRenderedTreeNode(node: ArchivioDetail): TreeNode {
+    console.log("generatingTreeNode", node)
     const newNode: TreeNode = {};
-    newNode.key = node.id.toString();
-    newNode.data = node;
-    newNode.label = node.numerazioneGerarchica + ' ' + node.oggetto
-    newNode.children = [];
-    newNode.expanded = true;
-
     if (node.id === this.data['id']) {
       this.selectedNode = newNode;
     }
+    newNode.key = node.id.toString();
+    newNode.data = node;
+    newNode.collapsedIcon = "pi pi-folder"
+    newNode.expandedIcon = "pi pi-folder-open"
+    newNode.label = node.numerazioneGerarchica + ' ' + node.oggetto
+    newNode.children = [];
+    newNode.expanded = true;
+    /*     if (node.idArchivioPadre) {
+          console.log("set parent");
+          const parent = this.getRenderedTreeNode(node.idArchivioPadre)
+          console.log("The parent", parent);
+    
+          newNode.parent = parent
+        } */
+    return newNode;
+  }
 
-    node.archiviFigliList?.forEach(
-      archivioFiglio => newNode.children.push(this.getRenderedTreeNode(archivioFiglio))
-    )
-    node.archiviNipotiList?.forEach(inserto => {
+  pushChildrenNodesRecursively(archive: ArchivioDetail, nodoArchivio: TreeNode) {
+    archive.archiviFigliList?.forEach(archivioFiglio => {
+      let subNode: TreeNode = this.getRenderedTreeNode(archivioFiglio);
+      this.pushChildrenNodesRecursively(archivioFiglio, subNode);
+      nodoArchivio.children.push(subNode);
+    })
+  }
+
+
+
+  getFullRenderedTreeNode(node: ArchivioDetail): TreeNode {
+    console.log("getFullRenderedTreeNode", node);
+
+    let newNode: TreeNode = this.getRenderedTreeNode(node);
+
+    this.pushChildrenNodesRecursively(node, newNode);
+    /* node.archiviNipotiList?.forEach(inserto => {
       newNode.children?.forEach(subfascicolo => {
         if (inserto.fk_idArchivioPadre && subfascicolo.key === inserto.fk_idArchivioPadre.id.toString()) {
           subfascicolo.children.push(this.getRenderedTreeNode(inserto))
         }
       })
-    });
-
+    }); */
+    console.log("fullRenderedTreeNode", newNode);
     return newNode;
   }
 
@@ -57,7 +82,7 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
   getArchiviListByIdPadre(id: number): Promise<ArchivioDetail[]> {
     let archivi: ArchivioDetail[] = null;
     let filter: FiltersAndSorts = new FiltersAndSorts();
-    filter.addFilter(new FilterDefinition('fk_idArchivioPadre', FILTER_TYPES.not_string.equals, id));
+    filter.addFilter(new FilterDefinition('idArchivioPadre.id', FILTER_TYPES.not_string.equals, id));
     return new Promise<ArchivioDetail[]>
       (
         (resolve, error) => this.archivioService.getData(
@@ -93,39 +118,108 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
       )
   }
 
-  loadArchivi(): Promise<ArchivioDetail> {
-    return new Promise<ArchivioDetail>((archivio) => {
-      this.getArchivioById(this.data['id']).then(
-        res => {
-          console.log("loaded archivio res", res);
-          console.log("loading archivi by idPadre res['id']", res['id']);
-
-          this.getArchiviListByIdPadre(res['id']).then(
-            archivi => {
-              console.log("loaded figli: ", archivi);
-              res.archiviFigliList = [];
-              archivi.forEach(a => {
-                res.archiviFigliList.push(a);
+  loadAncestors(baseArchive: ArchivioDetail): Promise<ArchivioDetail> {
+    console.log("load ancestor of ", baseArchive);
+    return new Promise<ArchivioDetail>((fullAncestered) => {
+      const idPadre = baseArchive.idArchivioPadre ? baseArchive.idArchivioPadre.id : baseArchive.fk_idArchivioPadre.id
+      if (idPadre) {
+        this.getArchivioById(idPadre).then(
+          father => {
+            console.log("father archive", father);
+            baseArchive.idArchivioPadre = father;
+            if (father.livello > 1 && ((father.fk_idArchivioPadre && father.fk_idArchivioPadre.id)
+              || (father.idArchivioPadre && father.idArchivioPadre.id))) {
+              this.loadAncestors(father).then(ancestered => {
+                father = ancestered;
               })
-              archivio(res);
-            },
-            err => {
-              archivio(res);
             }
-          )
-        },
-        err => archivio(null)
-      )
+            fullAncestered(baseArchive);
+          }
+        )
+      }
+      else {
+        fullAncestered(baseArchive);
+      }
+    })
+  }
+
+  loadFigli(baseArchive: ArchivioDetail): Promise<ArchivioDetail> {
+    return new Promise<ArchivioDetail>((fullWithChildren) => {
+      this.getArchiviListByIdPadre(baseArchive.id).then(
+        archivi => {
+          console.log("loaded figli: ", archivi);
+          baseArchive.archiviFigliList = [];
+          archivi.forEach(a => {
+            baseArchive.archiviFigliList.push(a);
+          })
+        }
+      ).then(() => fullWithChildren(baseArchive));
     });
+  }
+
+
+
+  loadAlberatura(): Promise<ArchivioDetail> {
+    let archive: ArchivioDetail;
+    return new Promise<ArchivioDetail>((archivioToReturn) => {
+      this.getArchivioById(this.data['id'])
+        .then(archivio => { // carico il fascicolo
+          archive = archivio;
+        }).then(() => {
+          // se c'è carico il padre
+          if (archive.livello > 1) {
+            this.loadAncestors(archive)
+              .then(ancesteredArchive => {
+                archive = ancesteredArchive;
+                console.log("full ancestored", archive);
+              })
+              .then(() => {// poi carico i figli
+                this.loadFigli(archive).then(() => {
+                  archivioToReturn(archive);
+                });
+              }
+              )
+          }
+          else {// altrimenti carico i figli
+            this.loadFigli(archive).then(() => {
+              archivioToReturn(archive);
+            });
+          }
+        })
+    });
+  }
+
+  transformStructure(archive: ArchivioDetail): ArchivioDetail {
+    console.log("transformStructure", archive);
+
+    let restructuredArchivio = null;
+    if (archive.idArchivioPadre) {
+      const father = archive.idArchivioPadre
+      if (!father.archiviFigliList) {
+        father.archiviFigliList = [];
+      }
+      father.archiviFigliList.push(archive);
+      if (father.idArchivioPadre) {
+        restructuredArchivio = this.transformStructure(father);
+      }
+      else {
+        restructuredArchivio = father;
+      }
+    }
+    else {
+      restructuredArchivio = archive;
+    }
+    return restructuredArchivio;
   }
 
 
   loadDataByIdArchivio(): void {
     console.log("data", this.data);
     let loadedElements: any[] = [];
-    this.loadArchivi().then(res => {
+    this.loadAlberatura().then(res => {
       console.log("FINAL RES", res);
-      const node = this.getRenderedTreeNode(res);
+      const restructured: ArchivioDetail = this.transformStructure(res);
+      const node = this.getFullRenderedTreeNode(restructured);
       loadedElements.push(node);
       this.elements = loadedElements;
     });
