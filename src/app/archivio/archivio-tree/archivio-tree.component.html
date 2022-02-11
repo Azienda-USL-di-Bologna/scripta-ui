@@ -1,6 +1,7 @@
 <main>
-    <p>archivio-tree works!</p>
-    <div *ngIf="data && elements">
-        <p-tree [value]='elements'></p-tree>
+    <div *ngIf="data && elements" class="tree-conainer">
+        <p-tree [value]='elements' [style]="{'height': '100%', 'width': '100%', 'border': 'none'}" [styleClass]="ciccio"
+            selectionMode="single" [(selection)]="selectedNode">
+        </p-tree>
     </div>
 </main>
