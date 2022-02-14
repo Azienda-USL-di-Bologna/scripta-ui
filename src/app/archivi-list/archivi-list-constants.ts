@@ -73,7 +73,7 @@ export const cols: ColonnaBds[] = [
     field: "idPersonaResponsabile",
     header: "Responsabile",
     filterField: "idPersonaResponsabile",
-    sortField: "idPersonaResponsabile",
+   // sortField: "idPersonaResponsabile",
     style: {},
     headerClass: ["header-column", "responsabile-column"],
     filterClass: ["filter-column", "responsabile-column"],
@@ -163,7 +163,6 @@ export const TipoArchivioTraduzioneVisualizzazione = [
 
 
 export const StatoArchivioTraduzioneVisualizzazione = [
-  { value: StatoArchivio.BOZZA, nome: "Bozza"},
   { value: StatoArchivio.PRECHIUSO, nome: "Prechiuso"},
   { value: StatoArchivio.APERTO, nome: "Aperto"},
   { value: StatoArchivio.CHIUSO, nome: "Chiuso"}

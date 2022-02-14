@@ -136,7 +136,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent {
     );
 
     /* this.subscriptions.push(
-      this.confirmationService.requireConfirmation$.subscribe((confirmation: Confirmation) => {
+      this.confirmatationService.requireConfirmation$.subscribe((confirmation: Confirmation) => {
         if (confirmation === null) {
           console.log(this.dropdownAzienda);
           console.log(this.filterAzienda);
