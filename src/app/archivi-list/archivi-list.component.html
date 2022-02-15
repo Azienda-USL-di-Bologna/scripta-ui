@@ -354,13 +354,11 @@
         </div>
         <div *ngSwitchCase="'numerazioneGerarchica'" class="search-wrapper">
           <p-columnFilter #colfilterNumerazioneGerarchica
-            type="numeric" 
             [field]="col.filterField" 
             [matchMode]="col.filterMatchMode" 
             [showMenu]="false"
             [useGrouping]="false"
-            placeholder=""
-            pTooltip="Inserire solo numeri">
+            placeholder="">
           </p-columnFilter>
           <button *ngIf="colfilterNumerazioneGerarchica.hasFilter()"
             class="material-icons close-icon" 
