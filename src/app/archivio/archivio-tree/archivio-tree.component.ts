@@ -35,7 +35,7 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
     newNode.data = node;
     newNode.collapsedIcon = "pi pi-folder"
     newNode.expandedIcon = "pi pi-folder-open"
-    newNode.label = node.numerazioneGerarchica + '/' + node.anno + ' ' + node.oggetto
+    newNode.label = node.numerazioneGerarchica + ' ' + node.oggetto
     newNode.children = [];
     newNode.expanded = true;
     return newNode;
@@ -52,7 +52,7 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
 
 
   getFullRenderedTreeNode(node: ArchivioDetail): TreeNode {
-    //console.log("getFullRenderedTreeNode", node);
+    console.log("getFullRenderedTreeNode", node);
     let newNode: TreeNode = this.getRenderedTreeNode(node);
     this.pushChildrenNodesRecursively(node, newNode);
     return newNode;
@@ -99,21 +99,23 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
   }
 
   loadAncestors(baseArchive: ArchivioDetail): Promise<ArchivioDetail> {
-    //console.log("load ancestor of ", baseArchive);
+    console.log("load ancestor of ", baseArchive);
     return new Promise<ArchivioDetail>((fullAncestered) => {
       const idPadre = baseArchive.idArchivioPadre ? baseArchive.idArchivioPadre.id : baseArchive.fk_idArchivioPadre.id
       if (idPadre) {
         this.getArchivioById(idPadre).then(
           father => {
-            //console.log("father archive", father);
+            console.log("father archive", father);
             baseArchive.idArchivioPadre = father;
             if (father.livello > 1 && ((father.fk_idArchivioPadre && father.fk_idArchivioPadre.id)
               || (father.idArchivioPadre && father.idArchivioPadre.id))) {
               this.loadAncestors(father).then(ancestered => {
                 father = ancestered;
-              })
+              }).then(() => fullAncestered(baseArchive))
             }
-            fullAncestered(baseArchive);
+            else {
+              fullAncestered(baseArchive);
+            }
           }
         )
       }
@@ -127,7 +129,7 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
     return new Promise<ArchivioDetail>((fullWithChildren) => {
       this.getArchiviListByIdPadre(baseArchive.id).then(
         archivi => {
-          //console.log("loaded figli: ", archivi);
+          console.log("loaded figli: ", archivi);
           baseArchive.archiviFigliList = [];
           archivi.forEach(a => {
             baseArchive.archiviFigliList.push(a);
