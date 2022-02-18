@@ -10,7 +10,7 @@ const routes: Routes = [
   { path: "", redirectTo: NAVIGATION_TABS_ROUTE, pathMatch: "full" },
   { path: HOME_ROUTE, redirectTo: NAVIGATION_TABS_ROUTE },
   { path: LOGIN_ROUTE, component: NtJwtLoginComponent, canActivate: [NoLoginGuard], data: {} },
-  { path: LOGGED_OUT_ROUTE, component: LoggedOutPageComponent},
+  { path: LOGGED_OUT_ROUTE, component: LoggedOutPageComponent },
   { path: DOC_ROUTE, loadChildren: () => import("./doc/doc.module").then(m => m.DocModule), canActivate: [RefreshLoggedUserGuard, LoginGuard] },
   /* { path: DOCS_LIST_ROUTE, loadChildren: () => import("./docs-list/docs-list.module").then(m => m.DocsListModule), canActivate: [RefreshLoggedUserGuard, LoginGuard] }, */
   { path: NAVIGATION_TABS_ROUTE, loadChildren: () => import("./navigation-tabs/navigation-tabs.module").then(m => m.NavigationTabsModule), canActivate: [RefreshLoggedUserGuard, LoginGuard] },

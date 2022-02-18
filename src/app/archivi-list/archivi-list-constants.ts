@@ -51,7 +51,7 @@ export const cols: ColonnaBds[] = [
     filterClass: ["filter-column", "numerazione-gerarchica-column"],
     bodyClass: ["numerazione-gerarchica-column"],
     fieldType: "string",
-    filterMatchMode: FILTER_TYPES.not_string.equals,
+    filterMatchMode: FILTER_TYPES.string.containsIgnoreCase,
     useFilterMatchMode: true,
     default: true
   },
@@ -73,7 +73,7 @@ export const cols: ColonnaBds[] = [
     field: "idPersonaResponsabile",
     header: "Responsabile",
     filterField: "idPersonaResponsabile",
-    sortField: "idPersonaResponsabile",
+   // sortField: "idPersonaResponsabile",
     style: {},
     headerClass: ["header-column", "responsabile-column"],
     filterClass: ["filter-column", "responsabile-column"],
@@ -163,7 +163,6 @@ export const TipoArchivioTraduzioneVisualizzazione = [
 
 
 export const StatoArchivioTraduzioneVisualizzazione = [
-  { value: StatoArchivio.BOZZA, nome: "Bozza"},
   { value: StatoArchivio.PRECHIUSO, nome: "Prechiuso"},
   { value: StatoArchivio.APERTO, nome: "Aperto"},
   { value: StatoArchivio.CHIUSO, nome: "Chiuso"}

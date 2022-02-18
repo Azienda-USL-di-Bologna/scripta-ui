@@ -4,12 +4,13 @@ import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { PrimengPluginModule } from "@bds/primeng-plugin";
-import { CommonComponentsModule,ProfiloComponent } from "@bds/common-components";
+import { CommonComponentsModule, ProfiloComponent } from "@bds/common-components";
 import { NtJwtLoginModule } from "@bds/nt-jwt-login";
 import { loginModuleConfig } from "./config/module-config";
 import { NtCommunicatorModule } from "@bds/nt-communicator";
 import { HomeComponent } from "./home/home.component";
 import { DatePipe } from "@angular/common";
+
 
 /* Registro la data italiana */
 import { LOCALE_ID } from "@angular/core";
@@ -39,7 +40,7 @@ registerLocaleData(localeIt, "it-IT", localeItExtra);
   ],
   providers: [
     DatePipe,
-    {provide: LOCALE_ID, useValue: "it-IT"},
+    { provide: LOCALE_ID, useValue: "it-IT" },
   ],
   bootstrap: [AppComponent],
   exports: [CommonComponentsModule],

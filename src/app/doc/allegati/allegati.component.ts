@@ -1,6 +1,6 @@
 import { HttpEvent, HttpEventType } from "@angular/common/http";
 import { Component, OnInit, Input, ViewChild, OnDestroy } from "@angular/core";
-import { Doc, Allegato, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, TipoDettaglioAllegato, DettaglioAllegato } from "@bds/ng-internauta-model";
+import { Doc, Allegato, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, TipoDettaglioAllegato } from "@bds/ng-internauta-model";
 import { UtilityFunctions } from "@bds/nt-communicator";
 import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity, SortDefinition, SORT_MODES } from "@nfa/next-sdr";
 import { MessageService } from "primeng/api";
@@ -16,7 +16,7 @@ import { ExtendedAllegatoService } from "./extended-allegato.service";
 export class AllegatiComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private actualPrincipale: Allegato;
-  private projectionAllegati: string = ENTITIES_STRUCTURE.scripta.allegato.standardProjections.AllegatoWithDettagliAllegatiListAndIdAllegatoPadre;
+  private projectionAllegati: string = ENTITIES_STRUCTURE.scripta.allegato.standardProjections.AllegatoWithIdAllegatoPadre;
   
   public _doc: Doc;
   public selectedAllegato: Allegato;
@@ -133,10 +133,10 @@ export class AllegatiComponent implements OnInit, OnDestroy {
    * Metodo che si occupa di far partire lo scaricamento di un allegato
    */
   public onDownloadAttachment(allegato: Allegato): void {
-    let dettaglioAllegato : DettaglioAllegato = this.getDettaglioByTipoDettaglioAllegato(allegato, "ORIGINALE");
-    this.allegatoService.downloadAttachment(dettaglioAllegato).subscribe(
+    //let dettaglioAllegato : DettaglioAllegato = this.getDettaglioByTipoDettaglioAllegato(allegato, "ORIGINALE");
+    this.allegatoService.downloadAttachment(allegato, TipoDettaglioAllegato.ORIGINALE).subscribe(
       response =>
-        UtilityFunctions.downLoadFile(response, dettaglioAllegato.mimeType, dettaglioAllegato.nome + "." + dettaglioAllegato.estensione, false)
+        UtilityFunctions.downLoadFile(response, allegato.dettagli.originale.mimeType, allegato.dettagli.originale.nome + "." + allegato.dettagli.originale.estensione, false)
     );
   }
 
@@ -272,9 +272,9 @@ export class AllegatiComponent implements OnInit, OnDestroy {
     }
   }
 
-  public getDettaglioByTipoDettaglioAllegato(allegato: Allegato, tipo : string ): DettaglioAllegato {
+  /* public getDettaglioByTipoDettaglioAllegato(allegato: Allegato, tipo : string ): DettaglioAllegato {
     return allegato.dettagliAllegatiList.find(dettaglioAllegato => (dettaglioAllegato.caratteristica === tipo));
-  }
+  } */
 
   /**
    * Mi desottoscrivo dalla varie sottoscrizioni

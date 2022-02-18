@@ -133,7 +133,7 @@
           <p-columnFilter #columnFilterAzienda [field]="col.filterField"  matchMode="in" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
                 <p-dropdown #dropdownAzienda
-                *ngIf = "isAccessibile() !== true"
+                  *ngIf = "isAccessibile() !== true"
                   [options]="aziendeFiltrabili" 
                   [ngModel]="value" 
                   (onChange)="filterAzienda(filter, $event.value, filteraziendacontainer)" 
