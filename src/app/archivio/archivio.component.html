@@ -1,1 +1,15 @@
-<p>archivio works!</p>
+<main class="main-element">
+    <p-splitter [style]="{'height':'100%'}" [panelSizes]="[35,65]">
+        <ng-template pTemplate>
+            <div class="left-side-element">
+                <app-archivio-tree [data]="data">
+                </app-archivio-tree>
+            </div>
+        </ng-template>
+        <ng-template pTemplate>
+            <div class="righ-side-element">
+                <p>archivio works!</p>
+            </div>
+        </ng-template>
+    </p-splitter>
+</main>
