@@ -1,7 +1,13 @@
 <main>
     <div *ngIf="data && elements" class="tree-conainer">
-        <p-tree [value]='elements' [style]="{'height': '100%', 'width': '100%', 'border': 'none'}" [styleClass]="ciccio"
-            selectionMode="single" [(selection)]="selectedNode" scrollHeight="flex">
+        <p-tree
+            [value]='elements' 
+            [style]="{'height': '100%', 'width': '100%', 'border': 'none'}" 
+            [styleClass]="ciccio"
+            selectionMode="single" 
+            [(selection)]="selectedNode" 
+            (onNodeSelect)="handleEvent('onNodeSelect',$event)"
+            scrollHeight="flex">
         </p-tree>
     </div>
 </main>

@@ -48,6 +48,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   private utenteUtilitiesLogin: UtenteUtilities;
   private subscriptions: Subscription[] = [];
   private archiviListModeItem: ArchiviListModeItem[];
+  private displayArchiviListModeItem: boolean =true;
+  private hasChildrens: boolean =false;
   public aziendeFiltrabili: ValueAndLabelObj[] = [];
   public exportCsvInProgress: boolean = false;
   public selectableColumns: ColonnaBds[] = [];
@@ -82,7 +84,20 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   };
   public cols: ColonnaBds[] = [];
   public _selectedColumns: ColonnaBds[];
+  private childrenId: number[] = [];
  
+  
+  @Input() set archiviListModeItem1(value: ArchiviListModeItem[]){
+    this.archiviListModeItem = [];
+    this.archiviListModeItem = value;
+    this.displayArchiviListModeItem=false;    
+  }
+
+  @Input() set archivioPadre(value: number[]){
+    this.childrenId=value;
+    this.hasChildrens=true;
+    this.loadData();
+  }
 
   constructor(
     private appService: AppService,
@@ -112,18 +127,21 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
           this.utenteUtilitiesLogin = utenteUtilities;
-          this.calcArchiviListModeItem();
-          this.selectedArchiviListMode = {
-            title: "Tutti gli archivi che posso vedere",
-            label: "Visibili",
-            routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-            queryParams: { "mode": ArchiviListMode.VISIBILI }
-          };
+          if(this.displayArchiviListModeItem){
+            this.calcArchiviListModeItem();          
+            this.selectedArchiviListMode = {
+              title: "Tutti gli archivi che posso vedere",
+              label: "Visibili",
+              routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+              queryParams: { "mode": ArchiviListMode.VISIBILI }
+            };
+          }
           // this.selectedArchiviListMode = this.archiviListModeItem.filter(element => element.queryParams.mode === this.archiviListMode)[0];
           if (this.archiviListMode) {
             this.calcAziendeFiltrabili();
           }
           this.loadConfiguration();
+         
         }
       )
     );
@@ -185,6 +203,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   @Input() get selectedColumns(): any[] {
     return this._selectedColumns;
   } 
+
 
   set selectedColumns(colsSelected: ColonnaBds[]) {
     if (this._selectedColumns.length > colsSelected.length) {
@@ -531,8 +550,17 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
    * @returns
    */
      private buildCustomFilterAndSort(): FiltersAndSorts {
+
+      //filter to display only children of archivi when archivio tab is open
       const filterAndSort = new FiltersAndSorts();
-  
+      if(this.hasChildrens && this.childrenId.length !=0){
+          this.childrenId.forEach(child =>{
+            filterAndSort.addFilter(new FilterDefinition("id", FILTER_TYPES.not_string.equals, child));
+          })
+        
+      }
+      
+
       switch (this.archiviListMode) {
         // case ArchiviListMode.RECENTI:
         //   filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
