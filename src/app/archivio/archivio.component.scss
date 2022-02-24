@@ -1,4 +1,60 @@
-main{
-    margin: 0rem 1.5rem;
+:host{
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
 }
+   
+.main-element{
+    margin: 0.5rem 1.5rem;
+    height: 100%;
+    overflow: hidden;
+    .left-side-element{
+        height: 100%;
+        flex: 1;
+
+    }
+    .right-side-element{
+        padding: 0 0.4rem 0 0.4rem;         
+        height: 100%; 
+        .archivi-list-comp{
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            
+        }
+    }    
+
+} 
+
+::ng-deep p-splitter {
+    height: 100%; 
+    .p-splitter {
+      height: 100%;     
+      .p-splitter-gutter {
+        background: #9933664d;
+        .p-splitter-gutter-handle {
+          background: #936;
+        }
+      }
+      .p-splitter-panel-nested{
+        overflow: hidden  !important;
+    }
+      .p-splitter-gutter-resizing {
+        background: #99336691;
+      }
+    }
+       .pannello-splitter {
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+    }
+  }
+
+
+
+
+ 
+ 

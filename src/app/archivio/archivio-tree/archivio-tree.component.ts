@@ -1,13 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { TabComponent } from 'src/app/navigation-tabs/tab.component';
 import { TreeNode } from 'primeng/api';
 import { ArchivioService } from '../archivio.service';
-import { Archivio, ArchivioDetail, ENTITIES_STRUCTURE } from '@bds/ng-internauta-model';
+import { ArchivioDetail } from '@bds/ng-internauta-model';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@nfa/next-sdr';
-import { Observable, of } from 'rxjs';
-import { flushMicrotasks } from '@angular/core/testing';
-
-
 @Component({
   selector: 'app-archivio-tree',
   templateUrl: './archivio-tree.component.html',
@@ -19,11 +15,13 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
   public selectedNode: TreeNode = null;
   private ARCHIVIO_PLAIN_FIELD_PROJECTION: string = "ArchivioDetailWithPlainFields";
 
+  @Output() archivioSelectedEvent = new EventEmitter<ArchivioDetail>();
+
   constructor(private archivioService: ArchivioService) { }
 
   ngOnInit(): void {
     console.log("ArchivioTreeComponent.ngOnInit()", this.data);
-    this.loadDataByIdArchivio();
+    this.handleEvent("onFirstLoad",this.data);
   }
 
   getRenderedTreeNode(node: ArchivioDetail): TreeNode {
@@ -37,7 +35,7 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
     newNode.expandedIcon = "pi pi-folder-open"
     newNode.label = node.numerazioneGerarchica + ' ' + node.oggetto
     newNode.children = [];
-    newNode.expanded = true;
+    newNode.expanded = true; 
     return newNode;
   }
 
@@ -141,10 +139,10 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
 
 
 
-  loadAlberatura(): Promise<ArchivioDetail> {
+  loadAlberatura(id:number): Promise<ArchivioDetail> {
     let archive: ArchivioDetail;
     return new Promise<ArchivioDetail>((archivioToReturn) => {
-      this.getArchivioById(this.data['id'])
+      this.getArchivioById(id)
         .then(archivio => { // carico il fascicolo
           archive = archivio;
         }).then(() => {
@@ -192,15 +190,34 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
   }
 
 
-  loadDataByIdArchivio(): void {
+  loadDataByIdArchivio(id: number): void {
     console.log("data", this.data);
     let loadedElements: any[] = [];
-    this.loadAlberatura().then(res => {
+    this.loadAlberatura(id).then(res => {
+      this.selctedArchivioDetail(res)
       const restructured: ArchivioDetail = this.transformStructure(res);
       const node = this.getFullRenderedTreeNode(restructured);
       loadedElements.push(node);
       this.elements = loadedElements;
+    
+    
     });
+  }
+
+  public handleEvent(nome: string, event: any) {
+    switch (nome) {
+      case "onFirstLoad":
+        this.loadDataByIdArchivio(event.id);
+      break;
+      case "onNodeSelect":
+       this.selctedArchivioDetail(event.node.data);
+      break;
+    }
+  }
+
+
+  selctedArchivioDetail(value: ArchivioDetail) {
+    this.archivioSelectedEvent.emit(value);
   }
 
   fakeDataConstructor(): void {

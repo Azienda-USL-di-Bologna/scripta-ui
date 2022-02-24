@@ -1,15 +1,30 @@
 <main class="main-element">
-    <p-splitter [style]="{'height':'100%'}" [panelSizes]="[35,65]">
+    <p-splitter [panelSizes]="[25,75]" [minSizes]="[15,55]">
         <ng-template pTemplate>
-            <div class="left-side-element">
-                <app-archivio-tree [data]="data">
-                </app-archivio-tree>
+            <div class="pannello-splitter">
+                <div class="left-side-element" style="overflow: auto;">
+
+                    <app-archivio-tree 
+                        [data]="data" 
+                        (archivioSelectedEvent)="archivioSelected($event)">
+                    </app-archivio-tree>
+
+                </div>
             </div>
         </ng-template>
+
         <ng-template pTemplate>
-            <div class="righ-side-element">
-                <p>archivio works!</p>
+            <div class="pannello-splitter">
+                <div class="right-side-element">
+                    <app-archivi-list *ngIf="hasChildren" 
+                        [archiviListModeItem1]="archiviListModeItemArchivo"
+                        [archivioPadre]="childrens " 
+                        class="archivi-list-comp">
+                    </app-archivi-list>
+                    <h3 *ngIf="!hasChildren">Nessun sottoarchivio da visualizzare </h3>
+                </div>
             </div>
         </ng-template>
+
     </p-splitter>
 </main>
