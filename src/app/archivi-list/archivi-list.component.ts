@@ -712,10 +712,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   TODO: Se il fascicolo cliccato in realtà è parte dell'alberatura in cui sono allora devo soloa ggiornare il tab
   */
   public openArchive(archivio: ExtendedArchiviView): void {
-    this.navigationTabsService.addTab(
-      this.navigationTabsService.buildaTabArchivio(archivio.id, archivio.numerazioneGerarchica)
-    );
-    this.navigationTabsService.activeLastTab();
+    this.navigationTabsService.addTabArchivio(archivio);
   }
 
    /**

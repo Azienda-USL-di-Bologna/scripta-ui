@@ -1,5 +1,5 @@
-:host{
-    height: 100%;
+:host ::ng-deep {
+  p-splitter .splitter-archivio {
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -48,8 +48,10 @@
     }
        .pannello-splitter {
         height: 100%;
-        width: 100%;
-        overflow: hidden;
+    .left-side-element {
+      width: 100%;
+    }
+  }
     }
   }
 

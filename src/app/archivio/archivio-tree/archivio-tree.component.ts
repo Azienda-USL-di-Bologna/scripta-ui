@@ -1,207 +1,130 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { TabComponent } from 'src/app/navigation-tabs/tab.component';
-import { TreeNode } from 'primeng/api';
-import { ArchivioService } from '../archivio.service';
-import { ArchivioDetail } from '@bds/ng-internauta-model';
+import { MenuItem, TreeNode } from 'primeng/api';
+import { ExtendedArchivioService } from '../extended-archivio.service';
+import { Archivio, ArchivioDetail } from '@bds/ng-internauta-model';
+import { combineLatest, Observable } from 'rxjs';
+import { MenuItemContent } from 'primeng/menu';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@nfa/next-sdr';
+
 @Component({
   selector: 'app-archivio-tree',
   templateUrl: './archivio-tree.component.html',
   styleUrls: ['./archivio-tree.component.scss']
 })
 export class ArchivioTreeComponent implements OnInit, TabComponent {
-  @Input() data: any;
-  public elements: any[] = [];
+  public archivi: TreeNode[] = [];
+  public bricioleArchivi: MenuItem[] = [];
   public selectedNode: TreeNode = null;
-  private ARCHIVIO_PLAIN_FIELD_PROJECTION: string = "ArchivioDetailWithPlainFields";
-
-  @Output() archivioSelectedEvent = new EventEmitter<ArchivioDetail>();
-
-  constructor(private archivioService: ArchivioService) { }
+  private ARCHIVIO_PLAIN_FIELD_PROJECTION: string = "ArchivioWithPlainFields"; 
+  
+  private _archivio: ArchivioDetail;
+  get archivio(): ArchivioDetail { return this._archivio; }
+  @Input() set data(data: any) { 
+    this._archivio = data.archivio;
+    console.log("hei")
+  }
+  
+  /**
+   * @param archivioService 
+   * Usiamo archivio e non archivio detail. 
+   * Questo non dovrebbe essere un problema per quanto riguarda i permessi.
+   * Se l'utente apre l'archivio allora ha diritto di vedere le altre numerazioni gerarchiche.
+   * Il nome verrà oscurato lato dall'after select interceptor nel backend.
+   */
+  constructor(private archivioService: ExtendedArchivioService) {
+    
+  }
 
   ngOnInit(): void {
-    console.log("ArchivioTreeComponent.ngOnInit()", this.data);
-    this.handleEvent("onFirstLoad",this.data);
+    console.log("ArchivioTreeComponent.ngOnInit()", this.archivio);
+    this.firstTreeLoad();
   }
 
-  getRenderedTreeNode(node: ArchivioDetail): TreeNode {
+  /**
+   * Questo metodo si occupa di caricare l'alberatura iniziale.
+   * In particolare, se ho aperto un sottofascicolo/inserto allora 
+   * devo caricare il padre e l'eventuale nonno.
+   */
+  private firstTreeLoad(): void {
+    switch (this.archivio.livello) {
+      case 1:
+        this.archivi.push(this.buildTreeNode(this.archivio));
+        this.bricioleArchivi.push(this.buildMenuItem(this.archivio));
+        break;
+      case 2:
+        this.getArchivioById(this.archivio.fk_idArchivioPadre.id).subscribe(
+          archivioPadre => {
+            this.archivi.push(
+              this.buildTreeNode(archivioPadre, [
+                this.buildTreeNode(this.archivio)
+              ]));
+            this.bricioleArchivi.push(this.buildMenuItem(archivioPadre));
+            this.bricioleArchivi.push(this.buildMenuItem(this.archivio));
+            this.bricioleArchivi = [...this.bricioleArchivi];
+          }
+        );
+        break;
+      case 3:
+        combineLatest([
+          this.getArchivioById(this.archivio.fk_idArchivioPadre.id), 
+          this.getArchivioById(this.archivio.fk_idArchivioNonno.id)
+        ]).subscribe(
+          ([archivioPadre, archivioNonno]) => {
+            this.archivi.push(
+              this.buildTreeNode(archivioNonno, [
+                this.buildTreeNode(archivioPadre, [
+                  this.buildTreeNode(this.archivio)
+                ])
+              ]));
+            this.bricioleArchivi.push(this.buildMenuItem(archivioNonno));
+            this.bricioleArchivi.push(this.buildMenuItem(archivioPadre));
+            this.bricioleArchivi.push(this.buildMenuItem(this.archivio));
+            this.bricioleArchivi = [...this.bricioleArchivi];
+          }
+        );       
+        break;
+    }
+  }
+
+  /**
+   * Ritorno l'observable per il get di un archivio
+   * @param idArchivio 
+   * @returns 
+   */
+  private getArchivioById(idArchivio: number): Observable<Archivio> {
+    return this.archivioService.getByIdHttpCall(idArchivio, this.ARCHIVIO_PLAIN_FIELD_PROJECTION);
+  }
+
+  /**
+   * Creo il nodo per l'albero e lo torno.
+   * @param archivio 
+   * @param children 
+   * @returns 
+   */
+  private buildTreeNode(archivio: Archivio| ArchivioDetail, children?: TreeNode[]): TreeNode {
     const newNode: TreeNode = {};
-    if (node.id === this.data['id']) {
+    if (archivio.id === this.archivio["id"]) {
       this.selectedNode = newNode;
     }
-    newNode.key = node.id.toString();
-    newNode.data = node;
-    newNode.collapsedIcon = "pi pi-folder"
-    newNode.expandedIcon = "pi pi-folder-open"
-    newNode.label = node.numerazioneGerarchica + ' ' + node.oggetto
-    newNode.children = [];
-    newNode.expanded = true; 
+    newNode.key = archivio.id.toString();
+    newNode.data = archivio;
+    newNode.collapsedIcon = "pi pi-folder";
+    newNode.expandedIcon = "pi pi-folder-open";
+    newNode.label = "[" + archivio.numerazioneGerarchica + "] " + archivio.oggetto;
+    newNode.children = children || [];
+    newNode.expanded = true;
     return newNode;
   }
 
-  pushChildrenNodesRecursively(archive: ArchivioDetail, nodoArchivio: TreeNode) {
-    archive.archiviFigliList?.forEach(archivioFiglio => {
-      let subNode: TreeNode = this.getRenderedTreeNode(archivioFiglio);
-      this.pushChildrenNodesRecursively(archivioFiglio, subNode);
-      nodoArchivio.children.push(subNode);
-    })
-  }
-
-
-
-  getFullRenderedTreeNode(node: ArchivioDetail): TreeNode {
-    console.log("getFullRenderedTreeNode", node);
-    let newNode: TreeNode = this.getRenderedTreeNode(node);
-    this.pushChildrenNodesRecursively(node, newNode);
-    return newNode;
-  }
-
-
-  getArchiviListByIdPadre(id: number): Promise<ArchivioDetail[]> {
-    let archivi: ArchivioDetail[] = null;
-    let filter: FiltersAndSorts = new FiltersAndSorts();
-    filter.addFilter(new FilterDefinition('idArchivioPadre.id', FILTER_TYPES.not_string.equals, id));
-    return new Promise<ArchivioDetail[]>
-      (
-        (resolve, error) => this.archivioService.getData(
-          this.ARCHIVIO_PLAIN_FIELD_PROJECTION, filter, null, null)
-          .subscribe(
-            (res: { results: any[]; }) => {
-              resolve(res.results)
-            },
-            (err: { results: any[]; }) => {
-              error(err)
-            }
-          )
-      )
-  }
-
-
-  async getArchivioById(id: number): Promise<ArchivioDetail> {
-    let archivio: ArchivioDetail = null;
-    let filter: FiltersAndSorts = new FiltersAndSorts();
-    filter.addFilter(new FilterDefinition('id', FILTER_TYPES.not_string.equals, id));
-    return new Promise<ArchivioDetail>
-      (
-        (resolve, error) => this.archivioService.getData(
-          this.ARCHIVIO_PLAIN_FIELD_PROJECTION, filter, null, null)
-          .subscribe(
-            (res: { results: any[]; }) => {
-              resolve(res.results[0])
-            },
-            (err: { results: any[]; }) => {
-              error(err)
-            }
-          )
-      )
-  }
-
-  loadAncestors(baseArchive: ArchivioDetail): Promise<ArchivioDetail> {
-    console.log("load ancestor of ", baseArchive);
-    return new Promise<ArchivioDetail>((fullAncestered) => {
-      const idPadre = baseArchive.idArchivioPadre ? baseArchive.idArchivioPadre.id : baseArchive.fk_idArchivioPadre.id
-      if (idPadre) {
-        this.getArchivioById(idPadre).then(
-          father => {
-            console.log("father archive", father);
-            baseArchive.idArchivioPadre = father;
-            if (father.livello > 1 && ((father.fk_idArchivioPadre && father.fk_idArchivioPadre.id)
-              || (father.idArchivioPadre && father.idArchivioPadre.id))) {
-              this.loadAncestors(father).then(ancestered => {
-                father = ancestered;
-              }).then(() => fullAncestered(baseArchive))
-            }
-            else {
-              fullAncestered(baseArchive);
-            }
-          }
-        )
-      }
-      else {
-        fullAncestered(baseArchive);
-      }
-    })
-  }
-
-  loadFigli(baseArchive: ArchivioDetail): Promise<ArchivioDetail> {
-    return new Promise<ArchivioDetail>((fullWithChildren) => {
-      this.getArchiviListByIdPadre(baseArchive.id).then(
-        archivi => {
-          console.log("loaded figli: ", archivi);
-          baseArchive.archiviFigliList = [];
-          archivi.forEach(a => {
-            baseArchive.archiviFigliList.push(a);
-          })
-        }
-      ).then(() => fullWithChildren(baseArchive));
-    });
-  }
-
-
-
-  loadAlberatura(id:number): Promise<ArchivioDetail> {
-    let archive: ArchivioDetail;
-    return new Promise<ArchivioDetail>((archivioToReturn) => {
-      this.getArchivioById(id)
-        .then(archivio => { // carico il fascicolo
-          archive = archivio;
-        }).then(() => {
-          // se c'è carico il padre
-          if (archive.livello > 1) {
-            this.loadAncestors(archive)
-              .then(ancesteredArchive => {
-                archive = ancesteredArchive;
-              })
-              .then(() => {// poi carico i figli
-                this.loadFigli(archive).then(() => {
-                  archivioToReturn(archive);
-                });
-              }
-              )
-          }
-          else {// altrimenti carico i figli
-            this.loadFigli(archive).then(() => {
-              archivioToReturn(archive);
-            });
-          }
-        })
-    });
-  }
-
-  transformStructure(archive: ArchivioDetail): ArchivioDetail {
-    let restructuredArchivio = null;
-    if (archive.idArchivioPadre) {
-      const father = archive.idArchivioPadre
-      if (!father.archiviFigliList) {
-        father.archiviFigliList = [];
-      }
-      father.archiviFigliList.push(archive);
-      if (father.idArchivioPadre) {
-        restructuredArchivio = this.transformStructure(father);
-      }
-      else {
-        restructuredArchivio = father;
-      }
-    }
-    else {
-      restructuredArchivio = archive;
-    }
-    return restructuredArchivio;
-  }
-
-
-  loadDataByIdArchivio(id: number): void {
-    console.log("data", this.data);
-    let loadedElements: any[] = [];
-    this.loadAlberatura(id).then(res => {
-      this.selctedArchivioDetail(res)
-      const restructured: ArchivioDetail = this.transformStructure(res);
-      const node = this.getFullRenderedTreeNode(restructured);
-      loadedElements.push(node);
-      this.elements = loadedElements;
+  private buildMenuItem(archivio: Archivio| ArchivioDetail): MenuItem {
+    return {
+      id: archivio.id,
+      label: archivio.numerazioneGerarchica,
+      icon: "pi pi-folder"
+    } as unknown as MenuItem;
     
     
-    });
   }
 
   public handleEvent(nome: string, event: any) {
@@ -219,56 +142,4 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
   selctedArchivioDetail(value: ArchivioDetail) {
     this.archivioSelectedEvent.emit(value);
   }
-
-  fakeDataConstructor(): void {
-    this.data = [
-      {
-        "label": "Documents",
-        "data": "Documents Folder",
-        "expandedIcon": "pi pi-folder-open",
-        "collapsedIcon": "pi pi-folder",
-        "children": [{
-          "label": "Work",
-          "data": "Work Folder",
-          "expandedIcon": "pi pi-folder-open",
-          "collapsedIcon": "pi pi-folder",
-          "children": [{ "label": "Expenses.doc", "icon": "pi pi-file", "data": "Expenses Document" }, { "label": "Resume.doc", "icon": "pi pi-file", "data": "Resume Document" }]
-        },
-        {
-          "label": "Home",
-          "data": "Home Folder",
-          "expandedIcon": "pi pi-folder-open",
-          "collapsedIcon": "pi pi-folder",
-          "children": [{ "label": "Invoices.txt", "icon": "pi pi-file", "data": "Invoices for this month" }]
-        }]
-      },
-      {
-        "label": "Pictures",
-        "data": "Pictures Folder",
-        "expandedIcon": "pi pi-folder-open",
-        "collapsedIcon": "pi pi-folder",
-        "children": [
-          { "label": "barcelona.jpg", "icon": "pi pi-image", "data": "Barcelona Photo" },
-          { "label": "logo.jpg", "icon": "pi pi-file", "data": "PrimeFaces Logo" },
-          { "label": "primeui.png", "icon": "pi pi-image", "data": "PrimeUI Logo" }]
-      },
-      {
-        "label": "Movies",
-        "data": "Movies Folder",
-        "expandedIcon": "pi pi-folder-open",
-        "collapsedIcon": "pi pi-folder",
-        "children": [{
-          "label": "Al Pacino",
-          "data": "Pacino Movies",
-          "children": [{ "label": "Scarface", "icon": "pi pi-video", "data": "Scarface Movie" }, { "label": "Serpico", "icon": "pi pi-file-video", "data": "Serpico Movie" }]
-        },
-        {
-          "label": "Robert De Niro",
-          "data": "De Niro Movies",
-          "children": [{ "label": "Goodfellas", "icon": "pi pi-video", "data": "Goodfellas Movie" }, { "label": "Untouchables", "icon": "pi pi-video", "data": "Untouchables Movie" }]
-        }]
-      }
-    ]
-  }
-
 }

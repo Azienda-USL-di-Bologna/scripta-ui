@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { ArchivioDetail } from '@bds/ng-internauta-model';
 import { ArchiviListComponent } from '../archivi-list/archivi-list.component';
 import { ArchivioComponent } from '../archivio/archivio.component';
 import { DocComponent } from '../doc/doc.component';
@@ -23,8 +24,10 @@ export class NavigationTabsService {
     this.setTabsInSessionStorage();
   }
 
-  public updateTab(tabIndex: number, field: string, value: any) {
-    // TODO: L'update servirà per modificare label e id dei tab archivio    
+  public updateTab(tabIndex: number, label: string, data: any) {
+    // TODO: L'update servirà per modificare label e id dei tab archivio
+    this.tabs[tabIndex].data = data;
+    this.tabs[tabIndex].label = label;
   }
 
   public getTabs() {
@@ -38,6 +41,12 @@ export class NavigationTabsService {
   public activeLastTab(): void {
     setTimeout(() => {
       this.activeTabIndex = this.tabs.length - 1; 
+    }, 0);
+  }
+
+  public activeTabByIndex(tabIndex: number): void {
+    setTimeout(() => {
+      this.activeTabIndex = tabIndex; 
     }, 0);
   }
 
@@ -98,7 +107,7 @@ export class NavigationTabsService {
     );
   }
 
-  public buildaTabDoc(idDoc: number, label: string): TabItem {
+  private buildaTabDoc(idDoc: number, label: string): TabItem {
     return new TabItem(
       DocComponent,
       { 
@@ -108,19 +117,45 @@ export class NavigationTabsService {
       label,
       "pi pi-fw pi-folder",
       TabType.DOC
-    )
+    );
   }
 
-  public buildaTabArchivio(idArchivio: number, label: string): TabItem {
+  private buildaTabArchivio(archivio: ArchivioDetail, label: string): TabItem {
     return new TabItem(
       ArchivioComponent,
       { 
-        id: idArchivio
+        archivio: archivio
       },
       true,
       label,
       "pi pi-fw pi-folder",
-      TabType.ARCHIVIO
-    )
+      TabType.ARCHIVIO,
+      archivio.fk_idArchivioNonno.id ?? archivio.fk_idArchivioPadre.id ?? archivio.id // archivio.idArchivioRadice
+    );
+  }
+
+  /**
+   * Quando un archivio viene cliccato va controllato se esiste già il tab
+   * per la sua alberatura. Altrimenti si apre nuovo tab.
+   * @param archivio 
+   * @param active 
+   */
+  public addTabArchivio(archivio: ArchivioDetail, active: boolean = true): void {
+    const tabIndex: number = this.tabs.findIndex(t => {
+      return t.type === TabType.ARCHIVIO && t.id === (archivio.fk_idArchivioNonno.id ?? archivio.fk_idArchivioPadre.id ?? archivio.id ) // archivio.idArchivioRadice
+    });
+    if (tabIndex !== -1) {
+      this.updateTab(tabIndex, archivio.numerazioneGerarchica, archivio);
+      if (active) {
+        this.activeTabByIndex(tabIndex);
+      }
+    } else {
+      this.addTab(
+        this.buildaTabArchivio(archivio, archivio.numerazioneGerarchica)
+      );
+      if (active) {
+        this.activeLastTab();
+      }
+    }
   }
 }

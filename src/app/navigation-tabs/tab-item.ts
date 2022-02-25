@@ -7,7 +7,8 @@ export class TabItem {
     public closable: boolean,
     public label: string,
     public icon: string,
-    public type: TabType) {}
+    public type: TabType,
+    public id: number = null) {}
 }
 
 export enum TabType {

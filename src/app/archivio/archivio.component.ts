@@ -5,15 +5,13 @@ import { ArchiviListModeItem } from '../archivi-list/archivi-list.component';
 import { TabComponent } from '../navigation-tabs/tab.component';
 import { ArchivioService } from './archivio.service';
 
-
-
 @Component({
   selector: 'app-archivio',
   templateUrl: './archivio.component.html',
   styleUrls: ['./archivio.component.scss']
 })
 export class ArchivioComponent implements OnInit, TabComponent {
-  @Input() data: any;
+  @Input() data: ArchivioDetail;
   
   private archiviListModeItemArchivo: ArchiviListModeItem[];
   public childrens: number[];
