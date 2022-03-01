@@ -1,13 +1,13 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { Archivio, ArchivioDetail, ArchivioDetailService, ArchivioDetailView, Azienda, Persona, PersonaService, Struttura, StrutturaService, Vicario } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, ArchivioDetailService, ArchivioDetailView, Azienda, Persona, PersonaService, Struttura, StrutturaService } from '@bds/ng-internauta-model';
 import { AppService } from '../app.service';
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { Subscription } from 'rxjs';
 import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
-import { ArchiviListMode,  cols, colsCSV, TipoArchivioTraduzioneVisualizzazione, StatoArchivioTraduzioneVisualizzazione } from './archivi-list-constants';
+import { ArchiviListMode, cols, colsCSV, TipoArchivioTraduzioneVisualizzazione, StatoArchivioTraduzioneVisualizzazione } from './archivi-list-constants';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ValueAndLabelObj } from '../docs-list/docs-list.component';
-import { FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf} from '@nfa/next-sdr';
+import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from '@nfa/next-sdr';
 import { ColumnFilter, Table } from 'primeng/table';
 import { Impostazioni } from '../utilities/utils';
 import { ConfirmationService, LazyLoadEvent, MessageService } from 'primeng/api';
@@ -41,6 +41,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   @ViewChild("dt") public dataTable: Table;
   @ViewChild("columnFilterDataCreazione") public columnFilterDataCreazione: ColumnFilter;
   @ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
+
+  private projection = "ArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari";
 
   public archivi: ExtendedArchiviView[] = [];
   public archiviListMode: ArchiviListMode;
@@ -121,7 +123,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
         (utenteUtilities: UtenteUtilities) => {
           this.utenteUtilitiesLogin = utenteUtilities;
           //if (this.displayArchiviListModeItem) {
-            this.calcArchiviListModeItem();          
+            this.calcArchiviListModeItem();
             this.selectedArchiviListMode = this.archiviListModeItem[0];
           //}
           // this.selectedArchiviListMode = this.archiviListModeItem.filter(element => element.queryParams.mode === this.archiviListMode)[0];
@@ -129,7 +131,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
             this.calcAziendeFiltrabili();
           }
           this.loadConfiguration();
-         
+
         }
       )
     );
@@ -187,7 +189,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
 
   @Input() get selectedColumns(): any[] {
     return this._selectedColumns;
-  } 
+  }
 
   set selectedColumns(colsSelected: ColonnaBds[]) {
     if (this._selectedColumns.length > colsSelected.length) {
@@ -208,11 +210,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
     this.saveConfiguration();
   }
 
-   /**
-   * Metodo chiamato quando l'utente cambia tab
-   * Risetta la configurazione pagine e chiama la laoddata
-   * Mantiene i filtri
-   */
+  /**
+  * Metodo chiamato quando l'utente cambia tab
+  * Risetta la configurazione pagine e chiama la laoddata
+  * Mantiene i filtri
+  */
   public resetPaginationAndLoadData(): void {
     this.resetArchiviArrayLenght = true;
     if (!!!this.storedLazyLoadEvent) {
@@ -352,7 +354,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
       mode: "PAGE_NO_COUNT"
     };
     this.archivioDetailService.getData(
-      "ArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura",
+      this.projection,
       null,
       null,
       pageConfNoLimit)
@@ -423,11 +425,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   }
 
 
-   /**
-   * Gestisco l'evento di cambiamento delle colonne visualizzate.
-   * In particolare se ho tolto una colonna che era filtrata, tolgo quel filtro.
-   * @param event
-   */
+  /**
+  * Gestisco l'evento di cambiamento delle colonne visualizzate.
+  * In particolare se ho tolto una colonna che era filtrata, tolgo quel filtro.
+  * @param event
+  */
   public onChangeSelectedColumns(event: any): void {
     if (!event.value.some((e: ColonnaBds) => e.field === event.itemValue.field)) {
       // Se itemValue non è dentro l'elenco value allora ho tolto la spunta e quella colonna non è più visibile
@@ -456,7 +458,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
     }
     const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
     this.loadArchiviListSubscription = this.archivioDetailService.getData(
-      "ArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura",
+      this.projection,
       filtersAndSorts,
       buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
       this.pageConf).subscribe((data: any) => {
@@ -516,7 +518,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
    * Questa funzione si occupa di ristabilire il filtro iniziale sulla data creazione.
    * Questo filtro serve per usare la partizione specifica dell'anno corrente
    */
-   private resetCalendarToInitialValues() {
+  private resetCalendarToInitialValues() {
     const oggi = new Date();
 
     switch (oggi.getMonth()) {
@@ -552,46 +554,48 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
     return this.utenteUtilitiesLogin.getUtente().idPersona.accessibilita;
   }
 
-    /**
-   * Questo metodo costruisce filtri e sorting non provenienti dalla p-table
-   * In particolare si occupa di impostare i giusti filtri a seconda
-   * del tab selezionato (docsListMode)
-   * @returns
-   */
+  /**
+ * Questo metodo costruisce filtri e sorting non provenienti dalla p-table
+ * In particolare si occupa di impostare i giusti filtri a seconda
+ * del tab selezionato (docsListMode)
+ * @returns
+ */
   private buildCustomFilterAndSort(): FiltersAndSorts {
+
     //filter to display only children of archivi when archivio tab is open
     const filterAndSort = new FiltersAndSorts();
     if (this.archivioPadre) {
       filterAndSort.addFilter(new FilterDefinition("idArchivioPadre", FILTER_TYPES.not_string.equals, this.archivioPadre.id));
     }
     
+
     switch (this.archiviListMode) {
       // case ArchiviListMode.RECENTI:
       //   filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
       //   this.initialSortField = "dataCreazione";
       //   this.serviceToGetData = this.archivioDetailService;
-      //   this.projectionToGetData = "ArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura";
+      //   this.projectionToGetData = this.projection;
       //   break;
       case ArchiviListMode.VISIBILI:
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
         filterAndSort.addFilter(new FilterDefinition("mioDocumento", FILTER_TYPES.not_string.equals, true));
         this.initialSortField = "dataCreazione";
         this.serviceToGetData = this.archivioDetailService;
-        this.projectionToGetData = "ArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura";
+        this.projectionToGetData = this.projection;
         break;
       // case ArchiviListMode.PREFERITI:
       //   filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
       //   this.initialSortField = "dataCreazione";
       //   this.serviceToGetData = this.archivioDetailService;
-      //   this.projectionToGetData = "ArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura";
+      //   this.projectionToGetData = this.projection;
       //   break;
       // case ArchiviListMode.FREQUENTI:
       //   filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
       //   this.initialSortField = "dataCreazione";
       //   this.serviceToGetData = this.archivioDetailService;
-      //   this.projectionToGetData = "ArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura";
+      //   this.projectionToGetData = this.projection;
       //   break;
-      
+
     }
 
     return filterAndSort;
@@ -631,16 +635,16 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
     }
   }
 
-    /**
-   * Funzione chiamata tipicamente dall'autocomplete per riempire la
-   * variabile di opzioni: filteredPersone con le persone che
-   * corrispondono al filtro utente. Viene aggiunta la condizione che la persona
-   * deve avere un utente nelle aziende visualizzabili dall'utente connesso.
-   * NB: Non mi interessa che persone o i suoi utenti non siano attivi.
-   * Li cerco lo stesso perché l'utente potrebbe proprio cercare la roba fatta
-   * da utenti spenti.
-   * @param event
-   */
+  /**
+ * Funzione chiamata tipicamente dall'autocomplete per riempire la
+ * variabile di opzioni: filteredPersone con le persone che
+ * corrispondono al filtro utente. Viene aggiunta la condizione che la persona
+ * deve avere un utente nelle aziende visualizzabili dall'utente connesso.
+ * NB: Non mi interessa che persone o i suoi utenti non siano attivi.
+ * Li cerco lo stesso perché l'utente potrebbe proprio cercare la roba fatta
+ * da utenti spenti.
+ * @param event
+ */
   public filterPersone(event: any) {
     const filtersAndSorts = new FiltersAndSorts();
     filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.containsIgnoreCase, event.query));
@@ -662,14 +666,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   }
 
 
-     /**
-   * Funzione chiamata tipicamente dall'autocomplete per riempire la
-   * variabile di opzioni: filteredStrutture con le strutture che
-   * corrispondono al filtro utente. Viene aggiunta la condizione che la struttura
-   * deve appartenere alle aziende visualizzabili dall'utente connesso.
-   * NB: Non mi interessa che la struttura non sia attiva
-   * @param event
-   */
+  /**
+* Funzione chiamata tipicamente dall'autocomplete per riempire la
+* variabile di opzioni: filteredStrutture con le strutture che
+* corrispondono al filtro utente. Viene aggiunta la condizione che la struttura
+* deve appartenere alle aziende visualizzabili dall'utente connesso.
+* NB: Non mi interessa che la struttura non sia attiva
+* @param event
+*/
   public filterStrutture(event: any) {
     const filtersAndSorts = new FiltersAndSorts();
     filtersAndSorts.addFilter(new FilterDefinition("nome", FILTER_TYPES.string.containsIgnoreCase, event.query));
@@ -718,29 +722,29 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
     this.navigationTabsService.addTabArchivio(archivio);
   }
 
-   /**
-   * Funzione che si occupa di fare il clear di tutti i filtri della tabella.
-   * In particolare quelli delle autocomplete che sono "separati" dal semplice
-   * table.reset() vengono fatti a patto che quell'autocomplete esista.
-   * @param table
-   */
-    public clear(): void {
-      this.inputGobalFilter.nativeElement.value = "";
-      if (this.autocompleteIdPersonaResponsabile) this.autocompleteIdPersonaResponsabile.writeValue(null);
-      if (this.autocompleteIdPersonaCreazione) this.autocompleteIdPersonaCreazione.writeValue(null);
-      if (this.autocompleteIdStruttura) this.autocompleteIdStruttura.writeValue(null);
-      if (this.autocompleteVicari) this.autocompleteVicari.writeValue(null);
-      this.myDatatableReset();
-    }
+  /**
+  * Funzione che si occupa di fare il clear di tutti i filtri della tabella.
+  * In particolare quelli delle autocomplete che sono "separati" dal semplice
+  * table.reset() vengono fatti a patto che quell'autocomplete esista.
+  * @param table
+  */
+  public clear(): void {
+    this.inputGobalFilter.nativeElement.value = "";
+    if (this.autocompleteIdPersonaResponsabile) this.autocompleteIdPersonaResponsabile.writeValue(null);
+    if (this.autocompleteIdPersonaCreazione) this.autocompleteIdPersonaCreazione.writeValue(null);
+    if (this.autocompleteIdStruttura) this.autocompleteIdStruttura.writeValue(null);
+    if (this.autocompleteVicari) this.autocompleteVicari.writeValue(null);
+    this.myDatatableReset();
+  }
 
   /**
    * Metodo che toglie il sort dalle colonne della tabella.
    * In particolare è usata dagli input dei campi che quando usati ordinano per ranking
    */
-   public removeSort(): void {
+  public removeSort(): void {
     this.dataTable.sortField = null;
     this.dataTable.sortOrder = null;
-    this.dataTable.tableService.onSort(null); 
+    this.dataTable.tableService.onSort(null);
   }
   /**
    * Metodo che reimposta il sort di default. Cioè al campo definito in initialSortField
@@ -766,12 +770,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   }
 
 
-    /**
-   * Metodo che intercetta la ricerca globale. E' solo un passa carte.
-   * Di fatto poi scatta l'onLazyLoad
-   * @param event
-   * @param matchMode
-   */
+  /**
+ * Metodo che intercetta la ricerca globale. E' solo un passa carte.
+ * Di fatto poi scatta l'onLazyLoad
+ * @param event
+ * @param matchMode
+ */
   public applyFilterGlobal(event: Event, matchMode: string) {
     const stringa: string = (event.target as HTMLInputElement).value;
     if (!!!stringa || stringa === "") {
@@ -811,46 +815,46 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
    * @param event 
    */
   public askConfirmAndHandleCalendarCreazioneEvent(calendar: Calendar, command: string, event: Event, filterCallback: (value: Date[]) => {}) {
-  if (command === "onClickOutside") {
-    calendar.writeValue(this.lastDataCreazioneFilterValue);
-    return;
-  }
-  console.log(calendar.value);
-  let needToAsk = false;
-  if (command === "clear" || !!!calendar.value || calendar.value[0] === null) {
-    // Sto cercando su tutti gli anni
-    needToAsk = true;
-  } else {
-    if (calendar.value[1] !== null && ((calendar.value[1].getYear() - calendar.value[0].getYear()) > 1)) {
-      // Se la differenza degli anni è maggiore di 1 allora sto cercando su almeno 3 anni.
+    if (command === "onClickOutside") {
+      calendar.writeValue(this.lastDataCreazioneFilterValue);
+      return;
+    }
+    console.log(calendar.value);
+    let needToAsk = false;
+    if (command === "clear" || !!!calendar.value || calendar.value[0] === null) {
+      // Sto cercando su tutti gli anni
       needToAsk = true;
+    } else {
+      if (calendar.value[1] !== null && ((calendar.value[1].getYear() - calendar.value[0].getYear()) > 1)) {
+        // Se la differenza degli anni è maggiore di 1 allora sto cercando su almeno 3 anni.
+        needToAsk = true;
+      }
+    }
+    if (needToAsk) {
+      setTimeout(() => {
+        this.confirmationService.confirm({
+          key: "confirm-popup",
+          target: event.target,
+          message: "La ricerca potrebbe risultare lenta. Vuoi procedere?",
+          icon: 'pi pi-exclamation-triangle',
+          accept: () => {
+            // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
+            this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
+          },
+          reject: () => {
+            // L'utente ha cambaito idea. Non faccio nulla
+          }
+        });
+      }, 0);
+    } else {
+      this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
     }
   }
-  if (needToAsk) {
-    setTimeout(() => {
-      this.confirmationService.confirm({
-        key: "confirm-popup",
-        target: event.target,
-        message: "La ricerca potrebbe risultare lenta. Vuoi procedere?",
-        icon: 'pi pi-exclamation-triangle',
-        accept: () => {
-          // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
-          this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
-        },
-        reject: () => {
-          // L'utente ha cambaito idea. Non faccio nulla
-        }
-      });
-    }, 0);
-  } else {
-    this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
-  }
-}
 
   /**
   * Filtering per gli autocomplete della versione accessibile
   */
-  public filterTipo(event:any) {
+  public filterTipo(event: any) {
     let filtered: any[] = [];
     let query = event.query;
     for (let i = 0; i < this.tipoVisualizzazioneObj.length; i++) {
@@ -862,7 +866,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
     this.filteredTipo = filtered;
   }
 
-  public filterStatoAccessibile(event:any) {
+  public filterStatoAccessibile(event: any) {
     let filtered: any[] = [];
     let query = event.query;
     for (let i = 0; i < this.statoVisualizzazioneObj.length; i++) {
@@ -874,7 +878,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
     this.filteredStati = filtered;
   }
 
-  public filterAziendaAccessibile(event:any) {
+  public filterAziendaAccessibile(event: any) {
     let filtered: any[] = [];
     let query = event.query;
     for (let i = 0; i < this.aziendeFiltrabili.length; i++) {
