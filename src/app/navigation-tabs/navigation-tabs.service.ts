@@ -24,10 +24,16 @@ export class NavigationTabsService {
     this.setTabsInSessionStorage();
   }
 
+  /**
+   * Update del tab. Viene aggiornato il label
+   * e la proprietà data (che contiene ad es l'archivio e il suo id)
+   * @param tabIndex 
+   * @param label 
+   * @param data 
+   */
   public updateTab(tabIndex: number, label: string, data: any) {
-    // TODO: L'update servirà per modificare label e id dei tab archivio
-    this.tabs[tabIndex].data = data;
     this.tabs[tabIndex].label = label;
+    this.tabs[tabIndex].data = data;
   }
 
   public getTabs() {
@@ -124,13 +130,14 @@ export class NavigationTabsService {
     return new TabItem(
       ArchivioComponent,
       { 
-        archivio: archivio
+        archivio: archivio,
+        id: archivio.id
       },
       true,
       label,
       "pi pi-fw pi-folder",
       TabType.ARCHIVIO,
-      archivio.fk_idArchivioNonno.id ?? archivio.fk_idArchivioPadre.id ?? archivio.id // archivio.idArchivioRadice
+      archivio.fk_idArchivioRadice.id
     );
   }
 
@@ -142,10 +149,10 @@ export class NavigationTabsService {
    */
   public addTabArchivio(archivio: ArchivioDetail, active: boolean = true): void {
     const tabIndex: number = this.tabs.findIndex(t => {
-      return t.type === TabType.ARCHIVIO && t.id === (archivio.fk_idArchivioNonno.id ?? archivio.fk_idArchivioPadre.id ?? archivio.id ) // archivio.idArchivioRadice
+      return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id
     });
     if (tabIndex !== -1) {
-      this.updateTab(tabIndex, archivio.numerazioneGerarchica, archivio);
+      this.updateTab(tabIndex, archivio.numerazioneGerarchica, {archivio: archivio, id: archivio.id});
       if (active) {
         this.activeTabByIndex(tabIndex);
       }

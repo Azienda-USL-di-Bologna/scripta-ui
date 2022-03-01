@@ -1,21 +1,29 @@
+:host {
+  width: 100%;
+}
 ::ng-deep .archivi-breadcrumb {
-  border: none;
+  /* border: none;
   border-bottom: 1px solid #c8c8c8;
-  border-radius: 0;
-  padding-top: 0;
-  padding-bottom: 0;
+  border-radius: 0; */
+  padding: 0;
+  margin: 5px;
+  .p-breadcrumb-chevron {
+    margin: 0 !important;
+  }
   .p-menuitem-link {
     display: flex;
     flex-wrap: nowrap;
     cursor: pointer;
     .p-menuitem-text {
       white-space: pre;
+      margin-left: 2px;
+      font-size: 15px;
     }
   }
 }
 ::ng-deep .archivi-tree {
   border: none;
-  .p-tree-container {
+  /* .p-tree-container {
     .p-treenode {
       .p-treenode-content {
         &:focus {
@@ -23,5 +31,5 @@
         }
       }
     }
-  }
+  } */
 }

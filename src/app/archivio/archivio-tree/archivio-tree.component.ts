@@ -1,28 +1,30 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { TabComponent } from 'src/app/navigation-tabs/tab.component';
 import { MenuItem, TreeNode } from 'primeng/api';
 import { ExtendedArchivioService } from '../extended-archivio.service';
 import { Archivio, ArchivioDetail } from '@bds/ng-internauta-model';
 import { combineLatest, Observable } from 'rxjs';
-import { MenuItemContent } from 'primeng/menu';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@nfa/next-sdr';
+import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
 
 @Component({
   selector: 'app-archivio-tree',
   templateUrl: './archivio-tree.component.html',
   styleUrls: ['./archivio-tree.component.scss']
 })
-export class ArchivioTreeComponent implements OnInit, TabComponent {
+export class ArchivioTreeComponent implements OnInit {
   public archivi: TreeNode[] = [];
   public bricioleArchivi: MenuItem[] = [];
   public selectedNode: TreeNode = null;
   private ARCHIVIO_PLAIN_FIELD_PROJECTION: string = "ArchivioWithPlainFields"; 
   
-  private _archivio: ArchivioDetail;
-  get archivio(): ArchivioDetail { return this._archivio; }
-  @Input() set data(data: any) { 
-    this._archivio = data.archivio;
-    console.log("hei")
+  @Output() archivioSelectedEvent = new EventEmitter<ArchivioDetail>();
+
+  private _archivio: Archivio | ArchivioDetail;
+  get archivio(): Archivio | ArchivioDetail { return this._archivio; }
+  @Input() set archivio(archivio: Archivio | ArchivioDetail) { 
+    this._archivio = archivio;
+    if (this.archivi.length > 0) {
+      this.addTreeNode(this._archivio);
+    }
   }
   
   /**
@@ -32,12 +34,14 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
    * Se l'utente apre l'archivio allora ha diritto di vedere le altre numerazioni gerarchiche.
    * Il nome verrà oscurato lato dall'after select interceptor nel backend.
    */
-  constructor(private archivioService: ExtendedArchivioService) {
+  constructor(
+    private archivioService: ExtendedArchivioService,
+    private navigationTabsService: NavigationTabsService,) {
     
   }
 
   ngOnInit(): void {
-    console.log("ArchivioTreeComponent.ngOnInit()", this.archivio);
+    //console.log("ArchivioTreeComponent.ngOnInit()", this.archivio);
     this.firstTreeLoad();
   }
 
@@ -68,7 +72,7 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
       case 3:
         combineLatest([
           this.getArchivioById(this.archivio.fk_idArchivioPadre.id), 
-          this.getArchivioById(this.archivio.fk_idArchivioNonno.id)
+          this.getArchivioById(this.archivio.fk_idArchivioRadice.id)
         ]).subscribe(
           ([archivioPadre, archivioNonno]) => {
             this.archivi.push(
@@ -83,6 +87,69 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
             this.bricioleArchivi = [...this.bricioleArchivi];
           }
         );       
+        break;
+    }
+  }
+
+  /**
+   * Questo metodo è chiamato quando l'albero già esiste e si vuole aggiungere un nodo.
+   * I nodi aggiunti saranno di livello 2 o 3.
+   * Vogliamo non aggiungere due volte lo stesso nodo.
+   * Se viene aggiunto un livello 3 figlio di un livello 2 ancora non presente allora va aggiunto anche
+   * questo livello 2 mancante.
+   * Se l'archivio cliccato c'era già lo devo comunque selezionare
+   */
+  private addTreeNode(archivio: Archivio | ArchivioDetail) {
+    switch (archivio.livello) {
+      case 1:
+        this.selectedNode = this.archivi[0];
+        this.bricioleArchivi = [this.bricioleArchivi[0]];
+        break;
+      case 2:
+        const index = this.archivi[0].children.findIndex(nodo => (nodo.data as Archivio).id === archivio.id);
+        if (index === -1) {
+          const indexArchivioSuccessivo = this.archivi[0].children.findIndex(nodo => (nodo.data as Archivio).numero > archivio.numero);
+          if (indexArchivioSuccessivo === -1) {
+            this.archivi[0].children.push(this.buildTreeNode(archivio));
+          } else {
+            this.archivi[0].children.splice(indexArchivioSuccessivo, 0, this.buildTreeNode(archivio));
+          }
+        } else {
+          this.selectedNode = this.archivi[0].children[index];
+        }
+        this.bricioleArchivi = [this.bricioleArchivi[0], this.buildMenuItem(archivio)];
+        break;
+      case 3:
+        const indexLiv2 = this.archivi[0].children.findIndex(nodo => (nodo.data as Archivio).id === archivio.fk_idArchivioPadre.id);
+        if (indexLiv2 !== -1) {
+          // Il sottofascicolo padre quindi esiste già. Devo solo aggiungere l'inserto se non c'è già.
+          const indexLiv3 = this.archivi[0].children[indexLiv2].children.findIndex(nodo => (nodo.data as Archivio).id === archivio.id);
+          if (indexLiv3 === -1) {
+            const indexArchivioSuccessivo = this.archivi[0].children[indexLiv2].children.findIndex(nodo => (nodo.data as Archivio).numero > archivio.numero);
+            if (indexArchivioSuccessivo === -1) {
+              this.archivi[0].children[indexLiv2].children.push(this.buildTreeNode(archivio));
+            } else {
+              this.archivi[0].children[indexLiv2].children.splice(indexArchivioSuccessivo, 0, this.buildTreeNode(archivio));
+            }
+          } else {
+            this.selectedNode = this.archivi[0].children[indexLiv2].children[indexLiv3];
+          }
+          this.bricioleArchivi = [this.bricioleArchivi[0], this.buildMenuItem(this.archivi[0].children[indexLiv2].data), this.buildMenuItem(archivio)];
+        } else {
+          // Manca il sottofascicolo, allora devo aggiungere sia lui che l'inserto
+          this.getArchivioById(archivio.fk_idArchivioPadre.id).subscribe(
+            archivioPadre => {
+              const newNode: TreeNode = this.buildTreeNode(archivioPadre, [this.buildTreeNode(archivio)]);
+              const indexArchivioSuccessivo = this.archivi[0].children.findIndex(nodo => (nodo.data as Archivio).numero > archivioPadre.numero);
+              if (indexArchivioSuccessivo === -1) {
+                this.archivi[0].children.push(newNode);
+              } else {
+                this.archivi[0].children.splice(indexArchivioSuccessivo, 0, newNode);
+              }
+              this.bricioleArchivi = [this.bricioleArchivi[0], this.buildMenuItem(archivioPadre), this.buildMenuItem(archivio)];
+            }
+          );
+        }
         break;
     }
   }
@@ -117,29 +184,26 @@ export class ArchivioTreeComponent implements OnInit, TabComponent {
     return newNode;
   }
 
+  /**
+   * Costruisco elemento per la breadcrumb
+   * @param archivio 
+   * @returns 
+   */
   private buildMenuItem(archivio: Archivio| ArchivioDetail): MenuItem {
     return {
       id: archivio.id,
       label: archivio.numerazioneGerarchica,
       icon: "pi pi-folder"
     } as unknown as MenuItem;
-    
-    
   }
 
-  public handleEvent(nome: string, event: any) {
-    switch (nome) {
-      case "onFirstLoad":
-        this.loadDataByIdArchivio(event.id);
-      break;
-      case "onNodeSelect":
-       this.selctedArchivioDetail(event.node.data);
-      break;
-    }
-  }
-
-
-  selctedArchivioDetail(value: ArchivioDetail) {
-    this.archivioSelectedEvent.emit(value);
+  /**
+   * Gestione della selezione archivio.
+   * Informo mio padre di quanto è successo.
+   * @param event 
+   */
+  public onNodeSelect(event: any): void {
+    this.navigationTabsService.addTabArchivio(event.node.data, false);
+    //this.archivioSelectedEvent.emit(event.node.data);
   }
 }

@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { ArchivioDetailService, ArchivioDetailView, Azienda, Persona, PersonaService, Struttura, StrutturaService, Vicario } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, ArchivioDetailService, ArchivioDetailView, Azienda, Persona, PersonaService, Struttura, StrutturaService, Vicario } from '@bds/ng-internauta-model';
 import { AppService } from '../app.service';
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { Subscription } from 'rxjs';
@@ -7,7 +7,7 @@ import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
 import { ArchiviListMode,  cols, colsCSV, TipoArchivioTraduzioneVisualizzazione, StatoArchivioTraduzioneVisualizzazione } from './archivi-list-constants';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ValueAndLabelObj } from '../docs-list/docs-list.component';
-import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf} from '@nfa/next-sdr';
+import { FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf} from '@nfa/next-sdr';
 import { ColumnFilter, Table } from 'primeng/table';
 import { Impostazioni } from '../utilities/utils';
 import { ConfirmationService, LazyLoadEvent, MessageService } from 'primeng/api';
@@ -42,14 +42,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   @ViewChild("columnFilterDataCreazione") public columnFilterDataCreazione: ColumnFilter;
   @ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
 
-  public j = JSON;
   public archivi: ExtendedArchiviView[] = [];
   public archiviListMode: ArchiviListMode;
   private utenteUtilitiesLogin: UtenteUtilities;
   private subscriptions: Subscription[] = [];
   private archiviListModeItem: ArchiviListModeItem[];
-  private displayArchiviListModeItem: boolean =true;
-  private hasChildrens: boolean =false;
   public aziendeFiltrabili: ValueAndLabelObj[] = [];
   public exportCsvInProgress: boolean = false;
   public selectableColumns: ColonnaBds[] = [];
@@ -84,19 +81,15 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   };
   public cols: ColonnaBds[] = [];
   public _selectedColumns: ColonnaBds[];
-  private childrenId: number[] = [];
- 
-  
-  @Input() set archiviListModeItem1(value: ArchiviListModeItem[]){
-    this.archiviListModeItem = [];
-    this.archiviListModeItem = value;
-    this.displayArchiviListModeItem=false;    
-  }
+  private firstLoadDone = false;
 
-  @Input() set archivioPadre(value: number[]){
-    this.childrenId=value;
-    this.hasChildrens=true;
-    this.loadData();
+  private _archivioPadre: Archivio | ArchivioDetail;
+  get archivioPadre(): Archivio | ArchivioDetail { return this._archivioPadre; }
+  @Input() set archivioPadre(archivioPadre: Archivio | ArchivioDetail) {
+    this._archivioPadre = archivioPadre;
+    if (this.firstLoadDone) {
+      this.resetPaginationAndLoadData();
+    }
   }
 
   constructor(
@@ -127,15 +120,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
           this.utenteUtilitiesLogin = utenteUtilities;
-          if(this.displayArchiviListModeItem){
+          //if (this.displayArchiviListModeItem) {
             this.calcArchiviListModeItem();          
-            this.selectedArchiviListMode = {
-              title: "Tutti gli archivi che posso vedere",
-              label: "Visibili",
-              routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-              queryParams: { "mode": ArchiviListMode.VISIBILI }
-            };
-          }
+            this.selectedArchiviListMode = this.archiviListModeItem[0];
+          //}
           // this.selectedArchiviListMode = this.archiviListModeItem.filter(element => element.queryParams.mode === this.archiviListMode)[0];
           if (this.archiviListMode) {
             this.calcAziendeFiltrabili();
@@ -146,18 +134,15 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
       )
     );
 
-
-     /* Mi sottoscrivo alla rotta per leggere la modalita dell'elenco documenti
-      e faccio partire il caricamento. Ogni volta che la modalità cambia
-      rifaccio la loadData */
-      this.route.queryParams.subscribe(params => {
-        //this.docsListMode = params["mode"];
-        if (this.utenteUtilitiesLogin) this.calcAziendeFiltrabili();
-        this.resetPaginationAndLoadData();
-      });
+    /* Mi sottoscrivo alla rotta per leggere la modalita dell'elenco documenti
+    e faccio partire il caricamento. Ogni volta che la modalità cambia
+    rifaccio la loadData */
+    this.route.queryParams.subscribe(params => {
+      //this.docsListMode = params["mode"];
+      if (this.utenteUtilitiesLogin) this.calcAziendeFiltrabili();
+      this.resetPaginationAndLoadData();
+    });
   }
-
-  
 
   /**
    * Questa funzione si occupa di caricare la configurazione personale
@@ -204,7 +189,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
     return this._selectedColumns;
   } 
 
-
   set selectedColumns(colsSelected: ColonnaBds[]) {
     if (this._selectedColumns.length > colsSelected.length) {
       this._selectedColumns = this._selectedColumns.filter(sc => colsSelected.includes(sc));
@@ -222,7 +206,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
    */
   public onColReorder(event: any): void {
     this.saveConfiguration();
-
   }
 
    /**
@@ -230,57 +213,82 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
    * Risetta la configurazione pagine e chiama la laoddata
    * Mantiene i filtri
    */
-    public resetPaginationAndLoadData(): void {
-      this.resetArchiviArrayLenght = true;
-      if (!!!this.storedLazyLoadEvent) {
-        this.storedLazyLoadEvent = {};
-      }
-      this.storedLazyLoadEvent.first = 0;
-      this.storedLazyLoadEvent.rows = this.rowsNumber * 2;
-  
-      if (this.dropdownAzienda) {
-        this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
-      }
-  
-      this.loadData();
+  public resetPaginationAndLoadData(): void {
+    this.resetArchiviArrayLenght = true;
+    if (!!!this.storedLazyLoadEvent) {
+      this.storedLazyLoadEvent = {};
+    }
+    this.storedLazyLoadEvent.first = 0;
+    this.storedLazyLoadEvent.rows = this.rowsNumber * 2;
+
+    if (this.dropdownAzienda) {
+      this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
     }
 
+    this.loadData();
+  }
 
   /**
    * Costruisco i tab per l'EFI
   */
   public calcArchiviListModeItem(): void {
     this.archiviListModeItem = [];
-    this.archiviListModeItem.push(
-      {
-        title: "Tutti gli archivi che posso vedere",
-        label: "Visibili",
-        // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-        queryParams: { "mode": ArchiviListMode.VISIBILI }
-      },
-      {
-        title: "",
-        label: "Recenti",
-        // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-        queryParams: { "mode": ArchiviListMode.RECENTI }
-      },
-      {
-        title: "",
-        label: "Preferiti",
-        // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-        queryParams: { "mode": ArchiviListMode.PREFERITI }
-      },
-      {
-        title: "",
-        label: "Frequenti",
-        // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-        queryParams: { "mode": ArchiviListMode.FREQUENTI }
-      }
-    )
+    if (this.archivioPadre) {
+      this.archiviListModeItem.push(
+        {
+          title: "",
+          label: "Archivi figli",
+          // icon: "pi pi-fw pi-list", 
+          routerLink: ["./"],
+          queryParams: { "mode": ArchiviListMode.VISIBILI }
+        },
+        {
+          title: "",
+          label: "Documenti",
+          // icon: "pi pi-fw pi-list", 
+          routerLink: ["./"],
+          queryParams: { "mode": ArchiviListMode.VISIBILI }
+        },
+        {
+          title: "",
+          label: "Dettaglio",
+          // icon: "pi pi-fw pi-list", 
+          routerLink: [  ],
+          queryParams: {  }
+        }
+      );
+    } else {
+      this.archiviListModeItem.push(
+        {
+          title: "Tutti gli archivi che posso vedere",
+          label: "Visibili",
+          // icon: "pi pi-fw pi-list", 
+          routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+          queryParams: { "mode": ArchiviListMode.VISIBILI }
+        },
+        {
+          title: "",
+          label: "Recenti",
+          // icon: "pi pi-fw pi-list", 
+          routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+          queryParams: { "mode": ArchiviListMode.RECENTI }
+        },
+        {
+          title: "",
+          label: "Preferiti",
+          // icon: "pi pi-fw pi-list", 
+          routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+          queryParams: { "mode": ArchiviListMode.PREFERITI }
+        },
+        {
+          title: "",
+          label: "Frequenti",
+          // icon: "pi pi-fw pi-list", 
+          routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+          queryParams: { "mode": ArchiviListMode.FREQUENTI }
+        }
+      );
+    }
   }
 
   private calcAziendeFiltrabili() {
@@ -420,15 +428,15 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
    * In particolare se ho tolto una colonna che era filtrata, tolgo quel filtro.
    * @param event
    */
-    public onChangeSelectedColumns(event: any): void {
-      if (!event.value.some((e: ColonnaBds) => e.field === event.itemValue.field)) {
-        // Se itemValue non è dentro l'elenco value allora ho tolto la spunta e quella colonna non è più visibile
-        const col = this.filterColumns.find((e: ColumnFilter) => e.field === event.itemValue.filterField);
-        if (col.hasFilter()) {
-          col.clearFilter();
-        }
+  public onChangeSelectedColumns(event: any): void {
+    if (!event.value.some((e: ColonnaBds) => e.field === event.itemValue.field)) {
+      // Se itemValue non è dentro l'elenco value allora ho tolto la spunta e quella colonna non è più visibile
+      const col = this.filterColumns.find((e: ColumnFilter) => e.field === event.itemValue.filterField);
+      if (col.hasFilter()) {
+        col.clearFilter();
       }
     }
+  }
 
   /**
    * Builda i filtri della tabella. Aggiunge eventuali altri filtri.
@@ -436,6 +444,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
    * @param event
    */
   private loadData(): void {
+    this.firstLoadDone = true;
     this.loading = true;
     this.pageConf.conf = {
       limit: this.storedLazyLoadEvent.rows,
@@ -473,14 +482,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
         }
         this.archivi = [...this.archivi]; // trigger change detection
       },
-        err => {
-          this.messageService.add({
-            severity: "warn",
-            key: "archiviListToast",
-            summary: "Attenzione",
-            detail: `Si è verificato un errore nel caricamento, contattare Babelcare`
-          });
+      err => {
+        this.messageService.add({
+          severity: "warn",
+          key: "archiviListToast",
+          summary: "Attenzione",
+          detail: `Si è verificato un errore nel caricamento, contattare Babelcare`
         });
+      });
   }
 
 
@@ -549,49 +558,44 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
    * del tab selezionato (docsListMode)
    * @returns
    */
-     private buildCustomFilterAndSort(): FiltersAndSorts {
-
-      //filter to display only children of archivi when archivio tab is open
-      const filterAndSort = new FiltersAndSorts();
-      if(this.hasChildrens && this.childrenId.length !=0){
-          this.childrenId.forEach(child =>{
-            filterAndSort.addFilter(new FilterDefinition("id", FILTER_TYPES.not_string.equals, child));
-          })
-        
-      }
-      
-
-      switch (this.archiviListMode) {
-        // case ArchiviListMode.RECENTI:
-        //   filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
-        //   this.initialSortField = "dataCreazione";
-        //   this.serviceToGetData = this.archivioDetailService;
-        //   this.projectionToGetData = "ArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura";
-        //   break;
-        case ArchiviListMode.VISIBILI:
-          filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
-          filterAndSort.addFilter(new FilterDefinition("mioDocumento", FILTER_TYPES.not_string.equals, true));
-          this.initialSortField = "dataCreazione";
-          this.serviceToGetData = this.archivioDetailService;
-          this.projectionToGetData = "ArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura";
-          break;
-        // case ArchiviListMode.PREFERITI:
-        //   filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
-        //   this.initialSortField = "dataCreazione";
-        //   this.serviceToGetData = this.archivioDetailService;
-        //   this.projectionToGetData = "ArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura";
-        //   break;
-        // case ArchiviListMode.FREQUENTI:
-        //   filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
-        //   this.initialSortField = "dataCreazione";
-        //   this.serviceToGetData = this.archivioDetailService;
-        //   this.projectionToGetData = "ArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura";
-        //   break;
-        
-      }
-  
-      return filterAndSort;
+  private buildCustomFilterAndSort(): FiltersAndSorts {
+    //filter to display only children of archivi when archivio tab is open
+    const filterAndSort = new FiltersAndSorts();
+    if (this.archivioPadre) {
+      filterAndSort.addFilter(new FilterDefinition("idArchivioPadre", FILTER_TYPES.not_string.equals, this.archivioPadre.id));
     }
+    
+    switch (this.archiviListMode) {
+      // case ArchiviListMode.RECENTI:
+      //   filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+      //   this.initialSortField = "dataCreazione";
+      //   this.serviceToGetData = this.archivioDetailService;
+      //   this.projectionToGetData = "ArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura";
+      //   break;
+      case ArchiviListMode.VISIBILI:
+        filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+        filterAndSort.addFilter(new FilterDefinition("mioDocumento", FILTER_TYPES.not_string.equals, true));
+        this.initialSortField = "dataCreazione";
+        this.serviceToGetData = this.archivioDetailService;
+        this.projectionToGetData = "ArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura";
+        break;
+      // case ArchiviListMode.PREFERITI:
+      //   filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
+      //   this.initialSortField = "dataCreazione";
+      //   this.serviceToGetData = this.archivioDetailService;
+      //   this.projectionToGetData = "ArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura";
+      //   break;
+      // case ArchiviListMode.FREQUENTI:
+      //   filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
+      //   this.initialSortField = "dataCreazione";
+      //   this.serviceToGetData = this.archivioDetailService;
+      //   this.projectionToGetData = "ArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura";
+      //   break;
+      
+    }
+
+    return filterAndSort;
+  }
 
   /**
    * Gestione custom del filtro per azienda scelto dall'utente. In particolare devo gestire il caso
@@ -637,25 +641,25 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
    * da utenti spenti.
    * @param event
    */
-     public filterPersone(event: any) {
-      const filtersAndSorts = new FiltersAndSorts();
-      filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.containsIgnoreCase, event.query));
-      this.aziendeFiltrabili.forEach(a => {
-        if ((typeof a.value) === "number")
-          filtersAndSorts.addFilter(new FilterDefinition("utenteList.idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
+  public filterPersone(event: any) {
+    const filtersAndSorts = new FiltersAndSorts();
+    filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.containsIgnoreCase, event.query));
+    this.aziendeFiltrabili.forEach(a => {
+      if ((typeof a.value) === "number")
+        filtersAndSorts.addFilter(new FilterDefinition("utenteList.idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
+    });
+    this.personaService.getData(null, filtersAndSorts, null)
+      .subscribe(res => {
+        if (res && res.results) {
+          res.results.forEach((persona: any) => {
+            persona["descrizioneVisualizzazione"] = persona.descrizione + (persona.idSecondario ? " (" + persona.idSecondario + ")" : "");
+          });
+          this.filteredPersone = res.results;
+        } else {
+          this.filteredPersone = [];
+        }
       });
-      this.personaService.getData(null, filtersAndSorts, null)
-        .subscribe(res => {
-          if (res && res.results) {
-            res.results.forEach((persona: any) => {
-              persona["descrizioneVisualizzazione"] = persona.descrizione + (persona.idSecondario ? " (" + persona.idSecondario + ")" : "");
-            });
-            this.filteredPersone = res.results;
-          } else {
-            this.filteredPersone = [];
-          }
-        });
-    }
+  }
 
 
      /**
@@ -698,19 +702,18 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
    * @param idPersona
    * @returns
    */
-    public buildJsonValueForFilterPersone(idPersona: number): string {
-      if (idPersona) {
-        const filtroJson: FilterJsonDefinition<Vicario> = new FilterJsonDefinition(true);
-        filtroJson.add("idPersona", idPersona);
-        return filtroJson.buildJsonString();
-      }
-      return null;
+  public buildJsonValueForFilterPersone(idPersona: number): string {
+    if (idPersona) {
+      const filtroJson: FilterJsonDefinition<Vicario> = new FilterJsonDefinition(true);
+      filtroJson.add("idPersona", idPersona);
+      return filtroJson.buildJsonString();
     }
+    return null;
+  }
 
   /* 
-  L'utente ha cliccato su un archivio. Apriamolo
-  TODO: Se il fascicolo cliccato in realtà è parte dell'alberatura in cui sono allora devo soloa ggiornare il tab
-  */
+   * L'utente ha cliccato su un archivio. Apriamolo
+   */
   public openArchive(archivio: ExtendedArchiviView): void {
     this.navigationTabsService.addTabArchivio(archivio);
   }
@@ -882,10 +885,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
     }
     this.aziendeFiltrabiliFiltered = filtered;
   }
-
-
-
-    
+  
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
    * desottoscrivo anche dalla specifica loadDocsListSubscription
@@ -905,9 +905,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   }
 }
 
-
-
-
 export interface ArchiviListModeItem {
   label: string;
   title: string;
@@ -915,5 +912,3 @@ export interface ArchiviListModeItem {
   routerLink: string[];
   queryParams: any;
 }
-
-
