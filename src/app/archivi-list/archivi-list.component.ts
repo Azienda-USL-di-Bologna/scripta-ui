@@ -699,22 +699,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
       });
   }
 
-   /**
-   * Usato per generare la stringa json che serve a filtrare
-   * per l'appunto, una colonna json. In questo caso è una persona.
-   * NB: Se ne servissero altri (oltre la persona) si può rendere più generica qeusta funzione.
-   * @param idPersona
-   * @returns
-   */
-  public buildJsonValueForFilterPersone(idPersona: number): string {
-    if (idPersona) {
-      const filtroJson: FilterJsonDefinition<Vicario> = new FilterJsonDefinition(true);
-      filtroJson.add("idPersona", idPersona);
-      return filtroJson.buildJsonString();
-    }
-    return null;
-  }
-
   /* 
    * L'utente ha cliccato su un archivio. Apriamolo
    */
