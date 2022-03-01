@@ -12,7 +12,6 @@ export enum ArchiviListMode {
     PREFERITI = "PREFERITI"
 }
 
-
 export const cols: ColonnaBds[] = [
   {
     field: "idAzienda",
@@ -167,9 +166,6 @@ export const StatoArchivioTraduzioneVisualizzazione = [
   { value: StatoArchivio.APERTO, nome: "Aperto"},
   { value: StatoArchivio.CHIUSO, nome: "Chiuso"}
 ];
-
-
-
 
 export const colsCSV: any[] = [
   {

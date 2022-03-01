@@ -22,8 +22,7 @@
   [loading]="loading"
   [totalRecords]="totalRecords"
   [ngClass]="{'table-zero-rows': totalRecords === 0}"
-  tableStyleClass="archiviolist-table-body"
-  >
+  tableStyleClass="archiviolist-table-body">
   <ng-template pTemplate="caption">
     <div class="caption-row">
       <div class="left-content">
@@ -124,7 +123,7 @@
     </tr>
   <!-------FILTRI -->
     <tr class="filter-row">
-        <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
+      <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
         <div *ngSwitchCase="'idAzienda'" #filteraziendacontainer>
             <p-columnFilter #columnFilterAzienda [field]="col.filterField" matchMode="in" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
