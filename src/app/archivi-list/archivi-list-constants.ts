@@ -5,11 +5,11 @@ import { Utils } from "../utilities/utils";
 import { ExtendedArchiviView } from "./extendend-archivi-view";
 
 export enum ArchiviListMode {
-    NUOVO = "NUOVO",
-    RECENTI = "RECENTI",
-    VISIBILI = "VISIBILI",
-    FREQUENTI = "FREQUENTI",
-    PREFERITI = "PREFERITI"
+  NUOVO = "NUOVO",
+  RECENTI = "RECENTI",
+  VISIBILI = "VISIBILI",
+  FREQUENTI = "FREQUENTI",
+  PREFERITI = "PREFERITI"
 }
 
 
@@ -73,7 +73,7 @@ export const cols: ColonnaBds[] = [
     field: "idPersonaResponsabile",
     header: "Responsabile",
     filterField: "idPersonaResponsabile",
-   // sortField: "idPersonaResponsabile",
+    // sortField: "idPersonaResponsabile",
     style: {},
     headerClass: ["header-column", "responsabile-column"],
     filterClass: ["filter-column", "responsabile-column"],
@@ -140,9 +140,9 @@ export const cols: ColonnaBds[] = [
     default: true
   },
   {
-    field: "vicari",
+    field: "idVicari",
     header: "Vicari",
-    filterField: "vicari",
+    filterField: "idVicari",
     style: {},
     headerClass: ["header-column", "vicari-column"],
     filterClass: ["filter-column", "vicari-column"],
@@ -155,17 +155,17 @@ export const cols: ColonnaBds[] = [
 ];
 
 export const TipoArchivioTraduzioneVisualizzazione = [
-  { value: TipoArchivio.PROCEDIMENTO, nome: "Procedimento"},
-  { value: TipoArchivio.SPECIALE, nome: "Speciale"},
-  { value: TipoArchivio.ATTIVITA, nome: "Attività"},
-  { value: TipoArchivio.AFFARE, nome: "Affare"}
+  { value: TipoArchivio.PROCEDIMENTO, nome: "Procedimento" },
+  { value: TipoArchivio.SPECIALE, nome: "Speciale" },
+  { value: TipoArchivio.ATTIVITA, nome: "Attività" },
+  { value: TipoArchivio.AFFARE, nome: "Affare" }
 ];
 
 
 export const StatoArchivioTraduzioneVisualizzazione = [
-  { value: StatoArchivio.PRECHIUSO, nome: "Prechiuso"},
-  { value: StatoArchivio.APERTO, nome: "Aperto"},
-  { value: StatoArchivio.CHIUSO, nome: "Chiuso"}
+  { value: StatoArchivio.PRECHIUSO, nome: "Prechiuso" },
+  { value: StatoArchivio.APERTO, nome: "Aperto" },
+  { value: StatoArchivio.CHIUSO, nome: "Chiuso" }
 ];
 
 
@@ -225,15 +225,15 @@ export const colsCSV: any[] = [
   {
     field: (arch: ExtendedArchiviView) => {
       let vicariString = "";
-      if (arch.vicari) {
-        arch.vicari.forEach(vicario => {
-          vicariString += vicario.descrizione + ", ";
+      if (arch.descrizionePersonaVicarioList) {
+        arch.descrizionePersonaVicarioList.forEach(vicario => {
+          vicariString += vicario + ", ";
         });
       }
       return vicariString !== "" ? vicariString.substr(0, vicariString.length - 2) : "";
     },
     header: "Vicari",
     fieldType: "object",
-    fieldId: "vicari"
+    fieldId: "idVicari"
   }
 ]

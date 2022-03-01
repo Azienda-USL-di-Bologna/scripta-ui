@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { ArchivioDetailService, ArchivioDetailView, Azienda, Persona, PersonaService, Struttura, StrutturaService, Vicario } from '@bds/ng-internauta-model';
+import { ArchivioDetailService, ArchivioDetailView, Azienda, Persona, PersonaService, Struttura, StrutturaService } from '@bds/ng-internauta-model';
 import { AppService } from '../app.service';
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { Subscription } from 'rxjs';
@@ -568,7 +568,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
       //   filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
       //   this.initialSortField = "dataCreazione";
       //   this.serviceToGetData = this.archivioDetailService;
-      //   this.projectionToGetData = "CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari";
+      //   this.projectionToGetData = this.projection;
       //   break;
       case ArchiviListMode.VISIBILI:
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
@@ -581,13 +581,13 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
       //   filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
       //   this.initialSortField = "dataCreazione";
       //   this.serviceToGetData = this.archivioDetailService;
-      //   this.projectionToGetData = "ArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura";
+      //   this.projectionToGetData = this.projection;
       //   break;
       // case ArchiviListMode.FREQUENTI:
       //   filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
       //   this.initialSortField = "dataCreazione";
       //   this.serviceToGetData = this.archivioDetailService;
-      //   this.projectionToGetData = "ArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStruttura";
+      //   this.projectionToGetData = this.projection;
       //   break;
 
     }
@@ -693,21 +693,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
       });
   }
 
-  /**
-  * Usato per generare la stringa json che serve a filtrare
-  * per l'appunto, una colonna json. In questo caso è una persona.
-  * NB: Se ne servissero altri (oltre la persona) si può rendere più generica qeusta funzione.
-  * @param idPersona
-  * @returns
-  */
-  public buildJsonValueForFilterPersone(idPersona: number): string {
-    if (idPersona) {
-      const filtroJson: FilterJsonDefinition<Vicario> = new FilterJsonDefinition(true);
-      filtroJson.add("idPersona", idPersona);
-      return filtroJson.buildJsonString();
-    }
-    return null;
-  }
 
   /* 
   L'utente ha cliccato su un archivio. Apriamolo
