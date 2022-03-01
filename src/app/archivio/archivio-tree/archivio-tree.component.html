@@ -1,13 +1,12 @@
-<main>
-    <div *ngIf="data && elements" class="tree-conainer">
-        <p-tree
-            [value]='elements' 
-            [style]="{'height': '100%', 'width': '100%', 'border': 'none'}" 
-            [styleClass]="ciccio"
-            selectionMode="single" 
-            [(selection)]="selectedNode" 
-            (onNodeSelect)="handleEvent('onNodeSelect',$event)"
-            scrollHeight="flex">
-        </p-tree>
-    </div>
-</main>
+<p-breadcrumb 
+  [model]="bricioleArchivi"
+  styleClass="archivi-breadcrumb">
+</p-breadcrumb>
+<p-tree 
+  [value]="archivi"
+  styleClass="archivi-tree"
+  selectionMode="single" 
+  [(selection)]="selectedNode" 
+  (onNodeSelect)="onNodeSelect($event)"
+  scrollHeight="flex">
+</p-tree>

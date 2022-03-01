@@ -1,27 +1,35 @@
-main{
-    padding: 1rem;
-    display: inline-block;
-    height: 100%;
-    width: 100%;
+:host {
+  width: 100%;
 }
-
-p-tree {
-    display: inline-block;
-    height: 100%; 
-    border: none;
+::ng-deep .archivi-breadcrumb {
+  /* border: none;
+  border-bottom: 1px solid #c8c8c8;
+  border-radius: 0; */
+  padding: 0;
+  margin: 5px;
+  .p-breadcrumb-chevron {
+    margin: 0 !important;
+  }
+  .p-menuitem-link {
+    display: flex;
+    flex-wrap: nowrap;
+    cursor: pointer;
+    .p-menuitem-text {
+      white-space: pre;
+      margin-left: 2px;
+      font-size: 15px;
+    }
+  }
 }
-
-.tree-conainer {
-    display: inline-block;
-    height: 100%;
-    background-color: lime;
-}
-
-.p-tree.p-component.ng-star-inserted {
-    display: inline-block;
-    height: 100%;
-}
-
-.ciccio {
-    background-color: blue;
+::ng-deep .archivi-tree {
+  border: none;
+  /* .p-tree-container {
+    .p-treenode {
+      .p-treenode-content {
+        &:focus {
+          box-shadow: none;
+        }
+      }
+    }
+  } */
 }

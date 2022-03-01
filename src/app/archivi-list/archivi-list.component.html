@@ -5,6 +5,7 @@
   (onLazyLoad)="onLazyLoad($event)" [lazy]="true" [lazyLoadOnInit]="false" [loading]="loading"
   [totalRecords]="totalRecords" [ngClass]="{'table-zero-rows': totalRecords === 0}"
   tableStyleClass="archiviolist-table-body">
+  scrollDirection="both"
   <ng-template pTemplate="caption">
     <div class="caption-row">
       <div class="left-content">

@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { ArchivioDetailService, ArchivioDetailView, Azienda, Persona, PersonaService, Struttura, StrutturaService } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, ArchivioDetailService, ArchivioDetailView, Azienda, Persona, PersonaService, Struttura, StrutturaService } from '@bds/ng-internauta-model';
 import { AppService } from '../app.service';
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { Subscription } from 'rxjs';
@@ -44,14 +44,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
 
   private projection = "ArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari";
 
-  public j = JSON;
   public archivi: ExtendedArchiviView[] = [];
   public archiviListMode: ArchiviListMode;
   private utenteUtilitiesLogin: UtenteUtilities;
   private subscriptions: Subscription[] = [];
   private archiviListModeItem: ArchiviListModeItem[];
-  private displayArchiviListModeItem: boolean = true;
-  private hasChildrens: boolean = false;
   public aziendeFiltrabili: ValueAndLabelObj[] = [];
   public exportCsvInProgress: boolean = false;
   public selectableColumns: ColonnaBds[] = [];
@@ -86,19 +83,15 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   };
   public cols: ColonnaBds[] = [];
   public _selectedColumns: ColonnaBds[];
-  private childrenId: number[] = [];
+  private firstLoadDone = false;
 
-
-  @Input() set archiviListModeItem1(value: ArchiviListModeItem[]) {
-    this.archiviListModeItem = [];
-    this.archiviListModeItem = value;
-    this.displayArchiviListModeItem = false;
-  }
-
-  @Input() set archivioPadre(value: number[]) {
-    this.childrenId = value;
-    this.hasChildrens = true;
-    this.loadData();
+  private _archivioPadre: Archivio | ArchivioDetail;
+  get archivioPadre(): Archivio | ArchivioDetail { return this._archivioPadre; }
+  @Input() set archivioPadre(archivioPadre: Archivio | ArchivioDetail) {
+    this._archivioPadre = archivioPadre;
+    if (this.firstLoadDone) {
+      this.resetPaginationAndLoadData();
+    }
   }
 
   constructor(
@@ -129,15 +122,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
           this.utenteUtilitiesLogin = utenteUtilities;
-          if (this.displayArchiviListModeItem) {
+          //if (this.displayArchiviListModeItem) {
             this.calcArchiviListModeItem();
-            this.selectedArchiviListMode = {
-              title: "Tutti gli archivi che posso vedere",
-              label: "Visibili",
-              routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-              queryParams: { "mode": ArchiviListMode.VISIBILI }
-            };
-          }
+            this.selectedArchiviListMode = this.archiviListModeItem[0];
+          //}
           // this.selectedArchiviListMode = this.archiviListModeItem.filter(element => element.queryParams.mode === this.archiviListMode)[0];
           if (this.archiviListMode) {
             this.calcAziendeFiltrabili();
@@ -148,18 +136,15 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
       )
     );
 
-
     /* Mi sottoscrivo alla rotta per leggere la modalita dell'elenco documenti
-     e faccio partire il caricamento. Ogni volta che la modalità cambia
-     rifaccio la loadData */
+    e faccio partire il caricamento. Ogni volta che la modalità cambia
+    rifaccio la loadData */
     this.route.queryParams.subscribe(params => {
       //this.docsListMode = params["mode"];
       if (this.utenteUtilitiesLogin) this.calcAziendeFiltrabili();
       this.resetPaginationAndLoadData();
     });
   }
-
-
 
   /**
    * Questa funzione si occupa di caricare la configurazione personale
@@ -206,7 +191,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
     return this._selectedColumns;
   }
 
-
   set selectedColumns(colsSelected: ColonnaBds[]) {
     if (this._selectedColumns.length > colsSelected.length) {
       this._selectedColumns = this._selectedColumns.filter(sc => colsSelected.includes(sc));
@@ -224,7 +208,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
    */
   public onColReorder(event: any): void {
     this.saveConfiguration();
-
   }
 
   /**
@@ -247,42 +230,67 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
     this.loadData();
   }
 
-
   /**
    * Costruisco i tab per l'EFI
   */
   public calcArchiviListModeItem(): void {
     this.archiviListModeItem = [];
-    this.archiviListModeItem.push(
-      {
-        title: "Tutti gli archivi che posso vedere",
-        label: "Visibili",
-        // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-        queryParams: { "mode": ArchiviListMode.VISIBILI }
-      },
-      {
-        title: "",
-        label: "Recenti",
-        // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-        queryParams: { "mode": ArchiviListMode.RECENTI }
-      },
-      {
-        title: "",
-        label: "Preferiti",
-        // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-        queryParams: { "mode": ArchiviListMode.PREFERITI }
-      },
-      {
-        title: "",
-        label: "Frequenti",
-        // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-        queryParams: { "mode": ArchiviListMode.FREQUENTI }
-      }
-    )
+    if (this.archivioPadre) {
+      this.archiviListModeItem.push(
+        {
+          title: "",
+          label: "Archivi figli",
+          // icon: "pi pi-fw pi-list", 
+          routerLink: ["./"],
+          queryParams: { "mode": ArchiviListMode.VISIBILI }
+        },
+        {
+          title: "",
+          label: "Documenti",
+          // icon: "pi pi-fw pi-list", 
+          routerLink: ["./"],
+          queryParams: { "mode": ArchiviListMode.VISIBILI }
+        },
+        {
+          title: "",
+          label: "Dettaglio",
+          // icon: "pi pi-fw pi-list", 
+          routerLink: [  ],
+          queryParams: {  }
+        }
+      );
+    } else {
+      this.archiviListModeItem.push(
+        {
+          title: "Tutti gli archivi che posso vedere",
+          label: "Visibili",
+          // icon: "pi pi-fw pi-list", 
+          routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+          queryParams: { "mode": ArchiviListMode.VISIBILI }
+        },
+        {
+          title: "",
+          label: "Recenti",
+          // icon: "pi pi-fw pi-list", 
+          routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+          queryParams: { "mode": ArchiviListMode.RECENTI }
+        },
+        {
+          title: "",
+          label: "Preferiti",
+          // icon: "pi pi-fw pi-list", 
+          routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+          queryParams: { "mode": ArchiviListMode.PREFERITI }
+        },
+        {
+          title: "",
+          label: "Frequenti",
+          // icon: "pi pi-fw pi-list", 
+          routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+          queryParams: { "mode": ArchiviListMode.FREQUENTI }
+        }
+      );
+    }
   }
 
   private calcAziendeFiltrabili() {
@@ -438,6 +446,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
    * @param event
    */
   private loadData(): void {
+    this.firstLoadDone = true;
     this.loading = true;
     this.pageConf.conf = {
       limit: this.storedLazyLoadEvent.rows,
@@ -475,14 +484,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
         }
         this.archivi = [...this.archivi]; // trigger change detection
       },
-        err => {
-          this.messageService.add({
-            severity: "warn",
-            key: "archiviListToast",
-            summary: "Attenzione",
-            detail: `Si è verificato un errore nel caricamento, contattare Babelcare`
-          });
+      err => {
+        this.messageService.add({
+          severity: "warn",
+          key: "archiviListToast",
+          summary: "Attenzione",
+          detail: `Si è verificato un errore nel caricamento, contattare Babelcare`
         });
+      });
   }
 
 
@@ -555,13 +564,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
 
     //filter to display only children of archivi when archivio tab is open
     const filterAndSort = new FiltersAndSorts();
-    if (this.hasChildrens && this.childrenId.length != 0) {
-      this.childrenId.forEach(child => {
-        filterAndSort.addFilter(new FilterDefinition("id", FILTER_TYPES.not_string.equals, child));
-      })
-
+    if (this.archivioPadre) {
+      filterAndSort.addFilter(new FilterDefinition("idArchivioPadre", FILTER_TYPES.not_string.equals, this.archivioPadre.id));
     }
-
+    
 
     switch (this.archiviListMode) {
       // case ArchiviListMode.RECENTI:
@@ -693,16 +699,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
       });
   }
 
-
   /* 
-  L'utente ha cliccato su un archivio. Apriamolo
-  TODO: Se il fascicolo cliccato in realtà è parte dell'alberatura in cui sono allora devo soloa ggiornare il tab
-  */
+   * L'utente ha cliccato su un archivio. Apriamolo
+   */
   public openArchive(archivio: ExtendedArchiviView): void {
-    this.navigationTabsService.addTab(
-      this.navigationTabsService.buildaTabArchivio(archivio.id, archivio.numerazioneGerarchica)
-    );
-    this.navigationTabsService.activeLastTab();
+    this.navigationTabsService.addTabArchivio(archivio);
   }
 
   /**
@@ -872,10 +873,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
     }
     this.aziendeFiltrabiliFiltered = filtered;
   }
-
-
-
-
+  
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
    * desottoscrivo anche dalla specifica loadDocsListSubscription
@@ -895,9 +893,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   }
 }
 
-
-
-
 export interface ArchiviListModeItem {
   label: string;
   title: string;
@@ -905,5 +900,3 @@ export interface ArchiviListModeItem {
   routerLink: string[];
   queryParams: any;
 }
-
-

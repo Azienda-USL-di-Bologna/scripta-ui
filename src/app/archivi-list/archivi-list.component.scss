@@ -1,5 +1,6 @@
 :host{
   height: 100%;
+  width: 100%;
 }
 ::ng-deep .p-table-scripta-archivi-list {
     /* CAPTION */
@@ -15,6 +16,7 @@
         align-self: center;
         .p-selectbutton {
           flex-wrap: nowrap;
+          display: flex;
           .p-button {
             border: 1px solid #9da3a9 !important;;
             color: #333333;
