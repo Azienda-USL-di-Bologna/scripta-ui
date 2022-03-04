@@ -1,4 +1,5 @@
-main{
-    margin: 0rem 1.5rem;
+:host ::ng-deep {
+  p-splitter .splitter-archivio {
     height: 100%;
+  }
 }

@@ -1,15 +1,13 @@
-<main class="main-element">
-    <p-splitter [style]="{'height':'100%'}" [panelSizes]="[35,65]">
-        <ng-template pTemplate>
-            <div class="left-side-element">
-                <app-archivio-tree [data]="data">
-                </app-archivio-tree>
-            </div>
-        </ng-template>
-        <ng-template pTemplate>
-            <div class="righ-side-element">
-                <p>archivio works!</p>
-            </div>
-        </ng-template>
-    </p-splitter>
-</main>
+<p-splitter styleClass="splitter-archivio" [panelSizes]="[25,75]" [minSizes]="[15,55]">
+  <ng-template pTemplate>
+    <app-archivio-tree 
+      [archivio]="archivio"><!-- (archivioSelectedEvent)="archivioSelected($event)" -->
+    </app-archivio-tree>
+  </ng-template>
+  <ng-template pTemplate>
+    <app-archivi-list
+      [archivioPadre]="archivio" 
+      class="archivi-list-comp">
+    </app-archivi-list>
+  </ng-template>
+</p-splitter>
