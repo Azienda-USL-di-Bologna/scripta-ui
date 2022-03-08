@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { ArchivioDetail } from '@bds/ng-internauta-model';
-import { ArchiviListComponent } from '../archivi-list/archivi-list.component';
+import { ArchiviListContainerComponent } from '../archivi-list-container/archivi-list-container.component';
 import { ArchivioComponent } from '../archivio/archivio.component';
 import { DocComponent } from '../doc/doc.component';
-import { DocsListComponent } from '../docs-list/docs-list.component';
+import { DocsListContainerComponent } from '../docs-list-container/docs-list-container.component';
 import { TabItem, TabType } from './tab-item';
 
 @Injectable()
@@ -71,10 +71,10 @@ export class NavigationTabsService {
       for (const tab of tabs) {
         switch (tab.type) {
           case TabType.DOCS_LIST:
-            tab.component = DocsListComponent;
+            tab.component = DocsListContainerComponent;
             break;
           case TabType.ARCHIVI_LIST:
-            tab.component = ArchiviListComponent;
+            tab.component = ArchiviListContainerComponent;
             break;
           case TabType.DOC:
             tab.component = DocComponent;
@@ -93,7 +93,7 @@ export class NavigationTabsService {
 
   public buildaTabDocsList(): TabItem {
     return new TabItem(
-      DocsListComponent,
+      DocsListContainerComponent,
       {  },
       false,
       "Documenti",
@@ -104,7 +104,7 @@ export class NavigationTabsService {
 
   public buildaTabArchiviList(): TabItem {
     return new TabItem(
-      ArchiviListComponent,
+      ArchiviListContainerComponent,
       {  },
       false,
       "Archivi",

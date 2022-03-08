@@ -26,6 +26,9 @@
               background-color: #993366 !important;
               border-color: #993366 !important;
             }
+            .p-button-label {
+              white-space: pre;
+            }
           }
           .p-highlight {
             color: white;
@@ -44,15 +47,18 @@
       .p-inputtext {
         align-self: center;
         height: 33.72px;
+        min-width: 190px;
       }
       .refresh-button {
         margin-left: 1px;
+        min-width: 38px;
       }
       .alarm-button {
         background-color: orange !important;
         margin-left: 4px;
         border: 1px solid darkorange !important;
         color: black;
+        min-width: 38px;
       }
       @media screen and (max-width: 1280px) {
         font-size: 10pt;
@@ -70,6 +76,9 @@
             flex-wrap: nowrap;
             align-self: center;
             font-size: 10pt;
+            .p-button-label {
+              white-space: pre;
+            }
           }
         }
       }
