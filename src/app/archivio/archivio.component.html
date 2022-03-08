@@ -1,13 +1,36 @@
-<p-splitter styleClass="splitter-archivio" [panelSizes]="[25,75]" [minSizes]="[15,55]">
+<generic-caption-table *ngIf="referenceTableComponent"
+  [configuration]="captionConfiguration"
+  [referenceTableComponent]="referenceTableComponent"
+  [selectButtonsComponent]="this">
+</generic-caption-table>
+<p-splitter 
+  styleClass="splitter-archivio" 
+  [panelSizes]="[25,75]" 
+  [minSizes]="[15,55]">
   <ng-template pTemplate>
     <app-archivio-tree 
-      [archivio]="archivio"><!-- (archivioSelectedEvent)="archivioSelected($event)" -->
+      [archivio]="archivio">
     </app-archivio-tree>
   </ng-template>
   <ng-template pTemplate>
-    <app-archivi-list
+
+    <!-- Lista sottoarchivi -->
+    <archivi-list #archivilist
       [archivioPadre]="archivio" 
-      class="archivi-list-comp">
-    </app-archivi-list>
+      [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'SOTTOARCHIVI'}">
+    </archivi-list>
+
+    <!-- Lista documenti contenuti -->
+    <docs-list #doclist
+      [archivio]="archivio"
+      [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'DOCUMENTI'}">
+    </docs-list>
+
+    <!-- Dettaglio dell'archivio -->
+    <dettaglio-archivio #dettaglioarchivio
+      [archivio]="archivio"
+      [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'DETTAGLIO'}">
+    </dettaglio-archivio>
+
   </ng-template>
 </p-splitter>
