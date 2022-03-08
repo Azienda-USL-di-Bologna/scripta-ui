@@ -17,7 +17,7 @@
 <main aria-level="2" *ngIf="doc">
   <section class="info-documento">
     <span class="dati-creazione">
-      <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del 2021</span>
+      <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del {{yearOfProposta}}</span>
       <span *ngIf="numeroVisualizzazione">{{numeroVisualizzazione}}</span>
       <span>
         Creato il giorno {{ removeZoneFromTime(doc?.dataCreazione?.toString()) | date: 'EE d MMM y, H:mm' | titlecase}}
