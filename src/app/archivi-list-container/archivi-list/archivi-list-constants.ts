@@ -1,7 +1,7 @@
 import { StatoArchivio, TipoArchivio } from "@bds/ng-internauta-model";
 import { ColonnaBds } from "@bds/primeng-plugin";
 import { FILTER_TYPES, NextSDRDateTypes } from "@nfa/next-sdr";
-import { Utils } from "../utilities/utils";
+import { Utils } from "../../utilities/utils";
 import { ExtendedArchiviView } from "./extendend-archivi-view";
 
 export enum ArchiviListMode {

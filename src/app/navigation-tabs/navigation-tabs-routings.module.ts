@@ -10,11 +10,11 @@ const routes: Routes = [
     children: [
       {
         path: DOCS_LIST_ROUTE, 
-        loadChildren: () => import("../docs-list/docs-list.module").then(m => m.DocsListModule)
+        loadChildren: () => import("../docs-list-container/docs-list/docs-list.module").then(m => m.DocsListModule)
       },
       {
         path: ARCHIVI_LIST_ROUTE,
-        loadChildren: () => import("../archivi-list/archivi-list.module").then(m => m.ArchiviListModule)
+        loadChildren: () => import("../archivi-list-container/archivi-list/archivi-list.module").then(m => m.ArchiviListModule)
       },
       {
         path: ARCHIVIO_ROUTE,
