@@ -32,11 +32,10 @@ export class ArchivioComponent implements AfterViewInit, TabComponent, CaptionSe
   public selectButtonItems: SelectButtonItem[];
   public selectedButtonItem: SelectButtonItem;
 
-  private hasNewArchivio: boolean = this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3;
-
   constructor() {}
   
   ngAfterViewInit(): void {
+    console.log(this.archivio.stato)
     this.buildSelectButtonItems();
     if (this.archivio.stato === StatoArchivio.BOZZA) {
       this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);

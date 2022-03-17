@@ -900,9 +900,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   /**
    * newArchivio
    */
-  public newArchivio(codiceAzienda: number): void {
-    console.log(this.archivioPadre as Archivio, this.archivioPadre.idArchivioPadre, this.archivioPadre.idArchivioRadice);
-    
+  public newArchivio(codiceAzienda: number): void {    
     const archivioBozza = new Archivio();
     archivioBozza.livello = this.archivioPadre?.livello != null ? this.archivioPadre?.livello + 1 : 1;
     archivioBozza.idAzienda = {id: codiceAzienda} as Azienda;
