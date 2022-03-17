@@ -164,7 +164,8 @@ export const TipoArchivioTraduzioneVisualizzazione = [
 export const StatoArchivioTraduzioneVisualizzazione = [
   { value: StatoArchivio.PRECHIUSO, nome: "Prechiuso" },
   { value: StatoArchivio.APERTO, nome: "Aperto" },
-  { value: StatoArchivio.CHIUSO, nome: "Chiuso" }
+  { value: StatoArchivio.CHIUSO, nome: "Chiuso" },
+  { value: StatoArchivio.BOZZA, nome: "Bozza" },
 ];
 
 export const colsCSV: any[] = [

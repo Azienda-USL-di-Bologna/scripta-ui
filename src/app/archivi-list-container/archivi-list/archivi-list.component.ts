@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { Archivio, ArchivioDetail, ArchivioDetailService, ArchivioDetailView, Azienda, Persona, PersonaService, Struttura, StrutturaService } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, ArchivioDetailService, ArchivioDetailView, ArchivioService, Azienda, Persona, PersonaService, StatoArchivio, Struttura, StrutturaService, TipoArchivio } from '@bds/ng-internauta-model';
 import { AppService } from '../../app.service';
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { Subscription } from 'rxjs';
@@ -24,13 +24,14 @@ import { DatePipe } from '@angular/common';
 import { CaptionReferenceTableComponent } from '../../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
 import { SelectButtonItem } from '../../generic-caption-table/select-button-item';
+import { CaptionArchiviComponent } from 'src/app/generic-caption-table/caption-archivi.component';
 
 @Component({
   selector: 'archivi-list',
   templateUrl: './archivi-list.component.html',
   styleUrls: ['./archivi-list.component.scss']
 })
-export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, CaptionReferenceTableComponent, CaptionSelectButtonsComponent {
+export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, CaptionReferenceTableComponent, CaptionSelectButtonsComponent, CaptionArchiviComponent {
   @Input() data: any;
   @ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>;
 
@@ -104,6 +105,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     private router: Router,
     private messageService: MessageService,
     private archiviListService: ArchiviListService,
+    private archivioService: ArchivioService,
     private confirmationService: ConfirmationService,
     private archivioDetailService: ArchivioDetailService,
     private navigationTabsService: NavigationTabsService,
@@ -190,7 +192,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     }
   }
 
-  @Input() get selectedColumns(): any[] {
+  @Input() get selectedColumns(): ColonnaBds[] {
     return this._selectedColumns;
   }
 
@@ -894,7 +896,42 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       this.loadArchiviListSubscription.unsubscribe();
     }
   }
+
+  /**
+   * newArchivio
+   */
+  public newArchivio(codiceAzienda: number): void {
+    console.log(this.archivioPadre as Archivio, this.archivioPadre.idArchivioPadre, this.archivioPadre.idArchivioRadice);
+    
+    const archivioBozza = new Archivio();
+    archivioBozza.livello = this.archivioPadre?.livello != null ? this.archivioPadre?.livello + 1 : 1;
+    archivioBozza.idAzienda = {id: codiceAzienda} as Azienda;
+    archivioBozza.stato = StatoArchivio.BOZZA;
+    archivioBozza.tipo = TipoArchivio.AFFARE;
+    archivioBozza.foglia = true;
+
+    archivioBozza.oggetto = "";
+
+    archivioBozza.numero = 0;
+    archivioBozza.anno = 0;
+    archivioBozza.numerazioneGerarchica = this.archivioPadre?.numerazioneGerarchica ? this.archivioPadre?.numerazioneGerarchica.replace("/", "-x/") : "x/x";
+    if (this.archivioPadre?.livello >= 1 && this.archivioPadre?.livello < 3) {
+      archivioBozza.livello = this.archivioPadre?.livello + 1;
+      archivioBozza.numerazioneGerarchica = this.archivioPadre?.numerazioneGerarchica.replace("/", "-x/");
+      archivioBozza.idArchivioPadre = {id: this.archivioPadre.id} as Archivio;
+      archivioBozza.idArchivioRadice = {id: this.archivioPadre.fk_idArchivioRadice.id} as Archivio;
+    } else {
+      archivioBozza.livello = 1;
+      archivioBozza.numerazioneGerarchica = "x/x";
+    }
+    console.log("archivioBozza", archivioBozza);
+    // archivioBozza.
+    this.subscriptions.push(this.archivioService.postHttpCall(archivioBozza).subscribe((nuovoArchivioCreato: Archivio) => {      
+        this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
+    }));
+  }
 }
+
 
 /* export interface ArchiviListModeItem {
   label: string;

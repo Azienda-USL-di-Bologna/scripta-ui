@@ -1,7 +1,8 @@
 import { AfterViewInit, Component, Input, ViewChild } from '@angular/core';
-import { ArchivioDetail } from '@bds/ng-internauta-model';
+import { ArchivioDetail, StatoArchivio } from '@bds/ng-internauta-model';
 import { ArchiviListComponent } from '../archivi-list-container/archivi-list/archivi-list.component';
 import { DocsListComponent } from '../docs-list-container/docs-list/docs-list.component';
+import { CaptionArchiviComponent } from '../generic-caption-table/caption-archivi.component';
 import { CaptionConfiguration } from '../generic-caption-table/caption-configuration';
 import { CaptionReferenceTableComponent } from '../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../generic-caption-table/caption-select-buttons.component';
@@ -27,17 +28,41 @@ export class ArchivioComponent implements AfterViewInit, TabComponent, CaptionSe
 
   public captionConfiguration: CaptionConfiguration;
   public referenceTableComponent: CaptionReferenceTableComponent;
+  public archiviComponent: CaptionArchiviComponent;
   public selectButtonItems: SelectButtonItem[];
   public selectedButtonItem: SelectButtonItem;
+
+  private hasNewArchivio: boolean = this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3;
 
   constructor() {}
   
   ngAfterViewInit(): void {
     this.buildSelectButtonItems();
-    this.selectedButtonItem = this.selectButtonItems[0];
-    this.captionConfiguration = new CaptionConfiguration(true, true, true, true);
+    if (this.archivio.stato === StatoArchivio.BOZZA) {
+      this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
+      this.setForDettaglio();
+    } else {
+      this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.SOTTOARCHIVI);
+      this.setForSottoarchivi();
+    }
+  }
+
+  private setForSottoarchivi(): void{
+    this.captionConfiguration = new CaptionConfiguration(true, true, true, true, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
     this.referenceTableComponent = this.archivilist;
-    //console.log(this.archivilist)
+    this.archiviComponent = this.archivilist;
+  }
+
+  private setForDocumenti(): void{
+    this.captionConfiguration = new CaptionConfiguration(true, true, true, true, false);
+    this.referenceTableComponent = this.doclist;
+    this.archiviComponent = this.archivilist;
+  }
+
+  private setForDettaglio(): void{
+    this.captionConfiguration = new CaptionConfiguration(false, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
+    this.referenceTableComponent = {} as CaptionReferenceTableComponent;
+    this.archiviComponent = this.archivilist;
   }
 
   /**
@@ -48,16 +73,13 @@ export class ArchivioComponent implements AfterViewInit, TabComponent, CaptionSe
   public onSelectButtonItemSelection(event: any): void {
     switch (event.option.id) {
       case SelectButton.SOTTOARCHIVI:
-        this.captionConfiguration = new CaptionConfiguration(true, true, true, true);
-        this.referenceTableComponent = this.archivilist;
+        this.setForSottoarchivi();
         break;
       case SelectButton.DOCUMENTI:
-        this.captionConfiguration = new CaptionConfiguration(true, true, true, true);
-        this.referenceTableComponent = this.doclist;
+        this.setForDocumenti();
         break;
       case SelectButton.DETTAGLIO:
-        this.captionConfiguration = new CaptionConfiguration(false, true, false, false);
-        this.referenceTableComponent = {} as CaptionReferenceTableComponent;
+        this.setForDettaglio();
         break;
     }
   }
@@ -72,11 +94,13 @@ export class ArchivioComponent implements AfterViewInit, TabComponent, CaptionSe
     this.selectButtonItems.push(
       {
         id: SelectButton.SOTTOARCHIVI,
-        label: "Archivi figli"
+        label: "Archivi figli",
+        disabled: this.archivio.stato === StatoArchivio.BOZZA
       },
       {
         id: SelectButton.DOCUMENTI,
-        label: "Documenti"
+        label: "Documenti",
+        disabled: this.archivio.stato === StatoArchivio.BOZZA
       },
       {
         id: SelectButton.DETTAGLIO,

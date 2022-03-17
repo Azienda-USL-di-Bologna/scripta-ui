@@ -3,5 +3,6 @@ export class CaptionConfiguration {
     public searchBox: boolean, 
     public selectButtons: boolean,
     public exportButton: boolean,
-    public selectableColumns: boolean) {}
+    public selectableColumns: boolean,
+    public newArchivio: boolean) {}
 }

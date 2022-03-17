@@ -27,6 +27,8 @@ import { TabViewModule } from 'primeng/tabview';
 import { SplitterModule } from 'primeng/splitter';
 import { TreeModule } from 'primeng/tree';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { MenuModule } from 'primeng/menu';
+
 
 @NgModule({
   declarations: [
@@ -59,7 +61,8 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
     TabViewModule,
     SplitterModule,
     TreeModule,
-    BreadcrumbModule
+    BreadcrumbModule,
+    MenuModule
   ],
   exports: [
     ButtonModule,
@@ -89,7 +92,8 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
     TabViewModule,
     SplitterModule,
     TreeModule,
-    BreadcrumbModule
+    BreadcrumbModule,
+    MenuModule
   ],
   providers: [MessageService, DialogService]
 })
