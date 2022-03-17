@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ArchivioDetail } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail } from '@bds/ng-internauta-model';
 import { ArchiviListContainerComponent } from '../archivi-list-container/archivi-list-container.component';
 import { ArchivioComponent } from '../archivio/archivio.component';
 import { DocComponent } from '../doc/doc.component';
@@ -126,7 +126,7 @@ export class NavigationTabsService {
     );
   }
 
-  private buildaTabArchivio(archivio: ArchivioDetail, label: string): TabItem {
+  private buildaTabArchivio(archivio: Archivio | ArchivioDetail, label: string): TabItem {
     return new TabItem(
       ArchivioComponent,
       { 
@@ -147,7 +147,7 @@ export class NavigationTabsService {
    * @param archivio 
    * @param active 
    */
-  public addTabArchivio(archivio: ArchivioDetail, active: boolean = true): void {
+  public addTabArchivio(archivio: Archivio | ArchivioDetail, active: boolean = true): void {
     const tabIndex: number = this.tabs.findIndex(t => {
       return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id
     });

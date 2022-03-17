@@ -11,7 +11,7 @@ export class ArchiviListContainerComponent implements OnInit {
   public captionConfiguration: CaptionConfiguration;
 
   constructor() {
-    this.captionConfiguration = new CaptionConfiguration(true, true, true, true);
+    this.captionConfiguration = new CaptionConfiguration(true, true, true, true, true);
   }
 
   ngOnInit(): void {

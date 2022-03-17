@@ -43,6 +43,25 @@
     </div>
   </div>
   <div class="right-content">
+    <!-- BOTTONE NUOVO ARCHIVIO -->
+    <span *ngIf="configuration.newArchivio">
+      <button
+        type="button" 
+        pButton 
+        pRipple 
+        icon="pi pi-plus" 
+        (click)="addArchivioClicked(); aziendaSelection.toggle($event);" 
+        class="p-mr-2" 
+        pTooltip="Crea nuovo archivio"
+        aria-label="Crea un nuovo archivio"
+        tooltipPosition="bottom">
+      </button>
+      <p-menu
+        #aziendaSelection
+        [model]="aziendeMenuItems"
+        [popup]="true">
+      </p-menu>
+    </span>
     <!-- PROGRESS SPINNER -->
     <span *ngIf="configuration.exportButton">
       <span *ngIf="referenceTableComponent.exportCsvInProgress">
