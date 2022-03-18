@@ -1,33 +1,37 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { Archivio, ArchivioDetail, ArchivioDetailService, ArchivioDetailView, Azienda, Persona, PersonaService, Struttura, StrutturaService } from '@bds/ng-internauta-model';
-import { AppService } from '../app.service';
+import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Archivio, ArchivioDetail, ArchivioDetailService, ArchivioDetailView, ArchivioService, Azienda, Persona, PersonaService, StatoArchivio, Struttura, StrutturaService, TipoArchivio } from '@bds/ng-internauta-model';
+import { AppService } from '../../app.service';
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { Subscription } from 'rxjs';
 import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
 import { ArchiviListMode, cols, colsCSV, TipoArchivioTraduzioneVisualizzazione, StatoArchivioTraduzioneVisualizzazione } from './archivi-list-constants';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ValueAndLabelObj } from '../docs-list/docs-list.component';
-import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from '@nfa/next-sdr';
+import { ValueAndLabelObj } from '../../docs-list-container/docs-list/docs-list.component';
+import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from '@nfa/next-sdr';
 import { ColumnFilter, Table } from 'primeng/table';
-import { Impostazioni } from '../utilities/utils';
+import { Impostazioni } from '../../utilities/utils';
 import { ConfirmationService, LazyLoadEvent, MessageService } from 'primeng/api';
 import { ArchiviListService } from './archivi-list.service';
 import { Calendar } from 'primeng/calendar';
 import { Dropdown } from 'primeng/dropdown';
 import { buildLazyEventFiltersAndSorts, ColonnaBds, CsvExtractor } from '@bds/primeng-plugin';
 import { ExtendedArchiviView } from './extendend-archivi-view';
-import { NavViews } from '../navigation-tabs/navigation-tabs-contants';
-import { TabComponent } from '../navigation-tabs/tab.component';
-import { NavigationTabsService } from '../navigation-tabs/navigation-tabs.service';
+import { NavViews } from '../../navigation-tabs/navigation-tabs-contants';
+import { TabComponent } from '../../navigation-tabs/tab.component';
+import { NavigationTabsService } from '../../navigation-tabs/navigation-tabs.service';
 import { AutoComplete } from 'primeng/autocomplete';
 import { DatePipe } from '@angular/common';
+import { CaptionReferenceTableComponent } from '../../generic-caption-table/caption-reference-table.component';
+import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
+import { SelectButtonItem } from '../../generic-caption-table/select-button-item';
+import { CaptionArchiviComponent } from 'src/app/generic-caption-table/caption-archivi.component';
 
 @Component({
-  selector: 'app-archivi-list',
+  selector: 'archivi-list',
   templateUrl: './archivi-list.component.html',
   styleUrls: ['./archivi-list.component.scss']
 })
-export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
+export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, CaptionReferenceTableComponent, CaptionSelectButtonsComponent, CaptionArchiviComponent {
   @Input() data: any;
   @ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>;
 
@@ -40,7 +44,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   @ViewChild("autocompleteVicari") public autocompleteVicari: AutoComplete;
   @ViewChild("dt") public dataTable: Table;
   @ViewChild("columnFilterDataCreazione") public columnFilterDataCreazione: ColumnFilter;
-  @ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
+  //@ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
 
   private projection = "ArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari";
 
@@ -48,7 +52,13 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   public archiviListMode: ArchiviListMode;
   private utenteUtilitiesLogin: UtenteUtilities;
   private subscriptions: Subscription[] = [];
-  private archiviListModeItem: ArchiviListModeItem[];
+  public selectButtonItems: SelectButtonItem[];
+  public selectedButtonItem: SelectButtonItem = {
+    title: "Tutti gli archivi che posso vedere",
+    label: "Visibili",
+    routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+    queryParams: { "mode": ArchiviListMode.VISIBILI }
+  };
   public aziendeFiltrabili: ValueAndLabelObj[] = [];
   public exportCsvInProgress: boolean = false;
   public selectableColumns: ColonnaBds[] = [];
@@ -75,12 +85,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   public dataMinimaCreazione: Date = new Date("2000-01-01");
   public dataMassimaCreazione: Date = new Date("2030-12-31");
   private pageConf: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 0, offset: 0 } };
-  public selectedArchiviListMode: ArchiviListModeItem = {
-    title: "Tutti gli archivi che posso vedere",
-    label: "Visibili",
-    routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-    queryParams: { "mode": ArchiviListMode.VISIBILI }
-  };
   public cols: ColonnaBds[] = [];
   public _selectedColumns: ColonnaBds[];
   private firstLoadDone = false;
@@ -101,6 +105,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
     private router: Router,
     private messageService: MessageService,
     private archiviListService: ArchiviListService,
+    private archivioService: ArchivioService,
     private confirmationService: ConfirmationService,
     private archivioDetailService: ArchivioDetailService,
     private navigationTabsService: NavigationTabsService,
@@ -124,9 +129,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
           this.utenteUtilitiesLogin = utenteUtilities;
           //if (this.displayArchiviListModeItem) {
             this.calcArchiviListModeItem();
-            this.selectedArchiviListMode = this.archiviListModeItem[0];
+            this.selectedButtonItem = this.selectButtonItems[0];
           //}
-          // this.selectedArchiviListMode = this.archiviListModeItem.filter(element => element.queryParams.mode === this.archiviListMode)[0];
+          // this.selectedButtonItem = this.selectButtonItems.filter(element => element.queryParams.mode === this.archiviListMode)[0];
           if (this.archiviListMode) {
             this.calcAziendeFiltrabili();
           }
@@ -187,7 +192,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
     }
   }
 
-  @Input() get selectedColumns(): any[] {
+  @Input() get selectedColumns(): ColonnaBds[] {
     return this._selectedColumns;
   }
 
@@ -234,9 +239,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
    * Costruisco i tab per l'EFI
   */
   public calcArchiviListModeItem(): void {
-    this.archiviListModeItem = [];
-    if (this.archivioPadre) {
-      this.archiviListModeItem.push(
+    this.selectButtonItems = [];
+    /* if (this.archivioPadre) {
+      this.selectButtonItems.push(
         {
           title: "",
           label: "Archivi figli",
@@ -259,8 +264,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
           queryParams: {  }
         }
       );
-    } else {
-      this.archiviListModeItem.push(
+    } else { */
+      this.selectButtonItems.push(
         {
           title: "Tutti gli archivi che posso vedere",
           label: "Visibili",
@@ -290,7 +295,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
           queryParams: { "mode": ArchiviListMode.FREQUENTI }
         }
       );
-    }
+    /* } */
   }
 
   private calcAziendeFiltrabili() {
@@ -328,7 +333,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   /**
    * Questa funzione gestisce il click del cambio tab
   */
-  public onChangeArchiviListMode(event: any): void {
+  public onSelectButtonItemSelection(event: any): void {
     this.archiviListMode = event.option.queryParams.mode;
 
     setTimeout(() => {
@@ -713,7 +718,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
   * @param table
   */
   public clear(): void {
-    this.inputGobalFilter.nativeElement.value = "";
+    //this.inputGobalFilter.nativeElement.value = "";
     if (this.autocompleteIdPersonaResponsabile) this.autocompleteIdPersonaResponsabile.writeValue(null);
     if (this.autocompleteIdPersonaCreazione) this.autocompleteIdPersonaCreazione.writeValue(null);
     if (this.autocompleteIdStruttura) this.autocompleteIdStruttura.writeValue(null);
@@ -891,12 +896,45 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy {
       this.loadArchiviListSubscription.unsubscribe();
     }
   }
+
+  /**
+   * newArchivio
+   */
+  public newArchivio(codiceAzienda: number): void {    
+    const archivioBozza = new Archivio();
+    archivioBozza.livello = this.archivioPadre?.livello != null ? this.archivioPadre?.livello + 1 : 1;
+    archivioBozza.idAzienda = {id: codiceAzienda} as Azienda;
+    archivioBozza.stato = StatoArchivio.BOZZA;
+    archivioBozza.tipo = TipoArchivio.AFFARE;
+    archivioBozza.foglia = true;
+
+    archivioBozza.oggetto = "";
+
+    archivioBozza.numero = 0;
+    archivioBozza.anno = 0;
+    archivioBozza.numerazioneGerarchica = this.archivioPadre?.numerazioneGerarchica ? this.archivioPadre?.numerazioneGerarchica.replace("/", "-x/") : "x/x";
+    if (this.archivioPadre?.livello >= 1 && this.archivioPadre?.livello < 3) {
+      archivioBozza.livello = this.archivioPadre?.livello + 1;
+      archivioBozza.numerazioneGerarchica = this.archivioPadre?.numerazioneGerarchica.replace("/", "-x/");
+      archivioBozza.idArchivioPadre = {id: this.archivioPadre.id} as Archivio;
+      archivioBozza.idArchivioRadice = {id: this.archivioPadre.fk_idArchivioRadice.id} as Archivio;
+    } else {
+      archivioBozza.livello = 1;
+      archivioBozza.numerazioneGerarchica = "x/x";
+    }
+    console.log("archivioBozza", archivioBozza);
+    // archivioBozza.
+    this.subscriptions.push(this.archivioService.postHttpCall(archivioBozza).subscribe((nuovoArchivioCreato: Archivio) => {      
+        this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
+    }));
+  }
 }
 
-export interface ArchiviListModeItem {
+
+/* export interface ArchiviListModeItem {
   label: string;
   title: string;
   // icon: string;
   routerLink: string[];
   queryParams: any;
-}
+} */

@@ -1,7 +1,7 @@
 import { StatoArchivio, TipoArchivio } from "@bds/ng-internauta-model";
 import { ColonnaBds } from "@bds/primeng-plugin";
 import { FILTER_TYPES, NextSDRDateTypes } from "@nfa/next-sdr";
-import { Utils } from "../utilities/utils";
+import { Utils } from "../../utilities/utils";
 import { ExtendedArchiviView } from "./extendend-archivi-view";
 
 export enum ArchiviListMode {
@@ -164,7 +164,8 @@ export const TipoArchivioTraduzioneVisualizzazione = [
 export const StatoArchivioTraduzioneVisualizzazione = [
   { value: StatoArchivio.PRECHIUSO, nome: "Prechiuso" },
   { value: StatoArchivio.APERTO, nome: "Aperto" },
-  { value: StatoArchivio.CHIUSO, nome: "Chiuso" }
+  { value: StatoArchivio.CHIUSO, nome: "Chiuso" },
+  { value: StatoArchivio.BOZZA, nome: "Bozza" },
 ];
 
 export const colsCSV: any[] = [
