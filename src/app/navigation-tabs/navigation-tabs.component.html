@@ -9,8 +9,7 @@
       <span>{{item.label}}</span>
     </ng-template>
     <ng-template pTemplate="content">
-      <tab-wrapper [item]="item"></tab-wrapper>
+      <tab-wrapper [item]="item" [id]="item.data?.id"></tab-wrapper>
     </ng-template>
   </p-tabPanel>
 </p-tabView>
-

@@ -1,5 +1,6 @@
 :host{
   height: 100%;
+  width: 100%;
 }
 ::ng-deep .p-table-scripta-archivi-list {
     /* CAPTION */
@@ -15,6 +16,7 @@
         align-self: center;
         .p-selectbutton {
           flex-wrap: nowrap;
+          display: flex;
           .p-button {
             border: 1px solid #9da3a9 !important;;
             color: #333333;
@@ -23,6 +25,9 @@
               color: #333333;
               background-color: #993366 !important;
               border-color: #993366 !important;
+            }
+            .p-button-label {
+              white-space: pre;
             }
           }
           .p-highlight {
@@ -42,15 +47,18 @@
       .p-inputtext {
         align-self: center;
         height: 33.72px;
+        min-width: 190px;
       }
       .refresh-button {
         margin-left: 1px;
+        min-width: 38px;
       }
       .alarm-button {
         background-color: orange !important;
         margin-left: 4px;
         border: 1px solid darkorange !important;
         color: black;
+        min-width: 38px;
       }
       @media screen and (max-width: 1280px) {
         font-size: 10pt;
@@ -68,6 +76,9 @@
             flex-wrap: nowrap;
             align-self: center;
             font-size: 10pt;
+            .p-button-label {
+              white-space: pre;
+            }
           }
         }
       }

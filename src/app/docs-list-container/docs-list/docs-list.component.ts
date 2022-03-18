@@ -1,35 +1,36 @@
 import { DatePipe } from "@angular/common";
-import { Component, ElementRef, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
+import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { CODICI_RUOLO, Persona, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService } from "@bds/ng-internauta-model";
-import { LOCAL_IT } from "@bds/nt-communicator";
+import { CODICI_RUOLO, Persona, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, ArchivioDetail } from "@bds/ng-internauta-model";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { buildLazyEventFiltersAndSorts, ColonnaBds, CsvExtractor } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from "@nfa/next-sdr";
-import { Confirmation, ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
+import { ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
 import { AutoComplete } from "primeng/autocomplete";
 import { Dropdown } from "primeng/dropdown";
 import { Calendar } from "primeng/calendar";
 import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
-import { AppService } from "../app.service";
-import { Impostazioni } from "../utilities/utils";
-import { cols, colsCSV, DocsListMode,StatoDocTraduzioneVisualizzazione, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
+import { AppService } from "../../app.service";
+import { Impostazioni } from "../../utilities/utils";
+import { cols, colsCSV, DocsListMode, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
 import { MultiSelect } from "primeng/multiselect";
-import { map } from "rxjs/operators";
-import { NavViews } from "../navigation-tabs/navigation-tabs-contants";
-import { TabComponent } from "../navigation-tabs/tab.component";
+import { NavViews } from "../../navigation-tabs/navigation-tabs-contants";
+import { TabComponent } from "../../navigation-tabs/tab.component";
+import { CaptionReferenceTableComponent } from '../../generic-caption-table/caption-reference-table.component';
+import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
+import { SelectButtonItem } from "../../generic-caption-table/select-button-item";
 
 @Component({
   selector: "docs-list",
   templateUrl: "./docs-list.component.html",
   styleUrls: ["./docs-list.component.scss"]
 })
-export class DocsListComponent implements OnInit, OnDestroy, TabComponent {
+export class DocsListComponent implements OnInit, OnDestroy, TabComponent, CaptionReferenceTableComponent, CaptionSelectButtonsComponent {
   @Input() data: any;
   private subscriptions: Subscription[] = [];
   private loadDocsListSubscription: Subscription;
@@ -50,7 +51,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent {
   @ViewChild("autocompleteIdStrutturaRegistrazione") public autocompleteIdStrutturaRegistrazione: AutoComplete;
   @ViewChild("autocompleteFirmatari") public autocompleteFirmatari: AutoComplete;
   @ViewChild("autocompleteSullaScrivaniaDi") public autocompleteSullaScrivaniaDi: AutoComplete;
-  @ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
+  //@ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
   @ViewChild("calendarcreazione") public calendarcreazione: Calendar;
   @ViewChild("columnFilterDataCreazione") public columnFilterDataCreazione: ColumnFilter;
 
@@ -77,8 +78,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent {
   public loading: boolean = false;
   public initialSortField: string = "dataCreazione";
   public exportCsvInProgress: boolean = false;
-  public docListModeItem: DocListModeItem[];
-  public selectedDocListMode: DocListModeItem = {
+  public selectButtonItems: SelectButtonItem[];
+  public selectedButtonItem: SelectButtonItem = {
     title: "",
     label: "Miei documenti", 
     // icon: "pi pi-fw pi-list", 
@@ -95,6 +96,12 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent {
   public filteredStati: any[];
   public filteredStatoUfficioAtti: any[];
   public aziendeFiltrabiliFiltered: any[];
+
+  private _archivio: Archivio | ArchivioDetail;
+  get archivio(): Archivio | ArchivioDetail { return this._archivio; }
+  @Input() set archivio(archivio: Archivio | ArchivioDetail) {
+    this._archivio = archivio;
+  }
 
   constructor(
     private messageService: MessageService,
@@ -125,7 +132,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent {
           this.utenteUtilitiesLogin = utenteUtilities;
           this.isSegretario = this.utenteUtilitiesLogin.getUtente().struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
           this.calcDocListModeItem();
-          this.selectedDocListMode = this.docListModeItem.filter(element => element.queryParams.mode === this.docsListMode)[0];
+          this.selectedButtonItem = this.selectButtonItems.filter(element => element.queryParams.mode === this.docsListMode)[0];
           if (this.docsListMode) {
             this.calcolaAziendeFiltrabili();
           }
@@ -158,8 +165,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent {
    * Costruisco i tab per l'EDI
    */
   public calcDocListModeItem(): void {
-    this.docListModeItem = [];
-    this.docListModeItem.push(
+    this.selectButtonItems = [];
+    this.selectButtonItems.push(
       {
         title: "Tutti i documenti che posso vedere",
         label: "Visibili", 
@@ -177,14 +184,14 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent {
     )
     
     if (this.isSegretario) {
-      this.docListModeItem.push({
+      this.selectButtonItems.push({
           label: "Firmario", 
           title: "Le proposte in scrivania dei responsabili",
           // icon: "pi pi-fw pi-user-edit", 
           routerLink: ["./" + DOCS_LIST_ROUTE], 
           queryParams: {"mode": DocsListMode.IFIRMARIO}
       });
-      this.docListModeItem.push({
+      this.selectButtonItems.push({
         label: "Firmati", 
         title: "Registrati dai responsabili",
         // icon: "pi pi-fw pi-user-edit", 
@@ -196,7 +203,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent {
     if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD)
         || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.OS)
         || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.MOS)) {
-      this.docListModeItem.push({
+      this.selectButtonItems.push({
         title: "",
         label: "Registrazioni", 
         // icon: "pi pi-fw pi-list", 
@@ -209,7 +216,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent {
   /**
    * Questa funzione gestisce il click del cambio tab
    */
-  public onChangeDocListMode(event: any): void {
+  public onSelectButtonItemSelection(event: any): void {
     this.docsListMode = event.option.queryParams.mode;
 
     // TODO: Se viene velocizzato il tab ifirmato allora si può cancellare questo if e togliere il setimeout
@@ -733,7 +740,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent {
    * @param table
    */
   public clear(): void {
-    this.inputGobalFilter.nativeElement.value = "";
+    //this.inputGobalFilter.nativeElement.value = "";
     if (this.autocompleteIdPersonaRedattrice) this.autocompleteIdPersonaRedattrice.writeValue(null);
     if (this.autocompleteidPersonaResponsabileProcedimento) this.autocompleteidPersonaResponsabileProcedimento.writeValue(null);
     if (this.autocompleteIdStrutturaRegistrazione) this.autocompleteIdStrutturaRegistrazione.writeValue(null);
@@ -762,7 +769,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent {
    * @param event
    * @param matchMode
    */
-  public applyFilterGlobal(event: Event, matchMode: string) {
+  public applyFilterGlobal(event: Event, matchMode: string): void {
     const stringa: string = (event.target as HTMLInputElement).value;
     if (!!!stringa || stringa === "") {
       this.resetSort();
@@ -1063,13 +1070,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent {
   }
 }
 
-export interface DocListModeItem {
+/* export interface DocListModeItem {
   label: string;
   title: string;
   // icon: string;
   routerLink: string[];
   queryParams: any;
-}
+} */
 
 export interface ValueAndLabelObj {
   value: number[];

@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { ArchiviListComponent } from '../archivi-list/archivi-list.component';
+import { Archivio, ArchivioDetail } from '@bds/ng-internauta-model';
+import { ArchiviListContainerComponent } from '../archivi-list-container/archivi-list-container.component';
 import { ArchivioComponent } from '../archivio/archivio.component';
 import { DocComponent } from '../doc/doc.component';
-import { DocsListComponent } from '../docs-list/docs-list.component';
+import { DocsListContainerComponent } from '../docs-list-container/docs-list-container.component';
 import { TabItem, TabType } from './tab-item';
 
 @Injectable()
@@ -23,8 +24,16 @@ export class NavigationTabsService {
     this.setTabsInSessionStorage();
   }
 
-  public updateTab(tabIndex: number, field: string, value: any) {
-    // TODO: L'update servirà per modificare label e id dei tab archivio    
+  /**
+   * Update del tab. Viene aggiornato il label
+   * e la proprietà data (che contiene ad es l'archivio e il suo id)
+   * @param tabIndex 
+   * @param label 
+   * @param data 
+   */
+  public updateTab(tabIndex: number, label: string, data: any) {
+    this.tabs[tabIndex].label = label;
+    this.tabs[tabIndex].data = data;
   }
 
   public getTabs() {
@@ -38,6 +47,12 @@ export class NavigationTabsService {
   public activeLastTab(): void {
     setTimeout(() => {
       this.activeTabIndex = this.tabs.length - 1; 
+    }, 0);
+  }
+
+  public activeTabByIndex(tabIndex: number): void {
+    setTimeout(() => {
+      this.activeTabIndex = tabIndex; 
     }, 0);
   }
 
@@ -56,10 +71,10 @@ export class NavigationTabsService {
       for (const tab of tabs) {
         switch (tab.type) {
           case TabType.DOCS_LIST:
-            tab.component = DocsListComponent;
+            tab.component = DocsListContainerComponent;
             break;
           case TabType.ARCHIVI_LIST:
-            tab.component = ArchiviListComponent;
+            tab.component = ArchiviListContainerComponent;
             break;
           case TabType.DOC:
             tab.component = DocComponent;
@@ -78,7 +93,7 @@ export class NavigationTabsService {
 
   public buildaTabDocsList(): TabItem {
     return new TabItem(
-      DocsListComponent,
+      DocsListContainerComponent,
       {  },
       false,
       "Documenti",
@@ -89,7 +104,7 @@ export class NavigationTabsService {
 
   public buildaTabArchiviList(): TabItem {
     return new TabItem(
-      ArchiviListComponent,
+      ArchiviListContainerComponent,
       {  },
       false,
       "Archivi",
@@ -98,7 +113,7 @@ export class NavigationTabsService {
     );
   }
 
-  public buildaTabDoc(idDoc: number, label: string): TabItem {
+  private buildaTabDoc(idDoc: number, label: string): TabItem {
     return new TabItem(
       DocComponent,
       { 
@@ -108,19 +123,46 @@ export class NavigationTabsService {
       label,
       "pi pi-fw pi-folder",
       TabType.DOC
-    )
+    );
   }
 
-  public buildaTabArchivio(idArchivio: number, label: string): TabItem {
+  private buildaTabArchivio(archivio: Archivio | ArchivioDetail, label: string): TabItem {
     return new TabItem(
       ArchivioComponent,
       { 
-        id: idArchivio
+        archivio: archivio,
+        id: archivio.id
       },
       true,
       label,
       "pi pi-fw pi-folder",
-      TabType.ARCHIVIO
-    )
+      TabType.ARCHIVIO,
+      archivio.fk_idArchivioRadice.id
+    );
+  }
+
+  /**
+   * Quando un archivio viene cliccato va controllato se esiste già il tab
+   * per la sua alberatura. Altrimenti si apre nuovo tab.
+   * @param archivio 
+   * @param active 
+   */
+  public addTabArchivio(archivio: Archivio | ArchivioDetail, active: boolean = true): void {
+    const tabIndex: number = this.tabs.findIndex(t => {
+      return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id
+    });
+    if (tabIndex !== -1) {
+      this.updateTab(tabIndex, archivio.numerazioneGerarchica, {archivio: archivio, id: archivio.id});
+      if (active) {
+        this.activeTabByIndex(tabIndex);
+      }
+    } else {
+      this.addTab(
+        this.buildaTabArchivio(archivio, archivio.numerazioneGerarchica)
+      );
+      if (active) {
+        this.activeLastTab();
+      }
+    }
   }
 }
