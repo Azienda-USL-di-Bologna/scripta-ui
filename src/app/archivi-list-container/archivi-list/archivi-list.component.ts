@@ -922,8 +922,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       archivioBozza.livello = 1;
       archivioBozza.numerazioneGerarchica = "x/x";
     }
-    console.log("archivioBozza", archivioBozza);
-    // archivioBozza.
     this.subscriptions.push(this.archivioService.postHttpCall(archivioBozza).subscribe((nuovoArchivioCreato: Archivio) => {      
         this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
     }));
