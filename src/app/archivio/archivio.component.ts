@@ -20,6 +20,7 @@ export class ArchivioComponent implements AfterViewInit, TabComponent, CaptionSe
   get archivio(): ArchivioDetail { return this._archivio; }
   @Input() set data(data: any) {
     this._archivio = data.archivio;
+    this.inizializeAll();
   }
 
   @ViewChild("archivilist") public archivilist: ArchiviListComponent;
@@ -36,6 +37,10 @@ export class ArchivioComponent implements AfterViewInit, TabComponent, CaptionSe
   
   ngAfterViewInit(): void {
     console.log(this.archivio.stato)
+    this.inizializeAll();
+  }
+
+  private inizializeAll(): void{
     this.buildSelectButtonItems();
     if (this.archivio.stato === StatoArchivio.BOZZA) {
       this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
