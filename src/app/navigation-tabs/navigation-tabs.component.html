@@ -1,7 +1,6 @@
 <p-tabView 
   styleClass="navigation-tabview" 
   [(activeIndex)]="navigationTabsService.activeTabIndex"
-  (onChange)="onChangeTab($event)"
   (onClose)="onCloseTab($event)">
   <p-tabPanel *ngFor="let item of tabItems" [closable]="item.closable">
     <ng-template pTemplate = "header">

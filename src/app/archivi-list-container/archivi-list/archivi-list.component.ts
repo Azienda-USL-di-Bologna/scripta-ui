@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { Archivio, ArchivioDetail, ArchivioDetailService, ArchivioDetailView, ArchivioService, Azienda, Persona, PersonaService, StatoArchivio, Struttura, StrutturaService, TipoArchivio } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio } from '@bds/ng-internauta-model';
 import { AppService } from '../../app.service';
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { Subscription } from 'rxjs';
@@ -44,9 +44,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   @ViewChild("autocompleteVicari") public autocompleteVicari: AutoComplete;
   @ViewChild("dt") public dataTable: Table;
   @ViewChild("columnFilterDataCreazione") public columnFilterDataCreazione: ColumnFilter;
-  //@ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
-
-  private projection = "ArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari";
 
   public archivi: ExtendedArchiviView[] = [];
   public archiviListMode: ArchiviListMode;
@@ -108,6 +105,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     private archivioService: ArchivioService,
     private confirmationService: ConfirmationService,
     private archivioDetailService: ArchivioDetailService,
+    private archivioDetailViewService: ArchivioDetailViewService,
     private navigationTabsService: NavigationTabsService,
     private strutturaService: StrutturaService,
     private personaService: PersonaService,
@@ -240,31 +238,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   */
   public calcArchiviListModeItem(): void {
     this.selectButtonItems = [];
-    /* if (this.archivioPadre) {
-      this.selectButtonItems.push(
-        {
-          title: "",
-          label: "Archivi figli",
-          // icon: "pi pi-fw pi-list", 
-          routerLink: ["./"],
-          queryParams: { "mode": ArchiviListMode.VISIBILI }
-        },
-        {
-          title: "",
-          label: "Documenti",
-          // icon: "pi pi-fw pi-list", 
-          routerLink: ["./"],
-          queryParams: { "mode": ArchiviListMode.VISIBILI }
-        },
-        {
-          title: "",
-          label: "Dettaglio",
-          // icon: "pi pi-fw pi-list", 
-          routerLink: [  ],
-          queryParams: {  }
-        }
-      );
-    } else { */
       this.selectButtonItems.push(
         {
           title: "Tutti gli archivi che posso vedere",
@@ -293,9 +266,15 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
           // icon: "pi pi-fw pi-list", 
           routerLink: ["./" + ARCHIVI_LIST_ROUTE],
           queryParams: { "mode": ArchiviListMode.FREQUENTI }
+        },
+        {
+          title: "",
+          label: "Tutti",
+          // icon: "pi pi-fw pi-list", 
+          routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+          queryParams: { "mode": ArchiviListMode.TUTTI }
         }
       );
-    /* } */
   }
 
   private calcAziendeFiltrabili() {
@@ -359,7 +338,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       mode: "PAGE_NO_COUNT"
     };
     this.archivioDetailService.getData(
-      this.projection,
+      this.projectionToGetData,
       null,
       null,
       pageConfNoLimit)
@@ -462,8 +441,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       this.loadArchiviListSubscription = null;
     }
     const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
-    this.loadArchiviListSubscription = this.archivioDetailService.getData(
-      this.projection,
+    this.loadArchiviListSubscription = this.serviceToGetData.getData(
+      this.projectionToGetData,
       filtersAndSorts,
       buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
       this.pageConf).subscribe((data: any) => {
@@ -566,13 +545,13 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
  * @returns
  */
   private buildCustomFilterAndSort(): FiltersAndSorts {
-
-    //filter to display only children of archivi when archivio tab is open
+    // filter to display only children of archivi when archivio tab is open
     const filterAndSort = new FiltersAndSorts();
     if (this.archivioPadre) {
-      filterAndSort.addFilter(new FilterDefinition("idArchivioPadre", FILTER_TYPES.not_string.equals, this.archivioPadre.id));
+      filterAndSort.addFilter(new FilterDefinition("idArchivioPadre.id", FILTER_TYPES.not_string.equals, this.archivioPadre.id));
+      
+      this.archiviListMode = ArchiviListMode.VISIBILI;
     }
-    
 
     switch (this.archiviListMode) {
       // case ArchiviListMode.RECENTI:
@@ -582,11 +561,16 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       //   this.projectionToGetData = this.projection;
       //   break;
       case ArchiviListMode.VISIBILI:
+        // Uso la vista che fa join con i permessi. E cerco solo archivi in cui io sono presente
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
-        filterAndSort.addFilter(new FilterDefinition("mioDocumento", FILTER_TYPES.not_string.equals, true));
+        this.initialSortField = "dataCreazione";
+        this.serviceToGetData = this.archivioDetailViewService;
+        this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
+        break;
+      case ArchiviListMode.TUTTI:
         this.initialSortField = "dataCreazione";
         this.serviceToGetData = this.archivioDetailService;
-        this.projectionToGetData = this.projection;
+        this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
         break;
       // case ArchiviListMode.PREFERITI:
       //   filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
@@ -600,9 +584,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       //   this.serviceToGetData = this.archivioDetailService;
       //   this.projectionToGetData = this.projection;
       //   break;
-
     }
-
     return filterAndSort;
   }
 
@@ -922,6 +904,15 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       archivioBozza.livello = 1;
       archivioBozza.numerazioneGerarchica = "x/x";
     }
+
+    const idPersonaCreazione = new AttoreArchivio();
+    idPersonaCreazione.idPersona = {
+      id: this.utenteUtilitiesLogin.getUtente().idPersona.id
+    } as Persona;
+    idPersonaCreazione.ruolo = RuoloAttoreArchivio.CREATORE;
+
+    archivioBozza.attoriList = [idPersonaCreazione];
+
     this.subscriptions.push(this.archivioService.postHttpCall(archivioBozza).subscribe((nuovoArchivioCreato: Archivio) => {      
         this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
     }));

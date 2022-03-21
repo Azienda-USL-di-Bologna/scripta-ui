@@ -14,8 +14,8 @@ import { DettaglioArchivioComponent } from "./dettaglio-archivio/dettaglio-archi
     ScriptaCommonModule
   ],
   declarations: [
-    ArchivioComponent,
-    DettaglioArchivioComponent
+    /* ArchivioComponent,
+    DettaglioArchivioComponent */
   ],
   providers: []
 })
