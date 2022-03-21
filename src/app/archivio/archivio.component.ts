@@ -41,7 +41,7 @@ export class ArchivioComponent implements AfterViewInit, TabComponent, CaptionSe
   }
 
   private inizializeAll(): void{
-    this.buildSelectButtonItems();
+    this.buildSelectButtonItems(this._archivio);
     if (this.archivio.stato === StatoArchivio.BOZZA) {
       this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
       this.setForDettaglio();
@@ -93,24 +93,59 @@ export class ArchivioComponent implements AfterViewInit, TabComponent, CaptionSe
    * In particolare se l'archivio aperto è un inserto allora
    * non sarà presente l'opzione sottoarchvi.
    */
-  public buildSelectButtonItems(): void {
+  public buildSelectButtonItems(archivio: ArchivioDetail): void {
     this.selectButtonItems = [];
-    this.selectButtonItems.push(
-      {
-        id: SelectButton.SOTTOARCHIVI,
-        label: "Archivi figli",
-        disabled: this.archivio.stato === StatoArchivio.BOZZA
-      },
-      {
-        id: SelectButton.DOCUMENTI,
-        label: "Documenti",
-        disabled: this.archivio.stato === StatoArchivio.BOZZA
-      },
-      {
-        id: SelectButton.DETTAGLIO,
-        label: "Dettaglio"
-      }
-    );
+    if(archivio.livello == 1) {
+      this.selectButtonItems.push(
+        {
+          id: SelectButton.SOTTOARCHIVI,
+          label: "Sottofascicoli",
+          disabled: this.archivio.stato === StatoArchivio.BOZZA
+        },
+        {
+          id: SelectButton.DOCUMENTI,
+          label: "Documenti",
+          disabled: this.archivio.stato === StatoArchivio.BOZZA
+        },
+        {
+          id: SelectButton.DETTAGLIO,
+          label: "Dettaglio"
+        }
+      );
+    }
+    if(archivio.livello == 2) {
+      this.selectButtonItems.push(
+        {
+          id: SelectButton.SOTTOARCHIVI,
+          label: "Inserti",
+          disabled: this.archivio.stato === StatoArchivio.BOZZA
+        },
+        {
+          id: SelectButton.DOCUMENTI,
+          label: "Documenti",
+          disabled: this.archivio.stato === StatoArchivio.BOZZA
+        },
+        {
+          id: SelectButton.DETTAGLIO,
+          label: "Dettaglio"
+        }
+      );
+    }
+    if(archivio.livello == 3) {
+      this.selectButtonItems.push(
+        {
+          id: SelectButton.DOCUMENTI,
+          label: "Documenti",
+          disabled: this.archivio.stato === StatoArchivio.BOZZA
+        },
+        {
+          id: SelectButton.DETTAGLIO,
+          label: "Dettaglio"
+        }
+      );
+    }
+
+    
   }
 }
 
