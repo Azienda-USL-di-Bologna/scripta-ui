@@ -95,57 +95,38 @@ export class ArchivioComponent implements AfterViewInit, TabComponent, CaptionSe
    */
   public buildSelectButtonItems(archivio: ArchivioDetail): void {
     this.selectButtonItems = [];
-    if(archivio.livello == 1) {
-      this.selectButtonItems.push(
-        {
-          id: SelectButton.SOTTOARCHIVI,
-          label: "Sottofascicoli",
-          disabled: this.archivio.stato === StatoArchivio.BOZZA
-        },
-        {
-          id: SelectButton.DOCUMENTI,
-          label: "Documenti",
-          disabled: this.archivio.stato === StatoArchivio.BOZZA
-        },
-        {
-          id: SelectButton.DETTAGLIO,
-          label: "Dettaglio"
-        }
-      );
+    switch (archivio.livello) {
+      case 1:
+        this.selectButtonItems.push(
+          {
+            id: SelectButton.SOTTOARCHIVI,
+            label: "Sottofascicoli",
+            disabled: this.archivio.stato === StatoArchivio.BOZZA
+          }
+        );
+      break;
+      case 2:
+        this.selectButtonItems.push(
+          {
+            id: SelectButton.SOTTOARCHIVI,
+            label: "Inserti",
+            disabled: this.archivio.stato === StatoArchivio.BOZZA
+          }
+        );
+      break;
     }
-    if(archivio.livello == 2) {
-      this.selectButtonItems.push(
-        {
-          id: SelectButton.SOTTOARCHIVI,
-          label: "Inserti",
-          disabled: this.archivio.stato === StatoArchivio.BOZZA
-        },
-        {
-          id: SelectButton.DOCUMENTI,
-          label: "Documenti",
-          disabled: this.archivio.stato === StatoArchivio.BOZZA
-        },
-        {
-          id: SelectButton.DETTAGLIO,
-          label: "Dettaglio"
-        }
-      );
-    }
-    if(archivio.livello == 3) {
-      this.selectButtonItems.push(
-        {
-          id: SelectButton.DOCUMENTI,
-          label: "Documenti",
-          disabled: this.archivio.stato === StatoArchivio.BOZZA
-        },
-        {
-          id: SelectButton.DETTAGLIO,
-          label: "Dettaglio"
-        }
-      );
-    }
-
     
+    this.selectButtonItems.push(
+      {
+        id: SelectButton.DOCUMENTI,
+        label: "Documenti",
+        disabled: this.archivio.stato === StatoArchivio.BOZZA
+      },
+      {
+        id: SelectButton.DETTAGLIO,
+        label: "Dettaglio"
+      }
+    );
   }
 }
 
