@@ -29,6 +29,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public dataProtocolloEsterno: Date;
   public numeroVisualizzazione: string;
   private projection: string = ENTITIES_STRUCTURE.scripta.doc.customProjections.DocWithAll;
+  public yearOfProposta: string;
 
   constructor(
     private router: Router,
@@ -36,7 +37,9 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     private loginService: NtJwtLoginService,
     private messageService: MessageService,
     private route: ActivatedRoute,
-    private appService: AppService) { }
+    private appService: AppService) { 
+      
+    }
 
   ngOnInit(): void {
     this.subscriptions.push(
@@ -58,10 +61,11 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
       )).subscribe((res: Doc) => {
         this.setFreezeDocumento(false);
         console.log("res", res);
-        this.doc = res;
+        this.doc = res;  
         if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG).length > 0) {
           this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
         }
+        this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
         this.appService.appNameSelection("PEIS - " + this.doc.idAzienda.descrizione);
         this.router.navigate(
           [], 
@@ -81,6 +85,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
         });
       })
     );
+    
   }
 
   ngAfterViewInit() {
@@ -284,6 +289,8 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     }
   }
+
+
 
   public ngOnDestroy() {
     if (this.subscriptions) {

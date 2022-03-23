@@ -1,0 +1,108 @@
+<div class="generic-caption-table-row">
+  <div class="left-content">
+    <div class="p-d-flex">
+      <!-- RICERCA -->
+      <span class="box-ricerca">
+        <span class="p-input-icon-left p-ml-auto">
+          <i class="pi pi-search"></i>
+          <input #inputGobalFilter pInputText 
+            [disabled]="!configuration.searchBox"
+            type="text" 
+            (input)="referenceTableComponent.removeSort(); referenceTableComponent.applyFilterGlobal($event, 'equals')" 
+            placeholder="Ricerca.. " />
+        </span>
+        <!-- BOTTONE AGGIORNA RICERCA -->
+        <button pButton 
+          [disabled]="!configuration.searchBox"
+          class="p-button-outlined refresh-button" 
+          icon="pi pi-filter" 
+          pTooltip="Applica i filtri. Aggiorna"
+          aria-label="Applica i filtri"
+          tooltipPosition="bottom"
+          (click)="referenceTableComponent.resetPaginationAndLoadData()">
+        </button>
+        <!-- BOTTONE RESETTA RICERCA -->
+        <button pButton 
+          [disabled]="!configuration.searchBox"
+          class="p-button-outlined alarm-button" 
+          icon="pi pi-filter-slash" 
+          pTooltip="Svuota i filtri"
+          aria-label="Svuota i filtri"
+          tooltipPosition="bottom"
+          (click)="inputGobalFilter.value = ''; referenceTableComponent.clear()">
+        </button>
+      </span>
+      <!-- ELENCO TAB -->
+      <p-selectButton *ngIf="configuration.selectButtons"
+        class="tabs"
+        [options]="selectButtonsComponent.selectButtonItems" 
+        [(ngModel)]="selectButtonsComponent.selectedButtonItem" 
+        optionLabel="label"
+        (onOptionClick)="inputGobalFilter.value = ''; selectButtonsComponent.onSelectButtonItemSelection($event)">
+      </p-selectButton>
+    </div>
+  </div>
+  <div class="right-content">
+    <!-- BOTTONE NUOVO ARCHIVIO -->
+    <span *ngIf="configuration.newArchivio">
+      <button
+        type="button" 
+        pButton 
+        pRipple 
+        icon="pi pi-plus" 
+        (click)="addArchivioClicked(); aziendaSelection.toggle($event);" 
+        class="p-mr-2" 
+        pTooltip="Crea nuovo archivio"
+        aria-label="Crea un nuovo archivio"
+        tooltipPosition="bottom">
+      </button>
+      <p-menu
+        #aziendaSelection
+        [model]="aziendeMenuItems"
+        [popup]="true">
+      </p-menu>
+    </span>
+    <!-- PROGRESS SPINNER -->
+    <span *ngIf="configuration.exportButton">
+      <span *ngIf="referenceTableComponent.exportCsvInProgress">
+        <p-progressSpinner 
+          [style]="{width: '2em', height: '2em', marginRight: '7px'}"
+          strokeWidth="8" 
+          fill="#FFFFFF" 
+          animationDuration=".5s">
+        </p-progressSpinner>
+      </span>
+      <!-- BOTTONE ESPORTA -->
+      <button
+        type="button" 
+        pButton 
+        pRipple 
+        icon="pi pi-file-o" 
+        (click)="referenceTableComponent.exportCSV(referenceTableComponent.dataTable)" 
+        class="p-mr-2" 
+        pTooltip="CSV"
+        aria-label="Scarica il csv della tabella"
+        tooltipPosition="bottom">
+      </button>
+    </span>
+    <!-- SELEZIONE COLONNE -->
+    <p-multiSelect #ms
+      *ngIf="configuration.selectableColumns && !accessibile"
+      [options]="referenceTableComponent.selectableColumns" 
+      [(ngModel)]="referenceTableComponent.selectedColumns" 
+      (onChange)="referenceTableComponent.onChangeSelectedColumns($event)"
+      optionLabel="header" 
+      optionDisabled="selectionDisabled"
+      [showHeader]="false"
+      selectedItemsLabel="{0} colonne selezionate"
+      [style]="{minWidth: '250px', maxWidth: '250px'}" 
+      placeholder="Scegli le colonne da visualizzare"
+      aria-label="Scegli le colonne da visualizzare">
+      <ng-template let-column pTemplate="item"  >
+          <div class="column-item">
+            <span >{{column.header}}</span>
+          </div>
+      </ng-template>
+    </p-multiSelect>
+  </div>
+</div>

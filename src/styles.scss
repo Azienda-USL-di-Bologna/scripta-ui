@@ -7,6 +7,10 @@
 @import '../node_modules/@bds/common-components/assets/bds-styles/custom-classes.scss';
 @import '../node_modules/@bds/common-components/assets/bds-styles/basic.scss';
 
+*:focus {
+  box-shadow: none !important;
+}
+
 prp-header {
   div {
     height: 42px !important;

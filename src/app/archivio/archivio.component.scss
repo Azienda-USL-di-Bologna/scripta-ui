@@ -1,4 +1,18 @@
-main{
-    margin: 0rem 1.5rem;
-    height: 100%;
+:host ::ng-deep {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  p-splitter {
+    flex: 1 1 0;
+    .splitter-archivio {
+      height: 100%;
+      .p-splitter-panel {
+        overflow: hidden;
+        .hide {
+          display: none;
+        }
+      }
+    }
+  }
 }

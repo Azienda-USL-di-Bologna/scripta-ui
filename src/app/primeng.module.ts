@@ -26,9 +26,8 @@ import { DropdownModule } from 'primeng/dropdown';
 import { TabViewModule } from 'primeng/tabview';
 import { SplitterModule } from 'primeng/splitter';
 import { TreeModule } from 'primeng/tree';
-
-
-
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { MenuModule } from 'primeng/menu';
 
 
 @NgModule({
@@ -62,6 +61,8 @@ import { TreeModule } from 'primeng/tree';
     TabViewModule,
     SplitterModule,
     TreeModule,
+    BreadcrumbModule,
+    MenuModule
   ],
   exports: [
     ButtonModule,
@@ -91,6 +92,8 @@ import { TreeModule } from 'primeng/tree';
     TabViewModule,
     SplitterModule,
     TreeModule,
+    BreadcrumbModule,
+    MenuModule
   ],
   providers: [MessageService, DialogService]
 })
