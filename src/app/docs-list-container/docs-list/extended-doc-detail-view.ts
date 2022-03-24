@@ -124,6 +124,18 @@ export class ExtendedDocDetailView extends DocDetailView {
         this.tipologiaVisualizzazione = "Delibera";
         this.codiceRegistro = "DELI";
         break;
+      case TipologiaDoc.DOCUMENT_PEC:
+        this.tipologiaVisualizzazione = "Delibera";
+        this.codiceRegistro = "DELI";
+        break;
+      case TipologiaDoc.DOCUMENT_REGISTRO:
+        this.tipologiaVisualizzazione = "Delibera";
+        this.codiceRegistro = "DELI";
+        break;
+      case TipologiaDoc.DOCUMENT_UTENTE:
+        this.tipologiaVisualizzazione = "Delibera";
+        this.codiceRegistro = "DELI";
+        break;
       default:
         this.tipologiaVisualizzazione = "Errore";
         this.codiceRegistro = "Err";

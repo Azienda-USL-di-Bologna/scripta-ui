@@ -570,6 +570,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       case ArchiviListMode.TUTTI:
         this.initialSortField = "dataCreazione";
         this.serviceToGetData = this.archivioDetailService;
+        filterAndSort.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
         this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
         break;
       // case ArchiviListMode.PREFERITI:
