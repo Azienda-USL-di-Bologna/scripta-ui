@@ -7,20 +7,20 @@ const routes: Routes = [
   {
     path: "",
     component: NavigationTabsComponent,
-    children: [
+    /* children: [
       {
         path: DOCS_LIST_ROUTE, 
-        loadChildren: () => import("../docs-list-container/docs-list/docs-list.module").then(m => m.DocsListModule)
+        loadChildren: () => import("../docs-list-container/docs-list-container.module").then(m => m.DocsListContainerModule)
       },
       {
         path: ARCHIVI_LIST_ROUTE,
-        loadChildren: () => import("../archivi-list-container/archivi-list/archivi-list.module").then(m => m.ArchiviListModule)
+        loadChildren: () => import("../archivi-list-container/archivi-list-container.module").then(m => m.ArchiviListContainerModule)
       },
       {
         path: ARCHIVIO_ROUTE,
         loadChildren: () => import("../archivio/archivio.module").then(m => m.ArchivioModule)
       }
-    ]
+    ] */
   },
 ];
 

@@ -124,7 +124,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (!Object.values(DocsListMode).includes(this.docsListMode)) {
       this.docsListMode = DocsListMode.MIEI_DOCUMENTI;
     }
-    this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.DOCUMENTI, mode: this.docsListMode } }); 
+    //this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.DOCUMENTI, mode: this.docsListMode } }); 
     
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
@@ -224,9 +224,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.initialSortField = "dataCreazione";
       //this.initialSortField = "dataRegistrazione";
     }
-    setTimeout(() => {
+    /* setTimeout(() => {
       this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
-    }, 0);
+    }, 0); */
   }
 
   @Input() get selectedColumns(): any[] {

@@ -119,7 +119,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     if (!Object.values(ArchiviListMode).includes(this.archiviListMode)) {
       this.archiviListMode = ArchiviListMode.VISIBILI;
     }
-    this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } });
+    //this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } });
 
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
@@ -315,9 +315,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   public onSelectButtonItemSelection(event: any): void {
     this.archiviListMode = event.option.queryParams.mode;
 
-    setTimeout(() => {
+    /* setTimeout(() => {
       this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
-    }, 0);
+    }, 0); */
   }
 
 

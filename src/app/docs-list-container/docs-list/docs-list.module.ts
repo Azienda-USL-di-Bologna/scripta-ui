@@ -15,11 +15,14 @@ import { ExtendedDocDetailService } from "./extended-doc-detail.service";
     ScriptaCommonModule
   ],
   declarations: [
-    //DocsListComponent
+    DocsListComponent
   ],
   providers: [
     ExtendedDocDetailService,
     ExtendedDocDetailViewService
+  ],
+  exports: [
+    DocsListComponent
   ]
 })
 export class DocsListModule { }
