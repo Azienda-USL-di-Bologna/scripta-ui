@@ -142,11 +142,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     /* Mi sottoscrivo alla rotta per leggere la modalita dell'elenco documenti
     e faccio partire il caricamento. Ogni volta che la modalità cambia
     rifaccio la loadData */
-    this.route.queryParams.subscribe(params => {
+    /* this.route.queryParams.subscribe(params => {
       //this.docsListMode = params["mode"];
       if (this.utenteUtilitiesLogin) this.calcAziendeFiltrabili();
       this.resetPaginationAndLoadData();
-    });
+    }); */
   }
 
   /**
@@ -318,6 +318,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     /* setTimeout(() => {
       this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
     }, 0); */
+    if (this.utenteUtilitiesLogin) this.calcAziendeFiltrabili();
+    this.resetPaginationAndLoadData();
   }
 
 

@@ -7,7 +7,7 @@ const routes: Routes = [
   {
     path: "",
     component: NavigationTabsComponent,
-    /* children: [
+    children: [
       {
         path: DOCS_LIST_ROUTE, 
         loadChildren: () => import("../docs-list-container/docs-list-container.module").then(m => m.DocsListContainerModule)
@@ -20,7 +20,7 @@ const routes: Routes = [
         path: ARCHIVIO_ROUTE,
         loadChildren: () => import("../archivio/archivio.module").then(m => m.ArchivioModule)
       }
-    ] */
+    ]
   },
 ];
 

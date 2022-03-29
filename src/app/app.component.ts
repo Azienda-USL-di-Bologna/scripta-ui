@@ -18,7 +18,7 @@ export class AppComponent implements OnInit {
   public headerFeaturesConfig: HeaderFeaturesConfig = new HeaderFeaturesConfig();
   private subscriptions: Subscription[] = [];
   public utenteConnesso: UtenteUtilities | undefined;
-  public appName = "";
+  public appName: string;
 
   constructor(
     public loginService: NtJwtLoginService,
@@ -64,7 +64,9 @@ export class AppComponent implements OnInit {
         params, this.loginService, this.router, '/' + LOGIN_ROUTE)));
 
     this.subscriptions.push(this.appService.appNameEvent.subscribe((appName: string) => {
-      this.appName = appName;
+      setTimeout(() => {
+        this.appName = appName;
+      }, 0);
     }));
   }
 }
