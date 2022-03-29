@@ -124,7 +124,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (!Object.values(DocsListMode).includes(this.docsListMode)) {
       this.docsListMode = DocsListMode.MIEI_DOCUMENTI;
     }
-    this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.DOCUMENTI, mode: this.docsListMode } }); 
+    //this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.DOCUMENTI, mode: this.docsListMode } }); 
     
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
@@ -154,11 +154,11 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     /* Mi sottoscrivo alla rotta per leggere la modalita dell'elenco documenti
       e faccio partire il caricamento. Ogni volta che la modalità cambia
       rifaccio la loadData */
-    this.route.queryParams.subscribe(params => {
+    /* this.route.queryParams.subscribe(params => {
       //this.docsListMode = params["mode"];
       if (this.utenteUtilitiesLogin) this.calcolaAziendeFiltrabili();
       this.resetPaginationAndLoadData();
-    });
+    }); */
   }
 
   /**
@@ -224,9 +224,11 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.initialSortField = "dataCreazione";
       //this.initialSortField = "dataRegistrazione";
     }
-    setTimeout(() => {
+    /* setTimeout(() => {
       this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
-    }, 0);
+    }, 0); */
+    if (this.utenteUtilitiesLogin) this.calcolaAziendeFiltrabili();
+    this.resetPaginationAndLoadData();
   }
 
   @Input() get selectedColumns(): any[] {

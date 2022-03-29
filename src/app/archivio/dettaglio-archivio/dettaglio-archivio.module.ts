@@ -7,27 +7,21 @@ import { ArchivioRoutingModule } from "./archivio-routings.module";
 import { DettaglioArchivioComponent } from "./dettaglio-archivio/dettaglio-archivio.component";
 import { ArchivioTreeComponent } from "./archivio-tree/archivio-tree.component";
 import { GenericCaptionTableModule } from "../generic-caption-table/generic-caption-table.module";
-import { ArchiviListModule } from "../archivi-list-container/archivi-list/archivi-list.module";
-import { DocsListModule } from "../docs-list-container/docs-list/docs-list.module";
+import { DocsListModule } from "src/app/docs-list-container/docs-list/docs-list.module";
 
 @NgModule({
   imports: [
     CommonModule,
-    ArchivioRoutingModule,
     PrimeNgModule,
     ScriptaCommonModule,
-    GenericCaptionTableModule,
-    DocsListModule,
-    ArchiviListModule,
+    
   ],
   declarations: [
-    ArchivioComponent,
     DettaglioArchivioComponent,
-    ArchivioTreeComponent,
   ],
   exports: [
-
+    DettaglioArchivioComponent,
   ],
   providers: []
 })
-export class ArchivioModule { }
+export class DettaglioArchivioModule { }
