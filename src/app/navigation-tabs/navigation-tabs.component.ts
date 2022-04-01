@@ -4,7 +4,7 @@ import { Subscription } from "rxjs";
 import { ConfigurazioneService, ParametroAziende } from "@bds/ng-internauta-model";
 import { NavigationTabsService } from "./navigation-tabs.service";
 import { TabItem } from "./tab-item";
-import { ActivatedRoute } from "@angular/router";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "navigation-tabs",
@@ -21,16 +21,24 @@ export class NavigationTabsComponent implements OnInit {
     private loginService: NtJwtLoginService,
     private configurazioneService: ConfigurazioneService,
     public navigationTabsService: NavigationTabsService,
-    private route: ActivatedRoute
+    //private route: ActivatedRoute,
+    private router: Router
   ) {
-    this.route.queryParams.subscribe(params => {
+    console.log(this.router)
+    if (this.router.routerState.snapshot.url.includes("archivilist")) {
+      this.navigationTabsService.activeTabIndex = 1;
+    } else {
+      this.navigationTabsService.activeTabIndex = 0;
+    }
+    /* this.route.queryParams.subscribe(params => {
+      console.log("params", params)
       this.tabName = params['view'];
       if(this.tabName == 'FASCICOLI') {
         this.navigationTabsService.activeTabIndex = 1;
       } else {
         this.navigationTabsService.activeTabIndex = 0;
       }
-    });
+    }); */
   }
 
   ngOnInit(): void {

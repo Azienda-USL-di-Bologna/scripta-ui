@@ -20,6 +20,7 @@ export class ArchivioComponent implements AfterViewInit, TabComponent, CaptionSe
   get archivio(): ArchivioDetail { return this._archivio; }
   @Input() set data(data: any) {
     this._archivio = data.archivio;
+    this.inizializeAll();
   }
 
   @ViewChild("archivilist") public archivilist: ArchiviListComponent;
@@ -36,7 +37,11 @@ export class ArchivioComponent implements AfterViewInit, TabComponent, CaptionSe
   
   ngAfterViewInit(): void {
     console.log(this.archivio.stato)
-    this.buildSelectButtonItems();
+    this.inizializeAll();
+  }
+
+  private inizializeAll(): void{
+    this.buildSelectButtonItems(this._archivio);
     if (this.archivio.stato === StatoArchivio.BOZZA) {
       this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
       this.setForDettaglio();
@@ -88,14 +93,30 @@ export class ArchivioComponent implements AfterViewInit, TabComponent, CaptionSe
    * In particolare se l'archivio aperto è un inserto allora
    * non sarà presente l'opzione sottoarchvi.
    */
-  public buildSelectButtonItems(): void {
+  public buildSelectButtonItems(archivio: ArchivioDetail): void {
     this.selectButtonItems = [];
+    switch (archivio.livello) {
+      case 1:
+        this.selectButtonItems.push(
+          {
+            id: SelectButton.SOTTOARCHIVI,
+            label: "Sottofascicoli",
+            disabled: this.archivio.stato === StatoArchivio.BOZZA
+          }
+        );
+      break;
+      case 2:
+        this.selectButtonItems.push(
+          {
+            id: SelectButton.SOTTOARCHIVI,
+            label: "Inserti",
+            disabled: this.archivio.stato === StatoArchivio.BOZZA
+          }
+        );
+      break;
+    }
+    
     this.selectButtonItems.push(
-      {
-        id: SelectButton.SOTTOARCHIVI,
-        label: "Archivi figli",
-        disabled: this.archivio.stato === StatoArchivio.BOZZA
-      },
       {
         id: SelectButton.DOCUMENTI,
         label: "Documenti",

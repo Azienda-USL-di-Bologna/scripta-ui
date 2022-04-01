@@ -9,7 +9,8 @@ export enum ArchiviListMode {
   RECENTI = "RECENTI",
   VISIBILI = "VISIBILI",
   FREQUENTI = "FREQUENTI",
-  PREFERITI = "PREFERITI"
+  PREFERITI = "PREFERITI",
+  TUTTI = "TUTTI"
 }
 
 export const cols: ColonnaBds[] = [
