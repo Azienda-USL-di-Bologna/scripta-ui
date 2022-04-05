@@ -63,8 +63,28 @@
         <span class="header-box" [pTooltip]="col.sortField ? null : 'Colonna non ordinabile'"
           [attr.aria-label]="col.label">
           {{col.header}}
-          <p-sortIcon *ngIf="col.sortField" [field]="col.sortField">
-          </p-sortIcon>
+          <p-sortIcon *ngIf="col.sortField" [field]="col.sortField"></p-sortIcon>
+
+          <i *ngIf="col.field === 'numerazioneGerarchica'" 
+            class="pi pi-info-circle info-numerazione-gerarchica" 
+            (click)="op.toggle($event)"
+            pTooltip="Scopri come usare al meglio la ricerca per numerazione">
+          </i>
+          <p-overlayPanel #op 
+            appendTo="body"
+            styleClass="overlaypanel-info-numerazione"
+            [showCloseIcon]="true">
+            <ng-template pTemplate>
+              <p>Questo filtro può essere usato per cercare un fascicolo per numero oppure per numerazione gerarchica. Di seguito alcuni esempi</p>
+              <ul>
+                <li>Seleziona il livello Sottofascicolo e scrivi nella ricerca il numero del sottofascicolo desiderato</li>
+                <li>Seleziona il livello Tutti e scrivi una numerazione gerarchica completa (es 23-1/2018) per trovare immediatamente il fascicolo desiderato</li>
+                <li>Non ti ricordi l'esatta numerazione? Inserisci quello che ti ricordi a partire dal livello più importante, ad es. con 23- troverari tutti i sottofascioli/inserti figli del fascicolo 23</li>
+              </ul>
+              Ricorda: usa poi il filtro sulla data di creazione o altri ancora per trovare più facilmente ciò che desideri.
+            </ng-template>
+          </p-overlayPanel>
+
         </span>
       </th>
     </tr>

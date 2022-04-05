@@ -113,6 +113,12 @@
           justify-content: space-between;
         }
       }
+      .info-numerazione-gerarchica {
+        color:#203244;
+        &:hover {
+          color: #936;
+        }
+      }
     }
     .filter-row {
       @media screen and (max-width: 1280px) {
@@ -339,6 +345,11 @@
       font-size: 18px;
       margin-right: 4px;
     }
+  }
+}
+::ng-deep {
+  .overlaypanel-info-numerazione {
+    width: 500px;
   }
 }
   
