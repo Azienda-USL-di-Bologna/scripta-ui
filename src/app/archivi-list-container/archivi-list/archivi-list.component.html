@@ -329,24 +329,59 @@
           {{rowData.tipoVisualizzazione}}
         </div>
         <div *ngSwitchCase="'numerazioneGerarchica'" class="numerazione-box">
-          <div *ngIf="rowData.livello == 1" class="box-livello-1">
-            <span class="material-icons folder_outline-icon" pTooltip="Fascicolo" tooltipPosition="top">
+          <div class="left-side">
+            <span [ngStyle]="{
+              'color': rowData.livello === 1 ? '#92225f' : 
+                (rowData.livello === 2 ? '#f68b20' : '#edc211')}" 
+              class="material-icons folder_outline-icon-fasc" 
+              [pTooltip]="rowData.livello === 1 ? 'Fascicolo' : 
+              (rowData.livello === 2 ? 'Sottofascicolo' : 'Inserto')" 
+              tooltipPosition="top">
+                folder
+            </span>
+            <i class="pi" 
+              [pTooltip]="rowData.isArchivioNero ? 'Nessun permesso sull\'archivio' : 
+              (rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO' ? 'Archivio chiuso' :
+               (rowData.tipo === 'SPECIALE' ? 'Archivio speciale' : ''))" 
+               [ngClass]="rowData.isArchivioNero ? 'pi-eye-slash' : 
+               (rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO' ? 'pi-lock' :
+                (rowData.tipo === 'SPECIALE' ? 'pi-slack' : 'display-none'))" 
+
+              tooltipPosition="top">
+            </i>
+          </div>
+          <!-- <div *ngIf="rowData.isArchivioNero" class="box-livello-1">
+            <span class="pi pi-eye-slash" pTooltip="Nessun permesso sul fascicolo" tooltipPosition="top">
+            </span>
+          </div>
+          <div *ngIf="isArchivioSpeciale(rowData) && !rowData.isArchivioNero" class="box-livello-1">
+            <span class="material-icons folder_outline-icon-speciale" pTooltip="Archivio speciale" tooltipPosition="top">
               folder
             </span>
           </div>
-          <div *ngIf="rowData.livello == 2" class="box-livello-2">
-            <span class="material-icons folder_outline-icon" pTooltip="Sottofascicolo" tooltipPosition="top">
+          <div *ngIf="isArchivioChiuso(rowData)
+           && !rowData.isArchivioNero" class="box-livello-1">
+            <span class="pi pi-lock" pTooltip="Archivio chiuso" tooltipPosition="top">
+            </span>
+          </div> 
+          <div *ngIf="rowData.livello == 1 && !isArchivioSpeciale(rowData)" class="box-livello-1">
+            <span class="material-icons folder_outline-icon-fasc" pTooltip="Fascicolo" tooltipPosition="top">
               folder
             </span>
           </div>
-          <div *ngIf="rowData.livello == 3" class="box-livello-3">
-            <span class="material-icons folder_outline-icon" pTooltip="Inserto" tooltipPosition="top">
+          <div *ngIf="rowData.livello == 2 && !isArchivioSpeciale(rowData)" class="box-livello-2">
+            <span class="material-icons folder_outline-icon-sottofs" pTooltip="Sottofascicolo" tooltipPosition="top">
               folder
             </span>
           </div>
+          <div *ngIf="rowData.livello == 3 && !isArchivioSpeciale(rowData)" class="box-livello-3">
+            <span class="material-icons folder_outline-icon-inserto" pTooltip="Inserto" tooltipPosition="top">
+              folder
+            </span>
+          </div> -->
           <div class="box-numerazione">
             {{rowData.numerazioneGerarchica}}
-          </div>
+          </div> 
         </div>
         <div *ngSwitchCase="'dataCreazione'">
           {{rowData.dataCreazione | date:'dd/MM/yyyy'}}

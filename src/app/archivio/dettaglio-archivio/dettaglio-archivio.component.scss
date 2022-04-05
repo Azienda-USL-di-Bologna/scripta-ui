@@ -1,0 +1,47 @@
+$font-size-label: 13px;
+:host {
+  padding: 5px;
+}
+.input-conservazione {
+  /*width: min-content;
+  */
+}
+.box-campi-dettaglio {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  .left-side {
+    //width: 100%;
+    flex-grow: 4;
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      label {
+        min-width: 155px;
+        text-align: right;
+        font-size: $font-size-label;
+      }
+    }
+  }
+  .right-side {
+    flex-grow: 1;
+    .flag-box {
+      display: flex;
+      justify-content: space-around;
+      label {
+        font-size: $font-size-label;
+      }
+    }
+    .note-box {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      label {
+        align-self: flex-start;
+        font-size: $font-size-label;
+      }
+    }
+  }
+}

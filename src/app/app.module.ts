@@ -9,7 +9,7 @@ import { NtJwtLoginModule } from "@bds/nt-jwt-login";
 import { loginModuleConfig } from "./config/module-config";
 import { NtCommunicatorModule } from "@bds/nt-communicator";
 import { HomeComponent } from "./home/home.component";
-import { DatePipe } from "@angular/common";
+import { DatePipe, TitleCasePipe } from "@angular/common";
 
 
 /* Registro la data italiana */
@@ -40,6 +40,7 @@ registerLocaleData(localeIt, "it-IT", localeItExtra);
   ],
   providers: [
     DatePipe,
+    TitleCasePipe,
     { provide: LOCALE_ID, useValue: "it-IT" },
   ],
   bootstrap: [AppComponent],

@@ -504,6 +504,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
           key: "archiviListToast",
           summary: "Attenzione",
           detail: `Si è verificato un errore nel caricamento, contattare Babelcare`
+          
         });
       });
   }
@@ -722,6 +723,20 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
    */
   public openArchive(archivio: ExtendedArchiviView): void {
     this.navigationTabsService.addTabArchivio(archivio);
+  }
+
+  public isArchivioChiuso(archivio: ExtendedArchiviView): boolean {
+    if(archivio.stato == "CHIUSO" || archivio.stato == "PRECHIUSO")
+      return true;
+    else
+      return false;
+  }
+
+  public isArchivioSpeciale(archivio: ExtendedArchiviView): boolean {
+    if(archivio.tipo == "SPECIALE")
+      return true;
+    else
+      return false;
   }
 
   /**
@@ -969,11 +984,20 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
    */
   public newArchivio(codiceAzienda: number): void {    
     const archivioBozza = new Archivio();
+    const archivioBozzaDetail = new ArchivioDetail();
     archivioBozza.livello = this.archivioPadre?.livello != null ? this.archivioPadre?.livello + 1 : 1;
     archivioBozza.idAzienda = {id: codiceAzienda} as Azienda;
     archivioBozza.stato = StatoArchivio.BOZZA;
     archivioBozza.tipo = TipoArchivio.AFFARE;
     archivioBozza.foglia = true;
+    archivioBozzaDetail.livello = archivioBozza.livello;
+    archivioBozzaDetail.idAzienda = archivioBozza.idAzienda;
+    archivioBozzaDetail.stato = archivioBozza.stato;
+    archivioBozzaDetail.tipo = archivioBozza.tipo;
+    archivioBozzaDetail.foglia = true;
+    archivioBozzaDetail.oggetto = "";
+    archivioBozzaDetail.anno = 0;
+    archivioBozzaDetail.numero = 0;
 
     archivioBozza.oggetto = "";
 
@@ -989,14 +1013,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       archivioBozza.livello = 1;
       archivioBozza.numerazioneGerarchica = "x/x";
     }
-
+    archivioBozzaDetail.numerazioneGerarchica = archivioBozza.numerazioneGerarchica;
     const idPersonaCreazione = new AttoreArchivio();
     idPersonaCreazione.idPersona = {
       id: this.utenteUtilitiesLogin.getUtente().idPersona.id
     } as Persona;
     idPersonaCreazione.ruolo = RuoloAttoreArchivio.CREATORE;
 
-    archivioBozza.attoriList = [idPersonaCreazione];
+    archivioBozzaDetail.fk_idPersonaCreazione = idPersonaCreazione.fk_idPersona;
 
     this.subscriptions.push(this.archivioService.postHttpCall(archivioBozza).subscribe((nuovoArchivioCreato: Archivio) => {      
         this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);

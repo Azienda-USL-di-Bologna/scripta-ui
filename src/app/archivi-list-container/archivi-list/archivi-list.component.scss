@@ -255,34 +255,55 @@
     min-width: 180px;
     max-width: 180px;
     .numerazione-box{
-      padding: 0 !important;
-      .box-livello-1{
-        border-right: 1px solid #e7e7e7d2  !important;
-        border-radius: 0 5px 5px 0 !important;
+      padding: 0px !important;
+      .left-side {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
         padding: 2px !important;
+        border-right: 1px solid #e7e7e7d2  !important;
         background-color: white !important;
-        .folder_outline-icon {
-            color: #993366;
+        .display-none {
+          display: none;
         }
       }
-      .box-livello-2{
-        border-right: 1px solid #e7e7e7d2!important;
-        border-radius: 0 5px 5px 0 !important;
-        padding: 2px !important;
-        background-color: white  !important;
-        .folder_outline-icon {
-          color:  #406284; 
-        }
-      }
-      .box-livello-3{
-        border-right: 1px solid #e7e7e7d2  !important;
-        border-radius: 0 5px 5px 0 !important;
-        padding: 2px !important;
-        background-color: white  !important;
-        .folder_outline-icon {
-          color: darkorange !important;
-        }
-      }
+      //   border-radius: 0 5px 5px 0 !important;
+      // .box-livello-1{
+      //   border-right: 1px solid #e7e7e7d2  !important;
+      //   border-radius: 0 5px 5px 0 !important;
+      //   padding: 2px !important;
+      //   background-color: white !important;
+      // //   .folder_outline-icon-fasc {
+      // //       color: #dc0404;
+      // //   }
+      // //   .folder_outline-icon-speciale {
+      // //     color: #8325be;
+      // // }
+      // }
+      // .box-livello-2{
+      //   border-right: 1px solid #e7e7e7d2!important;
+      //   border-radius: 0 5px 5px 0 !important;
+      //   padding: 2px !important;
+      //   background-color: white  !important;
+      //   // .folder_outline-icon-sottofs {
+      //   //   color:  #f68b20; 
+      //   // }
+      //   // .folder_outline-icon-nopermessi {
+      //   //   color: #000000;
+      //   // }
+      // }
+      // .box-livello-3{
+      //   border-right: 1px solid #e7e7e7d2  !important;
+      //   border-radius: 0 5px 5px 0 !important;
+      //   padding: 2px !important;
+      //   background-color: white  !important;
+      //   // .folder_outline-icon-inserto{
+      //   //   color: #edc211 !important;
+      //   // }
+      //   // .folder_outline-icon-nopermessi {
+      //   //   color: #000000;
+      //   // }
+      //}
       .box-numerazione {
         padding: 9px 13px;
       }
