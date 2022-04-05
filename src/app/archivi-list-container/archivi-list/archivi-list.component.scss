@@ -136,7 +136,6 @@
         .p-inputtext {
           font-size: 12px;
         }
-        
       } 
     }
     .search-wrapper {
@@ -144,10 +143,35 @@
       background-color: white;
       border: 1px solid #a6a6a6;
       border-radius: 3px;
+      &.box-filtro-numerazione {
+        width: 100%;
+      }
+      .search-wrapper {
+        border: none;
+      }
       p-columnfilter {
         width: 100%;
         .p-inputtext {
           border: none !important;
+        }
+        &.column-filter-livello {
+          .p-dropdown {
+            //border: none;
+            border-left: none;
+            border-top-color: transparent;
+            border-bottom: none;
+            
+            .p-dropdown-label {
+              padding: 0;
+              /* .folder_outline-icon {
+                vertical-align: sub;
+              } */
+            }
+            .p-dropdown-trigger {
+              //display: none;
+            }
+          }
+          
         }
       }
       
@@ -304,6 +328,17 @@
 ::ng-deep .table-zero-rows {
   .p-datatable-scrollable-header {
     overflow: scroll !important;
+  }
+}
+
+::ng-deep {
+  .dropdown-panel-livello .p-dropdown-item {
+    align-items: center;
+    display: flex;
+    .folder_outline-icon {
+      font-size: 18px;
+      margin-right: 4px;
+    }
   }
 }
   

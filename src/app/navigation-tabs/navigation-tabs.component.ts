@@ -14,7 +14,7 @@ import { Router } from "@angular/router";
 export class NavigationTabsComponent implements OnInit {
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
-  private tabName: any;
+  //private tabName: any;
   public tabItems: TabItem[] = [];
 
   constructor(

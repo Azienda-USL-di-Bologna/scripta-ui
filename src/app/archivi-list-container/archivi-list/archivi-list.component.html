@@ -213,13 +213,72 @@
           </button>
         </div>
         <div *ngSwitchCase="'numerazioneGerarchica'" class="search-wrapper">
-          <p-columnFilter #colfilterNumerazioneGerarchica [field]="col.filterField" [matchMode]="col.filterMatchMode"
-            [showMenu]="false" [useGrouping]="false" placeholder="">
-          </p-columnFilter>
-          <button *ngIf="colfilterNumerazioneGerarchica.hasFilter()" class="material-icons close-icon" type="reset"
-            (click)="colfilterNumerazioneGerarchica.clearFilter()">
-            close
-          </button>
+          <span class="search-wrapper"
+            pTooltip="Seleziona livello" 
+            tooltipPosition="top">
+            <p-columnFilter #columnFilterLivello 
+              field="livello" 
+              matchMode="in" 
+              class="column-filter-livello"
+              [showMenu]="false">
+              <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                <p-dropdown #dropdownLivello 
+                  
+                  [options]="livelliFiltrabili"
+                  [(ngModel)]="livelloValue"
+                  (onChange)="filter($event.value)"
+                  [disabled]="archiviListMode === archiviListModeEnum.TUTTI"
+                  optionValue="value" 
+                  optionLabel="label" 
+                  panelStyleClass="dropdown-panel-livello"
+                  appendTo="body">
+                  <ng-template pTemplate="selectedItem">
+                    <span class="material-icons folder_outline-icon"
+                      [ngStyle]="{
+                        'color': livelloValue.length > 1 ? 'white' : 
+                          (livelloValue[0] === 1 ? '#92225f' : 
+                            (livelloValue[0] === 2 ? '#f68b20' : '#edc211'))}">
+                      folder
+                    </span>
+                  </ng-template>
+                  <ng-template let-livello pTemplate="item">
+                    <span class="material-icons folder_outline-icon"
+                      [ngStyle]="{
+                        'color': livello.value.length > 1 ? 'white' : 
+                          (livello.value[0] === 1 ? '#92225f' : 
+                            (livello.value[0] === 2 ? '#f68b20' : '#edc211'))}"
+                      pTooltip="Fascicolo" 
+                      tooltipPosition="top">
+                      folder
+                    </span>
+                    {{livello.label}}
+                  </ng-template>
+                </p-dropdown>
+              </ng-template>
+            </p-columnFilter>
+          </span>
+          <div class="search-wrapper box-filtro-numerazione" >
+            <!--NB: La columnfilter qui è fittizia, in realtà il filtro è assolutamente custom e gestito dal ts -->
+            <p-columnFilter #colfilterNumerazioneGerarchica 
+              [field]="fieldNumerazioneGerarchica" 
+              [matchMode]="matchModeNumerazioneGerarchica"
+              [showMenu]="false" 
+              [useGrouping]="false">
+              <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                <input #inputnumerazionegerarchica
+                  [ngStyle]="{'background-color': !regexNumerazioneGerarchica.test(inputnumerazionegerarchica?.value) ? '#FFCDD2' : ''}"
+                  pInputText 
+                  [ngModel]="value"
+                  type="text" 
+                  placeholder="x-x-x/xxxx"
+                  (keydown.enter)="onEnterNumerazioneGerarchica(inputnumerazionegerarchica?.value)" />
+              </ng-template>
+            </p-columnFilter>
+            <button *ngIf="colfilterNumerazioneGerarchica.hasFilter()" class="material-icons close-icon" type="reset"
+              (click)="colfilterNumerazioneGerarchica.clearFilter()">
+              close
+            </button>
+          </div>
         </div>
         <div *ngSwitchCase="'idVicari'" class="search-wrapper">
           <p-columnFilter #colfiltervicari [field]="col.filterField" matchMode="" [showMenu]="false">

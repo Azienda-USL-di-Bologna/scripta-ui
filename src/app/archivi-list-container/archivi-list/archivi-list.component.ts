@@ -5,18 +5,17 @@ import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { Subscription } from 'rxjs';
 import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
 import { ArchiviListMode, cols, colsCSV, TipoArchivioTraduzioneVisualizzazione, StatoArchivioTraduzioneVisualizzazione } from './archivi-list-constants';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { ValueAndLabelObj } from '../../docs-list-container/docs-list/docs-list.component';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from '@nfa/next-sdr';
 import { ColumnFilter, Table } from 'primeng/table';
 import { Impostazioni } from '../../utilities/utils';
-import { ConfirmationService, LazyLoadEvent, MessageService } from 'primeng/api';
+import { ConfirmationService, FilterMatchMode, FilterMetadata, FilterOperator, LazyLoadEvent, MessageService } from 'primeng/api';
 import { ArchiviListService } from './archivi-list.service';
 import { Calendar } from 'primeng/calendar';
 import { Dropdown } from 'primeng/dropdown';
 import { buildLazyEventFiltersAndSorts, ColonnaBds, CsvExtractor } from '@bds/primeng-plugin';
 import { ExtendedArchiviView } from './extendend-archivi-view';
-import { NavViews } from '../../navigation-tabs/navigation-tabs-contants';
 import { TabComponent } from '../../navigation-tabs/tab.component';
 import { NavigationTabsService } from '../../navigation-tabs/navigation-tabs.service';
 import { AutoComplete } from 'primeng/autocomplete';
@@ -38,6 +37,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   @ViewChild("columnFilterAzienda") public columnFilterAzienda: ColumnFilter;
   @ViewChild("calendarcreazione") public calendarcreazione: Calendar;
   @ViewChild("dropdownAzienda") public dropdownAzienda: Dropdown;
+  @ViewChild("dropdownLivello") public dropdownLivello: Dropdown;
   @ViewChild("autocompleteIdPersonaResponsabile") public autocompleteIdPersonaResponsabile: AutoComplete;
   @ViewChild("autocompleteIdPersonaCreazione") public autocompleteIdPersonaCreazione: AutoComplete;
   @ViewChild("autocompleteIdStruttura") public autocompleteIdStruttura: AutoComplete;
@@ -45,6 +45,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   @ViewChild("dt") public dataTable: Table;
   @ViewChild("columnFilterDataCreazione") public columnFilterDataCreazione: ColumnFilter;
 
+  public archiviListModeEnum = ArchiviListMode;
   public archivi: ExtendedArchiviView[] = [];
   public archiviListMode: ArchiviListMode;
   private utenteUtilitiesLogin: UtenteUtilities;
@@ -57,6 +58,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     queryParams: { "mode": ArchiviListMode.VISIBILI }
   };
   public aziendeFiltrabili: ValueAndLabelObj[] = [];
+  public livelliFiltrabili: ValueAndLabelObj[] = [
+    { value: [1], label: "Fascicoli" },
+    { value: [2], label: "Sottofascicoli" },
+    { value: [3], label: "Inserti" },
+    { value: [1,2,3], label: "Tutti" }
+  ];
   public exportCsvInProgress: boolean = false;
   public selectableColumns: ColonnaBds[] = [];
   private mandatoryColumns: string[] = [];
@@ -85,6 +92,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   public cols: ColonnaBds[] = [];
   public _selectedColumns: ColonnaBds[];
   private firstLoadDone = false;
+  public livelloValue = [1]; // Mi serve per dare un valore iniziale alla dropdown del livello e per modificare il livello a esigenza
+  public regexNumerazioneGerarchica: RegExp = new RegExp('^(\\d+-?)?(\\d+-?)?((\\d+)?|(\\d+)+\\/?\\d{0,4})$', 'm');
+  public regexNumerazioneGerarchicaCompleta: RegExp = /^(\d+-?)?(\d+-?)?((\d+)+\/{1}\d{4}){1}$/m;
+  public regexNumero: RegExp = /^\d+$/m;
+  public fieldNumerazioneGerarchica: string = "numerazioneGerarchica";
+  public matchModeNumerazioneGerarchica: string = FILTER_TYPES.string.startsWith;
 
   private _archivioPadre: Archivio | ArchivioDetail;
   get archivioPadre(): Archivio | ArchivioDetail { return this._archivioPadre; }
@@ -99,7 +112,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     private appService: AppService,
     private loginService: NtJwtLoginService,
     private route: ActivatedRoute,
-    private router: Router,
     private messageService: MessageService,
     private archiviListService: ArchiviListService,
     private archivioService: ArchivioService,
@@ -229,6 +241,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     if (this.dropdownAzienda) {
       this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
     }
+    if (this.dropdownLivello) {
+      this.dataTable.filters["livello"] = {value: this.dropdownLivello.value, matchMode: "in" };
+    }
 
     this.loadData();
   }
@@ -319,6 +334,13 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
     }, 0); */
     if (this.utenteUtilitiesLogin) this.calcAziendeFiltrabili();
+    if ( this.archiviListMode === ArchiviListMode.TUTTI) {
+      // In TUTTI, devo obbligatoriamnte vedere solo il livello 1.
+      this.livelloValue = [1];
+      if (this.dropdownLivello) {
+        this.dropdownLivello.writeValue(this.livelloValue);
+      }
+    }
     this.resetPaginationAndLoadData();
   }
 
@@ -404,6 +426,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
         this.dropdownAzienda.writeValue(value);
         this.lastAziendaFilterValue = value;
         this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
+      }
+
+      if (this.dropdownLivello) {
+        this.livelloValue = [1];
+        this.dropdownLivello.writeValue(this.livelloValue);
+        this.dataTable.filters["livello"] = { value: this.dropdownLivello.value, matchMode: "in" };
       }
     }
 
@@ -863,7 +891,61 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     }
     this.aziendeFiltrabiliFiltered = filtered;
   }
-  
+
+  /**
+   * Toast mostrato all'utente quando cerca di eseguire una ricerca per numerazione
+   * gerarchica inserito un pattern non corretto
+   */
+  public showToastNumerazioneNonCorretta(): void {
+    this.messageService.add({
+      severity: "warn",
+      key: "archiviListToast",
+      summary: "Attenzione",
+      detail: `Quanto inserito non sembra essere una numerazione gerarchica`
+    }); 
+  }
+
+  /**
+   * Metodo per gestire il filtro della numerazione gerarchica completamente custom.
+   * La ColumnFilter di primeng non permette un cambio del campo di filtro a runtime.
+   * Dunque qui avviene una gestione custom del filtro.
+   * I campi di filtro sono "numero" o "numerazioneGerarchica" a seconda dell'input dell'utente
+   * 
+   * @param text 
+   */
+  public onEnterNumerazioneGerarchica(text: string) {
+    if (!this.regexNumerazioneGerarchica.test(text)) {
+      // La regex non è rispettata in nessun senso. Lo dico all'utente
+      this.showToastNumerazioneNonCorretta();
+      return;
+    } 
+    if (this.regexNumero.test(text)) {
+      // La regex è un numero. Preparo il filtro e lo faccio partire
+      (this.dataTable.filters[this.fieldNumerazioneGerarchica] as any).value = null;
+      this.fieldNumerazioneGerarchica = "numero";
+      this.matchModeNumerazioneGerarchica = FILTER_TYPES.not_string.equals;
+    } else if (this.regexNumerazioneGerarchicaCompleta.test(text)) {
+      // La regex è una numerazione Gerarchica completa. Preparo il filtro e lo faccio partire
+      (this.dataTable.filters[this.fieldNumerazioneGerarchica] as any).value = null;
+      this.fieldNumerazioneGerarchica = "numerazioneGerarchica";
+      this.matchModeNumerazioneGerarchica = FILTER_TYPES.string.equals;
+    } else {
+      // La regex è un numerazioneGerarchica. Preparo il filtro e lo faccio partire
+      (this.dataTable.filters[this.fieldNumerazioneGerarchica] as any).value = null;
+      this.fieldNumerazioneGerarchica = "numerazioneGerarchica";
+      this.matchModeNumerazioneGerarchica = FILTER_TYPES.string.startsWith;
+    }
+
+    if (text.includes("-") && this.livelloValue.length !== 3 && this.archiviListMode !== ArchiviListMode.TUTTI) {
+      this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
+      this.dropdownLivello.writeValue(this.livelloValue);
+      this.dataTable.filters["livello"] = { value: this.dropdownLivello.value, matchMode: "in" };
+    }
+    
+    this.dataTable.filters[this.fieldNumerazioneGerarchica] = {value: text, matchMode: this.matchModeNumerazioneGerarchica, operator: FilterOperator.AND};
+    this.dataTable._filter();
+  }
+
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
    * desottoscrivo anche dalla specifica loadDocsListSubscription
