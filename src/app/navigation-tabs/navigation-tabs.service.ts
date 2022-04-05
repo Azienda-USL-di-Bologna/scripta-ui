@@ -107,7 +107,7 @@ export class NavigationTabsService {
       ArchiviListContainerComponent,
       {  },
       false,
-      "Archivi",
+      "Fascicoli",
       "pi pi-fw pi-list",
       TabType.ARCHIVI_LIST
     );
