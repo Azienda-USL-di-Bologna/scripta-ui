@@ -5,7 +5,6 @@
   (onLazyLoad)="onLazyLoad($event)" [lazy]="true" [lazyLoadOnInit]="false" [loading]="loading"
   [totalRecords]="totalRecords" [ngClass]="{'table-zero-rows': totalRecords === 0}"
   tableStyleClass="archiviolist-table-body">
-  scrollDirection="both"
   <!-- <ng-template pTemplate="caption">
     <div class="caption-row">
       <div class="left-content">
@@ -106,7 +105,10 @@
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'dataCreazione'">
-          <p-columnFilter #columnFilterDataCreazione [field]="col.filterField" type="date" matchMode="is"
+          <p-columnFilter #columnFilterDataCreazione
+            [field]="col.filterField" 
+            type="date" 
+            matchMode="is"
             [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-calendar #calendarcreazione inputId="calendarcreazione" [ngModel]="value" [yearNavigator]="true"

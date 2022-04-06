@@ -7,7 +7,7 @@ import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
 import { ArchiviListMode, cols, colsCSV, TipoArchivioTraduzioneVisualizzazione, StatoArchivioTraduzioneVisualizzazione } from './archivi-list-constants';
 import { ActivatedRoute } from '@angular/router';
 import { ValueAndLabelObj } from '../../docs-list-container/docs-list/docs-list.component';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from '@nfa/next-sdr';
+import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from '@nfa/next-sdr';
 import { ColumnFilter, Table } from 'primeng/table';
 import { Impostazioni } from '../../utilities/utils';
 import { ConfirmationService, FilterMatchMode, FilterMetadata, FilterOperator, LazyLoadEvent, MessageService } from 'primeng/api';
@@ -323,7 +323,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     this.utenteUtilitiesLogin.setImpostazioniApplicazione(this.loginService, impostazioniVisualizzazioneObj);
   }
 
-
   /**
    * Questa funzione gestisce il click del cambio tab
   */
@@ -334,13 +333,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
     }, 0); */
     if (this.utenteUtilitiesLogin) this.calcAziendeFiltrabili();
-    if ( this.archiviListMode === ArchiviListMode.TUTTI) {
+    if (this.archiviListMode === ArchiviListMode.TUTTI) {
       // In TUTTI, devo obbligatoriamnte vedere solo il livello 1.
       this.livelloValue = [1];
       if (this.dropdownLivello) {
         this.dropdownLivello.writeValue(this.livelloValue);
       }
     }
+
     this.resetPaginationAndLoadData();
   }
 
@@ -585,12 +585,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     }
 
     switch (this.archiviListMode) {
-      // case ArchiviListMode.RECENTI:
-      //   filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
-      //   this.initialSortField = "dataCreazione";
-      //   this.serviceToGetData = this.archivioDetailService;
-      //   this.projectionToGetData = this.projection;
-      //   break;
       case ArchiviListMode.VISIBILI:
         // Uso la vista che fa join con i permessi. E cerco solo archivi in cui io sono presente
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
@@ -604,18 +598,24 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
         filterAndSort.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
         this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
         break;
-      // case ArchiviListMode.PREFERITI:
-      //   filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
-      //   this.initialSortField = "dataCreazione";
-      //   this.serviceToGetData = this.archivioDetailService;
-      //   this.projectionToGetData = this.projection;
-      //   break;
-      // case ArchiviListMode.FREQUENTI:
-      //   filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
-      //   this.initialSortField = "dataCreazione";
-      //   this.serviceToGetData = this.archivioDetailService;
-      //   this.projectionToGetData = this.projection;
-      //   break;
+      case ArchiviListMode.PREFERITI:
+        filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabPreferiti"));
+        this.initialSortField = "dataCreazione";
+        this.serviceToGetData = this.archivioDetailService;
+        this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
+        break;
+      case ArchiviListMode.FREQUENTI:
+        filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabFrequenti"));
+        this.initialSortField = "dataCreazione";
+        this.serviceToGetData = this.archivioDetailService;
+        this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
+        break;
+      case ArchiviListMode.RECENTI:
+        filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRecenti"));
+        this.initialSortField = "dataCreazione";
+        this.serviceToGetData = this.archivioDetailService;
+        this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
+        break;
     }
     return filterAndSort;
   }
