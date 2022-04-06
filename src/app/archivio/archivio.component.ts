@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Archivio, ArchivioDetail, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/ng-internauta-model';
+import { MenuItem } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { ArchiviListComponent } from '../archivi-list-container/archivi-list/archivi-list.component';
 import { DocsListComponent } from '../docs-list-container/docs-list/docs-list.component';
@@ -60,9 +61,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public archiviComponent: CaptionArchiviComponent;
   public selectButtonItems: SelectButtonItem[];
   public selectedButtonItem: SelectButtonItem;
-  public tipiDisponibili : String[];
-  public permessiArchivio : PermessoArchivio[] = [];
-  public colsResponsabili : any[];
   public newArchivoButton: NewArchivoButton;
 
   constructor(private extendedArchivioService: ExtendedArchivioService) {
@@ -78,7 +76,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
 
   private inizializeAll(): void {
     this.buildSelectButtonItems(this.archivio);
-    this.buildNewArchivioOption(this.archivio);
+    this.buildNewArchivioButton(this.archivio);
     if (this.archivio.stato === StatoArchivio.BOZZA) {
       this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
       this.setForDettaglio();
@@ -171,23 +169,34 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       }
     );
   }
-  public buildNewArchivioOption(archivio: Archivio | ArchivioDetail): void {
+
+  /**
+   * 
+   * @param archivio 
+   */
+  public buildNewArchivioButton(archivio: Archivio | ArchivioDetail): void {
+    const aziendaItem: MenuItem = {
+      label: this.archivio.idAzienda.nome,
+      disabled: false,
+      command: () => this.archivilist.newArchivio(this.archivio.idAzienda.id)
+    } as MenuItem;
+
     switch (archivio.livello) {
       case 1:
         this.newArchivoButton = {
-         pTooltipOption: "Crea nuovo sottofascicolo",
-         livello:1 
-        }
+          tooltip: "Crea nuovo sottofascicolo",
+          livello: 1,
+          aziendeItems: [aziendaItem]
+        };
       break;
       case 2:
         this.newArchivoButton ={
-          pTooltipOption: "Crea nuovo inserto",
-          livello:2 
-         }
+          tooltip: "Crea nuovo inserto",
+          livello: 2 ,
+          aziendeItems: [aziendaItem]
+        };
       break;
     }
-    
-   
   }
 }
 

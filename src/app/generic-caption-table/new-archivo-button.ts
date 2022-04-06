@@ -1,4 +1,7 @@
+import { MenuItem } from "primeng/api";
+
 export interface NewArchivoButton {
-    pTooltipOption: string;
+    tooltip: string;
     livello: number;
+    aziendeItems: MenuItem[]
   }

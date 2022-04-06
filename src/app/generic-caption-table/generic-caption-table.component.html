@@ -50,15 +50,17 @@
         pButton 
         pRipple 
         icon="pi pi-plus" 
-        (click)="addArchivioClicked(); aziendaSelection.toggle($event);" 
+        (click)="selectButtonsComponent.newArchivoButton.aziendeItems.length > 1 ? 
+          aziendaSelection.toggle($event) : 
+          selectButtonsComponent.newArchivoButton.aziendeItems[0].command()" 
         class="p-mr-2" 
-        [pTooltip]="selectButtonsComponent.newArchivoButton.pTooltipOption"
-        aria-label="Crea un nuovo archivio"
+        [pTooltip]="selectButtonsComponent.newArchivoButton.tooltip"
+        [aria-label]="selectButtonsComponent.newArchivoButton.tooltip"
         tooltipPosition="bottom">
       </button>
       <p-menu
         #aziendaSelection
-        [model]="aziendeMenuItems"
+        [model]="selectButtonsComponent.newArchivoButton.aziendeItems"
         [popup]="true">
       </p-menu>
     </span>

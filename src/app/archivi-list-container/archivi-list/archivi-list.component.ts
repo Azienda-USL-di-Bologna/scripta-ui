@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { Archivio, ArchivioDetail, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, FluxPermission, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio } from '@bds/ng-internauta-model';
 import { AppService } from '../../app.service';
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { Subscription } from 'rxjs';
@@ -10,7 +10,7 @@ import { ValueAndLabelObj } from '../../docs-list-container/docs-list/docs-list.
 import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from '@nfa/next-sdr';
 import { ColumnFilter, Table } from 'primeng/table';
 import { Impostazioni } from '../../utilities/utils';
-import { ConfirmationService, FilterMatchMode, FilterMetadata, FilterOperator, LazyLoadEvent, MessageService } from 'primeng/api';
+import { ConfirmationService, FilterMatchMode, FilterMetadata, FilterOperator, LazyLoadEvent, MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListService } from './archivi-list.service';
 import { Calendar } from 'primeng/calendar';
 import { Dropdown } from 'primeng/dropdown';
@@ -99,10 +99,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   public regexNumero: RegExp = /^\d+$/m;
   public fieldNumerazioneGerarchica: string = "numerazioneGerarchica";
   public matchModeNumerazioneGerarchica: string = FILTER_TYPES.string.startsWith;
-  public newArchivoButton: NewArchivoButton = {
-    pTooltipOption: "Crea nuovo fascicolo",
-    livello: 0
-  }; 
+  public newArchivoButton: NewArchivoButton;
 
   private _archivioPadre: Archivio | ArchivioDetail;
   get archivioPadre(): Archivio | ArchivioDetail { return this._archivioPadre; }
@@ -142,6 +139,18 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
           this.utenteUtilitiesLogin = utenteUtilities;
+          this.newArchivoButton = {
+            tooltip: "Crea nuovo fascicolo",
+            livello: 0,
+            aziendeItems: this.utenteUtilitiesLogin.getUtente().aziendeAttive.map(a => {
+              return {
+                label: a.nome,
+                disabled: false,
+                command: () => this.newArchivio(a.id)
+              } as MenuItem
+            })
+          }; 
+
           //if (this.displayArchiviListModeItem) {
             this.calcArchiviListModeItem();
             this.selectedButtonItem = this.selectButtonItems[0];
@@ -991,27 +1000,16 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
    */
   public newArchivio(codiceAzienda: number): void {    
     const archivioBozza = new Archivio();
-    //const archivioBozzaDetail = new ArchivioDetail();
     archivioBozza.livello = this.archivioPadre?.livello != null ? this.archivioPadre?.livello + 1 : 1;
     archivioBozza.idAzienda = this.archivioPadre?.idAzienda != null ? {id: this.archivioPadre?.idAzienda.id} as Azienda : {id: codiceAzienda} as Azienda;
-    //archivioBozza.idAzienda = {id: codiceAzienda} as Azienda;
     archivioBozza.stato = StatoArchivio.BOZZA;
     archivioBozza.tipo = TipoArchivio.AFFARE;
     archivioBozza.foglia = true;
-    /* archivioBozzaDetail.livello = archivioBozza.livello;
-    archivioBozzaDetail.idAzienda = archivioBozza.idAzienda;
-    archivioBozzaDetail.stato = archivioBozza.stato;
-    archivioBozzaDetail.tipo = archivioBozza.tipo;
-    archivioBozzaDetail.foglia = true;
-    archivioBozzaDetail.oggetto = "";
-    archivioBozzaDetail.anno = 0;
-    archivioBozzaDetail.numero = 0; */
-
     archivioBozza.oggetto = "";
-
     archivioBozza.numero = 0;
     archivioBozza.anno = 0;
     archivioBozza.numerazioneGerarchica = this.archivioPadre?.numerazioneGerarchica ? this.archivioPadre?.numerazioneGerarchica.replace("/", "-x/") : "x/x";
+
     if (this.archivioPadre?.livello >= 1 && this.archivioPadre?.livello < 3) {
       archivioBozza.livello = this.archivioPadre?.livello + 1;
       archivioBozza.numerazioneGerarchica = this.archivioPadre?.numerazioneGerarchica.replace("/", "-x/");
@@ -1021,7 +1019,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       archivioBozza.livello = 1;
       archivioBozza.numerazioneGerarchica = "x/x";
     }
-    //archivioBozzaDetail.numerazioneGerarchica = archivioBozza.numerazioneGerarchica;
+    
     const idPersonaCreazione = new AttoreArchivio();
     idPersonaCreazione.idPersona = {
       id: this.utenteUtilitiesLogin.getUtente().idPersona.id
@@ -1035,12 +1033,3 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     }));
   }
 }
-
-
-/* export interface ArchiviListModeItem {
-  label: string;
-  title: string;
-  // icon: string;
-  routerLink: string[];
-  queryParams: any;
-} */
