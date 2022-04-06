@@ -24,6 +24,7 @@ import { CaptionReferenceTableComponent } from '../../generic-caption-table/capt
 import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
 import { SelectButtonItem } from '../../generic-caption-table/select-button-item';
 import { CaptionArchiviComponent } from 'src/app/generic-caption-table/caption-archivi.component';
+import { NewArchivoButton } from 'src/app/generic-caption-table/new-archivo-button';
 
 @Component({
   selector: 'archivi-list',
@@ -98,6 +99,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   public regexNumero: RegExp = /^\d+$/m;
   public fieldNumerazioneGerarchica: string = "numerazioneGerarchica";
   public matchModeNumerazioneGerarchica: string = FILTER_TYPES.string.startsWith;
+  public newArchivoButton: NewArchivoButton = {
+    pTooltipOption: "Crea nuovo fascicolo",
+    livello: 0
+  }; 
 
   private _archivioPadre: Archivio | ArchivioDetail;
   get archivioPadre(): Archivio | ArchivioDetail { return this._archivioPadre; }
@@ -200,6 +205,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     if (!this._selectedColumns || this._selectedColumns.length === 0) {
       this._selectedColumns = this.cols.filter(c => c.default);
     }
+
+
   }
 
   @Input() get selectedColumns(): ColonnaBds[] {
@@ -986,7 +993,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     const archivioBozza = new Archivio();
     //const archivioBozzaDetail = new ArchivioDetail();
     archivioBozza.livello = this.archivioPadre?.livello != null ? this.archivioPadre?.livello + 1 : 1;
-    archivioBozza.idAzienda = {id: codiceAzienda} as Azienda;
+    archivioBozza.idAzienda = this.archivioPadre?.idAzienda != null ? {id: this.archivioPadre?.idAzienda.id} as Azienda : {id: codiceAzienda} as Azienda;
+    //archivioBozza.idAzienda = {id: codiceAzienda} as Azienda;
     archivioBozza.stato = StatoArchivio.BOZZA;
     archivioBozza.tipo = TipoArchivio.AFFARE;
     archivioBozza.foglia = true;

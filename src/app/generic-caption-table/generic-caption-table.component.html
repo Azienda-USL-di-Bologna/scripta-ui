@@ -52,7 +52,7 @@
         icon="pi pi-plus" 
         (click)="addArchivioClicked(); aziendaSelection.toggle($event);" 
         class="p-mr-2" 
-        pTooltip="Crea nuovo archivio"
+        [pTooltip]="selectButtonsComponent.newArchivoButton.pTooltipOption"
         aria-label="Crea un nuovo archivio"
         tooltipPosition="bottom">
       </button>

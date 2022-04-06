@@ -7,6 +7,7 @@ import { CaptionArchiviComponent } from '../generic-caption-table/caption-archiv
 import { CaptionConfiguration } from '../generic-caption-table/caption-configuration';
 import { CaptionReferenceTableComponent } from '../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../generic-caption-table/caption-select-buttons.component';
+import { NewArchivoButton } from '../generic-caption-table/new-archivo-button';
 import { SelectButtonItem } from '../generic-caption-table/select-button-item';
 import { TabComponent } from '../navigation-tabs/tab.component';
 import { DettaglioArchivioComponent } from './dettaglio-archivio/dettaglio-archivio.component';
@@ -62,6 +63,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public tipiDisponibili : String[];
   public permessiArchivio : PermessoArchivio[] = [];
   public colsResponsabili : any[];
+  public newArchivoButton: NewArchivoButton;
 
   constructor(private extendedArchivioService: ExtendedArchivioService) {
   }
@@ -76,6 +78,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
 
   private inizializeAll(): void {
     this.buildSelectButtonItems(this.archivio);
+    this.buildNewArchivioOption(this.archivio);
     if (this.archivio.stato === StatoArchivio.BOZZA) {
       this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
       this.setForDettaglio();
@@ -167,6 +170,24 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         label: "Dettaglio"
       }
     );
+  }
+  public buildNewArchivioOption(archivio: Archivio | ArchivioDetail): void {
+    switch (archivio.livello) {
+      case 1:
+        this.newArchivoButton = {
+         pTooltipOption: "Crea nuovo sottofascicolo",
+         livello:1 
+        }
+      break;
+      case 2:
+        this.newArchivoButton ={
+          pTooltipOption: "Crea nuovo inserto",
+          livello:2 
+         }
+      break;
+    }
+    
+   
   }
 }
 
