@@ -624,6 +624,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     const filterAndSort = new FiltersAndSorts();
     if (this.archivioPadre) {
       filterAndSort.addFilter(new FilterDefinition("idArchivioPadre.id", FILTER_TYPES.not_string.equals, this.archivioPadre.id));
+      filterAndSort.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, this.archivioPadre.fk_idAzienda.id));
       
       this.archiviListMode = ArchiviListMode.VISIBILI;
     }
@@ -661,6 +662,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
         this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
         break;
     }
+
     return filterAndSort;
   }
 
