@@ -566,30 +566,35 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   /**
    * Questa funzione si occupa di ristabilire il filtro iniziale sulla data creazione.
    * Questo filtro serve per usare la partizione specifica dell'anno corrente
+   * NB: In caso di lista aperta in dettaglio arhcivi il default è che non c'è filtro
    */
   private resetCalendarToInitialValues() {
-    const oggi = new Date();
+    if (this.archivioPadre) {
+      this.calendarcreazione.writeValue(null);
+    } else {
+      const oggi = new Date();
 
-    switch (oggi.getMonth()) {
-      case 0:
-        // Gennaio
-        this.calendarcreazione.writeValue([
-          new Date(new Date().getFullYear() - 1, 10, 1),
-          new Date(new Date().getFullYear(), 11, 31)
-        ]);
-        break;
-      case 1:
-        // Febbrario
-        this.calendarcreazione.writeValue([
-          new Date(new Date().getFullYear() - 1, 11, 1),
-          new Date(new Date().getFullYear(), 11, 31)
-        ]);
-        break
-      default:
-        this.calendarcreazione.writeValue([
-          new Date(new Date().getFullYear(), 0, 1),
-          new Date(new Date().getFullYear(), 11, 31)
-        ]);
+      switch (oggi.getMonth()) {
+        case 0:
+          // Gennaio
+          this.calendarcreazione.writeValue([
+            new Date(new Date().getFullYear() - 1, 10, 1),
+            new Date(new Date().getFullYear(), 11, 31)
+          ]);
+          break;
+        case 1:
+          // Febbrario
+          this.calendarcreazione.writeValue([
+            new Date(new Date().getFullYear() - 1, 11, 1),
+            new Date(new Date().getFullYear(), 11, 31)
+          ]);
+          break
+        default:
+          this.calendarcreazione.writeValue([
+            new Date(new Date().getFullYear(), 0, 1),
+            new Date(new Date().getFullYear(), 11, 31)
+          ]);
+      }
     }
     this.lastDataCreazioneFilterValue = this.calendarcreazione.value;
   }
