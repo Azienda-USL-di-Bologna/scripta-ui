@@ -50,17 +50,17 @@
         pButton 
         pRipple 
         icon="pi pi-plus" 
-        (click)="selectButtonsComponent.newArchivoButton.aziendeItems.length > 1 ? 
+        (click)="functionalButtonsComponent.newArchivoButton.aziendeItems.length > 1 ? 
           aziendaSelection.toggle($event) : 
-          selectButtonsComponent.newArchivoButton.aziendeItems[0].command()" 
+          functionalButtonsComponent.newArchivoButton.aziendeItems[0].command()" 
         class="p-mr-2" 
-        [pTooltip]="selectButtonsComponent.newArchivoButton.tooltip"
-        [aria-label]="selectButtonsComponent.newArchivoButton.tooltip"
+        [pTooltip]="functionalButtonsComponent.newArchivoButton.tooltip"
+        [attr.aria-label]="functionalButtonsComponent.newArchivoButton.tooltip"
         tooltipPosition="bottom">
       </button>
       <p-menu
         #aziendaSelection
-        [model]="selectButtonsComponent.newArchivoButton.aziendeItems"
+        [model]="functionalButtonsComponent.newArchivoButton.aziendeItems"
         [popup]="true">
       </p-menu>
     </span>

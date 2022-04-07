@@ -23,15 +23,15 @@ import { DatePipe } from '@angular/common';
 import { CaptionReferenceTableComponent } from '../../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
 import { SelectButtonItem } from '../../generic-caption-table/select-button-item';
-import { CaptionArchiviComponent } from 'src/app/generic-caption-table/caption-archivi.component';
 import { NewArchivoButton } from 'src/app/generic-caption-table/new-archivo-button';
+import { CaptionFunctionalButtonsComponent } from 'src/app/generic-caption-table/caption-functional-buttons.component';
 
 @Component({
   selector: 'archivi-list',
   templateUrl: './archivi-list.component.html',
   styleUrls: ['./archivi-list.component.scss']
 })
-export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, CaptionReferenceTableComponent, CaptionSelectButtonsComponent, CaptionArchiviComponent {
+export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, CaptionReferenceTableComponent, CaptionSelectButtonsComponent, CaptionFunctionalButtonsComponent {
   @Input() data: any;
   @ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>;
 
@@ -1019,7 +1019,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       archivioBozza.livello = 1;
       archivioBozza.numerazioneGerarchica = "x/x";
     }
-    
+
     const idPersonaCreazione = new AttoreArchivio();
     idPersonaCreazione.idPersona = {
       id: this.utenteUtilitiesLogin.getUtente().idPersona.id
