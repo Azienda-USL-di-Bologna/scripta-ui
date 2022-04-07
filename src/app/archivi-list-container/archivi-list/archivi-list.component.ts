@@ -463,7 +463,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       }
 
       if (this.dropdownLivello) {
-        this.livelloValue = [1];
+        if (this.archivioPadre) {
+          // Nel caso di dettaglio archivio non voglio imporre un filtro sul livello
+          this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
+        } else {
+          this.livelloValue = [1];
+        }
         this.dropdownLivello.writeValue(this.livelloValue);
         this.dataTable.filters["livello"] = { value: this.dropdownLivello.value, matchMode: "in" };
       }
