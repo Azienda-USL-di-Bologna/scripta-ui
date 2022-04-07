@@ -1,12 +1,12 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Archivio, ArchivioDetail, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/ng-internauta-model';
-import { Table } from 'primeng/table';
+import { MenuItem } from 'primeng/api';
 import { ArchiviListComponent } from '../archivi-list-container/archivi-list/archivi-list.component';
 import { DocsListComponent } from '../docs-list-container/docs-list/docs-list.component';
-import { CaptionArchiviComponent } from '../generic-caption-table/caption-archivi.component';
 import { CaptionConfiguration } from '../generic-caption-table/caption-configuration';
 import { CaptionReferenceTableComponent } from '../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../generic-caption-table/caption-select-buttons.component';
+import { NewArchivoButton } from '../generic-caption-table/new-archivo-button';
 import { SelectButtonItem } from '../generic-caption-table/select-button-item';
 import { TabComponent } from '../navigation-tabs/tab.component';
 import { DettaglioArchivioComponent } from './dettaglio-archivio/dettaglio-archivio.component';
@@ -56,12 +56,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
 
   public captionConfiguration: CaptionConfiguration;
   public referenceTableComponent: CaptionReferenceTableComponent;
-  public archiviComponent: CaptionArchiviComponent;
   public selectButtonItems: SelectButtonItem[];
   public selectedButtonItem: SelectButtonItem;
-  public tipiDisponibili : String[];
-  public permessiArchivio : PermessoArchivio[] = [];
-  public colsResponsabili : any[];
+  public newArchivoButton: NewArchivoButton;
 
   constructor(private extendedArchivioService: ExtendedArchivioService) {
   }
@@ -76,31 +73,35 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
 
   private inizializeAll(): void {
     this.buildSelectButtonItems(this.archivio);
+    this.buildNewArchivioButton(this.archivio);
     if (this.archivio.stato === StatoArchivio.BOZZA) {
       this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
       this.setForDettaglio();
     } else {
-      this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.SOTTOARCHIVI);
-      this.setForSottoarchivi();
+      if(this.archivio.livello === 3){
+        this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DOCUMENTI);
+        this.setForDocumenti();
+      }else{
+        this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.SOTTOARCHIVI);
+        this.setForSottoarchivi();
+      }
+      
     }
   }
 
-  private setForSottoarchivi(): void{
-    this.captionConfiguration = new CaptionConfiguration(true, true, true, true, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
+  private setForSottoarchivi(): void {
+    this.captionConfiguration = new CaptionConfiguration(true, true, true, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
     this.referenceTableComponent = this.archivilist;
-    this.archiviComponent = this.archivilist;
   }
 
-  private setForDocumenti(): void{
+  private setForDocumenti(): void {
     this.captionConfiguration = new CaptionConfiguration(true, true, true, true, false);
     this.referenceTableComponent = this.doclist;
-    this.archiviComponent = this.archivilist;
   }
 
-  private setForDettaglio(): void{
+  private setForDettaglio(): void {
     this.captionConfiguration = new CaptionConfiguration(false, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
     this.referenceTableComponent = {} as CaptionReferenceTableComponent;
-    this.archiviComponent = this.archivilist;
   }
 
   /**
@@ -121,8 +122,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         break;
     }
   }
-
-
 
   public onUpdateArchivio(event: any): void {
 
@@ -167,6 +166,35 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         label: "Dettaglio"
       }
     );
+  }
+
+  /**
+   * 
+   * @param archivio 
+   */
+  public buildNewArchivioButton(archivio: Archivio | ArchivioDetail): void {
+    const aziendaItem: MenuItem = {
+      label: this.archivio.idAzienda.nome,
+      disabled: false,
+      command: () => this.archivilist.newArchivio(this.archivio.idAzienda.id)
+    } as MenuItem;
+
+    switch (archivio.livello) {
+      case 1:
+        this.newArchivoButton = {
+          tooltip: "Crea nuovo sottofascicolo",
+          livello: 1,
+          aziendeItems: [aziendaItem]
+        };
+      break;
+      case 2:
+        this.newArchivoButton ={
+          tooltip: "Crea nuovo inserto",
+          livello: 2 ,
+          aziendeItems: [aziendaItem]
+        };
+      break;
+    }
   }
 }
 

@@ -14,19 +14,19 @@ export class ArchivioTreeComponent implements OnInit {
   public archivi: TreeNode[] = [];
   public bricioleArchivi: MenuItem[] = [];
   public selectedNode: TreeNode = null;
-  private ARCHIVIO_PLAIN_FIELD_PROJECTION: string = "ArchivioWithPlainFields"; 
-  
+  private ARCHIVIO_PLAIN_FIELD_PROJECTION: string = "ArchivioWithPlainFields";
+
   @Output() archivioSelectedEvent = new EventEmitter<ArchivioDetail>();
 
   private _archivio: Archivio | ArchivioDetail;
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
-  @Input() set archivio(archivio: Archivio | ArchivioDetail) { 
+  @Input() set archivio(archivio: Archivio | ArchivioDetail) {
     this._archivio = archivio;
     if (this.archivi.length > 0) {
       this.addTreeNode(this._archivio);
     }
   }
-  
+
   /**
    * @param archivioService 
    * Usiamo archivio e non archivio detail. 
@@ -37,7 +37,7 @@ export class ArchivioTreeComponent implements OnInit {
   constructor(
     private archivioService: ExtendedArchivioService,
     private navigationTabsService: NavigationTabsService,) {
-    
+
   }
 
   ngOnInit(): void {
@@ -51,6 +51,9 @@ export class ArchivioTreeComponent implements OnInit {
    * devo caricare il padre e l'eventuale nonno.
    */
   private firstTreeLoad(): void {
+    this.bricioleArchivi.push({
+      label: this.archivio.idAzienda.nome,
+    } as any);
     switch (this.archivio.livello) {
       case 1:
         this.archivi.push(this.buildTreeNode(this.archivio));
@@ -71,7 +74,7 @@ export class ArchivioTreeComponent implements OnInit {
         break;
       case 3:
         combineLatest([
-          this.getArchivioById(this.archivio.fk_idArchivioPadre.id), 
+          this.getArchivioById(this.archivio.fk_idArchivioPadre.id),
           this.getArchivioById(this.archivio.fk_idArchivioRadice.id)
         ]).subscribe(
           ([archivioPadre, archivioNonno]) => {
@@ -80,13 +83,13 @@ export class ArchivioTreeComponent implements OnInit {
                 this.buildTreeNode(archivioPadre, [
                   this.buildTreeNode(this.archivio)
                 ])
-              ]));
+              ])); 
             this.bricioleArchivi.push(this.buildMenuItem(archivioNonno));
             this.bricioleArchivi.push(this.buildMenuItem(archivioPadre));
             this.bricioleArchivi.push(this.buildMenuItem(this.archivio));
             this.bricioleArchivi = [...this.bricioleArchivi];
           }
-        );       
+        );
         break;
     }
   }
@@ -169,7 +172,7 @@ export class ArchivioTreeComponent implements OnInit {
    * @param children 
    * @returns 
    */
-  private buildTreeNode(archivio: Archivio| ArchivioDetail, children?: TreeNode[]): TreeNode {
+  private buildTreeNode(archivio: Archivio | ArchivioDetail, children?: TreeNode[]): TreeNode {
     const newNode: TreeNode = {};
     if (archivio.id === this.archivio["id"]) {
       this.selectedNode = newNode;
@@ -189,7 +192,7 @@ export class ArchivioTreeComponent implements OnInit {
    * @param archivio 
    * @returns 
    */
-  private buildMenuItem(archivio: Archivio| ArchivioDetail): MenuItem {
+  private buildMenuItem(archivio: Archivio | ArchivioDetail): MenuItem {
     return {
       id: archivio.id,
       label: archivio.numerazioneGerarchica,

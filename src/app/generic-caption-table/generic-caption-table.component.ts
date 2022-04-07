@@ -2,7 +2,7 @@ import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Menu } from 'primeng/menu';
 import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
 import { Subscription } from 'rxjs';
-import { CaptionArchiviComponent } from './caption-archivi.component';
+import { CaptionFunctionalButtonsComponent } from './caption-functional-buttons.component';
 import { CaptionConfiguration } from './caption-configuration';
 import { CaptionReferenceTableComponent } from './caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from './caption-select-buttons.component';
@@ -19,7 +19,7 @@ export class GenericCaptionTableComponent implements OnInit {
   @Input() configuration: CaptionConfiguration;
   @Input() referenceTableComponent: CaptionReferenceTableComponent;
   @Input() selectButtonsComponent: CaptionSelectButtonsComponent;
-  @Input() archiviComponent: CaptionArchiviComponent;
+  @Input() functionalButtonsComponent: CaptionFunctionalButtonsComponent;
 
   @ViewChild("aziendaSelection", {}) public aziendaSelection: Menu;
 
@@ -27,7 +27,6 @@ export class GenericCaptionTableComponent implements OnInit {
 
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
-  public aziendeMenuItems: MenuItem[];
 
   constructor(private loginService: NtJwtLoginService,) { }
 
@@ -41,22 +40,4 @@ export class GenericCaptionTableComponent implements OnInit {
       )
     );
   }
-
-  public addArchivioClicked(){
-    // apro il menu
-    // this.utenteUtilitiesLogin.getAziendeWithPermission(FluxPermission.)
-    const codiciAziende = this.utenteUtilitiesLogin.getUtente().aziende as Azienda[];
-    this.aziendeMenuItems = [];
-    codiciAziende.forEach(codiceAzienda => {
-      // const azienda = this.loggedUser.getUtente().aziende.find(a => a.codice === codiceAzienda);
-      this.aziendeMenuItems.push(
-        {
-          label: codiceAzienda.nome,
-          disabled: false,
-          command: () => this.archiviComponent.newArchivio(codiceAzienda.id)
-        }
-      );
-    });
-  }
-
 }

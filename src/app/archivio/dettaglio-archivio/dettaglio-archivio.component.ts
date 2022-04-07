@@ -1,6 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Archivio, ArchivioDetail, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService } from '@bds/ng-internauta-model';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
+import { MessageService } from 'primeng/api';
 import { TreeNode } from 'primeng/api/treenode';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { ExtendedArchivioService } from '../extended-archivio.service';
@@ -32,7 +33,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     private attoreArchivioService: AttoreArchivioService, 
     private extendedArchivioService: ExtendedArchivioService,
     private titoloService: TitoloService,
-    private massimarioService: MassimarioService) {
+    private massimarioService: MassimarioService,
+    private messageService: MessageService,) {
 
   }
 
@@ -152,4 +154,15 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     }
     this.subscriptions = [];
   }
+
+  public numeraFasicoloClicked(){
+    this.messageService.add({
+      severity: "warn",
+      key: "dettaglioArchivioToast",
+      summary: "Attenzione",
+      detail: `Questo non è un pulsante operativo per il momento!`
+    });
+  }
+
+ 
 }

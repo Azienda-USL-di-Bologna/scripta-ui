@@ -1,14 +1,14 @@
-<button *ngIf="archivio.stato == 'BOZZA'"
-  type="button" 
-  pButton 
-  label="Numera Fascicolo"
-  class="p-mr-2" 
-  pTooltip="Numera Fascicolo"
-  aria-label="Numera Fascicolo"
-  tooltipPosition="bottom">
-</button>
 <div class="box-campi-dettaglio">
   <div class="left-side">
+    <div class="row">
+      <label for="aziendaDescrizione">Azienda</label>   
+      <input id="aziendaDescrizione"  
+        class="input-aziendaDescrizione"
+        type="text" 
+        pInputText 
+        [disabled]="true" 
+        [(ngModel)]="archivio.idAzienda.descrizione"/>
+    </div>
     <div class="row">
       <label for="oggetto">Nome</label>
       <input id="oggetto"
@@ -79,6 +79,18 @@
     </div>
   </div>
   <div class="right-side">
+    <div class="numeraFasicolo">
+      <button *ngIf="archivio.stato == 'BOZZA'"
+        type="button" 
+        pButton         
+        (click)="numeraFasicoloClicked()"
+        label="Numera Fascicolo"
+        class="p-mr-2" 
+        pTooltip="Numera Fascicolo"
+        aria-label="Numera Fascicolo"
+        tooltipPosition="bottom">
+      </button>
+    </div>
     <div class="flag-box">
       <span>
         <label for="riservato">Riservato</label>
@@ -135,3 +147,4 @@
     </tr>
   </ng-template>
 </p-table>
+<p-toast key="dettaglioArchivioToast"></p-toast>

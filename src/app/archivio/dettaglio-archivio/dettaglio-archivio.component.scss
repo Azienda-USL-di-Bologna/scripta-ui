@@ -27,6 +27,13 @@ $font-size-label: 13px;
   }
   .right-side {
     flex-grow: 1;
+    .numeraFasicolo {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
     .flag-box {
       display: flex;
       justify-content: space-around;
