@@ -128,6 +128,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 
   ngOnInit(): void {
     this.serviceToGetData = this.archiviListService;
+    this.cols = cols;
     this.appService.appNameSelection("Elenco Fascicoli");
     this.archiviListMode = this.route.snapshot.queryParamMap.get('mode') as ArchiviListMode || ArchiviListMode.VISIBILI;
     if (!Object.values(ArchiviListMode).includes(this.archiviListMode)) {
@@ -159,8 +160,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
           if (this.archiviListMode) {
             this.calcAziendeFiltrabili();
           }
-          this.loadConfiguration();
-
+          
+          if (!!!this.archivioPadre) {
+            this.loadConfiguration();
+          } else {
+            this.setColumnsPerDetailArchivio();
+          }
         }
       )
     );
@@ -185,7 +190,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     if (this.aziendeFiltrabili.length > 1) {
       this.mandatoryColumns.push("idAzienda");
     }
-    this.cols = cols;
+    
 
     this.selectableColumns = cols.map(e => {
       if (this.mandatoryColumns.includes(e.field)) {
@@ -214,8 +219,21 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     if (!this._selectedColumns || this._selectedColumns.length === 0) {
       this._selectedColumns = this.cols.filter(c => c.default);
     }
+  }
 
-
+  /**
+   * In alternativa alla configurazione colonne caricata dal db vogliamo qui
+   * settare delle colonne predefinite per la lista archivi nella modalità dettaglio archivio.
+   * NB: In questa modalità l'utente non potrà modifcare le colonne
+   */
+  public setColumnsPerDetailArchivio(): void {
+    const colonneDaVisualizzare = ["numerazioneGerarchica", "dataCreazione", "oggetto", "idPersonaCreazione"];
+    // this._selectedColumns = this.cols.filter(c => colonneDaVisualizzare.includes(c.field));
+    this._selectedColumns = [];
+    colonneDaVisualizzare.forEach(c => {
+      this._selectedColumns.push(this.cols.find(e => e.field === c));
+    })
+    console.log(this._selectedColumns)
   }
 
   @Input() get selectedColumns(): ColonnaBds[] {

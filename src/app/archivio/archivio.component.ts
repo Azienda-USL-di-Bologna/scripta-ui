@@ -1,10 +1,8 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Archivio, ArchivioDetail, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/ng-internauta-model';
 import { MenuItem } from 'primeng/api';
-import { Table } from 'primeng/table';
 import { ArchiviListComponent } from '../archivi-list-container/archivi-list/archivi-list.component';
 import { DocsListComponent } from '../docs-list-container/docs-list/docs-list.component';
-import { CaptionFunctionalButtonsComponent } from '../generic-caption-table/caption-functional-buttons.component';
 import { CaptionConfiguration } from '../generic-caption-table/caption-configuration';
 import { CaptionReferenceTableComponent } from '../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../generic-caption-table/caption-select-buttons.component';
@@ -92,7 +90,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   private setForSottoarchivi(): void {
-    this.captionConfiguration = new CaptionConfiguration(true, true, true, true, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
+    this.captionConfiguration = new CaptionConfiguration(true, true, true, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
     this.referenceTableComponent = this.archivilist;
   }
 
