@@ -114,12 +114,10 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     private datepipe: DatePipe,
     private route: ActivatedRoute,
     private router: Router,
-    private appService: AppService,
     private confirmationService: ConfirmationService
   ) { }
 
   ngOnInit(): void {
-    this.appService.appNameSelection("Elenco documenti");
     this.docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode || DocsListMode.MIEI_DOCUMENTI;
     if (!Object.values(DocsListMode).includes(this.docsListMode)) {
       this.docsListMode = DocsListMode.MIEI_DOCUMENTI;

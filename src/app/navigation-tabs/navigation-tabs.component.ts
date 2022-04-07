@@ -5,6 +5,7 @@ import { ConfigurazioneService, ParametroAziende } from "@bds/ng-internauta-mode
 import { NavigationTabsService } from "./navigation-tabs.service";
 import { TabItem } from "./tab-item";
 import { Router } from "@angular/router";
+import { AppService } from "../app.service";
 
 @Component({
   selector: "navigation-tabs",
@@ -18,6 +19,7 @@ export class NavigationTabsComponent implements OnInit {
   public tabItems: TabItem[] = [];
 
   constructor(
+    private appService: AppService,
     private loginService: NtJwtLoginService,
     private configurazioneService: ConfigurazioneService,
     public navigationTabsService: NavigationTabsService,
@@ -27,8 +29,10 @@ export class NavigationTabsComponent implements OnInit {
     console.log(this.router)
     if (this.router.routerState.snapshot.url.includes("archivilist")) {
       this.navigationTabsService.activeTabIndex = 1;
+      this.appService.appNameSelection("Elenco Fascicoli")
     } else {
-      this.navigationTabsService.activeTabIndex = 0;
+      this.navigationTabsService.activeTabIndex = 0;      
+      this.appService.appNameSelection("Elenco Documenti")
     }
     /* this.route.queryParams.subscribe(params => {
       console.log("params", params)
@@ -46,6 +50,7 @@ export class NavigationTabsComponent implements OnInit {
 
     if (tabLoadedFromSessionStorage) {
       this.setTabsAndActiveOneOfThem();
+      
     } else {
       this.navigationTabsService.addTab(
         this.navigationTabsService.buildaTabDocsList()
@@ -95,11 +100,17 @@ export class NavigationTabsComponent implements OnInit {
     this.tabItems = this.navigationTabsService.getTabs();
   }
   
-  public onChangeTab(): void {
-
+  public onChangeTab(tabIndex:number): void {
+    if(tabIndex == 0 || tabIndex == 1 ){
+      this.appService.appNameSelection("Elenco "+ this.navigationTabsService.getTabs()[tabIndex].label);
+    }else{
+      this.appService.appNameSelection("Fascicolo "+ this.navigationTabsService.getTabs()[tabIndex].label);
+    }
   }
 
   public onCloseTab(e: any): void {
     this.navigationTabsService.removeTab(e.index);
+    this.appService.appNameSelection("Elenco Fascicoli");
+
   }
 }

@@ -111,9 +111,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   }
 
   constructor(
-    private appService: AppService,
     private loginService: NtJwtLoginService,
     private route: ActivatedRoute,
+    private appService: AppService,
     private messageService: MessageService,
     private archiviListService: ArchiviListService,
     private archivioService: ArchivioService,
@@ -128,8 +128,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 
   ngOnInit(): void {
     this.serviceToGetData = this.archiviListService;
-    this.cols = cols;
-    this.appService.appNameSelection("Elenco Fascicoli");
+    this.cols = cols; 
     this.archiviListMode = this.route.snapshot.queryParamMap.get('mode') as ArchiviListMode || ArchiviListMode.VISIBILI;
     if (!Object.values(ArchiviListMode).includes(this.archiviListMode)) {
       this.archiviListMode = ArchiviListMode.VISIBILI;
@@ -769,6 +768,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
    */
   public openArchive(archivio: ExtendedArchiviView): void {
     this.navigationTabsService.addTabArchivio(archivio);
+    this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica);
   }
 
   public isArchivioChiuso(archivio: ExtendedArchiviView): boolean {
