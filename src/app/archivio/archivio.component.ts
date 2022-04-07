@@ -81,8 +81,14 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
       this.setForDettaglio();
     } else {
-      this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.SOTTOARCHIVI);
-      this.setForSottoarchivi();
+      if(this.archivio.livello === 3){
+        this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DOCUMENTI);
+        this.setForDocumenti();
+      }else{
+        this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.SOTTOARCHIVI);
+        this.setForSottoarchivi();
+      }
+      
     }
   }
 
