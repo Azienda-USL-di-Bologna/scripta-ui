@@ -23,28 +23,27 @@ import { ScriptaCommonModule } from "./scripta-common.module";
 registerLocaleData(localeIt, "it-IT", localeItExtra);
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent
-  ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    AppRoutingModule,
-    PrimengPluginModule,
-    NtJwtLoginModule.forRoot(loginModuleConfig),
-    PrimeNgModule,
-    ScriptaCommonModule,
-    CommonComponentsModule,
-    NtCommunicatorModule
-  ],
-  providers: [
-    DatePipe,
-    TitleCasePipe,
-    { provide: LOCALE_ID, useValue: "it-IT" },
-  ],
-  bootstrap: [AppComponent],
-  exports: [CommonComponentsModule],
-  entryComponents: [ProfiloComponent]
+    declarations: [
+        AppComponent,
+        HomeComponent
+    ],
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        AppRoutingModule,
+        PrimengPluginModule,
+        NtJwtLoginModule.forRoot(loginModuleConfig),
+        PrimeNgModule,
+        ScriptaCommonModule,
+        CommonComponentsModule,
+        NtCommunicatorModule
+    ],
+    providers: [
+        DatePipe,
+        TitleCasePipe,
+        { provide: LOCALE_ID, useValue: "it-IT" },
+    ],
+    bootstrap: [AppComponent],
+    exports: [CommonComponentsModule]
 })
 export class AppModule { }

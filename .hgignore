@@ -53,3 +53,4 @@ projects/bds/common-components/ng-package.dev.json
 projects/bds/primeng-plugin/ng-package.dev.json
 projects/bds/nt-communicator/ng-package.dev.json
 projects/bds/nt-jwt-login/ng-package.dev.json
+.angular/cache/
