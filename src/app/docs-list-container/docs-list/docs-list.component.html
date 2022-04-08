@@ -29,8 +29,9 @@
         [ngSwitch]="col.field" 
         [ngClass]="col.headerClass"
         [pSortableColumn]="col.sortField"
-        >
-        <span class="header-box" [pTooltip]="col.sortField ? null : 'Colonna non ordinabile'" [attr.aria-label]="col.label">
+        [ngStyle]="{'cursor': col.sortField ? null  : 'move' }">
+        <span class="header-box" 
+          [attr.aria-label]="col.label">
           {{col.header}}
           <p-sortIcon *ngIf="col.sortField" 
             [field]="col.sortField" >
