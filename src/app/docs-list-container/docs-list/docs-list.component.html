@@ -15,95 +15,13 @@
   [virtualScrollDelay]="150"
   [virtualRowHeight]="54" 
   [lazy]="true" 
-  [lazyLoadOnInit]="false" 
+  [lazyLoadOnInit]="true" 
   [totalRecords]="totalRecords"
   (onLazyLoad)="onLazyLoad($event)" 
   [loading]="loading" 
   styleClass="p-table-scripta-docs-list"
   [ngClass]="{'table-zero-rows': totalRecords === 0}"
   tableStyleClass="docslist-table-body">
-  <!-- <ng-template pTemplate="caption">
-    <div class="caption-row">
-      <div class="left-content">
-        <div class="p-d-flex">
-          <span class="p-input-icon-left p-ml-auto">
-            <i class="pi pi-search"></i>
-            <input #inputGobalFilter pInputText 
-              type="text" 
-              (input)="removeSort(); applyFilterGlobal($event, 'equals')" 
-              placeholder="Ricerca.. " />
-          </span>
-          <button pButton 
-            class="p-button-outlined refresh-button" 
-            icon="pi pi-filter" 
-            pTooltip="Applica i filtri. Aggiorna"
-            aria-label="Applica i filtri"
-            tooltipPosition="bottom"
-            (click)="resetPaginationAndLoadData()">
-          </button>
-          <button pButton 
-            class="p-button-outlined alarm-button" 
-            icon="pi pi-filter-slash" 
-            pTooltip="Svuota i filtri"
-            aria-label="Svuota i filtri"
-            tooltipPosition="bottom"
-            (click)="clear()">
-          </button>
-          <p-selectButton class="tabs"
-            [options]="docListModeItem" 
-            [(ngModel)]="selectedDocListMode" 
-            optionLabel="label"
-            (onOptionClick)="onChangeDocListMode($event)">
-          </p-selectButton>
-        </div>
-      </div>
-      <div class="right-content">
-        <span *ngIf="exportCsvInProgress">
-          <p-progressSpinner 
-            [style]="{width: '2em', height: '2em', marginRight: '7px'}"
-            strokeWidth="8" 
-            fill="#FFFFFF" 
-            animationDuration=".5s">
-          </p-progressSpinner>
-        </span>
-        <button 
-          type="button" 
-          pButton 
-          pRipple 
-          icon="pi pi-file-o" 
-          (click)="exportCSV(dt)" 
-          class="p-mr-2" 
-          pTooltip="CSV"
-          aria-label="Scarica il csv della tabella"
-          tooltipPosition="bottom">
-        </button>
-        <p-multiSelect #ms
-          *ngIf = "isAccessibile() !== true"
-          [options]="selectableColumns" 
-          [(ngModel)]="selectedColumns" 
-          (onChange)="onChangeSelectedColumns($event)"
-          optionLabel="header" 
-          optionDisabled="selectionDisabled"
-          [showHeader]="false"
-          selectedItemsLabel="{0} colonne selezionate"
-          [style]="{minWidth: '250px', maxWidth: '250px'}" 
-          placeholder="Scegli le colonne da visualizzare"
-          aria-label="Scegli le colonne da visualizzare"
-          >
-          <ng-template let-column pTemplate="item"  >
-              <div class="column-item">
-                <span >{{column.header}}</span>
-              </div>
-          </ng-template>
-        </p-multiSelect>
-      </div>
-    </div>
-  </ng-template> -->
-  <ng-template pTemplate="colgroup" let-columns>
-    <colgroup>
-      <col *ngFor="let col of columns" [ngClass]="col.headerClass" >
-    </colgroup>
-  </ng-template>
   <ng-template pTemplate="header" let-columns>
     <!-- HEADER & ORDINAMENTO -->
     <tr class="header-row"> 
@@ -123,12 +41,6 @@
     <!-- FILTRI -->
     <tr class="filter-row">
       <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
-        <!-- <div *ngSwitchCase="'eliminabile'">
-          <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
-            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-            </ng-template>
-          </p-columnFilter>
-        </div> -->
         <div *ngSwitchCase="'idAzienda'" #filteraziendacontainer>
           <p-columnFilter #columnFilterAzienda [field]="col.filterField"  matchMode="in" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
@@ -704,7 +616,7 @@
           {{rowData.protocolloEsterno}}
         </div>
       </td>
-      <td class="scrollbar-overlay-placeholder-column"></td>
+      <!-- <td class="scrollbar-overlay-placeholder-column"></td> -->
     </tr>
   </ng-template>
   <ng-template pTemplate="loadingbody" let-columns="columns">

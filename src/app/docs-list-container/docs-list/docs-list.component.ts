@@ -12,14 +12,12 @@ import { Calendar } from "primeng/calendar";
 import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
-import { AppService } from "../../app.service";
 import { Impostazioni } from "../../utilities/utils";
 import { cols, colsCSV, DocsListMode, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
 import { MultiSelect } from "primeng/multiselect";
-import { NavViews } from "../../navigation-tabs/navigation-tabs-contants";
 import { TabComponent } from "../../navigation-tabs/tab.component";
 import { CaptionReferenceTableComponent } from '../../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
@@ -39,7 +37,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   private resetDocsArrayLenght: boolean = true;
   private storedLazyLoadEvent: LazyLoadEvent;
   private lastAziendaFilterValue: number[];
-  private lastStatoFilterValue: string[];
+  //private lastStatoFilterValue: string[];
   private lastDataCreazioneFilterValue: Date[];
 
   @ViewChild("dt") public dataTable: Table;
@@ -113,7 +111,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     private loginService: NtJwtLoginService,
     private datepipe: DatePipe,
     private route: ActivatedRoute,
-    private router: Router,
     private confirmationService: ConfirmationService
   ) { }
 
