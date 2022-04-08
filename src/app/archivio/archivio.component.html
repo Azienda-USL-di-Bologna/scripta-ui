@@ -1,4 +1,4 @@
-<generic-caption-table *ngIf="referenceTableComponent && !archivio.isArchivioNero"
+<generic-caption-table *ngIf="referenceTableComponent && !archivio?.isArchivioNero"
   [configuration]="captionConfiguration"
   [referenceTableComponent]="referenceTableComponent"
   [selectButtonsComponent]="this"
@@ -36,5 +36,5 @@
   </ng-template>
 </p-splitter>
 
-<richiesta-accesso-archivi #richiestaaccessoarchivi *ngIf="archivio.isArchivioNero"></richiesta-accesso-archivi>
+<richiesta-accesso-archivi #richiestaaccessoarchivi *ngIf="archivio?.isArchivioNero"></richiesta-accesso-archivi>
 
