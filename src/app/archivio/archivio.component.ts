@@ -22,7 +22,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   private _archivio: Archivio | ArchivioDetail;
   public captionConfiguration: CaptionConfiguration;
   public referenceTableComponent: CaptionReferenceTableComponent;
-  public archiviComponent: CaptionArchiviComponent;
   public selectButtonItems: SelectButtonItem[];
   public selectedButtonItem: SelectButtonItem;
   public tipiDisponibili : String[];
@@ -37,7 +36,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
       .subscribe((res: Archivio) => {
         this._archivio = res;
-        this._archivio.isArchivioNero;
         console.log("Archivio nell'archivio component: ", this._archivio);
         setTimeout(() => {
           this.inizializeAll();
