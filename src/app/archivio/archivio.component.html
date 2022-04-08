@@ -1,11 +1,11 @@
-<generic-caption-table *ngIf="referenceTableComponent"
+<generic-caption-table *ngIf="referenceTableComponent && !archivio.isArchivioNero"
   [configuration]="captionConfiguration"
   [referenceTableComponent]="referenceTableComponent"
   [selectButtonsComponent]="this"
   [functionalButtonsComponent]="this">
 </generic-caption-table>
 <p-splitter 
-  *ngIf="archivio"
+  *ngIf="archivio && !archivio.isArchivioNero"
   styleClass="splitter-archivio" 
   [panelSizes]="[25,75]" 
   [minSizes]="[15,55]">
@@ -15,24 +15,26 @@
     </app-archivio-tree>
   </ng-template>
   <ng-template pTemplate>
-
     <!-- Lista sottoarchivi -->
     <archivi-list #archivilist
       [archivioPadre]="archivio" 
-      [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'SOTTOARCHIVI'}">
+      [ngClass]="{'hide': (selectedButtonItem && selectedButtonItem.id !== 'SOTTOARCHIVI')}">
     </archivi-list>
 
     <!-- Lista documenti contenuti -->
-    <docs-list #doclist
-      [archivio]="archivio"
-      [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'DOCUMENTI'}">
-    </docs-list>
+      <docs-list #doclist 
+        [archivio]="archivio"
+        [ngClass]="{'hide': (selectedButtonItem && selectedButtonItem.id !== 'DOCUMENTI')}">
+      </docs-list>
 
     <!-- Dettaglio dell'archivio -->
-    <dettaglio-archivio #dettaglioarchivio
-      [archivio]="archivio"
-      [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'DETTAGLIO'}">
-    </dettaglio-archivio>
+      <dettaglio-archivio #dettaglioarchivio 
+        [archivio]="archivio"
+        [ngClass]="{'hide': (selectedButtonItem && selectedButtonItem.id !== 'DETTAGLIO')}">
+      </dettaglio-archivio>
 
   </ng-template>
 </p-splitter>
+
+<richiesta-accesso-archivi #richiestaaccessoarchivi *ngIf="archivio.isArchivioNero"></richiesta-accesso-archivi>
+

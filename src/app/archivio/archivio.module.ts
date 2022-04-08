@@ -9,7 +9,7 @@ import { ArchivioTreeComponent } from "./archivio-tree/archivio-tree.component";
 import { GenericCaptionTableModule } from "../generic-caption-table/generic-caption-table.module";
 import { ArchiviListModule } from "../archivi-list-container/archivi-list/archivi-list.module";
 import { DocsListModule } from "../docs-list-container/docs-list/docs-list.module";
-
+import { RichiestaAccessoArchiviComponent } from "./richiesta-accesso-archivi/richiesta-accesso-archivi.component"
 @NgModule({
   imports: [
     CommonModule,
@@ -24,9 +24,9 @@ import { DocsListModule } from "../docs-list-container/docs-list/docs-list.modul
     ArchivioComponent,
     DettaglioArchivioComponent,
     ArchivioTreeComponent,
+    RichiestaAccessoArchiviComponent,
   ],
   exports: [
-
   ],
   providers: []
 })

@@ -132,7 +132,7 @@ export class NavigationTabsService {
       ArchivioComponent,
       { 
         archivio: archivio,
-        id: archivio.id
+        id: archivio.id,
       },
       true,
       label,

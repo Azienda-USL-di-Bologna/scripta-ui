@@ -9,6 +9,7 @@ import { ArchivioTreeComponent } from "./archivio-tree/archivio-tree.component";
 import { GenericCaptionTableModule } from "../generic-caption-table/generic-caption-table.module";
 import { DocsListModule } from "src/app/docs-list-container/docs-list/docs-list.module";
 
+
 @NgModule({
   imports: [
     CommonModule,
