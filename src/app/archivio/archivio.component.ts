@@ -10,6 +10,7 @@ import { NewArchivoButton } from '../generic-caption-table/new-archivo-button';
 import { SelectButtonItem } from '../generic-caption-table/select-button-item';
 import { TabComponent } from '../navigation-tabs/tab.component';
 import { DettaglioArchivioComponent } from './dettaglio-archivio/dettaglio-archivio.component';
+import { RichiestaAccessoArchiviComponent } from './richiesta-accesso-archivi/richiesta-accesso-archivi.component';
 import { ExtendedArchivioService } from './extended-archivio.service';
 
 @Component({
@@ -19,13 +20,25 @@ import { ExtendedArchivioService } from './extended-archivio.service';
 })
 export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, CaptionSelectButtonsComponent {
   private _archivio: Archivio | ArchivioDetail;
+  public captionConfiguration: CaptionConfiguration;
+  public referenceTableComponent: CaptionReferenceTableComponent;
+  public archiviComponent: CaptionArchiviComponent;
+  public selectButtonItems: SelectButtonItem[];
+  public selectedButtonItem: SelectButtonItem;
+  public tipiDisponibili : String[];
+  public permessiArchivio : PermessoArchivio[] = [];
+  public colsResponsabili : any[];
+  public newArchivoButton: NewArchivoButton;
+
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set data(data: any) {
     this.extendedArchivioService.getByIdHttpCall(
       data.archivio.id,
-      ENTITIES_STRUCTURE.scripta.archivio.standardProjections.ArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
+      ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
       .subscribe((res: Archivio) => {
         this._archivio = res;
+        this._archivio.isArchivioNero;
+        console.log("Archivio nell'archivio component: ", this._archivio);
         setTimeout(() => {
           this.inizializeAll();
         }, 0); 
@@ -54,11 +67,13 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     }
   }
 
-  public captionConfiguration: CaptionConfiguration;
-  public referenceTableComponent: CaptionReferenceTableComponent;
-  public selectButtonItems: SelectButtonItem[];
-  public selectedButtonItem: SelectButtonItem;
-  public newArchivoButton: NewArchivoButton;
+  private _richiestaaccessoarchivi: RichiestaAccessoArchiviComponent;
+  public get richiestaaccessoarchivi() {return this._richiestaaccessoarchivi}
+  @ViewChild('richiestaaccessoarchivi') set richiestaaccessoarchivi(content: RichiestaAccessoArchiviComponent) {
+    if (content) {
+      this._richiestaaccessoarchivi = content;
+    }
+  }
 
   constructor(private extendedArchivioService: ExtendedArchivioService) {
   }

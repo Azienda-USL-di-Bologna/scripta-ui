@@ -767,6 +767,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
    * L'utente ha cliccato su un archivio. Apriamolo
    */
   public openArchive(archivio: ExtendedArchiviView): void {
+    console.log("Is fascicolo aperto nero: ", archivio.isArchivioNero);
     this.navigationTabsService.addTabArchivio(archivio);
     this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica);
   }
