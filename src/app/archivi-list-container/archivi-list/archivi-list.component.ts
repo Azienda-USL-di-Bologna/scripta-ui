@@ -288,35 +288,38 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     this.selectButtonItems = [];
       this.selectButtonItems.push(
         {
-          title: "Tutti gli archivi che posso vedere",
+          title: "Tutti i fascicoli che posso vedere",
           label: "Visibili",
           // icon: "pi pi-fw pi-list", 
           routerLink: ["./" + ARCHIVI_LIST_ROUTE],
           queryParams: { "mode": ArchiviListMode.VISIBILI }
         },
         {
-          title: "",
+          title: "I fascicoli usati di recente",
           label: "Recenti",
           // icon: "pi pi-fw pi-list", 
           routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-          queryParams: { "mode": ArchiviListMode.RECENTI }
+          queryParams: { "mode": ArchiviListMode.RECENTI },
+          disabled: true
         },
         {
-          title: "",
+          title: "I miei fascicoli preferiti",
           label: "Preferiti",
           // icon: "pi pi-fw pi-list", 
           routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-          queryParams: { "mode": ArchiviListMode.PREFERITI }
+          queryParams: { "mode": ArchiviListMode.PREFERITI },
+          disabled: true
         },
         {
-          title: "",
+          title: "I fascicoli frequenti",
           label: "Frequenti",
           // icon: "pi pi-fw pi-list", 
           routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-          queryParams: { "mode": ArchiviListMode.FREQUENTI }
+          queryParams: { "mode": ArchiviListMode.FREQUENTI },
+          disabled: true
         },
         {
-          title: "",
+          title: "Tutti i fascicoli",
           label: "Tutti",
           // icon: "pi pi-fw pi-list", 
           routerLink: ["./" + ARCHIVI_LIST_ROUTE],

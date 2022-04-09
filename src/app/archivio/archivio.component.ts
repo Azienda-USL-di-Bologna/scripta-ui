@@ -147,8 +147,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    */
   public buildSelectButtonItems(archivio: Archivio | ArchivioDetail): void {
     this.selectButtonItems = [];
+    let labelDati: string;
     switch (archivio.livello) {
       case 1:
+        labelDati = "Dati del fascicolo";
         this.selectButtonItems.push(
           {
             id: SelectButton.SOTTOARCHIVI,
@@ -158,6 +160,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         );
       break;
       case 2:
+        labelDati = "Dati del sottofascicolo";
         this.selectButtonItems.push(
           {
             id: SelectButton.SOTTOARCHIVI,
@@ -166,6 +169,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           }
         );
       break;
+      case 3:
+        labelDati = "Dati dell'inserto";
+        break;
     }
     
     this.selectButtonItems.push(
@@ -176,7 +182,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       },
       {
         id: SelectButton.DETTAGLIO,
-        label: "Dettaglio"
+        label: labelDati + (this.archivio.stato === StatoArchivio.BOZZA ? " (Bozza)" : "")
       }
     );
   }
