@@ -106,7 +106,7 @@ export class ArchivioTreeComponent implements OnInit {
     switch (archivio.livello) {
       case 1:
         this.selectedNode = this.archivi[0];
-        this.bricioleArchivi = [this.bricioleArchivi[0]];
+        this.bricioleArchivi = this.bricioleArchivi.slice(0,2);
         break;
       case 2:
         const index = this.archivi[0].children.findIndex(nodo => (nodo.data as Archivio).id === archivio.id);
@@ -120,7 +120,7 @@ export class ArchivioTreeComponent implements OnInit {
         } else {
           this.selectedNode = this.archivi[0].children[index];
         }
-        this.bricioleArchivi = [this.bricioleArchivi[0], this.buildMenuItem(archivio)];
+        this.bricioleArchivi = [this.bricioleArchivi[0],this.bricioleArchivi[1], this.buildMenuItem(archivio)];
         break;
       case 3:
         const indexLiv2 = this.archivi[0].children.findIndex(nodo => (nodo.data as Archivio).id === archivio.fk_idArchivioPadre.id);
@@ -137,7 +137,7 @@ export class ArchivioTreeComponent implements OnInit {
           } else {
             this.selectedNode = this.archivi[0].children[indexLiv2].children[indexLiv3];
           }
-          this.bricioleArchivi = [this.bricioleArchivi[0], this.buildMenuItem(this.archivi[0].children[indexLiv2].data), this.buildMenuItem(archivio)];
+          this.bricioleArchivi = [this.bricioleArchivi[0], this.bricioleArchivi[1], this.buildMenuItem(this.archivi[0].children[indexLiv2].data), this.buildMenuItem(archivio)];
         } else {
           // Manca il sottofascicolo, allora devo aggiungere sia lui che l'inserto
           this.getArchivioById(archivio.fk_idArchivioPadre.id).subscribe(
