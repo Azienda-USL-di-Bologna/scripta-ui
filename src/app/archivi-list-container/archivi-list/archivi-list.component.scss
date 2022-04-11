@@ -58,7 +58,6 @@
       background-color: white;
       border: 1px solid #a6a6a6;
       border-radius: 3px;
-      width: 100%;
       &.box-filtro-numerazione {
         width: 100%;
       }
@@ -101,6 +100,7 @@
       div {
         height: 54px;
         padding: 9px 13px;
+        width: 100%;
       }
       &:not(.scrollable-column) {
         div {
@@ -114,6 +114,7 @@
           word-wrap: break-word;
           word-break: break-word;
           &:hover {
+            overflow-y: auto !important; //needed for firefox
             overflow-y: scroll;
             overflow-y: overlay;
           }
@@ -152,9 +153,12 @@
   .numerazione-gerarchica-column {
     min-width: 234px;
     max-width: 234px;
+    cursor: pointer;
     .numerazione-box {
       padding: 0px !important;
       .left-side {
+        min-width: 30px;
+        max-width: 30px;
         display: flex;
         flex-direction: column;
         justify-content: space-around;
@@ -250,4 +254,8 @@
 .calendar-filter-footer-button-container {
   display: flex;
   justify-content: space-around;
+}
+
+::ng-deep .p-datepicker{
+  width: 300px !important;
 }

@@ -46,6 +46,8 @@
         }
         .p-inputtext {
           font-size: 12px;
+          color: #2e4a65 !important;
+          font-weight: bold;
         }
         .p-column-filter-clear-button {
           display: none !important;
@@ -61,7 +63,7 @@
       p-columnfilter {
         width: 100%;
         .p-inputtext {
-          border: none !important;
+          border: none !important;          
         }
       }
       .close-icon {
@@ -84,6 +86,7 @@
         color: #2e4a65 !important;
         height: 54px;
         padding: 9px 13px;
+        width: 100%; 
         &:hover {
           color: #7e7e7e !important;
         }
@@ -96,10 +99,11 @@
       }
       &.scrollable-column {
         div {
-          overflow: hidden;
+          overflow: hidden; 
           word-wrap: break-word;
           word-break: break-word;
           &:hover {
+            overflow-y: auto !important; //needed for firefox
             overflow-y: scroll;
             overflow-y: overlay;
           }
@@ -142,6 +146,8 @@
     .proposta-box {
       padding: 0 !important;
       .box-elimina {
+        min-width: 30px;
+        max-width: 30px;
         background-color: #406284;
         border-right: 1px solid #c8c8c8;
         border-radius: 0 5px 5px 0;
@@ -176,7 +182,7 @@
     cursor: pointer;
     font-weight: 600;
     color: #993366;
-    .oggetto-content {
+    .oggetto-content { 
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
@@ -306,3 +312,12 @@
   display: flex;
   justify-content: space-around;
 }
+
+::ng-deep .p-datepicker{
+  width: 300px !important;
+  .p-highlight {
+    color: #ffffff;
+    background: #2e4a65 !important;
+  }
+}
+

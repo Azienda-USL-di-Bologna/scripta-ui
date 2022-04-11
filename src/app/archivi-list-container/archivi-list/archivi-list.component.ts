@@ -600,7 +600,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
           this.calendarcreazione.writeValue([
             new Date(new Date().getFullYear(), 0, 1),
             new Date(new Date().getFullYear(), 11, 31)
-          ]);
+          ]); 
       }
     }
     this.lastDataCreazioneFilterValue = this.calendarcreazione.value;
@@ -880,23 +880,37 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
    * @param command 
    * @param event 
    */
+  needToAsk = false;
   public askConfirmAndHandleCalendarCreazioneEvent(calendar: Calendar, command: string, event: Event, filterCallback: (value: Date[]) => {}) {
+    //add this check becaus when we click on confirmation button it takas it as click outside
+    if (this.needToAsk) {
+      this.needToAsk = false;
+      return;
+    }
     if (command === "onClickOutside") {
       calendar.writeValue(this.lastDataCreazioneFilterValue);
       return;
     }
-    console.log(calendar.value);
-    let needToAsk = false;
+    console.log(calendar);
     if (command === "clear" || !!!calendar.value || calendar.value[0] === null) {
       // Sto cercando su tutti gli anni
-      needToAsk = true;
+      this.needToAsk = true;
     } else {
+      //for only year picker
+      //this is a check if it is only a year selected
+      //if is a range we change the date to the last day of the year
+      if(calendar.value[1]==null){
+        calendar.writeValue([calendar.value[0],new Date(calendar.value[0].getFullYear(), 11, 31)]);
+      }else{
+        calendar.writeValue([calendar.value[0],new Date(calendar.value[1].getFullYear(), 11, 31)]);
+      }
       if (calendar.value[1] !== null && ((calendar.value[1].getYear() - calendar.value[0].getYear()) > 1)) {
         // Se la differenza degli anni è maggiore di 1 allora sto cercando su almeno 3 anni.
-        needToAsk = true;
+        this.needToAsk = true;
       }
     }
-    if (needToAsk) {
+
+    if (this.needToAsk) {
       setTimeout(() => {
         this.confirmationService.confirm({
           key: "confirm-popup",
@@ -905,10 +919,13 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
           icon: 'pi pi-exclamation-triangle',
           accept: () => {
             // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
+            console.log("accepted");
             this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
           },
           reject: () => {
             // L'utente ha cambaito idea. Non faccio nulla
+            // repopulate with old value
+            calendar.writeValue(this.lastDataCreazioneFilterValue);
           }
         });
       }, 0);
