@@ -904,9 +904,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       //for only year picker
       //this is a check if it is only a year selected
       //if is a range we change the date to the last day of the year
-      if(calendar.value[1]==null){
+      if (calendar.value[1] === null) {
         calendar.writeValue([calendar.value[0],new Date(calendar.value[0].getFullYear(), 11, 31)]);
-      }else{
+      } else {
         calendar.writeValue([calendar.value[0],new Date(calendar.value[1].getFullYear(), 11, 31)]);
       }
       if (calendar.value[1] !== null && ((calendar.value[1].getYear() - calendar.value[0].getYear()) > 1)) {
