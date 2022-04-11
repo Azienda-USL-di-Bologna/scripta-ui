@@ -372,7 +372,7 @@
         </div>
         <div *ngSwitchCase="'oggetto'" class="oggetto-content" [pTooltip]="rowData.oggetto" tooltipPosition="top"
           (click)="openArchive(rowData)">
-          {{rowData.oggetto}}
+          {{rowData.oggetto && rowData.oggetto !== "" ? rowData.oggetto : "[nome non assegnato]"}}
         </div>
         <div *ngSwitchCase="'stato'">
           {{rowData.statoVisualizzazione}}

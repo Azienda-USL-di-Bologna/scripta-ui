@@ -28,6 +28,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public permessiArchivio : PermessoArchivio[] = [];
   public colsResponsabili : any[];
   public newArchivoButton: NewArchivoButton;
+  public contenutoDiviso = false;
 
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set data(data: any) {
@@ -91,19 +92,28 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
       this.setForDettaglio();
     } else {
-      if(this.archivio.livello === 3){
-        this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DOCUMENTI);
-        this.setForDocumenti();
-      }else{
-        this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.SOTTOARCHIVI);
-        this.setForSottoarchivi();
+      if (this.contenutoDiviso) {
+        if (this.archivio.livello === 3) {
+          this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DOCUMENTI);
+          this.setForDocumenti();
+        } else {
+          this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.SOTTOARCHIVI);
+          this.setForSottoarchivi();
+        }
+      } else {
+        this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.CONTENUTO);
+          this.setForContenuto();
       }
-      
     }
   }
 
   private setForSottoarchivi(): void {
     this.captionConfiguration = new CaptionConfiguration(true, true, true, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
+    this.referenceTableComponent = this.archivilist;
+  }
+
+  public setForContenuto(): void {
+    this.captionConfiguration = new CaptionConfiguration(false, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
     this.referenceTableComponent = this.archivilist;
   }
 
@@ -133,6 +143,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       case SelectButton.DETTAGLIO:
         this.setForDettaglio();
         break;
+      case SelectButton.CONTENUTO:
+        this.setForContenuto();
+        break;
     }
   }
 
@@ -151,35 +164,52 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     switch (archivio.livello) {
       case 1:
         labelDati = "Dati del fascicolo";
-        this.selectButtonItems.push(
-          {
-            id: SelectButton.SOTTOARCHIVI,
-            label: "Sottofascicoli",
-            disabled: this.archivio.stato === StatoArchivio.BOZZA
-          }
-        );
+        if (this.contenutoDiviso) {
+          this.selectButtonItems.push(
+            {
+              id: SelectButton.SOTTOARCHIVI,
+              label: "Sottofascicoli",
+              disabled: this.archivio.stato === StatoArchivio.BOZZA
+            }
+          );
+        }
       break;
       case 2:
         labelDati = "Dati del sottofascicolo";
-        this.selectButtonItems.push(
-          {
-            id: SelectButton.SOTTOARCHIVI,
-            label: "Inserti",
-            disabled: this.archivio.stato === StatoArchivio.BOZZA
-          }
-        );
+        if (this.contenutoDiviso) {
+          this.selectButtonItems.push(
+            {
+              id: SelectButton.SOTTOARCHIVI,
+              label: "Inserti",
+              disabled: this.archivio.stato === StatoArchivio.BOZZA
+            }
+          );
+        }
       break;
       case 3:
         labelDati = "Dati dell'inserto";
         break;
     }
     
+    if (this.contenutoDiviso) {
+      this.selectButtonItems.push(
+        {
+          id: SelectButton.DOCUMENTI,
+          label: "Documenti",
+          disabled: this.archivio.stato === StatoArchivio.BOZZA
+        }
+      );
+    } else {
+      this.selectButtonItems.push(
+        {
+          id: SelectButton.CONTENUTO,
+          label: "Contenuto",
+          disabled: this.archivio.stato === StatoArchivio.BOZZA
+        }
+      );
+    }
+    
     this.selectButtonItems.push(
-      {
-        id: SelectButton.DOCUMENTI,
-        label: "Documenti",
-        disabled: this.archivio.stato === StatoArchivio.BOZZA
-      },
       {
         id: SelectButton.DETTAGLIO,
         label: labelDati + (this.archivio.stato === StatoArchivio.BOZZA ? " (Bozza)" : "")
@@ -220,5 +250,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
 export enum SelectButton {
   SOTTOARCHIVI = "SOTTOARCHIVI",
   DOCUMENTI = "DOCUMENTI",
-  DETTAGLIO = "DETTAGLIO"
+  DETTAGLIO = "DETTAGLIO",
+  CONTENUTO = "CONTENUTO"
 }
