@@ -924,7 +924,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
           icon: 'pi pi-exclamation-triangle',
           accept: () => {
             // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
-            console.log("accepted");
             this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
           },
           reject: () => {

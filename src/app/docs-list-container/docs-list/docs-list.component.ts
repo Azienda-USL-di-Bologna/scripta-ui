@@ -895,43 +895,50 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * @param command 
    * @param event 
    */
-  public askConfirmAndHandleCalendarCreazioneEvent(calendar: Calendar, command: string, event: Event, filterCallback: (value: Date[]) => {}) {
-    if (command === "onClickOutside") {
-      calendar.writeValue(this.lastDataCreazioneFilterValue);
-      return;
-    }
-    console.log(calendar.value);
-    let needToAsk = false;
-    if (command === "clear" || !!!calendar.value || calendar.value[0] === null) {
-      // Sto cercando su tutti gli anni
-      needToAsk = true;
-    } else {
-      if (calendar.value[1] !== null && ((calendar.value[1].getYear() - calendar.value[0].getYear()) > 1)) {
-        // Se la differenza degli anni è maggiore di 1 allora sto cercando su almeno 3 anni.
-        needToAsk = true;
-      }
-    }
-    if (needToAsk) {
-      setTimeout(() => {
-        this.confirmationService.confirm({
-          key: "confirm-popup",
-          target: event.target,
-          message: "La ricerca potrebbe risultare lenta. Vuoi procedere?",
-          icon: 'pi pi-exclamation-triangle',
-          accept: () => {
-            // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
-            this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
-          },
-          reject: () => {
-            // L'utente ha cambaito idea. Non faccio nulla
-          }
-        });
-      }, 0);
-    } else {
-      this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
-    }
-  }
-
+   needToAsk = false;
+   public askConfirmAndHandleCalendarCreazioneEvent(calendar: Calendar, command: string, event: Event, filterCallback: (value: Date[]) => {}) {
+     //add this check becaus when we click on confirmation button it takas it as click outside
+     if (this.needToAsk) {
+       this.needToAsk = false;
+       return;
+     }
+     if (command === "onClickOutside") {
+       calendar.writeValue(this.lastDataCreazioneFilterValue);
+       return;
+     }
+     console.log(calendar);
+     if (command === "clear" || !!!calendar.value || calendar.value[0] === null) {
+       // Sto cercando su tutti gli anni
+       this.needToAsk = true;
+     } else {
+        if (calendar.value[1] !== null && ((calendar.value[1].getYear() - calendar.value[0].getYear()) > 1)) {
+         // Se la differenza degli anni è maggiore di 1 allora sto cercando su almeno 3 anni.
+         this.needToAsk = true;
+       }
+     }
+ 
+     if (this.needToAsk) {
+       setTimeout(() => {
+         this.confirmationService.confirm({
+           key: "confirm-popup",
+           target: event.target,
+           message: "La ricerca potrebbe risultare lenta. Vuoi procedere?",
+           icon: 'pi pi-exclamation-triangle',
+           accept: () => {
+             // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
+             this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
+           },
+           reject: () => {
+             // L'utente ha cambaito idea. Non faccio nulla
+             // repopulate with old value
+             calendar.writeValue(this.lastDataCreazioneFilterValue);
+           }
+         });
+       }, 0);
+     } else {
+       this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
+     }
+   }
   /**
    * Gestione custom del filtro per azienda scelto dall'utente. In particolare devo gestire il caso
    * in cui l'utente scelga l'opzione "Tutte le aziende" per avvisarlo di possibili rallentamenti.
