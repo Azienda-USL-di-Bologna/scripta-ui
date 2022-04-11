@@ -114,7 +114,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   public setForContenuto(): void {
-    this.captionConfiguration = new CaptionConfiguration(true, true, true, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
+    this.captionConfiguration = new CaptionConfiguration(true, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
     this.referenceTableComponent = this;
   }
 
