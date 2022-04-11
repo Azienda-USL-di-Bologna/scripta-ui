@@ -12,8 +12,8 @@ export interface CaptionReferenceTableComponent {
   clear: () => void;
   exportCsvInProgress: boolean;
   exportCSV: (table: Table) => void;
-  selectableColumns: ColonnaBds[];
-  selectedColumns: ColonnaBds[];
-  onChangeSelectedColumns: (event: any) => void;
-  dataTable: Table
+  selectableColumns?: ColonnaBds[];
+  selectedColumns?: ColonnaBds[];
+  onChangeSelectedColumns?: (event: any) => void;
+  dataTable?: Table
 }

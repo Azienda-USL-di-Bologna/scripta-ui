@@ -12,13 +12,14 @@ import { TabComponent } from '../navigation-tabs/tab.component';
 import { DettaglioArchivioComponent } from './dettaglio-archivio/dettaglio-archivio.component';
 import { RichiestaAccessoArchiviComponent } from './richiesta-accesso-archivi/richiesta-accesso-archivi.component';
 import { ExtendedArchivioService } from './extended-archivio.service';
+import { Table } from 'primeng/table';
 
 @Component({
   selector: 'app-archivio',
   templateUrl: './archivio.component.html',
   styleUrls: ['./archivio.component.scss']
 })
-export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, CaptionSelectButtonsComponent {
+export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, CaptionSelectButtonsComponent, CaptionReferenceTableComponent {
   private _archivio: Archivio | ArchivioDetail;
   public captionConfiguration: CaptionConfiguration;
   public referenceTableComponent: CaptionReferenceTableComponent;
@@ -113,8 +114,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   public setForContenuto(): void {
-    this.captionConfiguration = new CaptionConfiguration(false, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
-    this.referenceTableComponent = this.archivilist;
+    this.captionConfiguration = new CaptionConfiguration(true, true, true, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
+    this.referenceTableComponent = this;
   }
 
   private setForDocumenti(): void {
@@ -244,6 +245,34 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         };
       break;
     }
+  }
+
+  /**
+   * Di seguito un serie di metodi che servono da passa carte tra la 
+   * generic-caption-table e le due tabelle docs-list e archivi-list
+   * nel caso non sia attiva la modalità "contenutoDiviso"
+   */
+  public removeSort(): void {
+    this.archivilist.removeSort();
+    this.doclist.removeSort();
+  }
+  public applyFilterGlobal(event: any, matchOperation: string): void {
+    this.archivilist.applyFilterGlobal(event, matchOperation);
+    this.doclist.applyFilterGlobal(event, matchOperation);
+  }
+  public resetPaginationAndLoadData() {
+    this.archivilist.resetPaginationAndLoadData();
+    this.doclist.resetPaginationAndLoadData();
+  }
+  public clear() {
+    this.archivilist.clear();
+    this.doclist.clear();
+  }
+  public exportCsvInProgress = false;
+  public exportCSV(dataTable: Table) {
+    this.exportCsvInProgress =  this.doclist.exportCsvInProgress;
+    this.doclist.exportCSV(this.doclist.dataTable);
+
   }
 }
 

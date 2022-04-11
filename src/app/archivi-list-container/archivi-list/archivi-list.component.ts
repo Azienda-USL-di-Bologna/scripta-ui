@@ -397,10 +397,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       },
       mode: "PAGE_NO_COUNT"
     };
-    this.archivioDetailService.getData(
+    const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+    this.serviceToGetData.getData(
       this.projectionToGetData,
-      null,
-      null,
+      filtersAndSorts,
+      buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
       pageConfNoLimit)
       .subscribe(
         res => {
