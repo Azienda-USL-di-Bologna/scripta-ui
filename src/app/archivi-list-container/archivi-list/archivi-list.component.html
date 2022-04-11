@@ -99,18 +99,12 @@
                 appendTo="body">
                 <ng-template pTemplate="footer" class="calendar-filter-footer-button">
                   <div class="calendar-filter-footer-button-container">
-                    <p-button
-                      (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'doFilter', $event, filter)">
-                      Conferma
-                    </p-button>
-                    <p-button
+                    <p-button label="Conferma" (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'doFilter', $event, filter)"></p-button>
+                    <!-- <p-button
                       (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'setToday', $event, filter)">
                       Oggi
-                    </p-button>
-                    <p-button
-                      (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'clear', $event, filter)">
-                      Svuota
-                    </p-button>
+                    </p-button> -->
+                    <p-button label="Svuota" (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'clear', $event, filter)"></p-button>
                   </div>
                 </ng-template>
               </p-calendar>
@@ -216,7 +210,7 @@
         </div>
         <div *ngSwitchCase="'numerazioneGerarchica'" class="search-wrapper">
           <span class="search-wrapper"
-            [pTooltip]="archiviListMode === archiviListModeEnum.TUTTI || archivioPadre ? 'Albi' : 'Seleziona livello'" 
+            [pTooltip]="archiviListMode === archiviListModeEnum.TUTTI || archivioPadre ? 'La selezione è disabilitata' : 'Seleziona livello'" 
             tooltipPosition="top"
             >
             <p-columnFilter #columnFilterLivello 
@@ -403,6 +397,14 @@
       </td>
     </tr>
   </ng-template>
+  <!-- No Records-->
+  <ng-template pTemplate="emptymessage" let-columns>
+    <tr>
+      <td [attr.colspan]="columns.length" class="emptyMessage" >
+          <h3>Nessun documento trovato</h3>
+      </td>
+  </tr>
+</ng-template>
 </p-table>
 <p-toast key="archiviListToast"></p-toast>
 <p-confirmPopup key="confirm-popup"></p-confirmPopup>

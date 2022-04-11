@@ -42,11 +42,13 @@
         .p-multiselect-label,
         p-calendar .p-inputtext {
           font-size: 12px;
-          text-align: center;
+          text-align: center;          
+          color: #936 !important;
+          font-weight: bold;
         }
         .p-inputtext {
-          font-size: 12px;
-          color: #2e4a65 !important;
+          font-size: 12px;                  
+          color: #936 !important;
           font-weight: bold;
         }
         .p-column-filter-clear-button {
@@ -116,6 +118,13 @@
         }
       }
     }
+
+    /*Empty Message*/
+    .emptyMessage{
+      border: 0px;
+      justify-content: center;
+    }
+        
   }
 
   .cdk-virtual-scroll-viewport {
@@ -129,8 +138,8 @@
     max-height: 53px;
   }
   .ente-column {
-    min-width: 100px;
-    max-width: 100px;
+    min-width: 103px;
+    max-width: 103px;
   }
   .tipologia-column {
     min-width: 171px;
@@ -311,13 +320,8 @@
 .calendar-filter-footer-button-container {
   display: flex;
   justify-content: space-around;
+
 }
 
-::ng-deep .p-datepicker{
-  width: 300px !important;
-  .p-highlight {
-    color: #ffffff;
-    background: #2e4a65 !important;
-  }
-}
+
 

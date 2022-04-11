@@ -4,7 +4,7 @@
 }
 ::ng-deep .p-table-scripta-archivi-list {
   .archiviolist-table-body {
-    overflow: initial !important;
+    //overflow: initial !important;
     /* HEADER */
     .header-row {
       height: 41px;
@@ -44,9 +44,13 @@
         p-calendar .p-inputtext {
           font-size: 12px;
           text-align: center;
+          color: #2e4a65 !important;
+          font-weight: bold;
         }
         .p-inputtext {
           font-size: 12px;
+          color: #2e4a65 !important;
+          font-weight: bold;
         }
         .p-column-filter-clear-button {
           display: none !important;
@@ -67,6 +71,8 @@
       p-columnfilter {
         width: 100%;
         .p-inputtext {
+          color: #2e4a65 !important;
+          font-weight: bold;
           border: none !important;
         }
         &.column-filter-livello {
@@ -126,6 +132,14 @@
         }
       } 
     }
+
+    /*Empty Message*/
+    .emptyMessage{
+      border: 0px;
+      justify-content: center;
+    }
+
+    
   }
 
   .cdk-virtual-scroll-viewport {
@@ -139,12 +153,12 @@
     max-height: 53px;
   }
   .data-creazione-column {
-    min-width: 193px !important;
-    max-width: 193px !important;
+    min-width: 193px;
+    max-width: 193px;
   }
   .ente-column {
-    min-width: 100px;
-    max-width: 100px;
+    min-width: 103px;
+    max-width: 103px;
   }
   .tipo-column {
     min-width: 171px;
@@ -251,11 +265,20 @@
   }
 }
 
-.calendar-filter-footer-button-container {
+/*Calendar*/
+::ng-deep .calendar-filter-footer-button-container {
   display: flex;
   justify-content: space-around;
+  .p-button{
+    width: 110px !important;
+    justify-content: center;
+  }
 }
 
 ::ng-deep .p-datepicker{
-  width: 300px !important;
+  width: 420px !important;
+  .p-highlight {
+    color: #ffffff;
+    background: #2e4a65 !important;
+  }
 }
