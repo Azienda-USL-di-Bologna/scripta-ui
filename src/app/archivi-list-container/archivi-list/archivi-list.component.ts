@@ -847,6 +847,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     const stringa: string = (event.target as HTMLInputElement).value;
     if (!!!stringa || stringa === "") {
       this.resetSort();
+    } else {
+      this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
+      this.dropdownLivello.writeValue(this.livelloValue);
+      this.dataTable.filters["livello"] = { value: this.dropdownLivello.value, matchMode: "in" };
     }
     this.dataTable.filterGlobal(stringa, matchMode);
   }
