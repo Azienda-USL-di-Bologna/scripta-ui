@@ -141,9 +141,9 @@
   <ng-template pTemplate="body" let-rowRespo let-columns="columns">
     <tr>
       <td>{{rowRespo.idPersona.descrizione}}</td>
-      <td>{{rowRespo.idStruttura?.nome}}</td> 
-      <td>{{rowRespo.ruolo | titlecase}}</td> 
-      <td *ngIf="archivio.livello === 1"></td>  
+      <td>{{rowRespo.idStruttura?.nome}}</td>
+      <td>{{rowRespo.ruolo | titlecase}}</td>
+      <td *ngIf="archivio.livello === 1"></td>
     </tr>
   </ng-template>
 </p-table>

@@ -1086,4 +1086,5 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
         this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
     }));
   }
+
 }
