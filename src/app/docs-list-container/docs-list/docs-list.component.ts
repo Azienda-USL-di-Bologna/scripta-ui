@@ -115,6 +115,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   ) { }
 
   ngOnInit(): void {
+    this.cols = cols;
     this.docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode || DocsListMode.MIEI_DOCUMENTI;
     if (!Object.values(DocsListMode).includes(this.docsListMode)) {
       this.docsListMode = DocsListMode.MIEI_DOCUMENTI;
@@ -131,8 +132,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           if (this.docsListMode) {
             this.calcolaAziendeFiltrabili();
           }
+        
+          if (!!!this.archivio) { 
+            this.loadConfigurationAndSetItUp();
+          } else { 
+            this.setColumnsPerDetailArchivio();
+          }
 
-          this.loadConfigurationAndSetItUp();
         }
       )
     );
@@ -284,7 +290,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       return e;
     });
 
-    this.cols = cols;
+  
     const impostazioni = this.utenteUtilitiesLogin.getImpostazioniApplicazione();
 
     if (impostazioni && impostazioni.impostazioniVisualizzazione && impostazioni.impostazioniVisualizzazione !== "") {
@@ -309,6 +315,16 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (!this._selectedColumns || this._selectedColumns.length === 0) {
       this._selectedColumns = this.cols.filter(c => c.default);
     }
+  }
+
+  public setColumnsPerDetailArchivio(): void {
+    const colonneDaVisualizzare = ["registrazione", "dataRegistrazione", "oggetto", "tipologia","fascicolazioni"];
+    // this._selectedColumns = this.cols.filter(c => colonneDaVisualizzare.includes(c.field));
+    this._selectedColumns = [];
+    colonneDaVisualizzare.forEach(c => {
+      this._selectedColumns.push(this.cols.find(e => e.field === c));
+    })
+    console.log(this._selectedColumns)
   }
 
   /**
@@ -430,8 +446,10 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
 
     if (this.filtriPuliti) {
       this.filtriPuliti = false;
-      this.resetCalendarToInitialValues();
-      this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
+      if(!!!this.archivio){
+        this.resetCalendarToInitialValues();
+        this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
+      }
 
       if (this.dropdownAzienda) {
         const value = this.aziendeFiltrabili.find(a => a.value[0] === this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault.id).value;
@@ -575,7 +593,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Carica i docs per la lista.
    * @param event
    */
-  private loadData(): void {
+  private loadData(): void { 
     this.loading = true;
     this.pageConf.conf = {
       limit: this.storedLazyLoadEvent.rows,
