@@ -1082,8 +1082,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 
     archivioBozza.attoriList = [idPersonaCreazione];
 
-    this.subscriptions.push(this.archivioService.postHttpCall(archivioBozza).subscribe((nuovoArchivioCreato: Archivio) => {      
-        this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
+    this.subscriptions.push(this.archivioService.postHttpCall(
+        archivioBozza, 
+        ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
+        .subscribe((nuovoArchivioCreato: Archivio) => {      
+          this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
     }));
   }
 

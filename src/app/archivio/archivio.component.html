@@ -17,15 +17,19 @@
   <ng-template pTemplate>
     <!-- Contenuto (lista archivi + lista documenti)-->
     <p-splitter *ngIf="!contenutoDiviso"
-      styleClass="mb-5" 
       layout="vertical"
       gutterSize="6"
-      [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'CONTENUTO', 'hide-sottoarchivi': archivio.livello === 3}">
+      [ngClass]="{
+        'hide': selectedButtonItem && selectedButtonItem.id !== 'CONTENUTO', 
+        'hide-sottoarchivi': archivio.livello === 3 
+      }">
       <ng-template pTemplate>
         <!-- Lista sottoarchivi -->
-        <div style="width: 100%;">
+        <div style="width: 100%;"><!--  *ngIf="archivio.livello !== 3" -->
           <h4 class="mini-caption-table">{{archivio.livello === 1 ? 'Sottofascicoli' : 'Inserti'}} contenuti</h4>
-          <archivi-list #archivilist *ngIf="archivio.livello !== 3"
+          <!-- La condizione dell'ngIf potrebbe sembrare superflua ma è invece necessaria per far si che la ptable mostri il contenuto
+          altrimenti quello che fa è caricare le righe ma non mostrarle -->
+          <archivi-list #archivilist *ngIf="archivio.livello !== 3 && selectedButtonItem && selectedButtonItem.id === 'CONTENUTO'"
             [archivioPadre]="archivio">
           </archivi-list>
         </div>
@@ -62,4 +66,3 @@
 </p-splitter>
 
 <richiesta-accesso-archivi #richiestaaccessoarchivi *ngIf="archivio?.isArchivioNero"></richiesta-accesso-archivi>
-

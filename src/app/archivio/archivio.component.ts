@@ -272,7 +272,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public exportCSV(dataTable: Table) {
     this.exportCsvInProgress =  this.doclist.exportCsvInProgress;
     this.doclist.exportCSV(this.doclist.dataTable);
-
   }
 }
 
