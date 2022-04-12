@@ -20,11 +20,11 @@
       styleClass="mb-5" 
       layout="vertical"
       gutterSize="6"
-      [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'CONTENUTO'}">
+      [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'CONTENUTO', 'hide-sottoarchivi': archivio.livello === 3}">
       <ng-template pTemplate>
         <!-- Lista sottoarchivi -->
         <h4 class="mini-caption-table">{{archivio.livello === 1 ? 'Sottofascicoli' : 'Inserti'}} contenuti</h4>
-        <archivi-list #archivilist
+        <archivi-list #archivilist *ngIf="archivio.livello !== 3"
           [archivioPadre]="archivio">
         </archivi-list>
       </ng-template>

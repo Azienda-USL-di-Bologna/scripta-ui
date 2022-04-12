@@ -14,7 +14,7 @@
           background: #f4f4f4;
           color: #333333;
           border: 1px solid #c8c8c8;
-          border-width: 1px 1px 0 1px;
+          border-width: 0 1px 0 1px;
           padding: 0.857rem 1rem;
           font-weight: 700;
           box-sizing: border-box;
@@ -30,6 +30,12 @@
         }
         .hide {
           display: none;
+        }
+        .hide-sottoarchivi {
+          .p-splitter-panel:first-child,
+          .p-splitter-gutter {
+            display: none;
+          }
         }
       }
     }

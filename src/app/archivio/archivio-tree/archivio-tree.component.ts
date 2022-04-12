@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MenuItem, TreeNode } from 'primeng/api';
 import { ExtendedArchivioService } from '../extended-archivio.service';
-import { Archivio, ArchivioDetail } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, ENTITIES_STRUCTURE } from '@bds/ng-internauta-model';
 import { combineLatest, Observable } from 'rxjs';
 import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
 
@@ -14,7 +14,7 @@ export class ArchivioTreeComponent implements OnInit {
   public archivi: TreeNode[] = [];
   public bricioleArchivi: MenuItem[] = [];
   public selectedNode: TreeNode = null;
-  private ARCHIVIO_PLAIN_FIELD_PROJECTION: string = "ArchivioWithPlainFields";
+  private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
 
   @Output() archivioSelectedEvent = new EventEmitter<ArchivioDetail>();
 
@@ -163,7 +163,7 @@ export class ArchivioTreeComponent implements OnInit {
    * @returns 
    */
   private getArchivioById(idArchivio: number): Observable<Archivio> {
-    return this.archivioService.getByIdHttpCall(idArchivio, this.ARCHIVIO_PLAIN_FIELD_PROJECTION);
+    return this.archivioService.getByIdHttpCall(idArchivio, this.ARCHIVIO_PROJECTION);
   }
 
   /**
