@@ -12,7 +12,7 @@ import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.s
 })
 export class ArchivioTreeComponent implements OnInit {
   public archivi: TreeNode[] = [];
-  public bricioleArchivi: MenuItem[] = [];
+  //public bricioleArchivi: MenuItem[] = [];
   public selectedNode: TreeNode = null;
   private ARCHIVIO_PLAIN_FIELD_PROJECTION: string = "ArchivioWithPlainFields";
 
@@ -45,19 +45,21 @@ export class ArchivioTreeComponent implements OnInit {
     this.firstTreeLoad();
   }
 
+  //Todo: BreadCrumbs is not used for now but the code for it is still present (bricioleArchivi is commented)
+    
   /**
    * Questo metodo si occupa di caricare l'alberatura iniziale.
    * In particolare, se ho aperto un sottofascicolo/inserto allora 
    * devo caricare il padre e l'eventuale nonno.
    */
   private firstTreeLoad(): void {
-    this.bricioleArchivi.push({
-      label: this.archivio.idAzienda.nome,
-    } as any);
+    // this.bricioleArchivi.push({
+    //   label: this.archivio.idAzienda.nome,
+    // } as any);
     switch (this.archivio.livello) {
       case 1:
         this.archivi.push(this.buildTreeNode(this.archivio));
-        this.bricioleArchivi.push(this.buildMenuItem(this.archivio));
+      //  this.bricioleArchivi.push(this.buildMenuItem(this.archivio));
         break;
       case 2:
         this.getArchivioById(this.archivio.fk_idArchivioPadre.id).subscribe(
@@ -66,9 +68,9 @@ export class ArchivioTreeComponent implements OnInit {
               this.buildTreeNode(archivioPadre, [
                 this.buildTreeNode(this.archivio)
               ]));
-            this.bricioleArchivi.push(this.buildMenuItem(archivioPadre));
-            this.bricioleArchivi.push(this.buildMenuItem(this.archivio));
-            this.bricioleArchivi = [...this.bricioleArchivi];
+            // this.bricioleArchivi.push(this.buildMenuItem(archivioPadre));
+            // this.bricioleArchivi.push(this.buildMenuItem(this.archivio));
+            // this.bricioleArchivi = [...this.bricioleArchivi];
           }
         );
         break;
@@ -84,10 +86,10 @@ export class ArchivioTreeComponent implements OnInit {
                   this.buildTreeNode(this.archivio)
                 ])
               ])); 
-            this.bricioleArchivi.push(this.buildMenuItem(archivioNonno));
-            this.bricioleArchivi.push(this.buildMenuItem(archivioPadre));
-            this.bricioleArchivi.push(this.buildMenuItem(this.archivio));
-            this.bricioleArchivi = [...this.bricioleArchivi];
+            // this.bricioleArchivi.push(this.buildMenuItem(archivioNonno));
+            // this.bricioleArchivi.push(this.buildMenuItem(archivioPadre));
+            // this.bricioleArchivi.push(this.buildMenuItem(this.archivio));
+            // this.bricioleArchivi = [...this.bricioleArchivi];
           }
         );
         break;
@@ -106,7 +108,7 @@ export class ArchivioTreeComponent implements OnInit {
     switch (archivio.livello) {
       case 1:
         this.selectedNode = this.archivi[0];
-        this.bricioleArchivi = this.bricioleArchivi.slice(0,2);
+        //this.bricioleArchivi = this.bricioleArchivi.slice(0,2);
         break;
       case 2:
         const index = this.archivi[0].children.findIndex(nodo => (nodo.data as Archivio).id === archivio.id);
@@ -120,7 +122,7 @@ export class ArchivioTreeComponent implements OnInit {
         } else {
           this.selectedNode = this.archivi[0].children[index];
         }
-        this.bricioleArchivi = [this.bricioleArchivi[0],this.bricioleArchivi[1], this.buildMenuItem(archivio)];
+        //this.bricioleArchivi = [this.bricioleArchivi[0],this.bricioleArchivi[1], this.buildMenuItem(archivio)];
         break;
       case 3:
         const indexLiv2 = this.archivi[0].children.findIndex(nodo => (nodo.data as Archivio).id === archivio.fk_idArchivioPadre.id);
@@ -137,7 +139,7 @@ export class ArchivioTreeComponent implements OnInit {
           } else {
             this.selectedNode = this.archivi[0].children[indexLiv2].children[indexLiv3];
           }
-          this.bricioleArchivi = [this.bricioleArchivi[0], this.bricioleArchivi[1], this.buildMenuItem(this.archivi[0].children[indexLiv2].data), this.buildMenuItem(archivio)];
+          //this.bricioleArchivi = [this.bricioleArchivi[0], this.bricioleArchivi[1], this.buildMenuItem(this.archivi[0].children[indexLiv2].data), this.buildMenuItem(archivio)];
         } else {
           // Manca il sottofascicolo, allora devo aggiungere sia lui che l'inserto
           this.getArchivioById(archivio.fk_idArchivioPadre.id).subscribe(
@@ -149,7 +151,7 @@ export class ArchivioTreeComponent implements OnInit {
               } else {
                 this.archivi[0].children.splice(indexArchivioSuccessivo, 0, newNode);
               }
-              this.bricioleArchivi = [this.bricioleArchivi[0], this.buildMenuItem(archivioPadre), this.buildMenuItem(archivio)];
+              //this.bricioleArchivi = [this.bricioleArchivi[0], this.buildMenuItem(archivioPadre), this.buildMenuItem(archivio)];
             }
           );
         }
