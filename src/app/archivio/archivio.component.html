@@ -23,17 +23,21 @@
       [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'CONTENUTO', 'hide-sottoarchivi': archivio.livello === 3}">
       <ng-template pTemplate>
         <!-- Lista sottoarchivi -->
-        <h4 class="mini-caption-table">{{archivio.livello === 1 ? 'Sottofascicoli' : 'Inserti'}} contenuti</h4>
-        <archivi-list #archivilist *ngIf="archivio.livello !== 3"
-          [archivioPadre]="archivio">
-        </archivi-list>
+        <div style="width: 100%;">
+          <h4 class="mini-caption-table">{{archivio.livello === 1 ? 'Sottofascicoli' : 'Inserti'}} contenuti</h4>
+          <archivi-list #archivilist *ngIf="archivio.livello !== 3"
+            [archivioPadre]="archivio">
+          </archivi-list>
+        </div>
       </ng-template>
       <ng-template pTemplate>
         <!-- Lista documenti contenuti -->
-        <h4 class="mini-caption-table caption-lista-docs">Documenti contenuti</h4>
-        <docs-list #doclist
-          [archivio]="archivio">
-        </docs-list>
+        <div style="width: 100%;">
+          <h4 class="mini-caption-table caption-lista-docs">Documenti contenuti</h4>
+          <docs-list #doclist
+            [archivio]="archivio">
+          </docs-list>
+        </div>
       </ng-template>
     </p-splitter>
 
