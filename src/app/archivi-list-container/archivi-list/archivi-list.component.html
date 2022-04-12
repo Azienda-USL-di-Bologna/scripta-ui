@@ -305,7 +305,8 @@
         <div *ngSwitchCase="'tipo'">
           {{rowData.tipoVisualizzazione}}
         </div>
-        <div *ngSwitchCase="'numerazioneGerarchica'" class="numerazione-box">
+        <div *ngSwitchCase="'numerazioneGerarchica'" class="numerazione-box"
+          (click)="openArchive(rowData)">
           <div class="left-side">
             <span [ngStyle]="{
               'color': rowData.livello === 1 ? '#92225f' : 
@@ -356,8 +357,7 @@
               folder
             </span>
           </div> -->
-          <div class="box-numerazione"
-            (click)="openArchive(rowData)">
+          <div class="box-numerazione">
             {{rowData.numerazioneGerarchica}}
           </div> 
         </div>
