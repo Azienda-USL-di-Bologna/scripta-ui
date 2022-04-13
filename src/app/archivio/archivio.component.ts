@@ -29,7 +29,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public permessiArchivio : PermessoArchivio[] = [];
   public colsResponsabili : any[];
   public newArchivoButton: NewArchivoButton;
-  public contenutoDiviso = false;
+  public contenutoDiviso = true;
 
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set data(data: any) {
