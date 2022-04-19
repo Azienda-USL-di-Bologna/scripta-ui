@@ -92,17 +92,17 @@
       </button>
     </div>
     <div class="flag-box">
-      <span>
+      <span class="flag-icon">
         <label for="riservato">Riservato</label>
         <i id="riservato"
           type="button"
-          (onClick)="changeVisibilita()" 
+          (click)="changeVisibilita()" 
           class="pi" 
           title="Riservato"
           [ngClass]="{'pi-eye': !archivio.riservato, 'pi-eye-slash': archivio.riservato}">
         </i>
       </span>
-      <span>
+      <span class="flag-icon">
         <label for="preferito">Preferito</label>
         <i  id="preferito"
           type="button"
@@ -115,7 +115,13 @@
     </div>
     <div class="note-box">
       <label>Note</label>
-      <textarea rows="7" cols="22"></textarea>
+      <textarea #noteArea rows="7" cols="22" 
+        [(ngModel)]="archivio.note" 
+        (blur)="saveNote()" 
+        placeholder="Qui è possibile inserire note: descrizione, ubicazione fisica, etc..."
+        pTooltip="Qui è possibile inserire note: descrizione, ubicazione fisica, etc..."
+        tooltipPosition="bottom">
+      </textarea>
     </div>
   </div>
 </div>

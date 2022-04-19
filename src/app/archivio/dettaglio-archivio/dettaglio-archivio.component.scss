@@ -40,6 +40,9 @@ $font-size-label: 13px;
       label {
         font-size: $font-size-label;
       }
+      .flag-icon {
+        cursor: pointer;
+      }
     }
     .note-box {
       display: flex;
