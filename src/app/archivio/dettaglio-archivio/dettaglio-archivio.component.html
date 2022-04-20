@@ -59,11 +59,16 @@
     </div>
     <div class="row">
       <label for="tipo">Tipo</label>
-        <input pInputText id="tipo"/>
-        <!-- <p-dropdown #dropdownTipo [options]="tipiDisponibili"
-                [ngModel]="value" (onChange)="onUpdateArchivio($event.value)"
-                optionValue="value" optionLabel="label" appendTo="body">
-              </p-dropdown> -->
+        <!-- <input pInputText id="tipo"/> -->
+        <p-dropdown #dropdownTipo 
+          [options]="tipiArchivioObj"
+          [(ngModel)]="archivio.tipo"  
+          (onChange)="changeTipo($event.value)"
+          optionValue="value" 
+          optionLabel="nome" 
+          appendTo="body"
+          class="tipo-dropdown">
+        </p-dropdown>
     </div>
     <div class="row"> 
         <label for="tipo">Archivi collegati</label>

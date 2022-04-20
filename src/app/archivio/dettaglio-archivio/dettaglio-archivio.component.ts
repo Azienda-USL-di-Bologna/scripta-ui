@@ -30,7 +30,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public selectedArchivioCollegato: Archivio;
   public titoli: Titolo[] = [];
   public filteredMassimari: Massimario[] = [];
-  public tipoArchivioObj: any;
+  public tipiArchivioObj: any[];
 
   @ViewChild("noteArea") public noteArea: ElementRef;
 
@@ -45,7 +45,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.getResponsabili();
-    this.tipoArchivioObj = TipoArchivioTraduzioneVisualizzazione;
+    this.tipiArchivioObj = TipoArchivioTraduzioneVisualizzazione;
   }
 
   public changeVisibilita(): void {
@@ -58,6 +58,20 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       res => {
         console.log("Update archivio: ", res);
         this.archivio.version = res.version;
+        this.messageService.add({
+          severity: "success",
+          key: "dettaglioArchivioToast",
+          summary: "OK",
+          detail: `Riservatezza modificata con successo`
+        });
+      },
+      err => {
+        this.messageService.add({
+          severity: "error",
+          key: "dettaglioArchivioToast",
+          summary: "Attenzione",
+          detail: `Si è verificato un errore nella modifica della riservatezza, contattare Babelcare`
+        });
       }
     ))
 
@@ -160,6 +174,48 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       res => {
         console.log("Update archivio: ", res);
         this.archivio.version = res.version;
+        this.messageService.add({
+          severity: "success",
+          key: "dettaglioArchivioToast",
+          summary: "OK",
+          detail: `Note aggiunte con successo`
+        });
+      },
+      err => {
+        this.messageService.add({
+          severity: "error",
+          key: "dettaglioArchivioToast",
+          summary: "Attenzione",
+          detail: `Si è verificato un errore nella modifica/inserimento delle note, contattare Babelcare`
+        });
+      }
+    ))
+  }
+
+  public changeTipo(): void {
+    const archivioToUpdate: Archivio = new Archivio();
+    archivioToUpdate.tipo = this.archivio.tipo;
+    archivioToUpdate.version = this.archivio.version;
+    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
+    .subscribe(
+      res => {
+        console.log("Update archivio: ", res);
+        this.archivio.version = res.version;
+        this.messageService.add({
+          severity: "success",
+          key: "dettaglioArchivioToast",
+          summary: "OK",
+          detail: `Campo Tipo modificato con successo`
+        });
+      }
+      ,
+      err => {
+        this.messageService.add({
+          severity: "error",
+          key: "dettaglioArchivioToast",
+          summary: "Attenzione",
+          detail: `Si è verificato un errore nella modifica del tipo, contattare Babelcare`
+        });
       }
     ))
   }

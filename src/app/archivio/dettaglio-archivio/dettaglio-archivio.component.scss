@@ -18,6 +18,9 @@ $font-size-label: 13px;
       display: flex;
       justify-content: space-between;
       padding: 5px 0;
+      .tipo-dropdown{
+        width: 100%;
+      }
       label {
         min-width: 155px;
         text-align: right;
