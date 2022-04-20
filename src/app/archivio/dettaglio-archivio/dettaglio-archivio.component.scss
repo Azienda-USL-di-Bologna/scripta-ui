@@ -19,6 +19,9 @@ $font-size-label: 13px;
       display: flex;
       justify-content: space-between;
       padding: 5px 0;
+      .tipo-dropdown{
+        width: 100%;
+      }
       label {
         min-width: 155px;
         text-align: right;
@@ -40,6 +43,9 @@ $font-size-label: 13px;
       justify-content: space-around;
       label {
         font-size: $font-size-label;
+      }
+      .flag-icon {
+        cursor: pointer;
       }
     }
     .note-box {

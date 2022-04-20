@@ -59,11 +59,16 @@
     </div>
     <div class="row">
       <label for="tipo">Tipo</label>
-        <input pInputText id="tipo"/>
-        <!-- <p-dropdown #dropdownTipo [options]="tipiDisponibili"
-                [ngModel]="value" (onChange)="onUpdateArchivio($event.value)"
-                optionValue="value" optionLabel="label" appendTo="body">
-              </p-dropdown> -->
+        <!-- <input pInputText id="tipo"/> -->
+        <p-dropdown #dropdownTipo 
+          [options]="tipiArchivioObj"
+          [(ngModel)]="archivio.tipo"  
+          (onChange)="changeTipo($event.value)"
+          optionValue="value" 
+          optionLabel="nome" 
+          appendTo="body"
+          class="tipo-dropdown">
+        </p-dropdown>
     </div>
     <div class="row"> 
         <label for="tipo">Archivi collegati</label>
@@ -92,17 +97,17 @@
       </button>
     </div>
     <div class="flag-box">
-      <span>
+      <span class="flag-icon">
         <label for="riservato">Riservato</label>
         <i id="riservato"
           type="button"
-          (onClick)="changeVisibilita()" 
+          (click)="changeVisibilita()" 
           class="pi" 
           title="Riservato"
           [ngClass]="{'pi-eye': !archivio.riservato, 'pi-eye-slash': archivio.riservato}">
         </i>
       </span>
-      <span>
+      <span class="flag-icon">
         <label for="preferito">Preferito</label>
         <i  id="preferito"
           type="button"
@@ -115,7 +120,13 @@
     </div>
     <div class="note-box">
       <label>Note</label>
-      <textarea rows="7" cols="22"></textarea>
+      <textarea #noteArea rows="7" cols="22" 
+        [(ngModel)]="archivio.note" 
+        (keyup)="timeOutAndSaveArchivio(archivio, 'note')" 
+        placeholder="Qui è possibile inserire note come: descrizione, ubicazione fisica, etc..."
+        pTooltip="Qui è possibile inserire note come: descrizione, ubicazione fisica, etc..."
+        tooltipPosition="bottom">
+      </textarea>
     </div>
   </div>
 </div>

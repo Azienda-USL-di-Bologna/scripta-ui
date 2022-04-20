@@ -1,9 +1,11 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Archivio, ArchivioDetail, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService } from '@bds/ng-internauta-model';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Archivio, ArchivioDetail, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, TipoArchivio } from '@bds/ng-internauta-model';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
 import { MessageService } from 'primeng/api';
 import { TreeNode } from 'primeng/api/treenode';
+import { InputTextarea } from 'primeng/inputtextarea';
 import { Subscription } from 'rxjs/internal/Subscription';
+import { TipoArchivioTraduzioneVisualizzazione } from 'src/app/archivi-list-container/archivi-list/archivi-list-constants';
 import { ExtendedArchivioService } from '../extended-archivio.service';
 
 @Component({
@@ -28,6 +30,9 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public selectedArchivioCollegato: Archivio;
   public titoli: Titolo[] = [];
   public filteredMassimari: Massimario[] = [];
+  public tipiArchivioObj: any[];
+
+  @ViewChild("noteArea") public noteArea: ElementRef;
 
   constructor(
     private attoreArchivioService: AttoreArchivioService, 
@@ -40,7 +45,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.getResponsabili();
-    
+    this.tipiArchivioObj = TipoArchivioTraduzioneVisualizzazione;
   }
 
   public changeVisibilita(): void {
@@ -53,6 +58,26 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       res => {
         console.log("Update archivio: ", res);
         this.archivio.version = res.version;
+        let message: string;
+        if(this.archivio.riservato == true) {
+          message = `Impostato come Riservato correttamente`
+        } else {
+          message = `Impostato come Non-Riservato correttamente`
+        }
+        this.messageService.add({
+          severity: "success",
+          key: "dettaglioArchivioToast",
+          summary: "OK",
+          detail: message
+        });
+      },
+      err => {
+        this.messageService.add({
+          severity: "error",
+          key: "dettaglioArchivioToast",
+          summary: "Attenzione",
+          detail: `Si è verificato un errore nella modifica del camporiservato, contattare Babelcare`
+        });
       }
     ))
 
@@ -93,7 +118,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     }
     this.savingTimeout = setTimeout(() => {
       this.subscriptions.push(this.extendedArchivioService.updateArchivio(archivio, [field], null).subscribe(res => this.archivio.version = res.version));
-    }, 300);
+    }, 500);
   }
 
   /**
@@ -144,6 +169,20 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       }
     ))
     
+  }
+
+
+  public changeTipo(): void {
+    const archivioToUpdate: Archivio = new Archivio();
+    archivioToUpdate.tipo = this.archivio.tipo;
+    archivioToUpdate.version = this.archivio.version;
+    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
+    .subscribe(
+      res => {
+        console.log("Update archivio: ", res);
+        this.archivio.version = res.version;
+      }
+    ))
   }
 
   public ngOnDestroy(): void {
