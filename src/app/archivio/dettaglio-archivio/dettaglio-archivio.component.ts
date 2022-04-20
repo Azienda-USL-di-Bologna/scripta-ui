@@ -58,11 +58,17 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       res => {
         console.log("Update archivio: ", res);
         this.archivio.version = res.version;
+        let message: string;
+        if(this.archivio.riservato == true) {
+          message = `Impostato come Riservato correttamente`
+        } else {
+          message = `Impostato come Non-Riservato correttamente`
+        }
         this.messageService.add({
           severity: "success",
           key: "dettaglioArchivioToast",
           summary: "OK",
-          detail: `Riservatezza modificata con successo`
+          detail: message
         });
       },
       err => {
@@ -70,7 +76,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
           severity: "error",
           key: "dettaglioArchivioToast",
           summary: "Attenzione",
-          detail: `Si è verificato un errore nella modifica della riservatezza, contattare Babelcare`
+          detail: `Si è verificato un errore nella modifica del camporiservato, contattare Babelcare`
         });
       }
     ))
@@ -112,7 +118,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     }
     this.savingTimeout = setTimeout(() => {
       this.subscriptions.push(this.extendedArchivioService.updateArchivio(archivio, [field], null).subscribe(res => this.archivio.version = res.version));
-    }, 300);
+    }, 500);
   }
 
   /**
@@ -165,32 +171,6 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     
   }
 
-  public saveNote(): void {
-    const archivioToUpdate: Archivio = new Archivio();
-    archivioToUpdate.note = this.noteArea.nativeElement.value;
-    archivioToUpdate.version = this.archivio.version;
-    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
-    .subscribe(
-      res => {
-        console.log("Update archivio: ", res);
-        this.archivio.version = res.version;
-        this.messageService.add({
-          severity: "success",
-          key: "dettaglioArchivioToast",
-          summary: "OK",
-          detail: `Note aggiunte con successo`
-        });
-      },
-      err => {
-        this.messageService.add({
-          severity: "error",
-          key: "dettaglioArchivioToast",
-          summary: "Attenzione",
-          detail: `Si è verificato un errore nella modifica/inserimento delle note, contattare Babelcare`
-        });
-      }
-    ))
-  }
 
   public changeTipo(): void {
     const archivioToUpdate: Archivio = new Archivio();
@@ -201,21 +181,6 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       res => {
         console.log("Update archivio: ", res);
         this.archivio.version = res.version;
-        this.messageService.add({
-          severity: "success",
-          key: "dettaglioArchivioToast",
-          summary: "OK",
-          detail: `Campo Tipo modificato con successo`
-        });
-      }
-      ,
-      err => {
-        this.messageService.add({
-          severity: "error",
-          key: "dettaglioArchivioToast",
-          summary: "Attenzione",
-          detail: `Si è verificato un errore nella modifica del tipo, contattare Babelcare`
-        });
       }
     ))
   }

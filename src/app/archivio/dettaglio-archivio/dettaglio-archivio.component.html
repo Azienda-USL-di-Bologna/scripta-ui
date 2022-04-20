@@ -122,9 +122,9 @@
       <label>Note</label>
       <textarea #noteArea rows="7" cols="22" 
         [(ngModel)]="archivio.note" 
-        (blur)="saveNote()" 
-        placeholder="Qui è possibile inserire note: descrizione, ubicazione fisica, etc..."
-        pTooltip="Qui è possibile inserire note: descrizione, ubicazione fisica, etc..."
+        (keyup)="timeOutAndSaveArchivio(archivio, 'note')" 
+        placeholder="Qui è possibile inserire note come: descrizione, ubicazione fisica, etc..."
+        pTooltip="Qui è possibile inserire note come: descrizione, ubicazione fisica, etc..."
         tooltipPosition="bottom">
       </textarea>
     </div>
