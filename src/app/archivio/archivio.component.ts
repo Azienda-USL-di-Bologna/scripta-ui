@@ -12,13 +12,14 @@ import { TabComponent } from '../navigation-tabs/tab.component';
 import { DettaglioArchivioComponent } from './dettaglio-archivio/dettaglio-archivio.component';
 import { RichiestaAccessoArchiviComponent } from './richiesta-accesso-archivi/richiesta-accesso-archivi.component';
 import { ExtendedArchivioService } from './extended-archivio.service';
+import { Table } from 'primeng/table';
 
 @Component({
   selector: 'app-archivio',
   templateUrl: './archivio.component.html',
   styleUrls: ['./archivio.component.scss']
 })
-export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, CaptionSelectButtonsComponent {
+export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, CaptionSelectButtonsComponent, CaptionReferenceTableComponent {
   private _archivio: Archivio | ArchivioDetail;
   public captionConfiguration: CaptionConfiguration;
   public referenceTableComponent: CaptionReferenceTableComponent;
@@ -28,6 +29,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public permessiArchivio : PermessoArchivio[] = [];
   public colsResponsabili : any[];
   public newArchivoButton: NewArchivoButton;
+  public contenutoDiviso = true;
 
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set data(data: any) {
@@ -91,20 +93,29 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
       this.setForDettaglio();
     } else {
-      if(this.archivio.livello === 3){
-        this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DOCUMENTI);
-        this.setForDocumenti();
-      }else{
-        this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.SOTTOARCHIVI);
-        this.setForSottoarchivi();
+      if (this.contenutoDiviso) {
+        if (this.archivio.livello === 3) {
+          this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DOCUMENTI);
+          this.setForDocumenti();
+        } else {
+          this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.SOTTOARCHIVI);
+          this.setForSottoarchivi();
+        }
+      } else {
+        this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.CONTENUTO);
+          this.setForContenuto();
       }
-      
     }
   }
 
   private setForSottoarchivi(): void {
     this.captionConfiguration = new CaptionConfiguration(true, true, true, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
     this.referenceTableComponent = this.archivilist;
+  }
+
+  public setForContenuto(): void {
+    this.captionConfiguration = new CaptionConfiguration(true, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
+    this.referenceTableComponent = this;
   }
 
   private setForDocumenti(): void {
@@ -133,6 +144,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       case SelectButton.DETTAGLIO:
         this.setForDettaglio();
         break;
+      case SelectButton.CONTENUTO:
+        this.setForContenuto();
+        break;
     }
   }
 
@@ -147,36 +161,59 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    */
   public buildSelectButtonItems(archivio: Archivio | ArchivioDetail): void {
     this.selectButtonItems = [];
+    let labelDati: string;
     switch (archivio.livello) {
       case 1:
-        this.selectButtonItems.push(
-          {
-            id: SelectButton.SOTTOARCHIVI,
-            label: "Sottofascicoli",
-            disabled: this.archivio.stato === StatoArchivio.BOZZA
-          }
-        );
+        labelDati = "Dati del fascicolo";
+        if (this.contenutoDiviso) {
+          this.selectButtonItems.push(
+            {
+              id: SelectButton.SOTTOARCHIVI,
+              label: "Sottofascicoli",
+              disabled: this.archivio.stato === StatoArchivio.BOZZA
+            }
+          );
+        }
       break;
       case 2:
-        this.selectButtonItems.push(
-          {
-            id: SelectButton.SOTTOARCHIVI,
-            label: "Inserti",
-            disabled: this.archivio.stato === StatoArchivio.BOZZA
-          }
-        );
+        labelDati = "Dati del sottofascicolo";
+        if (this.contenutoDiviso) {
+          this.selectButtonItems.push(
+            {
+              id: SelectButton.SOTTOARCHIVI,
+              label: "Inserti",
+              disabled: this.archivio.stato === StatoArchivio.BOZZA
+            }
+          );
+        }
       break;
+      case 3:
+        labelDati = "Dati dell'inserto";
+        break;
+    }
+    
+    if (this.contenutoDiviso) {
+      this.selectButtonItems.push(
+        {
+          id: SelectButton.DOCUMENTI,
+          label: "Documenti",
+          disabled: this.archivio.stato === StatoArchivio.BOZZA
+        }
+      );
+    } else {
+      this.selectButtonItems.push(
+        {
+          id: SelectButton.CONTENUTO,
+          label: "Contenuto",
+          disabled: this.archivio.stato === StatoArchivio.BOZZA
+        }
+      );
     }
     
     this.selectButtonItems.push(
       {
-        id: SelectButton.DOCUMENTI,
-        label: "Documenti",
-        disabled: this.archivio.stato === StatoArchivio.BOZZA
-      },
-      {
         id: SelectButton.DETTAGLIO,
-        label: "Dettaglio"
+        label: labelDati + (this.archivio.stato === StatoArchivio.BOZZA ? " (Bozza)" : "")
       }
     );
   }
@@ -209,10 +246,38 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       break;
     }
   }
+
+  /**
+   * Di seguito un serie di metodi che servono da passa carte tra la 
+   * generic-caption-table e le due tabelle docs-list e archivi-list
+   * nel caso non sia attiva la modalità "contenutoDiviso"
+   */
+  public removeSort(): void {
+    this.archivilist.removeSort();
+    this.doclist.removeSort();
+  }
+  public applyFilterGlobal(event: any, matchOperation: string): void {
+    this.archivilist.applyFilterGlobal(event, matchOperation);
+    this.doclist.applyFilterGlobal(event, matchOperation);
+  }
+  public resetPaginationAndLoadData() {
+    this.archivilist.resetPaginationAndLoadData();
+    this.doclist.resetPaginationAndLoadData();
+  }
+  public clear() {
+    this.archivilist.clear();
+    this.doclist.clear();
+  }
+  public exportCsvInProgress = false;
+  public exportCSV(dataTable: Table) {
+    this.exportCsvInProgress =  this.doclist.exportCsvInProgress;
+    this.doclist.exportCSV(this.doclist.dataTable);
+  }
 }
 
 export enum SelectButton {
   SOTTOARCHIVI = "SOTTOARCHIVI",
   DOCUMENTI = "DOCUMENTI",
-  DETTAGLIO = "DETTAGLIO"
+  DETTAGLIO = "DETTAGLIO",
+  CONTENUTO = "CONTENUTO"
 }

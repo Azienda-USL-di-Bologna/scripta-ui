@@ -1,6 +1,19 @@
 :host {
   width: 100%;
 }
+::ng-deep .archivi-header-div{
+  display: flex;
+  justify-content: center;
+  border-bottom: 2px solid #c8c8c8;
+  border-radius: 5px;
+  margin: 10px;
+  padding: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  background-color: #f4f4f4;
+  box-shadow: 2px 2px 10px 5px #e1e1e1;
+}
+
 ::ng-deep .archivi-breadcrumb {
   /* border: none;
   border-bottom: 1px solid #c8c8c8;

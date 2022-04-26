@@ -153,13 +153,13 @@ export class NavigationTabsService {
       return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id
     });
     if (tabIndex !== -1) {
-      this.updateTab(tabIndex, archivio.numerazioneGerarchica, {archivio: archivio, id: archivio.id});
+      this.updateTab(tabIndex, archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]", {archivio: archivio, id: archivio.id});
       if (active) {
         this.activeTabByIndex(tabIndex);
       }
     } else {
       this.addTab(
-        this.buildaTabArchivio(archivio, archivio.numerazioneGerarchica)
+        this.buildaTabArchivio(archivio, archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]")
       );
       if (active) {
         this.activeLastTab();

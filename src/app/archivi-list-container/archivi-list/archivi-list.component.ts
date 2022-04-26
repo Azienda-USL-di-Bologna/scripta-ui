@@ -288,35 +288,38 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     this.selectButtonItems = [];
       this.selectButtonItems.push(
         {
-          title: "Tutti gli archivi che posso vedere",
+          title: "Tutti i fascicoli che posso vedere",
           label: "Visibili",
           // icon: "pi pi-fw pi-list", 
           routerLink: ["./" + ARCHIVI_LIST_ROUTE],
           queryParams: { "mode": ArchiviListMode.VISIBILI }
         },
         {
-          title: "",
+          title: "I fascicoli usati di recente",
           label: "Recenti",
           // icon: "pi pi-fw pi-list", 
           routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-          queryParams: { "mode": ArchiviListMode.RECENTI }
+          queryParams: { "mode": ArchiviListMode.RECENTI },
+          disabled: true
         },
         {
-          title: "",
+          title: "I miei fascicoli preferiti",
           label: "Preferiti",
           // icon: "pi pi-fw pi-list", 
           routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-          queryParams: { "mode": ArchiviListMode.PREFERITI }
+          queryParams: { "mode": ArchiviListMode.PREFERITI },
+          disabled: true
         },
         {
-          title: "",
+          title: "I fascicoli frequenti",
           label: "Frequenti",
           // icon: "pi pi-fw pi-list", 
           routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-          queryParams: { "mode": ArchiviListMode.FREQUENTI }
+          queryParams: { "mode": ArchiviListMode.FREQUENTI },
+          disabled: true
         },
         {
-          title: "",
+          title: "Tutti i fascicoli",
           label: "Tutti",
           // icon: "pi pi-fw pi-list", 
           routerLink: ["./" + ARCHIVI_LIST_ROUTE],
@@ -394,10 +397,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       },
       mode: "PAGE_NO_COUNT"
     };
-    this.archivioDetailService.getData(
+    const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+    this.serviceToGetData.getData(
       this.projectionToGetData,
-      null,
-      null,
+      filtersAndSorts,
+      buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
       pageConfNoLimit)
       .subscribe(
         res => {
@@ -597,7 +601,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
           this.calendarcreazione.writeValue([
             new Date(new Date().getFullYear(), 0, 1),
             new Date(new Date().getFullYear(), 11, 31)
-          ]);
+          ]); 
       }
     }
     this.lastDataCreazioneFilterValue = this.calendarcreazione.value;
@@ -843,6 +847,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     const stringa: string = (event.target as HTMLInputElement).value;
     if (!!!stringa || stringa === "") {
       this.resetSort();
+    } else {
+      this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
+      this.dropdownLivello.writeValue(this.livelloValue);
+      this.dataTable.filters["livello"] = { value: this.dropdownLivello.value, matchMode: "in" };
     }
     this.dataTable.filterGlobal(stringa, matchMode);
   }
@@ -877,23 +885,37 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
    * @param command 
    * @param event 
    */
+  needToAsk = false;
   public askConfirmAndHandleCalendarCreazioneEvent(calendar: Calendar, command: string, event: Event, filterCallback: (value: Date[]) => {}) {
+    //add this check becaus when we click on confirmation button it takas it as click outside
+    if (this.needToAsk) {
+      this.needToAsk = false;
+      return;
+    }
     if (command === "onClickOutside") {
       calendar.writeValue(this.lastDataCreazioneFilterValue);
       return;
     }
-    console.log(calendar.value);
-    let needToAsk = false;
+    console.log(calendar);
     if (command === "clear" || !!!calendar.value || calendar.value[0] === null) {
       // Sto cercando su tutti gli anni
-      needToAsk = true;
+      this.needToAsk = true;
     } else {
+      //for only year picker
+      //this is a check if it is only a year selected
+      //if is a range we change the date to the last day of the year
+      if (calendar.value[1] === null) {
+        calendar.writeValue([calendar.value[0],new Date(calendar.value[0].getFullYear(), 11, 31)]);
+      } else {
+        calendar.writeValue([calendar.value[0],new Date(calendar.value[1].getFullYear(), 11, 31)]);
+      }
       if (calendar.value[1] !== null && ((calendar.value[1].getYear() - calendar.value[0].getYear()) > 1)) {
         // Se la differenza degli anni è maggiore di 1 allora sto cercando su almeno 3 anni.
-        needToAsk = true;
+        this.needToAsk = true;
       }
     }
-    if (needToAsk) {
+
+    if (this.needToAsk) {
       setTimeout(() => {
         this.confirmationService.confirm({
           key: "confirm-popup",
@@ -906,6 +928,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
           },
           reject: () => {
             // L'utente ha cambaito idea. Non faccio nulla
+            // repopulate with old value
+            calendar.writeValue(this.lastDataCreazioneFilterValue);
           }
         });
       }, 0);
@@ -1058,8 +1082,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 
     archivioBozza.attoriList = [idPersonaCreazione];
 
-    this.subscriptions.push(this.archivioService.postHttpCall(archivioBozza).subscribe((nuovoArchivioCreato: Archivio) => {      
-        this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
+    this.subscriptions.push(this.archivioService.postHttpCall(
+        archivioBozza, 
+        ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
+        .subscribe((nuovoArchivioCreato: Archivio) => {      
+          this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
     }));
   }
+
 }

@@ -12,14 +12,12 @@ import { Calendar } from "primeng/calendar";
 import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
-import { AppService } from "../../app.service";
 import { Impostazioni } from "../../utilities/utils";
 import { cols, colsCSV, DocsListMode, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
 import { MultiSelect } from "primeng/multiselect";
-import { NavViews } from "../../navigation-tabs/navigation-tabs-contants";
 import { TabComponent } from "../../navigation-tabs/tab.component";
 import { CaptionReferenceTableComponent } from '../../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
@@ -39,7 +37,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   private resetDocsArrayLenght: boolean = true;
   private storedLazyLoadEvent: LazyLoadEvent;
   private lastAziendaFilterValue: number[];
-  private lastStatoFilterValue: string[];
+  //private lastStatoFilterValue: string[];
   private lastDataCreazioneFilterValue: Date[];
 
   @ViewChild("dt") public dataTable: Table;
@@ -113,11 +111,11 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     private loginService: NtJwtLoginService,
     private datepipe: DatePipe,
     private route: ActivatedRoute,
-    private router: Router,
     private confirmationService: ConfirmationService
   ) { }
 
   ngOnInit(): void {
+    this.cols = cols;
     this.docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode || DocsListMode.MIEI_DOCUMENTI;
     if (!Object.values(DocsListMode).includes(this.docsListMode)) {
       this.docsListMode = DocsListMode.MIEI_DOCUMENTI;
@@ -134,8 +132,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           if (this.docsListMode) {
             this.calcolaAziendeFiltrabili();
           }
+        
+          if (!!!this.archivio) { 
+            this.loadConfigurationAndSetItUp();
+          } else { 
+            this.setColumnsPerDetailArchivio();
+          }
 
-          this.loadConfigurationAndSetItUp();
         }
       )
     );
@@ -287,7 +290,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       return e;
     });
 
-    this.cols = cols;
+  
     const impostazioni = this.utenteUtilitiesLogin.getImpostazioniApplicazione();
 
     if (impostazioni && impostazioni.impostazioniVisualizzazione && impostazioni.impostazioniVisualizzazione !== "") {
@@ -312,6 +315,16 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (!this._selectedColumns || this._selectedColumns.length === 0) {
       this._selectedColumns = this.cols.filter(c => c.default);
     }
+  }
+
+  public setColumnsPerDetailArchivio(): void {
+    const colonneDaVisualizzare = ["registrazione", "dataRegistrazione", "oggetto", "tipologia","fascicolazioni"];
+    // this._selectedColumns = this.cols.filter(c => colonneDaVisualizzare.includes(c.field));
+    this._selectedColumns = [];
+    colonneDaVisualizzare.forEach(c => {
+      this._selectedColumns.push(this.cols.find(e => e.field === c));
+    })
+    console.log(this._selectedColumns)
   }
 
   /**
@@ -433,8 +446,10 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
 
     if (this.filtriPuliti) {
       this.filtriPuliti = false;
-      this.resetCalendarToInitialValues();
-      this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
+      if(!!!this.archivio){
+        this.resetCalendarToInitialValues();
+        this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
+      }
 
       if (this.dropdownAzienda) {
         const value = this.aziendeFiltrabili.find(a => a.value[0] === this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault.id).value;
@@ -578,7 +593,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Carica i docs per la lista.
    * @param event
    */
-  private loadData(): void {
+  private loadData(): void { 
     this.loading = true;
     this.pageConf.conf = {
       limit: this.storedLazyLoadEvent.rows,
@@ -898,43 +913,50 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * @param command 
    * @param event 
    */
-  public askConfirmAndHandleCalendarCreazioneEvent(calendar: Calendar, command: string, event: Event, filterCallback: (value: Date[]) => {}) {
-    if (command === "onClickOutside") {
-      calendar.writeValue(this.lastDataCreazioneFilterValue);
-      return;
-    }
-    console.log(calendar.value);
-    let needToAsk = false;
-    if (command === "clear" || !!!calendar.value || calendar.value[0] === null) {
-      // Sto cercando su tutti gli anni
-      needToAsk = true;
-    } else {
-      if (calendar.value[1] !== null && ((calendar.value[1].getYear() - calendar.value[0].getYear()) > 1)) {
-        // Se la differenza degli anni è maggiore di 1 allora sto cercando su almeno 3 anni.
-        needToAsk = true;
-      }
-    }
-    if (needToAsk) {
-      setTimeout(() => {
-        this.confirmationService.confirm({
-          key: "confirm-popup",
-          target: event.target,
-          message: "La ricerca potrebbe risultare lenta. Vuoi procedere?",
-          icon: 'pi pi-exclamation-triangle',
-          accept: () => {
-            // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
-            this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
-          },
-          reject: () => {
-            // L'utente ha cambaito idea. Non faccio nulla
-          }
-        });
-      }, 0);
-    } else {
-      this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
-    }
-  }
-
+   needToAsk = false;
+   public askConfirmAndHandleCalendarCreazioneEvent(calendar: Calendar, command: string, event: Event, filterCallback: (value: Date[]) => {}) {
+     //add this check becaus when we click on confirmation button it takas it as click outside
+     if (this.needToAsk) {
+       this.needToAsk = false;
+       return;
+     }
+     if (command === "onClickOutside") {
+       calendar.writeValue(this.lastDataCreazioneFilterValue);
+       return;
+     }
+     console.log(calendar);
+     if (command === "clear" || !!!calendar.value || calendar.value[0] === null) {
+       // Sto cercando su tutti gli anni
+       this.needToAsk = true;
+     } else {
+        if (calendar.value[1] !== null && ((calendar.value[1].getYear() - calendar.value[0].getYear()) > 1)) {
+         // Se la differenza degli anni è maggiore di 1 allora sto cercando su almeno 3 anni.
+         this.needToAsk = true;
+       }
+     }
+ 
+     if (this.needToAsk) {
+       setTimeout(() => {
+         this.confirmationService.confirm({
+           key: "confirm-popup",
+           target: event.target,
+           message: "La ricerca potrebbe risultare lenta. Vuoi procedere?",
+           icon: 'pi pi-exclamation-triangle',
+           accept: () => {
+             // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
+             this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
+           },
+           reject: () => {
+             // L'utente ha cambaito idea. Non faccio nulla
+             // repopulate with old value
+             calendar.writeValue(this.lastDataCreazioneFilterValue);
+           }
+         });
+       }, 0);
+     } else {
+       this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
+     }
+   }
   /**
    * Gestione custom del filtro per azienda scelto dall'utente. In particolare devo gestire il caso
    * in cui l'utente scelga l'opzione "Tutte le aziende" per avvisarlo di possibili rallentamenti.
