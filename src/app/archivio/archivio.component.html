@@ -1,10 +1,11 @@
-<generic-caption-table *ngIf="referenceTableComponent"
+<generic-caption-table *ngIf="referenceTableComponent && !archivio?.isArchivioNero"
   [configuration]="captionConfiguration"
   [referenceTableComponent]="referenceTableComponent"
   [selectButtonsComponent]="this"
-  [archiviComponent]="archiviComponent">
+  [functionalButtonsComponent]="this">
 </generic-caption-table>
 <p-splitter 
+  *ngIf="archivio && !archivio.isArchivioNero"
   styleClass="splitter-archivio" 
   [panelSizes]="[25,75]" 
   [minSizes]="[15,55]">
@@ -14,24 +15,54 @@
     </app-archivio-tree>
   </ng-template>
   <ng-template pTemplate>
+    <!-- Contenuto (lista archivi + lista documenti)-->
+    <p-splitter *ngIf="!contenutoDiviso"
+      layout="vertical"
+      gutterSize="6"
+      [ngClass]="{
+        'hide': selectedButtonItem && selectedButtonItem.id !== 'CONTENUTO', 
+        'hide-sottoarchivi': archivio.livello === 3 
+      }">
+      <ng-template pTemplate>
+        <!-- Lista sottoarchivi -->
+        <div style="width: 100%;"><!--  *ngIf="archivio.livello !== 3" -->
+          <h4 class="mini-caption-table">{{archivio.livello === 1 ? 'Sottofascicoli' : 'Inserti'}} contenuti</h4>
+          <!-- La condizione dell'ngIf potrebbe sembrare superflua ma è invece necessaria per far si che la ptable mostri il contenuto
+          altrimenti quello che fa è caricare le righe ma non mostrarle -->
+          <archivi-list #archivilist *ngIf="archivio.livello !== 3 && selectedButtonItem && selectedButtonItem.id === 'CONTENUTO'"
+            [archivioPadre]="archivio">
+          </archivi-list>
+        </div>
+      </ng-template>
+      <ng-template pTemplate>
+        <!-- Lista documenti contenuti -->
+        <div style="width: 100%;">
+          <h4 class="mini-caption-table caption-lista-docs">Documenti contenuti</h4>
+          <docs-list #doclist
+            [archivio]="archivio">
+          </docs-list>
+        </div>
+      </ng-template>
+    </p-splitter>
 
     <!-- Lista sottoarchivi -->
-    <archivi-list #archivilist
+    <archivi-list #archivilist *ngIf="contenutoDiviso"
       [archivioPadre]="archivio" 
       [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'SOTTOARCHIVI'}">
     </archivi-list>
 
     <!-- Lista documenti contenuti -->
-    <docs-list #doclist
+    <docs-list #doclist *ngIf="contenutoDiviso" 
       [archivio]="archivio"
       [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'DOCUMENTI'}">
     </docs-list>
 
-    <!-- Dettaglio dell'archivio -->
-    <dettaglio-archivio #dettaglioarchivio
+    <!-- Dati dell'archivio -->
+    <dettaglio-archivio #dettaglioarchivio 
       [archivio]="archivio"
       [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'DETTAGLIO'}">
     </dettaglio-archivio>
-
   </ng-template>
 </p-splitter>
+
+<richiesta-accesso-archivi #richiestaaccessoarchivi *ngIf="archivio?.isArchivioNero"></richiesta-accesso-archivi>

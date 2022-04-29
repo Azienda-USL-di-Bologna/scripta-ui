@@ -2,11 +2,13 @@
 <html lang="it">
 <head>
   <meta charset="utf-8">
-  <title>Scripta</title>
+  <title>Gedi internauta</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="assets/images/logo_icon.png">
   <script>
+    Object.values = Object.values || (obj => Object.keys(obj).map(key => obj[key]));
+
     if (!Array.prototype.includes) {
       Object.defineProperty(Array.prototype, 'includes', {
         value: function(searchElement, fromIndex) {

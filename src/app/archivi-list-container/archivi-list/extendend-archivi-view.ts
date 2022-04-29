@@ -7,6 +7,7 @@ export class ExtendedArchiviView extends ArchivioDetailView {
     private _vicariVisualizzazione: string[];
     private _idPersonaResponsabileVisualizzazione: string;
     private _idPersonaCreazioneVisualizzazione: string;
+    private riservato: boolean;
 
     constructor() { super(); }
 

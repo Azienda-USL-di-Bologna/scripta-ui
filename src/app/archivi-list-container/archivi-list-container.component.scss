@@ -7,3 +7,10 @@
     flex: 1 1 0;
   }
 }
+
+:host::ng-deep .generic-caption-table-row {
+  .left-content .tabs .p-selectbutton .p-button:hover{
+    background-color: #993366 !important;
+    border-color: #993366 !important;
+  }
+}

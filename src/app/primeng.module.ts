@@ -28,6 +28,8 @@ import { SplitterModule } from 'primeng/splitter';
 import { TreeModule } from 'primeng/tree';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { MenuModule } from 'primeng/menu';
+import { MessageModule } from 'primeng/message';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
 
 
 @NgModule({
@@ -62,7 +64,9 @@ import { MenuModule } from 'primeng/menu';
     SplitterModule,
     TreeModule,
     BreadcrumbModule,
-    MenuModule
+    MenuModule,
+    MessageModule,
+    OverlayPanelModule
   ],
   exports: [
     ButtonModule,
@@ -93,7 +97,9 @@ import { MenuModule } from 'primeng/menu';
     SplitterModule,
     TreeModule,
     BreadcrumbModule,
-    MenuModule
+    MenuModule,
+    MessageModule,
+    OverlayPanelModule
   ],
   providers: [MessageService, DialogService]
 })

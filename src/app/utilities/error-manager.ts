@@ -7,7 +7,7 @@ export class ErrorManager {
     let errorMessage = "";
     if (error.error instanceof ErrorEvent) {
       // Get client-side error
-      errorMessage = "Client-side error :" + error.error.message;
+      errorMessage = "Client-side error:" + error.error.message;
     } else {
       // Get server-side error
       errorMessage = `Server-side error, Error Code: ${error.status}\nMessage: ${error.message}`;

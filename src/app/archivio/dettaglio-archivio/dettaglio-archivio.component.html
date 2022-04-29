@@ -1,11 +1,161 @@
-<button
-    type="button" 
-    pButton 
-    pRipple 
-    label="Numera Fascicolo"
-    class="p-mr-2" 
-    pTooltip="Numera Fascicolo"
-    aria-label="Numera Fascicolo"
-    tooltipPosition="bottom">
-</button>
-<input type="text" placeholder="Inserisci il nome dell'archivio" pInputText [(ngModel)]="archivio.oggetto"/>
+<div class="box-campi-dettaglio">
+  <div class="left-side">
+    <div class="row">
+      <label for="aziendaDescrizione">Azienda</label>   
+      <input id="aziendaDescrizione"  
+        class="input-aziendaDescrizione"
+        type="text" 
+        pInputText 
+        [disabled]="true" 
+        [(ngModel)]="archivio.idAzienda.descrizione"/>
+    </div>
+    <div class="row">
+      <label for="oggetto">Nome</label>
+      <input id="oggetto"
+        type="text" 
+        placeholder="Inserisci il nome dell'archivio" 
+        (keyup)="timeOutAndSaveArchivio(archivio, 'oggetto')" 
+        pInputText 
+        [(ngModel)]="archivio.oggetto"/> 
+    </div>
+    <div class="row">
+      <label for="classificazione">Classificazione</label>
+      <input pInputText />
+      <!-- <p-treeSelect id="classificazione"
+        [(ngModel)]="archivio.idTitolo" 
+        [options]="titoli" 
+        (onShow)="onShowTitoli()"
+        selectionMode="single"  
+        placeholder="Seleziona una classificazione">
+      </p-treeSelect> -->
+    </div>
+    <div class="row">
+      <label for="categoria">Categoria documentale</label>
+      <p-autoComplete id="categoria" #autocompleteCategoria 
+        ariaLabel="categoria documentale"
+        [(ngModel)]="archivio.idMassimario" 
+        (onSelect)="onSelectMassimario($event)" 
+        [suggestions]="filteredMassimari"
+        (completeMethod)="filterMassimario($event)" 
+        field="nome" 
+        appendTo="body" 
+        [dropdown]=true 
+        placeholder="Cerca categoria..." 
+        emptyMessage="Nessun riferimento trovato">
+        <ng-template let-massimario pTemplate="item">
+          <span>{{massimario.nome}} ({{massimario.descrizioneTenuta}})</span>
+        </ng-template>
+      </p-autoComplete>
+    </div>
+    <div class="row">
+      <label for="conservazione">Conservazione</label>
+    <input id="conservazione"
+      class="input-conservazione"
+      type="text" 
+      placeholder="Inserisci la conservazione" 
+      pInputText 
+      [disabled]="!archivio.idMassimario"
+      [(ngModel)]="archivio.anniTenuta"/> 
+    </div>
+    <div class="row">
+      <label for="tipo">Tipo</label>
+        <!-- <input pInputText id="tipo"/> -->
+        <p-dropdown #dropdownTipo 
+          [options]="tipiArchivioObj"
+          [(ngModel)]="archivio.tipo"  
+          (onChange)="changeTipo($event.value)"
+          optionValue="value" 
+          optionLabel="nome" 
+          appendTo="body"
+          class="tipo-dropdown">
+        </p-dropdown>
+    </div>
+    <div class="row"> 
+        <label for="tipo">Archivi collegati</label>
+        <input pInputText id="linkArchivi"/>
+        <!-- <p-autoComplete id="archiviCollegati" #autocompleteArchivio ariaLabel="archivi collegati"
+            [(ngModel)]="selectedArchivioCollegato" (onSelect)="linkArchivio($event)" [suggestions]="filteredFascicoli"
+            (completeMethod)="linkFascicolo($event)" field="nomeFascicolo" appendTo="body" class="p-col"
+            [dropdown]=true placeholder="Cerca fascicolo..." emptyMessage="Nessun riferimento trovato">
+            <ng-template let-fascicolo pTemplate="item">
+                <div>[{{fascicolo.numerazioneGerarchica}}] {{fascicolo.nomeFascicolo}}</div>
+            </ng-template>
+      </p-autoComplete> -->
+    </div>
+  </div>
+  <div class="right-side">
+    <div class="numeraFasicolo">
+      <button *ngIf="archivio.stato == 'BOZZA'"
+        type="button" 
+        pButton         
+        (click)="numeraFasicoloClicked()"
+        label="Numera Fascicolo"
+        class="p-mr-2" 
+        pTooltip="Numera Fascicolo"
+        aria-label="Numera Fascicolo"
+        tooltipPosition="bottom">
+      </button>
+    </div>
+    <div class="flag-box">
+      <span class="flag-icon">
+        <label for="riservato">Riservato</label>
+        <i id="riservato"
+          type="button"
+          (click)="changeVisibilita()" 
+          class="pi" 
+          title="Riservato"
+          [ngClass]="{'pi-eye': !archivio.riservato, 'pi-eye-slash': archivio.riservato}">
+        </i>
+      </span>
+      <span class="flag-icon">
+        <label for="preferito">Preferito</label>
+        <i  id="preferito"
+          type="button"
+          (onClick)="changePreferito()" 
+          class="pi" 
+          title="Preferito"
+          [ngClass]="{'pi-star-o': !archivio.preferito, 'pi-star': archivio.preferito}">
+        </i>
+      </span>
+    </div>
+    <div class="note-box">
+      <label>Note</label>
+      <textarea #noteArea rows="7" cols="22" 
+        [(ngModel)]="archivio.note" 
+        (keyup)="timeOutAndSaveArchivio(archivio, 'note')" 
+        placeholder="Qui è possibile inserire note come: descrizione, ubicazione fisica, etc..."
+        pTooltip="Qui è possibile inserire note come: descrizione, ubicazione fisica, etc..."
+        tooltipPosition="bottom">
+      </textarea>
+    </div>
+  </div>
+</div>
+
+<h3>Responsabili</h3>
+<p-table 
+  #tableResponsabiliArchivi 
+  [value]="responsabiliArchivi" 
+  [columns]="colsSottoarchivio">
+  <!-- Header tabella -->
+  <ng-template pTemplate="header" let-columns>
+    <tr>
+      <!-- <th *ngFor="let col of columns" [pTooltip]="col.label">
+          {{col.header}}
+      </th> -->
+      <th>Nome</th>
+      <th>Struttura</th>
+      <th>Ruolo</th>
+      <th *ngIf="archivio.livello === 1">Azioni</th>
+    </tr>
+  </ng-template>
+  <!-- Body tabella -->
+  <ng-template pTemplate="body" let-rowRespo let-columns="columns">
+    <tr>
+      <td>{{rowRespo.idPersona.descrizione}}</td>
+      <td>{{rowRespo.idStruttura?.nome}}</td>
+      <td>{{rowRespo.ruolo | titlecase}}</td>
+      <td *ngIf="archivio.livello === 1"></td>
+    </tr>
+  </ng-template>
+</p-table>
+<p-toast key="dettaglioArchivioToast"></p-toast>

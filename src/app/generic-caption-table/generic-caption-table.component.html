@@ -26,8 +26,8 @@
           [disabled]="!configuration.searchBox"
           class="p-button-outlined alarm-button" 
           icon="pi pi-filter-slash" 
-          pTooltip="Svuota i filtri"
-          aria-label="Svuota i filtri"
+          pTooltip="Ripristina filtri iniziali"
+          aria-label="Ripristina filtri iniziali"
           tooltipPosition="bottom"
           (click)="inputGobalFilter.value = ''; referenceTableComponent.clear()">
         </button>
@@ -50,15 +50,17 @@
         pButton 
         pRipple 
         icon="pi pi-plus" 
-        (click)="addArchivioClicked(); aziendaSelection.toggle($event);" 
+        (click)="functionalButtonsComponent.newArchivoButton.aziendeItems.length > 1 ? 
+          aziendaSelection.toggle($event) : 
+          functionalButtonsComponent.newArchivoButton.aziendeItems[0].command()" 
         class="p-mr-2" 
-        pTooltip="Crea nuovo archivio"
-        aria-label="Crea un nuovo archivio"
+        [pTooltip]="functionalButtonsComponent.newArchivoButton.tooltip"
+        [attr.aria-label]="functionalButtonsComponent.newArchivoButton.tooltip"
         tooltipPosition="bottom">
       </button>
       <p-menu
         #aziendaSelection
-        [model]="aziendeMenuItems"
+        [model]="functionalButtonsComponent.newArchivoButton.aziendeItems"
         [popup]="true">
       </p-menu>
     </span>
@@ -84,6 +86,11 @@
         aria-label="Scarica il csv della tabella"
         tooltipPosition="bottom">
       </button>
+      <!-- <p-menu
+        #exportCsvSelection
+        [model]="functionalButtonsComponent.newArchivoButton.aziendeItems"
+        [popup]="true">
+      </p-menu> -->
     </span>
     <!-- SELEZIONE COLONNE -->
     <p-multiSelect #ms
