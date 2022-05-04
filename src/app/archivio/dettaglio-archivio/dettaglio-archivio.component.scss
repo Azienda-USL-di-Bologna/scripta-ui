@@ -3,11 +3,7 @@ $font-size-label: 13px;
   padding: 5px;
   width: 100%;
 }
-.input-conservazione {
-  /*width: min-content;
-  */
-}
-.box-campi-dettaglio {
+::ng-deep .box-campi-dettaglio {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -26,6 +22,12 @@ $font-size-label: 13px;
         min-width: 155px;
         text-align: right;
         font-size: $font-size-label;
+      }
+      #classificazione {
+        width: 100%;
+        .p-treeselect {
+          width: 100%;
+        }
       }
     }
   }
@@ -58,4 +60,7 @@ $font-size-label: 13px;
       }
     }
   }
+}
+::ng-deep .box-autocomplete-classificazione {
+  padding: 4px 10px 0 10px;
 }

@@ -1,9 +1,9 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, TipoArchivio } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, TipoArchivio, ConfigurazioneService, ParametroAziende } from '@bds/ng-internauta-model';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
 import { MessageService } from 'primeng/api';
 import { TreeNode } from 'primeng/api/treenode';
-import { InputTextarea } from 'primeng/inputtextarea';
+import { TreeSelect } from 'primeng/treeselect';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { TipoArchivioTraduzioneVisualizzazione } from 'src/app/archivi-list-container/archivi-list/archivi-list-constants';
 import { ExtendedArchivioService } from '../extended-archivio.service';
@@ -19,6 +19,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set archivio(archivio: Archivio | ArchivioDetail) {
     this._archivio = archivio;
+    this.selectedTitolo = this.buildNodeTitolo(this.archivio.idTitolo as Titolo);
+    this.loadConfigurations();
   }
   private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
   private pageConfNoCountLimit20: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 20, offset: 0 } };
@@ -28,24 +30,41 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public selectedClassificazione: TreeNode;
   public selectedArchivioCollegato: Archivio;
-  public titoli: Titolo[] = [];
+  public titoli: TreeNode[];
+  public selectedTitolo: TreeNode;
   public filteredMassimari: Massimario[] = [];
-  public tipiArchivioObj: any[];
+  public filteredTitoli: Titolo[] = [];
+  public tipiArchivioObj: any[] = TipoArchivioTraduzioneVisualizzazione;
+  private classificazioneAllaFoglia: boolean = false;
+  
 
   @ViewChild("noteArea") public noteArea: ElementRef;
+  @ViewChild("titoliTreeSelect") public titoliTreeSelect: TreeSelect;
 
   constructor(
     private attoreArchivioService: AttoreArchivioService, 
     private extendedArchivioService: ExtendedArchivioService,
     private titoloService: TitoloService,
     private massimarioService: MassimarioService,
-    private messageService: MessageService,) {
-
+    private messageService: MessageService,
+    private configurazioneService: ConfigurazioneService) {
+    
   }
 
   ngOnInit(): void {
     this.getResponsabili();
-    this.tipiArchivioObj = TipoArchivioTraduzioneVisualizzazione;
+  }
+
+  private loadConfigurations() {
+    this.subscriptions.push(
+      this.configurazioneService.getParametriAziende("classificazioneAllaFoglia", null, [this.archivio.fk_idAzienda.id]).subscribe(
+        (parametriAziende: ParametroAziende[]) => {
+          if (parametriAziende && parametriAziende[0]) {
+            this.classificazioneAllaFoglia = JSON.parse(parametriAziende[0].valore || false);
+          }
+        }
+      )  
+    );
   }
 
   public changeVisibilita(): void {
@@ -80,9 +99,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         });
       }
     ))
-
   }
-
 
   /**
    * Questa funzione carica i responsabili dell'archivio 
@@ -122,18 +139,121 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Metodo invcato dall'apertura del treeselect delle classificazioni
-   * Carica le prime classificazioni se non sono già state caricate
+   * Metodo invcato dall'apertura del treeselect delle classificazioni o all'expand di un nodo.
+   * Caroca i titoli dell'azienda dell'archivio
+   * Se nessun parametro è passato carica le classificazioni di livello 1
+   * Se è passato il parametro event.node allora stiamo espandendo quel nodo e quindi verranno chiesti i figli.
    */
-  public onShowTitoli(): void {
+  public onShowTitoli(event?: any): void {
+    const node = event ? event.node : undefined;
     const filterAndsorts: FiltersAndSorts = new FiltersAndSorts();
-    filterAndsorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, this.archivio.fk_idAzienda.id))
-    this.subscriptions.push(this.titoloService.getData(null, filterAndsorts, null, this.pageConfNoCountNoLimit)
-    .subscribe(
+
+    if (node) {
+      if (node.children) return; // Figli già caricati per questo nodo, non serve fare altro
+      filterAndsorts.addFilter(new FilterDefinition("idTitoloPadre", FILTER_TYPES.not_string.equals, (node.data as Titolo).id));
+      filterAndsorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, (node.data as Titolo).livello + 1));
+    } else {
+      if (this.titoli && this.titoli.length > 0) return; // Titoli livello 1 già caricati. Non serve ricaricarli
+      filterAndsorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
+    }
+
+    filterAndsorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, this.archivio.fk_idAzienda.id));
+    filterAndsorts.addFilter(new FilterDefinition("chiuso", FILTER_TYPES.not_string.equals, false));
+    filterAndsorts.addSort(new SortDefinition("classificazione", SORT_MODES.asc));
+
+    this.subscriptions.push(this.titoloService.getData(null, filterAndsorts, null, this.pageConfNoCountNoLimit).subscribe(
       res => {
-        console.log("res", res);
+        if (res && res.results) {
+          const nodes: TreeNode[] = [];
+          res.results.forEach((t: Titolo) => {
+            nodes.push(this.buildNodeTitolo(t));
+          });
+          if (node) {
+            node.children = nodes;
+            this.titoliTreeSelect.nodeExpand(event); // Di fatto ritriggero questo metodo per espadnere bene il nodo. Ma se non faccio così non funziona
+          } else {
+            this.titoli = nodes;
+          }
+        } else if (node) {
+          // non ho trovato figli del nodo allora lo metto non espandibile
+          node.leaf = false;
+          node.selectable = true;
+        }
+
+        this.titoliTreeSelect.expandedNodes.forEach(element => {
+          console.log(element.label)
+        });
       }
     ));
+  }
+
+  /**
+   * Dato un titolo creo il corretto nodo che lo rappresenta
+   * @param titolo 
+   * @returns 
+   */
+  private buildNodeTitolo(titolo: Titolo): TreeNode {
+    const node: TreeNode = {};
+    let inizioLabel;
+    switch (titolo.livello) {
+      case 1:
+        inizioLabel = "Categoria";
+        node.leaf = false;
+        node.selectable = !this.classificazioneAllaFoglia;
+      break;
+      case 2:
+        inizioLabel = "Classe";
+        node.leaf = false;
+        node.selectable = !this.classificazioneAllaFoglia;
+      break;
+      case 3:
+        inizioLabel = "Sottoclasse";
+        node.leaf = true;
+        node.selectable = true;
+      break;
+    }
+    node.label = inizioLabel + " " + titolo.classificazione + ": " + titolo.nome;
+    node.data = titolo;
+    node.key = titolo.id.toString();
+    node.expandedIcon = "pi pi-folder-open";
+    node.collapsedIcon = "pi pi-folder";
+    node.expanded = false;
+    return node;
+  }
+
+  public filterTitoli(event: any): void {
+    const filterAndsorts: FiltersAndSorts = new FiltersAndSorts();
+    filterAndsorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, this.archivio.fk_idAzienda.id));
+    filterAndsorts.addFilter(new FilterDefinition("chiuso", FILTER_TYPES.not_string.equals, false));
+    if (this.classificazioneAllaFoglia) {
+      filterAndsorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 3));
+    }
+    filterAndsorts.addFilter(new FilterDefinition("nome", FILTER_TYPES.string.containsIgnoreCase, event.query));
+    filterAndsorts.addSort(new SortDefinition("classificazione", SORT_MODES.asc));
+    this.subscriptions.push(this.titoloService.getData(null, filterAndsorts, null, this.pageConfNoCountNoLimit).subscribe(
+      res => {
+        if (res && res.results) {
+          this.filteredTitoli = res.results;
+        }
+      }
+    ));
+  }
+
+  public onSelectTitolo(titolo: Titolo) {
+    const archivioToUpdate: Archivio = new Archivio();
+    archivioToUpdate.idTitolo = {
+      id: titolo.id
+    } as Titolo;
+    archivioToUpdate.version = this.archivio.version;
+    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
+    .subscribe(
+      res => {
+        console.log("Update archivio: ", res);
+        this.archivio.version = res.version;
+        this.archivio.idTitolo = titolo;
+        this.selectedTitolo = this.buildNodeTitolo(titolo);
+      }
+    ))
   }
 
   /**
@@ -161,28 +281,31 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       id: massimario.id
     } as Massimario;
     archivioToUpdate.version = this.archivio.version;
-    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
-    .subscribe(
-      res => {
-        console.log("Update archivio: ", res);
-        this.archivio.version = res.version;
-      }
-    ))
-    
+    this.patchArchivio(archivioToUpdate);
   }
 
-
-  public changeTipo(): void {
+  /**
+   * Viene aggiornato il tipo dell'archivio
+   */
+  public onChangeTipo(): void {
     const archivioToUpdate: Archivio = new Archivio();
     archivioToUpdate.tipo = this.archivio.tipo;
     archivioToUpdate.version = this.archivio.version;
+    this.patchArchivio(archivioToUpdate);
+  }
+
+  /**
+   * Un semplice update dell'archivio così come passato. Viene aggiornato poi il version
+   * @param archivioToUpdate 
+   */
+  public patchArchivio(archivioToUpdate: Archivio): void {
     this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
     .subscribe(
       res => {
         console.log("Update archivio: ", res);
         this.archivio.version = res.version;
       }
-    ))
+    ));
   }
 
   public ngOnDestroy(): void {
@@ -194,7 +317,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
   }
 
-  public numeraFasicoloClicked(){
+  public numeraFasicoloClicked(): void {
     this.messageService.add({
       severity: "warn",
       key: "dettaglioArchivioToast",
@@ -202,6 +325,4 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       detail: `Questo non è un pulsante operativo per il momento!`
     });
   }
-
- 
 }

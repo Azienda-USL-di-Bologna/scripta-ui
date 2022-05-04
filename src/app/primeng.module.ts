@@ -30,7 +30,7 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { MenuModule } from 'primeng/menu';
 import { MessageModule } from 'primeng/message';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
-
+import { TreeSelectModule } from 'primeng/treeselect';
 
 @NgModule({
   declarations: [
@@ -66,7 +66,8 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
     BreadcrumbModule,
     MenuModule,
     MessageModule,
-    OverlayPanelModule
+    OverlayPanelModule,
+    TreeSelectModule
   ],
   exports: [
     ButtonModule,
@@ -99,7 +100,8 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
     BreadcrumbModule,
     MenuModule,
     MessageModule,
-    OverlayPanelModule
+    OverlayPanelModule,
+    TreeSelectModule
   ],
   providers: [MessageService, DialogService]
 })

@@ -20,14 +20,38 @@
     </div>
     <div class="row">
       <label for="classificazione">Classificazione</label>
-      <input pInputText />
-      <!-- <p-treeSelect id="classificazione"
-        [(ngModel)]="archivio.idTitolo" 
+      <p-treeSelect #titoliTreeSelect
+        id="classificazione"
+        [(ngModel)]="selectedTitolo" 
         [options]="titoli" 
         (onShow)="onShowTitoli()"
+        (onNodeExpand)="onShowTitoli($event)"
+        (onNodeSelect)="onSelectTitolo($event.node.data)"
         selectionMode="single"  
-        placeholder="Seleziona una classificazione">
-      </p-treeSelect> -->
+        placeholder="Seleziona una classificazione"
+        appendTo="body"
+        [propagateSelectionUp]="false"
+        [propagateSelectionDown]="false">
+        <ng-template pTemplate="header">
+          <div class="p-tree-filter-container box-autocomplete-classificazione">
+            <p-autoComplete #autocompleteClassificazione
+              ariaLabel="Cerca classificazione"
+              ngModel
+              (onSelect)="onSelectTitolo($event)" 
+              [suggestions]="filteredTitoli"
+              (completeMethod)="filterTitoli($event)" 
+              field="nome" 
+              appendTo="body" 
+              [dropdown]=true 
+              placeholder="Cerca classificazione..." 
+              emptyMessage="Nessun riferimento trovato">
+              <ng-template let-titolo pTemplate="item">
+                <span>[{{titolo.classificazione}}] {{titolo.nome}}</span>
+              </ng-template>
+            </p-autoComplete>
+          </div>
+        </ng-template>
+      </p-treeSelect>
     </div>
     <div class="row">
       <label for="categoria">Categoria documentale</label>
@@ -59,16 +83,15 @@
     </div>
     <div class="row">
       <label for="tipo">Tipo</label>
-        <!-- <input pInputText id="tipo"/> -->
-        <p-dropdown #dropdownTipo 
-          [options]="tipiArchivioObj"
-          [(ngModel)]="archivio.tipo"  
-          (onChange)="changeTipo($event.value)"
-          optionValue="value" 
-          optionLabel="nome" 
-          appendTo="body"
-          class="tipo-dropdown">
-        </p-dropdown>
+      <p-dropdown #dropdownTipo 
+        [options]="tipiArchivioObj"
+        [(ngModel)]="archivio.tipo"  
+        (onChange)="onChangeTipo($event.value)"
+        optionValue="value" 
+        optionLabel="nome" 
+        appendTo="body"
+        class="tipo-dropdown">
+      </p-dropdown>
     </div>
     <div class="row"> 
         <label for="tipo">Archivi collegati</label>
