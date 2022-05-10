@@ -3,10 +3,7 @@ $font-size-label: 13px;
   padding: 5px;
   width: 100%;
 }
-.input-conservazione {
-  /*width: min-content;
-  */
-}
+
 .box-campi-dettaglio {
   display: flex;
   flex-direction: row;
@@ -19,7 +16,7 @@ $font-size-label: 13px;
       display: flex;
       justify-content: space-between;
       padding: 5px 0;
-      .tipo-dropdown{
+      .dropdown{
         width: 100%;
       }
       label {
@@ -28,6 +25,7 @@ $font-size-label: 13px;
         font-size: $font-size-label;
       }
     }
+    
   }
   .right-side {
     flex-grow: 1;

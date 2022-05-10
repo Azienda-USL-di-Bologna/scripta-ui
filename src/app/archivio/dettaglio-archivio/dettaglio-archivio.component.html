@@ -34,7 +34,7 @@
       <p-autoComplete id="categoria" #autocompleteCategoria 
         ariaLabel="categoria documentale"
         [(ngModel)]="archivio.idMassimario" 
-        (onSelect)="onSelectMassimario($event)" 
+        (onSelect)="archivio.anniTenuta = archivio.idMassimario.anniTenuta; onSelectMassimario($event)" 
         [suggestions]="filteredMassimari"
         (completeMethod)="filterMassimario($event)" 
         field="nome" 
@@ -47,15 +47,26 @@
         </ng-template>
       </p-autoComplete>
     </div>
-    <div class="row">
+    <div class="row conservazione" >
       <label for="conservazione">Conservazione</label>
-    <input id="conservazione"
+    <!-- <input id="conservazione"
       class="input-conservazione"
       type="text" 
       placeholder="Inserisci la conservazione" 
       pInputText 
       [disabled]="!archivio.idMassimario"
-      [(ngModel)]="archivio.anniTenuta"/> 
+      [(ngModel)]="archivio.anniTenuta"/>  -->
+      <p-dropdown 
+        [autoDisplayFirst]="false"
+        [disabled]="!archivio.idMassimario"
+        optionLabel="name"
+        optionValue="value"
+        [options]="possibleAnniTenuta"
+        (onClick)="saveAnniTenuta(archivio.anniTenuta)"
+        [(ngModel)]="archivio.anniTenuta" 
+        optionLabel="name"
+        class="dropdown">
+      </p-dropdown>
     </div>
     <div class="row">
       <label for="tipo">Tipo</label>
@@ -67,7 +78,7 @@
           optionValue="value" 
           optionLabel="nome" 
           appendTo="body"
-          class="tipo-dropdown">
+          class="dropdown">
         </p-dropdown>
     </div>
     <div class="row"> 

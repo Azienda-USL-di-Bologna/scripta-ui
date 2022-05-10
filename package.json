@@ -23,7 +23,7 @@
     "@angular/router": "12.2.16",
     "@bds/common-components": "3.0.1-alfa",
     "@bds/nt-communicator": "3.0.0-alfa",
-    "@bds/ng-internauta-model": "3.0.2-alfa",
+    "@bds/ng-internauta-model": "3.0.3-alfa",
     "@bds/nt-jwt-login": "3.0.0-alfa",
     "@bds/primeng-plugin": "3.0.0-alfa",
     "@nfa/core": "5.0.0-alfa",
