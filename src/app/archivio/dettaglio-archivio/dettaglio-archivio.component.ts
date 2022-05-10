@@ -1,5 +1,6 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, TipoArchivio, ConfigurazioneService, ParametroAziende } from '@bds/ng-internauta-model';
+import { NgModel } from '@angular/forms';
+import { Archivio, ArchivioDetail, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, TipoArchivio } from '@bds/ng-internauta-model';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
 import { MessageService } from 'primeng/api';
 import { TreeNode } from 'primeng/api/treenode';
@@ -37,6 +38,9 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public tipiArchivioObj: any[] = TipoArchivioTraduzioneVisualizzazione;
   private classificazioneAllaFoglia: boolean = false;
   
+  public possibleAnniTenuta: any[] = [{name: "1 anno", value: 1 },{name: "2 anni", value: 2 },{name: "3 anni", value: 3 },{name: "4 anni", value: 4 },{name: "5 anni", value: 5 },{name: "6 anni", value: 6 },
+  {name: "7 anni", value: 7 },{name: "8 anni", value: 8 },{name: "9 anni", value: 9 },{name: "10 anni", value: 10 },{name: "20 anni", value: 20 },{name: "30 anni", value: 30 },{name: "40 anni", value: 40 },
+  {name: "50 anni", value: 50 }, {name: "Illimitata", value: 999}];
 
   @ViewChild("noteArea") public noteArea: ElementRef;
   @ViewChild("titoliTreeSelect") public titoliTreeSelect: TreeSelect;
@@ -280,14 +284,27 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     archivioToUpdate.idMassimario = {
       id: massimario.id
     } as Massimario;
+    archivioToUpdate.anniTenuta = massimario.anniTenuta;
     archivioToUpdate.version = this.archivio.version;
     this.patchArchivio(archivioToUpdate);
   }
 
-  /**
-   * Viene aggiornato il tipo dell'archivio
-   */
-  public onChangeTipo(): void {
+  public saveAnniTenuta(anni: any): void {
+    console.log("selezionata anni tenuta fascicolo ", anni)
+    const archivioToUpdate: Archivio = new Archivio();
+    archivioToUpdate.anniTenuta = anni;
+    archivioToUpdate.version = this.archivio.version;
+    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
+    .subscribe(
+      res => {
+        console.log("Update archivio: ", res);
+        this.archivio.version = res.version;
+      }
+    ))
+  }
+
+
+  public changeTipo(): void {
     const archivioToUpdate: Archivio = new Archivio();
     archivioToUpdate.tipo = this.archivio.tipo;
     archivioToUpdate.version = this.archivio.version;
