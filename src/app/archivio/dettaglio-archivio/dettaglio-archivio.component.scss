@@ -15,7 +15,7 @@ $font-size-label: 13px;
       display: flex;
       justify-content: space-between;
       padding: 5px 0;
-      .tipo-dropdown{
+      .dropdown{
         width: 100%;
       }
       label {
@@ -30,6 +30,7 @@ $font-size-label: 13px;
         }
       }
     }
+    
   }
   .right-side {
     flex-grow: 1;
