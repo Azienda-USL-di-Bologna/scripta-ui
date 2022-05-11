@@ -10,6 +10,7 @@ import { GenericCaptionTableModule } from "../generic-caption-table/generic-capt
 import { ArchiviListModule } from "../archivi-list-container/archivi-list/archivi-list.module";
 import { DocsListModule } from "../docs-list-container/docs-list/docs-list.module";
 import { RichiestaAccessoArchiviComponent } from "./richiesta-accesso-archivi/richiesta-accesso-archivi.component"
+import { DettaglioArchivioModule } from "./dettaglio-archivio/dettaglio-archivio.module";
 @NgModule({
   imports: [
     CommonModule,
@@ -19,10 +20,10 @@ import { RichiestaAccessoArchiviComponent } from "./richiesta-accesso-archivi/ri
     GenericCaptionTableModule,
     DocsListModule,
     ArchiviListModule,
+    DettaglioArchivioModule
   ],
   declarations: [
     ArchivioComponent,
-    DettaglioArchivioComponent,
     ArchivioTreeComponent,
     RichiestaAccessoArchiviComponent,
   ],

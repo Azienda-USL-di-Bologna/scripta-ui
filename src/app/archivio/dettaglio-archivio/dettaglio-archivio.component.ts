@@ -19,7 +19,9 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set archivio(archivio: Archivio | ArchivioDetail) {
     this._archivio = archivio;
-    this.selectedTitolo = this.buildNodeTitolo(this.archivio.idTitolo as Titolo);
+    if (this.archivio.idTitolo) {
+      this.selectedTitolo = this.buildNodeTitolo(this.archivio.idTitolo as Titolo);
+    }
     this.loadConfigurations();
   }
   private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
