@@ -224,7 +224,7 @@
                   [options]="livelliFiltrabili"
                   [(ngModel)]="livelloValue"
                   (onChange)="filter($event.value)"
-                  [disabled]="archiviListMode === archiviListModeEnum.TUTTI || archivioPadre"
+                  [disabled]="(archiviListMode === archiviListModeEnum.TUTTI || archivioPadre)"
                   optionValue="value" 
                   optionLabel="label" 
                   panelStyleClass="dropdown-panel-livello"

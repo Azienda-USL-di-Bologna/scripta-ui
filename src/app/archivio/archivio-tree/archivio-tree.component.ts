@@ -6,7 +6,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
 
 @Component({
-  selector: 'app-archivio-tree',
+  selector: 'archivio-tree',
   templateUrl: './archivio-tree.component.html',
   styleUrls: ['./archivio-tree.component.scss']
 })
