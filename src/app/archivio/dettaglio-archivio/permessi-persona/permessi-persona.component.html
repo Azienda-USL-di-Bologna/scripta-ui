@@ -9,8 +9,8 @@
   <ng-template pTemplate="body" let-car>
       <tr *ngFor="let perm of perms">
           <td *ngFor="let col of cols">
-            <i *ngIf "col.filed==='azione'" class="pi-pencil"></i>
-            <i *ngIf "col.filed==='azione'" class="pi-trash"></i>
+            <i *ngIf="col.filed==='azione'" class="pi-pencil"></i>
+            <i *ngIf="col.filed==='azione'" class="pi-trash"></i>
             {{perm[col.field]}}
           </td>
       </tr>
