@@ -631,38 +631,27 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       
       this.archiviListMode = ArchiviListMode.VISIBILI;
     }
-
+    this.initialSortField = "dataCreazione";
+    this.serviceToGetData = this.archivioDetailService;
+    this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
     switch (this.archiviListMode) {
       case ArchiviListMode.VISIBILI:
         // Uso la vista che fa join con i permessi. E cerco solo archivi in cui io sono presente
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
-        this.initialSortField = "dataCreazione";
         this.serviceToGetData = this.archivioDetailViewService;
         this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
         break;
       case ArchiviListMode.TUTTI:
-        this.initialSortField = "dataCreazione";
-        this.serviceToGetData = this.archivioDetailService;
         filterAndSort.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
-        this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
+        
         break;
       case ArchiviListMode.PREFERITI:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabPreferiti"));
-        this.initialSortField = "dataCreazione";
-        this.serviceToGetData = this.archivioDetailService;
-        this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
         break;
       case ArchiviListMode.FREQUENTI:
-        filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabFrequenti"));
-        this.initialSortField = "dataCreazione";
-        this.serviceToGetData = this.archivioDetailService;
-        this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
         break;
       case ArchiviListMode.RECENTI:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRecenti"));
-        this.initialSortField = "dataCreazione";
-        this.serviceToGetData = this.archivioDetailService;
-        this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
         break;
     }
 
