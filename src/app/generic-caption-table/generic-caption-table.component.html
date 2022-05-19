@@ -56,11 +56,6 @@
         [attr.aria-label]="functionalButtonsComponent.archivioPreferito ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'"
         tooltipPosition="bottom">
       </button>
-      <p-menu
-        #aziendaSelection
-        [model]="functionalButtonsComponent.newArchivoButton.aziendeItems"
-        [popup]="true">
-      </p-menu>
     </span>
     <!-- BOTTONE NUOVO ARCHIVIO -->
     <span *ngIf="configuration.newArchivio">

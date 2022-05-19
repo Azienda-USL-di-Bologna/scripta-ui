@@ -321,7 +321,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
 
   /**
    * This function updates archivi di interesse table => preferito column.
-   * Firstly we check if user exist in table & if not we call addPreferito function to create new row.
+   * Firstly we check if user exist in table & if not we call addUserInArchivioDiInteresse function to create new row.
    * If exists we check if archivio id exists in table to add or remove it.
    */
   public updateOrAddPreferito() {
