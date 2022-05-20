@@ -546,7 +546,12 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    */
   private buildCustomFilterAndSort(): FiltersAndSorts {
     const filterAndSort = new FiltersAndSorts();
-
+    if (!!this.archivio) {
+      this.docsListMode =  DocsListMode.DOCUMENTI_VISIBILI;
+      filterAndSort.addFilter(new FilterDefinition("idArchivi", FILTER_TYPES.not_string.equals, this.archivio.id));
+      filterAndSort.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, this.archivio.idAzienda.id));
+      filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "FilterForRegisteredPDD"));
+    }
     switch (this.docsListMode) {
       case DocsListMode.DOCUMENTI_VISIBILI:
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
