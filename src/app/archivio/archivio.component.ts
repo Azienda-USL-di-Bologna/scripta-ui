@@ -12,7 +12,7 @@ import { TabComponent } from '../navigation-tabs/tab.component';
 import { DettaglioArchivioComponent } from './dettaglio-archivio/dettaglio-archivio.component';
 import { RichiestaAccessoArchiviComponent } from './richiesta-accesso-archivi/richiesta-accesso-archivi.component';
 import { ExtendedArchivioService } from './extended-archivio.service';
-import { Table } from 'primeng/table'; 
+import { Table } from 'primeng/table';
 import { AppComponent } from '../app.component';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@nfa/next-sdr';
 import { Subscription } from 'rxjs';
@@ -30,16 +30,16 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public referenceTableComponent: CaptionReferenceTableComponent;
   public selectButtonItems: SelectButtonItem[];
   public selectedButtonItem: SelectButtonItem;
-  public tipiDisponibili : String[];
-  public permessiArchivio : PermessoArchivio[] = [];
-  public colsResponsabili : any[];
+  public tipiDisponibili: String[];
+  public permessiArchivio: PermessoArchivio[] = [];
+  public colsResponsabili: any[];
   public newArchivoButton: NewArchivoButton;
   public contenutoDiviso = true;
-  public archivioPreferito : boolean
+  public archivioPreferito: boolean
   public utenteExistsInArchivioInteresse: boolean;
-  private utenteArchivioDiInteresse : ArchivioDiInteresse;
+  private utenteArchivioDiInteresse: ArchivioDiInteresse;
   public subscriptions: Subscription[] = [];
-  
+
 
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set data(data: any) {
@@ -51,27 +51,28 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         console.log("Archivio nell'archivio component: ", this._archivio);
         setTimeout(() => {
           this.inizializeAll();
-        }, 0); 
-    });
+
+        }, 0);
+      });
     this.checkPreferito(data.archivio.id);
   }
 
   private _archivilist: ArchiviListComponent;
-  public get archivilist() {return this._archivilist}
+  public get archivilist() { return this._archivilist }
   @ViewChild('archivilist') set archivilist(content: ArchiviListComponent) {
     if (content) {
       this._archivilist = content;
     }
   }
   private _doclist: DocsListComponent;
-  public get doclist() {return this._doclist}
+  public get doclist() { return this._doclist }
   @ViewChild('doclist') set doclist(content: DocsListComponent) {
     if (content) {
       this._doclist = content;
     }
   }
   private _dettaglioarchivio: DettaglioArchivioComponent;
-  public get dettaglioarchivio() {return this._dettaglioarchivio}
+  public get dettaglioarchivio() { return this._dettaglioarchivio }
   @ViewChild('dettaglioarchivio') set dettaglioarchivio(content: DettaglioArchivioComponent) {
     if (content) {
       this._dettaglioarchivio = content;
@@ -79,7 +80,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   private _richiestaaccessoarchivi: RichiestaAccessoArchiviComponent;
-  public get richiestaaccessoarchivi() {return this._richiestaaccessoarchivi}
+  public get richiestaaccessoarchivi() { return this._richiestaaccessoarchivi }
   @ViewChild('richiestaaccessoarchivi') set richiestaaccessoarchivi(content: RichiestaAccessoArchiviComponent) {
     if (content) {
       this._richiestaaccessoarchivi = content;
@@ -92,12 +93,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     private appComponent: AppComponent,
     private messageService: MessageService,
     private datepipe: DatePipe
-    ) {
+  ) {
   }
 
   ngOnInit(): void {
   }
-  
+
   ngAfterViewInit(): void {
     /* console.log(this.archivio.stato)*/
     //this.inizializeAll(); 
@@ -120,7 +121,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         }
       } else {
         this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.CONTENUTO);
-          this.setForContenuto();
+        this.setForContenuto();
       }
     }
   }
@@ -191,7 +192,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
             }
           );
         }
-      break;
+        break;
       case 2:
         labelDati = "Dati del sottofascicolo";
         if (this.contenutoDiviso) {
@@ -203,12 +204,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
             }
           );
         }
-      break;
+        break;
       case 3:
         labelDati = "Dati dell'inserto";
         break;
     }
-    
+
     if (this.contenutoDiviso) {
       this.selectButtonItems.push(
         {
@@ -226,7 +227,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         }
       );
     }
-    
+
     this.selectButtonItems.push(
       {
         id: SelectButton.DETTAGLIO,
@@ -253,16 +254,25 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           livello: 1,
           aziendeItems: [aziendaItem]
         };
-      break;
+        break;
       case 2:
-        this.newArchivoButton ={
+        this.newArchivoButton = {
           tooltip: "Crea nuovo inserto",
-          livello: 2 ,
+          livello: 2,
           aziendeItems: [aziendaItem]
         };
-      break;
+        break;
     }
   }
+
+  public updateArchivio(archivio: Archivio) {
+    console.log("updateArchivio(archivio: Archivio)", archivio);
+    this._archivio = archivio;
+    this.inizializeAll();
+    this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
+    this.setForDettaglio();
+  }
+
 
   /**
    * Di seguito un serie di metodi che servono da passa carte tra la 
@@ -287,7 +297,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
   public exportCsvInProgress = false;
   public exportCSV(dataTable: Table) {
-    this.exportCsvInProgress =  this.doclist.exportCsvInProgress;
+    this.exportCsvInProgress = this.doclist.exportCsvInProgress;
     this.doclist.exportCSV(this.doclist.dataTable);
   }
 
@@ -303,14 +313,14 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.archivioDiInteresseService.getData(
       ENTITIES_STRUCTURE.scripta.archiviodiinteresse.standardProjections.ArchivioDiInteresseWithPlainFields,
       filterAndSort,
-    ).subscribe((res) => { 
+    ).subscribe((res: any) => {
       if (res.results[0]) {
         this.utenteArchivioDiInteresse = res.results[0];
         this.utenteExistsInArchivioInteresse = true;
         //console.log("Utente Archivio Di Interesse",this.utenteArchivioDiInteresse);      
         if (this.utenteArchivioDiInteresse.idArchiviPreferiti) {
           this.archivioPreferito = res.results[0].idArchiviPreferiti.includes(id);
-        }else{
+        } else {
           this.archivioPreferito = false;
         }
       } else {
@@ -336,7 +346,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       archivioDiInteresseToSave.idArchiviPreferiti = this.utenteArchivioDiInteresse.idArchiviPreferiti;
       console.log("Utente Archivio Di Interesse", archivioDiInteresseToSave);
       this.subscriptions.push(this.archivioDiInteresseService.patchHttpCall(archivioDiInteresseToSave, this.utenteArchivioDiInteresse.id, null, null).subscribe({
-        next: (res) => {
+        next: (res: ArchivioDiInteresse) => {
           this.archivioPreferito = !this.archivioPreferito;
           //console.log("Update archivio Preferito: ", res);
           this.utenteArchivioDiInteresse.version = res.version;
@@ -367,38 +377,38 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     }
   }
 
-  public addUserInArchivioDiInteresse(){
+  public addUserInArchivioDiInteresse() {
     const archivioDiInteresseToSave: ArchivioDiInteresse = new ArchivioDiInteresse();
-      archivioDiInteresseToSave.idPersona = this.appComponent.utenteConnesso.getUtente().idPersona;
-      archivioDiInteresseToSave.idArchiviFrequenti = [];
-      archivioDiInteresseToSave.idArchiviRecenti = [];
-      archivioDiInteresseToSave.idArchiviPreferiti = [];
-      archivioDiInteresseToSave.idArchiviPreferiti.push(this.archivio.id);
-      this.subscriptions.push(this.archivioDiInteresseService.postHttpCall(
-        archivioDiInteresseToSave)
-        .subscribe({
-          next: (res) => {
-            //console.log("Added archivio to favories: ", res);
-            this.archivioPreferito = !this.archivioPreferito;
-            this.utenteExistsInArchivioInteresse=true;
-            this.utenteArchivioDiInteresse = res;
-            this.messageService.add({
-              severity: "success",
-              key: "ArchivioToast",
-              summary: "OK",
-              detail: "Aggiunto come preferito correttamente"
-            });
-          },
-          error: () => {
-            this.messageService.add({
-              severity: "error",
-              key: "ArchivioToast",
-              summary: "Attenzione",
-              detail: `Error, contattare Babelcare`
-            });
-          }
-        })
-      );
+    archivioDiInteresseToSave.idPersona = this.appComponent.utenteConnesso.getUtente().idPersona;
+    archivioDiInteresseToSave.idArchiviFrequenti = [];
+    archivioDiInteresseToSave.idArchiviRecenti = [];
+    archivioDiInteresseToSave.idArchiviPreferiti = [];
+    archivioDiInteresseToSave.idArchiviPreferiti.push(this.archivio.id);
+    this.subscriptions.push(this.archivioDiInteresseService.postHttpCall(
+      archivioDiInteresseToSave)
+      .subscribe({
+        next: (res: ArchivioDiInteresse) => {
+          //console.log("Added archivio to favories: ", res);
+          this.archivioPreferito = !this.archivioPreferito;
+          this.utenteExistsInArchivioInteresse = true;
+          this.utenteArchivioDiInteresse = res;
+          this.messageService.add({
+            severity: "success",
+            key: "ArchivioToast",
+            summary: "OK",
+            detail: "Aggiunto come preferito correttamente"
+          });
+        },
+        error: () => {
+          this.messageService.add({
+            severity: "error",
+            key: "ArchivioToast",
+            summary: "Attenzione",
+            detail: `Error, contattare Babelcare`
+          });
+        }
+      })
+    );
   }
   public ngOnDestroy(): void {
     if (this.subscriptions) {

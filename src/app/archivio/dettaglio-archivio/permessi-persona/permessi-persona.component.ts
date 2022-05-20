@@ -8,8 +8,8 @@ import { PagingConf } from '@nfa/next-sdr';
   styleUrls: ['./permessi-persona.component.scss']
 })
 export class PermessiPersonaComponent implements OnInit {
-  
-  public perms: any[]= [];
+
+  public perms: any[] = [];
   cols: any[];
   private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
   private _archivio: Archivio | ArchivioDetail;
@@ -22,7 +22,7 @@ export class PermessiPersonaComponent implements OnInit {
   constructor(
     // permessiService: PermessiService
   ) { }
-  
+
   ngOnInit(): void {
     this.cols = [
       { field: 'persona', header: 'Persona' },
@@ -33,10 +33,10 @@ export class PermessiPersonaComponent implements OnInit {
       { field: 'azione', header: 'Azione' }
     ];
   }
-  
+
   private buildPermessoPersona(oggettone: PermessoEntitaStoredProcedure[]) {
-    let struttura:string = "";
-    oggettone.forEach(oggetto => {
+    let struttura: string = "";
+    oggettone?.forEach(oggetto => {
       if (oggetto.soggetto.table === "persone") {
         oggetto.categorie.forEach(categoria => {
           categoria.permessi.forEach(permesso => {
