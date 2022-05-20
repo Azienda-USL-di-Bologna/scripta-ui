@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Archivio, ArchivioService } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, ArchivioService } from '@bds/ng-internauta-model';
 import { getInternautaUrl, BaseUrlType } from "@bds/ng-internauta-model";
 import { AdditionalDataDefinition } from '@nfa/next-sdr';
 import { Observable } from 'rxjs';
@@ -23,6 +23,15 @@ export class ExtendedArchivioService extends ArchivioService {
     );
     archivioToSave.version = archivio.version;
     return this.patchHttpCall(archivioToSave, archivio.id, projection, additionalData);
+  }
+
+  public numeraArchivio(archivio: Archivio | ArchivioDetail, requestedProjection: string): Observable<any> {
+    const url = getInternautaUrl(BaseUrlType.Scripta) + "/numeraArchivio";
+    console.log(url);
+    let formData: FormData = new FormData();
+    formData.append("idArchivio", archivio.id.toString());
+    formData.append("projection", requestedProjection);
+    return this._http.post(url, formData);
   }
 
 }

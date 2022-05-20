@@ -25,9 +25,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public referenceTableComponent: CaptionReferenceTableComponent;
   public selectButtonItems: SelectButtonItem[];
   public selectedButtonItem: SelectButtonItem;
-  public tipiDisponibili : String[];
-  public permessiArchivio : PermessoArchivio[] = [];
-  public colsResponsabili : any[];
+  public tipiDisponibili: String[];
+  public permessiArchivio: PermessoArchivio[] = [];
+  public colsResponsabili: any[];
   public newArchivoButton: NewArchivoButton;
   public contenutoDiviso = true;
 
@@ -41,26 +41,26 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         console.log("Archivio nell'archivio component: ", this._archivio);
         setTimeout(() => {
           this.inizializeAll();
-        }, 0); 
-    });
+        }, 0);
+      });
   }
 
   private _archivilist: ArchiviListComponent;
-  public get archivilist() {return this._archivilist}
+  public get archivilist() { return this._archivilist }
   @ViewChild('archivilist') set archivilist(content: ArchiviListComponent) {
     if (content) {
       this._archivilist = content;
     }
   }
   private _doclist: DocsListComponent;
-  public get doclist() {return this._doclist}
+  public get doclist() { return this._doclist }
   @ViewChild('doclist') set doclist(content: DocsListComponent) {
     if (content) {
       this._doclist = content;
     }
   }
   private _dettaglioarchivio: DettaglioArchivioComponent;
-  public get dettaglioarchivio() {return this._dettaglioarchivio}
+  public get dettaglioarchivio() { return this._dettaglioarchivio }
   @ViewChild('dettaglioarchivio') set dettaglioarchivio(content: DettaglioArchivioComponent) {
     if (content) {
       this._dettaglioarchivio = content;
@@ -68,7 +68,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   private _richiestaaccessoarchivi: RichiestaAccessoArchiviComponent;
-  public get richiestaaccessoarchivi() {return this._richiestaaccessoarchivi}
+  public get richiestaaccessoarchivi() { return this._richiestaaccessoarchivi }
   @ViewChild('richiestaaccessoarchivi') set richiestaaccessoarchivi(content: RichiestaAccessoArchiviComponent) {
     if (content) {
       this._richiestaaccessoarchivi = content;
@@ -80,7 +80,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
 
   ngOnInit(): void {
   }
-  
+
   ngAfterViewInit(): void {
     /* console.log(this.archivio.stato)*/
     //this.inizializeAll(); 
@@ -103,7 +103,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         }
       } else {
         this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.CONTENUTO);
-          this.setForContenuto();
+        this.setForContenuto();
       }
     }
   }
@@ -174,7 +174,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
             }
           );
         }
-      break;
+        break;
       case 2:
         labelDati = "Dati del sottofascicolo";
         if (this.contenutoDiviso) {
@@ -186,12 +186,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
             }
           );
         }
-      break;
+        break;
       case 3:
         labelDati = "Dati dell'inserto";
         break;
     }
-    
+
     if (this.contenutoDiviso) {
       this.selectButtonItems.push(
         {
@@ -209,7 +209,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         }
       );
     }
-    
+
     this.selectButtonItems.push(
       {
         id: SelectButton.DETTAGLIO,
@@ -236,16 +236,25 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           livello: 1,
           aziendeItems: [aziendaItem]
         };
-      break;
+        break;
       case 2:
-        this.newArchivoButton ={
+        this.newArchivoButton = {
           tooltip: "Crea nuovo inserto",
-          livello: 2 ,
+          livello: 2,
           aziendeItems: [aziendaItem]
         };
-      break;
+        break;
     }
   }
+
+  public updateArchivio(archivio: Archivio) {
+    console.log("updateArchivio(archivio: Archivio)", archivio);
+    this._archivio = archivio;
+    this.inizializeAll();
+    this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
+    this.setForDettaglio();
+  }
+
 
   /**
    * Di seguito un serie di metodi che servono da passa carte tra la 
@@ -270,7 +279,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
   public exportCsvInProgress = false;
   public exportCSV(dataTable: Table) {
-    this.exportCsvInProgress =  this.doclist.exportCsvInProgress;
+    this.exportCsvInProgress = this.doclist.exportCsvInProgress;
     this.doclist.exportCSV(this.doclist.dataTable);
   }
 }
