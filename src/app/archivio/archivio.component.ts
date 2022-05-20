@@ -12,7 +12,7 @@ import { TabComponent } from '../navigation-tabs/tab.component';
 import { DettaglioArchivioComponent } from './dettaglio-archivio/dettaglio-archivio.component';
 import { RichiestaAccessoArchiviComponent } from './richiesta-accesso-archivi/richiesta-accesso-archivi.component';
 import { ExtendedArchivioService } from './extended-archivio.service';
-import { Table } from 'primeng/table'; 
+import { Table } from 'primeng/table';
 import { AppComponent } from '../app.component';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@nfa/next-sdr';
 import { Subscription } from 'rxjs';
@@ -35,11 +35,11 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public colsResponsabili: any[];
   public newArchivoButton: NewArchivoButton;
   public contenutoDiviso = true;
-  public archivioPreferito : boolean
+  public archivioPreferito: boolean
   public utenteExistsInArchivioInteresse: boolean;
-  private utenteArchivioDiInteresse : ArchivioDiInteresse;
+  private utenteArchivioDiInteresse: ArchivioDiInteresse;
   public subscriptions: Subscription[] = [];
-  
+
 
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set data(data: any) {
@@ -51,14 +51,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         console.log("Archivio nell'archivio component: ", this._archivio);
         setTimeout(() => {
           this.inizializeAll();
-<<<<<<< HEAD
+
         }, 0);
       });
-=======
-        }, 0); 
-    });
     this.checkPreferito(data.archivio.id);
->>>>>>> sviluppo
   }
 
   private _archivilist: ArchiviListComponent;
@@ -97,7 +93,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     private appComponent: AppComponent,
     private messageService: MessageService,
     private datepipe: DatePipe
-    ) {
+  ) {
   }
 
   ngOnInit(): void {
@@ -317,14 +313,14 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.archivioDiInteresseService.getData(
       ENTITIES_STRUCTURE.scripta.archiviodiinteresse.standardProjections.ArchivioDiInteresseWithPlainFields,
       filterAndSort,
-    ).subscribe((res) => { 
+    ).subscribe((res: any) => {
       if (res.results[0]) {
         this.utenteArchivioDiInteresse = res.results[0];
         this.utenteExistsInArchivioInteresse = true;
         //console.log("Utente Archivio Di Interesse",this.utenteArchivioDiInteresse);      
         if (this.utenteArchivioDiInteresse.idArchiviPreferiti) {
           this.archivioPreferito = res.results[0].idArchiviPreferiti.includes(id);
-        }else{
+        } else {
           this.archivioPreferito = false;
         }
       } else {
@@ -350,7 +346,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       archivioDiInteresseToSave.idArchiviPreferiti = this.utenteArchivioDiInteresse.idArchiviPreferiti;
       console.log("Utente Archivio Di Interesse", archivioDiInteresseToSave);
       this.subscriptions.push(this.archivioDiInteresseService.patchHttpCall(archivioDiInteresseToSave, this.utenteArchivioDiInteresse.id, null, null).subscribe({
-        next: (res) => {
+        next: (res: ArchivioDiInteresse) => {
           this.archivioPreferito = !this.archivioPreferito;
           //console.log("Update archivio Preferito: ", res);
           this.utenteArchivioDiInteresse.version = res.version;
@@ -381,38 +377,38 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     }
   }
 
-  public addUserInArchivioDiInteresse(){
+  public addUserInArchivioDiInteresse() {
     const archivioDiInteresseToSave: ArchivioDiInteresse = new ArchivioDiInteresse();
-      archivioDiInteresseToSave.idPersona = this.appComponent.utenteConnesso.getUtente().idPersona;
-      archivioDiInteresseToSave.idArchiviFrequenti = [];
-      archivioDiInteresseToSave.idArchiviRecenti = [];
-      archivioDiInteresseToSave.idArchiviPreferiti = [];
-      archivioDiInteresseToSave.idArchiviPreferiti.push(this.archivio.id);
-      this.subscriptions.push(this.archivioDiInteresseService.postHttpCall(
-        archivioDiInteresseToSave)
-        .subscribe({
-          next: (res) => {
-            //console.log("Added archivio to favories: ", res);
-            this.archivioPreferito = !this.archivioPreferito;
-            this.utenteExistsInArchivioInteresse=true;
-            this.utenteArchivioDiInteresse = res;
-            this.messageService.add({
-              severity: "success",
-              key: "ArchivioToast",
-              summary: "OK",
-              detail: "Aggiunto come preferito correttamente"
-            });
-          },
-          error: () => {
-            this.messageService.add({
-              severity: "error",
-              key: "ArchivioToast",
-              summary: "Attenzione",
-              detail: `Error, contattare Babelcare`
-            });
-          }
-        })
-      );
+    archivioDiInteresseToSave.idPersona = this.appComponent.utenteConnesso.getUtente().idPersona;
+    archivioDiInteresseToSave.idArchiviFrequenti = [];
+    archivioDiInteresseToSave.idArchiviRecenti = [];
+    archivioDiInteresseToSave.idArchiviPreferiti = [];
+    archivioDiInteresseToSave.idArchiviPreferiti.push(this.archivio.id);
+    this.subscriptions.push(this.archivioDiInteresseService.postHttpCall(
+      archivioDiInteresseToSave)
+      .subscribe({
+        next: (res: ArchivioDiInteresse) => {
+          //console.log("Added archivio to favories: ", res);
+          this.archivioPreferito = !this.archivioPreferito;
+          this.utenteExistsInArchivioInteresse = true;
+          this.utenteArchivioDiInteresse = res;
+          this.messageService.add({
+            severity: "success",
+            key: "ArchivioToast",
+            summary: "OK",
+            detail: "Aggiunto come preferito correttamente"
+          });
+        },
+        error: () => {
+          this.messageService.add({
+            severity: "error",
+            key: "ArchivioToast",
+            summary: "Attenzione",
+            detail: `Error, contattare Babelcare`
+          });
+        }
+      })
+    );
   }
   public ngOnDestroy(): void {
     if (this.subscriptions) {
