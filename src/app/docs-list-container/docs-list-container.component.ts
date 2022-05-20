@@ -11,7 +11,7 @@ export class DocsListContainerComponent implements OnInit {
   public captionConfiguration: CaptionConfiguration;
 
   constructor() {
-    this.captionConfiguration = new CaptionConfiguration(true, true, true, true, false);
+    this.captionConfiguration = new CaptionConfiguration(true, true, true, true, false, false);
   }
 
   ngOnInit(): void {}

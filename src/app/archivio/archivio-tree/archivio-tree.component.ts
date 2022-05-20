@@ -4,6 +4,7 @@ import { ExtendedArchivioService } from '../extended-archivio.service';
 import { Archivio, ArchivioDetail, ENTITIES_STRUCTURE } from '@bds/ng-internauta-model';
 import { combineLatest, Observable } from 'rxjs';
 import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
+import { AppService } from 'src/app/app.service';
 
 @Component({
   selector: 'archivio-tree',
@@ -36,7 +37,9 @@ export class ArchivioTreeComponent implements OnInit {
    */
   constructor(
     private archivioService: ExtendedArchivioService,
-    private navigationTabsService: NavigationTabsService,) {
+    private navigationTabsService: NavigationTabsService,
+    private appService: AppService,
+    ) {
 
   }
 
@@ -212,6 +215,7 @@ export class ArchivioTreeComponent implements OnInit {
    */
   public onNodeSelect(event: any): void {
     this.navigationTabsService.addTabArchivio(event.node.data, false);
+    this.appService.appNameSelection("Fascicolo "+ event.node.data.numerazioneGerarchica  + " [" + event.node.data.idAzienda.aoo + "]");
     //this.archivioSelectedEvent.emit(event.node.data);
   }
 }

@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/ng-internauta-model';
-import { MenuItem } from 'primeng/api';
+import { Archivio, ArchivioDetail, ArchivioDiInteresse, ArchivioDiInteresseService, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/ng-internauta-model';
+import { MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListComponent } from '../archivi-list-container/archivi-list/archivi-list.component';
 import { DocsListComponent } from '../docs-list-container/docs-list/docs-list.component';
 import { CaptionConfiguration } from '../generic-caption-table/caption-configuration';
@@ -12,7 +12,12 @@ import { TabComponent } from '../navigation-tabs/tab.component';
 import { DettaglioArchivioComponent } from './dettaglio-archivio/dettaglio-archivio.component';
 import { RichiestaAccessoArchiviComponent } from './richiesta-accesso-archivi/richiesta-accesso-archivi.component';
 import { ExtendedArchivioService } from './extended-archivio.service';
-import { Table } from 'primeng/table';
+import { Table } from 'primeng/table'; 
+import { AppComponent } from '../app.component';
+import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@nfa/next-sdr';
+import { Subscription } from 'rxjs';
+import { DatePipe } from '@angular/common';
+
 
 @Component({
   selector: 'app-archivio',
@@ -30,6 +35,11 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public colsResponsabili: any[];
   public newArchivoButton: NewArchivoButton;
   public contenutoDiviso = true;
+  public archivioPreferito : boolean
+  public utenteExistsInArchivioInteresse: boolean;
+  private utenteArchivioDiInteresse : ArchivioDiInteresse;
+  public subscriptions: Subscription[] = [];
+  
 
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set data(data: any) {
@@ -41,8 +51,14 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         console.log("Archivio nell'archivio component: ", this._archivio);
         setTimeout(() => {
           this.inizializeAll();
+<<<<<<< HEAD
         }, 0);
       });
+=======
+        }, 0); 
+    });
+    this.checkPreferito(data.archivio.id);
+>>>>>>> sviluppo
   }
 
   private _archivilist: ArchiviListComponent;
@@ -75,7 +91,13 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     }
   }
 
-  constructor(private extendedArchivioService: ExtendedArchivioService) {
+  constructor(
+    private extendedArchivioService: ExtendedArchivioService,
+    private archivioDiInteresseService: ArchivioDiInteresseService,
+    private appComponent: AppComponent,
+    private messageService: MessageService,
+    private datepipe: DatePipe
+    ) {
   }
 
   ngOnInit(): void {
@@ -109,22 +131,22 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   private setForSottoarchivi(): void {
-    this.captionConfiguration = new CaptionConfiguration(true, true, true, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
+    this.captionConfiguration = new CaptionConfiguration(true, true, true, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true);
     this.referenceTableComponent = this.archivilist;
   }
 
   public setForContenuto(): void {
-    this.captionConfiguration = new CaptionConfiguration(true, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
+    this.captionConfiguration = new CaptionConfiguration(true, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true);
     this.referenceTableComponent = this;
   }
 
   private setForDocumenti(): void {
-    this.captionConfiguration = new CaptionConfiguration(true, true, true, true, false);
+    this.captionConfiguration = new CaptionConfiguration(true, true, true, true, false, true);
     this.referenceTableComponent = this.doclist;
   }
 
   private setForDettaglio(): void {
-    this.captionConfiguration = new CaptionConfiguration(false, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3);
+    this.captionConfiguration = new CaptionConfiguration(false, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true);
     this.referenceTableComponent = {} as CaptionReferenceTableComponent;
   }
 
@@ -281,6 +303,124 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public exportCSV(dataTable: Table) {
     this.exportCsvInProgress = this.doclist.exportCsvInProgress;
     this.doclist.exportCSV(this.doclist.dataTable);
+  }
+
+  /*   
+    check if archivio is preferito 
+    we do this by checking archivio_di_interesi table using the filter on utente connesso id 
+    here we also define if user exists in db
+    inicialize ArchivioDiInteresse of user
+  */
+  public checkPreferito(id: number) {
+    const filterAndSort = new FiltersAndSorts();
+    filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.appComponent.utenteConnesso.getUtente().idPersona.id));
+    this.archivioDiInteresseService.getData(
+      ENTITIES_STRUCTURE.scripta.archiviodiinteresse.standardProjections.ArchivioDiInteresseWithPlainFields,
+      filterAndSort,
+    ).subscribe((res) => { 
+      if (res.results[0]) {
+        this.utenteArchivioDiInteresse = res.results[0];
+        this.utenteExistsInArchivioInteresse = true;
+        //console.log("Utente Archivio Di Interesse",this.utenteArchivioDiInteresse);      
+        if (this.utenteArchivioDiInteresse.idArchiviPreferiti) {
+          this.archivioPreferito = res.results[0].idArchiviPreferiti.includes(id);
+        }else{
+          this.archivioPreferito = false;
+        }
+      } else {
+        this.utenteExistsInArchivioInteresse = false;
+      }
+    });
+  }
+
+  /**
+   * This function updates archivi di interesse table => preferito column.
+   * Firstly we check if user exist in table & if not we call addUserInArchivioDiInteresse function to create new row.
+   * If exists we check if archivio id exists in table to add or remove it.
+   */
+  public updateOrAddPreferito() {
+    if (this.utenteExistsInArchivioInteresse) {
+      const archivioDiInteresseToSave: ArchivioDiInteresse = new ArchivioDiInteresse();
+      if (this.utenteArchivioDiInteresse.idArchiviPreferiti.includes(this.archivio.id)) {
+        this.utenteArchivioDiInteresse.idArchiviPreferiti = this.utenteArchivioDiInteresse.idArchiviPreferiti.filter(archivio => archivio !== this.archivio.id);
+      } else {
+        this.utenteArchivioDiInteresse.idArchiviPreferiti.push(this.archivio.id);
+      }
+      archivioDiInteresseToSave.version = this.utenteArchivioDiInteresse.version;
+      archivioDiInteresseToSave.idArchiviPreferiti = this.utenteArchivioDiInteresse.idArchiviPreferiti;
+      console.log("Utente Archivio Di Interesse", archivioDiInteresseToSave);
+      this.subscriptions.push(this.archivioDiInteresseService.patchHttpCall(archivioDiInteresseToSave, this.utenteArchivioDiInteresse.id, null, null).subscribe({
+        next: (res) => {
+          this.archivioPreferito = !this.archivioPreferito;
+          //console.log("Update archivio Preferito: ", res);
+          this.utenteArchivioDiInteresse.version = res.version;
+          let message: string;
+          if (this.archivioPreferito) {
+            message = `Aggiunto come preferito correttamente`
+          } else {
+            message = `Rimosso dai preferiti correttamente`
+          }
+          this.messageService.add({
+            severity: "success",
+            key: "ArchivioToast",
+            summary: "OK",
+            detail: message
+          });
+        },
+        error: () => {
+          this.messageService.add({
+            severity: "error",
+            key: "ArchivioToast",
+            summary: "Attenzione",
+            detail: `Error, contattare Babelcare`
+          });
+        }
+      }));
+    } else {
+      this.addUserInArchivioDiInteresse();
+    }
+  }
+
+  public addUserInArchivioDiInteresse(){
+    const archivioDiInteresseToSave: ArchivioDiInteresse = new ArchivioDiInteresse();
+      archivioDiInteresseToSave.idPersona = this.appComponent.utenteConnesso.getUtente().idPersona;
+      archivioDiInteresseToSave.idArchiviFrequenti = [];
+      archivioDiInteresseToSave.idArchiviRecenti = [];
+      archivioDiInteresseToSave.idArchiviPreferiti = [];
+      archivioDiInteresseToSave.idArchiviPreferiti.push(this.archivio.id);
+      this.subscriptions.push(this.archivioDiInteresseService.postHttpCall(
+        archivioDiInteresseToSave)
+        .subscribe({
+          next: (res) => {
+            //console.log("Added archivio to favories: ", res);
+            this.archivioPreferito = !this.archivioPreferito;
+            this.utenteExistsInArchivioInteresse=true;
+            this.utenteArchivioDiInteresse = res;
+            this.messageService.add({
+              severity: "success",
+              key: "ArchivioToast",
+              summary: "OK",
+              detail: "Aggiunto come preferito correttamente"
+            });
+          },
+          error: () => {
+            this.messageService.add({
+              severity: "error",
+              key: "ArchivioToast",
+              summary: "Attenzione",
+              detail: `Error, contattare Babelcare`
+            });
+          }
+        })
+      );
+  }
+  public ngOnDestroy(): void {
+    if (this.subscriptions) {
+      this.subscriptions.forEach(
+        s => s.unsubscribe()
+      );
+    }
+    this.subscriptions = [];
   }
 }
 
