@@ -372,7 +372,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   }
 
 
-  public numeraFasicoloClicked(): void {
+  public numeraFasicoloClicked(event: Event): void {
 
     this.confirmationService.confirm({
       key: "confirm-popup",

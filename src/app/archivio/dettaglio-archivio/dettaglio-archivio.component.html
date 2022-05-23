@@ -78,7 +78,7 @@
   </div>
   <div class="right-side">
     <div class="numeraFasicolo">
-      <button *ngIf="archivio.stato == 'BOZZA'" type="button" pButton (click)="numeraFasicoloClicked()"
+      <button *ngIf="archivio.stato == 'BOZZA'" type="button" pButton (click)="numeraFasicoloClicked($event)"
         label="Numera Fascicolo" class="p-mr-2" pTooltip="Numera Fascicolo" aria-label="Numera Fascicolo"
         [disabled]="disableNumeraButton()" tooltipPosition="bottom">
       </button>
