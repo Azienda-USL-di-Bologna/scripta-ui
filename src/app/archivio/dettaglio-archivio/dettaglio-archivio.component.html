@@ -164,13 +164,11 @@
     </div>
   </div>
 </div>
-<p-accordion class="accodion-box">
+<p-accordion class="accodion-box-permessi">
   <p-accordionTab header="Responsabili e Vicari" [selected]="true">
-    
-
-<app-responsabili
-  [archivio]="archivio">
-</app-responsabili>
+  <app-responsabili
+    [archivio]="archivio">
+  </app-responsabili>
   </p-accordionTab>
   <p-accordionTab header="Permessi Struttura">
     <app-permessi-struttura

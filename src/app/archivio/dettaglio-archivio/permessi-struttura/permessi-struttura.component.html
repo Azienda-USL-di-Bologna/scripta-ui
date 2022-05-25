@@ -1,18 +1,143 @@
-<p-table [value]="perms">
-  <ng-template pTemplate="header">
-      <tr>
-          <th *ngFor="let col of cols">
-              {{col.header}}
-          </th>
-      </tr>
-  </ng-template>
-  <ng-template pTemplate="body" let-permesso>
-      <tr  *ngFor="let perm of perms">
-          <td *ngFor="let col of cols">
-            <i *ngIf="col.filed==='azione'" class="pi-pencil"></i>
-            <i *ngIf="col.filed==='azione'" class="pi-trash"></i>
-              {{perm[col.field]}}
-          </td>
-      </tr>
-  </ng-template>
+<p-table #dt 
+    styleClass="tabella-permessi-archivio" 
+    [value]="perms" 
+    dataKey="idProvenienzaSoggetto" 
+    editMode="row"
+    [scrollable]="true"
+    scrollHeight="flex">
+    <ng-template pTemplate="caption">
+        <div class="flex align-items-center justify-content-between">
+            <button 
+                id="aggiungiPermesso"
+                type="button"
+                pButton 
+                pRipple 
+                icon="pi pi-plus" 
+                (click)="inEditing = true; addPermesso()" 
+                class="mr-2" 
+                label="Aggiungi permesso"
+                [disabled]="inEditing">
+            </button>
+        </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+        <tr>
+          <th *ngFor="let col of cols" [ngClass]="col.class">
+            {{col.header}}
+            </th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-permesso let-editing="editing" let-ri="rowIndex">
+        <tr  [pEditableRow]="permesso">
+            <td class="struttura-column">
+                <!-- Non si deve poreter editare se perm['struttura'] è pieno -->
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <lib-structures-autocomplete *ngIf="!permesso.descrizioneSoggetto"
+                            [showPool]="true"
+                            [filterByRoles]= "_rolesToFilter"
+                            [enabled]="true" 
+                            [azienda]="azienda"
+                            [dataRiferimento]="_dataRiferimento"
+                            (strutturaSelezionataEmit)="strutturaSelezionataDaComboReceived($event, permesso)">
+                        </lib-structures-autocomplete>
+                        <div *ngIf="permesso.descrizioneSoggetto">{{permesso.descrizioneSoggetto}}</div>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{permesso.descrizioneSoggetto}}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td class="permesso-column">
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <p-dropdown 
+                            appendTo="body" 
+                            [options]="predicati" 
+                            [(ngModel)]="permesso.predicato">
+                        </p-dropdown>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        {{permesso.predicato}}
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td class="trasmetti-column">
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <p-checkbox
+                            [binary]="true" 
+                            [(ngModel)]="permesso.trasmetti">
+                        </p-checkbox>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        <p-checkbox
+                            [disabled]="true"
+                            [binary]="true"
+                            [(ngModel)]="permesso.trasmetti">
+                        </p-checkbox>
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td class="propaga-column">
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <p-checkbox
+                            [binary]="true" 
+                            [(ngModel)]="permesso.propaga">
+                        </p-checkbox>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        <p-checkbox
+                            [disabled]="true"
+                            [binary]="true"
+                            [(ngModel)]="permesso.propaga">
+                        </p-checkbox>
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td class="ereditato-column">
+                <p-cellEditor>
+                    <ng-template pTemplate="input">
+                        <p-checkbox
+                            [disabled]="true"
+                            [binary]="true" 
+                            [(ngModel)]="permesso.ereditato">
+                        </p-checkbox>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                        <p-checkbox
+                            [disabled]="true"
+                            [binary]="true"
+                            [(ngModel)]="permesso.ereditato">
+                        </p-checkbox>
+                    </ng-template>
+                </p-cellEditor>
+            </td>
+            <td class="azione-column" >
+                <button pButton pRipple pInitEditableRow class="p-button-rounded p-button-text"
+                    *ngIf="!editing" 
+                    type="button"  
+                    icon="pi pi-pencil" 
+                    (click)="inEditing = true;onRowEditInit(permesso)"></button>
+                <button pButton class="p-button-rounded p-button-text"
+                    *ngIf="!editing" 
+                    type="button"  
+                    icon="pi pi-trash" 
+                    (click)="onRowEditSave(permesso, ri, 'REMOVE')">
+                </button>
+                <button pButton pRipple pSaveEditableRow class="p-button-rounded p-button-text p-button-success p-mr-2"
+                    *ngIf="editing"
+                    type="button" 
+                    icon="pi pi-check" 
+                    (click)="inEditing = false; onRowEditSave(permesso, ri, 'ADD')" >
+                </button>
+                <button pButton pRipple pCancelEditableRow icon="pi pi-times" class="p-button-rounded p-button-text p-button-danger"
+                    *ngIf="editing" 
+                    type="button" 
+                    (click)="inEditing = false;onRowEditCancel(permesso, ri)"></button>
+            </td>
+        </tr>
+    </ng-template>
 </p-table>
+<p-toast></p-toast>

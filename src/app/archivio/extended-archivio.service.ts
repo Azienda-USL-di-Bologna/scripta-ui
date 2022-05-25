@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ExtendedArchivioService extends ArchivioService {
+  
   constructor(protected _http: HttpClient, protected _datepipe: DatePipe) {
     super(_http, _datepipe);
   }
@@ -25,4 +26,11 @@ export class ExtendedArchivioService extends ArchivioService {
     return this.patchHttpCall(archivioToSave, archivio.id, projection, additionalData);
   }
 
+  public calcolaPermessiEspliciti(idArchivio: number) {
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "calcolaPermessiEspliciti";
+    let formData: FormData = new FormData();
+    formData.append("idArchivio", idArchivio.toString());
+    this._http.post(apiUrl, formData).subscribe();
+        
+  }
 }
