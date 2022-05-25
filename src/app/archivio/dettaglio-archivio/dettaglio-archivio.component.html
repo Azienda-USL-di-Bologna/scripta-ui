@@ -35,6 +35,7 @@
       <label for="categoria">Categoria documentale</label>
       <p-autoComplete id="categoria" #autocompleteCategoria ariaLabel="categoria documentale"
         [(ngModel)]="archivio.idMassimario"
+        [disabled]="!archivio.idTitolo"
         (onSelect)="archivio.anniTenuta = archivio.idMassimario.anniTenuta; onSelectMassimario($event)"
         [suggestions]="filteredMassimari" (completeMethod)="filterMassimario($event)" field="nome" appendTo="body"
         [dropdown]=true placeholder="Cerca categoria..." emptyMessage="Nessun riferimento trovato">
@@ -52,8 +53,8 @@
       pInputText 
       [disabled]="!archivio.idMassimario"
       [(ngModel)]="archivio.anniTenuta"/>  -->
-      <p-dropdown [autoDisplayFirst]="false" [disabled]="!archivio.idMassimario" optionLabel="name" optionValue="value"
-        [options]="possibleAnniTenuta" (onClick)="saveAnniTenuta(archivio.anniTenuta)" [(ngModel)]="archivio.anniTenuta"
+      <p-dropdown [autoDisplayFirst]="true" [disabled]="!archivio.idMassimario" optionLabel="name" optionValue="value"
+        [options]="anniTenutaSelezionabili" (onClick)="saveAnniTenuta(archivio.anniTenuta)" [(ngModel)]="archivio.anniTenuta"
         optionLabel="name" class="dropdown">
       </p-dropdown>
     </div>
