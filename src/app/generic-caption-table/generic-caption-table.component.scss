@@ -98,6 +98,19 @@
           outline: none !important;
         }
       }
+      .preferitoStar{
+        color: #2e4a65 !important;
+        background-color: transparent !important;
+        border-color: transparent !important;
+        &:hover {
+          color: #7e7e7e !important;
+          background-color: transparent !important;
+          border-color: transparent !important;
+        }
+        &:target{
+          outline: none !important;
+        }
+      }
     }
   }
 }

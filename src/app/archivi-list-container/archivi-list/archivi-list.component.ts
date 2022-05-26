@@ -761,7 +761,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
    */
   public openArchive(archivio: ExtendedArchiviView): void {
     this.navigationTabsService.addTabArchivio(archivio);
-    this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica);
+    this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
   }
 
   public isArchivioChiuso(archivio: ExtendedArchiviView): boolean {

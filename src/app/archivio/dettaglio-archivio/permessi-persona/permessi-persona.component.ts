@@ -13,7 +13,8 @@ import { EnumPermessoTabella, PermessiDettaglioArchivioService, PermessoTabella 
   selector: 'app-permessi-persona',
   templateUrl: './permessi-persona.component.html',
   styleUrls: ['./permessi-persona.component.scss']
-})
+})  
+
 export class PermessiPersonaComponent implements OnInit, OnDestroy {
   public utentiStruttura: UtenteStruttura[] = [];
   public strutturaSelezionata: Struttura;
@@ -46,7 +47,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     private permessiDettaglioArchivioService: PermessiDettaglioArchivioService) {
     
   }
-  
+
   ngOnInit(): void {
     this.cols = [
       { field: 'persona', header: 'Persona', class: 'persona-column' },
@@ -111,45 +112,14 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
       ));
   }
 
-/**
- * metodo chiamato dal frontend per eliminare un permesso
- * @param perm 
- * @param index 
- */
- /*  public onRowDelete(perm:PermessoTabella, index: number) {
-    const oggettoToDelete: OggettonePermessiEntitaGenerator =
-      this.permessiDettaglioArchivioService.buildPermessoPerBlackbox(
-          perm, this._archivio.permessi, OggettoneOperation.REMOVE, this._archivio);
-    this.permissionManagerService.managePermissionsAdvanced(oggettoToDelete.getPermessiEntita())
-        .subscribe({
-          next: (res: any) => {
-            this.messageService.add({
-              severity: "success",
-              summary: "Permesso Eliminato",
-              detail: "E' stato eliminato il permesso."
-            });
-            this.perms.splice(index, 1);
-          },
-          error: () => {
-            this.messageService.add({
-              severity: "error",
-              summary: "Errore nel backend",
-              detail: "Non è stato possibile eliminare il permesso."
-            });
-            this.onRowEditCancel(perm, index);
-          }
-        }
-      )
-  } */
-
   /**
    * Metodo chiamato dal frontend per salvare il pemrmesso che sto inserindo o modficando
    * @param perm 
    * @param index 
    */
   public onRowEditSave(perm: PermessoTabella, index: number, operation: string) {
-    /* Lo faccio sempre ma in realtà serve solo per le insert. 
-      Perché dentro a this.dt.editingRowKeys la chiave di una nuova riga è "undefined" e non matcha con idProvenienzaSoggetto 
+    /* Lo faccio sempre ma in realt� serve solo per le insert. 
+      Perch� dentro a this.dt.editingRowKeys la chiave di una nuova riga � "undefined" e non matcha con idProvenienzaSoggetto 
       se lo setto subito alla scelta della persona
     */
     if (!!!perm.idProvenienzaSoggetto) {
@@ -184,7 +154,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
             this.messageService.add({
               severity: "error",
               summary: "Errore nel backend",
-              detail: "Non è stato possibile modificare il permesso."
+              detail: "Non � stato possibile modificare il permesso."
             });
             this.onRowEditCancel(perm, index);
           }

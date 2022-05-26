@@ -4,5 +4,7 @@ export class CaptionConfiguration {
     public selectButtons: boolean,
     public exportButton: boolean,
     public selectableColumns: boolean,
-    public newArchivio: boolean) {}
+    public newArchivio: boolean,
+    public preferitoButton: boolean
+    ) {}
 }
