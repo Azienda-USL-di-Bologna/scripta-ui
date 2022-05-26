@@ -11,6 +11,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    z-index: 700;
+    position: relative;
     .p-button {
       color: white;
     }
@@ -99,9 +101,8 @@
         }
       }
       .preferitoStar{
-        color: #2e4a65 !important;
-        background-color: transparent !important;
-        border-color: transparent !important;
+        font-size: 2rem;
+        color: #936 !important; 
         &:hover {
           color: #7e7e7e !important;
           background-color: transparent !important;
@@ -110,6 +111,9 @@
         &:target{
           outline: none !important;
         }
+      }
+      .empty{
+        color: #2e4a65  !important;
       }
     }
   }

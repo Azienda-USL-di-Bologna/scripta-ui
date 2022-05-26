@@ -44,7 +44,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   {name: "5", value: 5 },{name: "6", value: 6 },{name: "7", value: 7 },{name: "8", value: 8 },{name: "9", value: 9 },
   {name: "10", value: 10 },{name: "20", value: 20 },{name: "30", value: 30 },{name: "40", value: 40 },
   {name: "50", value: 50 }, {name: "60", value: 60 }, {name: "Illimitata", value: 999}];
-  public anniTenutaSelezionabili: any[];
+  public anniTenutaSelezionabili: any[] = [];
 
   @ViewChild("noteArea") public noteArea: ElementRef;
   @ViewChild("titoliTreeSelect") public titoliTreeSelect: TreeSelect;
