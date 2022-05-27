@@ -1,5 +1,5 @@
 import { DatePipe } from "@angular/common";
-import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
+import { Component, Input, OnChanges, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { CODICI_RUOLO, Persona, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, ArchivioDetail } from "@bds/ng-internauta-model";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
@@ -98,7 +98,10 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   private _archivio: Archivio | ArchivioDetail;
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set archivio(archivio: Archivio | ArchivioDetail) {
-    this._archivio = archivio;
+    this._archivio = archivio; 
+    if(this.loadDocsListSubscription){
+      this.loadData();
+    }
   }
 
   constructor(
@@ -546,7 +549,16 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    */
   private buildCustomFilterAndSort(): FiltersAndSorts {
     const filterAndSort = new FiltersAndSorts();
-
+    if (!!this.archivio) {
+      this.docsListMode = null;
+      this.initialSortField = "dataRegistrazione";
+      this.serviceForGetData = this.docDetailService;
+      this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
+      //filterAndSort.addFilter(new FilterDefinition("idArchivi", FILTER_TYPES.not_string.equals, this.archivio.id));
+      filterAndSort.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, this.archivio.idAzienda.id));
+      filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "FilterForArchiviContent"));
+      filterAndSort.addAdditionalData(new AdditionalDataDefinition("idArchivio", this.archivio.id.toString()));
+    }
     switch (this.docsListMode) {
       case DocsListMode.DOCUMENTI_VISIBILI:
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
@@ -608,36 +620,42 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.projectionFotGetData,
       filtersAndSorts,
       buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
-      this.pageConf).subscribe((data: any) => {
-        console.log(data);
-        this.totalRecords = data.page.totalElements;
-        this.loading = false;
+      this.pageConf).subscribe({
+        next: (data: any) => {
+          console.log(data);
+          this.totalRecords = data.page.totalElements;
+          this.loading = false;
 
-        if (this.resetDocsArrayLenght) {
-          /* Ho bisogno di far capire alla tabella quanto l'array docs è virtualmente grande
-            in questo modo la scrollbar sarà sufficientemente lunga per scrollare fino all'ultimo elemento
-            ps:a quanto pare la proprietà totalRecords non è sufficiente. */
-          this.resetDocsArrayLenght = false;
-          this.dataTable.resetScrollTop();
-          this.docs = Array.from({ length: this.totalRecords });
-        }
+          if (this.resetDocsArrayLenght) {
+            /* Ho bisogno di far capire alla tabella quanto l'array docs è virtualmente grande
+              in questo modo la scrollbar sarà sufficientemente lunga per scrollare fino all'ultimo elemento
+              ps:a quanto pare la proprietà totalRecords non è sufficiente. */
+            this.resetDocsArrayLenght = false;
+            this.dataTable.resetScrollTop();
+            this.docs = Array.from({ length: this.totalRecords });
+          }
 
-        if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
-          /* Questo meccanismo serve per cancellare i risultati di troppo della tranche precedente.
-          Se entro qui probabilmente ho fatto una ricerca */
-          Array.prototype.splice.apply(this.docs, [0, this.docs.length, ...this.setCustomProperties(data.results)]);
-        } else {
-          Array.prototype.splice.apply(this.docs, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
-        }
-        this.docs = [...this.docs]; // trigger change detection
-      },
-        err => {
+          if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
+            /* Questo meccanismo serve per cancellare i risultati di troppo della tranche precedente.
+            Se entro qui probabilmente ho fatto una ricerca */
+            Array.prototype.splice.apply(this.docs, [0, this.docs.length, ...this.setCustomProperties(data.results)]);
+          } else {
+            Array.prototype.splice.apply(this.docs, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
+          }
+          this.docs = [...this.docs]; // trigger change detection
+        },
+        error: (err) => {
+          if(err.error.message == "Persona senza permesso su Archivio"){
+            this.loading = false;  
+          }
+          
           this.messageService.add({
             severity: "warn",
             key : "docsListToast",
             summary: "Attenzione",
             detail: `Si è verificato un errore nel caricamento, contattare Babelcare`
           });
+        }
       });
   }
 

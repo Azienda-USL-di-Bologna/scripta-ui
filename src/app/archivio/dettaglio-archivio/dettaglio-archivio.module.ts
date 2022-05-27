@@ -6,12 +6,14 @@ import { DettaglioArchivioComponent } from "../dettaglio-archivio/dettaglio-arch
 import { ResponsabiliComponent } from "./responsabili/responsabili.component";
 import { PermessiStrutturaComponent } from './permessi-struttura/permessi-struttura.component';
 import { PermessiPersonaComponent } from './permessi-persona/permessi-persona.component';
+import { CommonComponentsModule } from "@bds/common-components";
 
 @NgModule({
   imports: [
     CommonModule,
     PrimeNgModule,
-    ScriptaCommonModule
+    ScriptaCommonModule,
+    CommonComponentsModule
   ],
   declarations: [
     DettaglioArchivioComponent,

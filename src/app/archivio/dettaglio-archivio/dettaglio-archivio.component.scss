@@ -2,6 +2,10 @@ $font-size-label: 13px;
 :host {
   padding: 5px;
   width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 ::ng-deep .box-campi-dettaglio {
   display: flex;
@@ -60,6 +64,12 @@ $font-size-label: 13px;
         font-size: $font-size-label;
       }
     }
+  }
+}
+::ng-deep .accodion-box-permessi {
+  flex: 1 1 0;
+  .p-accordion-content {
+    height: 100%;
   }
 }
 ::ng-deep .box-autocomplete-classificazione {

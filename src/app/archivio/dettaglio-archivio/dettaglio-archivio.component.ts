@@ -1,12 +1,13 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
 import { NgModel } from '@angular/forms';
 import { Archivio, ArchivioDetail, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, TipoArchivio, ConfigurazioneService, ParametroAziende } from '@bds/ng-internauta-model';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { TreeNode } from 'primeng/api/treenode';
 import { TreeSelect } from 'primeng/treeselect';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { TipoArchivioTraduzioneVisualizzazione } from 'src/app/archivi-list-container/archivi-list/archivi-list-constants';
+import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
 import { ExtendedArchivioService } from '../extended-archivio.service';
 
 @Component({
@@ -14,7 +15,7 @@ import { ExtendedArchivioService } from '../extended-archivio.service';
   templateUrl: './dettaglio-archivio.component.html',
   styleUrls: ['./dettaglio-archivio.component.scss']
 })
-export class DettaglioArchivioComponent implements OnInit, OnDestroy { 
+export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
   private _archivio: Archivio | ArchivioDetail;
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
@@ -29,7 +30,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   private pageConfNoCountLimit20: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 20, offset: 0 } };
   public responsabiliArchivi: AttoreArchivio[] = [];
   public subscriptions: Subscription[] = [];
-  public colsResponsabili : any[];
+  public colsResponsabili: any[];
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public selectedClassificazione: TreeNode;
   public selectedArchivioCollegato: Archivio;
@@ -39,25 +40,31 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public filteredTitoli: Titolo[] = [];
   public tipiArchivioObj: any[] = TipoArchivioTraduzioneVisualizzazione;
   private classificazioneAllaFoglia: boolean = false;
-  
-  public possibleAnniTenuta: any[] = [{name: "1 anno", value: 1 },{name: "2 anni", value: 2 },{name: "3 anni", value: 3 },{name: "4 anni", value: 4 },{name: "5 anni", value: 5 },{name: "6 anni", value: 6 },
-  {name: "7 anni", value: 7 },{name: "8 anni", value: 8 },{name: "9 anni", value: 9 },{name: "10 anni", value: 10 },{name: "20 anni", value: 20 },{name: "30 anni", value: 30 },{name: "40 anni", value: 40 },
-  {name: "50 anni", value: 50 }, {name: "Illimitata", value: 999}];
+  public possibleAnniTenuta: any[] = [{name: "1", value: 1 },{name: "2", value: 2 },{name: "3", value: 3 },{name: "4", value: 4 },
+  {name: "5", value: 5 },{name: "6", value: 6 },{name: "7", value: 7 },{name: "8", value: 8 },{name: "9", value: 9 },
+  {name: "10", value: 10 },{name: "20", value: 20 },{name: "30", value: 30 },{name: "40", value: 40 },
+  {name: "50", value: 50 }, {name: "60", value: 60 }, {name: "Illimitata", value: 999}];
+  public anniTenutaSelezionabili: any[] = [];
 
   @ViewChild("noteArea") public noteArea: ElementRef;
   @ViewChild("titoliTreeSelect") public titoliTreeSelect: TreeSelect;
+  @Output() public updateArchivio = new EventEmitter<Archivio>();
 
   constructor(
-    private attoreArchivioService: AttoreArchivioService, 
+    private attoreArchivioService: AttoreArchivioService,
     private extendedArchivioService: ExtendedArchivioService,
     private titoloService: TitoloService,
     private massimarioService: MassimarioService,
     private messageService: MessageService,
-    private configurazioneService: ConfigurazioneService) {
-    
+    private configurazioneService: ConfigurazioneService,
+    private confirmationService: ConfirmationService,
+    private navigationTabsService: NavigationTabsService) {
+
   }
 
   ngOnInit(): void {
+    console.log("Archivio test: ", this.archivio);
+    this.updateAnniTenuta();
     this.getResponsabili();
   }
 
@@ -69,9 +76,25 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
             this.classificazioneAllaFoglia = JSON.parse(parametriAziende[0].valore || false);
           }
         }
-      )  
+      )
     );
   }
+
+  private updateAnniTenuta() {
+    if(this.archivio.anniTenuta === undefined) {
+      this.anniTenutaSelezionabili = this.possibleAnniTenuta;
+      console.log("Anni tenuta: ", this.anniTenutaSelezionabili);
+      
+    }
+    else {
+      this.possibleAnniTenuta.forEach(elem => {
+        if(this.archivio.anniTenuta <= elem.value ) 
+          this.anniTenutaSelezionabili.push(elem);
+      });  
+      console.log("Anni tenuta: ", this.anniTenutaSelezionabili);
+    }
+  }
+
 
   public changeVisibilita(): void {
     this.archivio.riservato = !(this.archivio.riservato);
@@ -79,32 +102,32 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     archivioToUpdate.riservato = this.archivio.riservato
     archivioToUpdate.version = this.archivio.version;
     this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
-    .subscribe(
-      res => {
-        console.log("Update archivio: ", res);
-        this.archivio.version = res.version;
-        let message: string;
-        if(this.archivio.riservato == true) {
-          message = `Impostato come Riservato correttamente`
-        } else {
-          message = `Impostato come Non-Riservato correttamente`
+      .subscribe(
+        res => {
+          console.log("Update archivio: ", res);
+          this.archivio.version = res.version;
+          let message: string;
+          if (this.archivio.riservato == true) {
+            message = `Impostato come Riservato correttamente`
+          } else {
+            message = `Impostato come Non-Riservato correttamente`
+          }
+          this.messageService.add({
+            severity: "success",
+            key: "dettaglioArchivioToast",
+            summary: "OK",
+            detail: message
+          });
+        },
+        err => {
+          this.messageService.add({
+            severity: "error",
+            key: "dettaglioArchivioToast",
+            summary: "Attenzione",
+            detail: `Si è verificato un errore nella modifica del campo riservato, contattare Babelcare`
+          });
         }
-        this.messageService.add({
-          severity: "success",
-          key: "dettaglioArchivioToast",
-          summary: "OK",
-          detail: message
-        });
-      },
-      err => {
-        this.messageService.add({
-          severity: "error",
-          key: "dettaglioArchivioToast",
-          summary: "Attenzione",
-          detail: `Si è verificato un errore nella modifica del camporiservato, contattare Babelcare`
-        });
-      }
-    ))
+      ))
   }
 
   /**
@@ -113,7 +136,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
    */
   private getResponsabili(): void {
     const filterAndSort: FiltersAndSorts = new FiltersAndSorts();
-    filterAndSort.addFilter(new FilterDefinition("idArchivio.id",  FILTER_TYPES.not_string.equals, this.archivio.id));
+    filterAndSort.addFilter(new FilterDefinition("idArchivio.id", FILTER_TYPES.not_string.equals, this.archivio.id));
     filterAndSort.addFilter(new FilterDefinition("ruolo", FILTER_TYPES.not_string.equals, RuoloAttoreArchivio.RESPONSABILE));
     filterAndSort.addFilter(new FilterDefinition("ruolo", FILTER_TYPES.not_string.equals, RuoloAttoreArchivio.VICARIO));
     filterAndSort.addFilter(new FilterDefinition("ruolo", FILTER_TYPES.not_string.equals, RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
@@ -121,20 +144,20 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     this.subscriptions.push(this.attoreArchivioService.getData(
       ENTITIES_STRUCTURE.scripta.attorearchivio.standardProjections.AttoreArchivioWithIdPersonaAndIdStruttura,
       filterAndSort,
-      null, 
+      null,
       this.pageConfNoCountNoLimit).subscribe(
-      res => {
-        console.log(res.results);
-        this.responsabiliArchivi = res.results;
-      }
-    ));
+        res => {
+          console.log(res.results);
+          this.responsabiliArchivi = res.results;
+        }
+      ));
   }
 
-   /**
-   * Parte un timeout al termine del quale viene salvato il campo della firma specificato
-   * @param doc
-   * @param field
-   */
+  /**
+  * Parte un timeout al termine del quale viene salvato il campo della firma specificato
+  * @param doc
+  * @param field
+  */
   public timeOutAndSaveArchivio(archivio: Archivio, field: keyof Archivio) {
     if (this.savingTimeout) {
       clearTimeout(this.savingTimeout);
@@ -206,17 +229,17 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         inizioLabel = "Categoria";
         node.leaf = false;
         node.selectable = !this.classificazioneAllaFoglia;
-      break;
+        break;
       case 2:
         inizioLabel = "Classe";
         node.leaf = false;
         node.selectable = !this.classificazioneAllaFoglia;
-      break;
+        break;
       case 3:
         inizioLabel = "Sottoclasse";
         node.leaf = true;
         node.selectable = true;
-      break;
+        break;
     }
     node.label = inizioLabel + " " + titolo.classificazione + ": " + titolo.nome;
     node.data = titolo;
@@ -252,14 +275,14 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     } as Titolo;
     archivioToUpdate.version = this.archivio.version;
     this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
-    .subscribe(
-      res => {
-        console.log("Update archivio: ", res);
-        this.archivio.version = res.version;
-        this.archivio.idTitolo = titolo;
-        this.selectedTitolo = this.buildNodeTitolo(titolo);
-      }
-    ))
+      .subscribe(
+        res => {
+          console.log("Update archivio: ", res);
+          this.archivio.version = res.version;
+          this.archivio.idTitolo = titolo;
+          this.selectedTitolo = this.buildNodeTitolo(titolo);
+        }
+      ))
   }
 
   /**
@@ -271,13 +294,14 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     const filterAndsorts: FiltersAndSorts = new FiltersAndSorts();
     filterAndsorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, this.archivio.fk_idAzienda.id));
     filterAndsorts.addFilter(new FilterDefinition("nome", FILTER_TYPES.string.containsIgnoreCase, event.query));
+    filterAndsorts.addFilter(new FilterDefinition("titoli.id", FILTER_TYPES.not_string.equals, this.archivio.idTitolo.id));
     this.subscriptions.push(this.massimarioService.getData(null, filterAndsorts, null, this.pageConfNoCountLimit20)
-    .subscribe(
-      res => {
-        console.log("res", res);
-        this.filteredMassimari = res.results;
-      }
-    ));
+      .subscribe(
+        res => {
+          console.log("res", res);
+          this.filteredMassimari = res.results;
+        }
+      ));
   }
 
   public onSelectMassimario(massimario: Massimario): void {
@@ -293,16 +317,18 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
   public saveAnniTenuta(anni: any): void {
     console.log("selezionata anni tenuta fascicolo ", anni)
+    this.anniTenutaSelezionabili = [];
     const archivioToUpdate: Archivio = new Archivio();
     archivioToUpdate.anniTenuta = anni;
     archivioToUpdate.version = this.archivio.version;
     this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
-    .subscribe(
-      res => {
-        console.log("Update archivio: ", res);
-        this.archivio.version = res.version;
-      }
-    ))
+      .subscribe(
+        res => {
+          console.log("Update archivio: ", res);
+          this.archivio.version = res.version;
+        }
+      ))
+      this.updateAnniTenuta();
   }
 
 
@@ -319,12 +345,66 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
    */
   public patchArchivio(archivioToUpdate: Archivio): void {
     this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
-    .subscribe(
-      res => {
-        console.log("Update archivio: ", res);
-        this.archivio.version = res.version;
+      .subscribe(
+        res => {
+          console.log("Update archivio: ", res);
+          this.archivio.version = res.version;
+        }
+      ));
+  }
+
+  public disableNumeraButton(): boolean {
+    return !this.archivio?.oggetto || !this.archivio.tipo || !this.archivio.idTitolo
+  }
+
+  private numeraAndAggiorna(archivio: Archivio | ArchivioDetail) {
+    this.subscriptions.push(
+      this.extendedArchivioService.numeraArchivio(archivio,
+        ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
+        .subscribe(
+          {
+            next: (res) => {
+              console.log("Archivio aggiornato", res)
+              const updated: Archivio | ArchivioDetail = res;
+              this.archivio.version = res.version;
+              this.archivio.numerazioneGerarchica = res.numeraAndAggiorna;
+              this.archivio.stato = res.stato;
+              this.navigationTabsService.addTabArchivio(res, true)
+              this.updateArchivio.emit(res);
+              this.messageService.add({
+                severity: "success",
+                key: "dettaglioArchivioToast",
+                summary: "OK",
+                detail: `${res.numerazioneGerarchica}: Numerazione avvenuta con successo`
+              });
+            },
+            error: (e) => {
+              console.error(e)
+              this.messageService.add({
+                severity: "error",
+                key: "dettaglioArchivioToast",
+                summary: "Attenzione",
+                detail: `Si è verificato un errore nella numerazione dell'archivio, contattare Babelcare`
+              });
+            }
+          }
+        )
+    );
+
+  }
+
+
+  public numeraFasicoloClicked(event: Event): void {
+
+    this.confirmationService.confirm({
+      key: "confirm-popup",
+      target: event.target,
+      message: "Stai per numerare il fascicolo: confermi?",
+      accept: () => {
+        console.log("CONFERMATO");
+        this.numeraAndAggiorna(this._archivio)
       }
-    ));
+    });
   }
 
   public ngOnDestroy(): void {
@@ -336,12 +416,5 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
   }
 
-  public numeraFasicoloClicked(): void {
-    this.messageService.add({
-      severity: "warn",
-      key: "dettaglioArchivioToast",
-      summary: "Attenzione",
-      detail: `Questo non è un pulsante operativo per il momento!`
-    });
-  }
+
 }

@@ -4,6 +4,7 @@ import { ExtendedArchivioService } from '../extended-archivio.service';
 import { Archivio, ArchivioDetail, ENTITIES_STRUCTURE } from '@bds/ng-internauta-model';
 import { combineLatest, Observable } from 'rxjs';
 import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
+import { AppService } from 'src/app/app.service';
 
 @Component({
   selector: 'archivio-tree',
@@ -36,7 +37,9 @@ export class ArchivioTreeComponent implements OnInit {
    */
   constructor(
     private archivioService: ExtendedArchivioService,
-    private navigationTabsService: NavigationTabsService,) {
+    private navigationTabsService: NavigationTabsService,
+    private appService: AppService,
+    ) {
 
   }
 
@@ -46,7 +49,7 @@ export class ArchivioTreeComponent implements OnInit {
   }
 
   //Todo: BreadCrumbs is not used for now but the code for it is still present (bricioleArchivi is commented)
-    
+
   /**
    * Questo metodo si occupa di caricare l'alberatura iniziale.
    * In particolare, se ho aperto un sottofascicolo/inserto allora 
@@ -59,7 +62,7 @@ export class ArchivioTreeComponent implements OnInit {
     switch (this.archivio.livello) {
       case 1:
         this.archivi.push(this.buildTreeNode(this.archivio));
-      //  this.bricioleArchivi.push(this.buildMenuItem(this.archivio));
+        //  this.bricioleArchivi.push(this.buildMenuItem(this.archivio));
         break;
       case 2:
         this.getArchivioById(this.archivio.fk_idArchivioPadre.id).subscribe(
@@ -85,7 +88,7 @@ export class ArchivioTreeComponent implements OnInit {
                 this.buildTreeNode(archivioPadre, [
                   this.buildTreeNode(this.archivio)
                 ])
-              ])); 
+              ]));
             // this.bricioleArchivi.push(this.buildMenuItem(archivioNonno));
             // this.bricioleArchivi.push(this.buildMenuItem(archivioPadre));
             // this.bricioleArchivi.push(this.buildMenuItem(this.archivio));
@@ -107,6 +110,9 @@ export class ArchivioTreeComponent implements OnInit {
   private addTreeNode(archivio: Archivio | ArchivioDetail) {
     switch (archivio.livello) {
       case 1:
+        const nodo = this.buildTreeNode(archivio);
+        nodo.children = this.archivi[0].children;
+        this.archivi[0] = nodo;
         this.selectedNode = this.archivi[0];
         //this.bricioleArchivi = this.bricioleArchivi.slice(0,2);
         break;
@@ -209,6 +215,7 @@ export class ArchivioTreeComponent implements OnInit {
    */
   public onNodeSelect(event: any): void {
     this.navigationTabsService.addTabArchivio(event.node.data, false);
+    this.appService.appNameSelection("Fascicolo "+ event.node.data.numerazioneGerarchica  + " [" + event.node.data.idAzienda.aoo + "]");
     //this.archivioSelectedEvent.emit(event.node.data);
   }
 }
