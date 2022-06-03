@@ -9,7 +9,8 @@ export enum ArchiviListMode {
   RECENTI = "RECENTI",
   VISIBILI = "VISIBILI",
   FREQUENTI = "FREQUENTI",
-  PREFERITI = "PREFERITI"
+  PREFERITI = "PREFERITI",
+  TUTTI = "TUTTI"
 }
 
 export const cols: ColonnaBds[] = [
@@ -50,8 +51,8 @@ export const cols: ColonnaBds[] = [
     filterClass: ["filter-column", "numerazione-gerarchica-column"],
     bodyClass: ["numerazione-gerarchica-column"],
     fieldType: "string",
-    filterMatchMode: FILTER_TYPES.string.containsIgnoreCase,
-    useFilterMatchMode: true,
+    filterMatchMode: FILTER_TYPES.string.startsWith,
+    useFilterMatchMode: false,
     default: true
   },
   {

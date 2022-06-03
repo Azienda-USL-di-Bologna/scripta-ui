@@ -1,0 +1,63 @@
+::ng-deep.tabella-permessi-archivio {
+  .persona-column {
+    min-width: 300px;
+    width: 300px;
+    max-width: 300px;
+  }
+  .struttura-column {
+    min-width: 150px;
+    p-celleditor {
+      width: 100%;
+    }
+  }
+  .ereditato-column {
+    min-width: 130px;
+    width: 130px;
+    max-width: 130px;
+    justify-content: center;
+  }
+  .propaga-column {
+    min-width: 112px;
+    width: 112px;
+    max-width: 112px;
+    justify-content: center;
+  }
+  .permesso-column {
+    min-width: 150px;
+    width: 150px;
+    max-width: 150px;
+    justify-content: center;
+  }
+  .azione-column {
+    min-width: 112px;
+    width: 112px;
+    max-width: 112px;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: nowrap;
+    .p-button-rounded {
+      background-color: transparent !important;
+      border: none !important;
+      color: #203244 !important;
+      &:hover {
+        border-color: #2e4a65 !important;
+        background-color: #406284 !important;
+        color: #ffffff !important;
+        font-weight: normal !important;
+      }
+      &.p-button-danger {
+        color: #e91224 !important;
+      }
+      &.p-button-success {
+        color: #34A835 !important;
+      }
+      &.p-button-danger:hover, &.p-button-success:hover {
+        border:1px solid #2e4a65 !important;
+        background-color:transparent !important;
+      }
+      .p-button-icon {
+        font-size: 1.2rem;
+      } 
+    }
+  }
+}

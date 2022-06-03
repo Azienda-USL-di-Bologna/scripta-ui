@@ -4,7 +4,8 @@ import { Subscription } from "rxjs";
 import { ConfigurazioneService, ParametroAziende } from "@bds/ng-internauta-model";
 import { NavigationTabsService } from "./navigation-tabs.service";
 import { TabItem } from "./tab-item";
-import { ActivatedRoute } from "@angular/router";
+import { Router } from "@angular/router";
+import { AppService } from "../app.service";
 
 @Component({
   selector: "navigation-tabs",
@@ -14,23 +15,34 @@ import { ActivatedRoute } from "@angular/router";
 export class NavigationTabsComponent implements OnInit {
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
-  private tabName: any;
+  //private tabName: any;
   public tabItems: TabItem[] = [];
 
   constructor(
+    private appService: AppService,
     private loginService: NtJwtLoginService,
     private configurazioneService: ConfigurazioneService,
     public navigationTabsService: NavigationTabsService,
-    private route: ActivatedRoute
+    //private route: ActivatedRoute,
+    private router: Router
   ) {
-    this.route.queryParams.subscribe(params => {
+    console.log(this.router)
+    if (this.router.routerState.snapshot.url.includes("archivilist")) {
+      this.navigationTabsService.activeTabIndex = 1;
+      this.appService.appNameSelection("Elenco Fascicoli")
+    } else {
+      this.navigationTabsService.activeTabIndex = 0;      
+      this.appService.appNameSelection("Elenco Documenti")
+    }
+    /* this.route.queryParams.subscribe(params => {
+      console.log("params", params)
       this.tabName = params['view'];
       if(this.tabName == 'FASCICOLI') {
         this.navigationTabsService.activeTabIndex = 1;
       } else {
         this.navigationTabsService.activeTabIndex = 0;
       }
-    });
+    }); */
   }
 
   ngOnInit(): void {
@@ -38,6 +50,7 @@ export class NavigationTabsComponent implements OnInit {
 
     if (tabLoadedFromSessionStorage) {
       this.setTabsAndActiveOneOfThem();
+      
     } else {
       this.navigationTabsService.addTab(
         this.navigationTabsService.buildaTabDocsList()
@@ -87,11 +100,17 @@ export class NavigationTabsComponent implements OnInit {
     this.tabItems = this.navigationTabsService.getTabs();
   }
   
-  public onChangeTab(): void {
-
+  public onChangeTab(tabIndex:number): void {
+    if(tabIndex == 0 || tabIndex == 1 ){
+      this.appService.appNameSelection("Elenco "+ this.navigationTabsService.getTabs()[tabIndex].label);
+    }else{
+      this.appService.appNameSelection("Fascicolo "+ this.navigationTabsService.getTabs()[tabIndex].label);
+    }
   }
 
   public onCloseTab(e: any): void {
     this.navigationTabsService.removeTab(e.index);
+    this.appService.appNameSelection("Elenco Fascicoli");
+
   }
 }

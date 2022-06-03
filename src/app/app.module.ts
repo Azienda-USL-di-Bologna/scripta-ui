@@ -9,7 +9,7 @@ import { NtJwtLoginModule } from "@bds/nt-jwt-login";
 import { loginModuleConfig } from "./config/module-config";
 import { NtCommunicatorModule } from "@bds/nt-communicator";
 import { HomeComponent } from "./home/home.component";
-import { DatePipe } from "@angular/common";
+import { DatePipe, TitleCasePipe } from "@angular/common";
 
 
 /* Registro la data italiana */
@@ -23,27 +23,27 @@ import { ScriptaCommonModule } from "./scripta-common.module";
 registerLocaleData(localeIt, "it-IT", localeItExtra);
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent
-  ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    AppRoutingModule,
-    PrimengPluginModule,
-    NtJwtLoginModule.forRoot(loginModuleConfig),
-    PrimeNgModule,
-    ScriptaCommonModule,
-    CommonComponentsModule,
-    NtCommunicatorModule
-  ],
-  providers: [
-    DatePipe,
-    { provide: LOCALE_ID, useValue: "it-IT" },
-  ],
-  bootstrap: [AppComponent],
-  exports: [CommonComponentsModule],
-  entryComponents: [ProfiloComponent]
+    declarations: [
+        AppComponent,
+        HomeComponent
+    ],
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        AppRoutingModule,
+        PrimengPluginModule,
+        NtJwtLoginModule.forRoot(loginModuleConfig),
+        PrimeNgModule,
+        ScriptaCommonModule,
+        CommonComponentsModule,
+        NtCommunicatorModule
+    ],
+    providers: [
+        DatePipe,
+        TitleCasePipe,
+        { provide: LOCALE_ID, useValue: "it-IT" },
+    ],
+    bootstrap: [AppComponent],
+    exports: [CommonComponentsModule]
 })
 export class AppModule { }

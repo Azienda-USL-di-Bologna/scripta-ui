@@ -310,10 +310,13 @@ export const cols: ColonnaBds[] = [
 // }
 
 export const TipologiaDocTraduzioneVisualizzazione = [
-  { value: TipologiaDoc.PROTOCOLLO_IN_USCITA, nome: "Protocollo in uscita"},
-  { value: TipologiaDoc.PROTOCOLLO_IN_ENTRATA, nome: "Protocollo in entrata"},
-  { value: TipologiaDoc.DETERMINA, nome: "Determina"},
-  { value: TipologiaDoc.DELIBERA, nome: "Delibera"}
+  { value: TipologiaDoc.PROTOCOLLO_IN_USCITA, nome: "Protocollo in uscita" },
+  { value: TipologiaDoc.PROTOCOLLO_IN_ENTRATA, nome: "Protocollo in entrata" },
+  { value: TipologiaDoc.DETERMINA, nome: "Determina" },
+  { value: TipologiaDoc.DELIBERA, nome: "Delibera" },
+  { value: TipologiaDoc.DOCUMENT_PEC, nome: "Pec" },
+  { value: TipologiaDoc.DOCUMENT_REGISTRO, nome: "Registro giornaliero" },
+  { value: TipologiaDoc.DOCUMENT_UTENTE, nome: "Document" }
 ]
 
 export const StatoDocTraduzioneVisualizzazione = [

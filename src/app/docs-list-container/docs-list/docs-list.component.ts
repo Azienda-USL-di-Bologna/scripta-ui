@@ -1,5 +1,5 @@
 import { DatePipe } from "@angular/common";
-import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
+import { Component, Input, OnChanges, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { CODICI_RUOLO, Persona, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, ArchivioDetail } from "@bds/ng-internauta-model";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
@@ -12,14 +12,12 @@ import { Calendar } from "primeng/calendar";
 import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
-import { AppService } from "../../app.service";
 import { Impostazioni } from "../../utilities/utils";
 import { cols, colsCSV, DocsListMode, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
 import { MultiSelect } from "primeng/multiselect";
-import { NavViews } from "../../navigation-tabs/navigation-tabs-contants";
 import { TabComponent } from "../../navigation-tabs/tab.component";
 import { CaptionReferenceTableComponent } from '../../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
@@ -39,7 +37,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   private resetDocsArrayLenght: boolean = true;
   private storedLazyLoadEvent: LazyLoadEvent;
   private lastAziendaFilterValue: number[];
-  private lastStatoFilterValue: string[];
+  //private lastStatoFilterValue: string[];
   private lastDataCreazioneFilterValue: Date[];
 
   @ViewChild("dt") public dataTable: Table;
@@ -100,7 +98,10 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   private _archivio: Archivio | ArchivioDetail;
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set archivio(archivio: Archivio | ArchivioDetail) {
-    this._archivio = archivio;
+    this._archivio = archivio; 
+    if(this.loadDocsListSubscription){
+      this.loadData();
+    }
   }
 
   constructor(
@@ -113,18 +114,16 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     private loginService: NtJwtLoginService,
     private datepipe: DatePipe,
     private route: ActivatedRoute,
-    private router: Router,
-    private appService: AppService,
     private confirmationService: ConfirmationService
   ) { }
 
   ngOnInit(): void {
-    this.appService.appNameSelection("Elenco documenti");
+    this.cols = cols;
     this.docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode || DocsListMode.MIEI_DOCUMENTI;
     if (!Object.values(DocsListMode).includes(this.docsListMode)) {
       this.docsListMode = DocsListMode.MIEI_DOCUMENTI;
     }
-    this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.DOCUMENTI, mode: this.docsListMode } }); 
+    //this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.DOCUMENTI, mode: this.docsListMode } }); 
     
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
@@ -136,8 +135,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           if (this.docsListMode) {
             this.calcolaAziendeFiltrabili();
           }
+        
+          if (!!!this.archivio) { 
+            this.loadConfigurationAndSetItUp();
+          } else { 
+            this.setColumnsPerDetailArchivio();
+          }
 
-          this.loadConfigurationAndSetItUp();
         }
       )
     );
@@ -154,11 +158,11 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     /* Mi sottoscrivo alla rotta per leggere la modalita dell'elenco documenti
       e faccio partire il caricamento. Ogni volta che la modalità cambia
       rifaccio la loadData */
-    this.route.queryParams.subscribe(params => {
+    /* this.route.queryParams.subscribe(params => {
       //this.docsListMode = params["mode"];
       if (this.utenteUtilitiesLogin) this.calcolaAziendeFiltrabili();
       this.resetPaginationAndLoadData();
-    });
+    }); */
   }
 
   /**
@@ -224,9 +228,11 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.initialSortField = "dataCreazione";
       //this.initialSortField = "dataRegistrazione";
     }
-    setTimeout(() => {
+    /* setTimeout(() => {
       this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
-    }, 0);
+    }, 0); */
+    if (this.utenteUtilitiesLogin) this.calcolaAziendeFiltrabili();
+    this.resetPaginationAndLoadData();
   }
 
   @Input() get selectedColumns(): any[] {
@@ -287,7 +293,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       return e;
     });
 
-    this.cols = cols;
+  
     const impostazioni = this.utenteUtilitiesLogin.getImpostazioniApplicazione();
 
     if (impostazioni && impostazioni.impostazioniVisualizzazione && impostazioni.impostazioniVisualizzazione !== "") {
@@ -312,6 +318,16 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (!this._selectedColumns || this._selectedColumns.length === 0) {
       this._selectedColumns = this.cols.filter(c => c.default);
     }
+  }
+
+  public setColumnsPerDetailArchivio(): void {
+    const colonneDaVisualizzare = ["registrazione", "dataRegistrazione", "oggetto", "tipologia","fascicolazioni"];
+    // this._selectedColumns = this.cols.filter(c => colonneDaVisualizzare.includes(c.field));
+    this._selectedColumns = [];
+    colonneDaVisualizzare.forEach(c => {
+      this._selectedColumns.push(this.cols.find(e => e.field === c));
+    })
+    console.log(this._selectedColumns)
   }
 
   /**
@@ -433,8 +449,10 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
 
     if (this.filtriPuliti) {
       this.filtriPuliti = false;
-      this.resetCalendarToInitialValues();
-      this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
+      if(!!!this.archivio){
+        this.resetCalendarToInitialValues();
+        this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
+      }
 
       if (this.dropdownAzienda) {
         const value = this.aziendeFiltrabili.find(a => a.value[0] === this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault.id).value;
@@ -531,7 +549,16 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    */
   private buildCustomFilterAndSort(): FiltersAndSorts {
     const filterAndSort = new FiltersAndSorts();
-
+    if (!!this.archivio) {
+      this.docsListMode = null;
+      this.initialSortField = "dataRegistrazione";
+      this.serviceForGetData = this.docDetailService;
+      this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
+      //filterAndSort.addFilter(new FilterDefinition("idArchivi", FILTER_TYPES.not_string.equals, this.archivio.id));
+      filterAndSort.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, this.archivio.idAzienda.id));
+      filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "FilterForArchiviContent"));
+      filterAndSort.addAdditionalData(new AdditionalDataDefinition("idArchivio", this.archivio.id.toString()));
+    }
     switch (this.docsListMode) {
       case DocsListMode.DOCUMENTI_VISIBILI:
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
@@ -578,7 +605,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Carica i docs per la lista.
    * @param event
    */
-  private loadData(): void {
+  private loadData(): void { 
     this.loading = true;
     this.pageConf.conf = {
       limit: this.storedLazyLoadEvent.rows,
@@ -593,36 +620,42 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.projectionFotGetData,
       filtersAndSorts,
       buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
-      this.pageConf).subscribe((data: any) => {
-        console.log(data);
-        this.totalRecords = data.page.totalElements;
-        this.loading = false;
+      this.pageConf).subscribe({
+        next: (data: any) => {
+          console.log(data);
+          this.totalRecords = data.page.totalElements;
+          this.loading = false;
 
-        if (this.resetDocsArrayLenght) {
-          /* Ho bisogno di far capire alla tabella quanto l'array docs è virtualmente grande
-            in questo modo la scrollbar sarà sufficientemente lunga per scrollare fino all'ultimo elemento
-            ps:a quanto pare la proprietà totalRecords non è sufficiente. */
-          this.resetDocsArrayLenght = false;
-          this.dataTable.resetScrollTop();
-          this.docs = Array.from({ length: this.totalRecords });
-        }
+          if (this.resetDocsArrayLenght) {
+            /* Ho bisogno di far capire alla tabella quanto l'array docs è virtualmente grande
+              in questo modo la scrollbar sarà sufficientemente lunga per scrollare fino all'ultimo elemento
+              ps:a quanto pare la proprietà totalRecords non è sufficiente. */
+            this.resetDocsArrayLenght = false;
+            this.dataTable.resetScrollTop();
+            this.docs = Array.from({ length: this.totalRecords });
+          }
 
-        if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
-          /* Questo meccanismo serve per cancellare i risultati di troppo della tranche precedente.
-          Se entro qui probabilmente ho fatto una ricerca */
-          Array.prototype.splice.apply(this.docs, [0, this.docs.length, ...this.setCustomProperties(data.results)]);
-        } else {
-          Array.prototype.splice.apply(this.docs, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
-        }
-        this.docs = [...this.docs]; // trigger change detection
-      },
-        err => {
+          if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
+            /* Questo meccanismo serve per cancellare i risultati di troppo della tranche precedente.
+            Se entro qui probabilmente ho fatto una ricerca */
+            Array.prototype.splice.apply(this.docs, [0, this.docs.length, ...this.setCustomProperties(data.results)]);
+          } else {
+            Array.prototype.splice.apply(this.docs, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
+          }
+          this.docs = [...this.docs]; // trigger change detection
+        },
+        error: (err) => {
+          if(err.error.message == "Persona senza permesso su Archivio"){
+            this.loading = false;  
+          }
+          
           this.messageService.add({
             severity: "warn",
             key : "docsListToast",
             summary: "Attenzione",
             detail: `Si è verificato un errore nel caricamento, contattare Babelcare`
           });
+        }
       });
   }
 
@@ -898,43 +931,50 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * @param command 
    * @param event 
    */
-  public askConfirmAndHandleCalendarCreazioneEvent(calendar: Calendar, command: string, event: Event, filterCallback: (value: Date[]) => {}) {
-    if (command === "onClickOutside") {
-      calendar.writeValue(this.lastDataCreazioneFilterValue);
-      return;
-    }
-    console.log(calendar.value);
-    let needToAsk = false;
-    if (command === "clear" || !!!calendar.value || calendar.value[0] === null) {
-      // Sto cercando su tutti gli anni
-      needToAsk = true;
-    } else {
-      if (calendar.value[1] !== null && ((calendar.value[1].getYear() - calendar.value[0].getYear()) > 1)) {
-        // Se la differenza degli anni è maggiore di 1 allora sto cercando su almeno 3 anni.
-        needToAsk = true;
-      }
-    }
-    if (needToAsk) {
-      setTimeout(() => {
-        this.confirmationService.confirm({
-          key: "confirm-popup",
-          target: event.target,
-          message: "La ricerca potrebbe risultare lenta. Vuoi procedere?",
-          icon: 'pi pi-exclamation-triangle',
-          accept: () => {
-            // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
-            this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
-          },
-          reject: () => {
-            // L'utente ha cambaito idea. Non faccio nulla
-          }
-        });
-      }, 0);
-    } else {
-      this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
-    }
-  }
-
+   needToAsk = false;
+   public askConfirmAndHandleCalendarCreazioneEvent(calendar: Calendar, command: string, event: Event, filterCallback: (value: Date[]) => {}) {
+     //add this check becaus when we click on confirmation button it takas it as click outside
+     if (this.needToAsk) {
+       this.needToAsk = false;
+       return;
+     }
+     if (command === "onClickOutside") {
+       calendar.writeValue(this.lastDataCreazioneFilterValue);
+       return;
+     }
+     console.log(calendar);
+     if (command === "clear" || !!!calendar.value || calendar.value[0] === null) {
+       // Sto cercando su tutti gli anni
+       this.needToAsk = true;
+     } else {
+        if (calendar.value[1] !== null && ((calendar.value[1].getYear() - calendar.value[0].getYear()) > 1)) {
+         // Se la differenza degli anni è maggiore di 1 allora sto cercando su almeno 3 anni.
+         this.needToAsk = true;
+       }
+     }
+ 
+     if (this.needToAsk) {
+       setTimeout(() => {
+         this.confirmationService.confirm({
+           key: "confirm-popup",
+           target: event.target,
+           message: "La ricerca potrebbe risultare lenta. Vuoi procedere?",
+           icon: 'pi pi-exclamation-triangle',
+           accept: () => {
+             // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
+             this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
+           },
+           reject: () => {
+             // L'utente ha cambaito idea. Non faccio nulla
+             // repopulate with old value
+             calendar.writeValue(this.lastDataCreazioneFilterValue);
+           }
+         });
+       }, 0);
+     } else {
+       this.handleCalendarButtonEvent(calendar, command, event, filterCallback);
+     }
+   }
   /**
    * Gestione custom del filtro per azienda scelto dall'utente. In particolare devo gestire il caso
    * in cui l'utente scelga l'opzione "Tutte le aziende" per avvisarlo di possibili rallentamenti.

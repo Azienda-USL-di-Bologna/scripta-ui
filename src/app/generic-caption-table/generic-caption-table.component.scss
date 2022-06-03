@@ -11,6 +11,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    z-index: 700;
+    position: relative;
     .p-button {
       color: white;
     }
@@ -35,8 +37,8 @@
             background-color: #f4f4f4 !important;
             &:hover {
               color: #333333;
-              background-color: #993366 !important;
-              border-color: #993366 !important;
+              background-color: #993366 ;
+              border-color: #993366 ;
             }
           }
           .p-highlight {
@@ -97,6 +99,21 @@
         &:target{
           outline: none !important;
         }
+      }
+      .preferitoStar{
+        font-size: 2rem;
+        color: #936 !important; 
+        &:hover {
+          color: #7e7e7e !important;
+          background-color: transparent !important;
+          border-color: transparent !important;
+        }
+        &:target{
+          outline: none !important;
+        }
+      }
+      .empty{
+        color: #2e4a65  !important;
       }
     }
   }

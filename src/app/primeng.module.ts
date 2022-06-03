@@ -28,7 +28,9 @@ import { SplitterModule } from 'primeng/splitter';
 import { TreeModule } from 'primeng/tree';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { MenuModule } from 'primeng/menu';
-
+import { MessageModule } from 'primeng/message';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { TreeSelectModule } from 'primeng/treeselect';
 
 @NgModule({
   declarations: [
@@ -62,7 +64,10 @@ import { MenuModule } from 'primeng/menu';
     SplitterModule,
     TreeModule,
     BreadcrumbModule,
-    MenuModule
+    MenuModule,
+    MessageModule,
+    OverlayPanelModule,
+    TreeSelectModule
   ],
   exports: [
     ButtonModule,
@@ -93,7 +98,10 @@ import { MenuModule } from 'primeng/menu';
     SplitterModule,
     TreeModule,
     BreadcrumbModule,
-    MenuModule
+    MenuModule,
+    MessageModule,
+    OverlayPanelModule,
+    TreeSelectModule
   ],
   providers: [MessageService, DialogService]
 })

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Archivio, ArchivioDetail } from '@bds/ng-internauta-model';
 import { ArchiviListContainerComponent } from '../archivi-list-container/archivi-list-container.component';
+import { ExtendedArchiviView } from '../archivi-list-container/archivi-list/extendend-archivi-view';
 import { ArchivioComponent } from '../archivio/archivio.component';
 import { DocComponent } from '../doc/doc.component';
 import { DocsListContainerComponent } from '../docs-list-container/docs-list-container.component';
@@ -107,7 +108,7 @@ export class NavigationTabsService {
       ArchiviListContainerComponent,
       {  },
       false,
-      "Archivi",
+      "Fascicoli",
       "pi pi-fw pi-list",
       TabType.ARCHIVI_LIST
     );
@@ -126,12 +127,12 @@ export class NavigationTabsService {
     );
   }
 
-  private buildaTabArchivio(archivio: Archivio | ArchivioDetail, label: string): TabItem {
+  private buildaTabArchivio(archivio: Archivio | ArchivioDetail | ExtendedArchiviView, label: string): TabItem {
     return new TabItem(
       ArchivioComponent,
       { 
         archivio: archivio,
-        id: archivio.id
+        id: archivio.id,
       },
       true,
       label,
@@ -147,18 +148,18 @@ export class NavigationTabsService {
    * @param archivio 
    * @param active 
    */
-  public addTabArchivio(archivio: Archivio | ArchivioDetail, active: boolean = true): void {
+  public addTabArchivio(archivio: Archivio | ArchivioDetail | ExtendedArchiviView, active: boolean = true): void {
     const tabIndex: number = this.tabs.findIndex(t => {
       return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id
     });
     if (tabIndex !== -1) {
-      this.updateTab(tabIndex, archivio.numerazioneGerarchica, {archivio: archivio, id: archivio.id});
+      this.updateTab(tabIndex, archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]", {archivio: archivio, id: archivio.id});
       if (active) {
         this.activeTabByIndex(tabIndex);
       }
     } else {
       this.addTab(
-        this.buildaTabArchivio(archivio, archivio.numerazioneGerarchica)
+        this.buildaTabArchivio(archivio, archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]")
       );
       if (active) {
         this.activeLastTab();

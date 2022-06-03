@@ -1,70 +1,61 @@
-<p-table #dt ariaLabel="Tabella elenco archivi" styleClass="p-table-scripta-archivi-list" dataKey="id"
-  [columns]="selectedColumns" [value]="archivi" [reorderableColumns]="true" (onColReorder)="onColReorder($event)"
-  [sortField]="initialSortField" [sortOrder]="-1" [defaultSortOrder]="-1" [rows]="rowsNumber" scrollHeight="100%"
-  [scrollable]="true" [virtualScroll]="true" [virtualScrollDelay]="150" [virtualRowHeight]="54"
-  (onLazyLoad)="onLazyLoad($event)" [lazy]="true" [lazyLoadOnInit]="false" [loading]="loading"
-  [totalRecords]="totalRecords" [ngClass]="{'table-zero-rows': totalRecords === 0}"
+<p-table #dt 
+  ariaLabel="Tabella elenco archivi" 
+  styleClass="p-table-scripta-archivi-list" 
+  dataKey="id"
+  [columns]="selectedColumns" 
+  [value]="archivi" 
+  [reorderableColumns]="true" 
+  (onColReorder)="onColReorder($event)"
+  [sortField]="initialSortField" 
+  [sortOrder]="-1" 
+  [defaultSortOrder]="-1" 
+  [rows]="rowsNumber" 
+  scrollHeight="flex"
+  [scrollable]="true" 
+  [virtualScroll]="true" 
+  [virtualScrollDelay]="150" 
+  [virtualRowHeight]="54"
+  (onLazyLoad)="onLazyLoad($event)" 
+  [lazy]="true" 
+  [lazyLoadOnInit]="true" 
+  [loading]="loading"
+  [totalRecords]="totalRecords" 
+  [ngClass]="{'table-zero-rows': totalRecords === 0}"
   tableStyleClass="archiviolist-table-body">
-  scrollDirection="both"
-  <!-- <ng-template pTemplate="caption">
-    <div class="caption-row">
-      <div class="left-content">
-        <div class="p-d-flex">
-          <span class="p-input-icon-left p-ml-auto">
-            <i class="pi pi-search"></i>
-            <input #inputGobalFilter pInputText type="text" (input)="removeSort(); applyFilterGlobal($event, 'equals')"
-              placeholder="Ricerca.. " />
-          </span>
-          <button pButton class="p-button-outlined refresh-button" icon="pi pi-filter"
-            pTooltip="Applica i filtri. Aggiorna" tooltipPosition="bottom" aria-label="Applica i filtri"
-            (click)="resetPaginationAndLoadData()">
-          </button>
-          <button pButton class="p-button-outlined alarm-button" icon="pi pi-filter-slash" pTooltip="Svuota i filtri"
-            tooltipPosition="bottom" (click)="clear()" aria-label="Svuota i filtri">
-          </button>
-          <p-selectButton class="tabs" [options]="archiviListModeItem" [(ngModel)]="selectedArchiviListMode"
-            optionLabel="label" (onOptionClick)="onChangeArchiviListMode($event)">
-          </p-selectButton>
-        </div>
-      </div>
-      <div class="right-content">
-        <span *ngIf="exportCsvInProgress">
-          <p-progressSpinner [style]="{width: '2em', height: '2em', marginRight: '7px'}" strokeWidth="8" fill="#FFFFFF"
-            animationDuration=".5s">
-          </p-progressSpinner>
-        </span>
-        <button type="button" pButton pRipple icon="pi pi-file-o" (click)="exportCSV(dt)" class="p-mr-2"
-          aria-label="Scarica il csv della tabella" pTooltip="CSV" tooltipPosition="bottom">
-        </button>
-        <p-multiSelect *ngIf="isAccessibile() !== true" [options]="selectableColumns" [(ngModel)]="selectedColumns"
-          (onChange)="onChangeMultiSelectedColumns($event)" optionLabel="header" optionDisabled="selectionDisabled"
-          [showHeader]="false" selectedItemsLabel="{0} colonne selezionate"
-          [style]="{minWidth: '250px', maxWidth: '250px'}" placeholder="Scegli le colonne da visualizzare"
-          aria-label="Scegli le colonne da visualizzare">
-          <ng-template let-column pTemplate="item">
-            <div class="column-item">
-              <span>{{column.header}}</span>
-            </div>
-          </ng-template>
-        </p-multiSelect>
-      </div>
-    </div>
-  </ng-template> -->
-  <ng-template pTemplate="colgroup" let-columns>
-    <colgroup>
-      <col *ngFor="let col of columns" [ngClass]="col.headerClass">
-    </colgroup>
-  </ng-template>
   <!-- HEADER & ORDINAMENTO ---->
   <ng-template pTemplate="header" let-columns>
     <tr class="header-row">
-      <th *ngFor="let col of columns" pReorderableColumn [ngSwitch]="col.field" [ngClass]="col.headerClass"
-        [pSortableColumn]="col.sortField">
-        <span class="header-box" [pTooltip]="col.sortField ? null : 'Colonna non ordinabile'"
+      <th *ngFor="let col of columns" 
+        pReorderableColumn 
+        [ngSwitch]="col.field" 
+        [ngClass]="col.headerClass"
+        [pSortableColumn]="col.sortField"
+        [ngStyle]="{'cursor': col.sortField ? null  : 'move' }">
+        <span class="header-box" 
           [attr.aria-label]="col.label">
           {{col.header}}
-          <p-sortIcon *ngIf="col.sortField" [field]="col.sortField">
-          </p-sortIcon>
+          <p-sortIcon *ngIf="col.sortField" [field]="col.sortField"></p-sortIcon>
+
+          <i *ngIf="col.field === 'numerazioneGerarchica'" 
+            class="pi pi-info-circle info-numerazione-gerarchica" 
+            (click)="op.toggle($event)"
+            pTooltip="Scopri come usare al meglio la ricerca per numerazione">
+          </i>
+          <p-overlayPanel #op 
+            appendTo="body"
+            styleClass="overlaypanel-info-numerazione"
+            [showCloseIcon]="true">
+            <ng-template pTemplate>
+              <p>Questo filtro può essere usato per cercare un fascicolo per numero oppure per numerazione gerarchica. Di seguito alcuni esempi</p>
+              <ul>
+                <li>Seleziona il livello Sottofascicolo e scrivi nella ricerca il numero del sottofascicolo desiderato</li>
+                <li>Seleziona il livello Tutti e scrivi una numerazione gerarchica completa (es 23-1/2018) per trovare immediatamente il fascicolo desiderato</li>
+                <li>Non ti ricordi l'esatta numerazione? Inserisci quello che ti ricordi a partire dal livello più importante, ad es. con 23- troverari tutti i sottofascioli/inserti figli del fascicolo 23</li>
+              </ul>
+              Ricorda: usa poi il filtro sulla data di creazione o altri ancora per trovare più facilmente ciò che desideri.
+            </ng-template>
+          </p-overlayPanel>
+
         </span>
       </th>
     </tr>
@@ -86,29 +77,34 @@
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'dataCreazione'">
-          <p-columnFilter #columnFilterDataCreazione [field]="col.filterField" type="date" matchMode="is"
+          <p-columnFilter #columnFilterDataCreazione
+            [field]="col.filterField" 
+            type="date" 
+            matchMode="is"
             [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-calendar #calendarcreazione inputId="calendarcreazione" [ngModel]="value" [yearNavigator]="true"
-                [monthNavigator]="true" yearRange="2000:2030" [minDate]="dataMinimaCreazione"
-                [maxDate]="dataMassimaCreazione" dataType="date" dateFormat="dd/mm/yy" [showIcon]="false"
-                [showButtonBar]="false" selectionMode="range" [readonlyInput]="true"
+              <p-calendar #calendarcreazione 
+                inputId="calendarcreazione"
+                [ngModel]="value"  
+                [minDate]="dataMinimaCreazione"
+                [maxDate]="dataMassimaCreazione"
+                dataType="date" 
+                dateFormat="yy" 
+                [showIcon]="false"
+                [showButtonBar]="false" 
+                selectionMode="range" 
+                view="year"   
+                [readonlyInput]="true"                          
                 (onClickOutside)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'onClickOutside', $event, filter)"
                 appendTo="body">
                 <ng-template pTemplate="footer" class="calendar-filter-footer-button">
                   <div class="calendar-filter-footer-button-container">
-                    <p-button
-                      (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'doFilter', $event, filter)">
-                      Conferma
-                    </p-button>
-                    <p-button
+                    <p-button label="Conferma" (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'doFilter', $event, filter)"></p-button>
+                    <!-- <p-button
                       (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'setToday', $event, filter)">
                       Oggi
-                    </p-button>
-                    <p-button
-                      (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'clear', $event, filter)">
-                      Svuota
-                    </p-button>
+                    </p-button> -->
+                    <p-button label="Svuota" (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'clear', $event, filter)"></p-button>
                   </div>
                 </ng-template>
               </p-calendar>
@@ -213,13 +209,73 @@
           </button>
         </div>
         <div *ngSwitchCase="'numerazioneGerarchica'" class="search-wrapper">
-          <p-columnFilter #colfilterNumerazioneGerarchica [field]="col.filterField" [matchMode]="col.filterMatchMode"
-            [showMenu]="false" [useGrouping]="false" placeholder="">
-          </p-columnFilter>
-          <button *ngIf="colfilterNumerazioneGerarchica.hasFilter()" class="material-icons close-icon" type="reset"
-            (click)="colfilterNumerazioneGerarchica.clearFilter()">
-            close
-          </button>
+          <span class="search-wrapper"
+            [pTooltip]="archiviListMode === archiviListModeEnum.TUTTI || archivioPadre ? 'La selezione è disabilitata' : 'Seleziona livello'" 
+            tooltipPosition="top"
+            >
+            <p-columnFilter #columnFilterLivello 
+              field="livello" 
+              matchMode="in" 
+              class="column-filter-livello"
+              [showMenu]="false">
+              <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                <p-dropdown #dropdownLivello 
+                  
+                  [options]="livelliFiltrabili"
+                  [(ngModel)]="livelloValue"
+                  (onChange)="filter($event.value)"
+                  [disabled]="(archiviListMode === archiviListModeEnum.TUTTI || archivioPadre)"
+                  optionValue="value" 
+                  optionLabel="label" 
+                  panelStyleClass="dropdown-panel-livello"
+                  appendTo="body">
+                  <ng-template pTemplate="selectedItem">
+                    <span class="material-icons folder_outline-icon"
+                      [ngStyle]="{
+                        'color': livelloValue.length > 1 ? 'white' : 
+                          (livelloValue[0] === 1 ? '#92225f' : 
+                            (livelloValue[0] === 2 ? '#f68b20' : '#edc211'))}">
+                      folder
+                    </span>
+                  </ng-template>
+                  <ng-template let-livello pTemplate="item">
+                    <span class="material-icons folder_outline-icon"
+                      [ngStyle]="{
+                        'color': livello.value.length > 1 ? 'white' : 
+                          (livello.value[0] === 1 ? '#92225f' : 
+                            (livello.value[0] === 2 ? '#f68b20' : '#edc211'))}"
+                      pTooltip="Fascicolo" 
+                      tooltipPosition="top">
+                      folder
+                    </span>
+                    {{livello.label}}
+                  </ng-template>
+                </p-dropdown>
+              </ng-template>
+            </p-columnFilter>
+          </span>
+          <div class="search-wrapper box-filtro-numerazione" >
+            <!--NB: La columnfilter qui è fittizia, in realtà il filtro è assolutamente custom e gestito dal ts -->
+            <p-columnFilter #colfilterNumerazioneGerarchica 
+              [field]="fieldNumerazioneGerarchica" 
+              [matchMode]="matchModeNumerazioneGerarchica"
+              [showMenu]="false" 
+              [useGrouping]="false">
+              <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                <input #inputnumerazionegerarchica
+                  [ngStyle]="{'background-color': !regexNumerazioneGerarchica.test(inputnumerazionegerarchica?.value) ? '#FFCDD2' : ''}"
+                  pInputText 
+                  [ngModel]="value"
+                  type="text" 
+                  placeholder="x-x-x/xxxx"
+                  (keydown.enter)="onEnterNumerazioneGerarchica(inputnumerazionegerarchica?.value)" />
+              </ng-template>
+            </p-columnFilter>
+            <button *ngIf="colfilterNumerazioneGerarchica.hasFilter()" class="material-icons close-icon" type="reset"
+              (click)="colfilterNumerazioneGerarchica.clearFilter()">
+              close
+            </button>
+          </div>
         </div>
         <div *ngSwitchCase="'idVicari'" class="search-wrapper">
           <p-columnFilter #colfiltervicari [field]="col.filterField" matchMode="" [showMenu]="false">
@@ -249,32 +305,68 @@
         <div *ngSwitchCase="'tipo'">
           {{rowData.tipoVisualizzazione}}
         </div>
-        <div *ngSwitchCase="'numerazioneGerarchica'" class="numerazione-box">
-          <div *ngIf="rowData.livello == 1" class="box-livello-1">
-            <span class="material-icons folder_outline-icon" pTooltip="Fascicolo" tooltipPosition="top">
+        <div *ngSwitchCase="'numerazioneGerarchica'" class="numerazione-box"
+          (click)="openArchive(rowData)">
+          <div class="left-side">
+            <span [ngStyle]="{
+              'color': rowData.livello === 1 ? '#92225f' : 
+                (rowData.livello === 2 ? '#f68b20' : '#edc211')}" 
+              class="material-icons folder_outline-icon-fasc" 
+              [pTooltip]="rowData.livello === 1 ? 'Fascicolo' : 
+              (rowData.livello === 2 ? 'Sottofascicolo' : 'Inserto')" 
+              tooltipPosition="top">
+                folder
+            </span>
+            <i class="pi" 
+              [pTooltip]="rowData.isArchivioNero ? 'Nessun permesso sull\'archivio' : 
+              (rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO' ? 'Archivio chiuso' :
+               (rowData.tipo === 'SPECIALE' ? 'Archivio speciale' : ''))" 
+               [ngClass]="rowData.isArchivioNero ? 'pi-eye-slash' : 
+               (rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO' ? 'pi-lock' :
+                (rowData.tipo === 'SPECIALE' ? 'pi-slack' : 'display-none'))" 
+
+              tooltipPosition="top">
+            </i>
+          </div>
+          <!-- <div *ngIf="rowData.isArchivioNero" class="box-livello-1">
+            <span class="pi pi-eye-slash" pTooltip="Nessun permesso sul fascicolo" tooltipPosition="top">
+            </span>
+          </div>
+          <div *ngIf="isArchivioSpeciale(rowData) && !rowData.isArchivioNero" class="box-livello-1">
+            <span class="material-icons folder_outline-icon-speciale" pTooltip="Archivio speciale" tooltipPosition="top">
               folder
             </span>
           </div>
-          <div *ngIf="rowData.livello == 2" class="box-livello-2">
-            <span class="material-icons folder_outline-icon" pTooltip="Sottofascicolo" tooltipPosition="top">
+          <div *ngIf="isArchivioChiuso(rowData)
+           && !rowData.isArchivioNero" class="box-livello-1">
+            <span class="pi pi-lock" pTooltip="Archivio chiuso" tooltipPosition="top">
+            </span>
+          </div> 
+          <div *ngIf="rowData.livello == 1 && !isArchivioSpeciale(rowData)" class="box-livello-1">
+            <span class="material-icons folder_outline-icon-fasc" pTooltip="Fascicolo" tooltipPosition="top">
               folder
             </span>
           </div>
-          <div *ngIf="rowData.livello == 3" class="box-livello-3">
-            <span class="material-icons folder_outline-icon" pTooltip="Inserto" tooltipPosition="top">
+          <div *ngIf="rowData.livello == 2 && !isArchivioSpeciale(rowData)" class="box-livello-2">
+            <span class="material-icons folder_outline-icon-sottofs" pTooltip="Sottofascicolo" tooltipPosition="top">
               folder
             </span>
           </div>
+          <div *ngIf="rowData.livello == 3 && !isArchivioSpeciale(rowData)" class="box-livello-3">
+            <span class="material-icons folder_outline-icon-inserto" pTooltip="Inserto" tooltipPosition="top">
+              folder
+            </span>
+          </div> -->
           <div class="box-numerazione">
             {{rowData.numerazioneGerarchica}}
-          </div>
+          </div> 
         </div>
         <div *ngSwitchCase="'dataCreazione'">
           {{rowData.dataCreazione | date:'dd/MM/yyyy'}}
         </div>
         <div *ngSwitchCase="'oggetto'" class="oggetto-content" [pTooltip]="rowData.oggetto" tooltipPosition="top"
           (click)="openArchive(rowData)">
-          {{rowData.oggetto}}
+          {{rowData.oggetto && rowData.oggetto !== "" ? rowData.oggetto : "[nome non assegnato]"}}
         </div>
         <div *ngSwitchCase="'stato'">
           {{rowData.statoVisualizzazione}}
@@ -296,7 +388,6 @@
           </span>
         </div>
       </td>
-      <td class="scrollbar-overlay-placeholder-column"></td>
     </tr>
   </ng-template>
   <ng-template pTemplate="loadingbody" let-columns="columns">
@@ -306,6 +397,14 @@
       </td>
     </tr>
   </ng-template>
+  <!-- No Records-->
+  <ng-template pTemplate="emptymessage" let-columns>
+    <tr>
+      <td [attr.colspan]="columns.length" class="emptyMessage" >
+          <h3>Nessun fascicolo trovato</h3>
+      </td>
+  </tr>
+</ng-template>
 </p-table>
 <p-toast key="archiviListToast"></p-toast>
 <p-confirmPopup key="confirm-popup"></p-confirmPopup>
