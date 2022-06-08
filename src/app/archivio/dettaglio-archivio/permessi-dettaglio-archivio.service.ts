@@ -25,14 +25,15 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
    * che saranno di tipo PermessoTabella
    * @param oggettone 
    */
-   public buildPermessoPersonaPerTabella(oggettoni: PermessoEntitaStoredProcedure[], tabellaDiFiltro: string): PermessoTabella[] {
-    let struttura: string = "";
+   public buildPermessoPerTabella(archivio: Archivio|ArchivioDetail, tabellaDiFiltro: string): PermessoTabella[] {
     const permessiTabella: PermessoTabella[] = [];
+    const oggettoni: PermessoEntitaStoredProcedure[] = archivio.permessi;
     oggettoni?.forEach((oggettone: PermessoEntitaStoredProcedure) => {
       if (oggettone.soggetto.table === tabellaDiFiltro) {
         oggettone.categorie.forEach((categoria: CategoriaPermessiStoredProcedure) => {
           categoria.permessi.forEach((permesso: PermessoStoredProcedure) => {
             permessiTabella.push({
+              idPermesso: permesso.id,
               descrizioneSoggetto: oggettone.soggetto.descrizione,
               idProvenienzaSoggetto: oggettone.soggetto.id_provenienza,
               descrizioneVeicolo: permesso.entita_veicolante ? permesso.entita_veicolante.descrizione : null,
@@ -40,7 +41,7 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
               predicato: permesso.predicato,
               propaga: permesso.propaga_oggetto,
               trasmetti: permesso.propaga_soggetto,
-              ereditato: permesso.virtuale,
+              ereditato: permesso.virtuale_oggetto,
               soggettoEntita: oggettone.soggetto,
               oggettoEntita: oggettone.oggetto,
               veicoloEntita: permesso.entita_veicolante
@@ -50,21 +51,51 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
         )
       }
     });
-    console.log(permessiTabella);
+     console.log(permessiTabella);
+     this.filterByPermissionPriority(permessiTabella);
     return permessiTabella;
+  }
+
+  private filterByPermissionPriority(permessiTabella: PermessoTabella[]) {
+    const tuttiPermessi = [...permessiTabella]
+    tuttiPermessi.forEach((pt: PermessoTabella) => { 
+      this.getMaxPermesso(permessiTabella.filter((ptf: PermessoTabella) => { ptf.soggetto === pt.soggetto }));
+    })
+  }
+
+  private getMaxPermesso(permessiTabella: PermessoTabella[]): PermessoTabella {
+    let permessoTabella: PermessoTabella = permessiTabella.filter((ptf: PermessoTabella) => { ptf.predicato === EnumPermessoTabella.BLOCCO })[0];
+    if (permessoTabella) {
+      return permessoTabella;
+    }
+    permessoTabella = permessiTabella.filter((ptf: PermessoTabella) => { ptf.predicato === EnumPermessoTabella.ELIMINA })[0];
+    if (permessoTabella) {
+      return permessoTabella;
+    }
+    permessoTabella = permessiTabella.filter((ptf: PermessoTabella) => { ptf.predicato === EnumPermessoTabella.MODIFICA })[0];
+    if (permessoTabella) {
+      return permessoTabella;
+    }
+    permessoTabella = permessiTabella.filter((ptf: PermessoTabella) => { ptf.predicato === EnumPermessoTabella.VISUALIZZA })[0];
+    if (permessoTabella) {
+      return permessoTabella;
+    }
+    return null;
   }
 
   /**
    * Torno un array di tipo EnumPermessoTabella che servirà a mostrare i predicati nella dropdown del permesso
    */
-   public loadPredicati(conBlocco: boolean): EnumPermessoTabella[] {
+  public loadPredicati(conBlocco: boolean, permessoEreditato: boolean): EnumPermessoTabella[] {
     const predicati: EnumPermessoTabella[] = [];
-    predicati.push(
-      EnumPermessoTabella.VISUALIZZA,
-      EnumPermessoTabella.MODIFICA,
-      EnumPermessoTabella.ELIMINA
-    );
-    if (conBlocco) {
+    if (!permessoEreditato) {
+      predicati.push(
+        EnumPermessoTabella.VISUALIZZA,
+        EnumPermessoTabella.MODIFICA,
+        EnumPermessoTabella.ELIMINA
+      );
+    }
+    if (conBlocco||permessoEreditato) {
       predicati.push(EnumPermessoTabella.BLOCCO);
     }
     return predicati;
@@ -100,11 +131,11 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
     const predicatoDaAggiungere: EnumPermessoTabella = permesso.predicato;
     const permessoDaAggiungereORimuovere: PermessoStoredProcedure = permessoPerBlackbox.buildPermesso(
       predicatoDaAggiungere,
-      permesso.trasmetti,  // Il soggetto è una persona e quindi non è trasmettibile ai figli (strutture figlie)
-      permesso.propaga, // E' il propaga verso gli arhcivi figli
+      permesso.predicato != EnumPermessoTabella.BLOCCO ? permesso.trasmetti : true, //il trasmetti ha senso per le strutture che trasmettono la conscenza del permesso ai figli è sempre false per le persone
+      permesso.predicato != EnumPermessoTabella.BLOCCO ? permesso.propaga : true, // E' il propaga verso gli arhcivi figli
       false,
       this.APPLICATION,
-      null,
+      permesso.predicato != EnumPermessoTabella.BLOCCO ? null : permesso.idPermesso,
       null, // Attivo_dal lo passo null perché nel db c'è il tirgger che metterà now()
       null,
       entitaVeicolante
@@ -123,6 +154,7 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
 
 export class PermessoTabella { 
   id: number;
+  idPermesso: number;
   idProvenienzaSoggetto: number;
   soggetto: Persona | Struttura;
   descrizioneSoggetto: string;

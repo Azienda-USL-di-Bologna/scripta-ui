@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, Azienda, Struttura } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, Azienda, Predicato, Struttura } from '@bds/ng-internauta-model';
 import {Table} from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
@@ -27,7 +27,7 @@ export class PermessiStrutturaComponent implements OnInit {
   @Input() set archivio(archivio: Archivio | ArchivioDetail) {
     this._archivio = archivio;
     this.azienda = this._archivio.idAzienda;
-    this.perms = this.permessiDettaglioArchivioService.buildPermessoPersonaPerTabella(this.archivio.permessi, "strutture");
+    this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "strutture");
   }
   constructor(
     private messageService: MessageService,
@@ -42,10 +42,10 @@ export class PermessiStrutturaComponent implements OnInit {
       { field: 'permesso', header: 'Permesso', class:'permesso-column' },
       { field: 'trasmetti', header: 'Trasmetti a strutture figlie', class:'trasmetti-column' },
       { field: 'propaga', header: 'Propaga a sottolivelli', class:'propaga-column' },
-      { field: 'ereditato', header: 'Ereditato da sopralivello', class:'ereditato-column' },
+      { field: 'ereditato', header: 'Ereditato', class:'ereditato-column' },
       { field: 'azione', header: 'Azione', class:'azione-column' }
     ];
-    this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true);
+    this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true,false);
   }
  
   
@@ -87,6 +87,7 @@ export class PermessiStrutturaComponent implements OnInit {
  * @param perm 
  */
   public onRowEditInit(perm: PermessoTabella) {
+    this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true, perm.ereditato);
     this.permClone[perm.idProvenienzaSoggetto] = { ...perm };
     for (const key in this.dt.editingRowKeys) {
       if (key !== perm.idProvenienzaSoggetto.toString()) {
@@ -118,7 +119,7 @@ export class PermessiStrutturaComponent implements OnInit {
             this.messageService.add({
               severity: "error",
               summary: "Errore nel backend",
-              detail: "Non è stato possibile eliminare il permesso."
+              detail: "Non ï¿½ stato possibile eliminare il permesso."
             });
             this.onRowEditCancel(perm, index);
           }
@@ -131,8 +132,8 @@ export class PermessiStrutturaComponent implements OnInit {
    * @param index 
    */
   public onRowEditSave(perm: PermessoTabella, index: number, operation: string) {
-    /* Lo faccio sempre ma in realtà serve solo per le insert. 
-      Perché dentro a this.dt.editingRowKeys la chiave di una nuova riga è "undefined" e non matcha con idProvenienzaSoggetto 
+    /* Lo faccio sempre ma in realtï¿½ serve solo per le insert. 
+      Perchï¿½ dentro a this.dt.editingRowKeys la chiave di una nuova riga ï¿½ "undefined" e non matcha con idProvenienzaSoggetto 
       se lo setto subito alla scelta della persona
     */
       if (!!!perm.idProvenienzaSoggetto) {
@@ -165,7 +166,7 @@ export class PermessiStrutturaComponent implements OnInit {
             this.messageService.add({
               severity: "error",
               summary: "Errore nel backend",
-              detail: "Non è stato possibile modificare il permesso."
+              detail: "Non ï¿½ stato possibile modificare il permesso."
             });
             this.onRowEditCancel(perm, index);
           }
