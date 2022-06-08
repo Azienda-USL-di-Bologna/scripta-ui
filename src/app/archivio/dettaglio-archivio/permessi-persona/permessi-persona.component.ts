@@ -37,7 +37,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set archivio(archivio: Archivio | ArchivioDetail) {
     this._archivio = archivio;
-    this.perms = this.permessiDettaglioArchivioService.buildPermessoPersonaPerTabella(this.archivio.permessi, "persone");
+    this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
   }
 
   constructor(
@@ -58,7 +58,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
       { field: 'azione', header: 'Azione', class: 'azione-column' }
     ];
     this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field }));
-    this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true);
+    this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true,false);
   }
 
   ngOnDestroy() {

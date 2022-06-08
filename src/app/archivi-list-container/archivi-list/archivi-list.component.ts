@@ -1056,8 +1056,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     if (this.archivioPadre?.livello >= 1 && this.archivioPadre?.livello < 3) {
       archivioBozza.livello = this.archivioPadre?.livello + 1;
       archivioBozza.numerazioneGerarchica = this.archivioPadre?.numerazioneGerarchica.replace("/", "-x/");
-      archivioBozza.idArchivioPadre = {id: this.archivioPadre.id} as Archivio;
-      archivioBozza.idArchivioRadice = {id: this.archivioPadre.fk_idArchivioRadice.id} as Archivio;
+      archivioBozza.idArchivioPadre = { id: this.archivioPadre.id } as Archivio;
+      if (this.archivioPadre.fk_idArchivioRadice?.id) {
+        archivioBozza.idArchivioRadice = {id: this.archivioPadre.fk_idArchivioRadice.id} as Archivio;
+      }
+      
     } else {
       archivioBozza.livello = 1;
       archivioBozza.numerazioneGerarchica = "x/x";
