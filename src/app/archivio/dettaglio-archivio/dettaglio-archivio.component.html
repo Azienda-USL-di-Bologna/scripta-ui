@@ -32,8 +32,8 @@
       </p-treeSelect>
     </div>
     <div class="row">
-      <label for="categoria">Categoria documentale</label>
-      <p-autoComplete id="categoria" #autocompleteCategoria ariaLabel="categoria documentale"
+      <label for="categoria">Tipologia documentale</label>
+      <p-autoComplete id="categoria" #autocompleteCategoria ariaLabel="tipologia documentale"
         [(ngModel)]="archivio.idMassimario"
         [disabled]="!archivio.idTitolo"
         (onSelect)="archivio.anniTenuta = archivio.idMassimario.anniTenuta; onSelectMassimario($event)"
@@ -61,7 +61,8 @@
     <div class="row">
       <label for="tipo">Tipo</label>
       <p-dropdown #dropdownTipo [options]="tipiArchivioObj" [(ngModel)]="archivio.tipo"
-        (onChange)="onChangeTipo($event.value)" optionValue="value" optionLabel="nome" appendTo="body" class="dropdown">
+        (onChange)="onChangeTipo($event.value)" optionValue="value" optionLabel="nome" appendTo="body" class="dropdown"
+        [disabled] = "archivio.tipo.SPECIALE">
       </p-dropdown>
     </div>
     <div class="row">
@@ -88,7 +89,7 @@
       <span class="flag-icon">
         <label for="riservato">Riservato</label>
         <i id="riservato" type="button" (click)="changeVisibilita()" class="pi" title="Riservato"
-          [ngClass]="{'pi-eye': !archivio.riservato, 'pi-eye-slash': archivio.riservato}">
+          [ngClass]="{'pi-eye': !archivio.riservato, 'pi-ban': archivio.riservato}">
         </i>
       </span>
 
