@@ -559,7 +559,7 @@
         <div *ngSwitchCase="'oggetto'" (click)="openDoc(rowData)" class="oggetto-content"
           [pTooltip]="rowData.oggettoVisualizzazione" tooltipPosition="top">
           <i *ngIf="rowData.visibilitaLimitata && !rowData.riservato" class="pi pi-eye"></i>
-          <i *ngIf="rowData.riservato" class="pi pi-eye-slash"></i>
+          <i *ngIf="rowData.riservato" class="pi pi-ban"></i>
           {{rowData.oggettoVisualizzazione}}
         </div>
         <div *ngSwitchCase="'stato'">

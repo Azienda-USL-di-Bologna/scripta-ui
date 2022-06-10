@@ -3,7 +3,7 @@ import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { Subscription } from "rxjs";
 import { ConfigurazioneService, ParametroAziende } from "@bds/ng-internauta-model";
 import { NavigationTabsService } from "./navigation-tabs.service";
-import { TabItem } from "./tab-item";
+import { TabItem, TabType } from "./tab-item";
 import { Router } from "@angular/router";
 import { AppService } from "../app.service";
 
@@ -50,11 +50,10 @@ export class NavigationTabsComponent implements OnInit {
 
     if (tabLoadedFromSessionStorage) {
       this.setTabsAndActiveOneOfThem();
+
       
     } else {
-      this.navigationTabsService.addTab(
-        this.navigationTabsService.buildaTabDocsList()
-      );
+      
       /* Questa sottoscrizione serve a capire se l'utente appartiene ad una azienda che
         usa gedi internauta. serve quindi solo a decidere se mostrare il tab degli archivi
       */
@@ -90,6 +89,10 @@ export class NavigationTabsComponent implements OnInit {
           }
         )
       );
+
+      this.navigationTabsService.addTab(
+        this.navigationTabsService.buildaTabDocsList()
+      );
     }
   }
 
@@ -98,6 +101,13 @@ export class NavigationTabsComponent implements OnInit {
    */
   private setTabsAndActiveOneOfThem(): void {
     this.tabItems = this.navigationTabsService.getTabs();
+    for(let i=0; i < this.tabItems.length; i++) {
+      if(this.tabItems[i].type === TabType.ARCHIVI_LIST && this.tabItems[i-1].type === TabType.DOCS_LIST) {
+        let tempTab = this.tabItems[i-1];
+        this.tabItems[i-1] = this.tabItems[i];
+        this.tabItems[i] = tempTab;
+      }
+    }
   }
   
   public onChangeTab(tabIndex:number): void {

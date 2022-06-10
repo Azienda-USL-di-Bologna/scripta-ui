@@ -310,14 +310,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
           queryParams: { "mode": ArchiviListMode.PREFERITI },
           disabled: true
         },
-        {
-          title: "I fascicoli frequenti",
-          label: "Frequenti",
-          // icon: "pi pi-fw pi-list", 
-          routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-          queryParams: { "mode": ArchiviListMode.FREQUENTI },
-          disabled: true
-        },
+        // {
+        //   title: "I fascicoli frequenti",
+        //   label: "Frequenti",
+        //   // icon: "pi pi-fw pi-list", 
+        //   routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+        //   queryParams: { "mode": ArchiviListMode.FREQUENTI },
+        //   disabled: true
+        // },
         {
           title: "Tutti i fascicoli",
           label: "Tutti",

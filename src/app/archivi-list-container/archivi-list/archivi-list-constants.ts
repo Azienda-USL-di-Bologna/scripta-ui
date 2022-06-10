@@ -156,7 +156,6 @@ export const cols: ColonnaBds[] = [
 
 export const TipoArchivioTraduzioneVisualizzazione = [
   { value: TipoArchivio.PROCEDIMENTO, nome: "Procedimento" },
-  { value: TipoArchivio.SPECIALE, nome: "Speciale" },
   { value: TipoArchivio.ATTIVITA, nome: "Attività" },
   { value: TipoArchivio.AFFARE, nome: "Affare" }
 ];
