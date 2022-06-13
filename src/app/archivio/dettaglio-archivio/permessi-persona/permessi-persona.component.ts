@@ -39,6 +39,11 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     this._archivio = archivio;
     this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
   }
+  public _loggedUserIsResponsbaileOrVicario: Boolean;
+  get loggedUserIsResponsbaileOrVicario(): Boolean { return this._loggedUserIsResponsbaileOrVicario; }
+  @Input() set loggedUserIsResponsbaileOrVicario(loggedUserIsResponsbaileOrVicario: Boolean) {
+    this._loggedUserIsResponsbaileOrVicario = loggedUserIsResponsbaileOrVicario;
+  }
 
   constructor(
     private permissionManagerService: PermessiDettaglioArchivioService,
@@ -55,7 +60,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
       { field: 'permesso', header: 'Permesso', class: 'permesso-column' },
       { field: 'propaga', header: 'Propaga a sottolivelli', class: 'propaga-column' },
       { field: 'ereditato', header: 'Ereditato da sopralivello', class: 'ereditato-column' },
-      { field: 'azione', header: 'Azione', class: 'azione-column' }
+      //{ field: 'azione', header: 'Azione', class: 'azione-column' }
     ];
     this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field }));
     this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true,false);

@@ -29,6 +29,11 @@ export class PermessiStrutturaComponent implements OnInit {
     this.azienda = this._archivio.idAzienda;
     this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "strutture");
   }
+  public _loggedUserIsResponsbaileOrVicario: Boolean;
+  get loggedUserIsResponsbaileOrVicario(): Boolean { return this._loggedUserIsResponsbaileOrVicario; }
+  @Input() set loggedUserIsResponsbaileOrVicario(loggedUserIsResponsbaileOrVicario: Boolean) {
+    this._loggedUserIsResponsbaileOrVicario = loggedUserIsResponsbaileOrVicario;
+  }
   constructor(
     private messageService: MessageService,
     private permissionManagerService: PermessiDettaglioArchivioService,
@@ -43,7 +48,7 @@ export class PermessiStrutturaComponent implements OnInit {
       { field: 'trasmetti', header: 'Trasmetti a strutture figlie', class:'trasmetti-column' },
       { field: 'propaga', header: 'Propaga a sottolivelli', class:'propaga-column' },
       { field: 'ereditato', header: 'Ereditato', class:'ereditato-column' },
-      { field: 'azione', header: 'Azione', class:'azione-column' }
+      //{ field: 'azione', header: 'Azione', class:'azione-column' }
     ];
     this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true,false);
   }

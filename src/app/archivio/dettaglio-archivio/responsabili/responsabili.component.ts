@@ -17,6 +17,13 @@ export class ResponsabiliComponent implements OnInit {
   @Input() set archivio(archivio: Archivio | ArchivioDetail) {
     this._archivio = archivio;
   }
+
+  public _loggedUserIsResponsbaileOrVicario: Boolean;
+  get loggedUserIsResponsbaileOrVicario(): Boolean { return this._loggedUserIsResponsbaileOrVicario; }
+  @Input() set loggedUserIsResponsbaileOrVicario(loggedUserIsResponsbaileOrVicario: Boolean) {
+    this._loggedUserIsResponsbaileOrVicario = loggedUserIsResponsbaileOrVicario;
+  }
+  
   constructor(private attoreArchivioService: AttoreArchivioService) { }
 
   ngOnInit(): void {

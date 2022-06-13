@@ -182,6 +182,12 @@ export const colsCSV: any[] = [
     fieldId: "tipo"
   },
   {
+    field: "numerazioneGerarchica",
+    header: "Numerazione Gerarchica",
+    fieldType: "string",
+    fieldId: "numerazioneGerarchica"
+  },
+  {
     field: (arch: ExtendedArchiviView) => {
       return arch.dataCreazione ? Utils.dateFormatter(arch.dataCreazione) : "";
     },

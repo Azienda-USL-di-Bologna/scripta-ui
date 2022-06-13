@@ -25,7 +25,7 @@ import { DatePipe } from '@angular/common';
   styleUrls: ['./archivio.component.scss']
 })
 export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, CaptionSelectButtonsComponent, CaptionReferenceTableComponent {
-  private _archivio: Archivio | ArchivioDetail;
+  private _archivio: Archivio;
   public captionConfiguration: CaptionConfiguration;
   public referenceTableComponent: CaptionReferenceTableComponent;
   public selectButtonItems: SelectButtonItem[];
@@ -41,7 +41,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public subscriptions: Subscription[] = [];
 
 
-  get archivio(): Archivio | ArchivioDetail { return this._archivio; }
+  get archivio(): Archivio { return this._archivio; }
   @Input() set data(data: any) {
     this.extendedArchivioService.getByIdHttpCall(
       data.archivio.id,
