@@ -6,7 +6,7 @@ import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs';
 
-import { EnumPermessoTabella, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
+import { EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
 // import * as FileSaver from 'file-saver';
 
 @Component({
@@ -19,8 +19,8 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
   public utentiStruttura: UtenteStruttura[] = [];
   public strutturaSelezionata: Struttura;
   public strutture: Struttura[] = [];
-  public predicati: EnumPermessoTabella[] = [];
-  public permessoSelezionato: EnumPermessoTabella;
+  public predicati: EnumPredicatoPermessoArchivio[] = [];
+  public permessoSelezionato: EnumPredicatoPermessoArchivio;
   public perms: PermessoTabella[] = [];
   public cols: any[];
   public exportColumns: any[];

@@ -17,7 +17,8 @@ import { AppComponent } from '../app.component';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@nfa/next-sdr';
 import { Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
-
+import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
+import { EnumPredicatoPermessoArchivio } from './dettaglio-archivio/permessi-dettaglio-archivio.service';
 
 @Component({
   selector: 'app-archivio',
@@ -39,7 +40,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public utenteExistsInArchivioInteresse: boolean;
   private utenteArchivioDiInteresse: ArchivioDiInteresse;
   public subscriptions: Subscription[] = [];
-
 
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set data(data: any) {
@@ -92,7 +92,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     private archivioDiInteresseService: ArchivioDiInteresseService,
     private appComponent: AppComponent,
     private messageService: MessageService,
-    private datepipe: DatePipe
+    private datepipe: DatePipe,
+    private loginService: NtJwtLoginService,
   ) {
   }
 
@@ -252,18 +253,39 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         this.newArchivoButton = {
           tooltip: "Crea nuovo sottofascicolo",
           livello: 1,
-          aziendeItems: [aziendaItem]
+          aziendeItems: [aziendaItem],
+          hasPermessi: this.canCreateSottoarchivio()
         };
         break;
       case 2:
         this.newArchivoButton = {
           tooltip: "Crea nuovo inserto",
           livello: 2,
-          aziendeItems: [aziendaItem]
+          aziendeItems: [aziendaItem],
+          hasPermessi: this.canCreateSottoarchivio()
         };
         break;
     }
   }
+
+  public canCreateSottoarchivio() : boolean {
+    let valoreRitorno: boolean;
+    this.loginService.loggedUser$.subscribe(val => {
+      let permessiUtente =  this._archivio.permessi.filter(permesso => permesso.soggetto.id_provenienza = val.getUtente().id);
+      permessiUtente.forEach(permesso => 
+        permesso.categorie.forEach(categoria => 
+          categoria.permessi.forEach(permessoCategoria =>
+             {
+              if(permessoCategoria.predicato === EnumPredicatoPermessoArchivio.ELIMINA ||
+                 permessoCategoria.predicato === EnumPredicatoPermessoArchivio.MODIFICA)
+                valoreRitorno = true; 
+        }
+          )));
+  });
+  if(valoreRitorno === undefined)
+    valoreRitorno = false;
+  return valoreRitorno;
+}
 
   public updateArchivio(archivio: Archivio) {
     console.log("updateArchivio(archivio: Archivio)", archivio);
