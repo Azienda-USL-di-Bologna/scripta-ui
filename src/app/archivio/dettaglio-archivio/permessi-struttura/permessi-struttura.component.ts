@@ -3,7 +3,7 @@ import { Archivio, ArchivioDetail, Azienda, Predicato, Struttura } from '@bds/ng
 import {Table} from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
-import { EnumPermessoTabella, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
+import { EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
 import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/nt-communicator';
 
 @Component({
@@ -20,7 +20,7 @@ export class PermessiStrutturaComponent implements OnInit {
   public azienda: Azienda;
   public inEditing: boolean = false;
   public _dataRiferimento: Date = new Date();
-  public predicati: EnumPermessoTabella[] = [];
+  public predicati: EnumPredicatoPermessoArchivio[] = [];
   private permClone: { [s: number]: PermessoTabella; } = {};
   @ViewChild("dt", {}) private dt: Table;
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }

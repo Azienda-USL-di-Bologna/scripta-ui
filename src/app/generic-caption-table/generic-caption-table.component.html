@@ -54,12 +54,13 @@
         tooltipPosition="bottom">
       </i>
     </span>
-    <!-- BOTTONE NUOVO ARCHIVIO -->
+    <!-- BOTTONE NUOVO ARCHIVIO [disabled] = "archivio.canCreateSottoarchivio()"-->
     <span *ngIf="configuration.newArchivio">
       <button
         type="button" 
         pButton 
         pRipple 
+        [disabled] = "!functionalButtonsComponent.newArchivoButton.hasPermessi"
         icon="pi pi-plus" 
         (click)="functionalButtonsComponent.newArchivoButton.aziendeItems.length > 1 ? 
           aziendaSelection.toggle($event) : 
