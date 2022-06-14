@@ -40,6 +40,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public utenteExistsInArchivioInteresse: boolean;
   private utenteArchivioDiInteresse: ArchivioDiInteresse;
   public subscriptions: Subscription[] = [];
+  private utenteUtilitiesLogin: UtenteUtilities;
 
 
   get archivio(): Archivio { return this._archivio; }
@@ -51,8 +52,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         this._archivio = res;
         console.log("Archivio nell'archivio component: ", this._archivio);
         setTimeout(() => {
-          this.inizializeAll();
-
+          if (this.utenteUtilitiesLogin) {
+            this.inizializeAll();
+          }
         }, 0);
       });
     this.checkPreferito(data.archivio.id);
@@ -96,6 +98,16 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     private datepipe: DatePipe,
     private loginService: NtJwtLoginService,
   ) {
+    this.subscriptions.push(
+      this.loginService.loggedUser$.subscribe(
+        (utenteUtilities: UtenteUtilities) => {
+          this.utenteUtilitiesLogin = utenteUtilities;
+          if (this.archivio) {
+            this.inizializeAll();
+          }
+        }
+      )
+    );
   }
 
   ngOnInit(): void {
@@ -269,24 +281,27 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     }
   }
 
-  public canCreateSottoarchivio() : boolean {
-    let valoreRitorno: boolean;
-    this.loginService.loggedUser$.subscribe(val => {
-      let permessiUtente =  this._archivio.permessi.filter(permesso => permesso.soggetto.id_provenienza = val.getUtente().id);
-      permessiUtente.forEach(permesso => 
-        permesso.categorie.forEach(categoria => 
-          categoria.permessi.forEach(permessoCategoria =>
-             {
-              if(permessoCategoria.predicato === EnumPredicatoPermessoArchivio.ELIMINA ||
-                 permessoCategoria.predicato === EnumPredicatoPermessoArchivio.MODIFICA)
-                valoreRitorno = true; 
-        }
-          )));
-  });
-  if(valoreRitorno === undefined)
-    valoreRitorno = false;
-  return valoreRitorno;
-}
+  /**
+   * Ritorna true se l'utente può creare il sottoarcivio e cioè se è responsabile/vicario o ha permesso di almeno modifica
+   * @returns 
+   */
+  public canCreateSottoarchivio(): boolean {
+    let res = false;
+    if (this.archivio.permessi) {
+      const permessone = this._archivio.permessi.find(permesso => permesso.soggetto.id_provenienza = this.utenteUtilitiesLogin.getUtente().id);
+      if (permessone) {
+        permessone.categorie.forEach(categoria => {
+          categoria.permessi.forEach(permessoCategoria => {
+            if (permessoCategoria.predicato === EnumPredicatoPermessoArchivio.ELIMINA 
+                || permessoCategoria.predicato === EnumPredicatoPermessoArchivio.MODIFICA) {
+              res = true;
+            }
+          });
+        });
+      }
+    }
+    return res;
+  }
 
   public updateArchivio(archivio: Archivio) {
     console.log("updateArchivio(archivio: Archivio)", archivio);
