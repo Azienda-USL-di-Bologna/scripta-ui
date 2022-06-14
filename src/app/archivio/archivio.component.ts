@@ -293,7 +293,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         permessone.categorie.forEach(categoria => {
           categoria.permessi.forEach(permessoCategoria => {
             if (permessoCategoria.predicato === EnumPredicatoPermessoArchivio.ELIMINA 
-                || permessoCategoria.predicato === EnumPredicatoPermessoArchivio.MODIFICA) {
+                || permessoCategoria.predicato === EnumPredicatoPermessoArchivio.MODIFICA
+                || permessoCategoria.predicato === EnumPredicatoPermessoArchivio.VICARIO
+                || permessoCategoria.predicato === EnumPredicatoPermessoArchivio.RESPONSABILE) {
               res = true;
             }
           });
