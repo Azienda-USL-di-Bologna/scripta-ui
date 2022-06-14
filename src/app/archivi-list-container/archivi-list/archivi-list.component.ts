@@ -1053,8 +1053,16 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     archivioBozza.oggetto = "";
     archivioBozza.numero = 0;
     archivioBozza.anno = 0;
-    archivioBozza.numerazioneGerarchica = this.archivioPadre?.numerazioneGerarchica ? this.archivioPadre?.numerazioneGerarchica.replace("/", "-x/") : "x/x";
+    archivioBozza.numerazioneGerarchica = "x/x";
     archivioBozza.idAzienda = {id: idAzienda} as Azienda;
+    archivioBozza.attoriList = [];
+
+    const idPersonaCreazione = new AttoreArchivio();
+    idPersonaCreazione.idPersona = {
+      id: this.utenteUtilitiesLogin.getUtente().idPersona.id
+    } as Persona;
+    idPersonaCreazione.ruolo = RuoloAttoreArchivio.CREATORE;
+    archivioBozza.attoriList.push(idPersonaCreazione);
 
     if (this.archivioPadre) {
       archivioBozza.livello = this.archivioPadre.livello + 1;
@@ -1062,28 +1070,20 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       archivioBozza.idMassimario = { id: this.archivioPadre.idMassimario.id } as Massimario;
       archivioBozza.anniTenuta = this.archivioPadre.anniTenuta;
       archivioBozza.tipo =  this.archivioPadre.tipo;
-      archivioBozza.idAzienda = {id: this.archivioPadre?.idAzienda.id} as Azienda;
-    }
-
-    if (this.archivioPadre?.livello >= 1 && this.archivioPadre?.livello < 3) {
-      archivioBozza.livello = this.archivioPadre?.livello + 1;
-      archivioBozza.numerazioneGerarchica = this.archivioPadre?.numerazioneGerarchica.replace("/", "-x/");
+      archivioBozza.idAzienda = { id: this.archivioPadre?.idAzienda.id } as Azienda;
+      archivioBozza.numerazioneGerarchica = this.archivioPadre.numerazioneGerarchica.replace("/", "-x/");
       archivioBozza.idArchivioPadre = { id: this.archivioPadre.id } as Archivio;
       if (this.archivioPadre.fk_idArchivioRadice?.id) {
-        archivioBozza.idArchivioRadice = {id: this.archivioPadre.fk_idArchivioRadice.id} as Archivio;
+        archivioBozza.idArchivioRadice = { id: this.archivioPadre.fk_idArchivioRadice.id } as Archivio;
       }
     } else {
-      archivioBozza.livello = 1;
-      archivioBozza.numerazioneGerarchica = "x/x";
-    }
-
-    const idPersonaCreazione = new AttoreArchivio();
-    idPersonaCreazione.idPersona = {
-      id: this.utenteUtilitiesLogin.getUtente().idPersona.id
-    } as Persona;
-    idPersonaCreazione.ruolo = RuoloAttoreArchivio.CREATORE;
-
-    archivioBozza.attoriList = [idPersonaCreazione];
+      const idPersonaResponsabile = new AttoreArchivio();
+      idPersonaResponsabile.idPersona = {
+        id: this.utenteUtilitiesLogin.getUtente().idPersona.id
+      } as Persona;
+      idPersonaResponsabile.ruolo = RuoloAttoreArchivio.RESPONSABILE;
+      archivioBozza.attoriList.push(idPersonaResponsabile);
+    }   
 
     this.subscriptions.push(this.archivioService.postHttpCall(
         archivioBozza, 
@@ -1092,5 +1092,4 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
           this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
     }));
   }
-
 }
