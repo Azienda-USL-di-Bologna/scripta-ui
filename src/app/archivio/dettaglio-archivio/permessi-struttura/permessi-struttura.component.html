@@ -116,12 +116,12 @@
             </td>
             <td class="azione-column" >
                 <button pButton pRipple pInitEditableRow class="p-button-rounded p-button-text"
-                    *ngIf="!editing" 
+                    *ngIf="!editing || !permesso.ereditato || !permesso.trasmetti"
                     type="button"  
                     icon="pi pi-pencil" 
                     (click)="inEditing = true;onRowEditInit(permesso)"></button>
                 <button pButton class="p-button-rounded p-button-text"
-                    *ngIf="!editing" 
+                    *ngIf="!editing || !permesso.ereditato || !permesso.trasmetti" 
                     type="button"  
                     icon="pi pi-trash" 
                     (click)="onRowEditSave(permesso, ri, 'REMOVE')">

@@ -135,7 +135,7 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
       permesso.predicato != EnumPermessoTabella.BLOCCO ? permesso.propaga : true, // E' il propaga verso gli arhcivi figli
       false,
       this.APPLICATION,
-      permesso.predicato != EnumPermessoTabella.BLOCCO ? null : permesso.idPermesso,
+      null,//permesso.predicato != EnumPermessoTabella.BLOCCO ? null : permesso.idPermesso,
       null, // Attivo_dal lo passo null perché nel db c'è il tirgger che metterà now()
       null,
       entitaVeicolante
