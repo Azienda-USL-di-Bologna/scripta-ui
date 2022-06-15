@@ -288,7 +288,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public canCreateSottoarchivio(): boolean {
     let res = false;
     if (this.archivio.permessi) {
-      const permessone = this._archivio.permessi.find(permesso => permesso.soggetto.id_provenienza = this.utenteUtilitiesLogin.getUtente().id);
+      const permessone = this._archivio.permessi.find(permesso => permesso.soggetto.id_provenienza == this.utenteUtilitiesLogin.getUtente().idPersona.id);
       if (permessone) {
         permessone.categorie.forEach(categoria => {
           categoria.permessi.forEach(permessoCategoria => {
