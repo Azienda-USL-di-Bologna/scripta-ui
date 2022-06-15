@@ -1067,7 +1067,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     if (this.archivioPadre) {
       archivioBozza.livello = this.archivioPadre.livello + 1;
       archivioBozza.idTitolo = { id: this.archivioPadre.idTitolo.id } as Titolo;
-      archivioBozza.idMassimario = { id: this.archivioPadre.idMassimario.id } as Massimario;
+      if (this.archivioPadre.idMassimario) {
+        archivioBozza.idMassimario = { id: this.archivioPadre.idMassimario.id } as Massimario;
+      }
       archivioBozza.anniTenuta = this.archivioPadre.anniTenuta;
       archivioBozza.tipo =  this.archivioPadre.tipo;
       archivioBozza.idAzienda = { id: this.archivioPadre?.idAzienda.id } as Azienda;
