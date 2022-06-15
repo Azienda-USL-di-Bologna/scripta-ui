@@ -17,7 +17,8 @@ import { AppComponent } from '../app.component';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@nfa/next-sdr';
 import { Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
-
+import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
+import { EnumPredicatoPermessoArchivio } from './dettaglio-archivio/permessi-dettaglio-archivio.service';
 
 @Component({
   selector: 'app-archivio',
@@ -25,7 +26,7 @@ import { DatePipe } from '@angular/common';
   styleUrls: ['./archivio.component.scss']
 })
 export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, CaptionSelectButtonsComponent, CaptionReferenceTableComponent {
-  private _archivio: Archivio | ArchivioDetail;
+  private _archivio: Archivio;
   public captionConfiguration: CaptionConfiguration;
   public referenceTableComponent: CaptionReferenceTableComponent;
   public selectButtonItems: SelectButtonItem[];
@@ -39,9 +40,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public utenteExistsInArchivioInteresse: boolean;
   private utenteArchivioDiInteresse: ArchivioDiInteresse;
   public subscriptions: Subscription[] = [];
+  private utenteUtilitiesLogin: UtenteUtilities;
 
 
-  get archivio(): Archivio | ArchivioDetail { return this._archivio; }
+  get archivio(): Archivio { return this._archivio; }
   @Input() set data(data: any) {
     this.extendedArchivioService.getByIdHttpCall(
       data.archivio.id,
@@ -50,8 +52,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         this._archivio = res;
         console.log("Archivio nell'archivio component: ", this._archivio);
         setTimeout(() => {
-          this.inizializeAll();
-
+          if (this.utenteUtilitiesLogin) {
+            this.inizializeAll();
+          }
         }, 0);
       });
     this.checkPreferito(data.archivio.id);
@@ -92,8 +95,19 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     private archivioDiInteresseService: ArchivioDiInteresseService,
     private appComponent: AppComponent,
     private messageService: MessageService,
-    private datepipe: DatePipe
+    private datepipe: DatePipe,
+    private loginService: NtJwtLoginService,
   ) {
+    this.subscriptions.push(
+      this.loginService.loggedUser$.subscribe(
+        (utenteUtilities: UtenteUtilities) => {
+          this.utenteUtilitiesLogin = utenteUtilities;
+          if (this.archivio) {
+            this.inizializeAll();
+          }
+        }
+      )
+    );
   }
 
   ngOnInit(): void {
@@ -252,17 +266,43 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         this.newArchivoButton = {
           tooltip: "Crea nuovo sottofascicolo",
           livello: 1,
-          aziendeItems: [aziendaItem]
+          aziendeItems: [aziendaItem],
+          hasPermessi: this.canCreateSottoarchivio()
         };
         break;
       case 2:
         this.newArchivoButton = {
           tooltip: "Crea nuovo inserto",
           livello: 2,
-          aziendeItems: [aziendaItem]
+          aziendeItems: [aziendaItem],
+          hasPermessi: this.canCreateSottoarchivio()
         };
         break;
     }
+  }
+
+  /**
+   * Ritorna true se l'utente può creare il sottoarcivio e cioè se è responsabile/vicario o ha permesso di almeno modifica
+   * @returns 
+   */
+  public canCreateSottoarchivio(): boolean {
+    let res = false;
+    if (this.archivio.permessi) {
+      const permessone = this._archivio.permessi.find(permesso => permesso.soggetto.id_provenienza = this.utenteUtilitiesLogin.getUtente().id);
+      if (permessone) {
+        permessone.categorie.forEach(categoria => {
+          categoria.permessi.forEach(permessoCategoria => {
+            if (permessoCategoria.predicato === EnumPredicatoPermessoArchivio.ELIMINA 
+                || permessoCategoria.predicato === EnumPredicatoPermessoArchivio.MODIFICA
+                || permessoCategoria.predicato === EnumPredicatoPermessoArchivio.VICARIO
+                || permessoCategoria.predicato === EnumPredicatoPermessoArchivio.RESPONSABILE) {
+              res = true;
+            }
+          });
+        });
+      }
+    }
+    return res;
   }
 
   public updateArchivio(archivio: Archivio) {

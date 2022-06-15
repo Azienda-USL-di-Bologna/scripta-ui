@@ -16,7 +16,7 @@
                 (click)="inEditing = true; addPermesso()" 
                 class="mr-2" 
                 label="Aggiungi permesso"
-                [disabled]="inEditing">
+                [disabled]="inEditing || !loggedUserIsResponsbaileOrVicario">
             </button>
         </div>
     </ng-template>
@@ -25,6 +25,7 @@
             <th *ngFor="let col of cols" [ngClass]="col.class">
                 {{col.header}}
             </th>
+            <th *ngIf="loggedUserIsResponsbaileOrVicario" class="azione-column"></th>
         </tr>
     </ng-template>
     <ng-template pTemplate="body" let-permesso let-editing="editing" let-ri="rowIndex">
@@ -111,8 +112,8 @@
                         <p-checkbox [disabled]="true" [binary]="true" [(ngModel)]="permesso.ereditato"></p-checkbox>
                     </ng-template>
                 </p-cellEditor>
-                </td>
-            <td class="azione-column">
+            </td>
+            <td *ngIf="loggedUserIsResponsbaileOrVicario" class="azione-column">
                 <button pButton pRipple pInitEditableRow 
                     class="p-button-rounded p-button-text"
                     *ngIf="!editing" 

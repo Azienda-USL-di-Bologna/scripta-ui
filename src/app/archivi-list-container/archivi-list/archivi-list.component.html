@@ -321,7 +321,7 @@
               [pTooltip]="rowData.isArchivioNero ? 'Nessun permesso sull\'archivio' : 
               (rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO' ? 'Archivio chiuso' :
                (rowData.tipo === 'SPECIALE' ? 'Archivio speciale' : ''))" 
-               [ngClass]="rowData.isArchivioNero ? 'pi-eye-slash' : 
+               [ngClass]="rowData.isArchivioNero ? 'pi-ban' : 
                (rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO' ? 'pi-lock' :
                 (rowData.tipo === 'SPECIALE' ? 'pi-slack' : 'display-none'))" 
 

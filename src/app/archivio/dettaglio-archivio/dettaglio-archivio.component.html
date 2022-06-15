@@ -1,27 +1,81 @@
 <div class="box-campi-dettaglio">
   <div class="left-side">
-    <div class="row">
-      <label for="aziendaDescrizione">Azienda</label>
-      <input id="aziendaDescrizione" class="input-aziendaDescrizione" type="text" pInputText [disabled]="true"
-        [(ngModel)]="archivio.idAzienda.descrizione" />
+    <div class="row multielements">
+      <!-- Campo azienda -->
+      <div class="input-box">
+        <label for="aziendaDescrizione">Azienda</label>
+        <input id="aziendaDescrizione" 
+          class="input-aziendaDescrizione" 
+          type="text" pInputText 
+          [disabled]="true"
+          [(ngModel)]="archivio.idAzienda.descrizione" />
+      </div>
+      <!-- Campo Tipo -->
+      <div class="input-box campo-tipo">
+        <label for="tipo">Tipo</label>
+        <p-dropdown #dropdownTipo 
+          [options]="tipiArchivioObj" 
+          [(ngModel)]="archivio.tipo"
+          (onChange)="onChangeTipo($event.value)" 
+          optionValue="value" 
+          optionLabel="nome" 
+          appendTo="body" 
+          class="dropdown"
+          [disabled]="archivio.tipo.SPECIALE || archivio.livello > 1 || !loggedUserIsResponsbaileOrVicario">
+        </p-dropdown>
+      </div>
+      <!-- Campo riservato -->
+      <div class="input-box campo-riservato">
+        <label for="riservato">Riservato</label>
+        <i id="riservato" 
+          type="button" 
+          (click)="changeVisibilita()" 
+          class="pi icona-riservato" 
+          title="Riservato"
+          [ngClass]="{'pi-eye': !archivio.riservato, 'pi-ban': archivio.riservato}">
+        </i>
+      </div>
     </div>
     <div class="row">
+      <!-- Campo Oggetto -->
       <label for="oggetto">Nome</label>
-      <input id="oggetto" type="text" placeholder="Inserisci il nome dell'archivio"
-        (keyup)="timeOutAndSaveArchivio(archivio, 'oggetto')" pInputText [(ngModel)]="archivio.oggetto" />
+      <input 
+        id="oggetto" 
+        [disabled]="!loggedUserIsResponsbaileOrVicario"
+        type="text" 
+        placeholder="Inserisci il nome dell'archivio"
+        (keyup)="timeOutAndSaveArchivio(archivio, 'oggetto')" 
+        pInputText 
+        [(ngModel)]="archivio.oggetto" />
     </div>
     <div class="row">
+      <!-- Campo Classificazione -->
       <label for="classificazione">Classificazione</label>
-      <p-treeSelect #titoliTreeSelect id="classificazione" [(ngModel)]="selectedTitolo" [options]="titoli"
-        (onShow)="onShowTitoli()" (onNodeExpand)="onShowTitoli($event)"
-        (onNodeSelect)="onSelectTitolo($event.node.data)" selectionMode="single"
-        placeholder="Seleziona una classificazione" appendTo="body" [propagateSelectionUp]="false"
+      <p-treeSelect #titoliTreeSelect 
+        id="classificazione" 
+        [(ngModel)]="selectedTitolo" 
+        [options]="titoli"
+        [disabled]="archivio.livello > 1 || !loggedUserIsResponsbaileOrVicario"
+        (onShow)="onShowTitoli()" 
+        (onNodeExpand)="onShowTitoli($event)"
+        (onNodeSelect)="onSelectTitolo($event.node.data)" 
+        selectionMode="single"
+        placeholder="Seleziona una classificazione" 
+        appendTo="body" 
+        [propagateSelectionUp]="false"
         [propagateSelectionDown]="false">
         <ng-template pTemplate="header">
           <div class="p-tree-filter-container box-autocomplete-classificazione">
-            <p-autoComplete #autocompleteClassificazione ariaLabel="Cerca classificazione" ngModel
-              (onSelect)="onSelectTitolo($event)" [suggestions]="filteredTitoli" (completeMethod)="filterTitoli($event)"
-              field="nome" appendTo="body" [dropdown]=true placeholder="Cerca classificazione..."
+            <p-autoComplete #autocompleteClassificazione 
+              ariaLabel="Cerca classificazione" 
+              ngModel
+              (onSelect)="onSelectTitolo($event)" 
+              [suggestions]="filteredTitoli" 
+              (completeMethod)="filterTitoli($event)"
+              field="nome" 
+              appendTo="body" 
+              [dropdown]=true 
+              placeholder="Cerca classificazione..."
               emptyMessage="Nessun riferimento trovato">
               <ng-template let-titolo pTemplate="item">
                 <span>[{{titolo.classificazione}}] {{titolo.nome}}</span>
@@ -31,42 +85,47 @@
         </ng-template>
       </p-treeSelect>
     </div>
-    <div class="row">
-      <label for="categoria">Categoria documentale</label>
-      <p-autoComplete id="categoria" #autocompleteCategoria ariaLabel="categoria documentale"
-        [(ngModel)]="archivio.idMassimario"
-        [disabled]="!archivio.idTitolo"
-        (onSelect)="archivio.anniTenuta = archivio.idMassimario.anniTenuta; onSelectMassimario($event)"
-        [suggestions]="filteredMassimari" (completeMethod)="filterMassimario($event)" field="nome" appendTo="body"
-        [dropdown]=true placeholder="Cerca categoria..." emptyMessage="Nessun riferimento trovato">
-        <ng-template let-massimario pTemplate="item">
-          <span>{{massimario.nome}} ({{massimario.descrizioneTenuta}})</span>
-        </ng-template>
-      </p-autoComplete>
+    <div class="row multielements">
+      <!-- Campo tipologia documentale / massimario -->
+      <div class="input-box">
+        <label for="categoria">Tipologia documentale</label>
+        <p-autoComplete id="categoria" #autocompleteCategoria 
+          ariaLabel="tipologia documentale"
+          [(ngModel)]="archivio.idMassimario"
+          [disabled]="!archivio.idTitolo || archivio.livello > 1 || !loggedUserIsResponsbaileOrVicario"
+          (onSelect)="archivio.anniTenuta = archivio.idMassimario.anniTenuta; onSelectMassimario($event)"
+          [suggestions]="filteredMassimari" 
+          (completeMethod)="filterMassimario($event)" 
+          field="nome" 
+          appendTo="body"
+          [dropdown]=true 
+          placeholder="Cerca categoria..." 
+          emptyMessage="Nessun riferimento trovato">
+          <ng-template let-massimario pTemplate="item">
+            <span>{{massimario.nome}} ({{massimario.descrizioneTenuta}})</span>
+          </ng-template>
+        </p-autoComplete>
+      </div>
+      <!-- Campo conservazione -->
+      <div class="input-box campo-conservazione">
+        <label for="conservazione">Conservazione</label>
+        <p-dropdown 
+          [autoDisplayFirst]="true" 
+          [disabled]="!archivio.idMassimario || archivio.livello > 1 || !loggedUserIsResponsbaileOrVicario" 
+          optionLabel="name" 
+          optionValue="value"
+          [options]="anniTenutaSelezionabili" 
+          (onClick)="saveAnniTenuta(archivio.anniTenuta)" 
+          [(ngModel)]="archivio.anniTenuta"
+          optionLabel="name" 
+          class="dropdown">
+        </p-dropdown>
+      </div>
     </div>
-    <div class="row conservazione">
-      <label for="conservazione">Conservazione</label>
-      <!-- <input id="conservazione"
-      class="input-conservazione"
-      type="text" 
-      placeholder="Inserisci la conservazione" 
-      pInputText 
-      [disabled]="!archivio.idMassimario"
-      [(ngModel)]="archivio.anniTenuta"/>  -->
-      <p-dropdown [autoDisplayFirst]="true" [disabled]="!archivio.idMassimario" optionLabel="name" optionValue="value"
-        [options]="anniTenutaSelezionabili" (onClick)="saveAnniTenuta(archivio.anniTenuta)" [(ngModel)]="archivio.anniTenuta"
-        optionLabel="name" class="dropdown">
-      </p-dropdown>
-    </div>
-    <div class="row">
-      <label for="tipo">Tipo</label>
-      <p-dropdown #dropdownTipo [options]="tipiArchivioObj" [(ngModel)]="archivio.tipo"
-        (onChange)="onChangeTipo($event.value)" optionValue="value" optionLabel="nome" appendTo="body" class="dropdown">
-      </p-dropdown>
-    </div>
+    
     <div class="row">
       <label for="tipo">Archivi collegati</label>
-      <input pInputText id="linkArchivi" />
+      <input pInputText id="linkArchivi" [disabled]="!loggedUserIsResponsbaileOrVicario"  />
       <!-- <p-autoComplete id="archiviCollegati" #autocompleteArchivio ariaLabel="archivi collegati"
             [(ngModel)]="selectedArchivioCollegato" (onSelect)="linkArchivio($event)" [suggestions]="filteredFascicoli"
             (completeMethod)="linkFascicolo($event)" field="nomeFascicolo" appendTo="body" class="p-col"
@@ -79,26 +138,30 @@
   </div>
   <div class="right-side">
     <div class="numeraFasicolo">
-      <button *ngIf="archivio.stato == 'BOZZA'" type="button" pButton (click)="numeraFasicoloClicked($event)"
-        label="Numera Fascicolo" class="p-mr-2" pTooltip="Numera Fascicolo" aria-label="Numera Fascicolo"
-        [disabled]="disableNumeraButton()" tooltipPosition="bottom">
+      <button *ngIf="archivio.stato == 'BOZZA'" 
+        type="button" 
+        pButton 
+        (click)="numeraFasicoloClicked($event)"
+        label="Numera Fascicolo" 
+        class="p-mr-2" 
+        pTooltip="Numera Fascicolo" 
+        aria-label="Numera Fascicolo"
+        [disabled]="disableNumeraButton()" 
+        tooltipPosition="bottom">
       </button>
-    </div>
-    <div class="flag-box">
-      <span class="flag-icon">
-        <label for="riservato">Riservato</label>
-        <i id="riservato" type="button" (click)="changeVisibilita()" class="pi" title="Riservato"
-          [ngClass]="{'pi-eye': !archivio.riservato, 'pi-eye-slash': archivio.riservato}">
-        </i>
-      </span>
-
     </div>
     <div class="note-box">
       <label>Note</label>
-      <textarea #noteArea rows="7" cols="22" [(ngModel)]="archivio.note"
+      <textarea #noteArea
+        pInputTextarea
+        [disabled]="!loggedUserIsResponsbaileOrVicario"  
+        rows="7" 
+        cols="22" 
+        [(ngModel)]="archivio.note"
         (keyup)="timeOutAndSaveArchivio(archivio, 'note')"
         placeholder="Qui è possibile inserire note come: descrizione, ubicazione fisica, etc..."
-        pTooltip="Qui è possibile inserire note come: descrizione, ubicazione fisica, etc..." tooltipPosition="bottom">
+        pTooltip="Qui è possibile inserire note come: descrizione, ubicazione fisica, etc..." 
+        tooltipPosition="bottom">
       </textarea>
     </div>
   </div>
@@ -106,14 +169,14 @@
 <p-accordion class="accodion-box-permessi">
   <p-accordionTab header="Responsabili e Vicari" [selected]="true">
   <app-responsabili
-    [archivio]="archivio">
+    [archivio]="archivio" [loggedUserIsResponsbaileOrVicario]="loggedUserIsResponsbaileOrVicario">
   </app-responsabili>
   </p-accordionTab>
   <p-accordionTab header="Permessi Struttura">
-    <app-permessi-struttura [archivio]="archivio"></app-permessi-struttura>
+    <app-permessi-struttura [archivio]="archivio" [loggedUserIsResponsbaileOrVicario]="loggedUserIsResponsbaileOrVicario"></app-permessi-struttura>
   </p-accordionTab>
   <p-accordionTab header="Permessi Persona">
-    <app-permessi-persona [archivio]="archivio"></app-permessi-persona>
+    <app-permessi-persona [archivio]="archivio" [loggedUserIsResponsbaileOrVicario]="loggedUserIsResponsbaileOrVicario"></app-permessi-persona>
   </p-accordionTab>
 </p-accordion>
 

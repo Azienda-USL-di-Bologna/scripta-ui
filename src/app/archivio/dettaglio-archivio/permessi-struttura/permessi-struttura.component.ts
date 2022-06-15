@@ -3,7 +3,7 @@ import { Archivio, ArchivioDetail, Azienda, Predicato, Struttura } from '@bds/ng
 import {Table} from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
-import { EnumPermessoTabella, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
+import { EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
 import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/nt-communicator';
 
 @Component({
@@ -20,7 +20,7 @@ export class PermessiStrutturaComponent implements OnInit {
   public azienda: Azienda;
   public inEditing: boolean = false;
   public _dataRiferimento: Date = new Date();
-  public predicati: EnumPermessoTabella[] = [];
+  public predicati: EnumPredicatoPermessoArchivio[] = [];
   private permClone: { [s: number]: PermessoTabella; } = {};
   @ViewChild("dt", {}) private dt: Table;
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
@@ -28,6 +28,11 @@ export class PermessiStrutturaComponent implements OnInit {
     this._archivio = archivio;
     this.azienda = this._archivio.idAzienda;
     this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "strutture");
+  }
+  public _loggedUserIsResponsbaileOrVicario: Boolean;
+  get loggedUserIsResponsbaileOrVicario(): Boolean { return this._loggedUserIsResponsbaileOrVicario; }
+  @Input() set loggedUserIsResponsbaileOrVicario(loggedUserIsResponsbaileOrVicario: Boolean) {
+    this._loggedUserIsResponsbaileOrVicario = loggedUserIsResponsbaileOrVicario;
   }
   constructor(
     private messageService: MessageService,
@@ -43,7 +48,7 @@ export class PermessiStrutturaComponent implements OnInit {
       { field: 'trasmetti', header: 'Trasmetti a strutture figlie', class:'trasmetti-column' },
       { field: 'propaga', header: 'Propaga a sottolivelli', class:'propaga-column' },
       { field: 'ereditato', header: 'Ereditato', class:'ereditato-column' },
-      { field: 'azione', header: 'Azione', class:'azione-column' }
+      //{ field: 'azione', header: 'Azione', class:'azione-column' }
     ];
     this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true,false);
   }

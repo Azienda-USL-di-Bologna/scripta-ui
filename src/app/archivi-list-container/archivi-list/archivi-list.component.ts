@@ -25,6 +25,8 @@ import { CaptionSelectButtonsComponent } from '../../generic-caption-table/capti
 import { SelectButtonItem } from '../../generic-caption-table/select-button-item';
 import { NewArchivoButton } from 'src/app/generic-caption-table/new-archivo-button';
 import { CaptionFunctionalButtonsComponent } from 'src/app/generic-caption-table/caption-functional-buttons.component';
+import { Titolo } from '@bds/ng-internauta-model';
+import { Massimario } from '@bds/ng-internauta-model';
 
 @Component({
   selector: 'archivi-list',
@@ -101,9 +103,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   public matchModeNumerazioneGerarchica: string = FILTER_TYPES.string.startsWith;
   public newArchivoButton: NewArchivoButton;
 
-  private _archivioPadre: Archivio | ArchivioDetail;
-  get archivioPadre(): Archivio | ArchivioDetail { return this._archivioPadre; }
-  @Input() set archivioPadre(archivioPadre: Archivio | ArchivioDetail) {
+  private _archivioPadre: Archivio;
+  get archivioPadre(): Archivio { return this._archivioPadre; }
+  @Input() set archivioPadre(archivioPadre: Archivio) {
     this._archivioPadre = archivioPadre;
     if (this.firstLoadDone) {
       this.resetPaginationAndLoadData();
@@ -142,6 +144,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
           this.newArchivoButton = {
             tooltip: "Crea nuovo fascicolo",
             livello: 0,
+            hasPermessi: true,
             aziendeItems: this.utenteUtilitiesLogin.getUtente().aziendeAttive.map(a => {
               return {
                 label: a.nome,
@@ -310,14 +313,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
           queryParams: { "mode": ArchiviListMode.PREFERITI },
           disabled: true
         },
-        {
-          title: "I fascicoli frequenti",
-          label: "Frequenti",
-          // icon: "pi pi-fw pi-list", 
-          routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-          queryParams: { "mode": ArchiviListMode.FREQUENTI },
-          disabled: true
-        },
+        // {
+        //   title: "I fascicoli frequenti",
+        //   label: "Frequenti",
+        //   // icon: "pi pi-fw pi-list", 
+        //   routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+        //   queryParams: { "mode": ArchiviListMode.FREQUENTI },
+        //   disabled: true
+        // },
         {
           title: "Tutti i fascicoli",
           label: "Tutti",
@@ -1041,38 +1044,48 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   /**
    * newArchivio
    */
-  public newArchivio(codiceAzienda: number): void {    
+  public newArchivio(idAzienda: number): void {    
     const archivioBozza = new Archivio();
-    archivioBozza.livello = this.archivioPadre?.livello != null ? this.archivioPadre?.livello + 1 : 1;
-    archivioBozza.idAzienda = this.archivioPadre?.idAzienda != null ? {id: this.archivioPadre?.idAzienda.id} as Azienda : {id: codiceAzienda} as Azienda;
+    archivioBozza.livello = 1;
     archivioBozza.stato = StatoArchivio.BOZZA;
     archivioBozza.tipo = TipoArchivio.AFFARE;
     archivioBozza.foglia = true;
     archivioBozza.oggetto = "";
     archivioBozza.numero = 0;
     archivioBozza.anno = 0;
-    archivioBozza.numerazioneGerarchica = this.archivioPadre?.numerazioneGerarchica ? this.archivioPadre?.numerazioneGerarchica.replace("/", "-x/") : "x/x";
-
-    if (this.archivioPadre?.livello >= 1 && this.archivioPadre?.livello < 3) {
-      archivioBozza.livello = this.archivioPadre?.livello + 1;
-      archivioBozza.numerazioneGerarchica = this.archivioPadre?.numerazioneGerarchica.replace("/", "-x/");
-      archivioBozza.idArchivioPadre = { id: this.archivioPadre.id } as Archivio;
-      if (this.archivioPadre.fk_idArchivioRadice?.id) {
-        archivioBozza.idArchivioRadice = {id: this.archivioPadre.fk_idArchivioRadice.id} as Archivio;
-      }
-      
-    } else {
-      archivioBozza.livello = 1;
-      archivioBozza.numerazioneGerarchica = "x/x";
-    }
+    archivioBozza.numerazioneGerarchica = "x/x";
+    archivioBozza.idAzienda = {id: idAzienda} as Azienda;
+    archivioBozza.attoriList = [];
 
     const idPersonaCreazione = new AttoreArchivio();
     idPersonaCreazione.idPersona = {
       id: this.utenteUtilitiesLogin.getUtente().idPersona.id
     } as Persona;
     idPersonaCreazione.ruolo = RuoloAttoreArchivio.CREATORE;
+    archivioBozza.attoriList.push(idPersonaCreazione);
 
-    archivioBozza.attoriList = [idPersonaCreazione];
+    if (this.archivioPadre) {
+      archivioBozza.livello = this.archivioPadre.livello + 1;
+      archivioBozza.idTitolo = { id: this.archivioPadre.idTitolo.id } as Titolo;
+      if (this.archivioPadre.idMassimario) {
+        archivioBozza.idMassimario = { id: this.archivioPadre.idMassimario.id } as Massimario;
+      }
+      archivioBozza.anniTenuta = this.archivioPadre.anniTenuta;
+      archivioBozza.tipo =  this.archivioPadre.tipo;
+      archivioBozza.idAzienda = { id: this.archivioPadre?.idAzienda.id } as Azienda;
+      archivioBozza.numerazioneGerarchica = this.archivioPadre.numerazioneGerarchica.replace("/", "-x/");
+      archivioBozza.idArchivioPadre = { id: this.archivioPadre.id } as Archivio;
+      if (this.archivioPadre.fk_idArchivioRadice?.id) {
+        archivioBozza.idArchivioRadice = { id: this.archivioPadre.fk_idArchivioRadice.id } as Archivio;
+      }
+    } else {
+      const idPersonaResponsabile = new AttoreArchivio();
+      idPersonaResponsabile.idPersona = {
+        id: this.utenteUtilitiesLogin.getUtente().idPersona.id
+      } as Persona;
+      idPersonaResponsabile.ruolo = RuoloAttoreArchivio.RESPONSABILE;
+      archivioBozza.attoriList.push(idPersonaResponsabile);
+    }   
 
     this.subscriptions.push(this.archivioService.postHttpCall(
         archivioBozza, 
@@ -1081,5 +1094,4 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
           this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
     }));
   }
-
 }

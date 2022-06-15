@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
-import { NgModel } from '@angular/forms';
 import { Archivio, ArchivioDetail, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, TipoArchivio, ConfigurazioneService, ParametroAziende } from '@bds/ng-internauta-model';
+import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TreeNode } from 'primeng/api/treenode';
@@ -23,6 +23,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     this._archivio = archivio;
     if (this.archivio.idTitolo) {
       this.selectedTitolo = this.buildNodeTitolo(this.archivio.idTitolo as Titolo);
+    } else {
+      this.selectedTitolo = null;
     }
     this.loadConfigurations();
   }
@@ -45,6 +47,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   {name: "10", value: 10 },{name: "20", value: 20 },{name: "30", value: 30 },{name: "40", value: 40 },
   {name: "50", value: 50 }, {name: "60", value: 60 }, {name: "Illimitata", value: 999}];
   public anniTenutaSelezionabili: any[] = [];
+  private utenteUtilitiesLogin: UtenteUtilities;
+  public loggedUserIsResponsbaileOrVicario = false;
 
   @ViewChild("noteArea") public noteArea: ElementRef;
   @ViewChild("titoliTreeSelect") public titoliTreeSelect: TreeSelect;
@@ -58,8 +62,16 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private configurazioneService: ConfigurazioneService,
     private confirmationService: ConfirmationService,
-    private navigationTabsService: NavigationTabsService) {
-
+    private loginService: NtJwtLoginService,
+    private navigationTabsService: NavigationTabsService) 
+  {
+    this.subscriptions.push(
+      this.loginService.loggedUser$.subscribe(
+        (utenteUtilities: UtenteUtilities) => {
+          this.utenteUtilitiesLogin = utenteUtilities;
+        }
+      )
+    );
   }
 
   ngOnInit(): void {
@@ -97,37 +109,39 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
 
   public changeVisibilita(): void {
-    this.archivio.riservato = !(this.archivio.riservato);
-    const archivioToUpdate: Archivio = new Archivio();
-    archivioToUpdate.riservato = this.archivio.riservato
-    archivioToUpdate.version = this.archivio.version;
-    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
-      .subscribe(
-        res => {
-          console.log("Update archivio: ", res);
-          this.archivio.version = res.version;
-          let message: string;
-          if (this.archivio.riservato == true) {
-            message = `Impostato come Riservato correttamente`
-          } else {
-            message = `Impostato come Non-Riservato correttamente`
+    if (this.loggedUserIsResponsbaileOrVicario) {
+      this.archivio.riservato = !(this.archivio.riservato);
+      const archivioToUpdate: Archivio = new Archivio();
+      archivioToUpdate.riservato = this.archivio.riservato
+      archivioToUpdate.version = this.archivio.version;
+      this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
+        .subscribe(
+          res => {
+            console.log("Update archivio: ", res);
+            this.archivio.version = res.version;
+            let message: string;
+            if (this.archivio.riservato == true) {
+              message = `Impostato come Riservato correttamente`
+            } else {
+              message = `Impostato come Non-Riservato correttamente`
+            }
+            this.messageService.add({
+              severity: "success",
+              key: "dettaglioArchivioToast",
+              summary: "OK",
+              detail: message
+            });
+          },
+          err => {
+            this.messageService.add({
+              severity: "error",
+              key: "dettaglioArchivioToast",
+              summary: "Attenzione",
+              detail: `Si è verificato un errore nella modifica del campo riservato, contattare Babelcare`
+            });
           }
-          this.messageService.add({
-            severity: "success",
-            key: "dettaglioArchivioToast",
-            summary: "OK",
-            detail: message
-          });
-        },
-        err => {
-          this.messageService.add({
-            severity: "error",
-            key: "dettaglioArchivioToast",
-            summary: "Attenzione",
-            detail: `Si è verificato un errore nella modifica del campo riservato, contattare Babelcare`
-          });
-        }
-      ))
+        ))
+    }
   }
 
   /**
@@ -149,6 +163,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         res => {
           console.log(res.results);
           this.responsabiliArchivi = res.results;
+          this.loggedUserIsResponsbaileOrVicario = this.responsabiliArchivi.some((attore: AttoreArchivio) => attore.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id);
         }
       ));
   }
