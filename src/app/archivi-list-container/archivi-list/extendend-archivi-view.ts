@@ -18,7 +18,8 @@ export class ExtendedArchiviView extends ArchivioDetailView {
     public set tipoVisualizzazione(tipoVisualizzazione: string) {
         this._tipoVisualizzazione = "";
         if (tipoVisualizzazione) {
-            this._tipoVisualizzazione = TipoArchivioTraduzioneVisualizzazione.find(e => e.value === tipoVisualizzazione).nome;
+            if(TipoArchivioTraduzioneVisualizzazione.find(e => e.value === tipoVisualizzazione))
+                this._tipoVisualizzazione = TipoArchivioTraduzioneVisualizzazione.find(e => e.value === tipoVisualizzazione).nome;
         }
 
     }
