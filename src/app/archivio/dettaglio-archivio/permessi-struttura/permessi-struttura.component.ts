@@ -3,7 +3,7 @@ import { Archivio, ArchivioDetail, Azienda, Predicato, Struttura } from '@bds/ng
 import {Table} from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
-import { EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
+import { AzioniPossibili, EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
 import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/nt-communicator';
 
 @Component({
@@ -109,7 +109,12 @@ export class PermessiStrutturaComponent implements OnInit {
    * @param index 
    */
   public onRowDelete(perm:PermessoTabella, index: number) {
-    const oggettoToDelete: OggettonePermessiEntitaGenerator = this.permessiDettaglioArchivioService.buildPermessoPerBlackbox(perm,this._archivio.permessi,OggettoneOperation.REMOVE,this._archivio);
+    const oggettoToDelete: OggettonePermessiEntitaGenerator = this.permessiDettaglioArchivioService.buildPermessoPerBlackbox(perm,
+      this._archivio.permessi,
+      OggettoneOperation.REMOVE,
+      AzioniPossibili.REMOVE,
+      this._archivio);
+    
     this.permissionManagerService.managePermissionsAdvanced(oggettoToDelete.getPermessiEntita())
         .subscribe({
           next: (res: any) => {
@@ -149,6 +154,7 @@ export class PermessiStrutturaComponent implements OnInit {
         perm, 
         operation === "ADD" ? null : this._archivio.permessi,
         operation === "ADD" ? OggettoneOperation.ADD : OggettoneOperation.REMOVE,
+        <AzioniPossibili>operation,
         this._archivio
       );
     this.subscriptions.push(
@@ -157,8 +163,8 @@ export class PermessiStrutturaComponent implements OnInit {
           next: (res: any) => {
             this.messageService.add({
               severity: "success",
-              summary: operation === "ADD" ? "Permesso modificato" : "Permesso Eliminato",
-              detail: operation === "ADD" ? "E' stato modificato il permesso." : "E' stato eliminato il permesso."
+              summary: operation != "REMOVE" ? "Permesso modificato" : "Permesso Eliminato",
+              detail: operation != "REMOVE" ? "E' stato modificato il permesso." : "E' stato eliminato il permesso."
             });
             if (operation === "REMOVE") {
               this.perms.splice(index, 1);
@@ -166,6 +172,7 @@ export class PermessiStrutturaComponent implements OnInit {
               delete this.perms[perm.idProvenienzaSoggetto];
             }
             this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+            // this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
           },
           error: () => {
             this.messageService.add({

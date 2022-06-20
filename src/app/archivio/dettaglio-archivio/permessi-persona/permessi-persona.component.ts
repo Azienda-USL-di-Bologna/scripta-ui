@@ -6,7 +6,7 @@ import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs';
 
-import { EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
+import { AzioniPossibili, EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
 // import * as FileSaver from 'file-saver';
 
 @Component({
@@ -32,11 +32,13 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
   private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
   private _archivio: Archivio | ArchivioDetail;
   private lazyLoadFiltersAndSorts: FiltersAndSorts = new FiltersAndSorts();
+  public livello: number;
 
   @ViewChild("dt", {}) private dt: Table;
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set archivio(archivio: Archivio | ArchivioDetail) {
     this._archivio = archivio;
+    this.livello = archivio.livello
     this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
   }
   public _loggedUserIsResponsbaileOrVicario: Boolean;
@@ -134,8 +136,9 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     const oggettoToSave: OggettonePermessiEntitaGenerator =
       this.permessiDettaglioArchivioService.buildPermessoPerBlackbox(
         perm,
-        operation === "ADD" ? null : this._archivio.permessi,
-        operation === "ADD" ? OggettoneOperation.ADD : OggettoneOperation.REMOVE,
+        operation === "ADD" || operation ==="BAN" || operation==="RESTORE" ? null : this._archivio.permessi,
+        operation === "ADD" || operation === "BAN" || operation === "RESTORE" ? OggettoneOperation.ADD : OggettoneOperation.REMOVE,
+        <AzioniPossibili>operation,
         this._archivio
       );
     this.subscriptions.push(
@@ -144,8 +147,8 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
           next: (res: any) => {
             this.messageService.add({
               severity: "success",
-              summary: operation === "ADD" ? "Permesso modificato" : "Permesso Eliminato",
-              detail: operation === "ADD" ? "E' stato modificato il permesso." : "E' stato eliminato il permesso."
+              summary: operation === "ADD" || operation ==="BAN" || operation==="RESTORE" ? "Permesso modificato" : "Permesso Eliminato",
+              detail: operation === "ADD" || operation ==="BAN" || operation==="RESTORE" ? "E' stato modificato il permesso." : "E' stato eliminato il permesso."
             });
             
             if (operation === "REMOVE") {

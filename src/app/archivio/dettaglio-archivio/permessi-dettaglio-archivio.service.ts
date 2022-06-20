@@ -16,7 +16,7 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
   constructor(
     protected _http: HttpClient,
     protected datepipe: DatePipe,
-    private extendedArchivioService: ExtendedArchivioService) {
+    private extendedArchivioService: ExtendedArchivioService ) {
     super(_http, getInternautaUrl(BaseUrlType.Permessi), datepipe);
   }
 
@@ -32,20 +32,25 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
       if (oggettone.soggetto.table === tabellaDiFiltro) {
         oggettone.categorie.forEach((categoria: CategoriaPermessiStoredProcedure) => {
           categoria.permessi.forEach((permesso: PermessoStoredProcedure) => {
-            permessiTabella.push({
-              idPermesso: permesso.id,
-              descrizioneSoggetto: oggettone.soggetto.descrizione,
-              idProvenienzaSoggetto: oggettone.soggetto.id_provenienza,
-              descrizioneVeicolo: permesso.entita_veicolante ? permesso.entita_veicolante.descrizione : null,
-              idProvenienzaVeicolo: permesso.entita_veicolante ? permesso.entita_veicolante.id_provenienza : null,
-              predicato: permesso.predicato,
-              propaga: permesso.propaga_oggetto,
-              trasmetti: permesso.propaga_soggetto,
-              ereditato: permesso.virtuale_oggetto,
-              soggettoEntita: oggettone.soggetto,
-              oggettoEntita: oggettone.oggetto,
-              veicoloEntita: permesso.entita_veicolante
-            } as PermessoTabella)
+            if (permesso.predicato != EnumPredicatoPermessoArchivio.RESPONSABILE && permesso.predicato != EnumPredicatoPermessoArchivio.VICARIO) {
+              permessiTabella.push({
+                idPermesso: permesso.id,
+                descrizioneSoggetto: oggettone.soggetto.descrizione,
+                idProvenienzaSoggetto: oggettone.soggetto.id_provenienza,
+                descrizioneVeicolo: permesso.entita_veicolante ? permesso.entita_veicolante.descrizione : null,
+                idProvenienzaVeicolo: permesso.entita_veicolante ? permesso.entita_veicolante.id_provenienza : null,
+                predicato: permesso.id_permesso_bloccato ? permesso.permesso_bloccato.predicato : permesso.predicato,
+                propaga: permesso.id_permesso_bloccato ? permesso.permesso_bloccato.propaga_oggetto : permesso.propaga_oggetto,
+                trasmetti: permesso.id_permesso_bloccato ? permesso.permesso_bloccato.propaga_soggetto : permesso.propaga_soggetto,
+                ereditato: permesso.id_permesso_bloccato ? true :permesso.virtuale_oggetto,
+                soggettoEntita: oggettone.soggetto,
+                oggettoEntita: oggettone.oggetto,
+                veicoloEntita: permesso.entita_veicolante,
+                permessoBlacbox: permesso,
+                barrato: permesso.id_permesso_bloccato ? true : false
+              } as PermessoTabella)
+              
+            }
           })
         }
         )
@@ -62,6 +67,12 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
       this.getMaxPermesso(permessiTabella.filter((ptf: PermessoTabella) => { ptf.soggetto === pt.soggetto }));
     })
   }
+
+  // public showButton(permessoTabella: PermessoTabella): boolean { 
+  //   let show: boolean = false;
+    
+  //   return show;
+  // }
 
   private getMaxPermesso(permessiTabella: PermessoTabella[]): PermessoTabella {
     let permessoTabella: PermessoTabella = permessiTabella.filter((ptf: PermessoTabella) => { ptf.predicato === EnumPredicatoPermessoArchivio.BLOCCO })[0];
@@ -95,11 +106,20 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
         EnumPredicatoPermessoArchivio.ELIMINA
       );
     }
-    if (conBlocco||permessoEreditato) {
+    if (conBlocco || permessoEreditato) {
       predicati.push(EnumPredicatoPermessoArchivio.BLOCCO);
     }
     return predicati;
   }
+
+
+  // /**
+  //  * serve 
+  //  * @param archivio 
+  //  */
+  // public reloadPermessiArchivio(archivio: Archivio | ArchivioDetail) {
+    
+  // }
 
   /**
    * Funzione temporanea che calcola i permessi esplciti a partire dalla blackbox.
@@ -114,40 +134,64 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
    * @param perm 
    */
   public buildPermessoPerBlackbox(
-    permesso: PermessoTabella,
-    oggettone: PermessoEntitaStoredProcedure[],
-    oggettoneOperation: OggettoneOperation,
+    permesso: PermessoTabella, //permesso sulla riga che ho premuto
+    oggettone: PermessoEntitaStoredProcedure[], //oggettone da ridare alla blackbox per generare l'oggetto che modifica bene i permessi
+    oggettoneOperation: OggettoneOperation, // operazione che sto svolgendo (modifica / aggiunta oppure rimozione )
+    operazioneRichiesta: AzioniPossibili, // aggiunto per chiarezza di lettura mi serve a capire che operazione sto svolgendo sul frontend
     archivio: Archivio | ArchivioDetail): OggettonePermessiEntitaGenerator {
-    const permessoPerBlackbox: OggettonePermessiEntitaGenerator = new OggettonePermessiEntitaGenerator(oggettone);
+      const permessoPerBlackbox: OggettonePermessiEntitaGenerator = new OggettonePermessiEntitaGenerator(operazioneRichiesta === AzioniPossibili.BAN ? null: oggettone );
       let entitaVeicolante: EntitaStoredProcedure = null;
-      let soggetto: EntitaStoredProcedure
+      let soggetto: EntitaStoredProcedure = null;
+      let predicato: EnumPredicatoPermessoArchivio = permesso.predicato;
+      let trasmetti: boolean = permesso.trasmetti;
       if (permesso.idProvenienzaVeicolo) {
         entitaVeicolante = permessoPerBlackbox.buildEntita(permesso.idProvenienzaVeicolo, EntitaBlackbox.STRUTTURE);
         soggetto = permessoPerBlackbox.buildEntita(permesso.idProvenienzaSoggetto, EntitaBlackbox.PERSONE);
       } else {
-      soggetto = permessoPerBlackbox.buildEntita(permesso.idProvenienzaSoggetto, EntitaBlackbox.STRUTTURE);
+        soggetto = permessoPerBlackbox.buildEntita(permesso.idProvenienzaSoggetto, EntitaBlackbox.STRUTTURE);
+
       }
-    const oggetto: EntitaStoredProcedure = permessoPerBlackbox.buildEntita(archivio.id, EntitaBlackbox.ARCHIVI);
-    const predicatoDaAggiungere: EnumPredicatoPermessoArchivio = permesso.predicato;
-    const permessoDaAggiungereORimuovere: PermessoStoredProcedure = permessoPerBlackbox.buildPermesso(
-      predicatoDaAggiungere,
-      permesso.predicato != EnumPredicatoPermessoArchivio.BLOCCO ? permesso.trasmetti : true, //il trasmetti ha senso per le strutture che trasmettono la conscenza del permesso ai figli è sempre false per le persone
-      permesso.predicato != EnumPredicatoPermessoArchivio.BLOCCO ? permesso.propaga : true, // E' il propaga verso gli arhcivi figli
-      false,
-      this.APPLICATION,
-      permesso.predicato != EnumPredicatoPermessoArchivio.BLOCCO ? null : permesso.idPermesso,
-      null, // Attivo_dal lo passo null perché nel db c'è il tirgger che metterà now()
-      null,
-      entitaVeicolante
-    );
-    permessoPerBlackbox.managePermessoOggettone(
-      soggetto,
-      oggetto,
-      this.AMBITO,
-      this.TIPO,
-      [permessoDaAggiungereORimuovere],
-      oggettoneOperation
-    );
+      let oggetto: EntitaStoredProcedure = permessoPerBlackbox.buildEntita(archivio.id, EntitaBlackbox.ARCHIVI);
+      let id_permesso_bloccato: number = null; 
+      if (operazioneRichiesta === AzioniPossibili.RESTORE) {
+        //vuol dire che sto rimuovendo il blocco quindi 
+        //mostro il permesso vecchio e rimuovo il permesso di NON_PROPAGA con OggettoneOperation.REMOVE cosi la BlackBox spegnerà quel permesso
+        oggettoneOperation = OggettoneOperation.REMOVE;
+        permesso.predicato = <EnumPredicatoPermessoArchivio>permesso.permessoBlacbox.predicato;
+        id_permesso_bloccato = permesso.permessoBlacbox.id_permesso_bloccato;
+        soggetto = permesso.permessoBlacbox.soggetto;
+        oggetto = permesso.permessoBlacbox.oggetto;
+        permesso.barrato = false;
+
+      } else if (operazioneRichiesta === AzioniPossibili.BAN) {
+        //vuol dire che voglio bloccare quel permesso quindi 
+        //devo aggiungere un permesso di NON_PROPAGA(id_permesso_bloccato valorizzato) cosi da bloccare quel permesso 
+        //(se piu avanti si vorra depotenziare il permesso o modificarlo si puo bloccare il permesso vecchio e leggere il predicato di questo ultimo)
+        oggettoneOperation = OggettoneOperation.ADD;
+        id_permesso_bloccato = permesso.idPermesso;
+        predicato = EnumPredicatoPermessoArchivio.NON_PROPAGATO;
+        trasmetti = entitaVeicolante === null;
+      }
+    
+      const permessoDaAggiungereORimuovere: PermessoStoredProcedure = permessoPerBlackbox.buildPermesso(
+        predicato,
+        trasmetti, //il trasmetti ha senso per le strutture che trasmettono la conscenza del permesso ai figli è sempre false per le persone
+        permesso.propaga, // E' il propaga verso gli archivi figli
+        false, // virtuale
+        this.APPLICATION,
+        id_permesso_bloccato,
+        null, // Attivo_dal lo passo null perché nel db c'è il tirgger che metterà now()
+        null, // Attivo_al lo passo null cosi il db lo metterà a now() ?? 
+        entitaVeicolante
+      );
+      permessoPerBlackbox.managePermessoOggettone(
+        soggetto,
+        oggetto,
+        this.AMBITO,
+        this.TIPO,
+        [permessoDaAggiungereORimuovere],
+        oggettoneOperation
+      );
     return permessoPerBlackbox;
   }
 }
@@ -168,6 +212,8 @@ export class PermessoTabella {
   soggettoEntita:EntitaStoredProcedure;
   oggettoEntita: EntitaStoredProcedure;
   veicoloEntita: EntitaStoredProcedure;
+  permessoBlacbox: PermessoStoredProcedure;
+  barrato: boolean;
 }
 
 export enum EnumPredicatoPermessoArchivio {
@@ -176,5 +222,13 @@ export enum EnumPredicatoPermessoArchivio {
   ELIMINA = "ELIMINA",
   BLOCCO = "BLOCCO",
   VICARIO = "VICARIO",
-  RESPONSABILE = "RESPONSABILE"
+  RESPONSABILE = "RESPONSABILE",
+  NON_PROPAGATO = "NON_PROPAGATO"
+}
+
+export enum AzioniPossibili { 
+  BAN = "BAN",
+  RESTORE = "RESTORE",
+  ADD = "ADD",
+  REMOVE= "REMOVE"
 }
