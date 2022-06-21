@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, ArchivioDiInteresse, ArchivioDiInteresseService, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, ArchivioDiInteresse, ArchivioDiInteresseService, DecimalePredicato, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/ng-internauta-model';
 import { MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListComponent } from '../archivi-list-container/archivi-list/archivi-list.component';
 import { DocsListComponent } from '../docs-list-container/docs-list/docs-list.component';
@@ -286,7 +286,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * @returns 
    */
   public canCreateSottoarchivio(): boolean {
-    let res = false;
+    return this._archivio.permessiEspliciti.some(permessoArchivio => 
+      permessoArchivio.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id
+      &&
+      permessoArchivio.bit >= DecimalePredicato.MODIFICA
+    );
+    /* let res = false;
     if (this.archivio.permessi) {
       const permessone = this._archivio.permessi.find(permesso => permesso.soggetto.id_provenienza == this.utenteUtilitiesLogin.getUtente().idPersona.id);
       if (permessone) {
@@ -302,7 +307,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         });
       }
     }
-    return res;
+    return res; */
   }
 
   public updateArchivio(archivio: Archivio) {
