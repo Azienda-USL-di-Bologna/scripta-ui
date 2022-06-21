@@ -290,6 +290,19 @@
     min-width: 230px;
     max-width: 230px;
   }
+  .edit-archiviation-column {
+    width: 50px;
+    max-width: 50px;
+    justify-content: center;
+    padding-right: 10px !important;
+    i {
+      cursor: pointer;
+      font-size: 22px;
+      &:hover {
+        color: #936;
+      }
+    }
+  }
 }
 
 ::ng-deep .table-zero-rows {

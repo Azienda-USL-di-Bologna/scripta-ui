@@ -38,6 +38,13 @@
           </p-sortIcon>
         </span>
       </th>
+      <th *ngIf="archivio"
+        class="edit-archiviation-column"
+        alignFrozen="right" 
+        pFrozenColumn 
+        [frozen]="true">
+        
+      </th>
     </tr>
     <!-- FILTRI -->
     <tr class="filter-row">
@@ -517,6 +524,13 @@
           </button>
         </div>
       </th>
+      <th  *ngIf="archivio"
+        class="edit-archiviation-column"
+        alignFrozen="right" 
+        pFrozenColumn 
+        [frozen]="true">
+        
+      </th>
     </tr>
   </ng-template>
   <!-- BODY -->
@@ -607,6 +621,24 @@
         </div>
       </td>
       <!-- <td class="scrollbar-overlay-placeholder-column"></td> -->
+      <td *ngIf="archivio"
+        class="edit-archiviation-column"
+        alignFrozen="right"  
+        pFrozenColumn 
+        [frozen]="true">
+        <i *ngIf="loggedUserCanRestoreArchiviation && rowData.archiviation.dataEliminazione"
+          class="pi pi-undo" 
+          pTooltip="Ripristina fascicolazione"
+          (click)="restoreArchiviation(rowData)"
+        >
+        </i>
+        <i *ngIf="loggedUserCanDeleteArchiviation && !!!rowData.archiviation.dataEliminazione"
+          class="pi pi-times" 
+          pTooltip="Elimina fascicolazione"
+          (click)="deleteArchiviation(rowData)"
+        >
+        </i>
+      </td>
     </tr>
   </ng-template>
   <ng-template pTemplate="loadingbody" let-columns="columns">
