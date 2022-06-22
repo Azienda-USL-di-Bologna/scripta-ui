@@ -5,7 +5,6 @@ import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from '@nf
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs';
-
 import { AzioniPossibili, EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
 // import * as FileSaver from 'file-saver';
 
@@ -65,7 +64,13 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
       //{ field: 'azione', header: 'Azione', class: 'azione-column' }
     ];
     this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field }));
-    this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true,false);
+    this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true, false);
+    this.subscriptions.push(this.permessiDettaglioArchivioService.archivioReloadPermessiEvent.subscribe((archivioReloadPermessi: boolean) => {
+      debugger;
+      if (archivioReloadPermessi) { 
+        this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
+      }
+     }));
   }
 
   ngOnDestroy() {
@@ -136,7 +141,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     const oggettoToSave: OggettonePermessiEntitaGenerator =
       this.permessiDettaglioArchivioService.buildPermessoPerBlackbox(
         perm,
-        operation === "ADD" || operation ==="BAN" || operation==="RESTORE" ? null : this._archivio.permessi,
+        operation === "ADD" || operation === "BAN" ? null : this._archivio.permessi,
         operation === "ADD" || operation === "BAN" || operation === "RESTORE" ? OggettoneOperation.ADD : OggettoneOperation.REMOVE,
         <AzioniPossibili>operation,
         this._archivio
@@ -157,6 +162,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
               delete this.perms[perm.idProvenienzaSoggetto];
             }
             this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+            this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
           },
           error: () => {
             this.messageService.add({

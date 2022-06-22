@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, Azienda, Predicato, Struttura } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, Azienda, Struttura } from '@bds/ng-internauta-model';
 import {Table} from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
@@ -40,17 +40,24 @@ export class PermessiStrutturaComponent implements OnInit {
     private permessiDettaglioArchivioService: PermessiDettaglioArchivioService
   ) { }
 
-  ngOnInit(): void {
+  ngOnInit(
+  ): void {
 
     this.cols = [
-      { field: 'struttura', header: 'Struttura', class:'struttura-column' },
-      { field: 'permesso', header: 'Permesso', class:'permesso-column' },
-      { field: 'trasmetti', header: 'Trasmetti a strutture figlie', class:'trasmetti-column' },
-      { field: 'propaga', header: 'Propaga a sottolivelli', class:'propaga-column' },
-      { field: 'ereditato', header: 'Ereditato', class:'ereditato-column' },
+      { field: 'struttura', header: 'Struttura', class: 'struttura-column' },
+      { field: 'permesso', header: 'Permesso', class: 'permesso-column' },
+      { field: 'trasmetti', header: 'Trasmetti a strutture figlie', class: 'trasmetti-column' },
+      { field: 'propaga', header: 'Propaga a sottolivelli', class: 'propaga-column' },
+      { field: 'ereditato', header: 'Ereditato', class: 'ereditato-column' },
       //{ field: 'azione', header: 'Azione', class:'azione-column' }
     ];
-    this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true,false);
+    this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true, false);
+    this.subscriptions.push(this.permessiDettaglioArchivioService.archivioReloadPermessiEvent.subscribe((archivioReloadPermessi: boolean) => {
+      if (archivioReloadPermessi) { 
+        this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "strutture");
+      }
+     }));
+    
   }
  
   
@@ -152,8 +159,8 @@ export class PermessiStrutturaComponent implements OnInit {
     const oggettoToSave: OggettonePermessiEntitaGenerator =
       this.permessiDettaglioArchivioService.buildPermessoPerBlackbox(
         perm, 
-        operation === "ADD" ? null : this._archivio.permessi,
-        operation === "ADD" ? OggettoneOperation.ADD : OggettoneOperation.REMOVE,
+        operation === "ADD" || operation === "BAN"? null : this._archivio.permessi,
+        operation === "ADD" || operation === "BAN" ? OggettoneOperation.ADD : OggettoneOperation.REMOVE,
         <AzioniPossibili>operation,
         this._archivio
       );
@@ -172,7 +179,7 @@ export class PermessiStrutturaComponent implements OnInit {
               delete this.perms[perm.idProvenienzaSoggetto];
             }
             this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
-            // this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+            this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
           },
           error: () => {
             this.messageService.add({

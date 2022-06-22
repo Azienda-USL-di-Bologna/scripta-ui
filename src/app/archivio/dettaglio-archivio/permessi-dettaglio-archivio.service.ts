@@ -4,6 +4,9 @@ import { Injectable } from "@angular/core";
 import { Archivio, ArchivioDetail, CategoriaPermessiStoredProcedure, EntitaStoredProcedure, PermessoEntitaStoredProcedure, PermessoStoredProcedure, Persona, Struttura } from "@bds/ng-internauta-model";
 import { BaseUrlType, EntitaBlackbox, getInternautaUrl, OggettoneOperation, OggettonePermessiEntitaGenerator, PermissionManagerService } from "@bds/nt-communicator";
 import { ExtendedArchivioService } from "../extended-archivio.service";
+import { MessageService } from "primeng/api";
+import { Observable, Subject } from "rxjs";
+import { BlackboxPermessiService } from "@bds/ng-internauta-model";
 
 
 @Injectable({
@@ -13,11 +16,30 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
   private APPLICATION: string = "GEDI_INTERNAUTA";
   private AMBITO: string = "SCRIPTA";
   private TIPO: string = "ARCHIVIO";
+  
+  private _archivioReloadPermessi = new Subject<boolean>();
+
   constructor(
     protected _http: HttpClient,
     protected datepipe: DatePipe,
-    private extendedArchivioService: ExtendedArchivioService ) {
+    private extendedArchivioService: ExtendedArchivioService,
+    private messageService: MessageService,
+    private blackboxPermessiService: BlackboxPermessiService) {
     super(_http, getInternautaUrl(BaseUrlType.Permessi), datepipe);
+  }
+
+  /******************************************************************
+   * GETTER DEGLI OBSERVABLE
+   */
+   public get archivioReloadPermessiEvent(): Observable<boolean> {
+    return this._archivioReloadPermessi.asObservable();
+  }
+
+  /******************************************************************
+   * SETTER DEGLI OBSERVABLE
+   */
+  public archivioReloadPermessiSelection(archivioReloadPermessi: boolean) {
+    this._archivioReloadPermessi.next(archivioReloadPermessi);
   }
 
   /**
@@ -68,12 +90,6 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
     })
   }
 
-  // public showButton(permessoTabella: PermessoTabella): boolean { 
-  //   let show: boolean = false;
-    
-  //   return show;
-  // }
-
   private getMaxPermesso(permessiTabella: PermessoTabella[]): PermessoTabella {
     let permessoTabella: PermessoTabella = permessiTabella.filter((ptf: PermessoTabella) => { ptf.predicato === EnumPredicatoPermessoArchivio.BLOCCO })[0];
     if (permessoTabella) {
@@ -113,13 +129,26 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
   }
 
 
-  // /**
-  //  * serve 
-  //  * @param archivio 
-  //  */
-  // public reloadPermessiArchivio(archivio: Archivio | ArchivioDetail) {
-    
-  // }
+  /**
+   * funzione che richiama PermessiCustomController
+   * nella risposta setto nel parametro archivio.permessi poi faccio scattare l'osservable
+   * i componenti permessi-struttura e permessi-persona richiameranno la buildpermessotabella
+   * @param archivio 
+   */
+  public reloadPermessiArchivio(archivio: Archivio | ArchivioDetail) {
+    this.blackboxPermessiService.getPermessiArchivio(archivio.id).subscribe((permessi: PermessoEntitaStoredProcedure[]) => {
+      archivio.permessi = permessi;
+      this.archivioReloadPermessiSelection(true);
+    },
+    err => {
+      this.messageService.add({
+        severity: "error",
+        summary: "Errore",
+        detail: "Errore nel caricamento dei permessi. Ricarica la pagina."
+      });
+    }
+);
+  }
 
   /**
    * Funzione temporanea che calcola i permessi esplciti a partire dalla blackbox.
@@ -139,6 +168,7 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
     oggettoneOperation: OggettoneOperation, // operazione che sto svolgendo (modifica / aggiunta oppure rimozione )
     operazioneRichiesta: AzioniPossibili, // aggiunto per chiarezza di lettura mi serve a capire che operazione sto svolgendo sul frontend
     archivio: Archivio | ArchivioDetail): OggettonePermessiEntitaGenerator {
+      oggettone = this.filtraVirtuali(oggettone);
       const permessoPerBlackbox: OggettonePermessiEntitaGenerator = new OggettonePermessiEntitaGenerator(operazioneRichiesta === AzioniPossibili.BAN ? null: oggettone );
       let entitaVeicolante: EntitaStoredProcedure = null;
       let soggetto: EntitaStoredProcedure = null;
@@ -157,7 +187,7 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
         //vuol dire che sto rimuovendo il blocco quindi 
         //mostro il permesso vecchio e rimuovo il permesso di NON_PROPAGA con OggettoneOperation.REMOVE cosi la BlackBox spegnerà quel permesso
         oggettoneOperation = OggettoneOperation.REMOVE;
-        permesso.predicato = <EnumPredicatoPermessoArchivio>permesso.permessoBlacbox.predicato;
+        predicato = <EnumPredicatoPermessoArchivio>permesso.permessoBlacbox.predicato;
         id_permesso_bloccato = permesso.permessoBlacbox.id_permesso_bloccato;
         soggetto = permesso.permessoBlacbox.soggetto;
         oggetto = permesso.permessoBlacbox.oggetto;
@@ -193,6 +223,17 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
         oggettoneOperation
       );
     return permessoPerBlackbox;
+  }
+
+  private filtraVirtuali(oggettoni: PermessoEntitaStoredProcedure[]): PermessoEntitaStoredProcedure[] {
+    oggettoni?.forEach((oggettone: PermessoEntitaStoredProcedure) => {
+      oggettone.categorie.forEach((categoria: CategoriaPermessiStoredProcedure) => {
+        categoria.permessi = categoria.permessi.filter((permesso: PermessoStoredProcedure) => {
+          permesso.virtuale === true || permesso.virtuale_oggetto === true
+        })
+      })
+    })
+    return oggettoni;
   }
 }
 
