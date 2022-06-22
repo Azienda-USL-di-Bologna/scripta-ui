@@ -34,7 +34,7 @@
     }
   }
 }
-::ng-deep .archivi-tree {
+::ng-deep .archivi-tree  {
   border: none;
   /* .p-tree-container {
     .p-treenode {
@@ -46,3 +46,14 @@
     }
   } */
 }
+
+::ng-deep .alert-too-much-archives{
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  font-size: 12px;
+  .alert-text{
+    padding: 0px 15px 0px 8px;
+  }
+}
+
