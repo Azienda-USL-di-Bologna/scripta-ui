@@ -30,7 +30,7 @@
     </ng-template>
     <ng-template pTemplate="body" let-permesso let-editing="editing" let-ri="rowIndex">
         <tr [pEditableRow]="permesso">
-            <td class="persona-column">
+            <td class="persona-column" [ngClass]="permesso.barrato ? 'barrato':'' ">
                 <!-- Non si deve poreter editare se perm['persona'] è pieno -->
                 <p-cellEditor>
                     <ng-template pTemplate="input">
@@ -44,11 +44,11 @@
                         <div *ngIf="permesso.descrizioneSoggetto">{{permesso.descrizioneSoggetto}}</div>
                     </ng-template>
                     <ng-template pTemplate="output">
-                        {{permesso.descrizioneSoggetto}}
+                        {{permesso.idPermesso}} ---- {{permesso.descrizioneSoggetto}}
                     </ng-template>
                 </p-cellEditor>
             </td>
-            <td class="struttura-column">
+            <td class="struttura-column" [ngClass]="permesso.barrato ? 'barrato':'' ">
                 <p-cellEditor>
                     <ng-template pTemplate="input">
                         <p-dropdown 
@@ -72,7 +72,7 @@
                     </ng-template>
                 </p-cellEditor>
             </td>
-            <td class="permesso-column">
+            <td class="permesso-column" [ngClass]="permesso.barrato ? 'barrato':'' ">
                 <p-cellEditor>
                     <ng-template pTemplate="input">
                         <p-dropdown 
@@ -116,14 +116,14 @@
             <td *ngIf="loggedUserIsResponsbaileOrVicario" class="azione-column">
                 <button pButton pRipple pInitEditableRow 
                     class="p-button-rounded p-button-text"
-                    *ngIf="!editing" 
+                    *ngIf="!editing && !permesso.barrato && !permesso.ereditato" 
                     type="button"  
                     icon="pi pi-pencil" 
                     (click)="inEditing = true; onRowEditInit(permesso)">
                 </button>
                 <button pButton pRipple 
                     class="p-button-rounded p-button-text"
-                    *ngIf="!editing" 
+                    *ngIf="!editing && !permesso.barrato && !permesso.ereditato" 
                     type="button"  
                     icon="pi pi-trash" 
                     (click)="onRowEditSave(permesso, ri, 'REMOVE')">
@@ -140,6 +140,20 @@
                     *ngIf="editing" 
                     type="button" 
                     (click)="inEditing = false; onRowEditCancel(permesso, ri)">
+                </button>
+                <button pButton pRipple 
+                    class="p-button-rounded p-button-text"
+                    *ngIf="!permesso.barrato && permesso.ereditato" 
+                    type="button"  
+                    icon="pi pi-ban" 
+                    (click)="onRowEditSave(permesso, ri, 'BAN')">
+                </button>
+                <button pButton pRipple 
+                    class="p-button-rounded p-button-text"
+                    *ngIf="permesso.barrato && permesso.ereditato" 
+                    type="button"  
+                    icon="pi pi-replay" 
+                    (click)="onRowEditSave(permesso, ri, 'RESTORE')">
                 </button>
             </td>
         </tr>

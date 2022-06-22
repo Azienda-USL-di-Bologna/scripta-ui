@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
-import { Component, Input, OnChanges, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
-import { CODICI_RUOLO, Persona, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, ArchivioDetail } from "@bds/ng-internauta-model";
+import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio } from "@bds/ng-internauta-model";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { buildLazyEventFiltersAndSorts, ColonnaBds, CsvExtractor } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from "@nfa/next-sdr";
@@ -22,6 +22,7 @@ import { TabComponent } from "../../navigation-tabs/tab.component";
 import { CaptionReferenceTableComponent } from '../../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
 import { SelectButtonItem } from "../../generic-caption-table/select-button-item";
+import { DecimalePredicato } from "@bds/ng-internauta-model";
 
 @Component({
   selector: "docs-list",
@@ -94,12 +95,14 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public filteredStati: any[];
   public filteredStatoUfficioAtti: any[];
   public aziendeFiltrabiliFiltered: any[];
+  public loggedUserCanRestoreArchiviation: boolean = false;
+  public loggedUserCanDeleteArchiviation: boolean = false;
 
-  private _archivio: Archivio | ArchivioDetail;
-  get archivio(): Archivio | ArchivioDetail { return this._archivio; }
-  @Input() set archivio(archivio: Archivio | ArchivioDetail) {
+  private _archivio: Archivio;
+  get archivio(): Archivio { return this._archivio; }
+  @Input() set archivio(archivio: Archivio) {
     this._archivio = archivio; 
-    if(this.loadDocsListSubscription){
+    if (this.loadDocsListSubscription) {
       this.loadData();
     }
   }
@@ -114,7 +117,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     private loginService: NtJwtLoginService,
     private datepipe: DatePipe,
     private route: ActivatedRoute,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private archivioDocService: ArchivioDocService
   ) { }
 
   ngOnInit(): void {
@@ -140,8 +144,11 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
             this.loadConfigurationAndSetItUp();
           } else { 
             this.setColumnsPerDetailArchivio();
-          }
 
+            const bit = this.archivio.permessiEspliciti.find((permessoArchivio: PermessoArchivio) => permessoArchivio.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit;
+            this.loggedUserCanRestoreArchiviation = bit >= DecimalePredicato.VICARIO;
+            this.loggedUserCanDeleteArchiviation = bit >= DecimalePredicato.ELIMINA;
+          }
         }
       )
     );
@@ -327,7 +334,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     colonneDaVisualizzare.forEach(c => {
       this._selectedColumns.push(this.cols.find(e => e.field === c));
     })
-    console.log(this._selectedColumns)
+    console.log(this._selectedColumns);
   }
 
   /**
@@ -553,8 +560,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.docsListMode = null;
       this.initialSortField = "dataRegistrazione";
       this.serviceForGetData = this.docDetailService;
-      this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
-      //filterAndSort.addFilter(new FilterDefinition("idArchivi", FILTER_TYPES.not_string.equals, this.archivio.id));
+      this.projectionFotGetData = "CustomDocDetailForDocList";
+      // filterAndSort.addFilter(new FilterDefinition("idArchivi", FILTER_TYPES.not_string.equals, this.archivio.id));
       filterAndSort.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, this.archivio.idAzienda.id));
       filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "FilterForArchiviContent"));
       filterAndSort.addAdditionalData(new AdditionalDataDefinition("idArchivio", this.archivio.id.toString()));
@@ -564,7 +571,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
         this.initialSortField = "dataCreazione";
         this.serviceForGetData = this.docDetailViewService;
-        this.projectionFotGetData = "DocDetailViewWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
+        this.projectionFotGetData = "CustomDocDetailViewForDocList";
         break;
       case DocsListMode.MIEI_DOCUMENTI:
         /* const filtroJson: FilterJsonDefinition<PersonaVedente> = new FilterJsonDefinition(true);
@@ -575,25 +582,25 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         filterAndSort.addFilter(new FilterDefinition("mioDocumento", FILTER_TYPES.not_string.equals, true));
         this.initialSortField = "dataCreazione";
         this.serviceForGetData = this.docDetailViewService;
-        this.projectionFotGetData = "DocDetailViewWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
+        this.projectionFotGetData = "CustomDocDetailViewForDocList";
         break;
       case DocsListMode.IFIRMARIO:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
         this.initialSortField = "dataCreazione";
         this.serviceForGetData = this.docDetailService;
-        this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
+        this.projectionFotGetData = "CustomDocDetailForDocList";
         break;
       case DocsListMode.IFIRMATO:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmato"));
         this.initialSortField = "dataRegistrazione";
         this.serviceForGetData = this.docDetailService;
-        this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
+        this.projectionFotGetData = "CustomDocDetailForDocList";
         break;
       case DocsListMode.REGISTRAZIONI:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRegistrazioni"));
         this.initialSortField = "dataRegistrazione";
         this.serviceForGetData = this.docDetailService;
-        this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
+        this.projectionFotGetData = "CustomDocDetailForDocList";//"DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
     }
 
@@ -682,6 +689,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       doc.destinatariVisualizzazione = null;
       doc.firmatariVisualizzazione = null;
       doc.sullaScrivaniaDiVisualizzazione = null;
+      if (this.archivio) {
+        doc.archiviation = doc.archiviDocList.find(archivioDoc => archivioDoc.idArchivio.id === this.archivio.id);
+      }
     });
     return extendedDocsList;
   }
@@ -1088,6 +1098,36 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       }
     }
     this.aziendeFiltrabiliFiltered = filtered;
+  }
+
+  /**
+   * Preso in ingresso un doc, prendo l'archivioDoc e lo aggiorno 
+   * togliendo idPersonaEliminazione e dataEliminazione
+   * @param doc 
+   */
+  public restoreArchiviation(doc: ExtendedDocDetailView): void {
+    const archivioDocToUpdate: ArchivioDoc = new ArchivioDoc();
+    archivioDocToUpdate.dataEliminazione = null;
+    archivioDocToUpdate.idPersonaEliminazione = null;
+    archivioDocToUpdate.version = doc.archiviation.version;
+    archivioDocToUpdate.id = doc.archiviation.id;
+    this.subscriptions.push(this.archivioDocService.patchHttpCall(archivioDocToUpdate, archivioDocToUpdate.id)
+      .subscribe(
+        res => {
+          doc.archiviation.dataEliminazione = res.dataEliminazione;
+          doc.archiviation.idPersonaEliminazione = res.idPersonaEliminazione;
+          doc.archiviation.version = res.version;
+        }
+      )
+    );
+  }
+
+  /**
+   * TODO in altro rm
+   * @param doc 
+   */
+  public deleteArchiviation(doc: ExtendedDocDetailView): void {
+
   }
 
 

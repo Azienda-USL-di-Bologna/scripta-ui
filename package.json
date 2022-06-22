@@ -22,7 +22,7 @@
     "@angular/platform-browser-dynamic": "12.2.16",
     "@angular/router": "12.2.16",
     "@bds/common-components": "3.0.10",
-    "@bds/ng-internauta-model": "3.0.18",
+    "@bds/ng-internauta-model": "3.0.20",
     "@bds/nt-communicator": "3.0.1",
     "@bds/nt-jwt-login": "3.0.0-alfa",
     "@bds/primeng-plugin": "3.0.0-alfa",
