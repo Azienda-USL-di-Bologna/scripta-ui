@@ -110,7 +110,7 @@ export class ArchivioTreeComponent implements OnInit {
           this.achivioDetailViewService.getData(this.ARCHIVIO_DETAIL_PROJECTION, filtersAndSorts, null, this.pageConfNoLimit)
             .subscribe(
               (res) => {
-                let children = res.results;
+                const children = res.results;
                 let childrenNodes: TreeNode<any>[] = [];
                 for (let i = 0; i < children.length ; i++ ) {
                   childrenNodes.push(this.buildTreeNode(children[i]))
@@ -167,15 +167,21 @@ export class ArchivioTreeComponent implements OnInit {
           ]).subscribe(
             ([archivioPadre, archivioNonno ] ) => {
               if(archivioNonno.numeroSottoarchivi <= this.numeroMaxSottoarchiviCaricabili && archivioPadre.numeroSottoarchivi <= this.numeroMaxSottoarchiviCaricabili) {
-                const filtersAndSorts =  this.buildFilterToLoadChildren(archivioNonno)
+                const nonnoNodo = this.buildTreeNode(archivioNonno)
+                this.archivi.push(nonnoNodo);
+                const filtersAndSorts =  this.buildFilterToLoadChildren(archivioNonno);
                 this.achivioDetailViewService.getData(this.ARCHIVIO_DETAIL_PROJECTION, filtersAndSorts, null, this.pageConfNoLimit)
                 .subscribe(
                   (res) => {
-                    let uncles = res.results;
-                    let unclesNodes: TreeNode<any>[] = [];
-                    let fatherAndSons: TreeNode<any>[] = [];
+                    const uncles = res.results;
+                    // let unclesNodes: TreeNode<any>[] = [];
+                    // let fatherAndSons: TreeNode<any>[] = [];
                     for (let i = 0; i < uncles.length ; i++ ) {
-                      if(uncles[1].id == archivioPadre.id) {
+                      if(uncles[i].id != archivioPadre.id) {
+                        nonnoNodo.children.push(this.buildTreeNode(uncles[i]))
+                        
+                      }
+                      if(uncles[i].id == archivioPadre.id) {
                         const filtersAndSorts =  this.buildFilterToLoadChildren(archivioPadre)
                         this.achivioDetailViewService.getData(this.ARCHIVIO_DETAIL_PROJECTION, filtersAndSorts, null, this.pageConfNoLimit)
                         .subscribe(
@@ -185,43 +191,43 @@ export class ArchivioTreeComponent implements OnInit {
                             for (let i = 0; i < children.length ; i++ ) {
                               childrenNodes.push(this.buildTreeNode(children[i]))
                             }
-                            fatherAndSons.push(
-                                this.buildTreeNode(archivioPadre, [
-                                  this.buildTreeNode(this.archivio)
-                                ]
+                            nonnoNodo.children.push(
+                                this.buildTreeNode(archivioPadre, 
+                                  childrenNodes
                               )
                             );
                           }
                         )
-                      } else {
-                        unclesNodes.push(this.buildTreeNode(uncles[i]))
-                      }
-                      unclesNodes = unclesNodes.concat(fatherAndSons)
-                      this.archivi.push(this.buildTreeNode(archivioNonno, unclesNodes))
+                      } 
                     }
                   }
                 ) 
               }
               else if (archivioNonno.numeroSottoarchivi <= this.numeroMaxSottoarchiviCaricabili && archivioPadre.numeroSottoarchivi > this.numeroMaxSottoarchiviCaricabili) {
-                const filtersAndSorts =  this.buildFilterToLoadChildren(archivioNonno)
+                const filtersAndSorts =  this.buildFilterToLoadChildren(archivioNonno);
+                const nonnoNodo = this.buildTreeNode(archivioNonno);
+                this.archivi.push(nonnoNodo);
                 this.achivioDetailViewService.getData(this.ARCHIVIO_DETAIL_PROJECTION, filtersAndSorts, null, this.pageConfNoLimit)
                 .subscribe(
                   (res) => {
-                    let uncles = res.results;
-                    let unclesNodes: TreeNode<any>[] = [];
-                    let fatherAndSons: TreeNode<any>[] = [];
+                    const uncles = res.results;
                     for (let i = 0; i < uncles.length ; i++ ) {
-                      unclesNodes.push(this.buildTreeNode(uncles[i]))
-                      unclesNodes = unclesNodes.concat(fatherAndSons);
-                      this.archivi.push(this.buildTreeNode(archivioNonno, unclesNodes))
+                      if(uncles[i].id == archivioPadre.id) {
+                        nonnoNodo.children.push(this.buildTreeNode(uncles[i],  [
+                          this.buildTreeNode(this.archivio)
+                        ]))
+                      } else {
+                        nonnoNodo.children.push(this.buildTreeNode(uncles[i]))
+                      }
                     }
                     this.troppiInserti = true;
                   }
                 )
               }
               else if (archivioNonno.numeroSottoarchivi > this.numeroMaxSottoarchiviCaricabili && archivioPadre.numeroSottoarchivi <= this.numeroMaxSottoarchiviCaricabili) {
-              let fatherAndSons: TreeNode<any>[] = [];
                 this.troppiSottoFascicoli = true;
+                const nonnoNodo = this.buildTreeNode(archivioNonno);
+                this.archivi.push(nonnoNodo);
                 const filtersAndSorts =  this.buildFilterToLoadChildren(archivioPadre)
                 this.achivioDetailViewService.getData(this.ARCHIVIO_DETAIL_PROJECTION, filtersAndSorts, null, this.pageConfNoLimit)
                 .subscribe(
@@ -231,15 +237,9 @@ export class ArchivioTreeComponent implements OnInit {
                     for (let i = 0; i < children.length ; i++ ) {
                       childrenNodes.push(this.buildTreeNode(children[i]))
                     }
-                    fatherAndSons.push(
-                        this.buildTreeNode(archivioPadre, [
-                          this.buildTreeNode(this.archivio)
-                        ]
-                      )
-                    );
+                    nonnoNodo.children.push(this.buildTreeNode(archivioPadre, childrenNodes))
                   }
                 )
-              this.archivi.push(this.buildTreeNode(archivioNonno, fatherAndSons))
             }
             else {
               this.archivi.push(
