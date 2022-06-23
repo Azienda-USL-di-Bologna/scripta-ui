@@ -66,7 +66,6 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field }));
     this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true, false);
     this.subscriptions.push(this.permessiDettaglioArchivioService.archivioReloadPermessiEvent.subscribe((archivioReloadPermessi: boolean) => {
-      debugger;
       if (archivioReloadPermessi) { 
         this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
       }

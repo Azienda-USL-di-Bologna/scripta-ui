@@ -2,7 +2,7 @@
     [value]="perms" 
     dataKey="idProvenienzaSoggetto" 
     editMode="row" 
-    styleClass="tabella-permessi-archivio"
+    styleClass="tabella-permessi-persona-archivio"
     [scrollable]="true"
     scrollHeight="flex">
     <ng-template pTemplate="caption">
@@ -25,7 +25,12 @@
             <th *ngFor="let col of cols" [ngClass]="col.class">
                 {{col.header}}
             </th>
-            <th *ngIf="loggedUserIsResponsbaileOrVicario" class="azione-column"></th>
+            <th *ngIf="loggedUserIsResponsbaileOrVicario" 
+                class="azione-column"
+                alignFrozen="right" 
+                pFrozenColumn 
+                [frozen]="true">
+            </th>
         </tr>
     </ng-template>
     <ng-template pTemplate="body" let-permesso let-editing="editing" let-ri="rowIndex">
@@ -113,44 +118,64 @@
                     </ng-template>
                 </p-cellEditor>
             </td>
-            <td *ngIf="loggedUserIsResponsbaileOrVicario" class="azione-column">
-                <button pButton pRipple pInitEditableRow 
+            <td *ngIf="loggedUserIsResponsbaileOrVicario" 
+                class="azione-column"
+                alignFrozen="right" 
+                pFrozenColumn 
+                [frozen]="true">
+                <button *ngIf="!editing && !permesso.barrato && !permesso.ereditato" 
+                    pButton 
+                    pRipple 
+                    pInitEditableRow 
+                    pTooltip="Modifica permesso"
                     class="p-button-rounded p-button-text"
-                    *ngIf="!editing && !permesso.barrato && !permesso.ereditato" 
                     type="button"  
                     icon="pi pi-pencil" 
                     (click)="inEditing = true; onRowEditInit(permesso)">
                 </button>
-                <button pButton pRipple 
+                <button *ngIf="!editing && !permesso.barrato && !permesso.ereditato" 
+                    pButton 
+                    pRipple 
+                    pTooltip="Elimina permesso"
                     class="p-button-rounded p-button-text"
-                    *ngIf="!editing && !permesso.barrato && !permesso.ereditato" 
                     type="button"  
                     icon="pi pi-trash" 
                     (click)="onRowEditSave(permesso, ri, 'REMOVE')">
                 </button>
-                <button pButton pRipple pSaveEditableRow 
+                <button *ngIf="editing"
+                    pButton 
+                    pRipple 
+                    pSaveEditableRow 
+                    pTooltip="Salva permesso"
                     class="p-button-rounded p-button-text p-button-success p-mr-2"
-                    *ngIf="editing"
                     type="button" 
                     icon="pi pi-check" 
                     (click)="inEditing = false; onRowEditSave(permesso, ri, 'ADD')" >
                 </button>
-                <button pButton pRipple pCancelEditableRow icon="pi pi-times" 
+                <button *ngIf="editing" 
+                    pButton 
+                    pRipple 
+                    pCancelEditableRow 
+                    icon="pi pi-times" 
+                    pTooltip="Annulla modifiche"
                     class="p-button-rounded p-button-text p-button-danger"
-                    *ngIf="editing" 
                     type="button" 
                     (click)="inEditing = false; onRowEditCancel(permesso, ri)">
                 </button>
-                <button pButton pRipple 
+                <button *ngIf="!permesso.barrato && permesso.ereditato" 
+                    pButton 
+                    pRipple 
+                    pTooltip="Non ereditare il permesso"
                     class="p-button-rounded p-button-text"
-                    *ngIf="!permesso.barrato && permesso.ereditato" 
                     type="button"  
                     icon="pi pi-ban" 
                     (click)="onRowEditSave(permesso, ri, 'BAN')">
                 </button>
-                <button pButton pRipple 
+                <button *ngIf="permesso.barrato && permesso.ereditato" 
+                    pButton 
+                    pRipple 
+                    pTooltip="Ripristina il permesso ereditato"
                     class="p-button-rounded p-button-text"
-                    *ngIf="permesso.barrato && permesso.ereditato" 
                     type="button"  
                     icon="pi pi-replay" 
                     (click)="onRowEditSave(permesso, ri, 'RESTORE')">

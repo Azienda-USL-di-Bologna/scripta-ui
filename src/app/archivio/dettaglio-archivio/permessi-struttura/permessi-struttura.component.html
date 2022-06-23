@@ -119,15 +119,18 @@
                 <button pButton pRipple pInitEditableRow class="p-button-rounded p-button-text"
                     *ngIf="!editing && !permesso.barrato && !permesso.ereditato"
                     type="button"  
+                    pTooltip="Modifica permesso"
                     icon="pi pi-pencil" 
                     (click)="inEditing = true;onRowEditInit(permesso)"></button> 
                 <button pButton class="p-button-rounded p-button-text"
                     *ngIf="!editing && !permesso.barrato && !permesso.ereditato" 
+                    pTooltip="Elimina permesso"
                     type="button"  
                     icon="pi pi-trash" 
                     (click)="onRowEditSave(permesso, ri, 'REMOVE')">
                 </button>
                 <button pButton pRipple pSaveEditableRow class="p-button-rounded p-button-text p-button-success p-mr-2"
+                    pTooltip="Salva permesso"
                     *ngIf="editing"
                     type="button" 
                     icon="pi pi-check" 
@@ -135,10 +138,12 @@
                 </button>
                 <button pButton pRipple pCancelEditableRow icon="pi pi-times" class="p-button-rounded p-button-text p-button-danger"
                     *ngIf="editing" 
+                    pTooltip="Annulla modifiche"
                     type="button" 
                     (click)="inEditing = false;onRowEditCancel(permesso, ri)">
                 </button>
                 <button pButton pRipple 
+                    pTooltip="Non ereditare il permesso"
                     class="p-button-rounded p-button-text"
                     *ngIf="!permesso.barrato && permesso.ereditato" 
                     type="button"  
@@ -148,6 +153,7 @@
                 <button pButton pRipple 
                     class="p-button-rounded p-button-text"
                     *ngIf="permesso.barrato && permesso.ereditato" 
+                    pTooltip="Ripristina il permesso ereditato"
                     type="button"  
                     icon="pi pi-replay" 
                     (click)="inEditing = false; onRowEditSave(permesso, ri, 'RESTORE')" >
