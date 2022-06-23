@@ -1117,6 +1117,11 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           doc.archiviation.dataEliminazione = res.dataEliminazione;
           doc.archiviation.idPersonaEliminazione = res.idPersonaEliminazione;
           doc.archiviation.version = res.version;
+          this.messageService.add({
+            severity: "success",
+            key: "docsListToast",
+            detail: `Fascicolazione ripristinata con successo`
+          });
         }
       )
     );
