@@ -60,7 +60,7 @@
         type="button" 
         pButton 
         pRipple 
-        [disabled] = "!functionalButtonsComponent.newArchivoButton.hasPermessi"
+        [disabled] = "!functionalButtonsComponent.newArchivoButton?.hasPermessi"
         icon="pi pi-plus" 
         (click)="functionalButtonsComponent.newArchivoButton.aziendeItems.length > 1 ? 
           aziendaSelection.toggle($event) : 
