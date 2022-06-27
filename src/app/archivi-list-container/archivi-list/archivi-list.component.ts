@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren
 import { Archivio, ArchivioDetail, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, FluxPermission, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio } from '@bds/ng-internauta-model';
 import { AppService } from '../../app.service';
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
-import { Subscription } from 'rxjs';
+import { Subscription, combineLatest } from 'rxjs';
 import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
 import { ArchiviListMode, cols, colsCSV, TipoArchivioTraduzioneVisualizzazione, StatoArchivioTraduzioneVisualizzazione } from './archivi-list-constants';
 import { ActivatedRoute } from '@angular/router';
@@ -27,6 +27,8 @@ import { NewArchivoButton } from 'src/app/generic-caption-table/new-archivo-butt
 import { CaptionFunctionalButtonsComponent } from 'src/app/generic-caption-table/caption-functional-buttons.component';
 import { Titolo } from '@bds/ng-internauta-model';
 import { Massimario } from '@bds/ng-internauta-model';
+import { ConfigurazioneService } from '@bds/ng-internauta-model';
+import { ParametroAziende } from '@bds/ng-internauta-model/lib/entities/configurazione/ParametroAziende';
 
 @Component({
   selector: 'archivi-list',
@@ -81,6 +83,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   private projectionToGetData: string = null;
   private lastDataCreazioneFilterValue: Date[];
   private lastAziendaFilterValue: number[];
+  public aziendeConFascicoliParlanti: number[] = [];
   public tipoVisualizzazioneObj = TipoArchivioTraduzioneVisualizzazione;
   public statoVisualizzazioneObj = StatoArchivioTraduzioneVisualizzazione;
   public aziendeFiltrabiliFiltered: any[];
@@ -89,6 +92,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   public filteredPersone: Persona[] = [];
   public filteredStrutture: Struttura[] = [];
   private resetArchiviArrayLenght: boolean = true;
+  public fascicoliParlanti: boolean = false;
   public dataMinimaCreazione: Date = new Date("2000-01-01");
   public dataMassimaCreazione: Date = new Date("2030-12-31");
   private pageConf: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 0, offset: 0 } };
@@ -125,6 +129,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     private navigationTabsService: NavigationTabsService,
     private strutturaService: StrutturaService,
     private personaService: PersonaService,
+    private configurazioneService: ConfigurazioneService,
     private datepipe: DatePipe
   ) { }
 
@@ -138,8 +143,19 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     //this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } });
 
     this.subscriptions.push(
-      this.loginService.loggedUser$.subscribe(
-        (utenteUtilities: UtenteUtilities) => {
+      combineLatest(
+        this.loginService.loggedUser$,
+        this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null)
+      ).subscribe(
+        ([utenteUtilities, parametriAziende]: [UtenteUtilities, ParametroAziende[]]) => {
+          //parte relativa al parametro aziendale
+          if (parametriAziende && parametriAziende[0]) {
+            this.fascicoliParlanti = JSON.parse(parametriAziende[0].valore || false);
+            if (this.fascicoliParlanti) {
+              this.aziendeConFascicoliParlanti = parametriAziende[0].idAziende;
+            }
+          }
+          //parte relativa al utenteUtilities
           this.utenteUtilitiesLogin = utenteUtilities;
           this.newArchivoButton = {
             tooltip: "Crea nuovo fascicolo",
@@ -275,6 +291,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     this.storedLazyLoadEvent.rows = this.rowsNumber * 2;
 
     if (this.dropdownAzienda) {
+      const value = this.aziendeFiltrabili.find(a => a.value[0] === this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault.id)?.value || this.aziendeFiltrabili[0].value;
+      this.dropdownAzienda.writeValue(value);
+      this.lastAziendaFilterValue = value;
       this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
     }
     if (this.dropdownLivello) {
@@ -289,53 +308,70 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   */
   public calcArchiviListModeItem(): void {
     this.selectButtonItems = [];
-      this.selectButtonItems.push(
-        {
-          title: "Tutti i fascicoli che posso vedere",
-          label: "Visibili",
-          // icon: "pi pi-fw pi-list", 
-          routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-          queryParams: { "mode": ArchiviListMode.VISIBILI }
-        },
-        {
-          title: "I fascicoli usati di recente",
-          label: "Recenti",
-          // icon: "pi pi-fw pi-list", 
-          routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-          queryParams: { "mode": ArchiviListMode.RECENTI },
-          disabled: true
-        },
-        {
-          title: "I miei fascicoli preferiti",
-          label: "Preferiti",
-          // icon: "pi pi-fw pi-list", 
-          routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-          queryParams: { "mode": ArchiviListMode.PREFERITI },
-          disabled: true
-        },
-        // {
-        //   title: "I fascicoli frequenti",
-        //   label: "Frequenti",
-        //   // icon: "pi pi-fw pi-list", 
-        //   routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-        //   queryParams: { "mode": ArchiviListMode.FREQUENTI },
-        //   disabled: true
-        // },
-        {
-          title: "Tutti i fascicoli",
-          label: "Tutti",
-          // icon: "pi pi-fw pi-list", 
-          routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-          queryParams: { "mode": ArchiviListMode.TUTTI }
-        }
-      );
+    this.selectButtonItems.push(
+      {
+        title: "Tutti i fascicoli che posso vedere",
+        label: "Visibili",
+        // icon: "pi pi-fw pi-list", 
+        routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+        queryParams: { "mode": ArchiviListMode.VISIBILI }
+      },
+      {
+        title: "I fascicoli usati di recente",
+        label: "Recenti",
+        // icon: "pi pi-fw pi-list", 
+        routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+        queryParams: { "mode": ArchiviListMode.RECENTI },
+        disabled: true
+      },
+      {
+        title: "I miei fascicoli preferiti",
+        label: "Preferiti",
+        // icon: "pi pi-fw pi-list", 
+        routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+        queryParams: { "mode": ArchiviListMode.PREFERITI },
+        disabled: true
+      },
+      // {
+      //   title: "I fascicoli frequenti",
+      //   label: "Frequenti",
+      //   // icon: "pi pi-fw pi-list", 
+      //   routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+      //   queryParams: { "mode": ArchiviListMode.FREQUENTI },
+      //   disabled: true
+      // },
+    );
+    if (!!!(this.fascicoliParlanti && 
+      this.utenteUtilitiesLogin.getUtente().aziendeAttive.length === 1 && 
+      this.aziendeConFascicoliParlanti.some(azienda => this.utenteUtilitiesLogin.getUtente().aziendeAttive[0].id === azienda))){
+        this.selectButtonItems.push(
+          {
+            title: "Tutti i fascicoli",
+            label: "Tutti",
+            // icon: "pi pi-fw pi-list", 
+            routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+            queryParams: { "mode": ArchiviListMode.TUTTI }
+          }
+        );
+      }
+      
   }
 
   private calcAziendeFiltrabili() {
     this.aziendeFiltrabili = [];
     this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive.map((azienda: Azienda) => {
       return { value: [azienda.id], label: azienda.nome } as ValueAndLabelObj;
-    })
+    });
+    /*controllo:
+        se sto preparando la richiesta per il filtro TUTTI
+      allora:
+        tolgo l'azienda o le aziende parlanti e lascio creare la voce tutti con value tutte le aziende
+      altrimenti: (comportamento di default)
+        lascio creare la voce tutti con value tutte le aziende
+    */
+    if (this.archiviListMode === this.archiviListModeEnum.TUTTI){
+      this.aziendeFiltrabili = this.aziendeFiltrabili.filter(aziendaFiltrabile => !this.aziendeConFascicoliParlanti.includes(aziendaFiltrabile.value[0]));
+    } 
     if (this.aziendeFiltrabili.length > 1) {
       this.aziendeFiltrabili.push({
         value: this.aziendeFiltrabili.map(e => e.value[0]),
@@ -462,7 +498,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
 
       if (this.dropdownAzienda) {
-        const value = this.aziendeFiltrabili.find(a => a.value[0] === this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault.id).value;
+        const value = this.aziendeFiltrabili.find(a => a.value[0] === this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault.id)?.value || this.aziendeFiltrabili[0].value;
         this.dropdownAzienda.writeValue(value);
         this.lastAziendaFilterValue = value;
         this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
@@ -646,7 +682,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
         break;
       case ArchiviListMode.TUTTI:
         filterAndSort.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
-        
+
         break;
       case ArchiviListMode.PREFERITI:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabPreferiti"));
