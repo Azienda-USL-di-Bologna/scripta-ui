@@ -16,9 +16,9 @@ import { Table } from 'primeng/table';
 import { AppComponent } from '../app.component';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@nfa/next-sdr';
 import { Subscription } from 'rxjs';
+import { first } from 'rxjs/operators'
 import { DatePipe } from '@angular/common';
 import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
-import { EnumPredicatoPermessoArchivio } from './dettaglio-archivio/permessi-dettaglio-archivio.service';
 
 @Component({
   selector: 'app-archivio',
@@ -98,15 +98,13 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     private datepipe: DatePipe,
     private loginService: NtJwtLoginService,
   ) {
-    this.subscriptions.push(
-      this.loginService.loggedUser$.subscribe(
-        (utenteUtilities: UtenteUtilities) => {
-          this.utenteUtilitiesLogin = utenteUtilities;
-          if (this.archivio) {
-            this.inizializeAll();
-          }
+    this.loginService.loggedUser$.pipe(first()).subscribe(
+      (utenteUtilities: UtenteUtilities) => {
+        this.utenteUtilitiesLogin = utenteUtilities;
+        if (this.archivio) {
+          this.inizializeAll();
         }
-      )
+      }
     );
   }
 
@@ -180,10 +178,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         this.setForContenuto();
         break;
     }
-  }
-
-  public onUpdateArchivio(event: any): void {
-
   }
 
   /**
@@ -310,7 +304,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     return res; */
   }
 
-  public updateArchivio(archivio: Archivio) {
+  /**
+   * Metodo chiamato quando non ho cambiato archivio, ma esso è stato modificato, 
+   * e alcune di queste modifiche le vogliamo "notare"
+   * @param archivio 
+   */
+  public onUpdateArchivio(archivio: Archivio) {
     console.log("updateArchivio(archivio: Archivio)", archivio);
     this._archivio = archivio;
     this.inizializeAll();

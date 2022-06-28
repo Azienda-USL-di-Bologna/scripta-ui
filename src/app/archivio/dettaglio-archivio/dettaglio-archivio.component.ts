@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
-import { Archivio, ArchivioDetail, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, TipoArchivio, ConfigurazioneService, ParametroAziende } from '@bds/ng-internauta-model';
+import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende } from '@bds/ng-internauta-model';
 import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -17,9 +17,9 @@ import { ExtendedArchivioService } from '../extended-archivio.service';
 })
 export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
-  private _archivio: Archivio | ArchivioDetail;
-  get archivio(): Archivio | ArchivioDetail { return this._archivio; }
-  @Input() set archivio(archivio: Archivio | ArchivioDetail) {
+  private _archivio: Archivio;
+  get archivio(): Archivio { return this._archivio; }
+  @Input() set archivio(archivio: Archivio) {
     this._archivio = archivio;
     if (this.archivio.idTitolo) {
       this.selectedTitolo = this.buildNodeTitolo(this.archivio.idTitolo as Titolo);
@@ -43,12 +43,13 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public tipiArchivioObj: any[] = TipoArchivioTraduzioneVisualizzazione;
   private classificazioneAllaFoglia: boolean = false;
   public possibleAnniTenuta: any[] = [{name: "1", value: 1 },{name: "2", value: 2 },{name: "3", value: 3 },{name: "4", value: 4 },
-  {name: "5", value: 5 },{name: "6", value: 6 },{name: "7", value: 7 },{name: "8", value: 8 },{name: "9", value: 9 },
-  {name: "10", value: 10 },{name: "20", value: 20 },{name: "30", value: 30 },{name: "40", value: 40 },
-  {name: "50", value: 50 }, {name: "60", value: 60 }, {name: "Illimitata", value: 999}];
+    {name: "5", value: 5 },{name: "6", value: 6 },{name: "7", value: 7 },{name: "8", value: 8 },{name: "9", value: 9 },
+    {name: "10", value: 10 },{name: "20", value: 20 },{name: "30", value: 30 },{name: "40", value: 40 },
+    {name: "50", value: 50 }, {name: "60", value: 60 }, {name: "Illimitata", value: 999}];
   public anniTenutaSelezionabili: any[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
   public loggedUserIsResponsbaileOrVicario = false;
+  private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
 
   @ViewChild("noteArea") public noteArea: ElementRef;
   @ViewChild("titoliTreeSelect") public titoliTreeSelect: TreeSelect;
@@ -97,8 +98,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       this.anniTenutaSelezionabili = this.possibleAnniTenuta;
       console.log("Anni tenuta: ", this.anniTenutaSelezionabili);
       
-    }
-    else {
+    } else {
       this.possibleAnniTenuta.forEach(elem => {
         if(this.archivio.anniTenuta <= elem.value ) 
           this.anniTenutaSelezionabili.push(elem);
@@ -178,8 +178,17 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       clearTimeout(this.savingTimeout);
     }
     this.savingTimeout = setTimeout(() => {
-      this.subscriptions.push(this.extendedArchivioService.updateArchivio(archivio, [field], null).subscribe(res => this.archivio.version = res.version));
-    }, 500);
+      this.subscriptions.push(
+        this.extendedArchivioService.updateArchivio(archivio, [field], this.ARCHIVIO_PROJECTION).subscribe(
+          (resArchivio: Archivio) => {
+            this.archivio.version = resArchivio.version;
+            if (field === "oggetto") {
+              this.updateArchivio.emit(resArchivio);
+            }
+          }
+        )
+      );
+    }, 350);
   }
 
   /**
@@ -368,56 +377,47 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       ));
   }
 
-  public disableNumeraButton(): boolean {
-    return !this.archivio?.oggetto || !this.archivio.tipo || !this.archivio.idTitolo
-  }
-
-  private numeraAndAggiorna(archivio: Archivio | ArchivioDetail) {
-    this.subscriptions.push(
-      this.extendedArchivioService.numeraArchivio(archivio,
-        ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
-        .subscribe(
-          {
-            next: (res) => {
-              console.log("Archivio aggiornato", res)
-              const updated: Archivio | ArchivioDetail = res;
-              this.archivio.version = res.version;
-              this.archivio.numerazioneGerarchica = res.numeraAndAggiorna;
-              this.archivio.stato = res.stato;
-              this.navigationTabsService.addTabArchivio(res, true)
-              this.updateArchivio.emit(res);
-              this.messageService.add({
-                severity: "success",
-                key: "dettaglioArchivioToast",
-                summary: "OK",
-                detail: `${res.numerazioneGerarchica}: Numerazione avvenuta con successo`
-              });
-            },
-            error: (e) => {
-              console.error(e)
-              this.messageService.add({
-                severity: "error",
-                key: "dettaglioArchivioToast",
-                summary: "Attenzione",
-                detail: `Si è verificato un errore nella numerazione dell'archivio, contattare Babelcare`
-              });
-            }
-          }
-        )
-    );
-
-  }
-
-
+  /**
+   * Funzione che si occupa della numerazione di un archivio
+   * @param event 
+   */
   public numeraFasicoloClicked(event: Event): void {
-
     this.confirmationService.confirm({
       key: "confirm-popup",
       target: event.target,
       message: "Stai per numerare il fascicolo: confermi?",
       accept: () => {
-        console.log("CONFERMATO");
-        this.numeraAndAggiorna(this._archivio)
+        this.subscriptions.push(
+          this.extendedArchivioService.numeraArchivio(
+            this.archivio,
+            this.ARCHIVIO_PROJECTION)
+            .subscribe({
+                next: (resArchivio: Archivio) => {
+                  console.log("Archivio aggiornato", resArchivio);
+                  this.archivio.version = resArchivio.version;
+                  this.archivio.numerazioneGerarchica = resArchivio.numerazioneGerarchica;
+                  this.archivio.stato = resArchivio.stato;
+                  this.navigationTabsService.addTabArchivio(resArchivio, true, true);
+                  this.updateArchivio.emit(resArchivio);
+                  this.messageService.add({
+                    severity: "success",
+                    key: "dettaglioArchivioToast",
+                    summary: "OK",
+                    detail: `${resArchivio.numerazioneGerarchica}: Numerazione avvenuta con successo`
+                  });
+                },
+                error: (e) => {
+                  console.error(e);
+                  this.messageService.add({
+                    severity: "error",
+                    key: "dettaglioArchivioToast",
+                    summary: "Attenzione",
+                    detail: `Si è verificato un errore nella numerazione dell'archivio, contattare Babelcare`
+                  });
+                }
+              }
+            )
+        );
       }
     });
   }

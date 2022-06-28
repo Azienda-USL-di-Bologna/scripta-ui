@@ -146,7 +146,7 @@
         class="p-mr-2" 
         pTooltip="Numera Fascicolo" 
         aria-label="Numera Fascicolo"
-        [disabled]="disableNumeraButton()" 
+        [disabled]="!archivio.oggetto || !archivio.tipo || !archivio.idTitolo" 
         tooltipPosition="bottom">
       </button>
     </div>
