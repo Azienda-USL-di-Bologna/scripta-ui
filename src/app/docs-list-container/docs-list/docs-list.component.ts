@@ -146,7 +146,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           } else { 
             this.setColumnsPerDetailArchivio();
 
-            const bit = this.archivio.permessiEspliciti.find((permessoArchivio: PermessoArchivio) => permessoArchivio.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit;
+            const bit = this.archivio.permessiEspliciti.find((permessoArchivio: PermessoArchivio) => permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit;
             this.loggedUserCanRestoreArchiviation = bit >= DecimalePredicato.VICARIO;
             this.loggedUserCanDeleteArchiviation = bit >= DecimalePredicato.ELIMINA;
           }
