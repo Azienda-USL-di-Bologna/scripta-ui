@@ -1,6 +1,8 @@
 <generic-caption-table *ngIf="referenceTableComponent && !archivio?.isArchivioNero"
-  [configuration]="captionConfiguration" [referenceTableComponent]="referenceTableComponent"
-  [selectButtonsComponent]="this" [functionalButtonsComponent]="this">
+  [configuration]="captionConfiguration" 
+  [referenceTableComponent]="referenceTableComponent"
+  [selectButtonsComponent]="this" 
+  [functionalButtonsComponent]="this">
 </generic-caption-table>
 <p-splitter *ngIf="archivio && !archivio.isArchivioNero" styleClass="splitter-archivio" [panelSizes]="[25,75]"
   [minSizes]="[15,55]">
@@ -50,7 +52,7 @@
     <!-- Dati dell'archivio -->
     <dettaglio-archivio #dettaglioarchivio [archivio]="archivio"
       [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'DETTAGLIO'}"
-      (updateArchivio)="updateArchivio($event)">
+      (updateArchivio)="onUpdateArchivio($event)">
     </dettaglio-archivio>
   </ng-template>
 </p-splitter>

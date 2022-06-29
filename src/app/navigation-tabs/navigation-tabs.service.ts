@@ -32,16 +32,20 @@ export class NavigationTabsService {
    * @param label 
    * @param data 
    */
-  public updateTab(tabIndex: number, label: string, data: any) {
+  public updateTab(tabIndex: number, label: string, data: any, tabId?: number): void {
     this.tabs[tabIndex].label = label;
     this.tabs[tabIndex].data = data;
+    if (tabId) {
+      this.tabs[tabIndex].id = tabId;
+    }
+    this.setTabsInSessionStorage();
   }
 
-  public getTabs() {
+  public getTabs(): TabItem[] {
     return this.tabs;
   }
 
-  private setTabsInSessionStorage() {
+  private setTabsInSessionStorage(): void {
     sessionStorage.setItem("tabs", JSON.stringify(this.tabs));
   }
 
@@ -148,7 +152,7 @@ export class NavigationTabsService {
    * @param archivio 
    * @param active 
    */
-  public addTabArchivio(archivio: Archivio | ArchivioDetail | ExtendedArchiviView, active: boolean = true): void {
+  public addTabArchivio(archivio: Archivio | ArchivioDetail | ExtendedArchiviView, active: boolean = true, reuseActiveTab: boolean = false): void {
     const tabIndex: number = this.tabs.findIndex(t => {
       return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id
     });
@@ -157,6 +161,8 @@ export class NavigationTabsService {
       if (active) {
         this.activeTabByIndex(tabIndex);
       }
+    } else if (reuseActiveTab) {
+      this.updateTab(this.activeTabIndex, archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]", {archivio: archivio, id: archivio.id}, archivio.fk_idArchivioRadice.id);
     } else {
       this.addTab(
         this.buildaTabArchivio(archivio, archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]")

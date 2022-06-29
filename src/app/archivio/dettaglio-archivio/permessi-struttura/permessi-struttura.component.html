@@ -1,165 +1,177 @@
 <p-table #dt 
-    styleClass="tabella-permessi-archivio" 
-    [value]="perms" 
-    dataKey="idProvenienzaSoggetto" 
-    editMode="row"
-    [scrollable]="true"
-    scrollHeight="flex">
-    <ng-template pTemplate="caption">
-        <div class="flex align-items-center justify-content-between">
-            <button 
-                id="aggiungiPermesso"
-                type="button"
-                pButton 
-                pRipple 
-                icon="pi pi-plus" 
-                (click)="inEditing = true; addPermesso()" 
-                class="mr-2" 
-                label="Aggiungi permesso"
-                [disabled]="inEditing || !loggedUserIsResponsbaileOrVicario">
-            </button>
-        </div>
-    </ng-template>
-    <ng-template pTemplate="header">
-        <tr>
-            <th *ngFor="let col of cols" [ngClass]="col.class">
-                {{col.header}}
-            </th>
-            <th *ngIf="loggedUserIsResponsbaileOrVicario" class="azione-column"></th>
-        </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-permesso let-editing="editing" let-ri="rowIndex">
-        <tr [pEditableRow]="permesso">
-            <td class="struttura-column" [ngClass]="permesso.barrato ? 'barrato':'' ">
-                <!-- Non si deve poreter editare se perm['struttura'] è pieno -->
-                <p-cellEditor>
-                    <ng-template pTemplate="input">
-                        <lib-structures-autocomplete *ngIf="!permesso.descrizioneSoggetto"
-                            [showPool]="false"
-                            [filterByRoles]= "_rolesToFilter"
-                            [enabled]="true" 
-                            [azienda]="azienda"
-                            [dataRiferimento]="_dataRiferimento"
-                            (strutturaSelezionataEmit)="strutturaSelezionataDaComboReceived($event, permesso)">
-                        </lib-structures-autocomplete>
-                        <div *ngIf="permesso.descrizioneSoggetto">{{permesso.descrizioneSoggetto}}</div>
-                    </ng-template>
-                    <ng-template pTemplate="output">
-                        {{permesso.idPermesso}} ---- {{permesso.descrizioneSoggetto}}
-                    </ng-template>
-                </p-cellEditor>
-            </td>
-            <td class="permesso-column" [ngClass]="permesso.barrato ? 'barrato':'' ">
-                <p-cellEditor>
-                    <ng-template pTemplate="input">
-                        <p-dropdown 
-                            appendTo="body" 
-                            [options]="predicati" 
-                            [(ngModel)]="permesso.predicato">
-                        </p-dropdown>
-                    </ng-template>
-                    <ng-template pTemplate="output">
-                        {{permesso.predicato}}
-                    </ng-template>
-                </p-cellEditor>
-            </td>
-            <td class="trasmetti-column">
-                <p-cellEditor>
-                    <ng-template pTemplate="input">
-                        <p-checkbox
-                            [binary]="true" 
-                            [(ngModel)]="permesso.trasmetti">
-                        </p-checkbox>
-                    </ng-template>
-                    <ng-template pTemplate="output">
-                        <p-checkbox
-                            [disabled]="true"
-                            [binary]="true"
-                            [(ngModel)]="permesso.trasmetti">
-                        </p-checkbox>
-                    </ng-template>
-                </p-cellEditor>
-            </td>
-            <td class="propaga-column">
-                <p-cellEditor>
-                    <ng-template pTemplate="input">
-                        <p-checkbox
-                            [binary]="true" 
-                            [(ngModel)]="permesso.propaga">
-                        </p-checkbox>
-                    </ng-template>
-                    <ng-template pTemplate="output">
-                        <p-checkbox
-                            [disabled]="true"
-                            [binary]="true"
-                            [(ngModel)]="permesso.propaga">
-                        </p-checkbox>
-                    </ng-template>
-                </p-cellEditor>
-            </td>
-            <td class="ereditato-column">
-                <p-cellEditor>
-                    <ng-template pTemplate="input">
-                        <p-checkbox
-                            [disabled]="true"
-                            [binary]="true" 
-                            [(ngModel)]="permesso.ereditato">
-                        </p-checkbox>
-                    </ng-template>
-                    <ng-template pTemplate="output">
-                        <p-checkbox
-                            [disabled]="true"
-                            [binary]="true"
-                            [(ngModel)]="permesso.ereditato">
-                        </p-checkbox>
-                    </ng-template>
-                </p-cellEditor>
-            </td>
-            <td *ngIf="loggedUserIsResponsbaileOrVicario" class="azione-column" >
-                <button pButton pRipple pInitEditableRow class="p-button-rounded p-button-text"
-                    *ngIf="!editing && !permesso.barrato && !permesso.ereditato"
-                    type="button"  
-                    pTooltip="Modifica permesso"
-                    icon="pi pi-pencil" 
-                    (click)="inEditing = true;onRowEditInit(permesso)"></button> 
-                <button pButton class="p-button-rounded p-button-text"
-                    *ngIf="!editing && !permesso.barrato && !permesso.ereditato" 
-                    pTooltip="Elimina permesso"
-                    type="button"  
-                    icon="pi pi-trash" 
-                    (click)="onRowEditSave(permesso, ri, 'REMOVE')">
-                </button>
-                <button pButton pRipple pSaveEditableRow class="p-button-rounded p-button-text p-button-success p-mr-2"
-                    pTooltip="Salva permesso"
-                    *ngIf="editing"
-                    type="button" 
-                    icon="pi pi-check" 
-                    (click)="inEditing = false; onRowEditSave(permesso, ri, 'ADD')" >
-                </button>
-                <button pButton pRipple pCancelEditableRow icon="pi pi-times" class="p-button-rounded p-button-text p-button-danger"
-                    *ngIf="editing" 
-                    pTooltip="Annulla modifiche"
-                    type="button" 
-                    (click)="inEditing = false;onRowEditCancel(permesso, ri)">
-                </button>
-                <button pButton pRipple 
-                    pTooltip="Non ereditare il permesso"
-                    class="p-button-rounded p-button-text"
-                    *ngIf="!permesso.barrato && permesso.ereditato" 
-                    type="button"  
-                    icon="pi pi-ban" 
-                    (click)="inEditing = false; onRowEditSave(permesso, ri, 'BAN')" >
-                </button>
-                <button pButton pRipple 
-                    class="p-button-rounded p-button-text"
-                    *ngIf="permesso.barrato && permesso.ereditato" 
-                    pTooltip="Ripristina il permesso ereditato"
-                    type="button"  
-                    icon="pi pi-replay" 
-                    (click)="inEditing = false; onRowEditSave(permesso, ri, 'RESTORE')" >
-                </button>
-            </td>
-        </tr>
-    </ng-template>
+	styleClass="tabella-permessi-archivio" 
+	[value]="perms" 
+	dataKey="idProvenienzaSoggetto" 
+	editMode="row"
+	[scrollable]="true"
+	scrollHeight="flex">
+	<ng-template pTemplate="caption">
+		<div class="flex align-items-center justify-content-between">
+			<button 
+				id="aggiungiPermesso"
+				type="button"
+				pButton 
+				pRipple 
+				icon="pi pi-plus" 
+				(click)="inEditing = true; addPermesso()" 
+				class="mr-2" 
+				label="Aggiungi permesso"
+				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario">
+			</button>
+		</div>
+	</ng-template>
+	<ng-template pTemplate="header">
+		<tr>
+			<!-- <th *ngFor="let col of cols" [ngClass]="col.class">
+				{{col.header}}
+			</th> -->
+			<th class="struttura-column">Struttura</th>
+			<th class="permesso-column">Permesso</th>
+			<th class="trasmetti-column">Trasmetti a strutture figlie</th>
+			<th class="propaga-column">Propaga a sottolivelli</th>
+			<th class="ereditato-column" *ngIf="archivio.livello !== 1">Ereditato</th>
+			<th *ngIf="loggedUserIsResponsbaileOrVicario" class="azione-column"></th>
+		</tr>
+	</ng-template>
+	<ng-template pTemplate="body" let-permesso let-editing="editing" let-ri="rowIndex">
+		<tr [pEditableRow]="permesso">
+			<td class="struttura-column" [ngClass]="permesso.barrato ? 'barrato':'' ">
+				<!-- Non si deve poreter editare se perm['struttura'] è pieno -->
+				<p-cellEditor>
+					<ng-template pTemplate="input">
+						<lib-structures-autocomplete *ngIf="!permesso.descrizioneSoggetto"
+							[showPool]="false"
+							[filterByRoles]= "_rolesToFilter"
+							[enabled]="true" 
+							[azienda]="azienda"
+							[dataRiferimento]="_dataRiferimento"
+							(strutturaSelezionataEmit)="strutturaSelezionataDaComboReceived($event, permesso)">
+						</lib-structures-autocomplete>
+						<div *ngIf="permesso.descrizioneSoggetto">{{permesso.descrizioneSoggetto}}</div>
+					</ng-template>
+					<ng-template pTemplate="output">
+						{{permesso.idPermesso}} ---- {{permesso.descrizioneSoggetto}}
+					</ng-template>
+				</p-cellEditor>
+			</td>
+			<td class="permesso-column" [ngClass]="permesso.barrato ? 'barrato':'' ">
+				<p-cellEditor>
+					<ng-template pTemplate="input">
+						<p-dropdown 
+							appendTo="body" 
+							[options]="predicati" 
+							[(ngModel)]="permesso.predicato">
+						</p-dropdown>
+					</ng-template>
+					<ng-template pTemplate="output">
+						{{permesso.predicato}}
+					</ng-template>
+				</p-cellEditor>
+			</td>
+			<td class="trasmetti-column">
+				<p-cellEditor>
+					<ng-template pTemplate="input">
+						<p-checkbox
+							[binary]="true" 
+							[(ngModel)]="permesso.trasmetti">
+						</p-checkbox>
+					</ng-template>
+					<ng-template pTemplate="output">
+						<p-checkbox
+							[disabled]="true"
+							[binary]="true"
+							[(ngModel)]="permesso.trasmetti">
+						</p-checkbox>
+					</ng-template>
+				</p-cellEditor>
+			</td>
+			<td class="propaga-column">
+				<p-cellEditor>
+					<ng-template pTemplate="input">
+						<p-checkbox
+							[binary]="true" 
+							[(ngModel)]="permesso.propaga">
+						</p-checkbox>
+					</ng-template>
+					<ng-template pTemplate="output">
+						<p-checkbox
+							[disabled]="true"
+							[binary]="true"
+							[(ngModel)]="permesso.propaga">
+						</p-checkbox>
+					</ng-template>
+				</p-cellEditor>
+			</td>
+			<td class="ereditato-column" *ngIf="archivio.livello !== 1">
+				<!-- <p-cellEditor>
+					<ng-template pTemplate="input">
+						<p-checkbox
+							[disabled]="true"
+							[binary]="true" 
+							[(ngModel)]="permesso.ereditato">
+						</p-checkbox>
+					</ng-template>
+					<ng-template pTemplate="output"> -->
+						<p-checkbox
+							[disabled]="true"
+							[binary]="true"
+							[(ngModel)]="permesso.ereditato">
+						</p-checkbox>
+					<!-- </ng-template>
+				</p-cellEditor> -->
+			</td>
+			<td *ngIf="loggedUserIsResponsbaileOrVicario" class="azione-column" >
+				<button pButton pRipple pInitEditableRow class="p-button-rounded p-button-text"
+					*ngIf="!editing && !permesso.barrato && !permesso.ereditato"
+					type="button"  
+					pTooltip="Modifica permesso"
+					icon="pi pi-pencil" 
+					(click)="inEditing = true;onRowEditInit(permesso)"></button> 
+				<button pButton class="p-button-rounded p-button-text"
+					*ngIf="!editing && !permesso.barrato && !permesso.ereditato" 
+					pTooltip="Elimina permesso"
+					type="button"  
+					icon="pi pi-trash" 
+					(click)="onRowEditSave(permesso, ri, 'REMOVE')">
+				</button>
+				<button pButton pRipple pSaveEditableRow class="p-button-rounded p-button-text p-button-success p-mr-2"
+					pTooltip="Salva permesso"
+					*ngIf="editing"
+					type="button" 
+					icon="pi pi-check" 
+					(click)="inEditing = false; onRowEditSave(permesso, ri, 'ADD')" >
+				</button>
+				<button pButton pRipple pCancelEditableRow icon="pi pi-times" class="p-button-rounded p-button-text p-button-danger"
+					*ngIf="editing" 
+					pTooltip="Annulla modifiche"
+					type="button" 
+					(click)="inEditing = false;onRowEditCancel(permesso, ri)">
+				</button>
+				<button pButton pRipple 
+					pTooltip="Non ereditare il permesso"
+					class="p-button-rounded p-button-text"
+					*ngIf="!permesso.barrato && permesso.ereditato" 
+					type="button"  
+					icon="pi pi-ban" 
+					(click)="inEditing = false; onRowEditSave(permesso, ri, 'BAN')" >
+				</button>
+				<button pButton pRipple 
+					class="p-button-rounded p-button-text"
+					*ngIf="permesso.barrato && permesso.ereditato" 
+					pTooltip="Ripristina il permesso ereditato"
+					type="button"  
+					icon="pi pi-replay" 
+					(click)="inEditing = false; onRowEditSave(permesso, ri, 'RESTORE')" >
+				</button>
+			</td>
+		</tr>
+	</ng-template>
+	<ng-template pTemplate="emptymessage">
+		<tr>
+			<td [attr.colspan]="5 + (archivio.livello !== 1 ? 1 : 0) + (loggedUserIsResponsbaileOrVicario ? 1 : 0)">
+				Non sono presenti permessi a strutture
+			</td>
+		</tr>
+	</ng-template>
 </p-table>
 <p-toast></p-toast>

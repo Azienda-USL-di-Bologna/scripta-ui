@@ -55,7 +55,7 @@
       </i>
     </span>
     <!-- BOTTONE NUOVO ARCHIVIO [disabled] = "archivio.canCreateSottoarchivio()"-->
-    <span *ngIf="configuration.newArchivio">
+    <span *ngIf="configuration.newArchivio && functionalButtonsComponent.newArchivoButton">
       <button
         type="button" 
         pButton 
