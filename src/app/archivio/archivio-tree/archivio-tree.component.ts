@@ -2,11 +2,12 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MenuItem, TreeNode } from 'primeng/api';
 import { ExtendedArchivioService } from '../extended-archivio.service';
 import { Archivio, ArchivioDetail, ArchivioDetailViewService, ConfigurazioneService, ENTITIES_STRUCTURE, ParametroAziende } from '@bds/ng-internauta-model';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
 import { AppService } from 'src/app/app.service';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from '@nfa/next-sdr';
 import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
+import { ArchivioFieldUpdating, ArchivioUtilsService } from '../archivio-utils.service';
 
 @Component({
   selector: 'archivio-tree',
@@ -25,6 +26,7 @@ export class ArchivioTreeComponent implements OnInit {
   public troppiInserti: boolean = false;
   public numeroMaxSottoarchiviCaricabili: number;
   private utenteUtilitiesLogin: UtenteUtilities;
+  public subscriptions: Subscription[] = [];
 
   public pageConfNoLimit: PagingConf = {
     conf: {
@@ -59,13 +61,23 @@ export class ArchivioTreeComponent implements OnInit {
     private loginService: NtJwtLoginService,
     private navigationTabsService: NavigationTabsService,
     private appService: AppService,
-    ) {
+    private archivioUtilsService: ArchivioUtilsService) {
      
   }
 
   ngOnInit(): void {
     //console.log("ArchivioTreeComponent.ngOnInit()", this.archivio);
     this.loadConfig();
+
+    this.subscriptions.push(
+      this.archivioUtilsService.updateArchivioFieldEvent.subscribe(
+        (archivioFieldUpdating: ArchivioFieldUpdating) => {
+          if (archivioFieldUpdating.field === "oggetto" && archivioFieldUpdating.archivio.fk_idArchivioRadice.id === this.archivio.fk_idArchivioRadice.id) {
+            this.addTreeNode(archivioFieldUpdating.archivio);
+          }
+        }
+      )
+    );
   }
 
   //Todo: BreadCrumbs is not used for now but the code for it is still present (bricioleArchivi is commented)

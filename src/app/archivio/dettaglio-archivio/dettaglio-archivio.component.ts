@@ -8,6 +8,7 @@ import { TreeSelect } from 'primeng/treeselect';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { TipoArchivioTraduzioneVisualizzazione } from 'src/app/archivi-list-container/archivi-list/archivi-list-constants';
 import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
+import { ArchivioFieldUpdating, ArchivioUtilsService } from '../archivio-utils.service';
 import { ExtendedArchivioService } from '../extended-archivio.service';
 
 @Component({
@@ -64,7 +65,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     private configurazioneService: ConfigurazioneService,
     private confirmationService: ConfirmationService,
     private loginService: NtJwtLoginService,
-    private navigationTabsService: NavigationTabsService) 
+    private navigationTabsService: NavigationTabsService,
+    private archivioUtilsService: ArchivioUtilsService) 
   {
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
@@ -184,7 +186,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
           (resArchivio: Archivio) => {
             this.archivio.version = resArchivio.version;
             if (field === "oggetto") {
-              this.updateArchivio.emit(resArchivio);
+              this.archivioUtilsService.updateArchivioFieldSelection({field: field, archivio: this.archivio} as ArchivioFieldUpdating);
             }
           }
         )
