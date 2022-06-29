@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
-import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende } from '@bds/ng-internauta-model';
+import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio } from '@bds/ng-internauta-model';
 import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -79,6 +79,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     console.log("Archivio test: ", this.archivio);
     this.updateAnniTenuta();
     this.getResponsabili();
+    this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
   }
 
   private loadConfigurations() {
@@ -356,7 +357,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   }
 
 
-  public changeTipo(): void {
+  public onChangeTipo(): void {
     const archivioToUpdate: Archivio = new Archivio();
     archivioToUpdate.tipo = this.archivio.tipo;
     archivioToUpdate.version = this.archivio.version;

@@ -223,7 +223,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         {
           id: SelectButton.DOCUMENTI,
           label: "Documenti",
-          disabled: this.archivio.stato === StatoArchivio.BOZZA
+          disabled: this.archivio.stato === StatoArchivio.BOZZA || 
+            !(this.archivio.permessiEspliciti.find(p => p.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id).bit > DecimalePredicato.PASSAGGIO)
         }
       );
     } else {

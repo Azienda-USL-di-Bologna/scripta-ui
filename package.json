@@ -21,7 +21,7 @@
     "@angular/platform-browser": "12.2.16",
     "@angular/platform-browser-dynamic": "12.2.16",
     "@angular/router": "12.2.16",
-    "@bds/common-components": "3.0.10",
+    "@bds/common-components": "3.0.12",
     "@bds/ng-internauta-model": "3.0.22",
     "@bds/nt-communicator": "3.0.1",
     "@bds/nt-jwt-login": "3.0.0-alfa",
