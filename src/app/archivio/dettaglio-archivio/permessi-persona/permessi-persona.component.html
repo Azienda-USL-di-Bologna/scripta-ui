@@ -43,6 +43,7 @@
                             class="autocomplete-utenti" 
                             [additionalFilters]="additionalFilterComboUtenti" 
                             [azienda]="archivio.idAzienda"
+                            [showPool]="false"
                             [showOnlyUser]="true"
                             (utenteStrutturaSelezionatoEmit)="aggiungiPersonaStruttura($event, permesso)">
                         </lib-users-autocomplete>
