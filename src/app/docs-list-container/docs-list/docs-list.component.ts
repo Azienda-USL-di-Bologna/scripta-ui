@@ -1149,7 +1149,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       && !doc.archiviDocList.some(archivioDoc => !archivioDoc.dataEliminazione && archivioDoc.id !== doc.archiviation.id)) {
       // Ho un PDD ma non ha altre archiviazioni non eliminate logicamente oltre quella che si sta provando a cancellare. Non posso far procedere
       this.messageService.add({
-        severity: "warning",
+        severity: "warn",
         key: "docsListToast",
         detail: `Il documento deve essere presente in almeno un altro fascicolo prima di poter eliminare questa fasciolazione`
       });
