@@ -1,12 +1,13 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MenuItem, TreeNode } from 'primeng/api';
 import { ExtendedArchivioService } from '../extended-archivio.service';
-import { Archivio, ArchivioDetail, ArchivioDetailViewService, ArchivioService, ConfigurazioneService, ENTITIES_STRUCTURE, ParametroAziende, UtenteService } from '@bds/ng-internauta-model';
-import { combineLatest, filter, Observable, Subscription } from 'rxjs';
+import { Archivio, ArchivioDetail, ArchivioDetailViewService, ConfigurazioneService, ENTITIES_STRUCTURE, ParametroAziende } from '@bds/ng-internauta-model';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
 import { AppService } from 'src/app/app.service';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from '@nfa/next-sdr';
 import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
+import { ArchivioFieldUpdating, ArchivioUtilsService } from '../archivio-utils.service';
 
 @Component({
   selector: 'archivio-tree',
@@ -18,13 +19,14 @@ export class ArchivioTreeComponent implements OnInit {
   //public bricioleArchivi: MenuItem[] = [];
   public selectedNode: TreeNode = null;
   private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
-  private ARCHIVIO_DETAIL_STANDARD: string = ENTITIES_STRUCTURE.scripta.archiviodetail.standardProjections.ArchivioDetailWithPlainFields;
+  //private ARCHIVIO_DETAIL_STANDARD: string = ENTITIES_STRUCTURE.scripta.archiviodetail.standardProjections.ArchivioDetailWithPlainFields;
   private ARCHIVIO_DETAIL_PROJECTION = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
 
   public troppiSottoFascicoli: boolean = false;
   public troppiInserti: boolean = false;
   public numeroMaxSottoarchiviCaricabili: number;
   private utenteUtilitiesLogin: UtenteUtilities;
+  public subscriptions: Subscription[] = [];
 
   public pageConfNoLimit: PagingConf = {
     conf: {
@@ -59,13 +61,23 @@ export class ArchivioTreeComponent implements OnInit {
     private loginService: NtJwtLoginService,
     private navigationTabsService: NavigationTabsService,
     private appService: AppService,
-    ) {
+    private archivioUtilsService: ArchivioUtilsService) {
      
   }
 
   ngOnInit(): void {
     //console.log("ArchivioTreeComponent.ngOnInit()", this.archivio);
     this.loadConfig();
+
+    this.subscriptions.push(
+      this.archivioUtilsService.updateArchivioFieldEvent.subscribe(
+        (archivioFieldUpdating: ArchivioFieldUpdating) => {
+          if (archivioFieldUpdating.field === "oggetto" && archivioFieldUpdating.archivio.fk_idArchivioRadice.id === this.archivio.fk_idArchivioRadice.id) {
+            this.addTreeNode(archivioFieldUpdating.archivio);
+          }
+        }
+      )
+    );
   }
 
   //Todo: BreadCrumbs is not used for now but the code for it is still present (bricioleArchivi is commented)
@@ -296,24 +308,28 @@ export class ArchivioTreeComponent implements OnInit {
    * Se l'archivio cliccato c'era già lo devo comunque selezionare
    */
   private addTreeNode(archivio: Archivio | ArchivioDetail) {
+    const nodoBuildato = this.buildTreeNode(archivio);
     switch (archivio.livello) {
       case 1:
-        const nodo = this.buildTreeNode(archivio);
-        nodo.children = this.archivi[0].children;
-        this.archivi[0] = nodo;
+        nodoBuildato.children = this.archivi[0].children;
+        this.archivi[0] = nodoBuildato;
         this.selectedNode = this.archivi[0];
         //this.bricioleArchivi = this.bricioleArchivi.slice(0,2);
         break;
       case 2:
         const index = this.archivi[0].children.findIndex(nodo => (nodo.data as Archivio).id === archivio.id);
         if (index === -1) {
+          // Il nodo non esiste, lo devo inserire ex novo
           const indexArchivioSuccessivo = this.archivi[0].children.findIndex(nodo => (nodo.data as Archivio).numero > archivio.numero);
           if (indexArchivioSuccessivo === -1) {
-            this.archivi[0].children.push(this.buildTreeNode(archivio));
+            this.archivi[0].children.push(nodoBuildato);
           } else {
-            this.archivi[0].children.splice(indexArchivioSuccessivo, 0, this.buildTreeNode(archivio));
+            this.archivi[0].children.splice(indexArchivioSuccessivo, 0, nodoBuildato);
           }
         } else {
+          // Il nodo esiste già, lo devo aggiornare. Mi salvo anche i children suoi.
+          nodoBuildato.children = this.archivi[0].children[index].children;
+          this.archivi[0].children[index] = nodoBuildato;
           this.selectedNode = this.archivi[0].children[index];
         }
         //this.bricioleArchivi = [this.bricioleArchivi[0],this.bricioleArchivi[1], this.buildMenuItem(archivio)];
@@ -321,16 +337,18 @@ export class ArchivioTreeComponent implements OnInit {
       case 3:
         const indexLiv2 = this.archivi[0].children.findIndex(nodo => (nodo.data as Archivio).id === archivio.fk_idArchivioPadre.id);
         if (indexLiv2 !== -1) {
-          // Il sottofascicolo padre quindi esiste già. Devo solo aggiungere l'inserto se non c'è già.
+          // Il sottofascicolo padre esiste già. Devo solo aggiungere l'inserto se non c'è già.
           const indexLiv3 = this.archivi[0].children[indexLiv2].children.findIndex(nodo => (nodo.data as Archivio).id === archivio.id);
           if (indexLiv3 === -1) {
             const indexArchivioSuccessivo = this.archivi[0].children[indexLiv2].children.findIndex(nodo => (nodo.data as Archivio).numero > archivio.numero);
             if (indexArchivioSuccessivo === -1) {
-              this.archivi[0].children[indexLiv2].children.push(this.buildTreeNode(archivio));
+              this.archivi[0].children[indexLiv2].children.push(nodoBuildato);
             } else {
-              this.archivi[0].children[indexLiv2].children.splice(indexArchivioSuccessivo, 0, this.buildTreeNode(archivio));
+              this.archivi[0].children[indexLiv2].children.splice(indexArchivioSuccessivo, 0, nodoBuildato);
             }
           } else {
+            // L'inserto c'è già. Allora lo voglio aggiornare.
+            this.archivi[0].children[indexLiv2].children[indexLiv3] = nodoBuildato;
             this.selectedNode = this.archivi[0].children[indexLiv2].children[indexLiv3];
           }
           //this.bricioleArchivi = [this.bricioleArchivi[0], this.bricioleArchivi[1], this.buildMenuItem(this.archivi[0].children[indexLiv2].data), this.buildMenuItem(archivio)];
@@ -338,7 +356,7 @@ export class ArchivioTreeComponent implements OnInit {
           // Manca il sottofascicolo, allora devo aggiungere sia lui che l'inserto
           this.getArchivioById(archivio.fk_idArchivioPadre.id).subscribe(
             archivioPadre => {
-              const newNode: TreeNode = this.buildTreeNode(archivioPadre, [this.buildTreeNode(archivio)]);
+              const newNode: TreeNode = this.buildTreeNode(archivioPadre, [nodoBuildato]);
               const indexArchivioSuccessivo = this.archivi[0].children.findIndex(nodo => (nodo.data as Archivio).numero > archivioPadre.numero);
               if (indexArchivioSuccessivo === -1) {
                 this.archivi[0].children.push(newNode);

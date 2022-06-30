@@ -21,7 +21,7 @@
           optionLabel="nome" 
           appendTo="body" 
           class="dropdown"
-          [disabled]="archivio.tipo.SPECIALE || archivio.livello > 1 || !loggedUserIsResponsbaileOrVicario">
+          [disabled]="archivio.tipo === 'SPECIALE' || archivio.livello > 1 || !loggedUserIsResponsbaileOrVicario">
         </p-dropdown>
       </div>
       <!-- Campo riservato -->
@@ -146,7 +146,7 @@
         class="p-mr-2" 
         pTooltip="Numera Fascicolo" 
         aria-label="Numera Fascicolo"
-        [disabled]="disableNumeraButton()" 
+        [disabled]="!archivio.oggetto || !archivio.tipo || !archivio.idTitolo" 
         tooltipPosition="bottom">
       </button>
     </div>

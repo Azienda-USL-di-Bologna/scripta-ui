@@ -11,6 +11,7 @@ import { Dropdown } from "primeng/dropdown";
 import { Calendar } from "primeng/calendar";
 import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
+import { first } from 'rxjs/operators'
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
 import { Impostazioni } from "../../utilities/utils";
 import { cols, colsCSV, DocsListMode, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
@@ -130,7 +131,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     //this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.DOCUMENTI, mode: this.docsListMode } }); 
     
     this.subscriptions.push(
-      this.loginService.loggedUser$.subscribe(
+      this.loginService.loggedUser$.pipe(first()).subscribe(
         (utenteUtilities: UtenteUtilities) => {
           this.utenteUtilitiesLogin = utenteUtilities;
           this.isSegretario = this.utenteUtilitiesLogin.getUtente().struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
@@ -145,7 +146,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           } else { 
             this.setColumnsPerDetailArchivio();
 
-            const bit = this.archivio.permessiEspliciti.find((permessoArchivio: PermessoArchivio) => permessoArchivio.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit;
+            const bit = this.archivio.permessiEspliciti.find((permessoArchivio: PermessoArchivio) => permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit;
             this.loggedUserCanRestoreArchiviation = bit >= DecimalePredicato.VICARIO;
             this.loggedUserCanDeleteArchiviation = bit >= DecimalePredicato.ELIMINA;
           }
@@ -254,7 +255,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     } else if (this._selectedColumns.length < colsSelected.length) {
       this._selectedColumns.push(colsSelected.find(cs => !this._selectedColumns.includes(cs)));
     }
-    this.saveConfiguration();
+    if (!this.archivio) {
+      this.saveConfiguration();
+    }
   }
 
   /**
@@ -335,6 +338,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this._selectedColumns.push(this.cols.find(e => e.field === c));
     })
     console.log(this._selectedColumns);
+
+    this.selectableColumns = cols.map(e => {
+      if (colonneDaVisualizzare.includes(e.field)) {
+        e.selectionDisabled = true;
+      }
+      return e;
+    });
   }
 
   /**
@@ -1103,6 +1113,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   /**
    * Preso in ingresso un doc, prendo l'archivioDoc e lo aggiorno 
    * togliendo idPersonaEliminazione e dataEliminazione
+   * NB: Dentro archiviation c'è l'archivioDoc su cui sto lavorando
    * @param doc 
    */
   public restoreArchiviation(doc: ExtendedDocDetailView): void {
@@ -1128,13 +1139,54 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   /**
-   * TODO in altro rm
+   * Preso in ingresso un doc, ne faccio l'eliminazione logica.
+   * - Se ho un PDD però devo controllare che il doc abbia almeno un altra fascicolazione non eliminata logicamente
+   * NB: Dentro archiviation c'è l'archivioDoc su cui sto lavorando
    * @param doc 
    */
-  public deleteArchiviation(doc: ExtendedDocDetailView): void {
-
+  public deleteArchiviation(doc: ExtendedDocDetailView, rowIndex: number, iconaEliminazioneArchiviazione: any): void {
+    if (["PROTOCOLLO_IN_USCITA", "PROTOCOLLO_IN_ENTRATA", "DETERMINA", "DELIBERA"].includes(doc.tipologia)
+      && !doc.archiviDocList.some(archivioDoc => !archivioDoc.dataEliminazione && archivioDoc.id !== doc.archiviation.id)) {
+      // Ho un PDD ma non ha altre archiviazioni non eliminate logicamente oltre quella che si sta provando a cancellare. Non posso far procedere
+      this.messageService.add({
+        severity: "warning",
+        key: "docsListToast",
+        detail: `Il documento deve essere presente in almeno un altro fascicolo prima di poter eliminare questa fasciolazione`
+      });
+      return;
+    } else {
+      // Procediamo con l'eliminazione logica. Prima chiediamo conferma:
+      this.confirmationService.confirm({
+        key: "confirm-popup",
+        target: iconaEliminazioneArchiviazione,
+        message: `Stai per eliminare logicamente la fascicolazione di ${doc.registrazioneVisualizzazione ? doc.registrazioneVisualizzazione : doc.oggettoVisualizzazione}. Vuoi procedere?`,
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => {
+          // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
+          const archivioDocToUpdate: ArchivioDoc = new ArchivioDoc();
+          archivioDocToUpdate.dataEliminazione = new Date();
+          archivioDocToUpdate.idPersonaEliminazione = { id: this.utenteUtilitiesLogin.getUtente().idPersona.id } as Persona;
+          archivioDocToUpdate.version = doc.archiviation.version;
+          archivioDocToUpdate.id = doc.archiviation.id;
+          this.subscriptions.push(this.archivioDocService.patchHttpCall(archivioDocToUpdate, archivioDocToUpdate.id)
+            .subscribe(
+              res => {
+                doc.archiviation.dataEliminazione = res.dataEliminazione;
+                doc.archiviation.idPersonaEliminazione = res.idPersonaEliminazione;
+                doc.archiviation.version = res.version;
+                this.messageService.add({
+                  severity: "success",
+                  key: "docsListToast",
+                  detail: `Fascicolazione eliminata logicamente con successo`
+                });
+              }
+            )
+          );
+        },
+        reject: () => { /* L'utente ha cambaito idea. Non faccio nulla */ }
+      });
+    }
   }
-
 
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi

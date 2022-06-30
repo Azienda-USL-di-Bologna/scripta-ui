@@ -16,9 +16,9 @@ import { Table } from 'primeng/table';
 import { AppComponent } from '../app.component';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@nfa/next-sdr';
 import { Subscription } from 'rxjs';
+import { first } from 'rxjs/operators'
 import { DatePipe } from '@angular/common';
 import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
-import { EnumPredicatoPermessoArchivio } from './dettaglio-archivio/permessi-dettaglio-archivio.service';
 
 @Component({
   selector: 'app-archivio',
@@ -42,8 +42,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
 
-
   get archivio(): Archivio { return this._archivio; }
+
+  /**
+   * Prendo in input l'archivio che il componente deve mostrare.
+   * Lo ricarico con la projection che voglio e inizializzo il componente
+   */
   @Input() set data(data: any) {
     this.extendedArchivioService.getByIdHttpCall(
       data.archivio.id,
@@ -98,15 +102,13 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     private datepipe: DatePipe,
     private loginService: NtJwtLoginService,
   ) {
-    this.subscriptions.push(
-      this.loginService.loggedUser$.subscribe(
-        (utenteUtilities: UtenteUtilities) => {
-          this.utenteUtilitiesLogin = utenteUtilities;
-          if (this.archivio) {
-            this.inizializeAll();
-          }
+    this.loginService.loggedUser$.pipe(first()).subscribe(
+      (utenteUtilities: UtenteUtilities) => {
+        this.utenteUtilitiesLogin = utenteUtilities;
+        if (this.archivio) {
+          this.inizializeAll();
         }
-      )
+      }
     );
   }
 
@@ -114,10 +116,15 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   ngAfterViewInit(): void {
-    /* console.log(this.archivio.stato)*/
-    //this.inizializeAll(); 
+
   }
 
+  /**
+   * Funzione chiamata quando ho un nuovo archivio da mostrare. Si occupa di:
+   * - Costruire i selectedButton da mostrare/abilitare
+   * - Creare o meno il bottone per creare nuovi sottoarchivi
+   * - Si posizione sul corretto selctedButton e mostra il corretto sottocomponente
+   */
   private inizializeAll(): void {
     this.buildSelectButtonItems(this.archivio);
     this.buildNewArchivioButton(this.archivio);
@@ -182,10 +189,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     }
   }
 
-  public onUpdateArchivio(event: any): void {
-
-  }
-
   /**
    * Calcolo la lista di selectButton che vogliamo vedere.
    * In particolare se l'archivio aperto è un inserto allora
@@ -223,13 +226,13 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         labelDati = "Dati dell'inserto";
         break;
     }
-
     if (this.contenutoDiviso) {
       this.selectButtonItems.push(
         {
           id: SelectButton.DOCUMENTI,
           label: "Documenti",
-          disabled: this.archivio.stato === StatoArchivio.BOZZA
+          disabled: this.archivio.stato === StatoArchivio.BOZZA || 
+            !(this.archivio.permessiEspliciti.find(p => p.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id).bit > DecimalePredicato.PASSAGGIO)
         }
       );
     } else {
@@ -241,7 +244,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         }
       );
     }
-
     this.selectButtonItems.push(
       {
         id: SelectButton.DETTAGLIO,
@@ -251,7 +253,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   /**
-   * 
+   * Creo il bottone per creare un nuovo sottoarchivio
    * @param archivio 
    */
   public buildNewArchivioButton(archivio: Archivio | ArchivioDetail): void {
@@ -287,30 +289,18 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    */
   public canCreateSottoarchivio(): boolean {
     return this._archivio.permessiEspliciti.some(permessoArchivio => 
-      permessoArchivio.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id
+      permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id
       &&
       permessoArchivio.bit >= DecimalePredicato.MODIFICA
     );
-    /* let res = false;
-    if (this.archivio.permessi) {
-      const permessone = this._archivio.permessi.find(permesso => permesso.soggetto.id_provenienza == this.utenteUtilitiesLogin.getUtente().idPersona.id);
-      if (permessone) {
-        permessone.categorie.forEach(categoria => {
-          categoria.permessi.forEach(permessoCategoria => {
-            if (permessoCategoria.predicato === EnumPredicatoPermessoArchivio.ELIMINA 
-                || permessoCategoria.predicato === EnumPredicatoPermessoArchivio.MODIFICA
-                || permessoCategoria.predicato === EnumPredicatoPermessoArchivio.VICARIO
-                || permessoCategoria.predicato === EnumPredicatoPermessoArchivio.RESPONSABILE) {
-              res = true;
-            }
-          });
-        });
-      }
-    }
-    return res; */
   }
 
-  public updateArchivio(archivio: Archivio) {
+  /**
+   * Metodo chiamato quando non ho cambiato archivio, ma esso è stato modificato, 
+   * e alcune di queste modifiche le vogliamo "notare"
+   * @param archivio 
+   */
+  public onUpdateArchivio(archivio: Archivio) {
     console.log("updateArchivio(archivio: Archivio)", archivio);
     this._archivio = archivio;
     this.inizializeAll();
@@ -455,6 +445,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       })
     );
   }
+  
   public ngOnDestroy(): void {
     if (this.subscriptions) {
       this.subscriptions.forEach(

@@ -13,7 +13,7 @@ import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/nt-co
 })
 export class PermessiStrutturaComponent implements OnInit {
   public perms: PermessoTabella[] = [];
-  public cols: any[];
+  //public cols: any[] = [];
   public _rolesToFilter: string[];
   public subscriptions: Subscription[] = [];
   private _archivio: Archivio | ArchivioDetail;
@@ -23,12 +23,22 @@ export class PermessiStrutturaComponent implements OnInit {
   public predicati: EnumPredicatoPermessoArchivio[] = [];
   private permClone: { [s: number]: PermessoTabella; } = {};
   @ViewChild("dt", {}) private dt: Table;
+
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set archivio(archivio: Archivio | ArchivioDetail) {
     this._archivio = archivio;
     this.azienda = this._archivio.idAzienda;
     this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "strutture");
+    /* if (this.archivio.livello !== 1 && !this.cols.some(c => c.field === 'ereditato')) {
+      this.cols.push({ field: 'ereditato', header: 'Ereditato', class: 'ereditato-column' });
+    } else if (this.archivio.livello === 1 && !this.cols.some(c => c.field === 'ereditato')) {
+      const index = this.cols.findIndex(c => c.field === 'ereditato');
+      if (index !== -1) {
+        this.cols.splice(index, 1);
+      }
+    } */
   }
+
   public _loggedUserIsResponsbaileOrVicario: Boolean;
   get loggedUserIsResponsbaileOrVicario(): Boolean { return this._loggedUserIsResponsbaileOrVicario; }
   @Input() set loggedUserIsResponsbaileOrVicario(loggedUserIsResponsbaileOrVicario: Boolean) {
@@ -43,14 +53,17 @@ export class PermessiStrutturaComponent implements OnInit {
   ngOnInit(
   ): void {
 
-    this.cols = [
+    /* this.cols = [
       { field: 'struttura', header: 'Struttura', class: 'struttura-column' },
       { field: 'permesso', header: 'Permesso', class: 'permesso-column' },
       { field: 'trasmetti', header: 'Trasmetti a strutture figlie', class: 'trasmetti-column' },
       { field: 'propaga', header: 'Propaga a sottolivelli', class: 'propaga-column' },
-      { field: 'ereditato', header: 'Ereditato', class: 'ereditato-column' },
+      
       //{ field: 'azione', header: 'Azione', class:'azione-column' }
     ];
+    if (this.archivio.livello !== 1) {
+      this.cols.push({ field: 'ereditato', header: 'Ereditato', class: 'ereditato-column' });
+    } */
     this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true, false);
     this.subscriptions.push(this.permessiDettaglioArchivioService.archivioReloadPermessiEvent.subscribe((archivioReloadPermessi: boolean) => {
       if (archivioReloadPermessi) { 

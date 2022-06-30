@@ -534,7 +534,7 @@
     </tr>
   </ng-template>
   <!-- BODY -->
-  <ng-template pTemplate="body" let-rowData let-columns="columns">
+  <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex">
     <tr class="row-height">
       <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
         <div *ngSwitchCase="'idAzienda'">
@@ -634,9 +634,10 @@
         >
         </i>
         <i *ngIf="loggedUserCanDeleteArchiviation && !!!rowData.archiviation.dataEliminazione"
+          #iconaEliminazioneArchiviazione
           class="pi pi-times" 
           pTooltip="Elimina fascicolazione"
-          (click)="deleteArchiviation(rowData)"
+          (click)="deleteArchiviation(rowData, index, iconaEliminazioneArchiviazione)"
         >
         </i>
       </td>

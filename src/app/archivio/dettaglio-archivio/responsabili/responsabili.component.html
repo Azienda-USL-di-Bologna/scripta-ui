@@ -1,24 +1,60 @@
 <p-table 
   #tableResponsabiliArchivi 
+  dataKey="id"
+  editMode="row" 
   [value]="responsabiliArchivi" 
-  [columns]="colsSottoarchivio">
-<ng-template pTemplate="header" let-columns>
-  <tr>
-    <th>Nome</th>
-    <th>Struttura</th>
-    <th>Ruolo</th>
-    <th *ngIf="archivio.livello === 1 && loggedUserIsResponsbaileOrVicario">Azioni</th>
-  </tr>
-</ng-template>
-<ng-template pTemplate="body" let-rowRespo let-columns="columns">
-  <tr>
-    <td>{{rowRespo.idPersona.descrizione}}</td>
-    <td>{{rowRespo.idStruttura?.nome}}</td>
-    <td>{{rowRespo.ruolo | titlecase}}</td>
-    <td *ngIf="archivio.livello === 1 && loggedUserIsResponsbaileOrVicario">
-        <button type="button" pButton icon="pi pi-pencil" pTooltip="Modifica Permesso"></button>
-        <button type="button" pButton icon="pi pi-trash" pTooltip="Elimina Permesso"></button>
-    </td>
-  </tr>
-</ng-template>
+  styleClass="tabella-responsabili-archivio"
+  [scrollable]="true"
+	scrollHeight="flex">
+  <ng-template pTemplate="caption">
+		<div class="">
+			<button 
+				id="aggiungiResponsabile"
+				type="button"
+				pButton 
+				pRipple 
+				icon="pi pi-plus" 
+				(click)="inEditing = true; addResponsabile()" 
+				class="mr-2" 
+				label="Aggiungi responsabile o vicario"
+				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario">
+			</button>
+		</div>
+	</ng-template>
+  <ng-template pTemplate="header">
+    <tr>
+      <th class="nome-column">Nome</th>
+      <th class="struttura-column">Struttura</th>
+      <th class="ruolo-column">Ruolo</th>
+      <th class="azione-column" *ngIf="archivio.livello === 1 && loggedUserIsResponsbaileOrVicario">Azioni</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-rowRespo let-editing="editing">
+    <tr [pEditableRow]="rowRespo">
+      <td class="nome-column">{{rowRespo.idPersona.descrizione}}</td>
+      <td class="struttura-column">{{rowRespo.idStruttura?.nome}}</td>
+      <td class="ruolo-column">{{rowRespo.ruolo | titlecase}}</td>
+      <td *ngIf="archivio.livello === 1 && loggedUserIsResponsbaileOrVicario"
+        class="azione-column">
+          <button 
+            type="button" 
+            pButton 
+            pRipple
+            pInitEditableRow
+            class="p-button-rounded p-button-text"
+            icon="pi pi-pencil" 
+            pTooltip="Modifica Permesso">
+          </button>
+          <button 
+            type="button" 
+            pButton 
+            pRipple
+            pInitEditableRow
+            class="p-button-rounded p-button-text"
+            icon="pi pi-trash" 
+            pTooltip="Elimina Permesso">
+          </button>
+      </td>
+    </tr>
+  </ng-template>
 </p-table>
