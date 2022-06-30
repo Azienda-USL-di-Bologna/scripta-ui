@@ -30,7 +30,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
   private permClone: { [s: number]: PermessoTabella; } = {};
   private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
   private _archivio: Archivio | ArchivioDetail;
-  private lazyLoadFiltersAndSorts: FiltersAndSorts = new FiltersAndSorts();
+  //private lazyLoadFiltersAndSorts: FiltersAndSorts = new FiltersAndSorts();
   public livello: number;
 
   @ViewChild("dt", {}) private dt: Table;
@@ -100,14 +100,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
    * @param perm 
    */
   private loadStruttureRigaSelezionata(perm: PermessoTabella, idSoggetto: number) {
-    const initialFiltersAndSorts = new FiltersAndSorts();
-    initialFiltersAndSorts.addFilter(new FilterDefinition("idUtente.idPersona.id", FILTER_TYPES.not_string.equals, idSoggetto));
-    initialFiltersAndSorts.addFilter(new FilterDefinition("idStruttura.idAzienda.id", FILTER_TYPES.not_string.equals, this._archivio.idAzienda.id));
-    this.subscriptions.push(this.utenteStrutturaService.getData(
-      PROJECTIONS.utentestruttura.customProjections.UtenteStrutturaWithIdAfferenzaStrutturaCustom,
-      initialFiltersAndSorts,
-      this.lazyLoadFiltersAndSorts,
-      this.pageConfNoCountNoLimit)
+    this.subscriptions.push(this.permessiDettaglioArchivioService.loadStruttureOfPersona(idSoggetto, this._archivio.idAzienda.id)
       .subscribe(
         data => {
           if (data && data.results && data.page) {
@@ -176,8 +169,6 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     )
   }
 
-  
-
   /**
    * funzione richiamata dall'html per ripristinare i dati della vecchia riga
    * @param perm 
@@ -190,7 +181,6 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     } else { 
       this.perms.pop();
     }
-
   }
   
   /**

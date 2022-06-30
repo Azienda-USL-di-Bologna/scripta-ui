@@ -1,12 +1,13 @@
 import { DatePipe } from "@angular/common";
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Archivio, ArchivioDetail, CategoriaPermessiStoredProcedure, EntitaStoredProcedure, PermessoEntitaStoredProcedure, PermessoStoredProcedure, Persona, Struttura } from "@bds/ng-internauta-model";
-import { BaseUrlType, EntitaBlackbox, getInternautaUrl, OggettoneOperation, OggettonePermessiEntitaGenerator, PermissionManagerService } from "@bds/nt-communicator";
+import { Archivio, ArchivioDetail, CategoriaPermessiStoredProcedure, EntitaStoredProcedure, PermessoEntitaStoredProcedure, PermessoStoredProcedure, Persona, Struttura, UtenteStrutturaService } from "@bds/ng-internauta-model";
+import { BaseUrlType, EntitaBlackbox, getInternautaUrl, OggettoneOperation, OggettonePermessiEntitaGenerator, PermissionManagerService, PROJECTIONS } from "@bds/nt-communicator";
 import { ExtendedArchivioService } from "../extended-archivio.service";
 import { MessageService } from "primeng/api";
 import { Observable, Subject } from "rxjs";
 import { BlackboxPermessiService } from "@bds/ng-internauta-model";
+import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from "@nfa/next-sdr";
 
 
 @Injectable({
@@ -16,6 +17,7 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
   private APPLICATION: string = "GEDI_INTERNAUTA";
   private AMBITO: string = "SCRIPTA";
   private TIPO: string = "ARCHIVIO";
+  private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
   
   private _archivioReloadPermessi = new Subject<boolean>();
 
@@ -24,7 +26,8 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
     protected datepipe: DatePipe,
     private extendedArchivioService: ExtendedArchivioService,
     private messageService: MessageService,
-    private blackboxPermessiService: BlackboxPermessiService) {
+    private blackboxPermessiService: BlackboxPermessiService,
+    private utenteStrutturaService: UtenteStrutturaService) {
     super(_http, getInternautaUrl(BaseUrlType.Permessi), datepipe);
   }
 
@@ -235,6 +238,24 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
     })
     return oggettoni;
   }
+
+  /**
+   * Torno l'observable che carica le strutture di una persona su una azienda
+   * @param idPersona 
+   * @param idAzienda 
+   * @returns 
+   */
+  public loadStruttureOfPersona(idPersona: number, idAzienda: number) {
+    const initialFiltersAndSorts = new FiltersAndSorts();
+    initialFiltersAndSorts.addFilter(new FilterDefinition("idUtente.idPersona.id", FILTER_TYPES.not_string.equals, idPersona));
+    initialFiltersAndSorts.addFilter(new FilterDefinition("idStruttura.idAzienda.id", FILTER_TYPES.not_string.equals, idAzienda));
+    initialFiltersAndSorts.addFilter(new FilterDefinition("idStruttura.ufficio", FILTER_TYPES.not_string.equals, false));
+    return this.utenteStrutturaService.getData(
+      PROJECTIONS.utentestruttura.customProjections.UtenteStrutturaWithIdAfferenzaStrutturaCustom,
+      initialFiltersAndSorts,
+      null,
+      this.pageConfNoCountNoLimit);
+    }
 }
 
 export class PermessoTabella { 

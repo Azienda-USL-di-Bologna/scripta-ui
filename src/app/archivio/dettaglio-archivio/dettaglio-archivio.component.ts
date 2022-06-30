@@ -80,7 +80,12 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     console.log("Archivio test: ", this.archivio);
     this.updateAnniTenuta();
-    this.getResponsabili();
+    // this.getResponsabili();
+    this.loggedUserIsResponsbaileOrVicario = (this.archivio["attoriList"] as AttoreArchivio[])
+      .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id 
+        && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE 
+        || a.ruolo === RuoloAttoreArchivio.VICARIO 
+        || a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
     this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
   }
 
@@ -151,7 +156,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
    * Questa funzione carica i responsabili dell'archivio 
    * ordinati per ruolo
    */
-  private getResponsabili(): void {
+  /* private getResponsabili(): void {
     const filterAndSort: FiltersAndSorts = new FiltersAndSorts();
     filterAndSort.addFilter(new FilterDefinition("idArchivio.id", FILTER_TYPES.not_string.equals, this.archivio.id));
     filterAndSort.addFilter(new FilterDefinition("ruolo", FILTER_TYPES.not_string.equals, RuoloAttoreArchivio.RESPONSABILE));
@@ -169,7 +174,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
           this.loggedUserIsResponsbaileOrVicario = this.responsabiliArchivi.some((attore: AttoreArchivio) => attore.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id);
         }
       ));
-  }
+  } */
 
   /**
   * Parte un timeout al termine del quale viene salvato il campo della firma specificato

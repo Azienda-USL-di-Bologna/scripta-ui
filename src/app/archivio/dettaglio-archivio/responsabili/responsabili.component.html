@@ -1,5 +1,4 @@
-<p-table 
-  #tableResponsabiliArchivi 
+<p-table #tableResponsabiliArchivi 
   dataKey="id"
   editMode="row" 
   [value]="responsabiliArchivi" 
@@ -29,31 +28,98 @@
       <th class="azione-column" *ngIf="archivio.livello === 1 && loggedUserIsResponsbaileOrVicario">Azioni</th>
     </tr>
   </ng-template>
-  <ng-template pTemplate="body" let-rowRespo let-editing="editing">
-    <tr [pEditableRow]="rowRespo">
-      <td class="nome-column">{{rowRespo.idPersona.descrizione}}</td>
-      <td class="struttura-column">{{rowRespo.idStruttura?.nome}}</td>
-      <td class="ruolo-column">{{rowRespo.ruolo | titlecase}}</td>
+  <ng-template pTemplate="body" let-attore let-editing="editing" let-ri="rowIndex">
+    <tr [pEditableRow]="attore">
+      <td class="nome-column">
+        <!-- Non si deve poreter editare se perm['persona'] è pieno -->
+				<p-cellEditor>
+					<ng-template pTemplate="input">
+						<lib-users-autocomplete *ngIf="!permesso.descrizioneSoggetto" 
+							class="autocomplete-utenti" 
+							[additionalFilters]="additionalFilterComboUtenti" 
+							[azienda]="archivio.idAzienda"
+              [showPool]="false"
+							[showOnlyUser]="true"
+							(utenteStrutturaSelezionatoEmit)="aggiungiPersonaStruttura($event, permesso)">
+						</lib-users-autocomplete>
+						<div *ngIf="permesso.descrizioneSoggetto">{{permesso.descrizioneSoggetto}}</div>
+					</ng-template>
+					<ng-template pTemplate="output">
+						{{attore.idPersona.descrizione}}
+					</ng-template>
+				</p-cellEditor>
+      </td>
+      <td class="struttura-column">
+        <p-cellEditor>
+					<ng-template pTemplate="input">
+						<p-dropdown 
+							appendTo="body" 
+							[options]="struttureAttoreInEditing" 
+							[(ngModel)]="attore.idStruttura">
+							<ng-template let-struttura pTemplate="selectedItem">
+									<div>{{struttura.nome}}</div>
+							</ng-template>
+							<ng-template let-struttura pTemplate="item">
+									<div>{{struttura.nome}}</div>
+							</ng-template>
+						</p-dropdown>
+					</ng-template>
+					<ng-template pTemplate="output">
+						{{attore.idStruttura?.nome}}
+					</ng-template>
+				</p-cellEditor>
+      </td>
+      <td class="ruolo-column">{{attore.ruolo | titlecase}}</td>
       <td *ngIf="archivio.livello === 1 && loggedUserIsResponsbaileOrVicario"
         class="azione-column">
-          <button 
-            type="button" 
-            pButton 
-            pRipple
-            pInitEditableRow
-            class="p-button-rounded p-button-text"
-            icon="pi pi-pencil" 
-            pTooltip="Modifica Permesso">
-          </button>
-          <button 
-            type="button" 
-            pButton 
-            pRipple
-            pInitEditableRow
-            class="p-button-rounded p-button-text"
-            icon="pi pi-trash" 
-            pTooltip="Elimina Permesso">
-          </button>
+        <!-- Bottone di editing.
+          Se la riga riguarda il resp o il proposto allora devo essere RESPONSABILE -->
+        <button *ngIf="!editing && (ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE 
+              || (attore.ruolo !== ruoliEnum.RESPONSABILE && attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO))" 
+          type="button" 
+          pButton 
+          pRipple
+          pInitEditableRow
+          class="p-button-rounded p-button-text"
+          icon="pi pi-pencil" 
+          pTooltip="Modifica struttura"
+          (click)="inEditing = true; onRowEditInit(attore)">
+        </button>
+        <!-- Bottone di cancellazione. 
+          Non si può cancellare il responsabile. E per cancellare un proposto devo essere RESPONSABILE -->
+        <button *ngIf="!editing && attore.ruolo !== ruoliEnum.RESPONSABILE && 
+              (attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO || ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE)"
+          type="button" 
+          pButton 
+          pRipple
+          pInitEditableRow
+          class="p-button-rounded p-button-text"
+          icon="pi pi-trash" 
+          pTooltip="Elimina"
+          (click)="onRowEditSave(attore, ri, 'REMOVE')">
+        </button>
+        <!-- Bottone di salvataggio dell'editing. -->
+        <button *ngIf="editing"
+					pButton 
+					pRipple 
+					pSaveEditableRow 
+					pTooltip="Salva"
+					class="p-button-rounded p-button-text p-button-success p-mr-2"
+					type="button" 
+					icon="pi pi-check" 
+					(click)="inEditing = false; onRowEditSave(attore, ri, 'ADD')" >
+				</button>
+        <!-- Bottone di annullamento editing -->
+				<button *ngIf="editing" 
+					pButton 
+					pRipple 
+					pCancelEditableRow 
+					icon="pi pi-times" 
+					pTooltip="Annulla modifiche"
+					class="p-button-rounded p-button-text p-button-danger"
+					type="button" 
+					(click)="inEditing = false; onRowEditCancel(attore, ri)">
+				</button>
       </td>
     </tr>
   </ng-template>
