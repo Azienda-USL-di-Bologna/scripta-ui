@@ -1,0 +1,16 @@
+:host {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  docs-list {
+    flex: 1 1 0;
+  }
+}
+:host::ng-deep .generic-caption-table-row {
+  background-color: #AFC1DE !important;
+  .left-content .tabs .p-selectbutton .p-button:hover{
+    background-color: #7e7e7e !important;
+    
+  }
+}

@@ -1,0 +1,327 @@
+:host {
+  height: 100%;
+  width: 100%;
+}
+::ng-deep .p-table-scripta-docs-list {
+  .docslist-table-body {
+    //overflow: initial !important;
+    background-color: #AFC1DE !important;
+    
+    /* HEADER */
+    .header-row {
+      height: 41px;
+      .header-column {
+        padding: 2px 13px;
+        .header-box {
+          display: flex;
+          justify-content: space-between;
+        }
+        &.p-highlight {
+          background-color: #2e4a65 !important;
+        }
+      }
+    }
+    /* FILTER */
+    .filter-row {
+      @media screen and (max-width: 1280px) {
+        font-size: 11pt;
+      }
+      .filter-column {
+        padding: 1px;
+        border: transparent;
+        div:first-child {
+          width: 100%;
+        }
+        .p-inputnumber-buttons-stacked .p-inputnumber-input {
+          border-radius: 3px;
+        }
+        .p-inputnumber-button-group {
+          display: none;
+        }
+        .p-dropdown-label, 
+        .p-multiselect-label,
+        p-calendar .p-inputtext {
+          font-size: 12px;
+          text-align: center;          
+          color: #936 !important;
+          font-weight: bold;
+        }
+        .p-inputtext {
+          font-size: 12px;                  
+          color: #936 !important;
+          font-weight: bold;
+        }
+        .p-column-filter-clear-button {
+          display: none !important;
+        }
+      }
+    }
+    .search-wrapper {
+      display: flex;
+      background-color: white;
+      border: 1px solid #a6a6a6;
+      border-radius: 3px;
+      width: 100%;
+      p-columnfilter {
+        width: 100%;
+        .p-inputtext {
+          border: none !important;          
+        }
+      }
+      .close-icon {
+        align-self: center;
+        font-size: 15px;
+        border: 1px solid transparent;
+        background-color: white;
+        display: inline-block;
+        vertical-align: middle;
+        outline: 0;
+        cursor: pointer;
+      }
+    }
+
+    /* BODY */
+    .p-datatable-tbody > tr > td {
+      border-color:#AFC1DE;
+      padding: 0;
+      div {
+        color: #2e4a65 !important;
+        height: 54px;
+        padding: 9px 13px;
+        width: 100%; 
+        &:hover {
+          color: #7e7e7e !important;
+        }
+      }
+      &:not(.scrollable-column) {
+        div {
+          display: flex;
+          align-items: center;
+        }
+      }
+      &.scrollable-column {
+        div {
+          overflow: hidden; 
+          word-wrap: break-word;
+          word-break: break-word;
+          &:hover {
+            overflow-y: auto !important; //needed for firefox
+            overflow-y: scroll;
+            overflow-y: overlay;
+          }
+        }
+      } 
+      &.data-creazione-column,
+      &.data-registrazione-column {
+        div {
+          justify-content: center;
+        }
+      }
+    }
+
+    /*Empty Message*/
+    .emptyMessage{
+      border: 0px;
+      justify-content: center;
+    }
+        
+  }
+
+  .cdk-virtual-scroll-viewport {
+    overflow: scroll !important; // Questo lo prende firefox
+    overflow: overlay !important; // Questo lo prende chrome
+  }
+
+  /* HEADER, FILTER E BODY */
+  .row-height {
+    height: 53px;
+    max-height: 53px;
+  }
+  .ente-column {
+    min-width: 103px;
+    max-width: 103px;
+  }
+  .tipologia-column {
+    min-width: 171px;
+    max-width: 171px;
+  }
+  .registrazione-column {
+    min-width: 180px;
+    max-width: 180px;
+  }
+  .proposta-column {
+    min-width: 146px;
+    max-width: 146px;
+    .proposta-box {
+      padding: 0 !important;
+      .box-elimina {
+        min-width: 30px;
+        max-width: 30px;
+        background-color: #406284;
+        border-right: 1px solid #c8c8c8;
+        border-radius: 0 5px 5px 0;
+        padding: 2px;
+        cursor: pointer;
+        &:hover {
+          background-color: darkorange;
+        }
+        .delete_outline-icon {
+          color: white;
+        }
+      }
+      .box-numero-proposta {
+  
+        padding: 9px 13px;
+      }
+    }
+  }
+  .data-creazione-column,
+  .data-registrazione-column,
+  .data-pubblicazione-column {
+    min-width: 165px;
+    max-width: 165px;
+  }
+  .stato-column {
+    min-width: 134px;
+    max-width: 134px;
+  }
+  .oggetto-column {
+    width: 100%;
+    min-width: 350px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #993366;
+    .oggetto-content { 
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      i {
+        font-size: 28px;
+        margin-right: 7px;
+      }
+    }
+  }
+  .fascicolazioni-column {
+    min-width: 230px;
+    max-width: 230px;
+    .fascicolazione-item {
+      display: inline-block;
+      padding: 3px 5px;
+      margin-bottom: 2px;
+      cursor: pointer;
+      border: 1px solid #203244;
+      font-size: 13px;
+      border-radius: 3px;
+      word-break: break-word;
+      &:hover {
+        border: 1px solid #936;
+      }
+    }
+  }
+  .stato-ufficio-atti-column {
+    min-width: 184px;
+    max-width: 184px;
+  }
+  .responsabile-column {
+    min-width: 204px;
+    max-width: 204px;
+  }
+  .redattore-column {
+    min-width: 204px;
+    max-width: 204px;
+  }
+  .adottato-da-column {
+    min-width: 204px;
+    max-width: 204px;
+  }
+  .mittente-column {
+    min-width: 204px;
+    max-width: 204px;
+  }
+  .destinatari-column {
+    min-width: 230px;
+    max-width: 230px;
+    .destinatari-item {
+      display: inline-block;
+      padding: 3px 5px;
+      margin-bottom: 2px;
+      border: 1px solid #203244;
+      font-size: 13px;
+      border-radius: 3px;
+      word-break: break-word;
+      &:hover {
+        border: 1px solid #936;
+      }
+    }
+  }
+  .firmatari-column {
+    min-width: 230px;
+    max-width: 230px;
+    .firmatari-item {
+      display: inline-block;
+      padding: 3px 5px;
+      margin-bottom: 2px;
+      border: 1px solid #203244;
+      font-size: 13px;
+      border-radius: 3px;
+      word-break: break-word;
+      &:hover {
+        border: 1px solid #936;
+      }
+    }
+  }
+  .sulla-scrivania-di-column {
+    min-width: 230px;
+    max-width: 230px;
+    .sulla-scrivania-di-item {
+      display: inline-block;
+      padding: 3px 5px;
+      margin-bottom: 2px;
+      border: 1px solid #203244;
+      font-size: 13px;
+      border-radius: 3px;
+      word-break: break-word;
+      &:hover {
+        border: 1px solid #936;
+      }
+    }
+  }
+  .protocollo-esterno-column {
+    min-width: 230px;
+    max-width: 230px;
+  }
+}
+
+::ng-deep .table-zero-rows {
+  .p-datatable-scrollable-header {
+    overflow: scroll !important;
+  }
+}
+
+:host ::ng-deep .p-datatable {
+    .p-datatable-thead > tr > th {
+      background: #AFC1DE !important; 
+  }
+}
+
+/* EFFETTO CARICAMENTO RIGHE */
+.loading-cell {
+  padding: 0.571rem 0.857rem !important;
+  .loading-text {
+    display: block;
+    background-color: #f1f1f1;
+    min-height: 19px;
+    animation: pulse 1s infinite ease-in-out;
+    text-indent: -99999px;
+    overflow: hidden;
+  }
+}
+
+.calendar-filter-footer-button-container {
+  display: flex;
+  justify-content: space-around;
+
+}
+
+
+

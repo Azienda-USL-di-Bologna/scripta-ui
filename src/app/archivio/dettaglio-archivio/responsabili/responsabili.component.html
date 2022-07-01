@@ -1,0 +1,24 @@
+<p-table 
+#tableResponsabiliArchivi 
+[value]="responsabiliArchivi" 
+[columns]="colsSottoarchivio">
+<ng-template pTemplate="header" let-columns>
+  <tr>
+    <th>Nome</th>
+    <th>Struttura</th>
+    <th>Ruolo</th>
+    <th *ngIf="archivio.livello === 1">Azioni</th>
+  </tr>
+</ng-template>
+<ng-template pTemplate="body" let-rowRespo let-columns="columns">
+  <tr>
+    <td>{{rowRespo.idPersona.descrizione}}</td>
+    <td>{{rowRespo.idStruttura?.nome}}</td>
+    <td>{{rowRespo.ruolo | titlecase}}</td>
+    <td *ngIf="archivio.livello === 1">
+        <button type="button" pButton icon="pi pi-pencil" pTooltip="Modifica Permesso"></button>
+        <button type="button" pButton icon="pi pi-trash" pTooltip="Elimina Permesso"></button>
+    </td>
+  </tr>
+</ng-template>
+</p-table>

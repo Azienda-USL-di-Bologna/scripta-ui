@@ -1,0 +1,77 @@
+$font-size-label: 13px;
+:host {
+  padding: 5px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+::ng-deep .box-campi-dettaglio {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  .left-side {
+    //width: 100%;
+    flex-grow: 4;
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      .dropdown{
+        width: 100%;
+      }
+      label {
+        min-width: 155px;
+        text-align: right;
+        font-size: $font-size-label;
+      }
+      #classificazione {
+        width: 100%;
+        .p-treeselect {
+          width: 100%;
+        }
+      }
+    }
+    
+  }
+  .right-side {
+    flex-grow: 1;
+    .numeraFasicolo {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
+    .flag-box {
+      display: flex;
+      justify-content: space-around;
+      label {
+        font-size: $font-size-label;
+      }
+      .flag-icon {
+        cursor: pointer;
+      }
+    }
+    .note-box {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      label {
+        align-self: flex-start;
+        font-size: $font-size-label;
+      }
+    }
+  }
+}
+::ng-deep .accodion-box-permessi {
+  flex: 1 1 0;
+  .p-accordion-content {
+    height: 100%;
+  }
+}
+::ng-deep .box-autocomplete-classificazione {
+  padding: 4px 10px 0 10px;
+}

@@ -1,0 +1,630 @@
+<p-table #dt 
+  ariaLabel="Tabella elenco documenti" 
+  [value]="docs" 
+  dataKey="id" 
+  [columns]="selectedColumns"
+  [sortField]="initialSortField"
+  [sortOrder]="-1"
+  [defaultSortOrder]="-1"
+  [reorderableColumns]="true"
+  (onColReorder)="onColReorder($event)"
+  [rows]="rowsNumber" 
+  scrollHeight="flex" 
+  [scrollable]="true" 
+  [virtualScroll]="true" 
+  [virtualScrollDelay]="150"
+  [virtualRowHeight]="54" 
+  [lazy]="true" 
+  [lazyLoadOnInit]="true" 
+  [totalRecords]="totalRecords"
+  (onLazyLoad)="onLazyLoad($event)" 
+  [loading]="loading" 
+  styleClass="p-table-scripta-docs-list"
+  [ngClass]="{'table-zero-rows': totalRecords === 0}"
+  tableStyleClass="docslist-table-body">
+  <ng-template pTemplate="header" let-columns>
+    <!-- HEADER & ORDINAMENTO -->
+    <tr class="header-row"> 
+      <th *ngFor="let col of columns" pReorderableColumn
+        [ngSwitch]="col.field" 
+        [ngClass]="col.headerClass"
+        [pSortableColumn]="col.sortField"
+        [ngStyle]="{'cursor': col.sortField ? null  : 'move' }">
+        <span class="header-box" 
+          [attr.aria-label]="col.label">
+          {{col.header}}
+          <p-sortIcon *ngIf="col.sortField" 
+            [field]="col.sortField" >
+          </p-sortIcon>
+        </span>
+      </th>
+    </tr>
+    <!-- FILTRI -->
+    <tr class="filter-row">
+      <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
+        <div *ngSwitchCase="'idAzienda'" #filteraziendacontainer>
+          <p-columnFilter #columnFilterAzienda [field]="col.filterField"  matchMode="in" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                <p-dropdown #dropdownAzienda
+                  *ngIf = "isAccessibile() !== true"
+                  [options]="aziendeFiltrabili" 
+                  [ngModel]="value" 
+                  (onChange)="filterAzienda(filter, $event.value, filteraziendacontainer)" 
+                  optionValue="value"
+                  optionLabel="label"
+                  appendTo="body"
+                  >
+                </p-dropdown>
+                <p-autoComplete 
+                  *ngIf = "isAccessibile() == true"
+                  [suggestions]="aziendeFiltrabiliFiltered" 
+                  (completeMethod)="filterAziendaAccessibile($event)"
+                  (onClear)="filter(null)"
+                  field = "label"
+                  type="search"
+                  appendTo="body"
+                  (onSelect)="filterAzienda(filter, $event.value, filteraziendacontainer)"
+                >
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+        </div>
+        <div *ngSwitchCase="'tipologia'">
+          <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-multiSelect
+                *ngIf = "isAccessibile() !== true"
+                [showHeader]="false" 
+                [ngModel]="value" 
+                [options]="tipologiaVisualizzazioneObj" 
+                optionValue="value" 
+                optionLabel="nome" 
+                (onChange)="filter($event.value)" 
+                appendTo="body"
+                >
+                <ng-template let-option pTemplate="item">
+                  <div class="p-multiselect-representative-option">
+                    <span class="p-ml-1">{{option.nome}}</span>
+                  </div>
+                </ng-template>
+              </p-multiSelect>
+              <p-autoComplete 
+                *ngIf = "isAccessibile() == true"
+                [suggestions]="filteredTipologia" 
+                (completeMethod)="filterTipologia($event)"
+                (onClear)="filter(null)"
+                field = "nome"
+                type="search"
+                appendTo="body"
+                (onSelect)="filter($event.value)"
+                >
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+        </div>
+        <div *ngSwitchCase="'registrazione'" class="search-wrapper">
+          <p-columnFilter #colfilterregistrazione 
+            type="numeric" 
+            [field]="col.filterField"
+            [matchMode]="col.filterMatchMode" 
+            [showMenu]="false" 
+            [useGrouping]="false"
+            pTooltip="Inserire solo numeri">
+          </p-columnFilter>
+          <button *ngIf="colfilterregistrazione.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilterregistrazione.clearFilter()">
+            close
+          </button>
+        </div>
+        <div *ngSwitchCase="'proposta'" class="search-wrapper">
+          <p-columnFilter #colfilterproposta
+            type="numeric" 
+            [field]="col.filterField" 
+            [matchMode]="col.filterMatchMode" 
+            [showMenu]="false"
+            [useGrouping]="false"
+            placeholder=""
+            pTooltip="Inserire solo numeri">
+          </p-columnFilter>
+          <button *ngIf="colfilterproposta.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilterproposta.clearFilter()">
+            close
+          </button>
+        </div>
+        <div *ngSwitchCase="'dataCreazione'">
+          <p-columnFilter #columnFilterDataCreazione
+            [field]="col.filterField" 
+            type="date" matchMode="is" 
+            [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-calendar #calendarcreazione 
+                inputId="calendarcreazione" 
+                [ngModel]="value" 
+                [yearNavigator]="true" 
+                [monthNavigator]="true" 
+                [minDate]="dataMinimaCreazione"
+                [maxDate]="dataMassimaCreazione"
+                dataType="date" 
+                dateFormat="dd/mm/yy" 
+                [showIcon]="false"
+                [showButtonBar]="false"
+                selectionMode="range"
+                [readonlyInput]="true"
+                (onClickOutside)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'onClickOutside', $event, filter)"
+                appendTo="body">
+                <ng-template pTemplate="footer" class="calendar-filter-footer-button">
+                  <div class="calendar-filter-footer-button-container">
+                    <p-button label="Conferma" (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'doFilter', $event, filter)"></p-button>
+                    <p-button label="Oggi" (click)="handleCalendarButtonEvent(calendarcreazione, 'setToday', $event, filter)"></p-button>
+                    <p-button label="Svuota"(click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'clear', $event, filter)"></p-button>
+                  </div>
+                </ng-template>
+              </p-calendar>
+            </ng-template>
+          </p-columnFilter>
+        </div>
+        <div *ngSwitchCase="'dataRegistrazione'">
+          <p-columnFilter 
+          [field]="col.filterField" 
+          type="date" 
+          matchMode="is" 
+          [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-calendar #calendarregistrazione
+                inputId="calendarregistrazione" 
+                [ngModel]="value"
+                [yearNavigator]="true"
+                [monthNavigator]="true" 
+                [ngModel]="value" 
+                dataType="date" 
+                dateFormat="dd/mm/yy" 
+                [showIcon]="false"
+                [showButtonBar]="false"
+                selectionMode="range"
+                [readonlyInput]="true"
+                appendTo="body"
+                (onClickOutside)="handleCalendarButtonEvent(calendarregistrazione, 'doFilter', $event, filter)"><!-- (onClickOutside)="filter(calendarregistrazione.value)"
+                  (onClearClick)="filter(null)"
+                  (onClickOutside)="calendarregistrazione.value ? filter(calendarregistrazione.value) : handleCalendarButtonEvent(calendarregistrazione, 'doFilter', $event)" -->
+                <ng-template pTemplate="footer" class="calendar-filter-footer-button">
+                  <div class="calendar-filter-footer-button-container">
+                    <p-button label="Conferma" (click)="handleCalendarButtonEvent(calendarregistrazione, 'doFilter', $event, filter)"></p-button>
+                    <p-button label="Oggi" (click)="handleCalendarButtonEvent(calendarregistrazione, 'setToday', $event, filter)"></p-button>
+                    <p-button label="Svuota"  (click)="handleCalendarButtonEvent(calendarregistrazione, 'clear', $event, filter)"></p-button>
+                  </div>
+                </ng-template>
+              </p-calendar>
+            </ng-template>
+          </p-columnFilter>
+        </div>
+        <div *ngSwitchCase="'dataPubblicazione'">
+          <p-columnFilter [field]="col.filterField" type="date" matchMode="is" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-calendar #calendarpubblicazione
+                inputId="calendarpubblicazione" 
+                [ngModel]="value"
+                [yearNavigator]="true"
+                [monthNavigator]="true"
+                yearRange="2000:2030"
+                dataType="date" 
+                dateFormat="dd/mm/yy" 
+                [showIcon]="false"
+                [showButtonBar]="false"
+                selectionMode="range"
+                [readonlyInput]="true"
+                (onClickOutside)="handleCalendarButtonEvent(calendarpubblicazione, 'doFilter', $event, filter)" 
+                appendTo="body">
+                <ng-template pTemplate="footer" class="calendar-filter-footer-button">
+                  <div class="calendar-filter-footer-button-container">
+                    <p-button label="Conferma" (click)="handleCalendarButtonEvent(calendarpubblicazione, 'doFilter', $event, filter)"></p-button>
+                    <p-button label="Oggi" (click)="handleCalendarButtonEvent(calendarpubblicazione, 'setToday', $event, filter)"></p-button>
+                    <p-button label="Svuota" (click)="handleCalendarButtonEvent(calendarpubblicazione, 'clear', $event, filter)"></p-button>
+                  </div>
+                </ng-template>
+              </p-calendar>
+            </ng-template>
+          </p-columnFilter>
+        </div>
+        <div *ngSwitchCase="'oggetto'" class="search-wrapper">
+          <p-columnFilter #colfilteroggetto 
+            type="text" 
+            [field]="col.filterField" 
+            [matchMode]="col.filterMatchMode"
+            [showMenu]="false" >
+            <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
+              <input #inputOggetto 
+                type="text" 
+                pInputText 
+                [value]="value" 
+                (keydown.enter)="removeSort(); filterMethod(inputOggetto.value)">
+            </ng-template>
+          </p-columnFilter>
+          <button  *ngIf="colfilteroggetto.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilteroggetto.clearFilter(); resetSort()">
+            close
+          </button>
+        </div>
+        <div *ngSwitchCase="'stato'" #multiselectStati >
+          <p-columnFilter 
+            [field]="col.filterField" 
+            matchMode="in" 
+            [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <!-- nell'ngModel ho messo il nome perchè altrimenti non venivano settati i filtri una volta cliccati -->
+              <p-multiSelect 
+                *ngIf = "isAccessibile() !== true"
+                [ngModel]="nome"
+                [showHeader]="false" 
+                [options]="statoVisualizzazioneObj" 
+                optionValue="nome"
+                optionLabel="nome" 
+                (onChange)="filterStato(filter,$event.value)" 
+                appendTo="body">
+                <ng-template let-option pTemplate="item">
+                  <div class="p-multiselect-representative-option">
+                    <span class="p-ml-1">{{option.nome}}</span>
+                  </div>
+                </ng-template>
+              </p-multiSelect>
+              <p-autoComplete 
+                *ngIf = "isAccessibile() == true"
+                [suggestions]="filteredStati" 
+                (completeMethod)="filterStatoAccessibile($event)"
+                (onClear)="filter(null)"
+                field = "nome"
+                type="search"
+                appendTo="body"
+                (onSelect)="filter($event.value)"
+                >
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+        </div>
+        <div *ngSwitchCase="'fascicolazioni'" class="search-wrapper">
+          <p-columnFilter #colfilterfascicolazioni 
+            type="text" 
+            [field]="col.filterField"
+            [matchMode]="col.filterMatchMode" 
+            [showMenu]="false" >
+            <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
+              <input #inputFascicolazioni 
+              type="text" 
+              pInputText 
+              [value]="value"
+              (keydown.enter)="removeSort(); filterMethod(inputFascicolazioni.value)">
+            </ng-template>
+          </p-columnFilter>
+          <button *ngIf="colfilterfascicolazioni.hasFilter()" class="material-icons close-icon" type="reset"
+            (click)="colfilterfascicolazioni.clearFilter(); resetSort()">
+            close
+          </button>
+        </div>
+        <div *ngSwitchCase="'statoUfficioAtti'">
+          <p-columnFilter 
+            [field]="col.filterField" 
+            matchMode="in" 
+            [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-multiSelect 
+                *ngIf = "isAccessibile() !== true"
+                [showHeader]="false"
+                [ngModel]="value" 
+                [options]="statoUfficioAttiVisualizzazioneObj"
+                optionValue="value" 
+                optionLabel="nome" 
+                (onChange)="filter($event.value)" 
+                appendTo="body">
+                <ng-template let-option pTemplate="item">
+                  <div class="p-multiselect-representative-option">
+                    <span class="p-ml-1">{{option.nome}}</span>
+                  </div>
+                </ng-template>
+              </p-multiSelect>
+              <p-autoComplete 
+                *ngIf = "isAccessibile() == true"
+                [suggestions]="filteredStatoUfficioAtti" 
+                (completeMethod)="filterStatoUfficioAtti($event)"
+                (onClear)="filter(null)"
+                field = "nome"
+                type="search"
+                appendTo="body"
+                (onSelect)="filter($event.value)"
+                >
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+        </div>
+        <div *ngSwitchCase="'idPersonaResponsabileProcedimento'" class="search-wrapper">
+          <p-columnFilter #colfilteridPersonaResponsabileProcedimento 
+            [field]="col.filterField" 
+            matchMode="equals"
+            [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-autoComplete
+              #autocompleteidPersonaResponsabileProcedimento
+                [showEmptyMessage]="true"
+                emptyMessage="Nessun utente trovato" 
+                [suggestions]="filteredPersone"
+                (completeMethod)="filterPersone($event)" 
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter($event?.id)" 
+                (onClear)="filter(null)"
+                type="search" 
+                appendTo="body">
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+          <button *ngIf="colfilteridPersonaResponsabileProcedimento.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilteridPersonaResponsabileProcedimento.clearFilter(); autocompleteidPersonaResponsabileProcedimento.writeValue(null)">
+            close
+          </button>
+        </div>
+        <div *ngSwitchCase="'idPersonaRedattrice'" class="search-wrapper">
+          <p-columnFilter #colfilteridPersonaRedattrice 
+            [field]="col.filterField" 
+            matchMode="equals" 
+            [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-autoComplete #autocompleteIdPersonaRedattrice 
+                [showEmptyMessage]="true"
+                emptyMessage="Nessun utente trovato" 
+                [suggestions]="filteredPersone"
+                (completeMethod)="filterPersone($event)" 
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter($event?.id)" 
+                (onClear)="filter(null)" 
+                type="search" 
+                appendTo="body">
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+          <button *ngIf="colfilteridPersonaRedattrice.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilteridPersonaRedattrice.clearFilter(); autocompleteIdPersonaRedattrice.writeValue(null)">
+            close
+          </button>
+        </div>
+        <div *ngSwitchCase="'idStrutturaRegistrazione'" class="search-wrapper">
+          <p-columnFilter #colfilteridStrutturaRegistrazione 
+            [field]="col.filterField" 
+            matchMode="equals"
+            [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-autoComplete #autocompleteIdStrutturaRegistrazione 
+                [showEmptyMessage]="true"
+                emptyMessage="Nessuna struttura trovata" 
+                [suggestions]="filteredStrutture"
+                (completeMethod)="filterStrutture($event)" 
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter($event?.id)" 
+                (onClear)="filter(null)" 
+                appendTo="body">
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+          <button *ngIf="colfilteridStrutturaRegistrazione.hasFilter()" 
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilteridStrutturaRegistrazione.clearFilter(); autocompleteIdStrutturaRegistrazione.writeValue(null)">
+            close
+          </button>
+        </div>
+        <div *ngSwitchCase="'mittente'" class="search-wrapper">
+          <p-columnFilter #colfiltermittente
+          type="text" 
+          [field]="col.filterField" 
+          [matchMode]="col.filterMatchMode" 
+          [showMenu]="false"
+          placeholder="">
+          <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
+            <input #inputMittente type="text" pInputText [value]="value" 
+                  (keydown.enter)="removeSort(); filterMethod(inputMittente.value)">
+          </ng-template>
+        </p-columnFilter>
+          <button  *ngIf="colfiltermittente.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfiltermittente.clearFilter(); resetSort()">
+            close
+          </button>
+        </div>
+        <div *ngSwitchCase="'destinatari'" class="search-wrapper">
+          <p-columnFilter #colfilterdestinatari
+          type="text" 
+          [field]="col.filterField" 
+          [matchMode]="col.filterMatchMode" 
+          [showMenu]="false"
+          placeholder="">
+            <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
+              <input #inputDestinatari type="text" pInputText [value]="value"
+                (keydown.enter)="removeSort(); filterMethod(inputDestinatari.value)">
+            </ng-template>
+          </p-columnFilter>
+          <button  *ngIf="colfilterdestinatari.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilterdestinatari.clearFilter(); resetSort()">
+            close
+          </button>
+        </div>
+        <div *ngSwitchCase="'firmatari'" class="search-wrapper">
+          <p-columnFilter #colfilterfirmatari
+            [field]="col.filterField" matchMode="" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-autoComplete #autocompleteFirmatari 
+                [showEmptyMessage]="true" 
+                emptyMessage="Nessun utente trovato"
+                [suggestions]="filteredPersone" 
+                (completeMethod)="filterPersone($event)"
+                field="descrizioneVisualizzazione" 
+                (onSelect)="filter(buildJsonValueForFilterPersone($event?.id))"
+                (onClear)="filter(null)" 
+                appendTo="body">
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+          <button *ngIf="colfilterfirmatari.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilterfirmatari.clearFilter(); autocompleteFirmatari.writeValue(null)">
+            close
+          </button>
+        </div>
+        <div *ngSwitchCase="'sullaScrivaniaDi'" class="search-wrapper">
+          <p-columnFilter #colfiltersullascrivaniadi
+            [field]="col.filterField" matchMode="" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-autoComplete #autocompleteSullaScrivaniaDi 
+                [showEmptyMessage]="true"
+                emptyMessage="Nessun utente trovato" 
+                [suggestions]="filteredPersone"
+                (completeMethod)="filterPersone($event)" 
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter(buildJsonValueForFilterPersone($event?.id))" 
+                (onClear)="filter(null)"
+                appendTo="body">
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+          <button *ngIf="colfiltersullascrivaniadi.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfiltersullascrivaniadi.clearFilter(); autocompleteSullaScrivaniaDi.writeValue(null)">
+            close
+          </button>
+        </div>
+        <div *ngSwitchCase="'protocolloEsterno'" class="search-wrapper">
+          <p-columnFilter #colfilterprotocolloesterno
+            [field]="col.filterField"
+            [matchMode]="col.filterMatchMode" 
+            [showMenu]="false" 
+            [useGrouping]="false" >
+          </p-columnFilter>
+          <button *ngIf="colfilterprotocolloesterno.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilterprotocolloesterno.clearFilter()">
+            close
+          </button>
+        </div>
+      </th>
+    </tr>
+  </ng-template>
+  <!-- BODY -->
+  <ng-template pTemplate="body" let-rowData let-columns="columns">
+    <tr class="row-height">
+      <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
+        <div *ngSwitchCase="'idAzienda'">
+          {{rowData.idAzienda.nome}}
+        </div>
+        <div *ngSwitchCase="'tipologia'">
+          {{rowData.tipologiaVisualizzazione}}
+        </div>
+        <div *ngSwitchCase="'registrazione'">
+          {{rowData.registrazioneVisualizzazione}}
+        </div>
+        <div *ngSwitchCase="'proposta'" class="proposta-box">
+          <div *ngIf="rowData.eliminabile"
+            class="box-elimina" 
+            (click)="confermaEliminaProposta(rowData, $event)"
+            pTooltip="Elimina proposta">
+            <span 
+              class="material-icons delete_outline-icon" 
+              >
+              close
+            </span>
+          </div>
+          <div class="box-numero-proposta">
+            {{rowData.propostaVisualizzazione}}
+          </div>
+        </div>
+        <div *ngSwitchCase="'dataCreazione'">
+          {{rowData.dataCreazione | date:'dd/MM/yyyy'}}
+        </div>
+        <div *ngSwitchCase="'dataRegistrazione'">
+          {{rowData.dataRegistrazione | date:'dd/MM/yyyy'}}
+        </div>
+        <div *ngSwitchCase="'dataPubblicazione'">
+          {{rowData.dataPubblicazione | date:'dd/MM/yyyy'}}
+        </div>
+        <div *ngSwitchCase="'oggetto'" (click)="openDoc(rowData)" class="oggetto-content"
+          [pTooltip]="rowData.oggettoVisualizzazione" tooltipPosition="top">
+          <i *ngIf="rowData.visibilitaLimitata && !rowData.riservato" class="pi pi-eye"></i>
+          <i *ngIf="rowData.riservato" class="pi pi-eye-slash"></i>
+          {{rowData.oggettoVisualizzazione}}
+        </div>
+        <div *ngSwitchCase="'stato'">
+          {{rowData.statoVisualizzazione}}
+        </div>
+        <div *ngSwitchCase="'fascicolazioni'" [pTooltip]="rowData.fascicolazioniVisualizzazione" tooltipPosition="top">
+          <span *ngFor="let f of rowData.fascicolazioni" class="fascicolazione-item">
+            {{"[" + f.numerazione + "] " + f.nome}}
+          </span>
+        </div>
+        <div *ngSwitchCase="'statoUfficioAtti'">
+          {{rowData.statoUfficioAttiVisualizzazione}}
+        </div>
+        <div *ngSwitchCase="'idPersonaResponsabileProcedimento'">
+          {{rowData.idPersonaResponsabileProcedimentoVisualizzazione}}
+        </div>
+        <div *ngSwitchCase="'idPersonaRedattrice'">
+          {{rowData.idPersonaRedattriceVisualizzazione}}
+        </div>
+        <div *ngSwitchCase="'idStrutturaRegistrazione'" [pTooltip]="rowData.idStrutturaRegistrazione?.nome"
+          tooltipPosition="top">
+          {{rowData.idStrutturaRegistrazione?.nome}}
+        </div>
+        <div *ngSwitchCase="'mittente'" [pTooltip]="rowData.mittente" tooltipPosition="top">
+          {{rowData.mittente}}
+        </div>
+        <div *ngSwitchCase="'destinatari'" [pTooltip]="rowData.destinatariVisualizzazione" tooltipPosition="top">
+          <span *ngFor="let d of rowData.destinatari" class="destinatari-item">
+            {{d.nome}}
+          </span>
+        </div>
+        <div *ngSwitchCase="'firmatari'" [pTooltip]="rowData.firmatariVisualizzazione" tooltipPosition="top">
+          <span *ngFor="let d of rowData.firmatari" class="firmatari-item">
+            {{d.descrizione}}
+          </span>
+        </div>
+        <div *ngSwitchCase="'sullaScrivaniaDi'" [pTooltip]="rowData.sullaScrivaniaDiVisualizzazione"
+          tooltipPosition="top">
+          <span *ngFor="let d of rowData.sullaScrivaniaDi" class="sulla-scrivania-di-item">
+            {{d.descrizione}}
+          </span>
+        </div>
+        <div *ngSwitchCase="'protocolloEsterno'">
+          {{rowData.protocolloEsterno}}
+        </div>
+      </td>
+      <!-- <td class="scrollbar-overlay-placeholder-column"></td> -->
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="loadingbody" let-columns="columns">
+    <tr class="row-height">
+      <td *ngFor="let col of columns" [ngClass]="col.bodyClass" class="loading-cell">
+        <div class="loading-text"></div>
+      </td>
+    </tr>
+  </ng-template>
+  <!-- No Records-->
+  <ng-template pTemplate="emptymessage" let-columns>
+    <tr>
+      <td [attr.colspan]="columns.length" class="emptyMessage" >
+          <h3>Nessun documento trovato</h3>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+<p-toast key="docsListToast"></p-toast>
+<p-confirmDialog [baseZIndex]="10000" acceptLabel="Sì"></p-confirmDialog>
+<p-confirmPopup key="confirm-popup"></p-confirmPopup>

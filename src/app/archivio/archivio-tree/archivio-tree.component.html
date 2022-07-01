@@ -1,0 +1,13 @@
+<!-- <p-breadcrumb 
+  [model]="bricioleArchivi"
+  styleClass="archivi-breadcrumb">
+</p-breadcrumb> -->
+<div class="archivi-header-div">Fascicoli in uso</div>
+<p-tree 
+  [value]="archivi"
+  styleClass="archivi-tree"
+  selectionMode="single" 
+  [(selection)]="selectedNode" 
+  (onNodeSelect)="onNodeSelect($event)"
+  scrollHeight="flex">
+</p-tree>
