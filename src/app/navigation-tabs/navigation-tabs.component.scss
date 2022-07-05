@@ -4,6 +4,16 @@
   flex-direction: column;
   overflow: hidden;
   .navigation-tabview {
+    .p-tabview-nav-btn {
+      border: 1px solid #203244 !important;
+      background: #2e4a65 !important;
+      &:hover {
+        border-color: #2e4a65 !important;
+        background: #406284 !important;
+        color: #ffffff !important;
+        font-weight: normal !important;
+      }
+    }
     .p-tabview-nav {
       .p-tabview-nav-link {
         padding: 0.657rem 1rem;
@@ -13,6 +23,16 @@
       } 
       span { 
         margin: 0 .5rem; 
+        flex-wrap: nowrap;
+        display: flex;
+        .sottoelemento-tab {
+          font-size: 10px;
+          align-self: center;
+          margin: 0;
+        }
+      }
+      .p-tabview-close {
+        margin: 0;
       }
       .p-button { 
         margin-right: .25rem;

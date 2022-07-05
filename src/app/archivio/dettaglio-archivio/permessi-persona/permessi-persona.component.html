@@ -22,9 +22,14 @@
 	</ng-template>
 	<ng-template pTemplate="header">
 		<tr>
-			<th *ngFor="let col of cols" [ngClass]="col.class">
+			<!-- <th *ngFor="let col of cols" [ngClass]="col.class">
 				{{col.header}}
-			</th>
+			</th> -->
+			<th class="persona-column">Persona</th>
+			<th class="struttura-column">Struttura</th>
+			<th class="permesso-column">Permesso</th>
+			<th *ngIf="archivio.livello !== 3" class="propaga-column">Propaga a sottolivelli</th>
+			<th *ngIf="archivio.livello !== 1" class="ereditato-column">Ereditato da sopralivello</th>
 			<th *ngIf="loggedUserIsResponsbaileOrVicario" 
 				class="azione-column"
 				alignFrozen="right" 
@@ -92,7 +97,7 @@
 					</ng-template>
 				</p-cellEditor>
 			</td>
-			<td class="propaga-column">
+			<td *ngIf="archivio.livello !== 3" class="propaga-column">
 				<p-cellEditor>
 					<ng-template pTemplate="input">
 						<p-checkbox
@@ -109,7 +114,7 @@
 					</ng-template>
 				</p-cellEditor>
 			</td>
-			<td class="ereditato-column">
+			<td *ngIf="archivio.livello !== 1" class="ereditato-column">
 				<p-cellEditor>
 					<ng-template pTemplate="input">
 						<p-checkbox [disabled]="true" [binary]="true" [(ngModel)]="permesso.ereditato"></p-checkbox>
@@ -186,9 +191,9 @@
 	</ng-template>
 	<ng-template pTemplate="emptymessage">
 		<tr>
-				<td [attr.colspan]="cols.length + 1">
-					Non sono presenti permessi a utenti
-				</td>
+			<td [attr.colspan]="5 + (archivio.livello === 2 ? 1 : 0) + (loggedUserIsResponsbaileOrVicario ? 1 : 0)"><!-- [attr.colspan]="cols.length + 1" -->
+				Non sono presenti permessi a utenti
+			</td>
 		</tr>
 	</ng-template>
 </p-table>

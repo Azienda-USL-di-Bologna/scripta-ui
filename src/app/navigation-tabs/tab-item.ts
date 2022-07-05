@@ -8,7 +8,8 @@ export class TabItem {
     public label: string,
     public icon: string,
     public type: TabType,
-    public id: number = null) {}
+    public id: number = null,
+    public labelForAppName: string) {}
 }
 
 export enum TabType {

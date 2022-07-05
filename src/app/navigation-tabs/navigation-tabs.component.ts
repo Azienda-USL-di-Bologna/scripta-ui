@@ -110,11 +110,12 @@ export class NavigationTabsComponent implements OnInit {
   }
   
   public onChangeTab(tabIndex:number): void {
-    if(tabIndex == 0 || tabIndex == 1 ){
+    /* if (tabIndex == 0 || tabIndex == 1 ){
       this.appService.appNameSelection("Elenco "+ this.navigationTabsService.getTabs()[tabIndex].label);
-    }else{
+    } else {
       this.appService.appNameSelection("Fascicolo "+ this.navigationTabsService.getTabs()[tabIndex].label);
-    }
+    } */
+    this.appService.appNameSelection(this.navigationTabsService.getTabs()[tabIndex].labelForAppName);
   }
 
   public onCloseTab(e: any): void {
@@ -122,4 +123,11 @@ export class NavigationTabsComponent implements OnInit {
     this.appService.appNameSelection("Elenco Fascicoli");
 
   }
+
+  /* public clickOnTab(event: MouseEvent, item: TabItem) {
+    console.log(event, item);
+    if (item.closable) {
+      event.
+    }
+  } */
 }

@@ -2,11 +2,14 @@
   styleClass="navigation-tabview" 
   [(activeIndex)]="navigationTabsService.activeTabIndex"
   (onClose)="onCloseTab($event)"
-  (onChange)="onChangeTab(navigationTabsService.activeTabIndex)">
+  (onChange)="onChangeTab(navigationTabsService.activeTabIndex)"
+  [scrollable]="true">
   <p-tabPanel *ngFor="let item of tabItems" [closable]="item.closable">
     <ng-template pTemplate = "header">
-      <i [ngClass]="item.icon"></i>
-      <span>{{item.label}}</span>
+      <span ><!-- (mouseup)="$event.which === 2 ? clickOnTab($event, item) : null" -->
+        <i [ngClass]="item.icon"></i>
+        <span [innerHTML]="item.label"></span>
+      </span>
     </ng-template>
     <ng-template pTemplate="content">
       <tab-wrapper [item]="item" [id]="item.data?.id"></tab-wrapper>

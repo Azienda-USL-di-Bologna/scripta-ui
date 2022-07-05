@@ -6,6 +6,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { TreeNode } from 'primeng/api/treenode';
 import { TreeSelect } from 'primeng/treeselect';
 import { Subscription } from 'rxjs/internal/Subscription';
+import { AppService } from 'src/app/app.service';
 import { TipoArchivioTraduzioneVisualizzazione } from 'src/app/archivi-list-container/archivi-list/archivi-list-constants';
 import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
 import { ArchivioFieldUpdating, ArchivioUtilsService } from '../archivio-utils.service';
@@ -57,9 +58,9 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   @Output() public updateArchivio = new EventEmitter<Archivio>();
 
   constructor(
-    private attoreArchivioService: AttoreArchivioService,
     private extendedArchivioService: ExtendedArchivioService,
     private titoloService: TitoloService,
+    private appService: AppService,
     private massimarioService: MassimarioService,
     private messageService: MessageService,
     private configurazioneService: ConfigurazioneService,
@@ -407,6 +408,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
                   this.archivio.stato = resArchivio.stato;
                   this.navigationTabsService.addTabArchivio(resArchivio, true, true);
                   this.updateArchivio.emit(resArchivio);
+                  this.appService.appNameSelection(`Fascicolo ${resArchivio.numerazioneGerarchica} [${resArchivio.idAzienda.aoo}]`);
                   this.messageService.add({
                     severity: "success",
                     key: "dettaglioArchivioToast",

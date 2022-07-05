@@ -291,7 +291,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     return this._archivio.permessiEspliciti.some(permessoArchivio => 
       permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id
       &&
-      permessoArchivio.bit >= DecimalePredicato.MODIFICA
+      permessoArchivio.bit >= DecimalePredicato.VICARIO
     );
   }
 

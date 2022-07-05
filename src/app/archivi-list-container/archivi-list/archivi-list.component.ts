@@ -1128,7 +1128,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			if (this.archivioPadre.fk_idArchivioRadice?.id) {
 				archivioBozza.idArchivioRadice = { id: this.archivioPadre.fk_idArchivioRadice.id } as Archivio;
 			}
-			this.archivioPadre.attoriList.filter(a => [RuoloAttoreArchivio.RESPONSABILE, RuoloAttoreArchivio.VICARIO].includes(a.ruolo)).forEach(attore => {
+			this.archivioPadre.attoriList.filter(a => [RuoloAttoreArchivio.RESPONSABILE, RuoloAttoreArchivio.RESPONSABILE_PROPOSTO, RuoloAttoreArchivio.VICARIO].includes(a.ruolo)).forEach(attore => {
 				const newAttore = new AttoreArchivio();
 				newAttore.idPersona = {
 					id: attore.fk_idPersona.id
@@ -1147,6 +1147,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				id: this.utenteUtilitiesLogin.getUtente().idPersona.id
 			} as Persona;
 			idPersonaResponsabile.ruolo = RuoloAttoreArchivio.RESPONSABILE;
+			//debugger;
+			//idPersonaResponsabile.idStruttura = this.utenteUtilitiesLogin.getUtente().utenteStrutturaList.find(us => us.idAfferenzaStruttura.codice === )
 			archivioBozza.attoriList.push(idPersonaResponsabile);
 		}   
 
@@ -1155,6 +1157,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
 				.subscribe((nuovoArchivioCreato: Archivio) => {      
 					this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
+					this.appService.appNameSelection(`Fascicolo ${nuovoArchivioCreato.numerazioneGerarchica} [${nuovoArchivioCreato.idAzienda.aoo}]`);
 		}));
 	}
 }

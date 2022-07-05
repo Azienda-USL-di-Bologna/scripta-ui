@@ -51,11 +51,10 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private utenteStrutturaService: UtenteStrutturaService,
     private permessiDettaglioArchivioService: PermessiDettaglioArchivioService) {
-    
   }
 
   ngOnInit(): void {
-    this.cols = [
+   /*  this.cols = [
       { field: 'persona', header: 'Persona', class: 'persona-column' },
       { field: 'struttura', header: 'Struttura', class: 'struttura-column' },
       { field: 'permesso', header: 'Permesso', class: 'permesso-column' },
@@ -63,7 +62,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
       { field: 'ereditato', header: 'Ereditato da sopralivello', class: 'ereditato-column' },
       //{ field: 'azione', header: 'Azione', class: 'azione-column' }
     ];
-    this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field }));
+    this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field })); */
     this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true, false);
     this.subscriptions.push(this.permessiDettaglioArchivioService.archivioReloadPermessiEvent.subscribe((archivioReloadPermessi: boolean) => {
       if (archivioReloadPermessi) { 
@@ -160,7 +159,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
             this.messageService.add({
               severity: "error",
               summary: "Errore nel backend",
-              detail: "Non � stato possibile modificare il permesso."
+              detail: "Non è stato possibile modificare il permesso."
             });
             this.onRowEditCancel(perm, index);
           }
