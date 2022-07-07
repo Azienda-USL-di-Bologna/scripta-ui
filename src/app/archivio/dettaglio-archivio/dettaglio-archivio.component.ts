@@ -35,6 +35,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public responsabiliArchivi: AttoreArchivio[] = [];
   public subscriptions: Subscription[] = [];
   public colsResponsabili: any[];
+  public aziendeConFascicoliParlanti: number[];
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public selectedClassificazione: TreeNode;
   public selectedArchivioCollegato: Archivio;
@@ -51,6 +52,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public anniTenutaSelezionabili: any[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
   public loggedUserIsResponsbaileOrVicario = false;
+  public fascicoliParlanti: boolean = false;
   private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
 
   @ViewChild("noteArea") public noteArea: ElementRef;
@@ -83,11 +85,12 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     this.updateAnniTenuta();
     // this.getResponsabili();
     this.loggedUserIsResponsbaileOrVicario = (this.archivio["attoriList"] as AttoreArchivio[])
-      .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id 
-        && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE 
-        || a.ruolo === RuoloAttoreArchivio.VICARIO 
-        || a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
-    this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
+    .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id 
+    && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE 
+      || a.ruolo === RuoloAttoreArchivio.VICARIO 
+      || a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
+      this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
+    this.loadParametroAziendaleFascicoliParlanti()
   }
 
   private loadConfigurations() {
@@ -116,9 +119,21 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     }
   }
 
+  private loadParametroAziendaleFascicoliParlanti(){
+    this.subscriptions.push(this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null).subscribe((parametriAziende: ParametroAziende[]) => {
+      //parte relativa al parametro aziendale
+      if (parametriAziende && parametriAziende[0]) {
+        this.fascicoliParlanti = JSON.parse(parametriAziende[0].valore || false);
+        if (this.fascicoliParlanti) {
+          this.aziendeConFascicoliParlanti = parametriAziende[0].idAziende;
+        }
+      }
+    }));
+  }
+
 
   public changeVisibilita(): void {
-    if (this.loggedUserIsResponsbaileOrVicario) {
+    if (this.loggedUserIsResponsbaileOrVicario && !this.aziendeConFascicoliParlanti.includes(this.archivio.idAzienda.id)) {
       this.archivio.riservato = !(this.archivio.riservato);
       const archivioToUpdate: Archivio = new Archivio();
       archivioToUpdate.riservato = this.archivio.riservato
