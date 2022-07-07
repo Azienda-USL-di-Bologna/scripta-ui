@@ -523,6 +523,14 @@
             close
           </button>
         </div>
+        <!-- <div *ngSwitchCase="'conservazone'" class="search-wrapper">
+          <p-columnFilter 
+            [field]="col.filterField"
+            [matchMode]="col.filterMatchMode" 
+            [showMenu]="false" >
+            <p-triStateCheckbox [ngModel]="conservazione" readonly = "true" class = "conservazione-icon" ></p-triStateCheckbox>
+          </p-columnFilter>
+        </div> -->
       </th>
       <th  *ngIf="archivio"
         class="edit-archiviation-column"
@@ -619,6 +627,10 @@
         </div>
         <div *ngSwitchCase="'protocolloEsterno'">
           {{rowData.protocolloEsterno}}
+        </div>
+        <div *ngSwitchCase="'conservazione'">
+          <p-triStateCheckbox [(ngModel)]="rowData.conservazione" readonly = "true" class = "conservazione-icon" ></p-triStateCheckbox>
+          <!-- {{rowData.conservazione}} -->
         </div>
       </td>
       <!-- <td class="scrollbar-overlay-placeholder-column"></td> -->

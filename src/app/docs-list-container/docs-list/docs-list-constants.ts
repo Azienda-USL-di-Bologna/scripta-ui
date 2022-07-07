@@ -288,6 +288,20 @@ export const cols: ColonnaBds[] = [
     filterMatchMode: FILTER_TYPES.string.containsIgnoreCase,
     useFilterMatchMode: true,
     default: false
+  },
+  {
+    field: "conservazione",
+    header: "In conservazione",
+    filterField: "conservazione",
+    // sortField: "sullaScrivaniaDi.descrizione",
+    style: {},
+    headerClass: ["header-column", "conservazione-column"],
+    filterClass: ["filter-column", "conservazione-column"],
+    bodyClass: ["conservazione-column"],
+    fieldType: "boolean",
+    filterMatchMode: FILTER_TYPES.not_string.equals,
+    useFilterMatchMode: true,
+    default: false
   }
 ];
 // SPOSTATA IN PRIMENG PLUGIN
@@ -552,5 +566,11 @@ export const colsCSV: any[] = [
     header: "Protocollo esterno",
     fieldType: "string",
     fieldId: "protocolloEsterno"
+  },
+  {
+    field: "conservazione",
+    header: "In conservazione",
+    fieldType: "boolean",
+    fieldId: "conservazione"
   }
 ]

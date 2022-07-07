@@ -112,7 +112,8 @@
         }
       } 
       &.data-creazione-column,
-      &.data-registrazione-column {
+      &.data-registrazione-column,
+      &.conservazione-column {
         div {
           justify-content: center;
         }
@@ -303,6 +304,10 @@
       }
     }
   }
+  .conservazione-column {
+    width: 170px;
+    max-width: 170px;
+  }
 }
 
 ::ng-deep .table-zero-rows {
@@ -337,4 +342,21 @@
 }
 
 
-
+::ng-deep .conservazione-icon {
+  .p-checkbox {
+    cursor: default;
+    .p-checkbox-box.p-highlight {
+      background-color: white !important;
+      color: #203244;
+      height: 30px !important;
+      width: 30px !important;
+      cursor: default;
+    }
+    .p-checkbox-box {
+      border-color: white !important;
+      .p-checkbox-icon {
+        color: #203244;
+      }
+    }
+  }
+}
