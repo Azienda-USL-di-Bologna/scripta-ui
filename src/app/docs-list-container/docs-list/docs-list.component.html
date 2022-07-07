@@ -629,7 +629,7 @@
           {{rowData.protocolloEsterno}}
         </div>
         <div *ngSwitchCase="'conservazione'">
-          <p-triStateCheckbox [(ngModel)]="rowData.conservazione" readonly = "true" class = "conservazione-icon" ></p-triStateCheckbox>
+          <p-triStateCheckbox [(ngModel)]="rowData.conservazione" readonly = "true" class = "conservazione-icon" checkboxFalseIcon="blank"></p-triStateCheckbox>
           <!-- {{rowData.conservazione}} -->
         </div>
       </td>
