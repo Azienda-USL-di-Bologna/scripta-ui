@@ -32,16 +32,21 @@ export class NavigationTabsService {
    * @param label 
    * @param data 
    */
-  public updateTab(tabIndex: number, label: string, data: any) {
+  public updateTab(tabIndex: number, label: string, data: any, labelForAppName: string, tabId?: number) : void {
     this.tabs[tabIndex].label = label;
+    this.tabs[tabIndex].labelForAppName = labelForAppName;
     this.tabs[tabIndex].data = data;
+    if (tabId) {
+      this.tabs[tabIndex].id = tabId;
+    }
+    this.setTabsInSessionStorage();
   }
 
-  public getTabs() {
+  public getTabs(): TabItem[] {
     return this.tabs;
   }
 
-  private setTabsInSessionStorage() {
+  private setTabsInSessionStorage(): void {
     sessionStorage.setItem("tabs", JSON.stringify(this.tabs));
   }
 
@@ -99,7 +104,9 @@ export class NavigationTabsService {
       false,
       "Documenti",
       "pi pi-fw pi-list",
-      TabType.DOCS_LIST
+      TabType.DOCS_LIST,
+      null,
+      "Elenco Documenti"
     );
   }
 
@@ -110,7 +117,9 @@ export class NavigationTabsService {
       false,
       "Fascicoli",
       "pi pi-fw pi-list",
-      TabType.ARCHIVI_LIST
+      TabType.ARCHIVI_LIST,
+      null,
+      "Elenco Fascicoli"
     );
   }
 
@@ -123,11 +132,13 @@ export class NavigationTabsService {
       true,
       label,
       "pi pi-fw pi-folder",
-      TabType.DOC
+      TabType.DOC,
+      idDoc,
+      label
     );
   }
 
-  private buildaTabArchivio(archivio: Archivio | ArchivioDetail | ExtendedArchiviView, label: string): TabItem {
+  private buildaTabArchivio(archivio: Archivio | ArchivioDetail | ExtendedArchiviView, label: string, labelForAppName: string): TabItem {
     return new TabItem(
       ArchivioComponent,
       { 
@@ -138,7 +149,8 @@ export class NavigationTabsService {
       label,
       "pi pi-fw pi-folder",
       TabType.ARCHIVIO,
-      archivio.fk_idArchivioRadice.id
+      archivio.fk_idArchivioRadice.id,
+      labelForAppName
     );
   }
 
@@ -148,18 +160,35 @@ export class NavigationTabsService {
    * @param archivio 
    * @param active 
    */
-  public addTabArchivio(archivio: Archivio | ArchivioDetail | ExtendedArchiviView, active: boolean = true): void {
+  public addTabArchivio(archivio: Archivio | ArchivioDetail | ExtendedArchiviView, active: boolean = true, reuseActiveTab: boolean = false): void {
     const tabIndex: number = this.tabs.findIndex(t => {
       return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id
     });
     if (tabIndex !== -1) {
-      this.updateTab(tabIndex, archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]", {archivio: archivio, id: archivio.id});
+      this.updateTab(
+        tabIndex, 
+        `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
+        {archivio: archivio, id: archivio.id},
+        `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
+      );
       if (active) {
         this.activeTabByIndex(tabIndex);
       }
+    } else if (reuseActiveTab) {
+      this.updateTab(
+        this.activeTabIndex, 
+        `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
+        {archivio: archivio, id: archivio.id}, 
+        `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
+        archivio.fk_idArchivioRadice.id
+      );
     } else {
       this.addTab(
-        this.buildaTabArchivio(archivio, archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]")
+        this.buildaTabArchivio(
+          archivio, 
+          `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
+          `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`
+        )
       );
       if (active) {
         this.activeLastTab();

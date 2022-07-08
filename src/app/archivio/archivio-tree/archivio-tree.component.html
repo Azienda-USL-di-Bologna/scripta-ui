@@ -3,11 +3,21 @@
   styleClass="archivi-breadcrumb">
 </p-breadcrumb> -->
 <div class="archivi-header-div">Fascicoli in uso</div>
-<p-tree 
-  [value]="archivi"
-  styleClass="archivi-tree"
-  selectionMode="single" 
-  [(selection)]="selectedNode" 
-  (onNodeSelect)="onNodeSelect($event)"
-  scrollHeight="flex">
-</p-tree>
+<div>
+  <p-tree 
+    [value]="archivi"
+    styleClass="archivi-tree"
+    selectionMode="single" 
+    [(selection)]="selectedNode" 
+    (onNodeSelect)="onNodeSelect($event)"
+    scrollHeight="flex">
+  </p-tree>
+  <div class="alert-too-much-archives" *ngIf="troppiSottoFascicoli ">
+    <i class="pi pi-info-circle"></i>
+    <span class = "alert-text" >Troppi sottofascicoli da caricare</span>
+  </div>
+  <div class="alert-too-much-archives" *ngIf="troppiInserti">
+    <i class="pi pi-info-circle"></i>
+    <span class = "alert-text" >Troppi inserti da caricare  </span>
+  </div>
+</div>

@@ -1,4 +1,4 @@
-import { DocDetailView, Fascicolazione, Persona, TipologiaDoc } from "@bds/ng-internauta-model";
+import { ArchivioDoc, DocDetailView, Fascicolazione, Persona, TipologiaDoc } from "@bds/ng-internauta-model";
 import { StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione } from "./docs-list-constants";
 
 export class ExtendedDocDetailView extends DocDetailView {
@@ -16,6 +16,7 @@ export class ExtendedDocDetailView extends DocDetailView {
   private _idPersonaResponsabileProcedimentoVisualizzazione: string;
   private _idPersonaRedattriceVisualizzazione: string;
   private _eliminabile: boolean;
+  private _archiviation: ArchivioDoc; // Proprietà riempita quando l'apertura di doclist avviene dentro un archivio
 
   constructor() {super();}
 
@@ -226,5 +227,13 @@ export class ExtendedDocDetailView extends DocDetailView {
 
   private calcDescrizioneVisualizzazionePerPersona(persona: Persona): string {
     return persona.descrizione + (persona.idSecondario ? " (" + persona.idSecondario + ")" : "");
+  }
+
+  public get archiviation(): ArchivioDoc {
+    return this._archiviation;
+  }
+
+  public set archiviation(archiviation: ArchivioDoc) {
+    this._archiviation = archiviation;
   }
 }

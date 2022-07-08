@@ -5,8 +5,7 @@ import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from '@nf
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs';
-
-import { EnumPermessoTabella, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
+import { AzioniPossibili, EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
 // import * as FileSaver from 'file-saver';
 
 @Component({
@@ -19,8 +18,8 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
   public utentiStruttura: UtenteStruttura[] = [];
   public strutturaSelezionata: Struttura;
   public strutture: Struttura[] = [];
-  public predicati: EnumPermessoTabella[] = [];
-  public permessoSelezionato: EnumPermessoTabella;
+  public predicati: EnumPredicatoPermessoArchivio[] = [];
+  public permessoSelezionato: EnumPredicatoPermessoArchivio;
   public perms: PermessoTabella[] = [];
   public cols: any[];
   public exportColumns: any[];
@@ -31,13 +30,20 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
   private permClone: { [s: number]: PermessoTabella; } = {};
   private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
   private _archivio: Archivio | ArchivioDetail;
-  private lazyLoadFiltersAndSorts: FiltersAndSorts = new FiltersAndSorts();
+  //private lazyLoadFiltersAndSorts: FiltersAndSorts = new FiltersAndSorts();
+  public livello: number;
 
   @ViewChild("dt", {}) private dt: Table;
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
   @Input() set archivio(archivio: Archivio | ArchivioDetail) {
     this._archivio = archivio;
-    this.perms = this.permessiDettaglioArchivioService.buildPermessoPersonaPerTabella(this.archivio.permessi, "persone");
+    this.livello = archivio.livello
+    this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
+  }
+  public _loggedUserIsResponsbaileOrVicario: Boolean;
+  get loggedUserIsResponsbaileOrVicario(): Boolean { return this._loggedUserIsResponsbaileOrVicario; }
+  @Input() set loggedUserIsResponsbaileOrVicario(loggedUserIsResponsbaileOrVicario: Boolean) {
+    this._loggedUserIsResponsbaileOrVicario = loggedUserIsResponsbaileOrVicario;
   }
 
   constructor(
@@ -45,20 +51,24 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private utenteStrutturaService: UtenteStrutturaService,
     private permessiDettaglioArchivioService: PermessiDettaglioArchivioService) {
-    
   }
 
   ngOnInit(): void {
-    this.cols = [
+   /*  this.cols = [
       { field: 'persona', header: 'Persona', class: 'persona-column' },
       { field: 'struttura', header: 'Struttura', class: 'struttura-column' },
       { field: 'permesso', header: 'Permesso', class: 'permesso-column' },
       { field: 'propaga', header: 'Propaga a sottolivelli', class: 'propaga-column' },
       { field: 'ereditato', header: 'Ereditato da sopralivello', class: 'ereditato-column' },
-      { field: 'azione', header: 'Azione', class: 'azione-column' }
+      //{ field: 'azione', header: 'Azione', class: 'azione-column' }
     ];
-    this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field }));
-    this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true);
+    this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field })); */
+    this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true, false);
+    this.subscriptions.push(this.permessiDettaglioArchivioService.archivioReloadPermessiEvent.subscribe((archivioReloadPermessi: boolean) => {
+      if (archivioReloadPermessi) { 
+        this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
+      }
+     }));
   }
 
   ngOnDestroy() {
@@ -89,14 +99,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
    * @param perm 
    */
   private loadStruttureRigaSelezionata(perm: PermessoTabella, idSoggetto: number) {
-    const initialFiltersAndSorts = new FiltersAndSorts();
-    initialFiltersAndSorts.addFilter(new FilterDefinition("idUtente.idPersona.id", FILTER_TYPES.not_string.equals, idSoggetto));
-    initialFiltersAndSorts.addFilter(new FilterDefinition("idStruttura.idAzienda.id", FILTER_TYPES.not_string.equals, this._archivio.idAzienda.id));
-    this.subscriptions.push(this.utenteStrutturaService.getData(
-      PROJECTIONS.utentestruttura.customProjections.UtenteStrutturaWithIdAfferenzaStrutturaCustom,
-      initialFiltersAndSorts,
-      this.lazyLoadFiltersAndSorts,
-      this.pageConfNoCountNoLimit)
+    this.subscriptions.push(this.permessiDettaglioArchivioService.loadStruttureOfPersona(idSoggetto, this._archivio.idAzienda.id)
       .subscribe(
         data => {
           if (data && data.results && data.page) {
@@ -129,8 +132,9 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     const oggettoToSave: OggettonePermessiEntitaGenerator =
       this.permessiDettaglioArchivioService.buildPermessoPerBlackbox(
         perm,
-        operation === "ADD" ? null : this._archivio.permessi,
-        operation === "ADD" ? OggettoneOperation.ADD : OggettoneOperation.REMOVE,
+        operation === "ADD" || operation === "BAN" ? null : this._archivio.permessi,
+        operation === "ADD" || operation === "BAN" || operation === "RESTORE" ? OggettoneOperation.ADD : OggettoneOperation.REMOVE,
+        <AzioniPossibili>operation,
         this._archivio
       );
     this.subscriptions.push(
@@ -139,8 +143,8 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
           next: (res: any) => {
             this.messageService.add({
               severity: "success",
-              summary: operation === "ADD" ? "Permesso modificato" : "Permesso Eliminato",
-              detail: operation === "ADD" ? "E' stato modificato il permesso." : "E' stato eliminato il permesso."
+              summary: operation === "ADD" || operation ==="BAN" || operation==="RESTORE" ? "Permesso modificato" : "Permesso Eliminato",
+              detail: operation === "ADD" || operation ==="BAN" || operation==="RESTORE" ? "E' stato modificato il permesso." : "E' stato eliminato il permesso."
             });
             
             if (operation === "REMOVE") {
@@ -149,12 +153,13 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
               delete this.perms[perm.idProvenienzaSoggetto];
             }
             this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+            this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
           },
           error: () => {
             this.messageService.add({
               severity: "error",
               summary: "Errore nel backend",
-              detail: "Non � stato possibile modificare il permesso."
+              detail: "Non è stato possibile modificare il permesso."
             });
             this.onRowEditCancel(perm, index);
           }
@@ -162,8 +167,6 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
       )
     )
   }
-
-  
 
   /**
    * funzione richiamata dall'html per ripristinare i dati della vecchia riga
@@ -177,7 +180,6 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     } else { 
       this.perms.pop();
     }
-
   }
   
   /**

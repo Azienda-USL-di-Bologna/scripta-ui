@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
-import { Component, Input, OnChanges, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
-import { ActivatedRoute, Router } from "@angular/router";
-import { CODICI_RUOLO, Persona, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, ArchivioDetail } from "@bds/ng-internauta-model";
+import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio } from "@bds/ng-internauta-model";
 import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 import { buildLazyEventFiltersAndSorts, ColonnaBds, CsvExtractor } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from "@nfa/next-sdr";
@@ -11,6 +11,7 @@ import { Dropdown } from "primeng/dropdown";
 import { Calendar } from "primeng/calendar";
 import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
+import { first } from 'rxjs/operators'
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
 import { Impostazioni } from "../../utilities/utils";
 import { cols, colsCSV, DocsListMode, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
@@ -22,6 +23,7 @@ import { TabComponent } from "../../navigation-tabs/tab.component";
 import { CaptionReferenceTableComponent } from '../../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
 import { SelectButtonItem } from "../../generic-caption-table/select-button-item";
+import { DecimalePredicato } from "@bds/ng-internauta-model";
 
 @Component({
   selector: "docs-list",
@@ -94,12 +96,14 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public filteredStati: any[];
   public filteredStatoUfficioAtti: any[];
   public aziendeFiltrabiliFiltered: any[];
+  public loggedUserCanRestoreArchiviation: boolean = false;
+  public loggedUserCanDeleteArchiviation: boolean = false;
 
-  private _archivio: Archivio | ArchivioDetail;
-  get archivio(): Archivio | ArchivioDetail { return this._archivio; }
-  @Input() set archivio(archivio: Archivio | ArchivioDetail) {
+  private _archivio: Archivio;
+  get archivio(): Archivio { return this._archivio; }
+  @Input() set archivio(archivio: Archivio) {
     this._archivio = archivio; 
-    if(this.loadDocsListSubscription){
+    if (this.loadDocsListSubscription) {
       this.loadData();
     }
   }
@@ -114,7 +118,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     private loginService: NtJwtLoginService,
     private datepipe: DatePipe,
     private route: ActivatedRoute,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private archivioDocService: ArchivioDocService
   ) { }
 
   ngOnInit(): void {
@@ -126,7 +131,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     //this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.DOCUMENTI, mode: this.docsListMode } }); 
     
     this.subscriptions.push(
-      this.loginService.loggedUser$.subscribe(
+      this.loginService.loggedUser$.pipe(first()).subscribe(
         (utenteUtilities: UtenteUtilities) => {
           this.utenteUtilitiesLogin = utenteUtilities;
           this.isSegretario = this.utenteUtilitiesLogin.getUtente().struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
@@ -140,8 +145,11 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
             this.loadConfigurationAndSetItUp();
           } else { 
             this.setColumnsPerDetailArchivio();
-          }
 
+            const bit = this.archivio.permessiEspliciti.find((permessoArchivio: PermessoArchivio) => permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit;
+            this.loggedUserCanRestoreArchiviation = bit >= DecimalePredicato.VICARIO;
+            this.loggedUserCanDeleteArchiviation = bit >= DecimalePredicato.ELIMINA;
+          }
         }
       )
     );
@@ -247,7 +255,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     } else if (this._selectedColumns.length < colsSelected.length) {
       this._selectedColumns.push(colsSelected.find(cs => !this._selectedColumns.includes(cs)));
     }
-    this.saveConfiguration();
+    if (!this.archivio) {
+      this.saveConfiguration();
+    }
   }
 
   /**
@@ -327,7 +337,14 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     colonneDaVisualizzare.forEach(c => {
       this._selectedColumns.push(this.cols.find(e => e.field === c));
     })
-    console.log(this._selectedColumns)
+    console.log(this._selectedColumns);
+
+    this.selectableColumns = cols.map(e => {
+      if (colonneDaVisualizzare.includes(e.field)) {
+        e.selectionDisabled = true;
+      }
+      return e;
+    });
   }
 
   /**
@@ -553,8 +570,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.docsListMode = null;
       this.initialSortField = "dataRegistrazione";
       this.serviceForGetData = this.docDetailService;
-      this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
-      //filterAndSort.addFilter(new FilterDefinition("idArchivi", FILTER_TYPES.not_string.equals, this.archivio.id));
+      this.projectionFotGetData = "CustomDocDetailForDocList";
+      // filterAndSort.addFilter(new FilterDefinition("idArchivi", FILTER_TYPES.not_string.equals, this.archivio.id));
       filterAndSort.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, this.archivio.idAzienda.id));
       filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "FilterForArchiviContent"));
       filterAndSort.addAdditionalData(new AdditionalDataDefinition("idArchivio", this.archivio.id.toString()));
@@ -564,7 +581,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
         this.initialSortField = "dataCreazione";
         this.serviceForGetData = this.docDetailViewService;
-        this.projectionFotGetData = "DocDetailViewWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
+        this.projectionFotGetData = "CustomDocDetailViewForDocList";
         break;
       case DocsListMode.MIEI_DOCUMENTI:
         /* const filtroJson: FilterJsonDefinition<PersonaVedente> = new FilterJsonDefinition(true);
@@ -575,25 +592,25 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         filterAndSort.addFilter(new FilterDefinition("mioDocumento", FILTER_TYPES.not_string.equals, true));
         this.initialSortField = "dataCreazione";
         this.serviceForGetData = this.docDetailViewService;
-        this.projectionFotGetData = "DocDetailViewWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
+        this.projectionFotGetData = "CustomDocDetailViewForDocList";
         break;
       case DocsListMode.IFIRMARIO:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmario"));
         this.initialSortField = "dataCreazione";
         this.serviceForGetData = this.docDetailService;
-        this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
+        this.projectionFotGetData = "CustomDocDetailForDocList";
         break;
       case DocsListMode.IFIRMATO:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabIFirmato"));
         this.initialSortField = "dataRegistrazione";
         this.serviceForGetData = this.docDetailService;
-        this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
+        this.projectionFotGetData = "CustomDocDetailForDocList";
         break;
       case DocsListMode.REGISTRAZIONI:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRegistrazioni"));
         this.initialSortField = "dataRegistrazione";
         this.serviceForGetData = this.docDetailService;
-        this.projectionFotGetData = "DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
+        this.projectionFotGetData = "CustomDocDetailForDocList";//"DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
         break;
     }
 
@@ -682,6 +699,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       doc.destinatariVisualizzazione = null;
       doc.firmatariVisualizzazione = null;
       doc.sullaScrivaniaDiVisualizzazione = null;
+      if (this.archivio) {
+        doc.archiviation = doc.archiviDocList.find(archivioDoc => archivioDoc.idArchivio.id === this.archivio.id);
+      }
     });
     return extendedDocsList;
   }
@@ -1090,6 +1110,83 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.aziendeFiltrabiliFiltered = filtered;
   }
 
+  /**
+   * Preso in ingresso un doc, prendo l'archivioDoc e lo aggiorno 
+   * togliendo idPersonaEliminazione e dataEliminazione
+   * NB: Dentro archiviation c'è l'archivioDoc su cui sto lavorando
+   * @param doc 
+   */
+  public restoreArchiviation(doc: ExtendedDocDetailView): void {
+    const archivioDocToUpdate: ArchivioDoc = new ArchivioDoc();
+    archivioDocToUpdate.dataEliminazione = null;
+    archivioDocToUpdate.idPersonaEliminazione = null;
+    archivioDocToUpdate.version = doc.archiviation.version;
+    archivioDocToUpdate.id = doc.archiviation.id;
+    this.subscriptions.push(this.archivioDocService.patchHttpCall(archivioDocToUpdate, archivioDocToUpdate.id)
+      .subscribe(
+        res => {
+          doc.archiviation.dataEliminazione = res.dataEliminazione;
+          doc.archiviation.idPersonaEliminazione = res.idPersonaEliminazione;
+          doc.archiviation.version = res.version;
+          this.messageService.add({
+            severity: "success",
+            key: "docsListToast",
+            detail: `Fascicolazione ripristinata con successo`
+          });
+        }
+      )
+    );
+  }
+
+  /**
+   * Preso in ingresso un doc, ne faccio l'eliminazione logica.
+   * - Se ho un PDD però devo controllare che il doc abbia almeno un altra fascicolazione non eliminata logicamente
+   * NB: Dentro archiviation c'è l'archivioDoc su cui sto lavorando
+   * @param doc 
+   */
+  public deleteArchiviation(doc: ExtendedDocDetailView, rowIndex: number, iconaEliminazioneArchiviazione: any): void {
+    if (["PROTOCOLLO_IN_USCITA", "PROTOCOLLO_IN_ENTRATA", "DETERMINA", "DELIBERA"].includes(doc.tipologia)
+      && !doc.archiviDocList.some(archivioDoc => !archivioDoc.dataEliminazione && archivioDoc.id !== doc.archiviation.id)) {
+      // Ho un PDD ma non ha altre archiviazioni non eliminate logicamente oltre quella che si sta provando a cancellare. Non posso far procedere
+      this.messageService.add({
+        severity: "warn",
+        key: "docsListToast",
+        detail: `Il documento deve essere presente in almeno un altro fascicolo prima di poter eliminare questa fasciolazione`
+      });
+      return;
+    } else {
+      // Procediamo con l'eliminazione logica. Prima chiediamo conferma:
+      this.confirmationService.confirm({
+        key: "confirm-popup",
+        target: iconaEliminazioneArchiviazione,
+        message: `Stai per eliminare logicamente la fascicolazione di ${doc.registrazioneVisualizzazione ? doc.registrazioneVisualizzazione : doc.oggettoVisualizzazione}. Vuoi procedere?`,
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => {
+          // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
+          const archivioDocToUpdate: ArchivioDoc = new ArchivioDoc();
+          archivioDocToUpdate.dataEliminazione = new Date();
+          archivioDocToUpdate.idPersonaEliminazione = { id: this.utenteUtilitiesLogin.getUtente().idPersona.id } as Persona;
+          archivioDocToUpdate.version = doc.archiviation.version;
+          archivioDocToUpdate.id = doc.archiviation.id;
+          this.subscriptions.push(this.archivioDocService.patchHttpCall(archivioDocToUpdate, archivioDocToUpdate.id)
+            .subscribe(
+              res => {
+                doc.archiviation.dataEliminazione = res.dataEliminazione;
+                doc.archiviation.idPersonaEliminazione = res.idPersonaEliminazione;
+                doc.archiviation.version = res.version;
+                this.messageService.add({
+                  severity: "success",
+                  key: "docsListToast",
+                  detail: `Fascicolazione eliminata logicamente con successo`
+                });
+              }
+            )
+          );
+        },
+        reject: () => { /* L'utente ha cambaito idea. Non faccio nulla */ }
+      });
+    }
+  }
 
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi

@@ -156,9 +156,9 @@ export const cols: ColonnaBds[] = [
 
 export const TipoArchivioTraduzioneVisualizzazione = [
   { value: TipoArchivio.PROCEDIMENTO, nome: "Procedimento" },
-  { value: TipoArchivio.SPECIALE, nome: "Speciale" },
   { value: TipoArchivio.ATTIVITA, nome: "Attività" },
-  { value: TipoArchivio.AFFARE, nome: "Affare" }
+  { value: TipoArchivio.AFFARE, nome: "Affare" },
+  { value: TipoArchivio.SPECIALE, nome: "Speciale" }
 ];
 
 
@@ -181,6 +181,12 @@ export const colsCSV: any[] = [
     header: "Tipo",
     fieldType: "string",
     fieldId: "tipo"
+  },
+  {
+    field: "numerazioneGerarchica",
+    header: "Numerazione Gerarchica",
+    fieldType: "string",
+    fieldId: "numerazioneGerarchica"
   },
   {
     field: (arch: ExtendedArchiviView) => {

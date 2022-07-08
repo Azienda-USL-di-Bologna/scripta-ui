@@ -9,7 +9,7 @@
             [disabled]="!configuration.searchBox"
             type="text" 
             (input)="referenceTableComponent.removeSort(); referenceTableComponent.applyFilterGlobal($event, 'equals')" 
-            placeholder="Ricerca.. " />
+            placeholder="Ricerca.." />
         </span>
         <!-- BOTTONE AGGIORNA RICERCA -->
         <button pButton 
@@ -54,12 +54,13 @@
         tooltipPosition="bottom">
       </i>
     </span>
-    <!-- BOTTONE NUOVO ARCHIVIO -->
-    <span *ngIf="configuration.newArchivio">
+    <!-- BOTTONE NUOVO ARCHIVIO [disabled] = "archivio.canCreateSottoarchivio()"-->
+    <span *ngIf="configuration.newArchivio && functionalButtonsComponent.newArchivoButton">
       <button
         type="button" 
         pButton 
         pRipple 
+        [disabled] = "!functionalButtonsComponent.newArchivoButton?.hasPermessi"
         icon="pi pi-plus" 
         (click)="functionalButtonsComponent.newArchivoButton.aziendeItems.length > 1 ? 
           aziendaSelection.toggle($event) : 
@@ -70,6 +71,7 @@
         tooltipPosition="bottom">
       </button>
       <p-menu
+        appendTo="body"
         #aziendaSelection
         [model]="functionalButtonsComponent.newArchivoButton.aziendeItems"
         [popup]="true">

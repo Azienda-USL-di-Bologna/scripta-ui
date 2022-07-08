@@ -1,24 +1,142 @@
-<p-table 
-#tableResponsabiliArchivi 
-[value]="responsabiliArchivi" 
-[columns]="colsSottoarchivio">
-<ng-template pTemplate="header" let-columns>
-  <tr>
-    <th>Nome</th>
-    <th>Struttura</th>
-    <th>Ruolo</th>
-    <th *ngIf="archivio.livello === 1">Azioni</th>
-  </tr>
-</ng-template>
-<ng-template pTemplate="body" let-rowRespo let-columns="columns">
-  <tr>
-    <td>{{rowRespo.idPersona.descrizione}}</td>
-    <td>{{rowRespo.idStruttura?.nome}}</td>
-    <td>{{rowRespo.ruolo | titlecase}}</td>
-    <td *ngIf="archivio.livello === 1">
-        <button type="button" pButton icon="pi pi-pencil" pTooltip="Modifica Permesso"></button>
-        <button type="button" pButton icon="pi pi-trash" pTooltip="Elimina Permesso"></button>
-    </td>
-  </tr>
-</ng-template>
+<p-table #tableResponsabiliArchivi 
+  dataKey="id"
+  editMode="row" 
+  [value]="responsabiliArchivi" 
+  styleClass="tabella-responsabili-archivio"
+  [scrollable]="true"
+	scrollHeight="flex">
+  <ng-template pTemplate="caption">
+		<div class="">
+			<button *ngIf="archivio.livello === 1"
+				id="aggiungiResponsabile"
+				type="button"
+				pButton 
+				pRipple 
+				icon="pi pi-plus" 
+				(click)="inEditing = true; addResponsabile()" 
+				class="mr-2" 
+				label="Aggiungi responsabile o vicario"
+				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario">
+			</button>
+		</div>
+	</ng-template>
+  <ng-template pTemplate="header">
+    <tr>
+      <th class="nome-column">Nome</th>
+      <th class="struttura-column">Struttura</th>
+      <th class="ruolo-column">Ruolo</th>
+      <th class="azione-column" *ngIf="archivio.livello === 1 && loggedUserIsResponsbaileOrVicario">Azioni</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-attore let-editing="editing" let-ri="rowIndex">
+    <tr [pEditableRow]="attore">
+      <td class="nome-column">
+        <!-- Non si deve poreter editare se perm['persona'] è pieno -->
+				<p-cellEditor>
+					<ng-template pTemplate="input">
+						<lib-users-autocomplete *ngIf="!attore.idPersona" 
+							class="autocomplete-utenti" 
+							[additionalFilters]="additionalFilterComboUtenti" 
+							[azienda]="archivio.idAzienda"
+              [showPool]="false"
+							[showOnlyUser]="true"
+							(utenteStrutturaSelezionatoEmit)="onUtenteStrutturaSelected($event, attore)">
+						</lib-users-autocomplete>
+						<div *ngIf="attore.idPersona">{{attore.idPersona.descrizione}}</div>
+					</ng-template>
+					<ng-template pTemplate="output">
+						{{attore.idPersona.descrizione}}
+					</ng-template>
+				</p-cellEditor>
+      </td>
+      <td class="struttura-column">
+        <p-cellEditor>
+					<ng-template pTemplate="input">
+						<p-dropdown 
+							appendTo="body" 
+							[options]="struttureAttoreInEditing" 
+							[(ngModel)]="attore.idStruttura">
+							<ng-template let-struttura pTemplate="selectedItem">
+									<div>{{struttura.nome}}</div>
+							</ng-template>
+							<ng-template let-struttura pTemplate="item">
+									<div>{{struttura.nome}}</div>
+							</ng-template>
+						</p-dropdown>
+					</ng-template>
+					<ng-template pTemplate="output">
+						{{attore.idStruttura?.nome}}
+					</ng-template>
+				</p-cellEditor>
+      </td>
+      <td class="ruolo-column">
+        <p-cellEditor>
+					<ng-template pTemplate="input">
+						<p-dropdown *ngIf="!attore.id"
+							appendTo="body" 
+							[options]="ruoliList" 
+							[(ngModel)]="attore.ruolo">
+						</p-dropdown>
+            <div *ngIf="attore.id">
+              {{attore.ruolo === ruoliEnum.RESPONSABILE_PROPOSTO ? "Responsabile proposto" : attore.ruolo | titlecase}}
+            </div>
+					</ng-template>
+					<ng-template pTemplate="output">
+						{{attore.ruolo === ruoliEnum.RESPONSABILE_PROPOSTO ? "Responsabile proposto" : attore.ruolo | titlecase}}
+					</ng-template>
+				</p-cellEditor>
+      </td>
+      <td *ngIf="archivio.livello === 1 && loggedUserIsResponsbaileOrVicario"
+        class="azione-column">
+        <!-- Bottone di editing.
+          Se la riga riguarda il resp o il proposto allora devo essere RESPONSABILE -->
+        <button *ngIf="!editing && (ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE 
+              || (attore.ruolo !== ruoliEnum.RESPONSABILE && attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO))" 
+          type="button" 
+          pButton 
+          pRipple
+          pInitEditableRow
+          class="p-button-rounded p-button-text"
+          icon="pi pi-pencil" 
+          pTooltip="Modifica struttura"
+          (click)="inEditing = true; onRowEditInit(attore)">
+        </button>
+        <!-- Bottone di cancellazione. 
+          Non si può cancellare il responsabile. E per cancellare un proposto devo essere RESPONSABILE -->
+        <button *ngIf="!editing && attore.ruolo !== ruoliEnum.RESPONSABILE && 
+              (attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO || ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE)"
+          type="button" 
+          pButton 
+          pRipple
+          pInitEditableRow
+          class="p-button-rounded p-button-text"
+          icon="pi pi-trash" 
+          pTooltip="Elimina"
+          (click)="onRowEditSave(attore, ri, 'DELETE')">
+        </button>
+        <!-- Bottone di salvataggio dell'editing. -->
+        <button *ngIf="editing"
+					pButton 
+					pRipple 
+					pSaveEditableRow 
+					pTooltip="Salva"
+					class="p-button-rounded p-button-text p-button-success p-mr-2"
+					type="button" 
+					icon="pi pi-check" 
+					(click)="inEditing = false; onRowEditSave(attore, ri, attore.id ? 'UPDATE' : 'INSERT')" >
+				</button>
+        <!-- Bottone di annullamento editing -->
+				<button *ngIf="editing" 
+					pButton 
+					pRipple 
+					pCancelEditableRow 
+					icon="pi pi-times" 
+					pTooltip="Annulla modifiche"
+					class="p-button-rounded p-button-text p-button-danger"
+					type="button" 
+					(click)="inEditing = false; onRowEditCancel(attore, ri)">
+				</button>
+      </td>
+    </tr>
+  </ng-template>
 </p-table>
