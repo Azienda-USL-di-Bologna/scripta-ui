@@ -11,18 +11,50 @@ import { TabItem, TabType } from './tab-item';
 export class NavigationTabsService {
   private tabs: TabItem[] = [];
   public activeTabIndex: number = 0;
+  private idTabActivatedHistory: string[] = [];
 
   public addTab(tab: TabItem) {
     this.tabs.push(tab);
     this.setTabsInSessionStorage();
   }
 
+  /**
+   * Si sta chiudendo un tab. Lo tolgo dalla lista dei tab e vado ad attivare il precedente tab usato.
+   * Se non trovassi nessun tab precedentemente usato (caso strano) allora attiverò arhcivi list o doc list
+   * a seconda del fatto che è appena stato chiuso un archivio o un doc.
+   * @param tabIndexToRemove 
+   */
   public removeTab(tabIndexToRemove: number): void {
-    if (this.tabs[tabIndexToRemove].type === TabType.ARCHIVIO) {
-      this.activeTabIndex = 1; // Sto dando per scotnato che il tab degli archiviList sia il secondo.
-    }
+    const typeOfTabToRemove: TabType = this.tabs[tabIndexToRemove].type;
     this.tabs.splice(tabIndexToRemove, 1);
     this.setTabsInSessionStorage();
+    const tabIndexToActivate = this.getIndexOfLastActivatedTab();
+    if (tabIndexToActivate) {
+      this.activeTabByIndex(tabIndexToActivate);
+    } else {
+      if (typeOfTabToRemove === TabType.ARCHIVIO) {
+        this.activeTabByIndex(this.tabs.findIndex(t => t.id === TabType.ARCHIVI_LIST));
+      } else {
+        this.activeTabByIndex(this.tabs.findIndex(t => t.id === TabType.DOCS_LIST));
+      }
+    }
+  }
+
+  /**
+   * Torna l'indice dell'ultimo tab ceh è stato usato, scegliendo però solo tra i tab ancora esistenti.
+   * Vengono quindi esclusi i tab già chiusi. Se nessun tab è stato trovato allora tornerà null.
+   * @returns 
+   */
+  private getIndexOfLastActivatedTab(): number {
+    if (this.idTabActivatedHistory.length === 0) {
+      return null;
+    }
+    const lastTabIdActivated = this.idTabActivatedHistory.pop();
+    const index = this.tabs.findIndex(t => t.id === lastTabIdActivated);
+    if (index !== -1) {
+      return index;
+    }
+    return this.getIndexOfLastActivatedTab();
   }
 
   /**
@@ -32,7 +64,7 @@ export class NavigationTabsService {
    * @param label 
    * @param data 
    */
-  public updateTab(tabIndex: number, label: string, data: any, labelForAppName: string, tabId?: number) : void {
+  public updateTab(tabIndex: number, label: string, data: any, labelForAppName: string, tabId?: string) : void {
     this.tabs[tabIndex].label = label;
     this.tabs[tabIndex].labelForAppName = labelForAppName;
     this.tabs[tabIndex].data = data;
@@ -51,15 +83,18 @@ export class NavigationTabsService {
   }
 
   public activeLastTab(): void {
-    setTimeout(() => {
-      this.activeTabIndex = this.tabs.length - 1; 
-    }, 0);
+    this.activeTabByIndex(this.tabs.length - 1);
   }
 
   public activeTabByIndex(tabIndex: number): void {
     setTimeout(() => {
       this.activeTabIndex = tabIndex; 
+      this.addTabToHistory(tabIndex);
     }, 0);
+  }
+
+  public addTabToHistory(tabIndex: number) {
+    this.idTabActivatedHistory.push(this.tabs[tabIndex].id);
   }
 
   /**
@@ -105,7 +140,7 @@ export class NavigationTabsService {
       "Documenti",
       "pi pi-fw pi-list",
       TabType.DOCS_LIST,
-      null,
+      TabType.DOCS_LIST, // Lo uso come id univoco di questo tab
       "Elenco Documenti"
     );
   }
@@ -118,7 +153,7 @@ export class NavigationTabsService {
       "Fascicoli",
       "pi pi-fw pi-list",
       TabType.ARCHIVI_LIST,
-      null,
+      TabType.ARCHIVI_LIST, // Lo uso come id univoco di questo tab
       "Elenco Fascicoli"
     );
   }
@@ -133,7 +168,7 @@ export class NavigationTabsService {
       label,
       "pi pi-fw pi-folder",
       TabType.DOC,
-      idDoc,
+      idDoc.toString(),
       label
     );
   }
@@ -149,7 +184,7 @@ export class NavigationTabsService {
       label,
       "pi pi-fw pi-folder",
       TabType.ARCHIVIO,
-      archivio.fk_idArchivioRadice.id,
+      archivio.fk_idArchivioRadice.id.toString(),
       labelForAppName
     );
   }
@@ -162,7 +197,7 @@ export class NavigationTabsService {
    */
   public addTabArchivio(archivio: Archivio | ArchivioDetail | ExtendedArchiviView, active: boolean = true, reuseActiveTab: boolean = false): void {
     const tabIndex: number = this.tabs.findIndex(t => {
-      return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id
+      return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id.toString()
     });
     if (tabIndex !== -1) {
       this.updateTab(
@@ -180,7 +215,7 @@ export class NavigationTabsService {
         `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
         {archivio: archivio, id: archivio.id}, 
         `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
-        archivio.fk_idArchivioRadice.id
+        archivio.fk_idArchivioRadice.id.toString()
       );
     } else {
       this.addTab(
