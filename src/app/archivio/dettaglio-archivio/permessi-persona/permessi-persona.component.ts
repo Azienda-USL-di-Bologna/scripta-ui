@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Archivio, ArchivioDetail, UtenteStruttura, UtenteStrutturaService, Struttura } from '@bds/ng-internauta-model';
-import { OggettoneOperation, OggettonePermessiEntitaGenerator, PROJECTIONS } from '@bds/nt-communicator';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from '@nfa/next-sdr';
+import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/nt-communicator';
+import { FilterDefinition, PagingConf } from '@nfa/next-sdr';
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs';
@@ -24,7 +24,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
   public cols: any[];
   public exportColumns: any[];
   public selectedStruttura: Struttura;
-  public additionalFilterComboUtenti: FilterDefinition[]
+  public additionalFilterComboUtenti: FilterDefinition[] = [];
   public inEditing: boolean = false;
   private subscriptions: Subscription[] = [];
   private permClone: { [s: number]: PermessoTabella; } = {};
@@ -189,7 +189,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
    * @param perm 
    */
   public aggiungiPersonaStruttura(utenteStruttura: UtenteStruttura, permesso: PermessoTabella) {
-    permesso.soggetto = utenteStruttura.idUtente.idPersona;
+    permesso.soggetto = utenteStruttura?.idUtente.idPersona;
     permesso.descrizioneSoggetto = utenteStruttura.idUtente.idPersona.descrizione;
     //permesso.idProvenienzaSoggetto = permesso.soggetto.id;
 
@@ -205,6 +205,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
    */
   public addPermesso(): void {
     this.strutture = [];
+    this.additionalFilterComboUtenti = this.permessiDettaglioArchivioService.filtraEntitaEsistenti(this._archivio.permessi, "persone");
     const newPermessoTabella = new PermessoTabella();
     this.perms.push(newPermessoTabella);
     this.dt.initRowEdit(newPermessoTabella);

@@ -3,6 +3,7 @@ import { Archivio, ArchivioDetail, Azienda, Struttura } from '@bds/ng-internauta
 import {Table} from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
+import { FilterDefinition} from '@nfa/next-sdr';
 import { AzioniPossibili, EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
 import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/nt-communicator';
 
@@ -22,6 +23,7 @@ export class PermessiStrutturaComponent implements OnInit {
   public _dataRiferimento: Date = new Date();
   public predicati: EnumPredicatoPermessoArchivio[] = [];
   private permClone: { [s: number]: PermessoTabella; } = {};
+  public additionalFilter: FilterDefinition[] = [];
   @ViewChild("dt", {}) private dt: Table;
 
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
@@ -79,6 +81,8 @@ export class PermessiStrutturaComponent implements OnInit {
    */
      public addPermesso(): void {
       const newPermessoTabella = new PermessoTabella();
+      debugger
+      this.additionalFilter = this.permessiDettaglioArchivioService.filtraEntitaEsistenti(this._archivio.permessi, "strutture");
       this.perms.push(newPermessoTabella);
       this.dt.initRowEdit(newPermessoTabella);
   }

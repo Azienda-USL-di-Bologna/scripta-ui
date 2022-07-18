@@ -171,6 +171,7 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
     oggettoneOperation: OggettoneOperation, // operazione che sto svolgendo (modifica / aggiunta oppure rimozione )
     operazioneRichiesta: AzioniPossibili, // aggiunto per chiarezza di lettura mi serve a capire che operazione sto svolgendo sul frontend
     archivio: Archivio | ArchivioDetail): OggettonePermessiEntitaGenerator {
+      debugger
       oggettone = this.filtraVirtuali(oggettone);
       const permessoPerBlackbox: OggettonePermessiEntitaGenerator = new OggettonePermessiEntitaGenerator(operazioneRichiesta === AzioniPossibili.BAN ? null: oggettone );
       let entitaVeicolante: EntitaStoredProcedure = null;
@@ -228,12 +229,36 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
     return permessoPerBlackbox;
   }
 
+  public filtraEntitaEsistenti(oggettonePassed: PermessoEntitaStoredProcedure[], tabella: string): FilterDefinition[]{
+    var entitaEsistenti: FilterDefinition[] = [];
+    oggettonePassed = this.filtraVirtuali(oggettonePassed);
+    oggettonePassed?.forEach((oggettone: PermessoEntitaStoredProcedure) => {
+      if (oggettone.soggetto.table === tabella) {
+        oggettone.categorie.forEach((categoria: CategoriaPermessiStoredProcedure) => {
+          categoria.permessi.forEach((permesso: PermessoStoredProcedure) => {
+            if (permesso.predicato != EnumPredicatoPermessoArchivio.RESPONSABILE && permesso.predicato != EnumPredicatoPermessoArchivio.VICARIO && permesso.predicato != EnumPredicatoPermessoArchivio.RESPONSABILE_PROPOSTO) {
+              if (tabella === "persone"){
+                entitaEsistenti.push(new FilterDefinition("idUtente.idPersona.descrizione", FILTER_TYPES.string.notEquals, oggettone.soggetto.descrizione) as FilterDefinition)
+              }else {
+                entitaEsistenti.push(new FilterDefinition("idStrutturaFiglia.nome", FILTER_TYPES.string.notEquals, oggettone.soggetto.descrizione) as FilterDefinition)
+              }
+              
+            }
+          })
+        })
+      }
+    });
+    return entitaEsistenti;
+  }
+
+  /**
+   * filtra i permessi virtuali 
+   * @param oggettoni 
+   */
   private filtraVirtuali(oggettoni: PermessoEntitaStoredProcedure[]): PermessoEntitaStoredProcedure[] {
     oggettoni?.forEach((oggettone: PermessoEntitaStoredProcedure) => {
       oggettone.categorie.forEach((categoria: CategoriaPermessiStoredProcedure) => {
-        categoria.permessi = categoria.permessi.filter((permesso: PermessoStoredProcedure) => {
-          permesso.virtuale === true || permesso.virtuale_oggetto === true
-        })
+        categoria.permessi = categoria.permessi.filter((permesso: PermessoStoredProcedure) => permesso.virtuale === false && permesso.virtuale_oggetto === false)
       })
     })
     return oggettoni;
@@ -285,6 +310,7 @@ export enum EnumPredicatoPermessoArchivio {
   BLOCCO = "BLOCCO",
   VICARIO = "VICARIO",
   RESPONSABILE = "RESPONSABILE",
+  RESPONSABILE_PROPOSTO = "RESPONSABILE_PROPOSTO",
   NON_PROPAGATO = "NON_PROPAGATO"
 }
 
