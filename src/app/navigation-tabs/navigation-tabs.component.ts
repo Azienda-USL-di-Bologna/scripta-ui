@@ -28,10 +28,10 @@ export class NavigationTabsComponent implements OnInit {
   ) {
     console.log(this.router)
     if (this.router.routerState.snapshot.url.includes("archivilist")) {
-      this.navigationTabsService.activeTabIndex = 0;
+      this.navigationTabsService.activeTabByIndex(0);
       this.appService.appNameSelection("Elenco Fascicoli")
     } else {
-      this.navigationTabsService.activeTabIndex = 1;      
+      this.navigationTabsService.activeTabByIndex(1);  
       this.appService.appNameSelection("Elenco Documenti")
     }
     /* this.route.queryParams.subscribe(params => {
@@ -109,12 +109,13 @@ export class NavigationTabsComponent implements OnInit {
     } */
   }
   
-  public onChangeTab(tabIndex:number): void {
+  public onChangeTab(tabIndex: number): void {
     /* if (tabIndex == 0 || tabIndex == 1 ){
       this.appService.appNameSelection("Elenco "+ this.navigationTabsService.getTabs()[tabIndex].label);
     } else {
       this.appService.appNameSelection("Fascicolo "+ this.navigationTabsService.getTabs()[tabIndex].label);
     } */
+    this.navigationTabsService.addTabToHistory(tabIndex);
     this.appService.appNameSelection(this.navigationTabsService.getTabs()[tabIndex].labelForAppName);
   }
 
