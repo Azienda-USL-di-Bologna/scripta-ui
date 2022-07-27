@@ -40,6 +40,5 @@ export class ExtendedArchivioService extends ArchivioService {
     let formData: FormData = new FormData();
     formData.append("idArchivio", idArchivio.toString());
     this._http.post(apiUrl, formData).subscribe();
-        
   }
 }

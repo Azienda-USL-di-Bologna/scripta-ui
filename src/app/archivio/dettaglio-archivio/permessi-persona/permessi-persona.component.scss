@@ -1,4 +1,4 @@
-::ng-deep.tabella-permessi-archivio {
+::ng-deep .tabella-permessi-persona-archivio {
   .persona-column {
     min-width: 300px;
     width: 300px;
@@ -6,6 +6,7 @@
   }
   .struttura-column {
     min-width: 150px;
+    max-width: 600px;
     p-celleditor {
       width: 100%;
     }
@@ -27,6 +28,9 @@
     width: 150px;
     max-width: 150px;
     justify-content: center;
+  }
+  .barrato{
+    text-decoration: line-through;
   }
   .azione-column {
     min-width: 112px;

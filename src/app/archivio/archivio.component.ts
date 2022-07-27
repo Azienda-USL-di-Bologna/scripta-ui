@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, ArchivioDiInteresse, ArchivioDiInteresseService, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, ArchivioDiInteresse, ArchivioDiInteresseService, DecimalePredicato, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/ng-internauta-model';
 import { MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListComponent } from '../archivi-list-container/archivi-list/archivi-list.component';
 import { DocsListComponent } from '../docs-list-container/docs-list/docs-list.component';
@@ -16,8 +16,9 @@ import { Table } from 'primeng/table';
 import { AppComponent } from '../app.component';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@nfa/next-sdr';
 import { Subscription } from 'rxjs';
+import { first } from 'rxjs/operators'
 import { DatePipe } from '@angular/common';
-
+import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
 
 @Component({
   selector: 'app-archivio',
@@ -25,7 +26,7 @@ import { DatePipe } from '@angular/common';
   styleUrls: ['./archivio.component.scss']
 })
 export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, CaptionSelectButtonsComponent, CaptionReferenceTableComponent {
-  private _archivio: Archivio | ArchivioDetail;
+  private _archivio: Archivio;
   public captionConfiguration: CaptionConfiguration;
   public referenceTableComponent: CaptionReferenceTableComponent;
   public selectButtonItems: SelectButtonItem[];
@@ -39,9 +40,14 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public utenteExistsInArchivioInteresse: boolean;
   private utenteArchivioDiInteresse: ArchivioDiInteresse;
   public subscriptions: Subscription[] = [];
+  private utenteUtilitiesLogin: UtenteUtilities;
 
+  get archivio(): Archivio { return this._archivio; }
 
-  get archivio(): Archivio | ArchivioDetail { return this._archivio; }
+  /**
+   * Prendo in input l'archivio che il componente deve mostrare.
+   * Lo ricarico con la projection che voglio e inizializzo il componente
+   */
   @Input() set data(data: any) {
     this.extendedArchivioService.getByIdHttpCall(
       data.archivio.id,
@@ -50,8 +56,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         this._archivio = res;
         console.log("Archivio nell'archivio component: ", this._archivio);
         setTimeout(() => {
-          this.inizializeAll();
-
+          if (this.utenteUtilitiesLogin) {
+            this.inizializeAll();
+          }
         }, 0);
       });
     this.checkPreferito(data.archivio.id);
@@ -92,18 +99,32 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     private archivioDiInteresseService: ArchivioDiInteresseService,
     private appComponent: AppComponent,
     private messageService: MessageService,
-    private datepipe: DatePipe
+    private datepipe: DatePipe,
+    private loginService: NtJwtLoginService,
   ) {
+    this.loginService.loggedUser$.pipe(first()).subscribe(
+      (utenteUtilities: UtenteUtilities) => {
+        this.utenteUtilitiesLogin = utenteUtilities;
+        if (this.archivio) {
+          this.inizializeAll();
+        }
+      }
+    );
   }
 
   ngOnInit(): void {
   }
 
   ngAfterViewInit(): void {
-    /* console.log(this.archivio.stato)*/
-    //this.inizializeAll(); 
+
   }
 
+  /**
+   * Funzione chiamata quando ho un nuovo archivio da mostrare. Si occupa di:
+   * - Costruire i selectedButton da mostrare/abilitare
+   * - Creare o meno il bottone per creare nuovi sottoarchivi
+   * - Si posizione sul corretto selctedButton e mostra il corretto sottocomponente
+   */
   private inizializeAll(): void {
     this.buildSelectButtonItems(this.archivio);
     this.buildNewArchivioButton(this.archivio);
@@ -168,10 +189,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     }
   }
 
-  public onUpdateArchivio(event: any): void {
-
-  }
-
   /**
    * Calcolo la lista di selectButton che vogliamo vedere.
    * In particolare se l'archivio aperto è un inserto allora
@@ -209,13 +226,13 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         labelDati = "Dati dell'inserto";
         break;
     }
-
     if (this.contenutoDiviso) {
       this.selectButtonItems.push(
         {
           id: SelectButton.DOCUMENTI,
           label: "Documenti",
-          disabled: this.archivio.stato === StatoArchivio.BOZZA
+          disabled: this.archivio.stato === StatoArchivio.BOZZA || 
+            !(this.archivio.permessiEspliciti.find(p => p.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id).bit > DecimalePredicato.PASSAGGIO)
         }
       );
     } else {
@@ -227,7 +244,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         }
       );
     }
-
     this.selectButtonItems.push(
       {
         id: SelectButton.DETTAGLIO,
@@ -237,7 +253,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   /**
-   * 
+   * Creo il bottone per creare un nuovo sottoarchivio
    * @param archivio 
    */
   public buildNewArchivioButton(archivio: Archivio | ArchivioDetail): void {
@@ -252,20 +268,39 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         this.newArchivoButton = {
           tooltip: "Crea nuovo sottofascicolo",
           livello: 1,
-          aziendeItems: [aziendaItem]
+          aziendeItems: [aziendaItem],
+          hasPermessi: this.canCreateSottoarchivio()
         };
         break;
       case 2:
         this.newArchivoButton = {
           tooltip: "Crea nuovo inserto",
           livello: 2,
-          aziendeItems: [aziendaItem]
+          aziendeItems: [aziendaItem],
+          hasPermessi: this.canCreateSottoarchivio()
         };
         break;
     }
   }
 
-  public updateArchivio(archivio: Archivio) {
+  /**
+   * Ritorna true se l'utente può creare il sottoarcivio e cioè se è responsabile/vicario o ha permesso di almeno modifica
+   * @returns 
+   */
+  public canCreateSottoarchivio(): boolean {
+    return this._archivio.permessiEspliciti.some(permessoArchivio => 
+      permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id
+      &&
+      permessoArchivio.bit >= DecimalePredicato.VICARIO
+    );
+  }
+
+  /**
+   * Metodo chiamato quando non ho cambiato archivio, ma esso è stato modificato, 
+   * e alcune di queste modifiche le vogliamo "notare"
+   * @param archivio 
+   */
+  public onUpdateArchivio(archivio: Archivio) {
     console.log("updateArchivio(archivio: Archivio)", archivio);
     this._archivio = archivio;
     this.inizializeAll();
@@ -410,6 +445,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       })
     );
   }
+  
   public ngOnDestroy(): void {
     if (this.subscriptions) {
       this.subscriptions.forEach(

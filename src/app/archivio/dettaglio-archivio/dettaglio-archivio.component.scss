@@ -1,4 +1,6 @@
 $font-size-label: 13px;
+$min-width-label: 155px;
+
 :host {
   padding: 5px;
   width: 100%;
@@ -18,12 +20,12 @@ $font-size-label: 13px;
     .row {
       display: flex;
       justify-content: space-between;
-      padding: 5px 0;
+      padding: 3px 0;
       .dropdown{
         width: 100%;
       }
       label {
-        min-width: 155px;
+        min-width: $min-width-label;
         text-align: right;
         font-size: $font-size-label;
       }
@@ -34,10 +36,40 @@ $font-size-label: 13px;
         }
       }
     }
-    
+    .multielements {
+      justify-content: flex-start;
+      .input-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        &:first-child {
+          width: 100%;
+        }
+        &.campo-tipo {
+          label {
+            min-width: 60px;
+          }
+        }
+        &.campo-riservato {
+          padding-right: 10px;
+          label {
+            min-width: 90px;
+          }
+          .icona-riservato {
+            cursor: pointer;
+          }
+        }
+        &.campo-conservazione {
+          label {
+            min-width: 120px;
+          }
+        }
+      }
+    }
   }
   .right-side {
-    flex-grow: 1;
+    //flex-grow: 1;
+    width: 280px;
     .numeraFasicolo {
       display: flex;
       flex-direction: row;
@@ -45,16 +77,13 @@ $font-size-label: 13px;
       align-items: center;
       padding: 10px;
     }
-    .flag-box {
+    /* .flag-box {
       display: flex;
       justify-content: space-around;
       label {
         font-size: $font-size-label;
       }
-      .flag-icon {
-        cursor: pointer;
-      }
-    }
+    } */
     .note-box {
       display: flex;
       flex-direction: column;

@@ -17,7 +17,7 @@
   [virtualRowHeight]="54"
   (onLazyLoad)="onLazyLoad($event)" 
   [lazy]="true" 
-  [lazyLoadOnInit]="true" 
+  [lazyLoadOnInit]="false" 
   [loading]="loading"
   [totalRecords]="totalRecords" 
   [ngClass]="{'table-zero-rows': totalRecords === 0}"
@@ -321,7 +321,7 @@
               [pTooltip]="rowData.isArchivioNero ? 'Nessun permesso sull\'archivio' : 
               (rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO' ? 'Archivio chiuso' :
                (rowData.tipo === 'SPECIALE' ? 'Archivio speciale' : ''))" 
-               [ngClass]="rowData.isArchivioNero ? 'pi-eye-slash' : 
+               [ngClass]="rowData.isArchivioNero ? 'pi-ban' : 
                (rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO' ? 'pi-lock' :
                 (rowData.tipo === 'SPECIALE' ? 'pi-slack' : 'display-none'))" 
 
