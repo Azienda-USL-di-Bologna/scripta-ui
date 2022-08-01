@@ -158,7 +158,13 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
    * Sarà proabbilmente eliminata quando avremo il servizo apposito
    */
    public calcolaPermessiEspliciti(archivio:Archivio|ArchivioDetail): void {
-    this.extendedArchivioService.calcolaPermessiEspliciti(archivio.id);
+     this.extendedArchivioService.calcolaPermessiEspliciti(archivio.id);
+     if (archivio.idArchivioPadre?.id) {
+        this.extendedArchivioService.calcolaPermessiEspliciti(archivio.idArchivioPadre.id);
+     }
+     if (archivio.idArchivioRadice?.id && archivio.idArchivioRadice?.id !== archivio.idArchivioPadre?.id) {
+       this.extendedArchivioService.calcolaPermessiEspliciti(archivio.idArchivioRadice.id);
+     }
   }
 
   /**
