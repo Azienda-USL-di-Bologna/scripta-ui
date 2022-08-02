@@ -40,7 +40,7 @@
 				<p-cellEditor>
 					<ng-template pTemplate="input">
 						<lib-structures-autocomplete *ngIf="!permesso.descrizioneSoggetto"
-							[showPool]="false"
+							[showPool]="true"
 							[filterByRoles]= "_rolesToFilter"
 							[enabled]="true" 
 							[azienda]="azienda"
@@ -72,6 +72,7 @@
 				<p-cellEditor>
 					<ng-template pTemplate="input">
 						<p-checkbox
+							[disabled]="permesso.soggetto.ufficio"
 							[binary]="true" 
 							[(ngModel)]="permesso.trasmetti">
 						</p-checkbox>
