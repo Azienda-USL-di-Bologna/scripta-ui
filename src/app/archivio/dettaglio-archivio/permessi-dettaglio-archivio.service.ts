@@ -7,7 +7,7 @@ import { ExtendedArchivioService } from "../extended-archivio.service";
 import { MessageService } from "primeng/api";
 import { Observable, Subject } from "rxjs";
 import { BlackboxPermessiService } from "@bds/ng-internauta-model";
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from "@nfa/next-sdr";
+import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from "@nfa/next-sdr";
 
 
 @Injectable({
@@ -171,7 +171,6 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
     oggettoneOperation: OggettoneOperation, // operazione che sto svolgendo (modifica / aggiunta oppure rimozione )
     operazioneRichiesta: AzioniPossibili, // aggiunto per chiarezza di lettura mi serve a capire che operazione sto svolgendo sul frontend
     archivio: Archivio | ArchivioDetail): OggettonePermessiEntitaGenerator {
-      debugger
       oggettone = this.filtraVirtuali(oggettone);
       const permessoPerBlackbox: OggettonePermessiEntitaGenerator = new OggettonePermessiEntitaGenerator(operazioneRichiesta === AzioniPossibili.BAN ? null: oggettone );
       let entitaVeicolante: EntitaStoredProcedure = null;
@@ -229,25 +228,29 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
     return permessoPerBlackbox;
   }
 
-  public filtraEntitaEsistenti(oggettonePassed: PermessoEntitaStoredProcedure[], tabella: string): FilterDefinition[]{
-    var entitaEsistenti: FilterDefinition[] = [];
+  public filtraEntitaEsistenti(oggettonePassed: PermessoEntitaStoredProcedure[], tabella: string): AdditionalDataDefinition[]{
+    var entitaEsistenti: AdditionalDataDefinition[] = [];
+    var idEntitaEsistenti: number[] = [];
     oggettonePassed = this.filtraVirtuali(oggettonePassed);
     oggettonePassed?.forEach((oggettone: PermessoEntitaStoredProcedure) => {
       if (oggettone.soggetto.table === tabella) {
         oggettone.categorie.forEach((categoria: CategoriaPermessiStoredProcedure) => {
           categoria.permessi.forEach((permesso: PermessoStoredProcedure) => {
             if (permesso.predicato != EnumPredicatoPermessoArchivio.RESPONSABILE && permesso.predicato != EnumPredicatoPermessoArchivio.VICARIO && permesso.predicato != EnumPredicatoPermessoArchivio.RESPONSABILE_PROPOSTO) {
-              if (tabella === "persone"){
-                entitaEsistenti.push(new FilterDefinition("idUtente.idPersona.descrizione", FILTER_TYPES.string.notEquals, oggettone.soggetto.descrizione) as FilterDefinition)
-              }else {
-                entitaEsistenti.push(new FilterDefinition("idStrutturaFiglia.nome", FILTER_TYPES.string.notEquals, oggettone.soggetto.descrizione) as FilterDefinition)
-              }
+              // if (tabella === "persone"){
+                idEntitaEsistenti.push(oggettone.soggetto.id_provenienza);
+              // }else {
+                // entitaEsistenti.push(new AdditionalDataDefinition("idStrutturaFiglia.nome", FILTER_TYPES.string.notEquals, oggettone.soggetto.descrizione) as AdditionalDataDefinition)
+              // }
               
             }
           })
         })
       }
     });
+    if(idEntitaEsistenti.length > 0){
+      entitaEsistenti.push(new AdditionalDataDefinition("doNotInclude", idEntitaEsistenti.join(";").toString()) as AdditionalDataDefinition);
+    }
     return entitaEsistenti;
   }
 
