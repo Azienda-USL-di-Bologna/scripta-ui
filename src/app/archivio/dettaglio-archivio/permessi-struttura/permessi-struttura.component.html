@@ -45,6 +45,7 @@
 							[enabled]="true" 
 							[azienda]="azienda"
 							[dataRiferimento]="_dataRiferimento"
+							[additionalDatas]="additionalData"
 							(strutturaSelezionataEmit)="strutturaSelezionataDaComboReceived($event, permesso)">
 						</lib-structures-autocomplete>
 						<div *ngIf="permesso.descrizioneSoggetto">{{permesso.descrizioneSoggetto}}</div>

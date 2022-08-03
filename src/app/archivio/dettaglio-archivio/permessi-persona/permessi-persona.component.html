@@ -46,7 +46,7 @@
 					<ng-template pTemplate="input">
 						<lib-users-autocomplete *ngIf="!permesso.descrizioneSoggetto" 
 							class="autocomplete-utenti" 
-							[additionalFilters]="additionalFilterComboUtenti" 
+							[additionalDatas]="additionalDataComboUtenti" 
 							[azienda]="archivio.idAzienda"
 							[showPool]="true"
 							[showOnlyUser]="true"
