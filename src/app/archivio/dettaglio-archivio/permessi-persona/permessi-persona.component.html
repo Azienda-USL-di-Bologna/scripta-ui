@@ -46,9 +46,9 @@
 					<ng-template pTemplate="input">
 						<lib-users-autocomplete *ngIf="!permesso.descrizioneSoggetto" 
 							class="autocomplete-utenti" 
-							[additionalFilters]="additionalFilterComboUtenti" 
+							[additionalDatas]="additionalDataComboUtenti" 
 							[azienda]="archivio.idAzienda"
-							[showPool]="false"
+							[showPool]="true"
 							[showOnlyUser]="true"
 							(utenteStrutturaSelezionatoEmit)="aggiungiPersonaStruttura($event, permesso)">
 						</lib-users-autocomplete>

@@ -7,7 +7,7 @@ import { ExtendedArchivioService } from "../extended-archivio.service";
 import { MessageService } from "primeng/api";
 import { Observable, Subject } from "rxjs";
 import { BlackboxPermessiService } from "@bds/ng-internauta-model";
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from "@nfa/next-sdr";
+import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from "@nfa/next-sdr";
 
 
 @Injectable({
@@ -158,7 +158,13 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
    * Sarà proabbilmente eliminata quando avremo il servizo apposito
    */
    public calcolaPermessiEspliciti(archivio:Archivio|ArchivioDetail): void {
-    this.extendedArchivioService.calcolaPermessiEspliciti(archivio.id);
+     this.extendedArchivioService.calcolaPermessiEspliciti(archivio.id);
+     if (archivio.idArchivioPadre?.id) {
+        this.extendedArchivioService.calcolaPermessiEspliciti(archivio.idArchivioPadre.id);
+     }
+     if (archivio.idArchivioRadice?.id && archivio.idArchivioRadice?.id !== archivio.idArchivioPadre?.id) {
+       this.extendedArchivioService.calcolaPermessiEspliciti(archivio.idArchivioRadice.id);
+     }
   }
 
   /**
@@ -228,12 +234,40 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
     return permessoPerBlackbox;
   }
 
+  public filtraEntitaEsistenti(oggettonePassed: PermessoEntitaStoredProcedure[], tabella: string): AdditionalDataDefinition[]{
+    var entitaEsistenti: AdditionalDataDefinition[] = [];
+    var idEntitaEsistenti: number[] = [];
+    oggettonePassed = this.filtraVirtuali(oggettonePassed);
+    oggettonePassed?.forEach((oggettone: PermessoEntitaStoredProcedure) => {
+      if (oggettone.soggetto.table === tabella) {
+        oggettone.categorie.forEach((categoria: CategoriaPermessiStoredProcedure) => {
+          categoria.permessi.forEach((permesso: PermessoStoredProcedure) => {
+            if (permesso.predicato != EnumPredicatoPermessoArchivio.RESPONSABILE && permesso.predicato != EnumPredicatoPermessoArchivio.VICARIO && permesso.predicato != EnumPredicatoPermessoArchivio.RESPONSABILE_PROPOSTO) {
+              // if (tabella === "persone"){
+                idEntitaEsistenti.push(oggettone.soggetto.id_provenienza);
+              // }else {
+                // entitaEsistenti.push(new AdditionalDataDefinition("idStrutturaFiglia.nome", FILTER_TYPES.string.notEquals, oggettone.soggetto.descrizione) as AdditionalDataDefinition)
+              // }
+              
+            }
+          })
+        })
+      }
+    });
+    if(idEntitaEsistenti.length > 0){
+      entitaEsistenti.push(new AdditionalDataDefinition("doNotInclude", idEntitaEsistenti.join(";").toString()) as AdditionalDataDefinition);
+    }
+    return entitaEsistenti;
+  }
+
+  /**
+   * filtra i permessi virtuali 
+   * @param oggettoni 
+   */
   private filtraVirtuali(oggettoni: PermessoEntitaStoredProcedure[]): PermessoEntitaStoredProcedure[] {
     oggettoni?.forEach((oggettone: PermessoEntitaStoredProcedure) => {
       oggettone.categorie.forEach((categoria: CategoriaPermessiStoredProcedure) => {
-        categoria.permessi = categoria.permessi.filter((permesso: PermessoStoredProcedure) => {
-          permesso.virtuale === true || permesso.virtuale_oggetto === true
-        })
+        categoria.permessi = categoria.permessi.filter((permesso: PermessoStoredProcedure) => permesso.virtuale === false && permesso.virtuale_oggetto === false)
       })
     })
     return oggettoni;
@@ -285,6 +319,7 @@ export enum EnumPredicatoPermessoArchivio {
   BLOCCO = "BLOCCO",
   VICARIO = "VICARIO",
   RESPONSABILE = "RESPONSABILE",
+  RESPONSABILE_PROPOSTO = "RESPONSABILE_PROPOSTO",
   NON_PROPAGATO = "NON_PROPAGATO"
 }
 

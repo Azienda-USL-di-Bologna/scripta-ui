@@ -125,6 +125,8 @@ export class ResponsabiliComponent implements OnInit {
                 summary: "Nuovo responsabile",
                 detail: "Nuovo responsabile inserito con successo"
               });
+              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+              this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
             },
             error: () => {
               this.messageService.add({
@@ -148,6 +150,8 @@ export class ResponsabiliComponent implements OnInit {
                 summary: "Aggiornamento responsabile",
                 detail: "Responsabile aggiornato con successo"
               });
+              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+              this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
             },
             error: () => {
               this.messageService.add({
@@ -170,6 +174,8 @@ export class ResponsabiliComponent implements OnInit {
                 summary: "Eliminazione responsabile",
                 detail: "Responsabile eliminato con successo"
               });
+              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+              this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
             },
             error: () => {
               this.messageService.add({
