@@ -1,4 +1,4 @@
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from "@angular/core";
+import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { PrimeNgModule } from "../../primeng.module";
 import { ScriptaCommonModule } from "../../scripta-common.module";

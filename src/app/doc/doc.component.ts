@@ -1,9 +1,9 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
-import { Doc, ENTITIES_STRUCTURE, Persona, Allegato, CODICI_REGISTRO } from "@bds/ng-internauta-model";
-import { LOCAL_IT } from "@bds/nt-communicator";
-import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
-import { AdditionalDataDefinition } from "@nfa/next-sdr";
+import { Doc, ENTITIES_STRUCTURE, Persona, Allegato, CODICI_REGISTRO } from "@bds/internauta-model";
+import { LOCAL_IT } from "@bds/common-tools";
+import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
+import { AdditionalDataDefinition } from "@bds/next-sdr";
 import { MessageService } from "primeng/api";
 import { Observable, Subscription } from "rxjs";
 import { switchMap } from "rxjs/operators";
@@ -34,7 +34,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private router: Router,
     private extendedDocService: ExtendedDocService,
-    private loginService: NtJwtLoginService,
+    private loginService: JwtLoginService,
     private messageService: MessageService,
     private route: ActivatedRoute,
     private appService: AppService) { 

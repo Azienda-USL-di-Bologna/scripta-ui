@@ -1,4 +1,4 @@
-import { ArchivioDetailView, Persona, TipoArchivio } from "@bds/ng-internauta-model";
+import { ArchivioDetailView, Persona, TipoArchivio } from "@bds/internauta-model";
 import { StatoArchivioTraduzioneVisualizzazione, TipoArchivioTraduzioneVisualizzazione } from "./archivi-list-constants";
 
 export class ExtendedArchiviView extends ArchivioDetailView {

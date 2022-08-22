@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { HeaderFeaturesConfig } from '@bds/common-components';
-import { NtJwtLoginService, UtenteUtilities, UtilityFunctions } from '@bds/nt-jwt-login';
+import { JwtLoginService, UtenteUtilities, UtilityFunctions } from '@bds/jwt-login';
 import { ActivatedRoute, Router, Params } from '@angular/router';
-import { IntimusClientService, PRIMENG_ITA_TRANSALATION } from '@bds/nt-communicator';
-import { getInternautaUrl, BaseUrlType, Azienda } from '@bds/ng-internauta-model';
+import { IntimusClientService, PRIMENG_ITA_TRANSALATION } from '@bds/common-tools';
+import { getInternautaUrl, BaseUrlType, Azienda } from '@bds/internauta-model';
 import { Subscription } from 'rxjs';
 import { APPLICATION, LOGIN_ROUTE, SCRIPTA_ROUTE } from 'src/environments/app-constants';
 import { AppService } from './app.service';
@@ -21,7 +21,7 @@ export class AppComponent implements OnInit {
   public appName: string;
 
   constructor(
-    public loginService: NtJwtLoginService,
+    public loginService: JwtLoginService,
     private config: PrimeNGConfig,
     private route: ActivatedRoute,
     private router: Router,

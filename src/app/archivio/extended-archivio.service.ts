@@ -1,9 +1,9 @@
 import { DatePipe } from '@angular/common';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Archivio, ArchivioDetail, ArchivioService } from '@bds/ng-internauta-model';
-import { getInternautaUrl, BaseUrlType } from "@bds/ng-internauta-model";
-import { AdditionalDataDefinition } from '@nfa/next-sdr';
+import { Archivio, ArchivioDetail, ArchivioService } from '@bds/internauta-model';
+import { getInternautaUrl, BaseUrlType } from "@bds/internauta-model";
+import { AdditionalDataDefinition } from '@bds/next-sdr';
 import { Observable } from 'rxjs';
 
 @Injectable({

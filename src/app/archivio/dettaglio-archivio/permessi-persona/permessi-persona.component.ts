@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, UtenteStruttura, UtenteStrutturaService, Struttura, PermessoEntitaStoredProcedure } from '@bds/ng-internauta-model';
-import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/nt-communicator';
-import { AdditionalDataDefinition, PagingConf } from '@nfa/next-sdr';
+import { Archivio, ArchivioDetail, UtenteStruttura, UtenteStrutturaService, Struttura, PermessoEntitaStoredProcedure } from '@bds/internauta-model';
+import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/common-tools';
+import { AdditionalDataDefinition, PagingConf } from '@bds/next-sdr';
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs';

@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
-import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
+import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { Subscription } from "rxjs";
-import { ConfigurazioneService, ParametroAziende } from "@bds/ng-internauta-model";
+import { ConfigurazioneService, ParametroAziende } from "@bds/internauta-model";
 import { NavigationTabsService } from "./navigation-tabs.service";
 import { TabItem } from "./tab-item";
 import { Router } from "@angular/router";
@@ -20,7 +20,7 @@ export class NavigationTabsComponent implements OnInit {
 
   constructor(
     private appService: AppService,
-    private loginService: NtJwtLoginService,
+    private loginService: JwtLoginService,
     private configurazioneService: ConfigurazioneService,
     public navigationTabsService: NavigationTabsService,
     //private route: ActivatedRoute,

@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MenuItem, TreeNode } from 'primeng/api';
 import { ExtendedArchivioService } from '../extended-archivio.service';
-import { Archivio, ArchivioDetail, ArchivioDetailViewService, ConfigurazioneService, ENTITIES_STRUCTURE, ParametroAziende } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, ArchivioDetailViewService, ConfigurazioneService, ENTITIES_STRUCTURE, ParametroAziende } from '@bds/internauta-model';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
 import { AppService } from 'src/app/app.service';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from '@nfa/next-sdr';
-import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
+import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from '@bds/next-sdr';
+import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { ArchivioFieldUpdating, ArchivioUtilsService } from '../archivio-utils.service';
 
 @Component({
@@ -58,7 +58,7 @@ export class ArchivioTreeComponent implements OnInit {
     private configurationService: ConfigurazioneService,
     private archivioService: ExtendedArchivioService,
     private achivioDetailViewService: ArchivioDetailViewService,
-    private loginService: NtJwtLoginService,
+    private loginService: JwtLoginService,
     private navigationTabsService: NavigationTabsService,
     private appService: AppService,
     private archivioUtilsService: ArchivioUtilsService) {
