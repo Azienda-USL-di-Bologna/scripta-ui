@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { AdditionalDataDefinition } from '@bds/next-sdr';
 import { AzioniPossibili, EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
-import { OggettoneOperation, OggettonePermessiEntitaGenerator, PermissionManagerService } from '@bds/common-tools';
+import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/common-tools';
 
 @Component({
   selector: 'app-permessi-struttura',
@@ -48,7 +48,6 @@ export class PermessiStrutturaComponent implements OnInit {
   }
   constructor(
     private messageService: MessageService,
-    private permissionManagerService: PermissionManagerService,
     private permessiDettaglioArchivioService: PermessiDettaglioArchivioService
   ) { }
 
@@ -138,7 +137,7 @@ export class PermessiStrutturaComponent implements OnInit {
       AzioniPossibili.REMOVE,
       this._archivio);
     
-    this.permissionManagerService.managePermissionsAdvanced(oggettoToDelete.getPermessiEntita())
+    this.permessiDettaglioArchivioService.managePermissionsAdvanced(oggettoToDelete.getPermessiEntita())
         .subscribe({
           next: (res: any) => {
             this.messageService.add({
@@ -181,7 +180,7 @@ export class PermessiStrutturaComponent implements OnInit {
         this._archivio
       );
     this.subscriptions.push(
-      this.permissionManagerService.managePermissionsAdvanced(oggettoToSave.getPermessiEntita())
+      this.permessiDettaglioArchivioService.managePermissionsAdvanced(oggettoToSave.getPermessiEntita())
         .subscribe({
           next: (res: any) => {
             this.messageService.add({
