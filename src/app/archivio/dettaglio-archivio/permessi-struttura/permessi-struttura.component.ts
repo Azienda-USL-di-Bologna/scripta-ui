@@ -3,8 +3,9 @@ import { Archivio, ArchivioDetail, Azienda, Struttura } from '@bds/internauta-mo
 import {Table} from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
+import { AdditionalDataDefinition } from '@bds/next-sdr';
 import { AzioniPossibili, EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
-import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/common-tools';
+import { OggettoneOperation, OggettonePermessiEntitaGenerator, PermissionManagerService } from '@bds/common-tools';
 
 @Component({
   selector: 'app-permessi-struttura',
@@ -22,6 +23,7 @@ export class PermessiStrutturaComponent implements OnInit {
   public _dataRiferimento: Date = new Date();
   public predicati: EnumPredicatoPermessoArchivio[] = [];
   private permClone: { [s: number]: PermessoTabella; } = {};
+  public additionalData: AdditionalDataDefinition[] = [];
   @ViewChild("dt", {}) private dt: Table;
 
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
@@ -46,7 +48,7 @@ export class PermessiStrutturaComponent implements OnInit {
   }
   constructor(
     private messageService: MessageService,
-    private permissionManagerService: PermessiDettaglioArchivioService,
+    private permissionManagerService: PermissionManagerService,
     private permessiDettaglioArchivioService: PermessiDettaglioArchivioService
   ) { }
 
@@ -79,6 +81,7 @@ export class PermessiStrutturaComponent implements OnInit {
    */
      public addPermesso(): void {
       const newPermessoTabella = new PermessoTabella();
+      this.additionalData = this.permessiDettaglioArchivioService.filtraEntitaEsistenti(this._archivio.permessi, "strutture");
       this.perms.push(newPermessoTabella);
       this.dt.initRowEdit(newPermessoTabella);
   }
