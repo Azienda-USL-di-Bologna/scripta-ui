@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Archivio, ArchivioDetail, UtenteStruttura, UtenteStrutturaService, Struttura } from '@bds/ng-internauta-model';
-import { OggettoneOperation, OggettonePermessiEntitaGenerator, PROJECTIONS } from '@bds/nt-communicator';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from '@nfa/next-sdr';
+import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/nt-communicator';
+import { FilterDefinition, PagingConf } from '@nfa/next-sdr';
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs';
