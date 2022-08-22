@@ -5,9 +5,9 @@ import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { PrimengPluginModule } from "@bds/primeng-plugin";
 import { CommonComponentsModule, ProfiloComponent } from "@bds/common-components";
-import { NtJwtLoginModule } from "@bds/nt-jwt-login";
+import { JwtLoginModule } from "@bds/jwt-login";
 import { loginModuleConfig } from "./config/module-config";
-import { NtCommunicatorModule } from "@bds/nt-communicator";
+import { CommonToolsModule } from "@bds/common-tools";
 import { HomeComponent } from "./home/home.component";
 import { DatePipe, TitleCasePipe } from "@angular/common";
 
@@ -32,11 +32,11 @@ registerLocaleData(localeIt, "it-IT", localeItExtra);
         BrowserAnimationsModule,
         AppRoutingModule,
         PrimengPluginModule,
-        NtJwtLoginModule.forRoot(loginModuleConfig),
+        JwtLoginModule.forRoot(loginModuleConfig),
         PrimeNgModule,
         ScriptaCommonModule,
         CommonComponentsModule,
-        NtCommunicatorModule
+        CommonToolsModule
     ],
     providers: [
         DatePipe,

@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Persona, Ruolo, RuoloAttoreArchivio, Struttura, UtenteStruttura } from '@bds/ng-internauta-model';
-import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
+import { Archivio, ArchivioDetail, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Persona, Ruolo, RuoloAttoreArchivio, Struttura, UtenteStruttura } from '@bds/internauta-model';
+import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
+import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@bds/next-sdr';
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -45,7 +45,7 @@ export class ResponsabiliComponent implements OnInit {
   
   constructor(
     private attoreArchivioService: AttoreArchivioService,
-    private loginService: NtJwtLoginService,
+    private loginService: JwtLoginService,
     private messageService: MessageService,
     private permessiDettaglioArchivioService: PermessiDettaglioArchivioService) { 
     this.subscriptions.push(

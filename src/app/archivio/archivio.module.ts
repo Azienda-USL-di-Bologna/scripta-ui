@@ -10,7 +10,7 @@ import { ArchiviListModule } from "../archivi-list-container/archivi-list/archiv
 import { DocsListModule } from "../docs-list-container/docs-list/docs-list.module";
 import { RichiestaAccessoArchiviComponent } from "./richiesta-accesso-archivi/richiesta-accesso-archivi.component"
 import { DettaglioArchivioModule } from "./dettaglio-archivio/dettaglio-archivio.module";
-import { BlackboxPermessiService } from "@bds/ng-internauta-model";
+import { BlackboxPermessiService } from "@bds/internauta-model";
 
 @NgModule({
   imports: [

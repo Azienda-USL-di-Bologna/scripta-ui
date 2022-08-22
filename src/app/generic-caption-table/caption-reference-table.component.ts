@@ -1,4 +1,4 @@
-import { ColonnaBds } from "@bds/primeng-plugin";
+import { ColonnaBds } from "@bds/common-tools";
 import { Table } from "primeng/table";
 
 /**

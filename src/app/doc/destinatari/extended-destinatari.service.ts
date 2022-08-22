@@ -1,6 +1,6 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {RelatedService} from "@bds/ng-internauta-model";
+import {RelatedService} from "@bds/internauta-model";
 import {DatePipe} from "@angular/common";
 
 

@@ -1,13 +1,13 @@
 import { DatePipe } from "@angular/common";
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Archivio, ArchivioDetail, BaseUrlType, CategoriaPermessiStoredProcedure, EntitaStoredProcedure, ENTITIES_STRUCTURE, getInternautaUrl, PermessoEntitaStoredProcedure, PermessoStoredProcedure, Persona, Struttura, UtenteStrutturaService } from "@bds/ng-internauta-model";
-import { EntitaBlackbox, OggettoneOperation, OggettonePermessiEntitaGenerator, PermissionManagerService } from "@bds/nt-communicator";
+import { Archivio, ArchivioDetail, BaseUrlType, CategoriaPermessiStoredProcedure, EntitaStoredProcedure, ENTITIES_STRUCTURE, getInternautaUrl, PermessoEntitaStoredProcedure, PermessoStoredProcedure, Persona, Struttura, UtenteStrutturaService } from "@bds/internauta-model";
+import { EntitaBlackbox, OggettoneOperation, OggettonePermessiEntitaGenerator, PermissionManagerService } from "@bds/common-tools";
 import { ExtendedArchivioService } from "../extended-archivio.service";
 import { MessageService } from "primeng/api";
 import { Observable, Subject } from "rxjs";
-import { BlackboxPermessiService } from "@bds/ng-internauta-model";
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from "@nfa/next-sdr";
+import { BlackboxPermessiService } from "@bds/internauta-model";
+import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from "@bds/next-sdr";
 
 
 @Injectable({

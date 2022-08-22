@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from "@angular/router";
-import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
+import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 
 
 @Injectable({
@@ -10,7 +10,7 @@ import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
 // adesso gestisce solo anagrafe-pec
 export class RoleGuard implements CanActivate {
     private loggedUtenteUtilites: UtenteUtilities;
-  constructor( private loginService: NtJwtLoginService, private router: Router) {
+  constructor( private loginService: JwtLoginService, private router: Router) {
       this.loginService.loggedUser$.subscribe(loggedUser => {
         this.loggedUtenteUtilites = loggedUser;
       });

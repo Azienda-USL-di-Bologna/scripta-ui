@@ -1,10 +1,10 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, Azienda, Struttura } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, Azienda, Struttura } from '@bds/internauta-model';
 import {Table} from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { AzioniPossibili, EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
-import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/nt-communicator';
+import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/common-tools';
 
 @Component({
   selector: 'app-permessi-struttura',

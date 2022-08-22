@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Archivio, ArchivioDetail } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail } from '@bds/internauta-model';
 import { ArchiviListContainerComponent } from '../archivi-list-container/archivi-list-container.component';
 import { ExtendedArchiviView } from '../archivi-list-container/archivi-list/extendend-archivi-view';
 import { ArchivioComponent } from '../archivio/archivio.component';

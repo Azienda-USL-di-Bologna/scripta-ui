@@ -1,10 +1,10 @@
 import { DatePipe } from "@angular/common";
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio } from "@bds/ng-internauta-model";
-import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
-import { buildLazyEventFiltersAndSorts, ColonnaBds, CsvExtractor } from "@bds/primeng-plugin";
-import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from "@nfa/next-sdr";
+import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio } from "@bds/internauta-model";
+import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
+import { buildLazyEventFiltersAndSorts } from "@bds/primeng-plugin";
+import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from "@bds/next-sdr";
 import { ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
 import { AutoComplete } from "primeng/autocomplete";
 import { Dropdown } from "primeng/dropdown";
@@ -23,7 +23,8 @@ import { TabComponent } from "../../navigation-tabs/tab.component";
 import { CaptionReferenceTableComponent } from '../../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
 import { SelectButtonItem } from "../../generic-caption-table/select-button-item";
-import { DecimalePredicato } from "@bds/ng-internauta-model";
+import { DecimalePredicato } from "@bds/internauta-model";
+import { ColonnaBds, CsvExtractor } from "@bds/common-tools";
 
 @Component({
   selector: "docs-list",
@@ -115,7 +116,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     private personaVedenteSerice: PersonaVedenteService,
     private personaService: PersonaService,
     private strutturaService: StrutturaService,
-    private loginService: NtJwtLoginService,
+    private loginService: JwtLoginService,
     private datepipe: DatePipe,
     private route: ActivatedRoute,
     private confirmationService: ConfirmationService,
