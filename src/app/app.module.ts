@@ -4,7 +4,7 @@ import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { PrimengPluginModule } from "@bds/primeng-plugin";
-import { CommonComponentsModule, ProfiloComponent } from "@bds/common-components";
+import { CommonComponentsModule, HeaderFeaturesModule, HeaderModule } from "@bds/common-components";
 import { JwtLoginModule } from "@bds/jwt-login";
 import { loginModuleConfig } from "./config/module-config";
 import { CommonToolsModule } from "@bds/common-tools";
@@ -36,6 +36,8 @@ registerLocaleData(localeIt, "it-IT", localeItExtra);
         PrimeNgModule,
         ScriptaCommonModule,
         CommonComponentsModule,
+        HeaderModule,
+        HeaderFeaturesModule,
         CommonToolsModule
     ],
     providers: [
