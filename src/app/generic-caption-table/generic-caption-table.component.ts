@@ -1,13 +1,13 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Menu } from 'primeng/menu';
-import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
+import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { Subscription } from 'rxjs';
 import { CaptionFunctionalButtonsComponent } from './caption-functional-buttons.component';
 import { CaptionConfiguration } from './caption-configuration';
 import { CaptionReferenceTableComponent } from './caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from './caption-select-buttons.component';
 import { MenuItem } from 'primeng/api';
-import { Azienda, AziendaService } from '@bds/ng-internauta-model';
+import { Azienda, AziendaService } from '@bds/internauta-model';
 
 @Component({
   selector: 'generic-caption-table',
@@ -28,7 +28,7 @@ export class GenericCaptionTableComponent implements OnInit {
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
 
-  constructor(private loginService: NtJwtLoginService,) { }
+  constructor(private loginService: JwtLoginService,) { }
 
   ngOnInit(): void {
     this.subscriptions.push(

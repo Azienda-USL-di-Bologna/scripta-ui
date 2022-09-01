@@ -1,8 +1,8 @@
 import { HttpEvent, HttpEventType } from "@angular/common/http";
 import { Component, OnInit, Input, ViewChild, OnDestroy } from "@angular/core";
-import { Doc, Allegato, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, TipoDettaglioAllegato } from "@bds/ng-internauta-model";
-import { UtilityFunctions } from "@bds/nt-communicator";
-import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity, SortDefinition, SORT_MODES } from "@nfa/next-sdr";
+import { UtilityFunctions } from "@bds/common-tools";
+import { Doc, Allegato, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, TipoDettaglioAllegato } from "@bds/internauta-model";
+import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity, SortDefinition, SORT_MODES } from "@bds/next-sdr";
 import { MessageService } from "primeng/api";
 import { FileUpload } from "primeng/fileupload";
 import { Subscription } from "rxjs";

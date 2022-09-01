@@ -1,13 +1,13 @@
 import { DatePipe } from "@angular/common";
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Archivio, ArchivioDetail, CategoriaPermessiStoredProcedure, EntitaStoredProcedure, PermessoEntitaStoredProcedure, PermessoStoredProcedure, Persona, Struttura, UtenteStrutturaService } from "@bds/ng-internauta-model";
-import { BaseUrlType, EntitaBlackbox, getInternautaUrl, OggettoneOperation, OggettonePermessiEntitaGenerator, PermissionManagerService, PROJECTIONS } from "@bds/nt-communicator";
+import { Archivio, ArchivioDetail, BaseUrlType, CategoriaPermessiStoredProcedure, EntitaStoredProcedure, ENTITIES_STRUCTURE, getInternautaUrl, PermessoEntitaStoredProcedure, PermessoStoredProcedure, Persona, Struttura, UtenteStrutturaService } from "@bds/internauta-model";
+import { EntitaBlackbox, OggettoneOperation, OggettonePermessiEntitaGenerator, PermissionManagerService } from "@bds/common-tools";
 import { ExtendedArchivioService } from "../extended-archivio.service";
 import { MessageService } from "primeng/api";
 import { Observable, Subject } from "rxjs";
-import { BlackboxPermessiService } from "@bds/ng-internauta-model";
-import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from "@nfa/next-sdr";
+import { BlackboxPermessiService } from "@bds/internauta-model";
+import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from "@bds/next-sdr";
 
 
 @Injectable({
@@ -285,7 +285,7 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
     initialFiltersAndSorts.addFilter(new FilterDefinition("idStruttura.idAzienda.id", FILTER_TYPES.not_string.equals, idAzienda));
     initialFiltersAndSorts.addFilter(new FilterDefinition("idStruttura.ufficio", FILTER_TYPES.not_string.equals, false));
     return this.utenteStrutturaService.getData(
-      PROJECTIONS.utentestruttura.customProjections.UtenteStrutturaWithIdAfferenzaStrutturaCustom,
+      ENTITIES_STRUCTURE.baborg.utentestruttura.customProjections.UtenteStrutturaWithIdAfferenzaStrutturaCustom,
       initialFiltersAndSorts,
       null,
       this.pageConfNoCountNoLimit);

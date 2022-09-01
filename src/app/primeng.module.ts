@@ -6,7 +6,7 @@ import { InputTextModule } from "primeng/inputtext";
 import { DialogModule } from "primeng/dialog";
 import { DialogService } from "primeng/dynamicdialog";
 import { ToastModule } from "primeng/toast";
-import { MessageService } from "primeng/api";
+import { ConfirmationService, MessageService } from "primeng/api";
 import { InputNumberModule } from "primeng/inputnumber";
 import { AccordionModule } from "primeng/accordion";
 import { CalendarModule } from "primeng/calendar";
@@ -106,6 +106,6 @@ import {TriStateCheckboxModule} from 'primeng/tristatecheckbox';
     TreeSelectModule,
     TriStateCheckboxModule
   ],
-  providers: [MessageService, DialogService]
+  providers: [MessageService, DialogService, ConfirmationService]
 })
 export class PrimeNgModule { }

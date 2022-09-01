@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, ArchivioDiInteresse, ArchivioDiInteresseService, DecimalePredicato, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, ArchivioDiInteresse, ArchivioDiInteresseService, DecimalePredicato, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/internauta-model';
 import { MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListComponent } from '../archivi-list-container/archivi-list/archivi-list.component';
 import { DocsListComponent } from '../docs-list-container/docs-list/docs-list.component';
@@ -14,11 +14,11 @@ import { RichiestaAccessoArchiviComponent } from './richiesta-accesso-archivi/ri
 import { ExtendedArchivioService } from './extended-archivio.service';
 import { Table } from 'primeng/table';
 import { AppComponent } from '../app.component';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@nfa/next-sdr';
+import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@bds/next-sdr';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators'
 import { DatePipe } from '@angular/common';
-import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
+import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 
 @Component({
   selector: 'app-archivio',
@@ -100,7 +100,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     private appComponent: AppComponent,
     private messageService: MessageService,
     private datepipe: DatePipe,
-    private loginService: NtJwtLoginService,
+    private loginService: JwtLoginService,
   ) {
     this.loginService.loggedUser$.pipe(first()).subscribe(
       (utenteUtilities: UtenteUtilities) => {

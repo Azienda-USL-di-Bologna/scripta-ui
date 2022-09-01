@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { DocDetailViewService } from "@bds/ng-internauta-model";
+import { DocDetailViewService } from "@bds/internauta-model";
 
 
 

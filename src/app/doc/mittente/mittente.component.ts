@@ -1,10 +1,10 @@
 import {Component, Input, OnDestroy, OnInit, Output, EventEmitter, ViewChild} from "@angular/core";
 import {ExtendedMittenteService} from "./extended-mittente.service";
 import {BaseUrls, BaseUrlType, CodiceMezzo, Contatto, DettaglioContatto, DettaglioContattoService, Doc, ENTITIES_STRUCTURE, 
-  IndirizzoSpedizione, Mezzo, MezzoService, OrigineRelated, Persona, Related, Spedizione, TipoDettaglio, TipoRelated} from "@bds/ng-internauta-model";
-import {AdditionalDataDefinition, FILTER_TYPES, FilterDefinition, FiltersAndSorts, BatchOperationTypes, NextSdrEntity, BatchOperation} from "@nfa/next-sdr";
+  IndirizzoSpedizione, Mezzo, MezzoService, OrigineRelated, Persona, Related, Spedizione, TipoDettaglio, TipoRelated} from "@bds/internauta-model";
+import {AdditionalDataDefinition, FILTER_TYPES, FilterDefinition, FiltersAndSorts, BatchOperationTypes, NextSdrEntity, BatchOperation} from "@bds/next-sdr";
 import {Subscription} from "rxjs";
-import {NtJwtLoginService, UtenteUtilities} from "@bds/nt-jwt-login";
+import {JwtLoginService, UtenteUtilities} from "@bds/jwt-login";
 import { MessageService } from "primeng/api";
 import { enumOrigine } from "./mittente-constants";
 import { DatePipe } from "@angular/common";
@@ -88,7 +88,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
   constructor(
     private mittenteService: ExtendedMittenteService,
     private mezzoService: MezzoService,
-    private loginService: NtJwtLoginService,
+    private loginService: JwtLoginService,
     private dettaglioContattoService: DettaglioContattoService,
     private messageService: MessageService,
     private datePipe: DatePipe

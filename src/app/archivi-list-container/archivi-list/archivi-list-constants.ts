@@ -1,6 +1,6 @@
-import { StatoArchivio, TipoArchivio } from "@bds/ng-internauta-model";
-import { ColonnaBds } from "@bds/primeng-plugin";
-import { FILTER_TYPES, NextSDRDateTypes } from "@nfa/next-sdr";
+import { ColonnaBds } from "@bds/common-tools";
+import { StatoArchivio, TipoArchivio } from "@bds/internauta-model";
+import { FILTER_TYPES, NextSDRDateTypes } from "@bds/next-sdr";
 import { Utils } from "../../utilities/utils";
 import { ExtendedArchiviView } from "./extendend-archivi-view";
 

@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
-import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio } from '@bds/ng-internauta-model';
-import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
+import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio } from '@bds/internauta-model';
+import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
+import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@bds/next-sdr';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TreeNode } from 'primeng/api/treenode';
 import { TreeSelect } from 'primeng/treeselect';
@@ -67,7 +67,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private configurazioneService: ConfigurazioneService,
     private confirmationService: ConfirmationService,
-    private loginService: NtJwtLoginService,
+    private loginService: JwtLoginService,
     private navigationTabsService: NavigationTabsService,
     private archivioUtilsService: ArchivioUtilsService) 
   {
