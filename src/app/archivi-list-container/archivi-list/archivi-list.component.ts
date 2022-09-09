@@ -23,7 +23,7 @@ import { DatePipe } from '@angular/common';
 import { CaptionReferenceTableComponent } from '../../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
 import { SelectButtonItem } from '../../generic-caption-table/select-button-item';
-import { NewArchivoButton } from 'src/app/generic-caption-table/new-archivo-button';
+import { NewArchivoButton } from 'src/app/generic-caption-table/functional-buttons/new-archivo-button';
 import { CaptionFunctionalButtonsComponent } from 'src/app/generic-caption-table/caption-functional-buttons.component';
 import { Titolo } from '@bds/internauta-model';
 import { Massimario } from '@bds/internauta-model';
