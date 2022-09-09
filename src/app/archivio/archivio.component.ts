@@ -105,6 +105,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.loginService.loggedUser$.pipe(first()).subscribe(
       (utenteUtilities: UtenteUtilities) => {
         this.utenteUtilitiesLogin = utenteUtilities;
+        
         if (this.archivio) {
           this.inizializeAll();
         }
@@ -128,7 +129,11 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   private inizializeAll(): void {
     this.buildSelectButtonItems(this.archivio);
     this.buildNewArchivioButton(this.archivio);
-    if (this.archivio.stato === StatoArchivio.BOZZA) {
+   if(this.archivio.attoriList.find(a => a.ruolo === 'RESPONSABILE_PROPOSTO' && a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id )) {
+     this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
+      this.setForDettaglio();
+   }
+    else if (this.archivio.stato === StatoArchivio.BOZZA) {
       this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
       this.setForDettaglio();
     } else {

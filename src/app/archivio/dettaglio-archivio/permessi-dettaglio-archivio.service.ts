@@ -290,6 +290,20 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
       null,
       this.pageConfNoCountNoLimit);
     }
+
+
+
+
+
+
+  public proponiResponsabile(idArchivio: number, idPersonaAttore: number, idStrutturaAttore: number) {
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "proponiResponsabile"
+    let formData: FormData = new FormData();
+    formData.append("idArchivio", idArchivio.toString());
+    formData.append("idPersonaAttore", idArchivio.toString());
+    formData.append("idStrutturaAttore", idArchivio.toString());
+    this._http.post(apiUrl, formData).subscribe();
+  }
 }
 
 export class PermessoTabella { 
