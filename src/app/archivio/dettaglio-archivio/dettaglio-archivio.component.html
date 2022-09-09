@@ -1,10 +1,11 @@
 <div class="box-campi-dettaglio">
   <div class="left-side">
+    <div style="height: 2px; background-color: #936;"  *ngIf="loggedUserIsResponsbaileProposto === true"></div>
     <div class="row accept-reponsability" *ngIf="loggedUserIsResponsbaileProposto === true" >
       <div>
         <b>Vuoi accettare la responsabilità di questo fascicolo?</b>
       </div>
-      <div>
+      <div class="bottons">
         <button pButton type="button" label="Accetta" (click)="accettaResponsabilita()" ></button>
         <button pButton type="button" label="Rifiuta" (click)="rifiutaResponsabilita()" ></button>
       </div>

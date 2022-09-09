@@ -457,10 +457,11 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public accettaResponsabilita() {
     console.log("CIAOOOOOOOOOOOOOO")
     const batchOperations: BatchOperation[] = [];
-    const attoreArchivioBody= this.archivio.attoriList.find((a: AttoreArchivio) => a.ruolo==="RESPONSABILE_PROPOSTO" && a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id);
-    attoreArchivioBody.idArchivio= this.archivio;
+    const attoreArchivioBody= this.archivio.attoriList.find((a: AttoreArchivio) => a.ruolo==="RESPONSABILE_PROPOSTO" );
+    attoreArchivioBody.fk_idArchivio.id= this.archivio.id;
     attoreArchivioBody.idPersona = this.utenteUtilitiesLogin.getUtente().idPersona;
     attoreArchivioBody.ruolo= RuoloAttoreArchivio.RESPONSABILE;
+    
     
     batchOperations.push({
       operation: BatchOperationTypes.UPDATE,
@@ -517,12 +518,12 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
           });
           this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
           this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
-          this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[]).some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id  && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
 
         }
       )
       
     )
+    this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[]).some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id  && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
     
 
   }
