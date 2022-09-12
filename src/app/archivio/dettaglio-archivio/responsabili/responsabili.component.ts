@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
+import { AttivitaService } from '@bds/internauta-model';
 import { Applicazione, ApplicazioneService, Archivio, ArchivioDetail, ArchivioService, Attivita, AttoreArchivio, AttoreArchivioService, Azienda, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, Persona, Ruolo, RuoloAttoreArchivio, Struttura, UtenteStruttura } from '@bds/internauta-model';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity, PagingConf, SortDefinition, SORT_MODES } from '@bds/next-sdr';
@@ -51,7 +52,8 @@ export class ResponsabiliComponent implements OnInit {
     private messageService: MessageService,
     private permessiDettaglioArchivioService: PermessiDettaglioArchivioService,
     private applicazioneService: ApplicazioneService,
-    private router: Router) { 
+    private router: Router,
+    private attivitaService: AttivitaService) { 
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -111,6 +113,7 @@ export class ResponsabiliComponent implements OnInit {
   public onRowEditSave(attore: AttoreArchivio, index: number, operation: string) {
     const attoreToOperate = new AttoreArchivio();
     attoreToOperate.id = attore.id;
+    console.log(attoreToOperate.id)
     attoreToOperate.idArchivio = { id: this.archivio.id } as Archivio;
     attoreToOperate.idPersona = { id: attore.idPersona.id } as Persona;
     attoreToOperate.idStruttura = { id: attore.idStruttura.id } as Struttura;
@@ -193,6 +196,14 @@ export class ResponsabiliComponent implements OnInit {
           this.subscriptions.push(
             this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
               (res: BatchOperation[]) => {
+                res.forEach(a  => {
+                  if (a.returnProjection === "AttoreArchivioWithIdPersonaAndIdStruttura")
+                  {
+                    const attoreArchivio : AttoreArchivio = a.entityBody as AttoreArchivio;
+                    attore.version =attoreArchivio.version;
+                    attore.id = attoreArchivio.id;
+                  }
+              })
                 this.messageService.add({
                   severity: "success", 
                   summary: "Proposta responsabilità", 
@@ -208,55 +219,87 @@ export class ResponsabiliComponent implements OnInit {
         break;
       case "UPDATE":
         this.subscriptions.push(this.attoreArchivioService.patchHttpCall(attoreToOperate, attoreToOperate.id, this.attoreArchivioProjection)
-          .subscribe({
-            next: (attoreRes: AttoreArchivio) => {
-              attore.version = attoreRes.version;
-              delete this.dictAttoriClonePerRipristino[attore.id];
-              this.messageService.add({
-                severity: "success",
-                summary: "Aggiornamento viario",
-                detail: "Vicario aggiornato con successo"
-              });
-              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
-              this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
-            },
-            error: () => {
-              this.messageService.add({
-                severity: "error",
-                summary: "Errore",
-                detail: "Errore nell'aggiornamento del vicario. Contattare Babelcare"
-              });
-              this.onRowEditCancel(attore, index);
-            }
-          })
-        );
-        break;
+        .subscribe({
+          next: (attoreRes: AttoreArchivio) => {
+            attore.version = attoreRes.version;
+            delete this.dictAttoriClonePerRipristino[attore.id];
+            this.messageService.add({
+              severity: "success",
+              summary: "Aggiornamento viario",
+              detail: "Vicario aggiornato con successo"
+            });
+            this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+            this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+          },
+          error: () => {
+            this.messageService.add({
+              severity: "error",
+              summary: "Errore",
+              detail: "Errore nell'aggiornamento del vicario. Contattare Babelcare"
+            });
+            this.onRowEditCancel(attore, index);
+          }
+        })
+      );
+
+      break;
       case "DELETE":
-        this.subscriptions.push(this.attoreArchivioService.deleteHttpCall(attoreToOperate.id)
-          .subscribe({
-            next: () => {
+        if(attoreToOperate.ruolo === "RESPONSABILE_PROPOSTO"){
+          const batchOperations: BatchOperation[] = [];
+          batchOperations.push({
+            operation: BatchOperationTypes.DELETE,
+            entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.attorearchivio.path,
+            id: attoreToOperate.id,
+            entityBody: attoreToOperate as NextSdrEntity,
+            returnProjection: this.attoreArchivioProjection
+          } as BatchOperation);
+          this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
+            (res: BatchOperation[]) => {
               this.responsabiliArchivi.splice(index, 1);
               this.messageService.add({
-                severity: "success",
-                summary: "Eliminazione responsabile",
-                detail: "Responsabile eliminato con successo"
+                severity: "warn", 
+                summary: "Eliminata proposta responsabilità", 
+                detail: "Hai eliminato il responsabile proposto"
               });
               this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
               this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
-            },
-            error: () => {
-              this.messageService.add({
-                severity: "error",
-                summary: "Errore",
-                detail: "Errore nell'eliminazione del responsabile. Contattare Babelcare"
-              });
-              this.onRowEditCancel(attore, index);
+              
             }
-          })
+          
+            )
+           
+        } else {
+          this.subscriptions.push(this.attoreArchivioService.deleteHttpCall(attoreToOperate.id)
+        .subscribe({
+          next: () => {
+            this.responsabiliArchivi.splice(index, 1);
+            this.messageService.add({
+              severity: "success",
+              summary: "Eliminazione responsabile",
+              detail: "Responsabile eliminato con successo"
+            });
+            this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+            this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+          },
+          error: () => {
+            this.messageService.add({
+              severity: "error",
+              summary: "Errore",
+              detail: "Errore nell'eliminazione del responsabile. Contattare Babelcare"
+            });
+            this.onRowEditCancel(attore, index);
+          }
+        })
         );
+      }
+      console.log(attoreToOperate)
         
-        break;
-    }
+      
+
+        
+     
+     break;
+      }
   }
 
 

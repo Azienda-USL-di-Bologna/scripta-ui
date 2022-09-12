@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
-import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio, BaseUrls, BaseUrlType, Attivita, Applicazione, Persona, Azienda, AttivitaService } from '@bds/internauta-model';
+import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio, BaseUrls, BaseUrlType, Attivita, Applicazione, Persona, Azienda, AttivitaService, AttivitaFatta } from '@bds/internauta-model';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES , BatchOperation, NextSdrEntity, BatchOperationTypes} from '@bds/next-sdr';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -512,25 +512,42 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       returnProjection: "AttivitaWithPlainFields"
     } as BatchOperation);
 
-    this.subscriptions.push(
-      this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
-        (res: BatchOperation[]) => {
-          this.messageService.add({
-            severity: "success", 
-            summary: "Proposta responsabilità", 
-            detail: "Hai accettato la responsabilità del fascicolo"
-          });
-          this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
-          responsabilePropostoVecchio.ruolo = RuoloAttoreArchivio.RESPONSABILE;
-          responsabilePropostoVecchio.version = (res.find(bo => (bo.entityBody as any).id === responsabilePropostoVecchio.id).entityBody as AttoreArchivio).version;
-          responsabileVecchio.ruolo = RuoloAttoreArchivio.VICARIO;
-          responsabileVecchio.version =  (res.find(bo => (bo.entityBody as any).id === responsabileVecchio.id).entityBody as AttoreArchivio).version;
-          //this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
 
-          this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[])
-            .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
-        }
-      )
+    const filterAndsorts: FiltersAndSorts = new FiltersAndSorts();
+      filterAndsorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, responsabilePropostoVecchio.idPersona.id));
+      filterAndsorts.addFilter(new FilterDefinition("idOggettoEsterno", FILTER_TYPES.string.containsIgnoreCase, this.archivio.id.toString()));
+
+    this.attivitaService.getData("AttivitaWithPlainFields", filterAndsorts, null,null).subscribe(
+      (res: Attivita) => {
+        batchOperations.push({
+          operation: BatchOperationTypes.DELETE,
+          entityPath: BaseUrls.get(BaseUrlType.Scrivania) + "/" + ENTITIES_STRUCTURE.scrivania.attivita.path,
+          id:res.id,
+          entityBody: res as NextSdrEntity,
+          returnProjection: "AttivitaWithPlainFields"
+        } as BatchOperation);
+        this.subscriptions.push(
+          this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
+            (res: BatchOperation[]) => {
+              this.messageService.add({
+                severity: "success", 
+                summary: "Proposta responsabilità", 
+                detail: "Hai accettato la responsabilità del fascicolo"
+              });
+              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+              responsabilePropostoVecchio.ruolo = RuoloAttoreArchivio.RESPONSABILE;
+              responsabilePropostoVecchio.version = (res.find(bo => (bo.entityBody as any).id === responsabilePropostoVecchio.id).entityBody as AttoreArchivio).version;
+              responsabileVecchio.ruolo = RuoloAttoreArchivio.VICARIO;
+              responsabileVecchio.version =  (res.find(bo => (bo.entityBody as any).id === responsabileVecchio.id).entityBody as AttoreArchivio).version;
+              //this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+    
+              this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[])
+                .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
+            }
+          )
+        )
+      }
+    
       
     )
     
@@ -577,6 +594,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       const filterAndsorts: FiltersAndSorts = new FiltersAndSorts();
       filterAndsorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, attoreToDelete.idPersona.id));
       filterAndsorts.addFilter(new FilterDefinition("idOggettoEsterno", FILTER_TYPES.string.containsIgnoreCase, this.archivio.id.toString()));
+      filterAndsorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.containsIgnoreCase, "Proposta responsabilità"));
 
       this.attivitaService.getData("AttivitaWithPlainFields", filterAndsorts, null,null).subscribe(
         (res: Attivita) => {
@@ -587,6 +605,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
             entityBody: res as NextSdrEntity,
             returnProjection: "AttivitaWithPlainFields"
           } as BatchOperation);
+          
           this.subscriptions.push(
           this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
             (res: BatchOperation[]) => {
@@ -598,8 +617,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
               this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
               
               // this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
-              this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[]).some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id  && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
-    
+              this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[])
+              .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
             }
          
             )
