@@ -170,7 +170,7 @@ export class ResponsabiliComponent implements OnInit {
           attivita.descrizione = "Proposta responsabilità";
           // const url = "/apridascrivania?id=" + this.archivio.id.toString();
           const url = [{
-            url: "/apridascrivania?id=" + this.archivio.id.toString(),
+            url: "/nav/apridascrivania?id=" + this.archivio.id.toString(),
             label: "Accetta/Rifiuta"
           }];
           attivita.urls = JSON.stringify(url); //"[{\"url\" :" + "\" " + url +"\", \"label\": \"Accetta\"}]";
