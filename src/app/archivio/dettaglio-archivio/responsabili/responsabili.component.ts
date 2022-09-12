@@ -168,8 +168,12 @@ export class ResponsabiliComponent implements OnInit {
           attivita.tipo = "attivita";
           attivita.oggetto = "Fascicolo: " + this.archivio.oggetto + " - " + this.archivio.numerazioneGerarchica;
           attivita.descrizione = "Proposta responsabilità";
-          const url ="/apridascrivania?id=" + this.archivio.id.toString();
-          attivita.urls ="[{\"url\" :" + "\" " + url +"\", \"label\": \"Accetta\"}]";
+          // const url = "/apridascrivania?id=" + this.archivio.id.toString();
+          const url = [{
+            url: "/apridascrivania?id=" + this.archivio.id.toString(),
+            label: "Accetta/Rifiuta"
+          }];
+          attivita.urls = JSON.stringify(url); //"[{\"url\" :" + "\" " + url +"\", \"label\": \"Accetta\"}]";
           attivita.aperta = false;
           attivita.provenienza = this.utenteUtilitiesLogin.getUtente().idPersona.descrizione;
           attivita.priorita = 3;
@@ -278,10 +282,12 @@ export class ResponsabiliComponent implements OnInit {
    * @param perm 
    */
    public onUtenteStrutturaSelected(utenteStruttura: UtenteStruttura, attore: AttoreArchivio) {
-    attore.idPersona =  utenteStruttura.idUtente.idPersona;
-    attore.idStruttura = utenteStruttura.idStruttura;
-    console.log("attore", attore)
-    this.loadStruttureAttore(attore);
+    if (utenteStruttura) {
+      attore.idPersona =  utenteStruttura.idUtente.idPersona;
+      attore.idStruttura = utenteStruttura.idStruttura;
+      console.log("attore", attore)
+      this.loadStruttureAttore(attore);
+    }
   }
 
   /**

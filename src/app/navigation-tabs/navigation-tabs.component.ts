@@ -115,9 +115,11 @@ export class NavigationTabsComponent implements OnInit {
     // this.tabItems.unshift(...allTabs)
     setTimeout(() => {
       this.tabItems = allTabs;
-      this.archivioService.getByIdHttpCall(this.idArchivioAperturaDaScrivania, 'ArchivioWithIdAziendaAndIdMassimarioAndIdTitolo').subscribe( res => {
-        this.navigationTabsService.addTabArchivio(res, true, false);
-      });
+      if (this.idArchivioAperturaDaScrivania) {
+        this.archivioService.getByIdHttpCall(this.idArchivioAperturaDaScrivania, 'ArchivioWithIdAziendaAndIdMassimarioAndIdTitolo').subscribe( res => {
+          this.navigationTabsService.addTabArchivio(res, true, false);
+        });
+      }
     }, 0);
     /* for(let i=0; i < this.tabItems.length; i++) {
       if(this.tabItems[i].type === TabType.ARCHIVI_LIST && this.tabItems[i-1].type === TabType.DOCS_LIST) {

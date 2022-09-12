@@ -27,7 +27,8 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
     private extendedArchivioService: ExtendedArchivioService,
     private messageService: MessageService,
     private blackboxPermessiService: BlackboxPermessiService,
-    private utenteStrutturaService: UtenteStrutturaService) {
+    private utenteStrutturaService: UtenteStrutturaService,
+    ) {
     super(_http, getInternautaUrl(BaseUrlType.Permessi), datepipe);
   }
 
