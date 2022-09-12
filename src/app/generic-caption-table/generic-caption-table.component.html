@@ -54,6 +54,28 @@
         tooltipPosition="bottom">
       </i>
     </span>
+    <!-- BOTTONE UPLOAD DOCUMENT -->
+    <span *ngIf="configuration.uploadDocumentButton">
+      <!-- <button
+        type="button" 
+        pButton 
+        pRipple 
+        icon="pi pi-upload" 
+        (click)="functionalButtonsComponent.uploadDocument()" 
+        class="p-mr-2" 
+        pTooltip="Carica un documento nell'archivio"
+        aria-label="Carica un documento nell'archivio"
+        tooltipPosition="bottom">
+      </button> -->
+      <p-fileUpload 
+        multiple="multiple"
+        mode="basic" 
+        name="demo[]"
+        maxFileSize="50000000" 
+        [customUpload]="true"
+        (uploadHandler)="functionalButtonsComponent.uploadDocument($event)">
+      </p-fileUpload>
+    </span>
     <!-- BOTTONE NUOVO ARCHIVIO [disabled] = "archivio.canCreateSottoarchivio()"-->
     <span *ngIf="configuration.newArchivio && functionalButtonsComponent.newArchivoButton">
       <button

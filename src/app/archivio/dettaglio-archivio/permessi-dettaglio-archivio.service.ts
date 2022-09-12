@@ -27,7 +27,8 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
     private extendedArchivioService: ExtendedArchivioService,
     private messageService: MessageService,
     private blackboxPermessiService: BlackboxPermessiService,
-    private utenteStrutturaService: UtenteStrutturaService) {
+    private utenteStrutturaService: UtenteStrutturaService,
+    ) {
     super(_http, getInternautaUrl(BaseUrlType.Permessi), datepipe);
   }
 
@@ -290,6 +291,20 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
       null,
       this.pageConfNoCountNoLimit);
     }
+
+
+
+
+
+
+  public proponiResponsabile(idArchivio: number, idPersonaAttore: number, idStrutturaAttore: number) {
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "proponiResponsabile"
+    let formData: FormData = new FormData();
+    formData.append("idArchivio", idArchivio.toString());
+    formData.append("idPersonaAttore", idArchivio.toString());
+    formData.append("idStrutturaAttore", idArchivio.toString());
+    this._http.post(apiUrl, formData).subscribe();
+  }
 }
 
 export class PermessoTabella { 

@@ -6,7 +6,7 @@ import { DocsListComponent } from '../docs-list-container/docs-list/docs-list.co
 import { CaptionConfiguration } from '../generic-caption-table/caption-configuration';
 import { CaptionReferenceTableComponent } from '../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../generic-caption-table/caption-select-buttons.component';
-import { NewArchivoButton } from '../generic-caption-table/new-archivo-button';
+import { NewArchivoButton } from '../generic-caption-table/functional-buttons/new-archivo-button';
 import { SelectButtonItem } from '../generic-caption-table/select-button-item';
 import { TabComponent } from '../navigation-tabs/tab.component';
 import { DettaglioArchivioComponent } from './dettaglio-archivio/dettaglio-archivio.component';
@@ -19,6 +19,7 @@ import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators'
 import { DatePipe } from '@angular/common';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
+import { UploadDocumentButton } from '../generic-caption-table/functional-buttons/upload-document-button';
 
 @Component({
   selector: 'app-archivio',
@@ -35,6 +36,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public permessiArchivio: PermessoArchivio[] = [];
   public colsResponsabili: any[];
   public newArchivoButton: NewArchivoButton;
+  public uploadDocumentButton: UploadDocumentButton;
   public contenutoDiviso = true;
   public archivioPreferito: boolean
   public utenteExistsInArchivioInteresse: boolean;
@@ -105,6 +107,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.loginService.loggedUser$.pipe(first()).subscribe(
       (utenteUtilities: UtenteUtilities) => {
         this.utenteUtilitiesLogin = utenteUtilities;
+        
         if (this.archivio) {
           this.inizializeAll();
         }
@@ -128,7 +131,11 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   private inizializeAll(): void {
     this.buildSelectButtonItems(this.archivio);
     this.buildNewArchivioButton(this.archivio);
-    if (this.archivio.stato === StatoArchivio.BOZZA) {
+    this.uploadDocumentButton = { command: this.uploadDocument};
+    if (this.archivio.attoriList.find(a => a.ruolo === 'RESPONSABILE_PROPOSTO' && a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id )) {
+      this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
+      this.setForDettaglio();
+    } else if (this.archivio.stato === StatoArchivio.BOZZA) {
       this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
       this.setForDettaglio();
     } else {
@@ -148,22 +155,22 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   private setForSottoarchivi(): void {
-    this.captionConfiguration = new CaptionConfiguration(true, true, true, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true);
+    this.captionConfiguration = new CaptionConfiguration(true, true, true, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, true);
     this.referenceTableComponent = this.archivilist;
   }
 
   public setForContenuto(): void {
-    this.captionConfiguration = new CaptionConfiguration(true, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true);
+    this.captionConfiguration = new CaptionConfiguration(true, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, true);
     this.referenceTableComponent = this;
   }
 
   private setForDocumenti(): void {
-    this.captionConfiguration = new CaptionConfiguration(true, true, true, true, false, true);
+    this.captionConfiguration = new CaptionConfiguration(true, true, true, true, false, true, true);
     this.referenceTableComponent = this.doclist;
   }
 
   private setForDettaglio(): void {
-    this.captionConfiguration = new CaptionConfiguration(false, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true);
+    this.captionConfiguration = new CaptionConfiguration(false, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, true);
     this.referenceTableComponent = {} as CaptionReferenceTableComponent;
   }
 
@@ -284,7 +291,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   /**
-   * Ritorna true se l'utente può creare il sottoarcivio e cioè se è responsabile/vicario o ha permesso di almeno modifica
+   * Ritorna true se l'utente può creare il sottoarchivio e cioè se è responsabile/vicario o ha permesso di almeno modifica
    * @returns 
    */
   public canCreateSottoarchivio(): boolean {
@@ -308,6 +315,25 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.setForDettaglio();
   }
 
+
+  /**
+   * Funzione utile al caricamento di un document
+   */
+  public uploadDocument(event: any): void {
+    console.log("icuhsbicdusbicju", event);
+    const formData: FormData = new FormData();
+    formData.append("idArchivio", this.archivio.id.toString());
+    event.files.forEach((file: File) => {
+      formData.append("files", file);
+    });
+    this.extendedArchivioService.uploadDocument(formData).subscribe(
+      res => {
+        console.log("fatto")
+      }
+    );
+
+    
+  }
 
   /**
    * Di seguito un serie di metodi che servono da passa carte tra la 
