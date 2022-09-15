@@ -43,6 +43,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   private utenteArchivioDiInteresse: ArchivioDiInteresse;
   public subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
+  public loggedUserCanVisualizeArchive = false;
 
   get archivio(): Archivio { return this._archivio; }
 
@@ -55,6 +56,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       data.archivio.id,
       ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
       .subscribe((res: Archivio) => {
+        this.loggedUserCanVisualizeArchive = this.canVisualizeArchive(res);
         this._archivio = res;
         console.log("Archivio nell'archivio component: ", this._archivio);
         setTimeout(() => {
@@ -239,7 +241,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           id: SelectButton.DOCUMENTI,
           label: "Documenti",
           disabled: this.archivio.stato === StatoArchivio.BOZZA || 
-            !(this.archivio.permessiEspliciti.find(p => p.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id).bit > DecimalePredicato.PASSAGGIO)
+            !(this.loggedUserCanVisualizeArchive)
         }
       );
     } else {
@@ -295,11 +297,20 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * @returns 
    */
   public canCreateSottoarchivio(): boolean {
-    return this._archivio.permessiEspliciti.some(permessoArchivio => 
+    return this._archivio.permessiEspliciti.some((permessoArchivio: PermessoArchivio) => 
       permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id
       &&
       permessoArchivio.bit >= DecimalePredicato.VICARIO
     );
+  }
+
+  /**
+   * Ritorna true se l'utente può creare il sottoarchivio e cioè se è responsabile/vicario o ha permesso di almeno modifica
+   * @returns 
+   */
+   public canVisualizeArchive(archivio: Archivio): boolean {
+    return archivio.permessiEspliciti.find((p: PermessoArchivio) => 
+      p.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit > DecimalePredicato.PASSAGGIO;
   }
 
   /**

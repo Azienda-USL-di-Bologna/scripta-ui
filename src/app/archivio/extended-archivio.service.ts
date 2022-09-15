@@ -36,10 +36,10 @@ export class ExtendedArchivioService extends ArchivioService {
     return this._http.post(url, formData);
   }
 
-  public calcolaPermessiEspliciti(idArchivio: number) {
+  public calcolaPermessiEspliciti(idArchivioRadice: number) {
     const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "calcolaPermessiEspliciti";
     let formData: FormData = new FormData();
-    formData.append("idArchivio", idArchivio.toString());
+    formData.append("idArchivioRadice", idArchivioRadice.toString());
     this._http.post(apiUrl, formData).subscribe();
   }
 

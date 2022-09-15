@@ -105,13 +105,12 @@
           Non si può cancellare il responsabile. E per cancellare un proposto devo essere RESPONSABILE -->
         <button *ngIf="!editing && attore.ruolo !== ruoliEnum.RESPONSABILE && 
               (attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO || ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE)"
-          type="button" 
-          pButton 
-          pRipple
-          pInitEditableRow
-          class="p-button-rounded p-button-text"
+					pButton 
+					pRipple
+					pTooltip="Elimina"
+					class="p-button-rounded p-button-text"
+					type="button" 
           icon="pi pi-trash" 
-          pTooltip="Elimina"
           (click)="onRowEditSave(attore, ri, 'DELETE')">
         </button>
         <!-- Bottone di salvataggio dell'editing. -->

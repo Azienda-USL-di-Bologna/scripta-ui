@@ -547,10 +547,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
           )
         )
       }
-    
-      
-    )
-    
+    );
   }
 
   public rifiutaResponsabilita(){
@@ -592,24 +589,22 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
           
     this.subscriptions.push(
-    this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
-      (res: BatchOperation[]) => {
-        this.messageService.add({
-          severity: "warn", 
-          summary: "Rifiutata responsabilità", 
-          detail: "Hai rifiutato la responsabilità del fascicolo"
-        });
-        this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
-        
-        attoreToDelete.version = (res.find(bo => (bo.entityBody as any).id === attoreToDelete.id).entityBody as AttoreArchivio).version;
-        this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
-        this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[])
-          .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
-      }
-    )
-  )
-     
-
+      this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
+        (res: BatchOperation[]) => {
+          this.messageService.add({
+            severity: "warn", 
+            summary: "Rifiutata responsabilità", 
+            detail: "Hai rifiutato la responsabilità del fascicolo"
+          });
+          this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+          
+          attoreToDelete.version = (res.find(bo => (bo.entityBody as any).id === attoreToDelete.id).entityBody as AttoreArchivio).version;
+          this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+          this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[])
+            .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
+        }
+      )
+    );
   }
 
   public ngOnDestroy(): void {
