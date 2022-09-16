@@ -73,9 +73,9 @@
 				<p-cellEditor>
 					<ng-template pTemplate="input">
 						<p-checkbox
-							[disabled]="permesso.soggetto.ufficio"
+							
 							[binary]="true" 
-							[(ngModel)]="permesso.trasmetti">
+							[(ngModel)]="permesso.trasmetti"><!-- [disabled]="permesso.soggetto.ufficio" qui si vorrebbe disabilitare il propaga nel caso sia un ufficio -->
 						</p-checkbox>
 					</ng-template>
 					<ng-template pTemplate="output">

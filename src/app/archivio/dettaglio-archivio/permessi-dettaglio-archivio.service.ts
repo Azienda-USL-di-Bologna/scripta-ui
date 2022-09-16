@@ -27,7 +27,8 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
     private extendedArchivioService: ExtendedArchivioService,
     private messageService: MessageService,
     private blackboxPermessiService: BlackboxPermessiService,
-    private utenteStrutturaService: UtenteStrutturaService) {
+    private utenteStrutturaService: UtenteStrutturaService,
+    ) {
     super(_http, getInternautaUrl(BaseUrlType.Permessi), datepipe);
   }
 
@@ -74,15 +75,13 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
                 permessoBlacbox: permesso,
                 barrato: permesso.id_permesso_bloccato ? true : false
               } as PermessoTabella)
-              
             }
           })
-        }
-        )
+        })
       }
     });
-     console.log(permessiTabella);
-     this.filterByPermissionPriority(permessiTabella);
+    console.log(permessiTabella);
+    this.filterByPermissionPriority(permessiTabella);
     return permessiTabella;
   }
 
@@ -155,16 +154,16 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
 
   /**
    * Funzione temporanea che calcola i permessi esplciti a partire dalla blackbox.
-   * Sarà proabbilmente eliminata quando avremo il servizo apposito
+   * Sarà proabbilmente eliminata quando avremo il servizo asincrono apposito.
    */
-   public calcolaPermessiEspliciti(archivio:Archivio|ArchivioDetail): void {
-     this.extendedArchivioService.calcolaPermessiEspliciti(archivio.id);
-     if (archivio.idArchivioPadre?.id) {
+   public calcolaPermessiEspliciti(archivio: Archivio | ArchivioDetail): void {
+     this.extendedArchivioService.calcolaPermessiEspliciti(archivio.fk_idArchivioRadice.id);
+     /* if (archivio.idArchivioPadre?.id) {
         this.extendedArchivioService.calcolaPermessiEspliciti(archivio.idArchivioPadre.id);
      }
      if (archivio.idArchivioRadice?.id && archivio.idArchivioRadice?.id !== archivio.idArchivioPadre?.id) {
        this.extendedArchivioService.calcolaPermessiEspliciti(archivio.idArchivioRadice.id);
-     }
+     } */
   }
 
   /**
@@ -289,7 +288,16 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
       initialFiltersAndSorts,
       null,
       this.pageConfNoCountNoLimit);
-    }
+  }
+
+  public proponiResponsabile(idArchivio: number, idPersonaAttore: number, idStrutturaAttore: number) {
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "proponiResponsabile"
+    let formData: FormData = new FormData();
+    formData.append("idArchivio", idArchivio.toString());
+    formData.append("idPersonaAttore", idArchivio.toString());
+    formData.append("idStrutturaAttore", idArchivio.toString());
+    this._http.post(apiUrl, formData).subscribe();
+  }
 }
 
 export class PermessoTabella { 

@@ -1,11 +1,12 @@
 import { Component, OnInit } from "@angular/core";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { Subscription } from "rxjs";
-import { ConfigurazioneService, ParametroAziende } from "@bds/internauta-model";
+import { Archivio, ConfigurazioneService, ParametroAziende } from "@bds/internauta-model";
 import { NavigationTabsService } from "./navigation-tabs.service";
 import { TabItem } from "./tab-item";
 import { Router } from "@angular/router";
 import { AppService } from "../app.service";
+import { ExtendedArchivioService } from "../archivio/extended-archivio.service";
 
 @Component({
   selector: "navigation-tabs",
@@ -17,6 +18,8 @@ export class NavigationTabsComponent implements OnInit {
   private utenteUtilitiesLogin: UtenteUtilities;
   //private tabName: any;
   public tabItems: TabItem[] = [];
+  private tabIndexToActiveAtTheBeginning = 0;
+  private idArchivioAperturaDaScrivania: number;
 
   constructor(
     private appService: AppService,
@@ -24,16 +27,25 @@ export class NavigationTabsComponent implements OnInit {
     private configurazioneService: ConfigurazioneService,
     public navigationTabsService: NavigationTabsService,
     //private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private archivioService: ExtendedArchivioService
   ) {
     console.log(this.router)
     if (this.router.routerState.snapshot.url.includes("archivilist")) {
       this.navigationTabsService.activeTabByIndex(0);
+      this.tabIndexToActiveAtTheBeginning = 0;
       this.appService.appNameSelection("Elenco Fascicoli")
+    } else if (this.router.routerState.snapshot.url.includes("apridascrivania")) {
+      this.navigationTabsService.activeTabByIndex(0);
+      this.tabIndexToActiveAtTheBeginning = 0;
+      this.idArchivioAperturaDaScrivania = this.router.parseUrl(this.router.url).queryParams["id"];
     } else {
       this.navigationTabsService.activeTabByIndex(1);  
+      this.tabIndexToActiveAtTheBeginning = 1;
       this.appService.appNameSelection("Elenco Documenti")
     }
+  
+    
     /* this.route.queryParams.subscribe(params => {
       console.log("params", params)
       this.tabName = params['view'];
@@ -49,11 +61,8 @@ export class NavigationTabsComponent implements OnInit {
     const tabLoadedFromSessionStorage = this.navigationTabsService.loadTabsFromSessionStorage();
 
     if (tabLoadedFromSessionStorage) {
-      this.setTabsAndActiveOneOfThem();
-
-      
+      this.setTabsAndActiveOneOfThem(); 
     } else {
-      
       /* Questa sottoscrizione serve a capire se l'utente appartiene ad una azienda che
         usa gedi internauta. serve quindi solo a decidere se mostrare il tab degli archivi
       */
@@ -99,7 +108,19 @@ export class NavigationTabsComponent implements OnInit {
    * E setto tutti i tab.
    */
   private setTabsAndActiveOneOfThem(): void {
-    this.tabItems = this.navigationTabsService.getTabs();
+    // this.tabItems = this.navigationTabsService.getTabs();
+    //debugger;
+    const allTabs = this.navigationTabsService.getTabs();
+    this.tabItems = [allTabs[this.tabIndexToActiveAtTheBeginning]];
+    // this.tabItems.unshift(...allTabs)
+    setTimeout(() => {
+      this.tabItems = allTabs;
+      if (this.idArchivioAperturaDaScrivania) {
+        this.archivioService.getByIdHttpCall(this.idArchivioAperturaDaScrivania, 'ArchivioWithIdAziendaAndIdMassimarioAndIdTitolo').subscribe( res => {
+          this.navigationTabsService.addTabArchivio(res, true, false);
+        });
+      }
+    }, 0);
     /* for(let i=0; i < this.tabItems.length; i++) {
       if(this.tabItems[i].type === TabType.ARCHIVI_LIST && this.tabItems[i-1].type === TabType.DOCS_LIST) {
         let tempTab = this.tabItems[i-1];

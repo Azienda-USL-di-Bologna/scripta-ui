@@ -29,13 +29,13 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private permClone: { [s: number]: PermessoTabella; } = {};
   private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
-  private _archivio: Archivio | ArchivioDetail;
+  private _archivio: Archivio;
   //private lazyLoadFiltersAndSorts: FiltersAndSorts = new FiltersAndSorts();
   public livello: number;
 
   @ViewChild("dt", {}) private dt: Table;
-  get archivio(): Archivio | ArchivioDetail { return this._archivio; }
-  @Input() set archivio(archivio: Archivio | ArchivioDetail) {
+  get archivio(): Archivio { return this._archivio; }
+  @Input() set archivio(archivio: Archivio) {
     this._archivio = archivio;
     this.livello = archivio.livello
     this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
@@ -66,6 +66,13 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true, false);
     this.subscriptions.push(this.permessiDettaglioArchivioService.archivioReloadPermessiEvent.subscribe((archivioReloadPermessi: boolean) => {
       if (archivioReloadPermessi) { 
+        this.inEditing = false;
+        for (const key in this.dt.editingRowKeys) {
+          delete this.dt.editingRowKeys[key];
+          if (key === "undefined") {
+            this.perms.pop();
+          }
+        }
         this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
       }
      }));

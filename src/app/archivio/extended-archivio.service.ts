@@ -4,7 +4,8 @@ import { Injectable } from '@angular/core';
 import { Archivio, ArchivioDetail, ArchivioService } from '@bds/internauta-model';
 import { getInternautaUrl, BaseUrlType } from "@bds/internauta-model";
 import { AdditionalDataDefinition } from '@bds/next-sdr';
-import { Observable } from 'rxjs';
+import { catchError, Observable } from 'rxjs';
+import { ErrorManager } from '../utilities/error-manager';
 
 @Injectable({
   providedIn: 'root'
@@ -35,10 +36,17 @@ export class ExtendedArchivioService extends ArchivioService {
     return this._http.post(url, formData);
   }
 
-  public calcolaPermessiEspliciti(idArchivio: number) {
+  public calcolaPermessiEspliciti(idArchivioRadice: number) {
     const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "calcolaPermessiEspliciti";
     let formData: FormData = new FormData();
-    formData.append("idArchivio", idArchivio.toString());
+    formData.append("idArchivioRadice", idArchivioRadice.toString());
     this._http.post(apiUrl, formData).subscribe();
+  }
+
+  public uploadDocument(formData: FormData) {
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "uploadDocument";
+    console.log(apiUrl);
+    return this._http.post(apiUrl, formData/* , { reportProgress: true, observe: "events" } */)
+        .pipe(catchError(ErrorManager.errorMgmt));
   }
 }

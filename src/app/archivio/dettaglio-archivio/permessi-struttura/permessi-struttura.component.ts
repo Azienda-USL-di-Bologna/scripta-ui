@@ -68,10 +68,16 @@ export class PermessiStrutturaComponent implements OnInit {
     this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true, false);
     this.subscriptions.push(this.permessiDettaglioArchivioService.archivioReloadPermessiEvent.subscribe((archivioReloadPermessi: boolean) => {
       if (archivioReloadPermessi) { 
+        this.inEditing = false;
+        for (const key in this.dt.editingRowKeys) {
+          delete this.dt.editingRowKeys[key];
+          if (key === "undefined") {
+            this.perms.pop();
+          }
+        }
         this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "strutture");
       }
      }));
-    
   }
  
   
