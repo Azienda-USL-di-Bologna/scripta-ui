@@ -184,7 +184,7 @@ export class NavigationTabsService {
       label,
       "pi pi-fw pi-folder",
       TabType.ARCHIVIO,
-      archivio.fk_idArchivioRadice.id?.toString(),
+      archivio.fk_idArchivioRadice?.id?.toString(),
       labelForAppName
     );
   }
