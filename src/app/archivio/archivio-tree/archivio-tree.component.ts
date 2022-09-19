@@ -432,7 +432,7 @@ export class ArchivioTreeComponent implements OnInit {
     newNode.data = archivio;
     newNode.collapsedIcon = "pi pi-folder";
     newNode.expandedIcon = "pi pi-folder-open";
-    newNode.label = "[" + archivio.numerazioneGerarchica + "] " + archivio.oggetto;
+    newNode.label = "[" + archivio.numerazioneGerarchica + "] " + archivio.oggetto + " " + archivio.id.toString();
     newNode.children = children || [];
     newNode.expanded = true;
     return newNode;
