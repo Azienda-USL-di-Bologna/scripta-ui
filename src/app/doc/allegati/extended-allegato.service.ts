@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Allegato, AllegatoService, BaseUrlType, DettaglioAllegato, Doc, getInternautaUrl, TipoDettaglioAllegato } from "@bds/ng-internauta-model";
+import { Allegato, AllegatoService, BaseUrlType, DettaglioAllegato, Doc, getInternautaUrl, TipoDettaglioAllegato } from "@bds/internauta-model";
 import { DatePipe } from "@angular/common";
 import { catchError } from "rxjs/operators";
 import { ErrorManager } from "src/app/utilities/error-manager";

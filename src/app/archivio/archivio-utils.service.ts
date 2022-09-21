@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Archivio } from "@bds/ng-internauta-model";
+import { Archivio } from "@bds/internauta-model";
 import { Observable, Subject } from "rxjs";
 
 @Injectable({

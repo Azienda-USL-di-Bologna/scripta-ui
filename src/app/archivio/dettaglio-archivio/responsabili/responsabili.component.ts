@@ -1,10 +1,13 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Persona, Ruolo, RuoloAttoreArchivio, Struttura, UtenteStruttura } from '@bds/ng-internauta-model';
-import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
+import { ActivatedRoute, Route, Router } from '@angular/router';
+import { AttivitaService } from '@bds/internauta-model';
+import { Applicazione, ApplicazioneService, Archivio, ArchivioDetail, ArchivioService, Attivita, AttoreArchivio, AttoreArchivioService, Azienda, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, Persona, Ruolo, RuoloAttoreArchivio, Struttura, UtenteStruttura } from '@bds/internauta-model';
+import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
+import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity, PagingConf, SortDefinition, SORT_MODES } from '@bds/next-sdr';
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs/internal/Subscription';
+import { APPLICATION } from 'src/environments/app-constants';
 import { PermessiDettaglioArchivioService } from '../permessi-dettaglio-archivio.service';
 
 @Component({
@@ -45,9 +48,12 @@ export class ResponsabiliComponent implements OnInit {
   
   constructor(
     private attoreArchivioService: AttoreArchivioService,
-    private loginService: NtJwtLoginService,
+    private loginService: JwtLoginService,
     private messageService: MessageService,
-    private permessiDettaglioArchivioService: PermessiDettaglioArchivioService) { 
+    private permessiDettaglioArchivioService: PermessiDettaglioArchivioService,
+    private applicazioneService: ApplicazioneService,
+    private router: Router,
+    private attivitaService: AttivitaService) { 
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -107,6 +113,7 @@ export class ResponsabiliComponent implements OnInit {
   public onRowEditSave(attore: AttoreArchivio, index: number, operation: string) {
     const attoreToOperate = new AttoreArchivio();
     attoreToOperate.id = attore.id;
+    console.log(attoreToOperate.id)
     attoreToOperate.idArchivio = { id: this.archivio.id } as Archivio;
     attoreToOperate.idPersona = { id: attore.idPersona.id } as Persona;
     attoreToOperate.idStruttura = { id: attore.idStruttura.id } as Struttura;
@@ -114,76 +121,188 @@ export class ResponsabiliComponent implements OnInit {
     attoreToOperate.version = attore.version;
     switch (operation) {
       case "INSERT":
-        this.subscriptions.push(this.attoreArchivioService.postHttpCall(attoreToOperate, this.attoreArchivioProjection)
-          .subscribe({
-            next: (attoreRes: AttoreArchivio) => {
-              attore.version = attoreRes.version;
-              attore.id = attoreRes.id;
-              delete this.dictAttoriClonePerRipristino[attore.id];
-              this.messageService.add({
-                severity: "success",
-                summary: "Nuovo responsabile",
-                detail: "Nuovo responsabile inserito con successo"
-              });
-            },
-            error: () => {
-              this.messageService.add({
-                severity: "error",
-                summary: "Errore",
-                detail: "Errore nell'inserimento del nuovo responsabile. Contattare Babelcare"
-              });
-              this.onRowEditCancel(attore, index);
-            }
-          })
-        );
+        if(attoreToOperate.ruolo === "VICARIO") {
+          this.subscriptions.push(this.attoreArchivioService.postHttpCall(attoreToOperate, this.attoreArchivioProjection)
+            .subscribe({
+              next: (attoreRes: AttoreArchivio) => {
+                attore.version = attoreRes.version;
+                attore.id = attoreRes.id;
+                delete this.dictAttoriClonePerRipristino[attore.id];
+                this.messageService.add({
+                  severity: "success",
+                  summary: "Nuovo vicario",
+                  detail: "Nuovo vicario inserito con successo"
+                });
+                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+                this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+              },
+              error: () => {
+                this.messageService.add({
+                  severity: "error",
+                  summary: "Errore",
+                  detail: "Errore nell'inserimento del nuovo vicario. Contattare Babelcare"
+                });
+                this.onRowEditCancel(attore, index);
+              }
+            })
+          );
+        } else if (attoreToOperate.ruolo === "RESPONSABILE_PROPOSTO") {
+          const batchOperations: BatchOperation[] = [];
+          
+          const attoreArchivioBody= new AttoreArchivio();
+          attoreArchivioBody.idArchivio= attoreToOperate.idArchivio;
+          attoreArchivioBody.idPersona = attoreToOperate.idPersona;
+          attoreArchivioBody.version = attoreToOperate.version;
+          attoreArchivioBody.dataInserimentoRiga = attoreToOperate.dataInserimentoRiga;
+          attoreArchivioBody.ruolo= RuoloAttoreArchivio.RESPONSABILE_PROPOSTO;
+          attoreArchivioBody.idStruttura = attoreToOperate.idStruttura;
+
+          batchOperations.push({
+            operation: BatchOperationTypes.INSERT,
+            entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.attorearchivio.path,
+            entityBody: attoreToOperate as NextSdrEntity,
+            returnProjection: this.attoreArchivioProjection
+          } as BatchOperation);
+
+          const attivita = new Attivita();
+          attivita.idApplicazione = {id: "scripta"} as Applicazione;
+          attivita.idAzienda = {id: this.archivio.idAzienda.id} as Azienda;
+          attivita.idPersona = {id:attoreToOperate.idPersona.id }as Persona;
+          attivita.tipo = "attivita";
+          attivita.oggetto = "Fascicolo: " + this.archivio.oggetto + " - " + this.archivio.numerazioneGerarchica;
+          attivita.descrizione = "Proposta responsabilità";
+          // const url = "/apridascrivania?id=" + this.archivio.id.toString();
+          const url = [{
+            url: "/nav/apridascrivania?id=" + this.archivio.id.toString(),
+            label: "Accetta/Rifiuta"
+          }];
+          attivita.urls = JSON.stringify(url); //"[{\"url\" :" + "\" " + url +"\", \"label\": \"Accetta\"}]";
+          attivita.aperta = false;
+          attivita.provenienza = this.utenteUtilitiesLogin.getUtente().idPersona.descrizione;
+          attivita.priorita = 3;
+          attivita.oggettoEsterno = this.archivio.id.toString();
+          attivita.tipoOggettoEsterno = "ArchivioInternauta";
+          attivita.oggettoEsternoSecondario = this.archivio.id.toString();
+          attivita.tipoOggettoEsternoSecondario = "ArchivioInternauta";
+          attivita.datiAggiuntivi = {};
+          
+
+          batchOperations.push({
+            operation: BatchOperationTypes.INSERT,
+            entityPath: BaseUrls.get(BaseUrlType.Scrivania) + "/" + ENTITIES_STRUCTURE.scrivania.attivita.path,
+            entityBody: attivita as NextSdrEntity,
+            returnProjection: "AttivitaWithPlainFields"
+          } as BatchOperation);
+          this.subscriptions.push(
+            this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
+              (res: BatchOperation[]) => {
+                res.forEach(a  => {
+                  if (a.returnProjection === "AttoreArchivioWithIdPersonaAndIdStruttura")
+                  {
+                    const attoreArchivio : AttoreArchivio = a.entityBody as AttoreArchivio;
+                    attore.version =attoreArchivio.version;
+                    attore.id = attoreArchivio.id;
+                  }
+              })
+                this.messageService.add({
+                  severity: "success", 
+                  summary: "Proposta responsabilità", 
+                  detail: "La persona proposta come responsabile ha ricevuto una attività in scrivania"
+                });
+                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+                this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+              }
+            )
+            
+          )
+        }
         break;
       case "UPDATE":
         this.subscriptions.push(this.attoreArchivioService.patchHttpCall(attoreToOperate, attoreToOperate.id, this.attoreArchivioProjection)
-          .subscribe({
-            next: (attoreRes: AttoreArchivio) => {
-              attore.version = attoreRes.version;
-              delete this.dictAttoriClonePerRipristino[attore.id];
-              this.messageService.add({
-                severity: "success",
-                summary: "Aggiornamento responsabile",
-                detail: "Responsabile aggiornato con successo"
-              });
-            },
-            error: () => {
-              this.messageService.add({
-                severity: "error",
-                summary: "Errore",
-                detail: "Errore nell'aggiornamento del responsabile. Contattare Babelcare"
-              });
-              this.onRowEditCancel(attore, index);
-            }
-          })
-        );
-        break;
+        .subscribe({
+          next: (attoreRes: AttoreArchivio) => {
+            attore.version = attoreRes.version;
+            delete this.dictAttoriClonePerRipristino[attore.id];
+            this.messageService.add({
+              severity: "success",
+              summary: "Aggiornamento viario",
+              detail: "Vicario aggiornato con successo"
+            });
+            this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+            this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+          },
+          error: () => {
+            this.messageService.add({
+              severity: "error",
+              summary: "Errore",
+              detail: "Errore nell'aggiornamento del vicario. Contattare Babelcare"
+            });
+            this.onRowEditCancel(attore, index);
+          }
+        })
+      );
+
+      break;
       case "DELETE":
-        this.subscriptions.push(this.attoreArchivioService.deleteHttpCall(attoreToOperate.id)
-          .subscribe({
-            next: () => {
+        if(attoreToOperate.ruolo === "RESPONSABILE_PROPOSTO"){
+          const batchOperations: BatchOperation[] = [];
+          batchOperations.push({
+            operation: BatchOperationTypes.DELETE,
+            entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.attorearchivio.path,
+            id: attoreToOperate.id,
+            entityBody: attoreToOperate as NextSdrEntity,
+            returnProjection: this.attoreArchivioProjection
+          } as BatchOperation);
+          this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
+            (res: BatchOperation[]) => {
               this.responsabiliArchivi.splice(index, 1);
               this.messageService.add({
-                severity: "success",
-                summary: "Eliminazione responsabile",
-                detail: "Responsabile eliminato con successo"
+                severity: "warn", 
+                summary: "Eliminata proposta responsabilità", 
+                detail: "Hai eliminato il responsabile proposto"
               });
-            },
-            error: () => {
-              this.messageService.add({
-                severity: "error",
-                summary: "Errore",
-                detail: "Errore nell'eliminazione del responsabile. Contattare Babelcare"
-              });
-              this.onRowEditCancel(attore, index);
+              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+              this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+              
             }
-          })
+          
+            )
+           
+        } else {
+          this.subscriptions.push(this.attoreArchivioService.deleteHttpCall(attoreToOperate.id)
+        .subscribe({
+          next: () => {
+            this.responsabiliArchivi.splice(index, 1);
+            this.messageService.add({
+              severity: "success",
+              summary: "Eliminazione responsabile",
+              detail: "Responsabile eliminato con successo"
+            });
+            this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+            this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+          },
+          error: () => {
+            this.messageService.add({
+              severity: "error",
+              summary: "Errore",
+              detail: "Errore nell'eliminazione del responsabile. Contattare Babelcare"
+            });
+            this.onRowEditCancel(attore, index);
+          }
+        })
         );
-        break
-    }
+      }
+      console.log(attoreToOperate)
+        
+      
+
+        
+     
+     break;
+      }
   }
+
+
 
   /**
    * Funzione chiamata dall'html per ripristinare i dati della vecchia riga
@@ -206,10 +325,12 @@ export class ResponsabiliComponent implements OnInit {
    * @param perm 
    */
    public onUtenteStrutturaSelected(utenteStruttura: UtenteStruttura, attore: AttoreArchivio) {
-    attore.idPersona =  utenteStruttura.idUtente.idPersona;
-    attore.idStruttura = utenteStruttura.idStruttura;
-    console.log("attore", attore)
-    this.loadStruttureAttore(attore);
+    if (utenteStruttura) {
+      attore.idPersona =  utenteStruttura.idUtente.idPersona;
+      attore.idStruttura = utenteStruttura.idStruttura;
+      console.log("attore", attore)
+      this.loadStruttureAttore(attore);
+    }
   }
 
   /**
@@ -220,7 +341,7 @@ export class ResponsabiliComponent implements OnInit {
   private loadStruttureAttore(attore: AttoreArchivio) {
     this.subscriptions.push(this.permessiDettaglioArchivioService.loadStruttureOfPersona(attore.idPersona.id, this._archivio.idAzienda.id)
       .subscribe(
-        data => {
+        (data: any) => {
           if (data && data.results) {
             const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]> data.results;
             if (attore.idStruttura) {

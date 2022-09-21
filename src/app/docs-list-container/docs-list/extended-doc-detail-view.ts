@@ -1,4 +1,4 @@
-import { ArchivioDoc, DocDetailView, Fascicolazione, Persona, TipologiaDoc } from "@bds/ng-internauta-model";
+import { ArchivioDoc, DocDetailView, Fascicolazione, Persona, TipologiaDoc } from "@bds/internauta-model";
 import { StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione } from "./docs-list-constants";
 
 export class ExtendedDocDetailView extends DocDetailView {

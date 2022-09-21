@@ -1,10 +1,11 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, Azienda, Struttura } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail, Azienda, Struttura } from '@bds/internauta-model';
 import {Table} from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
+import { AdditionalDataDefinition } from '@bds/next-sdr';
 import { AzioniPossibili, EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
-import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/nt-communicator';
+import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/common-tools';
 
 @Component({
   selector: 'app-permessi-struttura',
@@ -22,6 +23,7 @@ export class PermessiStrutturaComponent implements OnInit {
   public _dataRiferimento: Date = new Date();
   public predicati: EnumPredicatoPermessoArchivio[] = [];
   private permClone: { [s: number]: PermessoTabella; } = {};
+  public additionalData: AdditionalDataDefinition[] = [];
   @ViewChild("dt", {}) private dt: Table;
 
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
@@ -46,7 +48,6 @@ export class PermessiStrutturaComponent implements OnInit {
   }
   constructor(
     private messageService: MessageService,
-    private permissionManagerService: PermessiDettaglioArchivioService,
     private permessiDettaglioArchivioService: PermessiDettaglioArchivioService
   ) { }
 
@@ -67,10 +68,16 @@ export class PermessiStrutturaComponent implements OnInit {
     this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true, false);
     this.subscriptions.push(this.permessiDettaglioArchivioService.archivioReloadPermessiEvent.subscribe((archivioReloadPermessi: boolean) => {
       if (archivioReloadPermessi) { 
+        this.inEditing = false;
+        for (const key in this.dt.editingRowKeys) {
+          delete this.dt.editingRowKeys[key];
+          if (key === "undefined") {
+            this.perms.pop();
+          }
+        }
         this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "strutture");
       }
      }));
-    
   }
  
   
@@ -79,6 +86,7 @@ export class PermessiStrutturaComponent implements OnInit {
    */
      public addPermesso(): void {
       const newPermessoTabella = new PermessoTabella();
+      this.additionalData = this.permessiDettaglioArchivioService.filtraEntitaEsistenti(this._archivio.permessi, "strutture");
       this.perms.push(newPermessoTabella);
       this.dt.initRowEdit(newPermessoTabella);
   }
@@ -135,7 +143,7 @@ export class PermessiStrutturaComponent implements OnInit {
       AzioniPossibili.REMOVE,
       this._archivio);
     
-    this.permissionManagerService.managePermissionsAdvanced(oggettoToDelete.getPermessiEntita())
+    this.permessiDettaglioArchivioService.managePermissionsAdvanced(oggettoToDelete.getPermessiEntita())
         .subscribe({
           next: (res: any) => {
             this.messageService.add({
@@ -178,7 +186,7 @@ export class PermessiStrutturaComponent implements OnInit {
         this._archivio
       );
     this.subscriptions.push(
-      this.permissionManagerService.managePermissionsAdvanced(oggettoToSave.getPermessiEntita())
+      this.permessiDettaglioArchivioService.managePermissionsAdvanced(oggettoToSave.getPermessiEntita())
         .subscribe({
           next: (res: any) => {
             this.messageService.add({

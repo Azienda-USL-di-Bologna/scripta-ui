@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from "@angular/core";
-import { BaseUrls, BaseUrlType, CategoriaContatto, Contatto, ContattoService, DettaglioContatto, Doc, ENTITIES_STRUCTURE, OrigineRelated, Persona, Related, TipoContatto, TipoRelated } from "@bds/ng-internauta-model";
-import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
-import { AdditionalDataDefinition, BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity } from "@nfa/next-sdr";
+import { BaseUrls, BaseUrlType, CategoriaContatto, Contatto, ContattoService, DettaglioContatto, Doc, ENTITIES_STRUCTURE, OrigineRelated, Persona, Related, TipoContatto, TipoRelated } from "@bds/internauta-model";
+import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
+import { AdditionalDataDefinition, BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity } from "@bds/next-sdr";
 import { MessageService } from 'primeng/api';
 import { AutoComplete } from "primeng/autocomplete";
 import { Subscription } from "rxjs";
@@ -48,7 +48,7 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     private destinatariService: ExtendedDestinatariService,
-    private loginService: NtJwtLoginService,
+    private loginService: JwtLoginService,
     private contattoService: ContattoService,
     /* private extendedDocService: ExtendedDocService, */
     private messageService: MessageService,

@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, UtenteStruttura, UtenteStrutturaService, Struttura } from '@bds/ng-internauta-model';
-import { OggettoneOperation, OggettonePermessiEntitaGenerator, PROJECTIONS } from '@bds/nt-communicator';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from '@nfa/next-sdr';
+import { Archivio, ArchivioDetail, UtenteStruttura, UtenteStrutturaService, Struttura, PermessoEntitaStoredProcedure } from '@bds/internauta-model';
+import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/common-tools';
+import { AdditionalDataDefinition, PagingConf } from '@bds/next-sdr';
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs';
@@ -24,18 +24,18 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
   public cols: any[];
   public exportColumns: any[];
   public selectedStruttura: Struttura;
-  public additionalFilterComboUtenti: FilterDefinition[]
+  public additionalDataComboUtenti: AdditionalDataDefinition[] = [];
   public inEditing: boolean = false;
   private subscriptions: Subscription[] = [];
   private permClone: { [s: number]: PermessoTabella; } = {};
   private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
-  private _archivio: Archivio | ArchivioDetail;
+  private _archivio: Archivio;
   //private lazyLoadFiltersAndSorts: FiltersAndSorts = new FiltersAndSorts();
   public livello: number;
 
   @ViewChild("dt", {}) private dt: Table;
-  get archivio(): Archivio | ArchivioDetail { return this._archivio; }
-  @Input() set archivio(archivio: Archivio | ArchivioDetail) {
+  get archivio(): Archivio { return this._archivio; }
+  @Input() set archivio(archivio: Archivio) {
     this._archivio = archivio;
     this.livello = archivio.livello
     this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
@@ -66,6 +66,13 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     this.predicati = this.permessiDettaglioArchivioService.loadPredicati(true, false);
     this.subscriptions.push(this.permessiDettaglioArchivioService.archivioReloadPermessiEvent.subscribe((archivioReloadPermessi: boolean) => {
       if (archivioReloadPermessi) { 
+        this.inEditing = false;
+        for (const key in this.dt.editingRowKeys) {
+          delete this.dt.editingRowKeys[key];
+          if (key === "undefined") {
+            this.perms.pop();
+          }
+        }
         this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
       }
      }));
@@ -115,6 +122,16 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
       ));
   }
 
+  public getPermessiFiltratiPerSoggetto(oggettoni: PermessoEntitaStoredProcedure[], idProvenienzaSoggetto: number): PermessoEntitaStoredProcedure[] {
+    var permessiPerSoggetto: PermessoEntitaStoredProcedure[] = [];
+    oggettoni?.forEach((oggettone: PermessoEntitaStoredProcedure) => {
+      if(oggettone.soggetto.id_provenienza === idProvenienzaSoggetto){
+        permessiPerSoggetto.push(oggettone);
+      }
+    })
+    return permessiPerSoggetto.length > 0 ? permessiPerSoggetto : null;
+  }
+
   /**
    * Metodo chiamato dal frontend per salvare il pemrmesso che sto inserindo o modficando
    * @param perm 
@@ -129,10 +146,12 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
       perm.idProvenienzaSoggetto = perm.soggetto.id; 
     }
 
+    var permessiDelSoggetto = this.getPermessiFiltratiPerSoggetto(this._archivio.permessi, perm.idProvenienzaSoggetto);    
+
     const oggettoToSave: OggettonePermessiEntitaGenerator =
       this.permessiDettaglioArchivioService.buildPermessoPerBlackbox(
         perm,
-        operation === "ADD" || operation === "BAN" ? null : this._archivio.permessi,
+        operation === "ADD" || operation === "BAN" ? permessiDelSoggetto : this._archivio.permessi,
         operation === "ADD" || operation === "BAN" || operation === "RESTORE" ? OggettoneOperation.ADD : OggettoneOperation.REMOVE,
         <AzioniPossibili>operation,
         this._archivio
@@ -189,7 +208,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
    * @param perm 
    */
   public aggiungiPersonaStruttura(utenteStruttura: UtenteStruttura, permesso: PermessoTabella) {
-    permesso.soggetto = utenteStruttura.idUtente.idPersona;
+    permesso.soggetto = utenteStruttura?.idUtente.idPersona;
     permesso.descrizioneSoggetto = utenteStruttura.idUtente.idPersona.descrizione;
     //permesso.idProvenienzaSoggetto = permesso.soggetto.id;
 
@@ -205,6 +224,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
    */
   public addPermesso(): void {
     this.strutture = [];
+    this.additionalDataComboUtenti = this.permessiDettaglioArchivioService.filtraEntitaEsistenti(this._archivio.permessi, "persone");
     const newPermessoTabella = new PermessoTabella();
     this.perms.push(newPermessoTabella);
     this.dt.initRowEdit(newPermessoTabella);

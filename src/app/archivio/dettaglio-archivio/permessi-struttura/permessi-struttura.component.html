@@ -40,11 +40,12 @@
 				<p-cellEditor>
 					<ng-template pTemplate="input">
 						<lib-structures-autocomplete *ngIf="!permesso.descrizioneSoggetto"
-							[showPool]="false"
+							[showPool]="true"
 							[filterByRoles]= "_rolesToFilter"
 							[enabled]="true" 
 							[azienda]="azienda"
 							[dataRiferimento]="_dataRiferimento"
+							[additionalDatas]="additionalData"
 							(strutturaSelezionataEmit)="strutturaSelezionataDaComboReceived($event, permesso)">
 						</lib-structures-autocomplete>
 						<div *ngIf="permesso.descrizioneSoggetto">{{permesso.descrizioneSoggetto}}</div>
@@ -72,8 +73,9 @@
 				<p-cellEditor>
 					<ng-template pTemplate="input">
 						<p-checkbox
+							
 							[binary]="true" 
-							[(ngModel)]="permesso.trasmetti">
+							[(ngModel)]="permesso.trasmetti"><!-- [disabled]="permesso.soggetto.ufficio" qui si vorrebbe disabilitare il propaga nel caso sia un ufficio -->
 						</p-checkbox>
 					</ng-template>
 					<ng-template pTemplate="output">

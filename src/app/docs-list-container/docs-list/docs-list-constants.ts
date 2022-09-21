@@ -1,6 +1,6 @@
-import { StatoDoc, StatoUfficioAtti, TipologiaDoc } from "@bds/ng-internauta-model";
-import { ColonnaBds } from "@bds/primeng-plugin";
-import { FILTER_TYPES, NextSDRDateTypes } from "@nfa/next-sdr";
+import { ColonnaBds } from "@bds/common-tools";
+import { StatoDoc, StatoUfficioAtti, TipologiaDoc } from "@bds/internauta-model";
+import { FILTER_TYPES, NextSDRDateTypes } from "@bds/next-sdr";
 import { Utils } from "src/app/utilities/utils";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 

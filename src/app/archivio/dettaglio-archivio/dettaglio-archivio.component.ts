@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
-import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio } from '@bds/ng-internauta-model';
-import { NtJwtLoginService, UtenteUtilities } from '@bds/nt-jwt-login';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@nfa/next-sdr';
+import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio, BaseUrls, BaseUrlType, Attivita, Applicazione, Persona, Azienda, AttivitaService, AttivitaFatta } from '@bds/internauta-model';
+import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
+import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES , BatchOperation, NextSdrEntity, BatchOperationTypes} from '@bds/next-sdr';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TreeNode } from 'primeng/api/treenode';
 import { TreeSelect } from 'primeng/treeselect';
@@ -11,6 +11,7 @@ import { TipoArchivioTraduzioneVisualizzazione } from 'src/app/archivi-list-cont
 import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
 import { ArchivioFieldUpdating, ArchivioUtilsService } from '../archivio-utils.service';
 import { ExtendedArchivioService } from '../extended-archivio.service';
+import { PermessiDettaglioArchivioService } from './permessi-dettaglio-archivio.service';
 
 @Component({
   selector: 'dettaglio-archivio',
@@ -52,8 +53,11 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public anniTenutaSelezionabili: any[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
   public loggedUserIsResponsbaileOrVicario = false;
+  loggedUserIsResponsbaileProposto = false;
   public fascicoliParlanti: boolean = false;
   private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
+  private attoreArchivioProjection = ENTITIES_STRUCTURE.scripta.attorearchivio.standardProjections.AttoreArchivioWithIdPersonaAndIdStruttura;
+
 
   @ViewChild("noteArea") public noteArea: ElementRef;
   @ViewChild("titoliTreeSelect") public titoliTreeSelect: TreeSelect;
@@ -67,9 +71,12 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private configurazioneService: ConfigurazioneService,
     private confirmationService: ConfirmationService,
-    private loginService: NtJwtLoginService,
+    private loginService: JwtLoginService,
     private navigationTabsService: NavigationTabsService,
-    private archivioUtilsService: ArchivioUtilsService) 
+    private archivioUtilsService: ArchivioUtilsService,
+    private permessiDettaglioArchivioService: PermessiDettaglioArchivioService,
+    private attoreArchivioService: AttoreArchivioService,
+    private attivitaService: AttivitaService) 
   {
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
@@ -90,6 +97,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       || a.ruolo === RuoloAttoreArchivio.VICARIO 
       || a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
       this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
+     this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[]).some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id  && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
     this.loadParametroAziendaleFascicoliParlanti()
   }
 
@@ -445,6 +453,158 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         );
       }
     });
+  }
+
+  public accettaResponsabilita() {
+  
+    const batchOperations: BatchOperation[] = [];
+    const responsabilePropostoVecchio = this.archivio.attoriList.find((a: AttoreArchivio) => a.ruolo === "RESPONSABILE_PROPOSTO" );
+    const attoreArchivioBody = new AttoreArchivio();
+    attoreArchivioBody.id = responsabilePropostoVecchio.id;
+    attoreArchivioBody.ruolo = RuoloAttoreArchivio.RESPONSABILE;
+    attoreArchivioBody.version = responsabilePropostoVecchio.version;
+        
+    batchOperations.push({
+      operation: BatchOperationTypes.UPDATE,
+      entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.attorearchivio.path,
+      id: attoreArchivioBody.id,
+      entityBody: attoreArchivioBody as NextSdrEntity,
+      returnProjection: this.attoreArchivioProjection
+    } as BatchOperation);
+   
+    const responsabileVecchio =  this.archivio.attoriList.find((a: AttoreArchivio) => a.ruolo === "RESPONSABILE");
+    const nuovoVicario =  new AttoreArchivio();
+    nuovoVicario.id = responsabileVecchio.id;
+    nuovoVicario.ruolo = RuoloAttoreArchivio.VICARIO;
+    nuovoVicario.version = responsabileVecchio.version;
+    
+    
+    batchOperations.push({
+      operation: BatchOperationTypes.UPDATE,
+      entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.attorearchivio.path,
+      id: nuovoVicario.id,
+      entityBody: nuovoVicario as NextSdrEntity,
+      returnProjection: this.attoreArchivioProjection
+    } as BatchOperation);
+
+    
+    const attivita = new Attivita();
+    attivita.idApplicazione = {id: "scripta"} as Applicazione;
+    attivita.idAzienda = {id: this.archivio.idAzienda.id} as Azienda;
+    attivita.idPersona = {id: responsabileVecchio.idPersona.id} as Persona;
+    attivita.tipo = "notifica";
+    attivita.oggetto = "Fascicolo: " + this.archivio.oggetto + " - " + this.archivio.numerazioneGerarchica;
+    attivita.descrizione = "Accettata responsabilità";
+    attivita.urls = JSON.stringify({});
+    attivita.aperta = false;
+    attivita.provenienza = this.utenteUtilitiesLogin.getUtente().idPersona.descrizione;
+    attivita.priorita = 3;
+    attivita.oggettoEsterno = this.archivio.id.toString();
+    attivita.tipoOggettoEsterno = "ArchivioInternauta";
+    attivita.oggettoEsternoSecondario = this.archivio.id.toString();
+    attivita.tipoOggettoEsternoSecondario = "ArchivioInternauta";
+    attivita.datiAggiuntivi = {};
+
+    batchOperations.push({
+      operation: BatchOperationTypes.INSERT,
+      entityPath: BaseUrls.get(BaseUrlType.Scrivania) + "/" + ENTITIES_STRUCTURE.scrivania.attivita.path,
+      entityBody: attivita as NextSdrEntity,
+      returnProjection: "AttivitaWithPlainFields"
+    } as BatchOperation);
+
+
+    const filterAndsorts: FiltersAndSorts = new FiltersAndSorts();
+      filterAndsorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, responsabilePropostoVecchio.idPersona.id));
+      filterAndsorts.addFilter(new FilterDefinition("idOggettoEsterno", FILTER_TYPES.string.containsIgnoreCase, this.archivio.id.toString()));
+
+    this.attivitaService.getData("AttivitaWithPlainFields", filterAndsorts, null,null).subscribe(
+      (res) => {
+        batchOperations.push({
+          operation: BatchOperationTypes.DELETE,
+          entityPath: BaseUrls.get(BaseUrlType.Scrivania) + "/" + ENTITIES_STRUCTURE.scrivania.attivita.path,
+          id:res.results[0].id,
+          entityBody: res.results[0] as NextSdrEntity,
+          returnProjection: "AttivitaWithPlainFields"
+        } as BatchOperation);
+        this.subscriptions.push(
+          this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
+            (res: BatchOperation[]) => {
+              this.messageService.add({
+                severity: "success", 
+                summary: "Proposta responsabilità", 
+                detail: "Hai accettato la responsabilità del fascicolo"
+              });
+              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+              responsabilePropostoVecchio.ruolo = RuoloAttoreArchivio.RESPONSABILE;
+              responsabilePropostoVecchio.version = (res.find(bo => (bo.entityBody as any).id === responsabilePropostoVecchio.id).entityBody as AttoreArchivio).version;
+              responsabileVecchio.ruolo = RuoloAttoreArchivio.VICARIO;
+              responsabileVecchio.version =  (res.find(bo => (bo.entityBody as any).id === responsabileVecchio.id).entityBody as AttoreArchivio).version;
+              this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+    
+              this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[])
+                .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
+            }
+          )
+        )
+      }
+    );
+  }
+
+  public rifiutaResponsabilita(){
+    const batchOperations: BatchOperation[] = [];
+    const attoreToDelete = this.archivio.attoriList.find((a:AttoreArchivio)  => a.ruolo === 'RESPONSABILE_PROPOSTO');
+    
+    batchOperations.push({
+      operation: BatchOperationTypes.DELETE,
+      entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.attorearchivio.path,
+      id: attoreToDelete.id,
+      entityBody: attoreToDelete as NextSdrEntity,
+      returnProjection: this.attoreArchivioProjection
+    } as BatchOperation);
+
+    const responsabile = this.archivio.attoriList.find((a:AttoreArchivio) => a.ruolo === 'RESPONSABILE');
+    const attivita = new Attivita();
+    attivita.idApplicazione = {id: "scripta"} as Applicazione;
+    attivita.idAzienda = {id: this.archivio.idAzienda.id} as Azienda;
+    attivita.idPersona = {id: responsabile.idPersona.id} as Persona;
+    attivita.tipo = "notifica";
+    attivita.oggetto = "Fascicolo: " + this.archivio.oggetto + " - " + this.archivio.numerazioneGerarchica;
+    attivita.descrizione = "Rifiutata responsabilità";
+    attivita.urls =JSON.stringify({});
+    attivita.aperta = false;
+    attivita.provenienza = this.utenteUtilitiesLogin.getUtente().idPersona.descrizione;
+    attivita.priorita = 3;
+    attivita.oggettoEsterno = this.archivio.id.toString();
+    attivita.tipoOggettoEsterno = "ArchivioInternauta";
+    attivita.oggettoEsternoSecondario = this.archivio.id.toString();
+    attivita.tipoOggettoEsternoSecondario = "ArchivioInternauta";
+    attivita.datiAggiuntivi = {};
+
+    batchOperations.push({
+      operation: BatchOperationTypes.INSERT,
+      entityPath: BaseUrls.get(BaseUrlType.Scrivania) + "/" + ENTITIES_STRUCTURE.scrivania.attivita.path,
+      entityBody: attivita as NextSdrEntity,
+      returnProjection: "AttivitaWithPlainFields"
+    } as BatchOperation);
+
+          
+    this.subscriptions.push(
+      this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
+        (res: BatchOperation[]) => {
+          this.messageService.add({
+            severity: "warn", 
+            summary: "Rifiutata responsabilità", 
+            detail: "Hai rifiutato la responsabilità del fascicolo"
+          });
+          this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+          
+          attoreToDelete.version = (res.find(bo => (bo.entityBody as any).id === attoreToDelete.id).entityBody as AttoreArchivio).version;
+          this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+          this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[])
+            .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
+        }
+      )
+    );
   }
 
   public ngOnDestroy(): void {

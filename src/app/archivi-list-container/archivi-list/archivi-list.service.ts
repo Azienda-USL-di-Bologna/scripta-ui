@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ArchivioDetailService } from '@bds/ng-internauta-model';
+import { ArchivioDetailService } from '@bds/internauta-model';
 
 @Injectable({
   providedIn: 'root'

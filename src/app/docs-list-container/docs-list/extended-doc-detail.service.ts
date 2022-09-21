@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { BaseUrlType, DocDetailService, getInternautaUrl } from "@bds/ng-internauta-model";
+import { BaseUrlType, DocDetailService, getInternautaUrl } from "@bds/internauta-model";
 import { Observable } from "rxjs";
 import { CUSTOM_SERVER_METHODS } from "src/environments/app-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";

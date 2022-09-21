@@ -1,20 +1,20 @@
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, FluxPermission, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio } from '@bds/internauta-model';
 import { AppService } from '../../app.service';
-import { NtJwtLoginService, UtenteUtilities } from "@bds/nt-jwt-login";
+import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { Subscription, combineLatest } from 'rxjs';
 import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
 import { ArchiviListMode, cols, colsCSV, TipoArchivioTraduzioneVisualizzazione, StatoArchivioTraduzioneVisualizzazione } from './archivi-list-constants';
 import { ActivatedRoute } from '@angular/router';
 import { ValueAndLabelObj } from '../../docs-list-container/docs-list/docs-list.component';
-import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from '@nfa/next-sdr';
+import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from '@bds/next-sdr';
 import { ColumnFilter, Table } from 'primeng/table';
 import { Impostazioni } from '../../utilities/utils';
 import { ConfirmationService, FilterOperator, LazyLoadEvent, MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListService } from './archivi-list.service';
 import { Calendar } from 'primeng/calendar';
 import { Dropdown } from 'primeng/dropdown';
-import { buildLazyEventFiltersAndSorts, ColonnaBds, CsvExtractor } from '@bds/primeng-plugin';
+import { buildLazyEventFiltersAndSorts } from '@bds/primeng-plugin';
 import { ExtendedArchiviView } from './extendend-archivi-view';
 import { TabComponent } from '../../navigation-tabs/tab.component';
 import { NavigationTabsService } from '../../navigation-tabs/navigation-tabs.service';
@@ -23,12 +23,13 @@ import { DatePipe } from '@angular/common';
 import { CaptionReferenceTableComponent } from '../../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
 import { SelectButtonItem } from '../../generic-caption-table/select-button-item';
-import { NewArchivoButton } from 'src/app/generic-caption-table/new-archivo-button';
+import { NewArchivoButton } from 'src/app/generic-caption-table/functional-buttons/new-archivo-button';
 import { CaptionFunctionalButtonsComponent } from 'src/app/generic-caption-table/caption-functional-buttons.component';
-import { Titolo } from '@bds/ng-internauta-model';
-import { Massimario } from '@bds/ng-internauta-model';
-import { ConfigurazioneService } from '@bds/ng-internauta-model';
-import { ParametroAziende } from '@bds/ng-internauta-model/lib/entities/configurazione/ParametroAziende';
+import { Titolo } from '@bds/internauta-model';
+import { Massimario } from '@bds/internauta-model';
+import { ConfigurazioneService } from '@bds/internauta-model';
+import { ParametroAziende } from '@bds/internauta-model/lib/entities/configurazione/ParametroAziende';
+import { ColonnaBds, CsvExtractor } from '@bds/common-tools';
 
 @Component({
 	selector: 'archivi-list',
@@ -118,7 +119,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	}
 
 	constructor(
-		private loginService: NtJwtLoginService,
+		private loginService: JwtLoginService,
 		private route: ActivatedRoute,
 		private appService: AppService,
 		private messageService: MessageService,

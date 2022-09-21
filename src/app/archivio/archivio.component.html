@@ -45,7 +45,7 @@
     </archivi-list>
 
     <!-- Lista documenti contenuti -->
-    <docs-list #doclist *ngIf="contenutoDiviso" [archivio]="archivio"
+    <docs-list #doclist *ngIf="contenutoDiviso && loggedUserCanVisualizeArchive" [archivio]="archivio"
       [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'DOCUMENTI'}">
     </docs-list>
 

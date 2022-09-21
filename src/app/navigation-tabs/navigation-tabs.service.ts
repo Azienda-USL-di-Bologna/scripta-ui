@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Archivio, ArchivioDetail } from '@bds/ng-internauta-model';
+import { Archivio, ArchivioDetail } from '@bds/internauta-model';
 import { ArchiviListContainerComponent } from '../archivi-list-container/archivi-list-container.component';
 import { ExtendedArchiviView } from '../archivi-list-container/archivi-list/extendend-archivi-view';
 import { ArchivioComponent } from '../archivio/archivio.component';
@@ -184,7 +184,7 @@ export class NavigationTabsService {
       label,
       "pi pi-fw pi-folder",
       TabType.ARCHIVIO,
-      archivio.fk_idArchivioRadice.id.toString(),
+      archivio.fk_idArchivioRadice.id?.toString(),
       labelForAppName
     );
   }
@@ -197,7 +197,7 @@ export class NavigationTabsService {
    */
   public addTabArchivio(archivio: Archivio | ArchivioDetail | ExtendedArchiviView, active: boolean = true, reuseActiveTab: boolean = false): void {
     const tabIndex: number = this.tabs.findIndex(t => {
-      return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id.toString()
+      return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id?.toString()
     });
     if (tabIndex !== -1) {
       this.updateTab(
