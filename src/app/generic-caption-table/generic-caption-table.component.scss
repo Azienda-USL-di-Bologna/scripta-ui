@@ -31,6 +31,7 @@
         align-self: center;
         .p-selectbutton {
           flex-wrap: nowrap;
+          
           .p-button {
             border: 1px solid #9da3a9 !important;;
             color: #333333;
@@ -118,5 +119,18 @@
         color: #2e4a65  !important;
       }
     }
+  }
+
+}
+
+::ng-deep .span-fileUpload-button {
+  margin-right: 5px !important;
+}
+::ng-deep .upload-document-button {
+  /* height: 34.72px !important;
+  width: 37.7px;
+   */
+    .p-fileupload-choose {
+    height: 35px;
   }
 }

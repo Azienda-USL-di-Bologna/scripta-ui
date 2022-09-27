@@ -24,6 +24,8 @@ export class GenericCaptionTableComponent implements OnInit {
   @ViewChild("aziendaSelection", {}) public aziendaSelection: Menu;
 
   public accessibile: boolean = false;
+  public multiple: boolean = false;
+  public maxSizeUpload: Number = 50000000;
 
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
