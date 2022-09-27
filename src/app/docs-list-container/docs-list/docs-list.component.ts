@@ -687,6 +687,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     const extendedDocsList: ExtendedDocDetailView[] = docsList as ExtendedDocDetailView[];
     extendedDocsList.forEach((doc: ExtendedDocDetailView) => {
       Object.setPrototypeOf(doc, ExtendedDocDetailView.prototype);
+      if (this.archivio) {
+        doc.archiviation = doc.archiviDocList?.find(archivioDoc => archivioDoc.idArchivio.id === this.archivio.id);
+      }
       doc.oggettoVisualizzazione = doc.oggetto;
       doc.tipologiaVisualizzazioneAndCodiceRegistro = doc;
       doc.registrazioneVisualizzazione = null; // Qui sto passando null. Ma è un trucco, in realtà sto settando i valori.
@@ -700,9 +703,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       doc.destinatariVisualizzazione = null;
       doc.firmatariVisualizzazione = null;
       doc.sullaScrivaniaDiVisualizzazione = null;
-      if (this.archivio) {
-        doc.archiviation = doc.archiviDocList.find(archivioDoc => archivioDoc.idArchivio.id === this.archivio.id);
-      }
     });
     return extendedDocsList;
   }
