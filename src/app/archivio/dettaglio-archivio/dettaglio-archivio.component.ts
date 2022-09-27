@@ -300,8 +300,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     node.label = inizioLabel + " " + titolo.classificazione + ": " + titolo.nome;
     node.data = titolo;
     node.key = titolo.id.toString();
-    node.expandedIcon = "pi pi-folder-open";
-    node.collapsedIcon = "pi pi-folder";
+    node.expandedIcon = "pi pi-tag";
+    node.collapsedIcon = "pi pi-tags";
     node.expanded = false;
     return node;
   }

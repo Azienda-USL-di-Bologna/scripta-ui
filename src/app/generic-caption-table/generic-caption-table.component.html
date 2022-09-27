@@ -80,7 +80,7 @@
     <!-- BOTTONE UPLOAD DOCUMENT -->
     <!--fileUploaderDocumentsAuto.clear() serve a svuotare il componente altrimenti si carica sempre lo stesso file--> 
     <span  *ngIf="configuration.uploadDocumentButton" class="span-fileUpload-button">
-      <p-fileUpload #fileUploaderDocumentsAuto *ngIf="configuration.selectableColumns && !accessibile"
+      <p-fileUpload #fileUploaderDocumentsAuto
         chooseIcon="pi pi-upload"
         pTooltip="Carica documenti nell'archivio"
         class="upload-document-button"
