@@ -146,7 +146,7 @@ export const cols: ColonnaBds[] = [
     useFilterMatchMode: true,
     default: true
   },
-  {
+  /* {
     field: "fascicolazioni",
     header: "Fascicolazioni",
     filterField: "fascicolazioniTscol",
@@ -157,6 +157,19 @@ export const cols: ColonnaBds[] = [
     filterClass: ["filter-column", "fascicolazioni-column"],
     bodyClass: ["scrollable-column", "fascicolazioni-column"],
     fieldType: "",
+    filterMatchMode: FILTER_TYPES.not_string.equals,
+    useFilterMatchMode: true,
+    default: true
+  }, */
+  {
+    field: "idArchivi",
+    header: "Fascicolazioni",
+    filterField: "idArchivi",
+    style: {},
+    headerClass: ["header-column", "fascicolazioni-column"],
+    filterClass: ["filter-column", "fascicolazioni-column"],
+    bodyClass: ["scrollable-column","fascicolazioni-column"],
+    fieldType: "object",
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: true,
     default: true
@@ -475,7 +488,7 @@ export const colsCSV: any[] = [
     fieldType: "string",
     fieldId: "stato"
   },
-  {
+  /* {
     field: (doc: ExtendedDocDetailView) => {
       let fascicolazioniString = "";
       if (doc.fascicolazioni) {
@@ -488,7 +501,7 @@ export const colsCSV: any[] = [
     header: "Fascicolazioni",
     fieldType: "date",
     fieldId: "fascicolazioni"
-  },
+  }, */
   {
     field: "statoUfficioAttiVisualizzazione",
     header: "Stato ufficio atti",

@@ -1,4 +1,4 @@
-import { ArchivioDoc, DocDetailView, Fascicolazione, Persona, TipologiaDoc } from "@bds/internauta-model";
+import { ArchivioDoc, DocDetailView, /* Fascicolazione,  */Persona, TipologiaDoc } from "@bds/internauta-model";
 import { StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione } from "./docs-list-constants";
 
 export class ExtendedDocDetailView extends DocDetailView {
@@ -10,6 +10,7 @@ export class ExtendedDocDetailView extends DocDetailView {
   private _statoUfficioAttiVisualizzazione: string;
   private _codiceRegistro: string;
   private _fascicolazioniVisualizzazione: string[];
+  private _archiviDocListFiltered: ArchivioDoc[];
   private _destinatariVisualizzazione: string[];
   private _firmatariVisualizzazione: string[];
   private _sullaScrivaniaDiVisualizzazione: string[];
@@ -143,17 +144,33 @@ export class ExtendedDocDetailView extends DocDetailView {
     }
   }
 
+  public get archiviDocListFiltered(): ArchivioDoc[] {
+    return this._archiviDocListFiltered;
+  }
+
+  public set archiviDocListFiltered(archiviDocList: ArchivioDoc[]) {
+    this._archiviDocListFiltered = archiviDocList;
+    if (this.archiviation) {
+      this._archiviDocListFiltered = this._archiviDocListFiltered.filter(ad => ad.idArchivio.id !== this.archiviation.idArchivio.id);
+    }
+  }
+
   public get fascicolazioniVisualizzazione(): string[] {
     return this._fascicolazioniVisualizzazione;
   }
 
   public set fascicolazioniVisualizzazione(notUsedButNecessary: string[]) {
     this._fascicolazioniVisualizzazione = [];
-    if (this.fascicolazioni) {
+    if (this._archiviDocListFiltered) {
+      this._archiviDocListFiltered.forEach(ad => {
+        this._fascicolazioniVisualizzazione.push("[" + ad.idArchivio.numerazioneGerarchica + "] " + ad.idArchivio.oggetto);
+      });
+    }
+    /* if (this.fascicolazioni) {
       this.fascicolazioni.forEach(f => {
         this._fascicolazioniVisualizzazione.push("[" + f.numerazione + "] " + f.nome);
       });
-    }
+    } */
   }
 
   public get destinatariVisualizzazione(): string[] {
