@@ -1,10 +1,10 @@
 import { DatePipe } from "@angular/common";
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio } from "@bds/internauta-model";
+import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail } from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { buildLazyEventFiltersAndSorts } from "@bds/primeng-plugin";
-import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from "@bds/next-sdr";
+import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from "@bds/next-sdr";
 import { ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
 import { AutoComplete } from "primeng/autocomplete";
 import { Dropdown } from "primeng/dropdown";
@@ -25,6 +25,8 @@ import { CaptionSelectButtonsComponent } from '../../generic-caption-table/capti
 import { SelectButtonItem } from "../../generic-caption-table/select-button-item";
 import { DecimalePredicato } from "@bds/internauta-model";
 import { ColonnaBds, CsvExtractor } from "@bds/common-tools";
+import { NavigationTabsService } from "../../navigation-tabs/navigation-tabs.service";
+import { AppService } from "src/app/app.service";
 
 @Component({
   selector: "docs-list",
@@ -49,6 +51,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   @ViewChild("columnFilterAzienda") public columnFilterAzienda: ColumnFilter;
   @ViewChild("autocompleteIdPersonaRedattrice") public autocompleteIdPersonaRedattrice: AutoComplete;
   @ViewChild("autocompleteidPersonaResponsabileProcedimento") public autocompleteidPersonaResponsabileProcedimento: AutoComplete;
+  @ViewChild("autocompletearchiviDocList") public autocompletearchiviDocList: AutoComplete;
   @ViewChild("autocompleteIdStrutturaRegistrazione") public autocompleteIdStrutturaRegistrazione: AutoComplete;
   @ViewChild("autocompleteFirmatari") public autocompleteFirmatari: AutoComplete;
   @ViewChild("autocompleteSullaScrivaniaDi") public autocompleteSullaScrivaniaDi: AutoComplete;
@@ -67,7 +70,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public totalRecords: number;
   public aziendeFiltrabili: ValueAndLabelObj[] = [];
   public cols: ColonnaBds[] = [];
-  public _selectedColumns: ColonnaBds[];
+  public _selectedColumns: ColonnaBds[] = [];
   public rowsNumber: number = 20;
   public tipologiaVisualizzazioneObj = TipologiaDocTraduzioneVisualizzazione;
   public statoVisualizzazioneObj = StatoDocDetailPerFiltro;
@@ -75,6 +78,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public statoUfficioAttiVisualizzazioneObj = StatoUfficioAttiTraduzioneVisualizzazione;
   public mieiDocumenti: boolean = true;
   public filteredPersone: Persona[] = [];
+  public filteredArchivi: Archivio[] = [];
   public filteredStrutture: Struttura[] = [];
   public loading: boolean = false;
   public initialSortField: string = "dataCreazione";
@@ -115,12 +119,15 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     private docDetailViewService: ExtendedDocDetailViewService,
     private personaVedenteSerice: PersonaVedenteService,
     private personaService: PersonaService,
+    private archivioDetailViewService: ArchivioDetailViewService,
     private strutturaService: StrutturaService,
     private loginService: JwtLoginService,
     private datepipe: DatePipe,
     private route: ActivatedRoute,
     private confirmationService: ConfirmationService,
-    private archivioDocService: ArchivioDocService
+    private archivioDocService: ArchivioDocService,
+    private navigationTabsService: NavigationTabsService,
+    private appService: AppService,
   ) { }
 
   ngOnInit(): void {
@@ -292,6 +299,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * ed il filtro "miei documenti"
    */
   private loadConfigurationAndSetItUp(): void {
+    this.cols[this.cols.findIndex(c => c.field === "idArchivi")].header = "Fascicolazioni";
     this.mandatoryColumns = ["dataCreazione"];
     if (this.aziendeFiltrabili.length > 1) {
       this.mandatoryColumns.push("idAzienda");
@@ -303,10 +311,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       }
       return e;
     });
-
-  
     const impostazioni = this.utenteUtilitiesLogin.getImpostazioniApplicazione();
-
     if (impostazioni && impostazioni.impostazioniVisualizzazione && impostazioni.impostazioniVisualizzazione !== "") {
       const settings: Impostazioni = JSON.parse(impostazioni.impostazioniVisualizzazione) as Impostazioni;
       if (settings["scripta.docList"]) {
@@ -324,7 +329,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         });
       }
     }
-
     // Configurazione non presente o errata. Uso quella di default.
     if (!this._selectedColumns || this._selectedColumns.length === 0) {
       this._selectedColumns = this.cols.filter(c => c.default);
@@ -332,7 +336,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public setColumnsPerDetailArchivio(): void {
-    const colonneDaVisualizzare = ["registrazione", "dataRegistrazione", "oggetto", "tipologia","fascicolazioni"];
+    const colonneDaVisualizzare = ["registrazione", "dataRegistrazione", "oggetto", "tipologia", "idArchivi"];
+    this.cols[this.cols.findIndex(c => c.field === "idArchivi")].header = "Altre fascicolazioni"; // Modifica custom all'header delle fascicolazioni.
     // this._selectedColumns = this.cols.filter(c => colonneDaVisualizzare.includes(c.field));
     this._selectedColumns = [];
     colonneDaVisualizzare.forEach(c => {
@@ -611,7 +616,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRegistrazioni"));
         this.initialSortField = "dataRegistrazione";
         this.serviceForGetData = this.docDetailService;
-        this.projectionFotGetData = "CustomDocDetailForDocList";//"DocDetailWithIdApplicazioneAndIdAziendaAndIdPersonaRedattriceAndIdPersonaResponsabileProcedimentoAndIdStrutturaRegistrazione";
+        this.projectionFotGetData = "CustomDocDetailForDocList";
         break;
     }
 
@@ -698,7 +703,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       doc.statoUfficioAttiVisualizzazione = doc.statoUfficioAtti;
       doc.idPersonaResponsabileProcedimentoVisualizzazione = null;
       doc.idPersonaRedattriceVisualizzazione = null;
-      doc.fascicolazioniVisualizzazione = null;
+      doc.archiviDocListFiltered = doc.archiviDocList;
+      doc.fascicolazioniVisualizzazione = null; // vale per il campo archiviDocList
       doc.eliminabile = this.isEliminabile(doc);
       doc.destinatariVisualizzazione = null;
       doc.firmatariVisualizzazione = null;
@@ -733,6 +739,38 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           this.filteredPersone = res.results;
         } else {
           this.filteredPersone = [];
+        }
+      });
+  }
+
+
+  /**
+   * Funzione chiamata tipicamente dall'autocomplete per riempire la
+   * variabile di opzioni: filteredArchivi con gli archivi che
+   * corrispondono al filtro utente. L'utente deve avere un permesso minimo di 
+   * VISUALIZZA sull'archivio
+   * @param event
+   */
+   public filterArchivi(event: any) {
+    const filtersAndSorts = new FiltersAndSorts();
+    filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+    this.aziendeFiltrabili.forEach(a => {
+      if ((typeof a.value) === "number")
+        filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
+    });
+    filtersAndSorts.addFilter(new FilterDefinition("tscol", FILTER_TYPES.not_string.equals, event.query));
+    filtersAndSorts.addSort(new SortDefinition("ranking", SORT_MODES.desc));
+    filtersAndSorts.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "FilterBitPermessoMinimo"));
+    filtersAndSorts.addAdditionalData(new AdditionalDataDefinition("BitPermessoMinimo", DecimalePredicato.VISUALIZZA.toString()));
+    this.archivioDetailViewService.getData(null, filtersAndSorts, null)
+      .subscribe(res => {
+        if (res && res.results) {
+          res.results.forEach((archivio: any) => {
+            archivio["descrizioneVisualizzazione"] = "[" + archivio.numerazioneGerarchica + "] " + archivio.oggetto;
+          });
+          this.filteredArchivi = res.results;
+        } else {
+          this.filteredArchivi = [];
         }
       });
   }
@@ -797,6 +835,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     //this.inputGobalFilter.nativeElement.value = "";
     if (this.autocompleteIdPersonaRedattrice) this.autocompleteIdPersonaRedattrice.writeValue(null);
     if (this.autocompleteidPersonaResponsabileProcedimento) this.autocompleteidPersonaResponsabileProcedimento.writeValue(null);
+    if (this.autocompletearchiviDocList) this.autocompletearchiviDocList.writeValue(null);
     if (this.autocompleteIdStrutturaRegistrazione) this.autocompleteIdStrutturaRegistrazione.writeValue(null);
     if (this.autocompleteFirmatari) this.autocompleteFirmatari.writeValue(null);
     if (this.autocompleteSullaScrivaniaDi) this.autocompleteSullaScrivaniaDi.writeValue(null); 
@@ -1187,6 +1226,15 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         reject: () => { /* L'utente ha cambaito idea. Non faccio nulla */ }
       });
     }
+  }
+  
+  /**
+   * Apre il tab per l'archivio corrisondente alla fasciolazione
+   * @param f 
+   */
+  public openArchive(archivioDoc: ArchivioDoc, doc: ExtendedDocDetailView) {
+    this.navigationTabsService.addTabArchivio(archivioDoc.idArchivio);
+		this.appService.appNameSelection("Fascicolo "+ archivioDoc.idArchivio.numerazioneGerarchica + " [" + archivioDoc.idArchivio.idAzienda.aoo + "]");
   }
 
   /**

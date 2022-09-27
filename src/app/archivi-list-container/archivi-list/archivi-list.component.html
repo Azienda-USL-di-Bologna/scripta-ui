@@ -278,11 +278,20 @@
           </div>
         </div>
         <div *ngSwitchCase="'idVicari'" class="search-wrapper">
-          <p-columnFilter #colfiltervicari [field]="col.filterField" matchMode="" [showMenu]="false">
+          <p-columnFilter 
+            #colfiltervicari 
+            [field]="col.filterField" 
+            matchMode="" 
+            [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-autoComplete #autocompleteVicari [showEmptyMessage]="true" emptyMessage="Nessun utente trovato"
-                [suggestions]="filteredPersone" (completeMethod)="filterPersone($event)"
-                field="descrizioneVisualizzazione" (onSelect)="filter($event?.id)" (onClear)="filter(null)"
+              <p-autoComplete #autocompleteVicari 
+                [showEmptyMessage]="true" 
+                emptyMessage="Nessun utente trovato"
+                [suggestions]="filteredPersone" 
+                (completeMethod)="filterPersone($event)"
+                field="descrizioneVisualizzazione" 
+                (onSelect)="filter($event?.id)" 
+                (onClear)="filter(null)"
                 appendTo="body">
               </p-autoComplete>
             </ng-template>
