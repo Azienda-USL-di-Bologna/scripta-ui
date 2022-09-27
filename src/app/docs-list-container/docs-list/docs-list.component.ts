@@ -131,7 +131,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   ) { }
 
   ngOnInit(): void {
-    this.cols = cols;
+    this.cols = cols.map(a => {return {...a}})
     this.docsListMode = this.route.snapshot.queryParamMap.get('mode') as DocsListMode || DocsListMode.MIEI_DOCUMENTI;
     if (!Object.values(DocsListMode).includes(this.docsListMode)) {
       this.docsListMode = DocsListMode.MIEI_DOCUMENTI;
