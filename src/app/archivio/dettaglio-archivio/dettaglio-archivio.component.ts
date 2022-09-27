@@ -360,6 +360,13 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
           console.log("res", res);
           this.massimariPerTittolo = res.results;
           this.archivio.idMassimario = this.massimariPerTittolo?.filter((massimario: Massimario) => { massimario = this.archivio.idMassimario })[0];
+          const archivioToUpdate: Archivio = new Archivio();
+          archivioToUpdate.idMassimario = {
+            id: this.archivio.idMassimario.id
+            } as Massimario;
+          archivioToUpdate.anniTenuta = this.archivio.idMassimario.anniTenuta;
+          archivioToUpdate.version = this.archivio.version;
+          this.patchArchivio(archivioToUpdate);
         }
       ));
     }
