@@ -59,6 +59,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         this.loggedUserCanVisualizeArchive = this.canVisualizeArchive(res);
         this._archivio = res;
         console.log("Archivio nell'archivio component: ", this._archivio);
+        this.extendedArchivioService.aggiungiArchivioRecente(this._archivio.fk_idArchivioRadice.id);
         setTimeout(() => {
           if (this.utenteUtilitiesLogin) {
             this.inizializeAll();
