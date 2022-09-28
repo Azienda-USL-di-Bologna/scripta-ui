@@ -4,6 +4,7 @@ import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES , BatchOperation, NextSdrEntity, BatchOperationTypes} from '@bds/next-sdr';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TreeNode } from 'primeng/api/treenode';
+import { AutoComplete } from 'primeng/autocomplete';
 import { TreeSelect } from 'primeng/treeselect';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { AppService } from 'src/app/app.service';
@@ -43,6 +44,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public titoli: TreeNode[];
   public selectedTitolo: TreeNode;
   public filteredMassimari: Massimario[] = [];
+  private massimariPerTittolo: Massimario[] = [];
   public filteredTitoli: Titolo[] = [];
   public tipiArchivioObj: any[] = TipoArchivioTraduzioneVisualizzazione;
   private classificazioneAllaFoglia: boolean = false;
@@ -58,7 +60,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
   private attoreArchivioProjection = ENTITIES_STRUCTURE.scripta.attorearchivio.standardProjections.AttoreArchivioWithIdPersonaAndIdStruttura;
 
-
+  @ViewChild("autocompleteCategoria") public autocompleteCategoria: AutoComplete;
+  
   @ViewChild("noteArea") public noteArea: ElementRef;
   @ViewChild("titoliTreeSelect") public titoliTreeSelect: TreeSelect;
   @Output() public updateArchivio = new EventEmitter<Archivio>();
@@ -337,10 +340,11 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
           this.archivio.version = res.version;
           this.archivio.idTitolo = titolo;
           this.selectedTitolo = this.buildNodeTitolo(titolo);
+          this.archivio.idMassimario = res.idMassimario;
         }
       ))
   }
-
+  
   /**
    * Metodo che serve per filtrare le categorie.
    * Riempie la proprietà filteredMassimari
