@@ -337,7 +337,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				// icon: "pi pi-fw pi-list", 
 				routerLink: ["./" + ARCHIVI_LIST_ROUTE],
 				queryParams: { "mode": ArchiviListMode.RECENTI },
-				disabled: true
+				disabled: false
 			},
 			{
 				title: "I miei fascicoli preferiti",
@@ -345,7 +345,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				// icon: "pi pi-fw pi-list", 
 				routerLink: ["./" + ARCHIVI_LIST_ROUTE],
 				queryParams: { "mode": ArchiviListMode.PREFERITI },
-				disabled: true
+				disabled: false
 			},
 			// {
 			//   title: "I fascicoli frequenti",
