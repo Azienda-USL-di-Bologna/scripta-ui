@@ -17,7 +17,8 @@
         <label for="aziendaDescrizione">Azienda</label>
         <input id="aziendaDescrizione" 
           class="input-aziendaDescrizione" 
-          type="text" pInputText 
+          type="text" 
+          pInputText 
           [disabled]="true"
           [(ngModel)]="archivio.idAzienda.descrizione" />
       </div>
@@ -134,9 +135,10 @@
       </div>
     </div>
     
-    <div class="row">
+    <!-- <div class="row">
       <label for="tipo">Archivi collegati</label>
       <input pInputText id="linkArchivi" [disabled]="!loggedUserIsResponsbaileOrVicario"  />
+    </div> -->
       <!-- <p-autoComplete id="archiviCollegati" #autocompleteArchivio ariaLabel="archivi collegati"
             [(ngModel)]="selectedArchivioCollegato" (onSelect)="linkArchivio($event)" [suggestions]="filteredFascicoli"
             (completeMethod)="linkFascicolo($event)" field="nomeFascicolo" appendTo="body" class="p-col"
@@ -145,7 +147,7 @@
                 <div>[{{fascicolo.numerazioneGerarchica}}] {{fascicolo.nomeFascicolo}}</div>
             </ng-template>
       </p-autoComplete> -->
-    </div>
+    
   </div>
   <div class="right-side">
     <div class="numeraFasicolo">

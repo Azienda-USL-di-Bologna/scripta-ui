@@ -310,7 +310,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * @returns 
    */
    public canVisualizeArchive(archivio: Archivio): boolean {
-    return archivio.permessiEspliciti.find((p: PermessoArchivio) => 
+    return archivio.permessiEspliciti?.find((p: PermessoArchivio) => 
       p.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit > DecimalePredicato.PASSAGGIO;
   }
 
