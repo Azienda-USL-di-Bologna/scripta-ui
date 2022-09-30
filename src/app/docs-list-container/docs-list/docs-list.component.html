@@ -30,7 +30,8 @@
         [ngClass]="col.headerClass"
         [pSortableColumn]="col.sortField"
         [ngStyle]="{'cursor': col.sortField ? null  : 'move' }">
-        <span class="header-box" 
+        <span 
+          class="header-box" 
           [attr.aria-label]="col.label">
           {{col.header}}
           <p-sortIcon *ngIf="col.sortField" 
@@ -293,7 +294,7 @@
             </ng-template>
           </p-columnFilter>
         </div>
-        <div *ngSwitchCase="'fascicolazioni'" class="search-wrapper">
+        <!-- <div *ngSwitchCase="'fascicolazioni'" class="search-wrapper">
           <p-columnFilter #colfilterfascicolazioni 
             type="text" 
             [field]="col.filterField"
@@ -309,6 +310,33 @@
           </p-columnFilter>
           <button *ngIf="colfilterfascicolazioni.hasFilter()" class="material-icons close-icon" type="reset"
             (click)="colfilterfascicolazioni.clearFilter(); resetSort()">
+            close
+          </button>
+        </div> -->
+        <div *ngSwitchCase="'idArchivi'" class="search-wrapper">
+          <p-columnFilter #colfilterarchiviDocList
+            [field]="col.filterField" 
+            matchMode="equals"
+            [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-autoComplete
+                #autocompletearchiviDocList
+                [showEmptyMessage]="true"
+                emptyMessage="Nessun fascicolo trovato" 
+                [suggestions]="filteredArchivi"
+                (completeMethod)="filterArchivi($event)" 
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter($event?.id)" 
+                (onClear)="filter(null)"
+                type="search" 
+                appendTo="body">
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+          <button *ngIf="colfilterarchiviDocList.hasFilter()"
+            class="material-icons close-icon" 
+            type="reset"
+            (click)="colfilterarchiviDocList.clearFilter(); autocompletearchiviDocList.writeValue(null)">
             close
           </button>
         </div>
@@ -588,9 +616,16 @@
         <div *ngSwitchCase="'stato'">
           {{rowData.statoVisualizzazione}}
         </div>
-        <div *ngSwitchCase="'fascicolazioni'" [pTooltip]="rowData.fascicolazioniVisualizzazione" tooltipPosition="top">
+        <!-- <div *ngSwitchCase="'fascicolazioni'" [pTooltip]="rowData.fascicolazioniVisualizzazione" tooltipPosition="top">
           <span *ngFor="let f of rowData.fascicolazioni" class="fascicolazione-item">
             {{"[" + f.numerazione + "] " + f.nome}}
+          </span>
+        </div> -->
+        <div *ngSwitchCase="'idArchivi'" [pTooltip]="rowData.fascicolazioniVisualizzazione" tooltipPosition="top">
+          <span *ngFor="let f of rowData.archiviDocListFiltered" 
+            class="fascicolazione-item"
+            (click)="openArchive(f)">
+            {{"[" + f.idArchivio.numerazioneGerarchica + "] " + f.idArchivio.oggetto}}
           </span>
         </div>
         <div *ngSwitchCase="'statoUfficioAtti'">

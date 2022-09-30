@@ -54,28 +54,6 @@
         tooltipPosition="bottom">
       </i>
     </span>
-    <!-- BOTTONE UPLOAD DOCUMENT -->
-    <span *ngIf="configuration.uploadDocumentButton">
-      <!-- <button
-        type="button" 
-        pButton 
-        pRipple 
-        icon="pi pi-upload" 
-        (click)="functionalButtonsComponent.uploadDocument()" 
-        class="p-mr-2" 
-        pTooltip="Carica un documento nell'archivio"
-        aria-label="Carica un documento nell'archivio"
-        tooltipPosition="bottom">
-      </button> -->
-      <p-fileUpload 
-        multiple="multiple"
-        mode="basic" 
-        name="demo[]"
-        maxFileSize="50000000" 
-        [customUpload]="true"
-        (uploadHandler)="functionalButtonsComponent.uploadDocument($event)">
-      </p-fileUpload>
-    </span>
     <!-- BOTTONE NUOVO ARCHIVIO [disabled] = "archivio.canCreateSottoarchivio()"-->
     <span *ngIf="configuration.newArchivio && functionalButtonsComponent.newArchivoButton">
       <button
@@ -98,6 +76,23 @@
         [model]="functionalButtonsComponent.newArchivoButton.aziendeItems"
         [popup]="true">
       </p-menu>
+    </span>
+    <!-- BOTTONE UPLOAD DOCUMENT -->
+    <!--fileUploaderDocumentsAuto.clear() serve a svuotare il componente altrimenti si carica sempre lo stesso file--> 
+    <span  *ngIf="configuration.uploadDocumentButton" class="span-fileUpload-button">
+      <p-fileUpload #fileUploaderDocumentsAuto
+        chooseIcon="pi pi-upload"
+        pTooltip="Carica documenti nell'archivio"
+        class="upload-document-button"
+        multiple="true"
+        [disabled]="!functionalButtonsComponent.newArchivoButton?.hasPermessi"
+        mode="basic" 
+        name="document[]"
+        maxFileSize="5000000" 
+        [customUpload]="true"
+        [auto]="true"
+        (uploadHandler)="functionalButtonsComponent.uploadDocument($event);fileUploaderDocumentsAuto.clear()">
+      </p-fileUpload>
     </span>
     <!-- PROGRESS SPINNER -->
     <span *ngIf="configuration.exportButton">

@@ -59,6 +59,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         this.loggedUserCanVisualizeArchive = this.canVisualizeArchive(res);
         this._archivio = res;
         console.log("Archivio nell'archivio component: ", this._archivio);
+        this.extendedArchivioService.aggiungiArchivioRecente(this._archivio.fk_idArchivioRadice.id);
         setTimeout(() => {
           if (this.utenteUtilitiesLogin) {
             this.inizializeAll();
@@ -157,12 +158,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   private setForSottoarchivi(): void {
-    this.captionConfiguration = new CaptionConfiguration(true, true, true, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, true);
+    this.captionConfiguration = new CaptionConfiguration(true, true, true, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, false);
     this.referenceTableComponent = this.archivilist;
   }
 
   public setForContenuto(): void {
-    this.captionConfiguration = new CaptionConfiguration(true, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, true);
+    this.captionConfiguration = new CaptionConfiguration(true, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, false);
     this.referenceTableComponent = this;
   }
 
@@ -172,7 +173,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   private setForDettaglio(): void {
-    this.captionConfiguration = new CaptionConfiguration(false, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, true);
+    this.captionConfiguration = new CaptionConfiguration(false, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, false);
     this.referenceTableComponent = {} as CaptionReferenceTableComponent;
   }
 
@@ -309,7 +310,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * @returns 
    */
    public canVisualizeArchive(archivio: Archivio): boolean {
-    return archivio.permessiEspliciti.find((p: PermessoArchivio) => 
+    return archivio.permessiEspliciti?.find((p: PermessoArchivio) => 
       p.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit > DecimalePredicato.PASSAGGIO;
   }
 
@@ -331,19 +332,17 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * Funzione utile al caricamento di un document
    */
   public uploadDocument(event: any): void {
-    console.log("icuhsbicdusbicju", event);
     const formData: FormData = new FormData();
     formData.append("idArchivio", this.archivio.id.toString());
     event.files.forEach((file: File) => {
-      formData.append("files", file);
+      formData.append("documents", file);
     });
     this.extendedArchivioService.uploadDocument(formData).subscribe(
       res => {
-        console.log("fatto")
+        this.referenceTableComponent.resetPaginationAndLoadData();
+
       }
     );
-
-    
   }
 
   /**

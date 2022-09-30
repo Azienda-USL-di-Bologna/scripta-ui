@@ -49,4 +49,11 @@ export class ExtendedArchivioService extends ArchivioService {
     return this._http.post(apiUrl, formData/* , { reportProgress: true, observe: "events" } */)
         .pipe(catchError(ErrorManager.errorMgmt));
   }
+
+  public aggiungiArchivioRecente(idArchivioRadice: number) {
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "aggiungiArchivioRecente";
+    let formData: FormData = new FormData();
+    formData.append("idArchivioRadice", idArchivioRadice.toString());
+    this._http.post(apiUrl, formData).subscribe();
+  }
 }

@@ -105,7 +105,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
    * Serve per popolare la dropdown delle strutture
    * @param perm 
    */
-  private loadStruttureRigaSelezionata(perm: PermessoTabella, idSoggetto: number) {
+  private loadStruttureRigaSelezionata(perm: PermessoTabella, idSoggetto: number): void {
     this.subscriptions.push(this.permessiDettaglioArchivioService.loadStruttureOfPersona(idSoggetto, this._archivio.idAzienda.id)
       .subscribe(
         data => {
