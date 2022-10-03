@@ -40,17 +40,38 @@
     </p-splitter>
 
     <!-- Lista sottoarchivi -->
-    <archivi-list #archivilist *ngIf="contenutoDiviso" [archivioPadre]="archivio"
+    <archivi-list #archivilist *ngIf="contenutoDiviso" 
+      [archivioPadre]="archivio"
       [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'SOTTOARCHIVI'}">
     </archivi-list>
 
     <!-- Lista documenti contenuti -->
-    <docs-list #doclist *ngIf="contenutoDiviso && loggedUserCanVisualizeArchive" [archivio]="archivio"
+    <!-- <docs-list #doclist *ngIf="contenutoDiviso && loggedUserCanVisualizeArchive" 
+      [archivio]="archivio"
       [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'DOCUMENTI'}">
-    </docs-list>
+    </docs-list> -->
+    <p-splitter *ngIf="contenutoDiviso && loggedUserCanVisualizeArchive" 
+      styleClass="splitter-docs-list"
+      [panelSizes]="[60,40]"
+      [minSizes]="[50,30]"
+      [ngClass]="{ 'hiderightside': !showRightSide, 'hide': selectedButtonItem && selectedButtonItem.id !== 'DOCUMENTI' }">
+      <ng-template pTemplate>
+        <docs-list #doclist
+          [archivio]="archivio"
+          (showRightPanel)="manageRowSelected($event)" >
+        </docs-list>
+      </ng-template>
+      <ng-template pTemplate>
+        <doc-detail-and-preview *ngIf="showRightSide"
+          [doc]="docForDetailAndPreview" 
+          (closeRightPanel)="manageRowSelected({showPanel: false, rowSelected: null})" >
+        </doc-detail-and-preview>
+      </ng-template>
+    </p-splitter>
 
     <!-- Dati dell'archivio -->
-    <dettaglio-archivio #dettaglioarchivio [archivio]="archivio"
+    <dettaglio-archivio #dettaglioarchivio 
+      [archivio]="archivio"
       [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'DETTAGLIO'}"
       (updateArchivio)="onUpdateArchivio($event)">
     </dettaglio-archivio>

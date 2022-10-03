@@ -20,6 +20,7 @@ import { first } from 'rxjs/operators'
 import { DatePipe } from '@angular/common';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { UploadDocumentButton } from '../generic-caption-table/functional-buttons/upload-document-button';
+import { ExtendedDocDetailView } from '../docs-list-container/docs-list/extended-doc-detail-view';
 
 @Component({
   selector: 'app-archivio',
@@ -44,6 +45,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
   public loggedUserCanVisualizeArchive = false;
+  public showRightSide: boolean = false;
+  public docForDetailAndPreview: ExtendedDocDetailView;
 
   get archivio(): Archivio { return this._archivio; }
 
@@ -123,6 +126,15 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
 
   ngAfterViewInit(): void {
 
+  }
+
+  /**
+   * Metodo chiamato quando viene selezionato un documento nella docs-list
+   * @param event 
+   */
+  public manageRowSelected(event: {showPanel: boolean, rowSelected: ExtendedDocDetailView }) {
+    this.showRightSide = event.showPanel;
+    this.docForDetailAndPreview = event.rowSelected;
   }
 
   /**

@@ -11,6 +11,22 @@
   background-color: #AFC1DE !important;
   .left-content .tabs .p-selectbutton .p-button:hover{
     background-color: #7e7e7e !important;
-    
+  }
+}
+::ng-deep p-splitter {
+  height: 100%; 
+  flex: 1 1 0;
+  .p-splitter-gutter,
+  .p-splitter-gutter-handle {
+    background-color: #048d4f9c !important;
+  }
+  .splitter-docs-list {
+    height: 100%;
+  }
+  &.hiderightside .p-splitter .p-splitter-gutter {
+    display: none;
+  }
+  &.hiderightside .p-splitter .p-splitter-panel:nth-of-type(3) {
+    display: none !important;
   }
 }
