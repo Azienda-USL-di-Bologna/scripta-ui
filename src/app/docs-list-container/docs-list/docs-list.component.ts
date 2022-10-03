@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail } from "@bds/internauta-model";
+import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc } from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { buildLazyEventFiltersAndSorts } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from "@bds/next-sdr";
@@ -160,8 +160,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           }
         }
       )
+      
     );
-
+    if(this.utenteUtilitiesLogin.isCA() === false && this.utenteUtilitiesLogin.isCI() === false) {
+      this.tipologiaVisualizzazioneObj = this.tipologiaVisualizzazioneObj.filter(item => item.nome != "Registro giornaliero");
+    }
+   
+   
     /* this.subscriptions.push(
       this.confirmatationService.requireConfirmation$.subscribe((confirmation: Confirmation) => {
         if (confirmation === null) {
@@ -188,18 +193,18 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.selectButtonItems = [];
     this.selectButtonItems.push(
       {
-        title: "Tutti i documenti che posso vedere",
-        label: "Visibili", 
-        // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + DOCS_LIST_ROUTE], 
-        queryParams: {"mode": DocsListMode.DOCUMENTI_VISIBILI}
-      },
-      {
         title: "",
         label: "Miei  documenti", 
         // icon: "pi pi-fw pi-list", 
         routerLink: ["./" + DOCS_LIST_ROUTE], 
         queryParams: {"mode": DocsListMode.MIEI_DOCUMENTI}
+      },
+      {
+        title: "Tutti i documenti che posso vedere",
+        label: "Visibili", 
+        // icon: "pi pi-fw pi-list", 
+        routerLink: ["./" + DOCS_LIST_ROUTE], 
+        queryParams: {"mode": DocsListMode.DOCUMENTI_VISIBILI}
       },
     )
     
@@ -807,6 +812,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       if ((typeof a.value) === "number")
         filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
     });
+    filtersAndSorts.addFilter(new FilterDefinition("ufficio", FILTER_TYPES.not_string.equals, false));
     this.strutturaService.getData("StrutturaWithIdAzienda", filtersAndSorts, null)
       .subscribe(res => {
         if (res && res.results) {
