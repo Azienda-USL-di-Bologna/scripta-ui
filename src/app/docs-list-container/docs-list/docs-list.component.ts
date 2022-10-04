@@ -1,5 +1,5 @@
 import { DatePipe } from "@angular/common";
-import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail } from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
@@ -34,6 +34,7 @@ import { AppService } from "src/app/app.service";
   styleUrls: ["./docs-list.component.scss"]
 })
 export class DocsListComponent implements OnInit, OnDestroy, TabComponent, CaptionReferenceTableComponent, CaptionSelectButtonsComponent {
+  @Output() showRightPanel = new EventEmitter<{showPanel: boolean, rowSelected: ExtendedDocDetailView }>();
   @Input() data: any;
   private subscriptions: Subscription[] = [];
   private loadDocsListSubscription: Subscription;
@@ -103,6 +104,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public aziendeFiltrabiliFiltered: any[];
   public loggedUserCanRestoreArchiviation: boolean = false;
   public loggedUserCanDeleteArchiviation: boolean = false;
+  public docSelected: ExtendedDocDetailView;
 
   private _archivio: Archivio;
   get archivio(): Archivio { return this._archivio; }
@@ -1232,9 +1234,31 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Apre il tab per l'archivio corrisondente alla fasciolazione
    * @param f 
    */
-  public openArchive(archivioDoc: ArchivioDoc, doc: ExtendedDocDetailView) {
+  public openArchive(archivioDoc: ArchivioDoc, doc: ExtendedDocDetailView): void {
     this.navigationTabsService.addTabArchivio(archivioDoc.idArchivio);
 		this.appService.appNameSelection("Fascicolo "+ archivioDoc.idArchivio.numerazioneGerarchica + " [" + archivioDoc.idArchivio.idAzienda.aoo + "]");
+  }
+
+  public openDetailAndPreview(doc: ExtendedDocDetailView): void {
+    this.showRightPanel.emit({
+      showPanel: true,
+      rowSelected: doc
+    });
+  }
+
+  public onRowSelect(event: any): void {
+    if (this.archivio) {
+      this.openDetailAndPreview(event.data);
+    }
+  }
+
+  public onRowUnselect(event: any): void {
+    if (this.archivio) {
+      this.showRightPanel.emit({
+        showPanel: false,
+        rowSelected: null
+      });
+    }
   }
 
   /**

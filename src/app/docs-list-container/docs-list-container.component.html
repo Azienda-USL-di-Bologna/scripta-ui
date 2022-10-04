@@ -1,6 +1,22 @@
-<generic-caption-table 
+<generic-caption-table *ngIf="doclistComponent"
   [configuration]="captionConfiguration"
-  [referenceTableComponent]="doclist"
-  [selectButtonsComponent]="doclist">
+  [referenceTableComponent]="doclistComponent"
+  [selectButtonsComponent]="doclistComponent">
 </generic-caption-table>
-<docs-list #doclist></docs-list>
+<p-splitter 
+  styleClass="splitter-docs-list"
+  [panelSizes]="[60,40]"
+  [minSizes]="[50,30]"
+  [ngClass]="{ hiderightside: !showRightSide }">
+  <ng-template pTemplate>
+    <docs-list #doclist
+      (showRightPanel)="manageRowSelected($event)" >
+    </docs-list>
+  </ng-template>
+  <ng-template pTemplate>
+    <doc-detail-and-preview *ngIf="showRightSide"
+      [doc]="docForDetailAndPreview" 
+      (closeRightPanel)="manageRowSelected({showPanel: false, rowSelected: null})" >
+    </doc-detail-and-preview>
+  </ng-template>
+</p-splitter>

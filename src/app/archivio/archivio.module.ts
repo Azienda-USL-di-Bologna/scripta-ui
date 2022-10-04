@@ -11,6 +11,7 @@ import { DocsListModule } from "../docs-list-container/docs-list/docs-list.modul
 import { RichiestaAccessoArchiviComponent } from "./richiesta-accesso-archivi/richiesta-accesso-archivi.component"
 import { DettaglioArchivioModule } from "./dettaglio-archivio/dettaglio-archivio.module";
 import { BlackboxPermessiService } from "@bds/internauta-model";
+import { DocDetailAndPreviewModule } from "../docs-list-container/doc-detail-and-preview/doc-detail-and-preview.module";
 
 @NgModule({
   imports: [
@@ -20,6 +21,7 @@ import { BlackboxPermessiService } from "@bds/internauta-model";
     ScriptaCommonModule,
     GenericCaptionTableModule,
     DocsListModule,
+    DocDetailAndPreviewModule,
     ArchiviListModule,
     DettaglioArchivioModule
   ],

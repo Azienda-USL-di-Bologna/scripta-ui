@@ -19,6 +19,10 @@
   [totalRecords]="totalRecords"
   (onLazyLoad)="onLazyLoad($event)" 
   [loading]="loading" 
+  selectionMode="single" 
+  [(selection)]="docSelected"
+  (onRowSelect)="onRowSelect($event)" 
+  (onRowUnselect)="onRowUnselect($event)"
   styleClass="p-table-scripta-docs-list"
   [ngClass]="{'table-zero-rows': totalRecords === 0}"
   tableStyleClass="docslist-table-body">
@@ -38,6 +42,13 @@
             [field]="col.sortField" >
           </p-sortIcon>
         </span>
+      </th>
+      <th *ngIf="!archivio"
+        class="open-detail-and-preview-column"
+        alignFrozen="right" 
+        pFrozenColumn 
+        [frozen]="true">
+        
       </th>
       <th *ngIf="archivio"
         class="edit-archiviation-column"
@@ -560,6 +571,13 @@
           </p-columnFilter>
         </div> -->
       </th>
+      <th  *ngIf="!archivio"
+        class="open-detail-and-preview-column"
+        alignFrozen="right" 
+        pFrozenColumn 
+        [frozen]="true">
+        
+      </th>
       <th  *ngIf="archivio"
         class="edit-archiviation-column"
         alignFrozen="right" 
@@ -571,7 +589,9 @@
   </ng-template>
   <!-- BODY -->
   <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex">
-    <tr class="row-height">
+    <tr 
+      class="row-height" 
+      [pSelectableRow]="rowData">
       <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
         <div *ngSwitchCase="'idAzienda'">
           {{rowData.idAzienda.nome}}
@@ -606,7 +626,7 @@
         <div *ngSwitchCase="'dataPubblicazione'">
           {{rowData.dataPubblicazione | date:'dd/MM/yyyy'}}
         </div>
-        <div *ngSwitchCase="'oggetto'" (click)="openDoc(rowData)" class="oggetto-content"
+        <div *ngSwitchCase="'oggetto'" (click)="!archivio && openDoc(rowData)" class="oggetto-content"
           [ngStyle]="{'text-decoration': rowData.archiviation?.dataEliminazione ? 'line-through' : 'initial' }"
           [pTooltip]="rowData.oggettoVisualizzazione" tooltipPosition="top">
           <i *ngIf="rowData.visibilitaLimitata && !rowData.riservato" class="pi pi-eye"></i>
@@ -669,6 +689,17 @@
         </div>
       </td>
       <!-- <td class="scrollbar-overlay-placeholder-column"></td> -->
+      <td *ngIf="!archivio"
+        class="open-detail-and-preview-column"
+        alignFrozen="right"  
+        pFrozenColumn 
+        [frozen]="true">
+        <i class="pi pi-arrow-up-right" 
+          pTooltip="Vedi dettagli e anteprime"
+          (click)="openDetailAndPreview(rowData)"
+        >
+        </i>
+      </td>
       <td *ngIf="archivio"
         class="edit-archiviation-column"
         alignFrozen="right"  
