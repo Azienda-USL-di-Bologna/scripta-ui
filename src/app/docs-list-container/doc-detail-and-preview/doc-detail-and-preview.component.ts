@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ExtendedDocDetailView } from '../docs-list/extended-doc-detail-view';
 
 @Component({
@@ -7,6 +7,7 @@ import { ExtendedDocDetailView } from '../docs-list/extended-doc-detail-view';
   styleUrls: ['./doc-detail-and-preview.component.scss']
 })
 export class DocDetailAndPreviewComponent implements OnInit {
+  @Output('closeRightPanel') closeRightPanel = new EventEmitter();
   _doc: ExtendedDocDetailView;
   get doc(): ExtendedDocDetailView {
     return this._doc;

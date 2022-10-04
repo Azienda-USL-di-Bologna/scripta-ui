@@ -1,1 +1,5 @@
-prova
+<span class="title-box">
+  <h4>{{doc.oggetto}}</h4>
+  <p-button icon="pi pi-times" (onClick)="closeRightPanel.emit()"></p-button>
+</span>
+<attachments-box [idDoc]="doc.id"></attachments-box>
