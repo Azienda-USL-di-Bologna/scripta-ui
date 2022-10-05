@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { CaptionConfiguration } from '../generic-caption-table/caption-configuration';
+import { CaptionComponent, CaptionConfiguration } from '../generic-caption-table/caption-configuration';
 import { DocsListComponent } from './docs-list/docs-list.component';
 import { ExtendedDocDetailView } from './docs-list/extended-doc-detail-view';
 
@@ -16,7 +16,7 @@ export class DocsListContainerComponent implements OnInit {
   @ViewChild('doclist') doclistComponent: DocsListComponent;
 
   constructor() {
-    this.captionConfiguration = new CaptionConfiguration(true, true, true, true, false, false, false);
+    this.captionConfiguration = new CaptionConfiguration(CaptionComponent.DOCS_LIST, true, true, true, true, false, false, false, true);
   }
 
   ngOnInit(): void {}

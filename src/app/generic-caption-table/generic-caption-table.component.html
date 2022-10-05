@@ -40,6 +40,21 @@
         optionLabel="label"
         (onOptionClick)="inputGobalFilter.value = ''; selectButtonsComponent.onSelectButtonItemSelection($event)">
       </p-selectButton>
+      <!-- Conteggio elementi trovati -->
+      <span *ngIf="configuration.rowCount"
+        class="row-count">
+        <span *ngIf="!referenceTableComponent.rowCountInProgress && referenceTableComponent.rowCount >= 0">
+          Trovati {{referenceTableComponent.rowCount}} {{configuration.component === "DOCS_LIST" ? 'documenti' : 'fascicoli'}}
+        </span>
+        <span *ngIf="referenceTableComponent.rowCountInProgress">
+          <p-progressSpinner 
+            [style]="{width: '2em', height: '2em', marginRight: '7px'}"
+            strokeWidth="8" 
+            fill="#FFFFFF" 
+            animationDuration=".5s">
+          </p-progressSpinner>
+        </span>
+      </span>
     </div>
   </div>
   <div class="right-content">
