@@ -146,6 +146,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.subscriptions.push(
       this.loginService.loggedUser$.pipe(first()).subscribe(
         (utenteUtilities: UtenteUtilities) => {
+          console.log(utenteUtilities);
           this.utenteUtilitiesLogin = utenteUtilities;
           this.isSegretario = this.utenteUtilitiesLogin.getUtente().struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
           this.calcDocListModeItem();
