@@ -2,14 +2,15 @@ import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren
 import { Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio } from '@bds/internauta-model';
 import { AppService } from '../../app.service';
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
-import { Subscription, combineLatest } from 'rxjs';
+import { Subscription, combineLatestWith } from 'rxjs';
+import { first } from 'rxjs/operators'
 import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
 import { ArchiviListMode, cols, colsCSV, TipoArchivioTraduzioneVisualizzazione, StatoArchivioTraduzioneVisualizzazione } from './archivi-list-constants';
 import { ActivatedRoute } from '@angular/router';
 import { ValueAndLabelObj } from '../../docs-list-container/docs-list/docs-list.component';
 import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from '@bds/next-sdr';
 import { ColumnFilter, Table } from 'primeng/table';
-import { Impostazioni } from '../../utilities/utils';
+import { Impostazioni, ImpostazioniArchiviList } from '../../utilities/utils';
 import { ConfirmationService, FilterOperator, LazyLoadEvent, MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListService } from './archivi-list.service';
 import { Calendar } from 'primeng/calendar';
@@ -146,13 +147,19 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.archiviListMode = ArchiviListMode.VISIBILI;
 		}
 		//this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } });
-
+		const loggeduser$ = this.loginService.loggedUser$.pipe(first());
+		const parametroFascicoliParlanti$ = this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null).pipe(first());
 		this.subscriptions.push(
-			combineLatest(
-				this.loginService.loggedUser$,
-				this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null)
-			).subscribe(
-				([utenteUtilities, parametriAziende]: [UtenteUtilities, ParametroAziende[]]) => {
+			loggeduser$.pipe(combineLatestWith(parametroFascicoliParlanti$))
+			.subscribe(
+				/* [
+					this.loginService.loggedUser$,
+					this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null)
+				], */
+				([
+					utenteUtilities/* : UtenteUtilities */, 
+					parametriAziende/* : ParametroAziende[] */
+				]) => {
 					// Parte relativa al parametro aziendale
 					if (parametriAziende && parametriAziende[0]) {
 						this.fascicoliParlanti = JSON.parse(parametriAziende[0].valore || false);
@@ -227,7 +234,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.mandatoryColumns.push("idAzienda");
 		}
 		
-
 		this.selectableColumns = cols.map(e => {
 			if (this.mandatoryColumns.includes(e.field)) {
 				e.selectionDisabled = true;
@@ -250,7 +256,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				});
 			}
 		}
-
 		// Configurazione non presente o errata. Uso quella di default.
 		if (!this._selectedColumns || this._selectedColumns.length === 0) {
 			this._selectedColumns = this.cols.filter(c => c.default);
@@ -407,6 +412,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		let impostazioniVisualizzazioneObj: Impostazioni;
 		if (impostazioniVisualizzazione && impostazioniVisualizzazione !== "") {
 			impostazioniVisualizzazioneObj = JSON.parse(impostazioniVisualizzazione) as Impostazioni;
+			if (!impostazioniVisualizzazioneObj["scripta.archiviList"]) {
+				impostazioniVisualizzazioneObj["scripta.archiviList"] = {} as ImpostazioniArchiviList;
+			}
 		} else {
 			impostazioniVisualizzazioneObj = {
 				"scripta.archiviList": {}

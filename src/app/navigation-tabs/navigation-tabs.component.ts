@@ -32,15 +32,15 @@ export class NavigationTabsComponent implements OnInit {
   ) {
     console.log(this.router)
     if (this.router.routerState.snapshot.url.includes("archivilist")) {
-      this.navigationTabsService.activeTabByIndex(0);
+      //this.navigationTabsService.activeTabByIndex(0);
       this.tabIndexToActiveAtTheBeginning = 0;
       this.appService.appNameSelection("Elenco Fascicoli")
     } else if (this.router.routerState.snapshot.url.includes("apridascrivania")) {
-      this.navigationTabsService.activeTabByIndex(0);
+      //this.navigationTabsService.activeTabByIndex(0);
       this.tabIndexToActiveAtTheBeginning = 0;
       this.idArchivioAperturaDaScrivania = this.router.parseUrl(this.router.url).queryParams["id"];
     } else {
-      this.navigationTabsService.activeTabByIndex(1);  
+      //this.navigationTabsService.activeTabByIndex(1);  
       this.tabIndexToActiveAtTheBeginning = 1;
       this.appService.appNameSelection("Elenco Documenti")
     }
@@ -115,6 +115,7 @@ export class NavigationTabsComponent implements OnInit {
     // this.tabItems.unshift(...allTabs)
     setTimeout(() => {
       this.tabItems = allTabs;
+      this.navigationTabsService.activeTabByIndex(this.tabIndexToActiveAtTheBeginning);
       if (this.idArchivioAperturaDaScrivania) {
         this.archivioService.getByIdHttpCall(this.idArchivioAperturaDaScrivania, 'ArchivioWithIdAziendaAndIdMassimarioAndIdTitolo').subscribe( res => {
           this.navigationTabsService.addTabArchivio(res, true, false);
@@ -136,6 +137,7 @@ export class NavigationTabsComponent implements OnInit {
     } else {
       this.appService.appNameSelection("Fascicolo "+ this.navigationTabsService.getTabs()[tabIndex].label);
     } */
+    console.log("ma scatta subito?")
     this.navigationTabsService.addTabToHistory(tabIndex);
     this.appService.appNameSelection(this.navigationTabsService.getTabs()[tabIndex].labelForAppName);
   }

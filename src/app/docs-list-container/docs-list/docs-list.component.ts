@@ -13,7 +13,7 @@ import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
 import { first } from 'rxjs/operators'
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
-import { Impostazioni } from "../../utilities/utils";
+import { Impostazioni, ImpostazioniDocList } from "../../utilities/utils";
 import { cols, colsCSV, DocsListMode, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
@@ -371,6 +371,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     let impostazioniVisualizzazioneObj: Impostazioni;
     if (impostazioniVisualizzazione && impostazioniVisualizzazione !== "") {
       impostazioniVisualizzazioneObj = JSON.parse(impostazioniVisualizzazione) as Impostazioni;
+      if (!impostazioniVisualizzazioneObj["scripta.docList"]) {
+				impostazioniVisualizzazioneObj["scripta.docList"] = {} as ImpostazioniDocList;
+			}
     } else {
       impostazioniVisualizzazioneObj = {
         "scripta.docList": {}
