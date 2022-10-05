@@ -145,3 +145,28 @@ prova-p-accordiontab {
 ::-webkit-search-cancel-button {
   cursor: pointer;
 }
+
+p-splitter {
+  height: 100%; 
+  flex: 1 1 0;
+  .p-splitter-gutter,
+  .p-splitter-gutter-handle {
+    //background-color: #939 !important;
+  }
+  .splitter-docs-list {
+    height: 100%;
+  }
+  &.hiderightside .p-splitter .p-splitter-gutter {
+    display: none;
+  }
+  &.hiderightside .p-splitter .p-splitter-panel:nth-of-type(3) {
+    display: none !important;
+  }
+}
+
+.p-treetable .p-treetable-tbody > tr:focus {
+  outline: none !important;
+}
+body p-table .p-datatable .p-datatable-wrapper table .p-datatable-tbody .p-highlight {
+  background-color: #ffc4e1;
+}

@@ -107,6 +107,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public aziendeFiltrabiliFiltered: any[];
   public loggedUserCanRestoreArchiviation: boolean = false;
   public loggedUserCanDeleteArchiviation: boolean = false;
+  public docSelected: ExtendedDocDetailView;
 
   private _archivio: Archivio;
   get archivio(): Archivio { return this._archivio; }
@@ -1295,7 +1296,22 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.showRightPanel.emit({
       showPanel: true,
       rowSelected: doc
-    })
+    });
+  }
+
+  public onRowSelect(event: any): void {
+    if (this.archivio) {
+      this.openDetailAndPreview(event.data);
+    }
+  }
+
+  public onRowUnselect(event: any): void {
+    if (this.archivio) {
+      this.showRightPanel.emit({
+        showPanel: false,
+        rowSelected: null
+      });
+    }
   }
 
   /**

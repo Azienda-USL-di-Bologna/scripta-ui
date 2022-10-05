@@ -19,6 +19,10 @@
   [totalRecords]="totalRecords"
   (onLazyLoad)="onLazyLoad($event)" 
   [loading]="loading" 
+  selectionMode="single" 
+  [(selection)]="docSelected"
+  (onRowSelect)="onRowSelect($event)" 
+  (onRowUnselect)="onRowUnselect($event)"
   styleClass="p-table-scripta-docs-list"
   [ngClass]="{'table-zero-rows': totalRecords === 0}"
   tableStyleClass="docslist-table-body">
@@ -585,7 +589,9 @@
   </ng-template>
   <!-- BODY -->
   <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex">
-    <tr class="row-height" (click)="archivio && openDetailAndPreview(rowData)">
+    <tr 
+      class="row-height" 
+      [pSelectableRow]="rowData">
       <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
         <div *ngSwitchCase="'idAzienda'">
           {{rowData.idAzienda.nome}}

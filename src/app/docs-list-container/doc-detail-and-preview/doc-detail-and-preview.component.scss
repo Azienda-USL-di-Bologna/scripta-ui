@@ -1,0 +1,17 @@
+:host {
+  height: 100%;
+  width: 100%;
+  padding: 7px;
+  .title-box {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    width: 100%;
+    h4 {
+      margin: 0;
+      padding: 0;
+      align-self: center;
+    }
+  }
+}
