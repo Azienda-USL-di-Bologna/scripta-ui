@@ -16,9 +16,9 @@
   [virtualRowHeight]="54" 
   [lazy]="true" 
   [lazyLoadOnInit]="true" 
-  [totalRecords]="totalRecords"
   (onLazyLoad)="onLazyLoad($event)" 
   [loading]="loading" 
+  [totalRecords]="totalRecords"
   selectionMode="single" 
   [(selection)]="docSelected"
   (onRowSelect)="onRowSelect($event)" 
@@ -664,17 +664,17 @@
         <div *ngSwitchCase="'mittente'" [pTooltip]="rowData.mittente" tooltipPosition="top">
           {{rowData.mittente}}
         </div>
-        <div *ngSwitchCase="'destinatari'" [pTooltip]="rowData.destinatariVisualizzazione" tooltipPosition="top">
+        <div *ngSwitchCase="'destinatari'" [pTooltip]="tooltipsUtenti(rowData.destinatariVisualizzazione)" [escape]="false" tooltipPosition="top">
           <span *ngFor="let d of rowData.destinatari" class="destinatari-item">
             {{d.nome}}
           </span>
         </div>
-        <div *ngSwitchCase="'firmatari'" [pTooltip]="rowData.firmatariVisualizzazione" tooltipPosition="top">
+        <div *ngSwitchCase="'firmatari'" [pTooltip]="tooltipsUtenti(rowData.firmatariVisualizzazione)"  [escape]="false" tooltipPosition="top">
           <span *ngFor="let d of rowData.firmatari" class="firmatari-item">
             {{d.descrizione}}
           </span>
         </div>
-        <div *ngSwitchCase="'sullaScrivaniaDi'" [pTooltip]="rowData.sullaScrivaniaDiVisualizzazione"
+        <div *ngSwitchCase="'sullaScrivaniaDi'" [pTooltip]="tooltipsUtenti(rowData.sullaScrivaniaDiVisualizzazione)" [escape]="false"
           tooltipPosition="top">
           <span *ngFor="let d of rowData.sullaScrivaniaDi" class="sulla-scrivania-di-item">
             {{d.descrizione}}
@@ -708,14 +708,14 @@
         <i *ngIf="loggedUserCanRestoreArchiviation && rowData.archiviation.dataEliminazione"
           class="pi pi-undo" 
           pTooltip="Ripristina fascicolazione"
-          (click)="restoreArchiviation(rowData)"
+          (click)="$event.stopPropagation(); restoreArchiviation(rowData)"
         >
         </i>
         <i *ngIf="loggedUserCanDeleteArchiviation && !!!rowData.archiviation.dataEliminazione"
           #iconaEliminazioneArchiviazione
           class="pi pi-times" 
           pTooltip="Elimina fascicolazione"
-          (click)="deleteArchiviation(rowData, index, iconaEliminazioneArchiviazione)"
+          (click)="$event.stopPropagation(); deleteArchiviation(rowData, index, iconaEliminazioneArchiviazione)"
         >
         </i>
       </td>

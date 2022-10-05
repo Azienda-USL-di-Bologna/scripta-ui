@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CaptionConfiguration } from '../generic-caption-table/caption-configuration';
+import { CaptionComponent, CaptionConfiguration } from '../generic-caption-table/caption-configuration';
 
 @Component({
   selector: 'app-archivi-list-container',
@@ -11,7 +11,7 @@ export class ArchiviListContainerComponent implements OnInit {
   public captionConfiguration: CaptionConfiguration;
 
   constructor() {
-    this.captionConfiguration = new CaptionConfiguration(true, true, true, true, true, false, false);
+    this.captionConfiguration = new CaptionConfiguration(CaptionComponent.ARCHIVI_LIST, true, true, true, true, true, false, false, true);
   }
 
   ngOnInit(): void {

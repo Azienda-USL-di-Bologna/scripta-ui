@@ -3,7 +3,7 @@ import { Archivio, ArchivioDetail, ArchivioDiInteresse, ArchivioDiInteresseServi
 import { MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListComponent } from '../archivi-list-container/archivi-list/archivi-list.component';
 import { DocsListComponent } from '../docs-list-container/docs-list/docs-list.component';
-import { CaptionConfiguration } from '../generic-caption-table/caption-configuration';
+import { CaptionComponent, CaptionConfiguration } from '../generic-caption-table/caption-configuration';
 import { CaptionReferenceTableComponent } from '../generic-caption-table/caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from '../generic-caption-table/caption-select-buttons.component';
 import { NewArchivoButton } from '../generic-caption-table/functional-buttons/new-archivo-button';
@@ -47,6 +47,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public loggedUserCanVisualizeArchive = false;
   public showRightSide: boolean = false;
   public docForDetailAndPreview: ExtendedDocDetailView;
+  public exportCsvInProgress: boolean = false;
+  public rowCountInProgress: boolean = false;
+  public rowCount: number;
 
   get archivio(): Archivio { return this._archivio; }
 
@@ -170,22 +173,22 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   private setForSottoarchivi(): void {
-    this.captionConfiguration = new CaptionConfiguration(true, true, true, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, false);
+    this.captionConfiguration = new CaptionConfiguration(CaptionComponent.ARCHIVI_LIST, true, true, true, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, false, true);
     this.referenceTableComponent = this.archivilist;
   }
 
   public setForContenuto(): void {
-    this.captionConfiguration = new CaptionConfiguration(true, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, false);
+    this.captionConfiguration = new CaptionConfiguration(CaptionComponent.ARCHIVIO, true, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, false, false);
     this.referenceTableComponent = this;
   }
 
   private setForDocumenti(): void {
-    this.captionConfiguration = new CaptionConfiguration(true, true, true, true, false, true, true);
+    this.captionConfiguration = new CaptionConfiguration(CaptionComponent.DOCS_LIST, true, true, true, true, false, true, true, true);
     this.referenceTableComponent = this.doclist;
   }
 
   private setForDettaglio(): void {
-    this.captionConfiguration = new CaptionConfiguration(false, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, false);
+    this.captionConfiguration = new CaptionConfiguration(CaptionComponent.ARCHIVIO, false, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, false, false);
     this.referenceTableComponent = {} as CaptionReferenceTableComponent;
   }
 
@@ -351,8 +354,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     });
     this.extendedArchivioService.uploadDocument(formData).subscribe(
       res => {
-        this.referenceTableComponent.resetPaginationAndLoadData();
-
+        console.log("res", res)
+        this.referenceTableComponent.resetPaginationAndLoadData(res as number[]);
       }
     );
   }
@@ -378,7 +381,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.archivilist.clear();
     this.doclist.clear();
   }
-  public exportCsvInProgress = false;
   public exportCSV(dataTable: Table) {
     this.exportCsvInProgress = this.doclist.exportCsvInProgress;
     this.doclist.exportCSV(this.doclist.dataTable);

@@ -2,14 +2,15 @@ import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren
 import { Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio } from '@bds/internauta-model';
 import { AppService } from '../../app.service';
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
-import { Subscription, combineLatest } from 'rxjs';
+import { Subscription, combineLatestWith } from 'rxjs';
+import { first } from 'rxjs/operators'
 import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
 import { ArchiviListMode, cols, colsCSV, TipoArchivioTraduzioneVisualizzazione, StatoArchivioTraduzioneVisualizzazione } from './archivi-list-constants';
 import { ActivatedRoute } from '@angular/router';
 import { ValueAndLabelObj } from '../../docs-list-container/docs-list/docs-list.component';
-import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from '@bds/next-sdr';
+import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from '@bds/next-sdr';
 import { ColumnFilter, Table } from 'primeng/table';
-import { Impostazioni } from '../../utilities/utils';
+import { Impostazioni, ImpostazioniArchiviList } from '../../utilities/utils';
 import { ConfirmationService, FilterOperator, LazyLoadEvent, MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListService } from './archivi-list.service';
 import { Calendar } from 'primeng/calendar';
@@ -68,9 +69,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		{ value: [1], label: "Fascicoli" },
 		{ value: [2], label: "Sottofascicoli" },
 		{ value: [3], label: "Inserti" },
-		{ value: [1,2,3], label: "Tutti" }
+		{ value: [1], label: "Tutti" }
 	];
 	public exportCsvInProgress: boolean = false;
+	public rowCountInProgress: boolean = false;
+  public rowCount: number;
 	public selectableColumns: ColonnaBds[] = [];
 	private mandatoryColumns: string[] = [];
 	public rowsNumber: number = 20;
@@ -80,6 +83,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public filtriPuliti: boolean = true;
 	private storedLazyLoadEvent: LazyLoadEvent;
 	private loadArchiviListSubscription: Subscription;
+	private loadArchiviListCountSubscription: Subscription;
 	private serviceToGetData: NextSDREntityProvider = null;
 	private projectionToGetData: string = null;
 	private lastDataCreazioneFilterValue: Date[];
@@ -143,13 +147,19 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.archiviListMode = ArchiviListMode.VISIBILI;
 		}
 		//this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } });
-
+		const loggeduser$ = this.loginService.loggedUser$.pipe(first());
+		const parametroFascicoliParlanti$ = this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null).pipe(first());
 		this.subscriptions.push(
-			combineLatest(
-				this.loginService.loggedUser$,
-				this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null)
-			).subscribe(
-				([utenteUtilities, parametriAziende]: [UtenteUtilities, ParametroAziende[]]) => {
+			loggeduser$.pipe(combineLatestWith(parametroFascicoliParlanti$))
+			.subscribe(
+				/* [
+					this.loginService.loggedUser$,
+					this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null)
+				], */
+				([
+					utenteUtilities/* : UtenteUtilities */, 
+					parametriAziende/* : ParametroAziende[] */
+				]) => {
 					// Parte relativa al parametro aziendale
 					if (parametriAziende && parametriAziende[0]) {
 						this.fascicoliParlanti = JSON.parse(parametriAziende[0].valore || false);
@@ -224,7 +234,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.mandatoryColumns.push("idAzienda");
 		}
 		
-
 		this.selectableColumns = cols.map(e => {
 			if (this.mandatoryColumns.includes(e.field)) {
 				e.selectionDisabled = true;
@@ -247,7 +256,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				});
 			}
 		}
-
 		// Configurazione non presente o errata. Uso quella di default.
 		if (!this._selectedColumns || this._selectedColumns.length === 0) {
 			this._selectedColumns = this.cols.filter(c => c.default);
@@ -404,6 +412,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		let impostazioniVisualizzazioneObj: Impostazioni;
 		if (impostazioniVisualizzazione && impostazioniVisualizzazione !== "") {
 			impostazioniVisualizzazioneObj = JSON.parse(impostazioniVisualizzazione) as Impostazioni;
+			if (!impostazioniVisualizzazioneObj["scripta.archiviList"]) {
+				impostazioniVisualizzazioneObj["scripta.archiviList"] = {} as ImpostazioniArchiviList;
+			}
 		} else {
 			impostazioniVisualizzazioneObj = {
 				"scripta.archiviList": {}
@@ -550,6 +561,29 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		}
 	}
 
+	private loadCount(serviceToUse: NextSDREntityProvider, projectionFotGetData: string, filtersAndSorts: FiltersAndSorts, lazyFiltersAndSorts: FiltersAndSorts): void {
+    this.rowCountInProgress = true;
+    if (this.loadArchiviListCountSubscription) {
+      this.loadArchiviListCountSubscription.unsubscribe();
+      this.loadArchiviListCountSubscription = null;
+    }
+    const pageConf: PagingConf = { mode: "LIMIT_OFFSET", conf: { limit: 1, offset: 0 } };
+    //private pageConfNoLimit: PagingConf = {conf: {page: 0,size: 999999},mode: "PAGE_NO_COUNT"};
+    this.loadArchiviListCountSubscription = serviceToUse.getData(
+      projectionFotGetData,
+      filtersAndSorts,
+      lazyFiltersAndSorts,
+      pageConf).subscribe({
+        next: (data: any) => {
+          this.rowCount = data.page.totalElements;
+          this.rowCountInProgress = false;
+        },
+        error: (err) => {
+          console.log("Non sono riuscito a fare il count")
+        }
+      });
+  }
+
 	/**
 	 * Builda i filtri della tabella. Aggiunge eventuali altri filtri.
 	 * Carica i docs per la lista.
@@ -567,10 +601,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.loadArchiviListSubscription = null;
 		}
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
+		this.loadCount(this.serviceToGetData, this.projectionToGetData, filtersAndSorts, lazyFiltersAndSorts);
 		this.loadArchiviListSubscription = this.serviceToGetData.getData(
 			this.projectionToGetData,
 			filtersAndSorts,
-			buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
+			lazyFiltersAndSorts,
 			this.pageConf).subscribe((data: any) => {
 				console.log(data);
 				this.totalRecords = data.page.totalElements;
@@ -758,11 +794,13 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
  */
 	public filterPersone(event: any) {
 		const filtersAndSorts = new FiltersAndSorts();
-		filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.containsIgnoreCase, event.query));
+		filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.startsWith, event.query));
 		this.aziendeFiltrabili.forEach(a => {
 			if ((typeof a.value) === "number")
 				filtersAndSorts.addFilter(new FilterDefinition("utenteList.idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
 		});
+		
+		filtersAndSorts.addSort(new SortDefinition("nome", SORT_MODES.asc));
 		this.personaService.getData(null, filtersAndSorts, null)
 			.subscribe(res => {
 				if (res && res.results) {
@@ -1160,5 +1198,19 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
 					this.appService.appNameSelection(`Fascicolo ${nuovoArchivioCreato.numerazioneGerarchica} [${nuovoArchivioCreato.idAzienda.aoo}]`);
 		}));
+	}
+
+	/*funzioncina per fare il tooltip carino*/
+	public tooltipsVicari(vicariString : string[]):string {
+		let temp:string = ``;
+      for(let i = 0; i <  vicariString.length  ; i++){
+		if(i == vicariString.length - 1){
+			temp+=`<span>${vicariString[i]}</span><br>`;
+		}
+		else{
+			temp+=`<span>${vicariString[i]},</span><br>`;
+		}
+      }
+	  return temp;
 	}
 }

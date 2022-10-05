@@ -8,12 +8,14 @@ import { Table } from "primeng/table";
 export interface CaptionReferenceTableComponent {
   removeSort: () => void;
   applyFilterGlobal: (event: Event, matchMode: string) => void;
-  resetPaginationAndLoadData: () => void;
+  resetPaginationAndLoadData: (x?: number[]) => void;
   clear: () => void;
   exportCsvInProgress: boolean;
   exportCSV: (table: Table) => void;
   selectableColumns?: ColonnaBds[];
   selectedColumns?: ColonnaBds[];
   onChangeSelectedColumns?: (event: any) => void;
-  dataTable?: Table
+  dataTable?: Table,
+  rowCountInProgress: boolean,
+  rowCount: number
 }
