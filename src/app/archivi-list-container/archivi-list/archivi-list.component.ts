@@ -71,6 +71,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		{ value: [1], label: "Tutti" }
 	];
 	public exportCsvInProgress: boolean = false;
+	public rowCountInProgress: boolean = false;
+  public rowCount: number;
 	public selectableColumns: ColonnaBds[] = [];
 	private mandatoryColumns: string[] = [];
 	public rowsNumber: number = 20;
@@ -80,6 +82,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public filtriPuliti: boolean = true;
 	private storedLazyLoadEvent: LazyLoadEvent;
 	private loadArchiviListSubscription: Subscription;
+	private loadArchiviListCountSubscription: Subscription;
 	private serviceToGetData: NextSDREntityProvider = null;
 	private projectionToGetData: string = null;
 	private lastDataCreazioneFilterValue: Date[];
@@ -550,6 +553,29 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		}
 	}
 
+	private loadCount(serviceToUse: NextSDREntityProvider, projectionFotGetData: string, filtersAndSorts: FiltersAndSorts, lazyFiltersAndSorts: FiltersAndSorts): void {
+    this.rowCountInProgress = true;
+    if (this.loadArchiviListCountSubscription) {
+      this.loadArchiviListCountSubscription.unsubscribe();
+      this.loadArchiviListCountSubscription = null;
+    }
+    const pageConf: PagingConf = { mode: "LIMIT_OFFSET", conf: { limit: 1, offset: 0 } };
+    //private pageConfNoLimit: PagingConf = {conf: {page: 0,size: 999999},mode: "PAGE_NO_COUNT"};
+    this.loadArchiviListCountSubscription = serviceToUse.getData(
+      projectionFotGetData,
+      filtersAndSorts,
+      lazyFiltersAndSorts,
+      pageConf).subscribe({
+        next: (data: any) => {
+          this.rowCount = data.page.totalElements;
+          this.rowCountInProgress = false;
+        },
+        error: (err) => {
+          console.log("Non sono riuscito a fare il count")
+        }
+      });
+  }
+
 	/**
 	 * Builda i filtri della tabella. Aggiunge eventuali altri filtri.
 	 * Carica i docs per la lista.
@@ -567,10 +593,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.loadArchiviListSubscription = null;
 		}
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
+		this.loadCount(this.serviceToGetData, this.projectionToGetData, filtersAndSorts, lazyFiltersAndSorts);
 		this.loadArchiviListSubscription = this.serviceToGetData.getData(
 			this.projectionToGetData,
 			filtersAndSorts,
-			buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
+			lazyFiltersAndSorts,
 			this.pageConf).subscribe((data: any) => {
 				console.log(data);
 				this.totalRecords = data.page.totalElements;

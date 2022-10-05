@@ -38,6 +38,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   @Input() data: any;
   private subscriptions: Subscription[] = [];
   private loadDocsListSubscription: Subscription;
+  private loadDocsListCountSubscription: Subscription;
   private pageConf: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 0, offset: 0 } };
   private utenteUtilitiesLogin: UtenteUtilities;
   private resetDocsArrayLenght: boolean = true;
@@ -84,6 +85,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public loading: boolean = false;
   public initialSortField: string = "dataCreazione";
   public exportCsvInProgress: boolean = false;
+  public rowCountInProgress: boolean = false;
+  public rowCount: number;
   public selectButtonItems: SelectButtonItem[];
   public selectedButtonItem: SelectButtonItem = {
     title: "",
@@ -629,6 +632,30 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     return filterAndSort;
   }
 
+
+  private loadCount(serviceToUse: NextSDREntityProvider, projectionFotGetData: string, filtersAndSorts: FiltersAndSorts, lazyFiltersAndSorts: FiltersAndSorts): void {
+    this.rowCountInProgress = true;
+    if (this.loadDocsListCountSubscription) {
+      this.loadDocsListCountSubscription.unsubscribe();
+      this.loadDocsListCountSubscription = null;
+    }
+    const pageConf: PagingConf = { mode: "LIMIT_OFFSET", conf: { limit: 1, offset: 0 } };
+    //private pageConfNoLimit: PagingConf = {conf: {page: 0,size: 999999},mode: "PAGE_NO_COUNT"};
+    this.loadDocsListCountSubscription = serviceToUse.getData(
+      projectionFotGetData,
+      filtersAndSorts,
+      lazyFiltersAndSorts,
+      pageConf).subscribe({
+        next: (data: any) => {
+          this.rowCount = data.page.totalElements;
+          this.rowCountInProgress = false;
+        },
+        error: (err) => {
+          console.log("Non sono riuscito a fare il count")
+        }
+      });
+  }
+
   /**
    * Builda i filtri della tabella. Aggiunge eventuali altri filtri.
    * Carica i docs per la lista.
@@ -645,10 +672,12 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.loadDocsListSubscription = null;
     }
     const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+    const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
+    this.loadCount(this.serviceForGetData, this.projectionFotGetData, filtersAndSorts, lazyFiltersAndSorts);
     this.loadDocsListSubscription = this.serviceForGetData.getData(
       this.projectionFotGetData,
       filtersAndSorts,
-      buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
+      lazyFiltersAndSorts,
       this.pageConf).subscribe({
         next: (data: any) => {
           console.log(data);

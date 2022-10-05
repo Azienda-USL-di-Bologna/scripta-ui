@@ -15,5 +15,7 @@ export interface CaptionReferenceTableComponent {
   selectableColumns?: ColonnaBds[];
   selectedColumns?: ColonnaBds[];
   onChangeSelectedColumns?: (event: any) => void;
-  dataTable?: Table
+  dataTable?: Table,
+  rowCountInProgress: boolean,
+  rowCount: number
 }
