@@ -172,9 +172,9 @@
                 [showIcon]="false"
                 [showButtonBar]="false"
                 selectionMode="range"
-                [readonlyInput]="true"
+                
                 (onClickOutside)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'onClickOutside', $event, filter)"
-                appendTo="body">
+                appendTo="body"><!-- [readonlyInput]="true" -->
                 <ng-template pTemplate="footer" class="calendar-filter-footer-button">
                   <div class="calendar-filter-footer-button-container">
                     <p-button label="Conferma" (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'doFilter', $event, filter)"></p-button>
@@ -204,7 +204,6 @@
                 [showIcon]="false"
                 [showButtonBar]="false"
                 selectionMode="range"
-                [readonlyInput]="true"
                 appendTo="body"
                 (onClickOutside)="handleCalendarButtonEvent(calendarregistrazione, 'doFilter', $event, filter)"><!-- (onClickOutside)="filter(calendarregistrazione.value)"
                   (onClearClick)="filter(null)"
