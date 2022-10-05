@@ -68,7 +68,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		{ value: [1], label: "Fascicoli" },
 		{ value: [2], label: "Sottofascicoli" },
 		{ value: [3], label: "Inserti" },
-		{ value: [1,2,3], label: "Tutti" }
+		{ value: [1], label: "Tutti" }
 	];
 	public exportCsvInProgress: boolean = false;
 	public selectableColumns: ColonnaBds[] = [];
