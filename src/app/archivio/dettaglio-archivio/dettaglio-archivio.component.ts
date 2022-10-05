@@ -99,7 +99,10 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE 
       || a.ruolo === RuoloAttoreArchivio.VICARIO 
       || a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
-      this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
+      // this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
+      if(this.archivio.tipo !== TipoArchivio.SPECIALE) {
+        this.tipiArchivioObj = this.tipiArchivioObj.filter(a => a.value !== TipoArchivio.SPECIALE)
+      }
      this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[]).some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id  && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
     this.loadParametroAziendaleFascicoliParlanti()
   }
