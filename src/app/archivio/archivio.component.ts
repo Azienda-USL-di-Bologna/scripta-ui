@@ -354,8 +354,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     });
     this.extendedArchivioService.uploadDocument(formData).subscribe(
       res => {
-        this.referenceTableComponent.resetPaginationAndLoadData();
-
+        console.log("res", res)
+        this.referenceTableComponent.resetPaginationAndLoadData(res as number[]);
       }
     );
   }

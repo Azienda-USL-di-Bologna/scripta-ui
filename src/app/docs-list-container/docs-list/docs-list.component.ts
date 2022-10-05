@@ -528,7 +528,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Risetta la configurazione pagine e chiama la laoddata
    * Mantiene i filtri
    */
-  public resetPaginationAndLoadData(): void {
+  public resetPaginationAndLoadData(idDocListToSelect?: number[]): void {
     this.resetDocsArrayLenght = true;
     if (!!!this.storedLazyLoadEvent) {
       this.storedLazyLoadEvent = {};
@@ -540,7 +540,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
     }
 
-    this.loadData();
+    this.loadData(idDocListToSelect);
   }
 
   /**
@@ -662,7 +662,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Carica i docs per la lista.
    * @param event
    */
-  private loadData(): void { 
+  private loadData(idDocListToSelect?: number[]): void { 
     this.loading = true;
     this.pageConf.conf = {
       limit: this.storedLazyLoadEvent.rows,
@@ -702,6 +702,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
             Array.prototype.splice.apply(this.docs, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
           }
           this.docs = [...this.docs]; // trigger change detection
+
+          if (idDocListToSelect && idDocListToSelect.length > 0) {
+            const index = this.docs.findIndex(d => d.id === idDocListToSelect[0]);
+            if (index) {
+              this.docSelected = this.docs[index];
+            }
+          }
         },
         error: (err) => {
           if(err.error.message == "Persona senza permesso su Archivio"){

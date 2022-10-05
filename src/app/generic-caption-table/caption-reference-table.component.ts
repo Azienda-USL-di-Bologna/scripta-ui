@@ -8,7 +8,7 @@ import { Table } from "primeng/table";
 export interface CaptionReferenceTableComponent {
   removeSort: () => void;
   applyFilterGlobal: (event: Event, matchMode: string) => void;
-  resetPaginationAndLoadData: () => void;
+  resetPaginationAndLoadData: (x?: number[]) => void;
   clear: () => void;
   exportCsvInProgress: boolean;
   exportCSV: (table: Table) => void;
