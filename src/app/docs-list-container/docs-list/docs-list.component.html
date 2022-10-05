@@ -658,17 +658,17 @@
         <div *ngSwitchCase="'mittente'" [pTooltip]="rowData.mittente" tooltipPosition="top">
           {{rowData.mittente}}
         </div>
-        <div *ngSwitchCase="'destinatari'" [pTooltip]="rowData.destinatariVisualizzazione" tooltipPosition="top">
+        <div *ngSwitchCase="'destinatari'" [pTooltip]="tooltipsUtenti(rowData.destinatariVisualizzazione)" [escape]="false" tooltipPosition="top">
           <span *ngFor="let d of rowData.destinatari" class="destinatari-item">
             {{d.nome}}
           </span>
         </div>
-        <div *ngSwitchCase="'firmatari'" [pTooltip]="rowData.firmatariVisualizzazione" tooltipPosition="top">
+        <div *ngSwitchCase="'firmatari'" [pTooltip]="tooltipsUtenti(rowData.firmatariVisualizzazione)"  [escape]="false" tooltipPosition="top">
           <span *ngFor="let d of rowData.firmatari" class="firmatari-item">
             {{d.descrizione}}
           </span>
         </div>
-        <div *ngSwitchCase="'sullaScrivaniaDi'" [pTooltip]="rowData.sullaScrivaniaDiVisualizzazione"
+        <div *ngSwitchCase="'sullaScrivaniaDi'" [pTooltip]="tooltipsUtenti(rowData.sullaScrivaniaDiVisualizzazione)" [escape]="false"
           tooltipPosition="top">
           <span *ngFor="let d of rowData.sullaScrivaniaDi" class="sulla-scrivania-di-item">
             {{d.descrizione}}

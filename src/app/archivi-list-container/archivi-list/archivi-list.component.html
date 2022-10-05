@@ -390,10 +390,11 @@
           {{rowData.idStruttura?.nome}}
         </div>
         <div *ngSwitchCase="'idVicari'"
-          [pTooltip]="rowData.descrizionePersonaVicarioList != '' ? rowData.descrizionePersonaVicarioList : 'Nessun vicario selezionato'"
+          [pTooltip]="rowData.descrizionePersonaVicarioList != '' ? tooltipsVicari(rowData.descrizionePersonaVicarioList) : 'Nessun vicario selezionato'"
+          [escape] = "false"
           tooltipPosition="top">
           <span *ngFor="let v of rowData.descrizionePersonaVicarioList" class="vicari-item">
-            {{v}}
+            {{v}} 
           </span>
         </div>
       </td>

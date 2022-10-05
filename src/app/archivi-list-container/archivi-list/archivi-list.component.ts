@@ -7,7 +7,7 @@ import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
 import { ArchiviListMode, cols, colsCSV, TipoArchivioTraduzioneVisualizzazione, StatoArchivioTraduzioneVisualizzazione } from './archivi-list-constants';
 import { ActivatedRoute } from '@angular/router';
 import { ValueAndLabelObj } from '../../docs-list-container/docs-list/docs-list.component';
-import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from '@bds/next-sdr';
+import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from '@bds/next-sdr';
 import { ColumnFilter, Table } from 'primeng/table';
 import { Impostazioni } from '../../utilities/utils';
 import { ConfirmationService, FilterOperator, LazyLoadEvent, MenuItem, MessageService } from 'primeng/api';
@@ -758,11 +758,13 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
  */
 	public filterPersone(event: any) {
 		const filtersAndSorts = new FiltersAndSorts();
-		filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.containsIgnoreCase, event.query));
+		filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.startsWith, event.query));
 		this.aziendeFiltrabili.forEach(a => {
 			if ((typeof a.value) === "number")
 				filtersAndSorts.addFilter(new FilterDefinition("utenteList.idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
 		});
+		
+		filtersAndSorts.addSort(new SortDefinition("nome", SORT_MODES.asc));
 		this.personaService.getData(null, filtersAndSorts, null)
 			.subscribe(res => {
 				if (res && res.results) {
@@ -1160,5 +1162,19 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
 					this.appService.appNameSelection(`Fascicolo ${nuovoArchivioCreato.numerazioneGerarchica} [${nuovoArchivioCreato.idAzienda.aoo}]`);
 		}));
+	}
+
+	/*funzioncina per fare il tooltip carino*/
+	public tooltipsVicari(vicariString : string[]):string {
+		let temp:string = ``;
+      for(let i = 0; i <  vicariString.length  ; i++){
+		if(i == vicariString.length - 1){
+			temp+=`<span>${vicariString[i]}</span><br>`;
+		}
+		else{
+			temp+=`<span>${vicariString[i]},</span><br>`;
+		}
+      }
+	  return temp;
 	}
 }

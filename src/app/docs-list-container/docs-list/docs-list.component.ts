@@ -731,11 +731,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    */
   public filterPersone(event: any) {
     const filtersAndSorts = new FiltersAndSorts();
-    filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.containsIgnoreCase, event.query));
+    filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.startsWith, event.query));
     this.aziendeFiltrabili.forEach(a => {
       if ((typeof a.value) === "number")
         filtersAndSorts.addFilter(new FilterDefinition("utenteList.idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
     });
+    
+    filtersAndSorts.addSort(new SortDefinition("descrizione", SORT_MODES.asc));
     this.personaService.getData(null, filtersAndSorts, null)
       .subscribe(res => {
         if (res && res.results) {
@@ -814,6 +816,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
     });
     filtersAndSorts.addFilter(new FilterDefinition("ufficio", FILTER_TYPES.not_string.equals, false));
+    filtersAndSorts.addSort(new SortDefinition("attiva", SORT_MODES.desc));
+    filtersAndSorts.addSort(new SortDefinition("nome", SORT_MODES.asc));
     this.strutturaService.getData("StrutturaWithIdAzienda", filtersAndSorts, null)
       .subscribe(res => {
         if (res && res.results) {
@@ -1235,6 +1239,20 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     }
   }
   
+  /*funzioncina per fare il tooltip carino*/
+	public tooltipsUtenti(destString : string[]):string {
+		let temp:string = ``;
+      for(let i = 0; i <  destString.length  ; i++){
+		if(i == destString.length - 1){
+			temp+=`<span>${destString[i]}</span><br>`;
+		}
+		else{
+			temp+=`<span>${destString[i]},</span><br>`;
+		}
+      }
+	  return temp;
+	}
+
   /**
    * Apre il tab per l'archivio corrisondente alla fasciolazione
    * @param f 
