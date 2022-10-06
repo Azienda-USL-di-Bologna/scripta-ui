@@ -708,14 +708,14 @@
         <i *ngIf="loggedUserCanRestoreArchiviation && rowData.archiviation.dataEliminazione"
           class="pi pi-undo" 
           pTooltip="Ripristina fascicolazione"
-          (click)="restoreArchiviation(rowData)"
+          (click)="$event.stopPropagation(); restoreArchiviation(rowData)"
         >
         </i>
         <i *ngIf="loggedUserCanDeleteArchiviation && !!!rowData.archiviation.dataEliminazione"
           #iconaEliminazioneArchiviazione
           class="pi pi-times" 
           pTooltip="Elimina fascicolazione"
-          (click)="deleteArchiviation(rowData, index, iconaEliminazioneArchiviazione)"
+          (click)="$event.stopPropagation(); deleteArchiviation(rowData, index, iconaEliminazioneArchiviazione)"
         >
         </i>
       </td>
