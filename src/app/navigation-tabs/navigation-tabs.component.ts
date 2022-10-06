@@ -69,35 +69,37 @@ export class NavigationTabsComponent implements OnInit {
       this.subscriptions.push(
         this.loginService.loggedUser$.subscribe(
           (utenteUtilities: UtenteUtilities) => {
-            this.utenteUtilitiesLogin = utenteUtilities;
-            // Mostrare il tab fascicoli solo se è acceso il parametro in una delle aziende dell'utente
-            let idAziendaArray: number[] = [];
-            this.utenteUtilitiesLogin.getUtente().aziende.forEach(elem => {
-              idAziendaArray.push(elem.id);
-            });
-            this.subscriptions.push(
-              this.configurazioneService.getParametriAziende("tabFascicoliScriptaActive", null, idAziendaArray).subscribe(
-                (parametriAziende: ParametroAziende[]) => {
-                  console.log(parametriAziende[0].valore);
-                  const showTabFascicoli = JSON.parse(parametriAziende[0].valore || false);
-                  if (showTabFascicoli) {
+            if (utenteUtilities) {
+              this.utenteUtilitiesLogin = utenteUtilities;
+              // Mostrare il tab fascicoli solo se è acceso il parametro in una delle aziende dell'utente
+              let idAziendaArray: number[] = [];
+              this.utenteUtilitiesLogin.getUtente().aziende.forEach(elem => {
+                idAziendaArray.push(elem.id);
+              });
+              this.subscriptions.push(
+                this.configurazioneService.getParametriAziende("tabFascicoliScriptaActive", null, idAziendaArray).subscribe(
+                  (parametriAziende: ParametroAziende[]) => {
+                    console.log(parametriAziende[0].valore);
+                    const showTabFascicoli = JSON.parse(parametriAziende[0].valore || false);
+                    if (showTabFascicoli) {
+                      this.navigationTabsService.addTab(
+                        this.navigationTabsService.buildaTabArchiviList()
+                      );
+                    }
                     this.navigationTabsService.addTab(
-                      this.navigationTabsService.buildaTabArchiviList()
+                      this.navigationTabsService.buildaTabDocsList()
                     );
+                    this.setTabsAndActiveOneOfThem();
+  
+                    // Tolgo subito queste due sottoscrizioni che mi disturbano quando per qualche motivo riscattano.
+                    this.subscriptions.forEach(
+                      s => s.unsubscribe()
+                    );
+                    this.subscriptions = [];
                   }
-                  this.navigationTabsService.addTab(
-                    this.navigationTabsService.buildaTabDocsList()
-                  );
-                  this.setTabsAndActiveOneOfThem();
-
-                  // Tolgo subito queste due sottoscrizioni che mi disturbano quando per qualche motivo riscattano.
-                  this.subscriptions.forEach(
-                    s => s.unsubscribe()
-                  );
-                  this.subscriptions = [];
-                }
-              )  
-            );
+                )  
+              );
+            }
           }
         )
       ); 
