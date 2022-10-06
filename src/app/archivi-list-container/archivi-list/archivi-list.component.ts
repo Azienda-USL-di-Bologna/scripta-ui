@@ -69,7 +69,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		{ value: [1], label: "Fascicoli" },
 		{ value: [2], label: "Sottofascicoli" },
 		{ value: [3], label: "Inserti" },
-		{ value: [1], label: "Tutti" }
+		{ value: [1,2,3], label: "Tutti" }
 	];
 	public exportCsvInProgress: boolean = false;
 	public rowCountInProgress: boolean = false;
@@ -146,6 +146,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		if (!Object.values(ArchiviListMode).includes(this.archiviListMode)) {
 			this.archiviListMode = ArchiviListMode.VISIBILI;
 		}
+		
 		//this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } });
 		const loggeduser$ = this.loginService.loggedUser$.pipe(first());
 		const parametroFascicoliParlanti$ = this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null).pipe(first());
@@ -260,6 +261,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		if (!this._selectedColumns || this._selectedColumns.length === 0) {
 			this._selectedColumns = this.cols.filter(c => c.default);
 		}
+		
+		
 	}
 
 	/**
@@ -534,6 +537,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				if (this.archivioPadre) {
 					// Nel caso di dettaglio archivio non voglio imporre un filtro sul livello
 					this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
+					
 				} else {
 					this.livelloValue = [1];
 				}
