@@ -626,7 +626,7 @@
           {{rowData.dataPubblicazione | date:'dd/MM/yyyy'}}
         </div>
         <div *ngSwitchCase="'oggetto'" (click)="!archivio && openDoc(rowData)" class="oggetto-content"
-          [ngStyle]="{'text-decoration': rowData.archiviation?.dataEliminazione ? 'line-through' : 'initial' }"
+        [ngClass]="{'logically-deleted' : rowData.archiviation?.dataEliminazione != null}"
           [pTooltip]="rowData.oggettoVisualizzazione" tooltipPosition="top">
           <i *ngIf="rowData.visibilitaLimitata && !rowData.riservato" class="pi pi-eye"></i>
           <i *ngIf="rowData.riservato" class="pi pi-eye-slash"></i>

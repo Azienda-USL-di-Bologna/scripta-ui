@@ -38,6 +38,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public subscriptions: Subscription[] = [];
   public colsResponsabili: any[];
   public aziendeConFascicoliParlanti: number[];
+  public isParlante: boolean = false;
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public selectedClassificazione: TreeNode;
   public selectedArchivioCollegato: Archivio;
@@ -140,14 +141,18 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         this.fascicoliParlanti = JSON.parse(parametriAziende[0].valore || false);
         if (this.fascicoliParlanti) {
           this.aziendeConFascicoliParlanti = parametriAziende[0].idAziende;
+          if(this.aziendeConFascicoliParlanti.includes(this.archivio.idAzienda.id)) {
+            this.isParlante = true;
+          }
         }
       }
+      
     }));
   }
 
 
   public changeVisibilita(): void {
-    if (this.loggedUserIsResponsbaileOrVicario && !this.aziendeConFascicoliParlanti.includes(this.archivio.idAzienda.id)) {
+    if (this.loggedUserIsResponsbaileOrVicario && !this.aziendeConFascicoliParlanti?.includes(this.archivio.idAzienda.id)) {
       this.archivio.riservato = !(this.archivio.riservato);
       const archivioToUpdate: Archivio = new Archivio();
       archivioToUpdate.riservato = this.archivio.riservato

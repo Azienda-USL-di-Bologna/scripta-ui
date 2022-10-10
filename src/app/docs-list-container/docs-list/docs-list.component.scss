@@ -85,7 +85,7 @@
       border-color:#AFC1DE;
       padding: 0;
       div {
-        color: #2e4a65 !important;
+        color: #2e4a65;
         height: 54px;
         padding: 9px 13px;
         width: 100%; 
@@ -307,6 +307,14 @@
   .conservazione-column {
     width: 170px;
     max-width: 170px;
+  }
+  .logically-deleted {
+    text-decoration: line-through;
+    text-decoration-color: red;
+    &:hover {
+      text-decoration-color: #7e7e7e;
+    }
+    color:  red !important;
   }
 }
 
