@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio } from '@bds/internauta-model';
+import { Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteService, UtenteStruttura, UtenteStrutturaService } from '@bds/internauta-model';
 import { AppService } from '../../app.service';
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { Subscription, combineLatestWith } from 'rxjs';
@@ -136,7 +136,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		private strutturaService: StrutturaService,
 		private personaService: PersonaService,
 		private configurazioneService: ConfigurazioneService,
-		private datepipe: DatePipe
+		private datepipe: DatePipe,
+		private utenteStrutturaService: UtenteStrutturaService
 	) { }
 
 	ngOnInit(): void {
@@ -1149,59 +1150,81 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		archivioBozza.numerazioneGerarchica = "x/x";
 		archivioBozza.idAzienda = {id: idAzienda} as Azienda;
 		archivioBozza.attoriList = [];
-
-		const idPersonaCreazione = new AttoreArchivio();
-		idPersonaCreazione.idPersona = {
-			id: this.utenteUtilitiesLogin.getUtente().idPersona.id
-		} as Persona;
-		idPersonaCreazione.ruolo = RuoloAttoreArchivio.CREATORE;
-		archivioBozza.attoriList.push(idPersonaCreazione);
-
-		if (this.archivioPadre) {
-			archivioBozza.livello = this.archivioPadre.livello + 1;
-			archivioBozza.idTitolo = { id: this.archivioPadre.idTitolo.id } as Titolo;
-			if (this.archivioPadre.idMassimario) {
-				archivioBozza.idMassimario = { id: this.archivioPadre.idMassimario.id } as Massimario;
+		let strutturaCreatore = new Struttura();
+		const filterAndSort = new FiltersAndSorts();
+		filterAndSort.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, idAzienda));
+		filterAndSort.addFilter(new FilterDefinition("idUtente.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().id));
+		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.id", FILTER_TYPES.not_string.equals, 1));
+		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.id", FILTER_TYPES.not_string.equals, 9));
+		this.utenteStrutturaService.getData("UtenteStrutturaWithPlainFields",filterAndSort,null,null).subscribe((utenteStruttura ) =>  
+			{
+			if(utenteStruttura.results.some((a: UtenteStruttura) => a.fk_idAfferenzaStruttura.id === 1)) {
+				let utenteStrutturaResp = utenteStruttura.results.find((a: UtenteStruttura) => a.fk_idAfferenzaStruttura.id == 1)
+				 strutturaCreatore.id = utenteStrutturaResp.fk_idStruttura.id;
+			} else {
+				strutturaCreatore.id = utenteStruttura.results.find((a: UtenteStruttura) => a.fk_idAfferenzaStruttura.id == 9).fk_idStruttura.id;
 			}
-			archivioBozza.anniTenuta = this.archivioPadre.anniTenuta;
-			archivioBozza.tipo =  this.archivioPadre.tipo;
-			archivioBozza.idAzienda = { id: this.archivioPadre?.idAzienda.id } as Azienda;
-			archivioBozza.numerazioneGerarchica = this.archivioPadre.numerazioneGerarchica.replace("/", "-x/");
-			archivioBozza.idArchivioPadre = { id: this.archivioPadre.id } as Archivio;
-			if (this.archivioPadre.fk_idArchivioRadice?.id) {
-				archivioBozza.idArchivioRadice = { id: this.archivioPadre.fk_idArchivioRadice.id } as Archivio;
-			}
-			this.archivioPadre.attoriList.filter(a => [RuoloAttoreArchivio.RESPONSABILE, RuoloAttoreArchivio.RESPONSABILE_PROPOSTO, RuoloAttoreArchivio.VICARIO].includes(a.ruolo)).forEach(attore => {
-				const newAttore = new AttoreArchivio();
-				newAttore.idPersona = {
-					id: attore.fk_idPersona.id
-				} as Persona;
-				if (attore.fk_idStruttura && attore.fk_idStruttura.id) {
-					newAttore.idStruttura = {
-						id: attore.fk_idStruttura.id
-					} as Struttura;
-				}
-				newAttore.ruolo = attore.ruolo;
-				archivioBozza.attoriList.push(newAttore);
-			});
-		} else {
-			const idPersonaResponsabile = new AttoreArchivio();
-			idPersonaResponsabile.idPersona = {
+			
+			const idPersonaCreazione = new AttoreArchivio();
+			idPersonaCreazione.idPersona = {
 				id: this.utenteUtilitiesLogin.getUtente().idPersona.id
 			} as Persona;
-			idPersonaResponsabile.ruolo = RuoloAttoreArchivio.RESPONSABILE;
-			//debugger;
-			//idPersonaResponsabile.idStruttura = this.utenteUtilitiesLogin.getUtente().utenteStrutturaList.find(us => us.idAfferenzaStruttura.codice === )
-			archivioBozza.attoriList.push(idPersonaResponsabile);
-		}   
+			idPersonaCreazione.ruolo = RuoloAttoreArchivio.CREATORE;
+			archivioBozza.attoriList.push(idPersonaCreazione);
 
-		this.subscriptions.push(this.archivioService.postHttpCall(
+			if (this.archivioPadre) {
+				archivioBozza.livello = this.archivioPadre.livello + 1;
+				archivioBozza.idTitolo = { id: this.archivioPadre.idTitolo.id } as Titolo;
+				if (this.archivioPadre.idMassimario) {
+					archivioBozza.idMassimario = { id: this.archivioPadre.idMassimario.id } as Massimario;
+				}
+				archivioBozza.anniTenuta = this.archivioPadre.anniTenuta;
+				archivioBozza.tipo =  this.archivioPadre.tipo;
+				archivioBozza.idAzienda = { id: this.archivioPadre?.idAzienda.id } as Azienda;
+				archivioBozza.numerazioneGerarchica = this.archivioPadre.numerazioneGerarchica.replace("/", "-x/");
+				archivioBozza.idArchivioPadre = { id: this.archivioPadre.id } as Archivio;
+				if (this.archivioPadre.fk_idArchivioRadice?.id) {
+					archivioBozza.idArchivioRadice = { id: this.archivioPadre.fk_idArchivioRadice.id } as Archivio;
+				}
+				this.archivioPadre.attoriList.filter(a => [RuoloAttoreArchivio.RESPONSABILE, RuoloAttoreArchivio.RESPONSABILE_PROPOSTO, RuoloAttoreArchivio.VICARIO].includes(a.ruolo)).forEach(attore => {
+					const newAttore = new AttoreArchivio();
+					newAttore.idPersona = {
+						id: attore.fk_idPersona.id
+					} as Persona;
+					// non si vuole più che il vicario abbia la struttura 
+					if (attore.fk_idStruttura && attore.fk_idStruttura.id && attore.ruolo != "VICARIO") {
+						newAttore.idStruttura = {
+							id: attore.fk_idStruttura.id
+						} as Struttura;
+					}
+					newAttore.ruolo = attore.ruolo;
+					archivioBozza.attoriList.push(newAttore);
+				});
+			} else {
+				const idPersonaResponsabile = new AttoreArchivio();
+				idPersonaResponsabile.idPersona = {
+					id: this.utenteUtilitiesLogin.getUtente().idPersona.id
+				} as Persona;
+				idPersonaResponsabile.idStruttura = {
+					id: strutturaCreatore.id
+				} as Struttura;
+				idPersonaResponsabile.ruolo = RuoloAttoreArchivio.RESPONSABILE;
+				//debugger;
+				//idPersonaResponsabile.idStruttura = this.utenteUtilitiesLogin.getUtente().utenteStrutturaList.find(us => us.idAfferenzaStruttura.codice === )
+				archivioBozza.attoriList.push(idPersonaResponsabile);
+			}   
+			this.subscriptions.push(this.archivioService.postHttpCall(
 				archivioBozza, 
 				ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
 				.subscribe((nuovoArchivioCreato: Archivio) => {      
 					this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
 					this.appService.appNameSelection(`Fascicolo ${nuovoArchivioCreato.numerazioneGerarchica} [${nuovoArchivioCreato.idAzienda.aoo}]`);
-		}));
+			}));
+			})
+
+		
+
+		
 	}
 
 	/*funzioncina per fare il tooltip carino*/
