@@ -190,7 +190,7 @@ export const cols: ColonnaBds[] = [
   },
   {
     field: "idPersonaResponsabileProcedimento",
-    header: "Responsabile",
+    header: "Responsabile proc.",
     filterField: "idPersonaResponsabileProcedimento.id",
     // sortField: "idPersonaResponsabileProcedimento.descrizione",
     style: {},

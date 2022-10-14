@@ -49,11 +49,15 @@
           }
         }
       }
-      .p-progress-spinner {
+      .row-count {
+        align-self: center;
+        margin-left: 0.5vw;
+      }
+      /* .p-progress-spinner {
         height: 21px !important;
         width: 21px !important;
         vertical-align: sub;
-      }
+      } */
       .p-inputtext {
         align-self: center;
         height: 33.72px;
@@ -102,7 +106,7 @@
           outline: none !important;
         }
       }
-      .preferitoStar{
+      .preferitoStar {
         font-size: 2rem;
         cursor: pointer;
         color: #936 !important; 

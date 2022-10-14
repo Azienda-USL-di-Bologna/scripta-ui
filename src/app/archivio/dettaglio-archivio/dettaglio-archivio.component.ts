@@ -38,6 +38,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public subscriptions: Subscription[] = [];
   public colsResponsabili: any[];
   public aziendeConFascicoliParlanti: number[];
+  public isParlante: boolean = false;
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public selectedClassificazione: TreeNode;
   public selectedArchivioCollegato: Archivio;
@@ -99,7 +100,10 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE 
       || a.ruolo === RuoloAttoreArchivio.VICARIO 
       || a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
-      this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
+      // this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
+      if(this.archivio.tipo !== TipoArchivio.SPECIALE) {
+        this.tipiArchivioObj = this.tipiArchivioObj.filter(a => a.value !== TipoArchivio.SPECIALE)
+      }
      this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[]).some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id  && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
     this.loadParametroAziendaleFascicoliParlanti()
   }
@@ -137,14 +141,18 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         this.fascicoliParlanti = JSON.parse(parametriAziende[0].valore || false);
         if (this.fascicoliParlanti) {
           this.aziendeConFascicoliParlanti = parametriAziende[0].idAziende;
+          if(this.aziendeConFascicoliParlanti.includes(this.archivio.idAzienda.id)) {
+            this.isParlante = true;
+          }
         }
       }
+      
     }));
   }
 
 
   public changeVisibilita(): void {
-    if (this.loggedUserIsResponsbaileOrVicario && !this.aziendeConFascicoliParlanti.includes(this.archivio.idAzienda.id)) {
+    if (this.loggedUserIsResponsbaileOrVicario && !this.aziendeConFascicoliParlanti?.includes(this.archivio.idAzienda.id)) {
       this.archivio.riservato = !(this.archivio.riservato);
       const archivioToUpdate: Archivio = new Archivio();
       archivioToUpdate.riservato = this.archivio.riservato

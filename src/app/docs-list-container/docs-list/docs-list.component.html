@@ -16,9 +16,13 @@
   [virtualRowHeight]="54" 
   [lazy]="true" 
   [lazyLoadOnInit]="true" 
-  [totalRecords]="totalRecords"
   (onLazyLoad)="onLazyLoad($event)" 
   [loading]="loading" 
+  [totalRecords]="totalRecords"
+  selectionMode="single" 
+  [(selection)]="docSelected"
+  (onRowSelect)="onRowSelect($event)" 
+  (onRowUnselect)="onRowUnselect($event)"
   styleClass="p-table-scripta-docs-list"
   [ngClass]="{'table-zero-rows': totalRecords === 0}"
   tableStyleClass="docslist-table-body">
@@ -38,6 +42,13 @@
             [field]="col.sortField" >
           </p-sortIcon>
         </span>
+      </th>
+      <th *ngIf="!archivio"
+        class="open-detail-and-preview-column"
+        alignFrozen="right" 
+        pFrozenColumn 
+        [frozen]="true">
+        
       </th>
       <th *ngIf="archivio"
         class="edit-archiviation-column"
@@ -161,9 +172,9 @@
                 [showIcon]="false"
                 [showButtonBar]="false"
                 selectionMode="range"
-                [readonlyInput]="true"
+                
                 (onClickOutside)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'onClickOutside', $event, filter)"
-                appendTo="body">
+                appendTo="body"><!-- [readonlyInput]="true" -->
                 <ng-template pTemplate="footer" class="calendar-filter-footer-button">
                   <div class="calendar-filter-footer-button-container">
                     <p-button label="Conferma" (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'doFilter', $event, filter)"></p-button>
@@ -193,7 +204,6 @@
                 [showIcon]="false"
                 [showButtonBar]="false"
                 selectionMode="range"
-                [readonlyInput]="true"
                 appendTo="body"
                 (onClickOutside)="handleCalendarButtonEvent(calendarregistrazione, 'doFilter', $event, filter)"><!-- (onClickOutside)="filter(calendarregistrazione.value)"
                   (onClearClick)="filter(null)"
@@ -560,6 +570,13 @@
           </p-columnFilter>
         </div> -->
       </th>
+      <th  *ngIf="!archivio"
+        class="open-detail-and-preview-column"
+        alignFrozen="right" 
+        pFrozenColumn 
+        [frozen]="true">
+        
+      </th>
       <th  *ngIf="archivio"
         class="edit-archiviation-column"
         alignFrozen="right" 
@@ -571,7 +588,9 @@
   </ng-template>
   <!-- BODY -->
   <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex">
-    <tr class="row-height">
+    <tr 
+      class="row-height" 
+      [pSelectableRow]="rowData">
       <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
         <div *ngSwitchCase="'idAzienda'">
           {{rowData.idAzienda.nome}}
@@ -606,8 +625,8 @@
         <div *ngSwitchCase="'dataPubblicazione'">
           {{rowData.dataPubblicazione | date:'dd/MM/yyyy'}}
         </div>
-        <div *ngSwitchCase="'oggetto'" (click)="openDoc(rowData)" class="oggetto-content"
-          [ngStyle]="{'text-decoration': rowData.archiviation?.dataEliminazione ? 'line-through' : 'initial' }"
+        <div *ngSwitchCase="'oggetto'" (click)="!archivio && openDoc(rowData)" class="oggetto-content"
+        [ngClass]="{'logically-deleted' : rowData.archiviation?.dataEliminazione != null}"
           [pTooltip]="rowData.oggettoVisualizzazione" tooltipPosition="top">
           <i *ngIf="rowData.visibilitaLimitata && !rowData.riservato" class="pi pi-eye"></i>
           <i *ngIf="rowData.riservato" class="pi pi-eye-slash"></i>
@@ -644,17 +663,17 @@
         <div *ngSwitchCase="'mittente'" [pTooltip]="rowData.mittente" tooltipPosition="top">
           {{rowData.mittente}}
         </div>
-        <div *ngSwitchCase="'destinatari'" [pTooltip]="rowData.destinatariVisualizzazione" tooltipPosition="top">
+        <div *ngSwitchCase="'destinatari'" [pTooltip]="tooltipsUtenti(rowData.destinatariVisualizzazione)" [escape]="false" tooltipPosition="top">
           <span *ngFor="let d of rowData.destinatari" class="destinatari-item">
             {{d.nome}}
           </span>
         </div>
-        <div *ngSwitchCase="'firmatari'" [pTooltip]="rowData.firmatariVisualizzazione" tooltipPosition="top">
+        <div *ngSwitchCase="'firmatari'" [pTooltip]="tooltipsUtenti(rowData.firmatariVisualizzazione)"  [escape]="false" tooltipPosition="top">
           <span *ngFor="let d of rowData.firmatari" class="firmatari-item">
             {{d.descrizione}}
           </span>
         </div>
-        <div *ngSwitchCase="'sullaScrivaniaDi'" [pTooltip]="rowData.sullaScrivaniaDiVisualizzazione"
+        <div *ngSwitchCase="'sullaScrivaniaDi'" [pTooltip]="tooltipsUtenti(rowData.sullaScrivaniaDiVisualizzazione)" [escape]="false"
           tooltipPosition="top">
           <span *ngFor="let d of rowData.sullaScrivaniaDi" class="sulla-scrivania-di-item">
             {{d.descrizione}}
@@ -669,6 +688,17 @@
         </div>
       </td>
       <!-- <td class="scrollbar-overlay-placeholder-column"></td> -->
+      <td *ngIf="!archivio"
+        class="open-detail-and-preview-column"
+        alignFrozen="right"  
+        pFrozenColumn 
+        [frozen]="true">
+        <i class="pi pi-arrow-up-right" 
+          pTooltip="Vedi dettagli e anteprime"
+          (click)="openDetailAndPreview(rowData)"
+        >
+        </i>
+      </td>
       <td *ngIf="archivio"
         class="edit-archiviation-column"
         alignFrozen="right"  
@@ -677,14 +707,14 @@
         <i *ngIf="loggedUserCanRestoreArchiviation && rowData.archiviation.dataEliminazione"
           class="pi pi-undo" 
           pTooltip="Ripristina fascicolazione"
-          (click)="restoreArchiviation(rowData)"
+          (click)="$event.stopPropagation(); restoreArchiviation(rowData)"
         >
         </i>
         <i *ngIf="loggedUserCanDeleteArchiviation && !!!rowData.archiviation.dataEliminazione"
           #iconaEliminazioneArchiviazione
           class="pi pi-times" 
           pTooltip="Elimina fascicolazione"
-          (click)="deleteArchiviation(rowData, index, iconaEliminazioneArchiviazione)"
+          (click)="$event.stopPropagation(); deleteArchiviation(rowData, index, iconaEliminazioneArchiviazione)"
         >
         </i>
       </td>

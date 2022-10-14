@@ -1,13 +1,15 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MenuItem, TreeNode } from 'primeng/api';
 import { ExtendedArchivioService } from '../extended-archivio.service';
-import { Archivio, ArchivioDetail, ArchivioDetailViewService, ConfigurazioneService, ENTITIES_STRUCTURE, ParametroAziende } from '@bds/internauta-model';
+import { Archivio, ArchivioDetail, ArchivioDetailViewService, ConfigurazioneService, ENTITIES_STRUCTURE, ParametroAziende, StatoArchivio } from '@bds/internauta-model';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
 import { AppService } from 'src/app/app.service';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from '@bds/next-sdr';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { ArchivioFieldUpdating, ArchivioUtilsService } from '../archivio-utils.service';
+import { TouchSequence } from 'selenium-webdriver';
+import { ThisReceiver } from '@angular/compiler';
 
 @Component({
   selector: 'archivio-tree',
@@ -435,6 +437,9 @@ export class ArchivioTreeComponent implements OnInit {
     newNode.label = "[" + archivio.numerazioneGerarchica + "] " + archivio.oggetto + " " + archivio.id.toString();
     newNode.children = children || [];
     newNode.expanded = true;
+    if(archivio.stato === StatoArchivio.BOZZA) {
+      newNode.styleClass = "nodo-bozza";
+    }
     return newNode;
   }
 

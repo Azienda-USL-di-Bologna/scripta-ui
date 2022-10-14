@@ -1,25 +1,25 @@
 <p-table #dt 
   ariaLabel="Tabella elenco archivi" 
-  styleClass="p-table-scripta-archivi-list" 
+  [value]="archivi" 
   dataKey="id"
   [columns]="selectedColumns" 
-  [value]="archivi" 
-  [reorderableColumns]="true" 
-  (onColReorder)="onColReorder($event)"
   [sortField]="initialSortField" 
   [sortOrder]="-1" 
   [defaultSortOrder]="-1" 
+  [reorderableColumns]="true" 
+  (onColReorder)="onColReorder($event)"
   [rows]="rowsNumber" 
   scrollHeight="flex"
   [scrollable]="true" 
   [virtualScroll]="true" 
   [virtualScrollDelay]="150" 
   [virtualRowHeight]="54"
-  (onLazyLoad)="onLazyLoad($event)" 
   [lazy]="true" 
   [lazyLoadOnInit]="false" 
+  (onLazyLoad)="onLazyLoad($event)" 
   [loading]="loading"
   [totalRecords]="totalRecords" 
+  styleClass="p-table-scripta-archivi-list" 
   [ngClass]="{'table-zero-rows': totalRecords === 0}"
   tableStyleClass="archiviolist-table-body">
   <!-- HEADER & ORDINAMENTO ---->
@@ -52,10 +52,9 @@
                 <li>Seleziona il livello Tutti e scrivi una numerazione gerarchica completa (es 23-1/2018) per trovare immediatamente il fascicolo desiderato</li>
                 <li>Non ti ricordi l'esatta numerazione? Inserisci quello che ti ricordi a partire dal livello più importante, ad es. con 23- troverari tutti i sottofascioli/inserti figli del fascicolo 23</li>
               </ul>
-              Ricorda: usa poi il filtro sulla data di creazione o altri ancora per trovare più facilmente ciò che desideri.
+              Ricorda: Non cercare qui immettendo solo l'anno, usa il filtro sull'anno di creazione o altri ancora per trovare più facilmente ciò che desideri.
             </ng-template>
           </p-overlayPanel>
-
         </span>
       </th>
     </tr>
@@ -267,7 +266,7 @@
                   pInputText 
                   [ngModel]="value"
                   type="text" 
-                  placeholder="x-x-x/xxxx"
+                  placeholder="x-x-x/aaaa"
                   (keydown.enter)="onEnterNumerazioneGerarchica(inputnumerazionegerarchica?.value)" />
               </ng-template>
             </p-columnFilter>
@@ -390,10 +389,11 @@
           {{rowData.idStruttura?.nome}}
         </div>
         <div *ngSwitchCase="'idVicari'"
-          [pTooltip]="rowData.descrizionePersonaVicarioList != '' ? rowData.descrizionePersonaVicarioList : 'Nessun vicario selezionato'"
+          [pTooltip]="rowData.descrizionePersonaVicarioList != '' ? tooltipsVicari(rowData.descrizionePersonaVicarioList) : 'Nessun vicario selezionato'"
+          [escape] = "false"
           tooltipPosition="top">
           <span *ngFor="let v of rowData.descrizionePersonaVicarioList" class="vicari-item">
-            {{v}}
+            {{v}} 
           </span>
         </div>
       </td>

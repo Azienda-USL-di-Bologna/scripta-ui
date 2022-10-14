@@ -1,13 +1,12 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { AttivitaService } from '@bds/internauta-model';
-import { Applicazione, ApplicazioneService, Archivio, ArchivioDetail, ArchivioService, Attivita, AttoreArchivio, AttoreArchivioService, Azienda, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, Persona, Ruolo, RuoloAttoreArchivio, Struttura, UtenteStruttura } from '@bds/internauta-model';
+import { Applicazione, ApplicazioneService, Archivio, Attivita, AttoreArchivio, AttoreArchivioService, Azienda, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, Persona, Ruolo, RuoloAttoreArchivio, Struttura, UtenteStruttura } from '@bds/internauta-model';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
-import { BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity, PagingConf, SortDefinition, SORT_MODES } from '@bds/next-sdr';
+import { BatchOperation, BatchOperationTypes, NextSdrEntity, PagingConf, SortDefinition, SORT_MODES } from '@bds/next-sdr';
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs/internal/Subscription';
-import { APPLICATION } from 'src/environments/app-constants';
 import { PermessiDettaglioArchivioService } from '../permessi-dettaglio-archivio.service';
 
 @Component({
@@ -76,6 +75,11 @@ export class ResponsabiliComponent implements OnInit {
     } else {
       this.ruoliList = [{ value: RuoloAttoreArchivio.VICARIO, label: "Vicario"}];
     }
+    //voglio che i vicari che non hanno struttura, vengano mostrati con la struttura di appartenenza diretta/unificata
+    this.responsabiliArchivi.forEach( resp => {
+      if (resp.ruolo === "VICARIO"){
+        this.loadStruttureAttore(resp);
+      }})
   }
 
 
@@ -116,12 +120,13 @@ export class ResponsabiliComponent implements OnInit {
     console.log(attoreToOperate.id)
     attoreToOperate.idArchivio = { id: this.archivio.id } as Archivio;
     attoreToOperate.idPersona = { id: attore.idPersona.id } as Persona;
-    attoreToOperate.idStruttura = { id: attore.idStruttura.id } as Struttura;
+    attoreToOperate.idStruttura = { id: attore.idStruttura?.id } as Struttura;
     attoreToOperate.ruolo = attore.ruolo;
     attoreToOperate.version = attore.version;
     switch (operation) {
       case "INSERT":
         if(attoreToOperate.ruolo === "VICARIO") {
+          attoreToOperate.idStruttura = null;
           this.subscriptions.push(this.attoreArchivioService.postHttpCall(attoreToOperate, this.attoreArchivioProjection)
             .subscribe({
               next: (attoreRes: AttoreArchivio) => {
@@ -155,7 +160,7 @@ export class ResponsabiliComponent implements OnInit {
           attoreArchivioBody.version = attoreToOperate.version;
           attoreArchivioBody.dataInserimentoRiga = attoreToOperate.dataInserimentoRiga;
           attoreArchivioBody.ruolo= RuoloAttoreArchivio.RESPONSABILE_PROPOSTO;
-          attoreArchivioBody.idStruttura = attoreToOperate.idStruttura;
+          attoreArchivioBody.idStruttura = attoreToOperate?.idStruttura;
 
           batchOperations.push({
             operation: BatchOperationTypes.INSERT,
@@ -218,6 +223,9 @@ export class ResponsabiliComponent implements OnInit {
         }
         break;
       case "UPDATE":
+        if(attoreToOperate.ruolo === "VICARIO") {
+          attoreToOperate.idStruttura = null;
+        }
         this.subscriptions.push(this.attoreArchivioService.patchHttpCall(attoreToOperate, attoreToOperate.id, this.attoreArchivioProjection)
         .subscribe({
           next: (attoreRes: AttoreArchivio) => {
@@ -327,7 +335,9 @@ export class ResponsabiliComponent implements OnInit {
    public onUtenteStrutturaSelected(utenteStruttura: UtenteStruttura, attore: AttoreArchivio) {
     if (utenteStruttura) {
       attore.idPersona =  utenteStruttura.idUtente.idPersona;
-      attore.idStruttura = utenteStruttura.idStruttura;
+      if( attore.ruolo !== "VICARIO") {
+        attore.idStruttura = utenteStruttura.idStruttura;
+      }
       console.log("attore", attore)
       this.loadStruttureAttore(attore);
     }
@@ -344,15 +354,30 @@ export class ResponsabiliComponent implements OnInit {
         (data: any) => {
           if (data && data.results) {
             const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]> data.results;
-            if (attore.idStruttura) {
+            if (attore.ruolo !== "VICARIO") {
+              if (attore.idStruttura) {
+                attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
+                  return us.idStruttura.id === attore.idStruttura.id
+                })?.idStruttura;
+              }
+              this.struttureAttoreInEditing = [];
+              utentiStruttura
+                .filter((us: UtenteStruttura) => us.attivo === true)
+                .forEach((us: UtenteStruttura) => { this.struttureAttoreInEditing.push(us.idStruttura) });
+            } else {
               attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
-                return us.idStruttura.id === attore.idStruttura.id
+                return us.idAfferenzaStruttura.id === 1 
               })?.idStruttura;
+              if (attore.idStruttura == null) {
+                attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
+                  return us.idAfferenzaStruttura.id === 9;
+                })?.idStruttura;
+              }
+              this.struttureAttoreInEditing = []
+              this.struttureAttoreInEditing.push(attore.idStruttura);
+              console.log(this.struttureAttoreInEditing)
             }
-            this.struttureAttoreInEditing = [];
-            utentiStruttura
-              .filter((us: UtenteStruttura) => us.attivo === true)
-              .forEach((us: UtenteStruttura) => { this.struttureAttoreInEditing.push(us.idStruttura) });
+            
           }
         }
       ));

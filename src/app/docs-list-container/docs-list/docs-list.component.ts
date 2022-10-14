@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
-import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail } from "@bds/internauta-model";
+import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc } from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { buildLazyEventFiltersAndSorts } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from "@bds/next-sdr";
@@ -13,7 +13,7 @@ import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
 import { first } from 'rxjs/operators'
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
-import { Impostazioni } from "../../utilities/utils";
+import { Impostazioni, ImpostazioniDocList } from "../../utilities/utils";
 import { cols, colsCSV, DocsListMode, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
@@ -34,9 +34,11 @@ import { AppService } from "src/app/app.service";
   styleUrls: ["./docs-list.component.scss"]
 })
 export class DocsListComponent implements OnInit, OnDestroy, TabComponent, CaptionReferenceTableComponent, CaptionSelectButtonsComponent {
+  @Output() showRightPanel = new EventEmitter<{showPanel: boolean, rowSelected: ExtendedDocDetailView }>();
   @Input() data: any;
   private subscriptions: Subscription[] = [];
   private loadDocsListSubscription: Subscription;
+  private loadDocsListCountSubscription: Subscription;
   private pageConf: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 0, offset: 0 } };
   private utenteUtilitiesLogin: UtenteUtilities;
   private resetDocsArrayLenght: boolean = true;
@@ -83,6 +85,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public loading: boolean = false;
   public initialSortField: string = "dataCreazione";
   public exportCsvInProgress: boolean = false;
+  public rowCountInProgress: boolean = false;
+  public rowCount: number;
   public selectButtonItems: SelectButtonItem[];
   public selectedButtonItem: SelectButtonItem = {
     title: "",
@@ -103,6 +107,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public aziendeFiltrabiliFiltered: any[];
   public loggedUserCanRestoreArchiviation: boolean = false;
   public loggedUserCanDeleteArchiviation: boolean = false;
+  public docSelected: ExtendedDocDetailView;
 
   private _archivio: Archivio;
   get archivio(): Archivio { return this._archivio; }
@@ -141,6 +146,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.subscriptions.push(
       this.loginService.loggedUser$.pipe(first()).subscribe(
         (utenteUtilities: UtenteUtilities) => {
+          console.log(utenteUtilities);
           this.utenteUtilitiesLogin = utenteUtilities;
           this.isSegretario = this.utenteUtilitiesLogin.getUtente().struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
           this.calcDocListModeItem();
@@ -160,8 +166,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           }
         }
       )
+      
     );
-
+    if(this.utenteUtilitiesLogin.isCA() === false && this.utenteUtilitiesLogin.isCI() === false) {
+      this.tipologiaVisualizzazioneObj = this.tipologiaVisualizzazioneObj.filter(item => item.nome != "Registro giornaliero");
+    }
+   
+   
     /* this.subscriptions.push(
       this.confirmatationService.requireConfirmation$.subscribe((confirmation: Confirmation) => {
         if (confirmation === null) {
@@ -188,18 +199,18 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.selectButtonItems = [];
     this.selectButtonItems.push(
       {
-        title: "Tutti i documenti che posso vedere",
-        label: "Visibili", 
-        // icon: "pi pi-fw pi-list", 
-        routerLink: ["./" + DOCS_LIST_ROUTE], 
-        queryParams: {"mode": DocsListMode.DOCUMENTI_VISIBILI}
-      },
-      {
         title: "",
         label: "Miei  documenti", 
         // icon: "pi pi-fw pi-list", 
         routerLink: ["./" + DOCS_LIST_ROUTE], 
         queryParams: {"mode": DocsListMode.MIEI_DOCUMENTI}
+      },
+      {
+        title: "Tutti i documenti che posso vedere",
+        label: "Visibili", 
+        // icon: "pi pi-fw pi-list", 
+        routerLink: ["./" + DOCS_LIST_ROUTE], 
+        queryParams: {"mode": DocsListMode.DOCUMENTI_VISIBILI}
       },
     )
     
@@ -361,6 +372,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     let impostazioniVisualizzazioneObj: Impostazioni;
     if (impostazioniVisualizzazione && impostazioniVisualizzazione !== "") {
       impostazioniVisualizzazioneObj = JSON.parse(impostazioniVisualizzazione) as Impostazioni;
+      if (!impostazioniVisualizzazioneObj["scripta.docList"]) {
+				impostazioniVisualizzazioneObj["scripta.docList"] = {} as ImpostazioniDocList;
+			}
     } else {
       impostazioniVisualizzazioneObj = {
         "scripta.docList": {}
@@ -518,7 +532,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Risetta la configurazione pagine e chiama la laoddata
    * Mantiene i filtri
    */
-  public resetPaginationAndLoadData(): void {
+  public resetPaginationAndLoadData(idDocListToSelect?: number[]): void {
     this.resetDocsArrayLenght = true;
     if (!!!this.storedLazyLoadEvent) {
       this.storedLazyLoadEvent = {};
@@ -530,7 +544,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
     }
 
-    this.loadData();
+    this.loadData(idDocListToSelect);
   }
 
   /**
@@ -623,12 +637,36 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     return filterAndSort;
   }
 
+
+  private loadCount(serviceToUse: NextSDREntityProvider, projectionFotGetData: string, filtersAndSorts: FiltersAndSorts, lazyFiltersAndSorts: FiltersAndSorts): void {
+    this.rowCountInProgress = true;
+    if (this.loadDocsListCountSubscription) {
+      this.loadDocsListCountSubscription.unsubscribe();
+      this.loadDocsListCountSubscription = null;
+    }
+    const pageConf: PagingConf = { mode: "LIMIT_OFFSET", conf: { limit: 1, offset: 0 } };
+    //private pageConfNoLimit: PagingConf = {conf: {page: 0,size: 999999},mode: "PAGE_NO_COUNT"};
+    this.loadDocsListCountSubscription = serviceToUse.getData(
+      projectionFotGetData,
+      filtersAndSorts,
+      lazyFiltersAndSorts,
+      pageConf).subscribe({
+        next: (data: any) => {
+          this.rowCount = data.page.totalElements;
+          this.rowCountInProgress = false;
+        },
+        error: (err) => {
+          console.log("Non sono riuscito a fare il count")
+        }
+      });
+  }
+
   /**
    * Builda i filtri della tabella. Aggiunge eventuali altri filtri.
    * Carica i docs per la lista.
    * @param event
    */
-  private loadData(): void { 
+  private loadData(idDocListToSelect?: number[]): void { 
     this.loading = true;
     this.pageConf.conf = {
       limit: this.storedLazyLoadEvent.rows,
@@ -639,10 +677,12 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.loadDocsListSubscription = null;
     }
     const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+    const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
+    this.loadCount(this.serviceForGetData, this.projectionFotGetData, filtersAndSorts, lazyFiltersAndSorts);
     this.loadDocsListSubscription = this.serviceForGetData.getData(
       this.projectionFotGetData,
       filtersAndSorts,
-      buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
+      lazyFiltersAndSorts,
       this.pageConf).subscribe({
         next: (data: any) => {
           console.log(data);
@@ -666,6 +706,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
             Array.prototype.splice.apply(this.docs, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
           }
           this.docs = [...this.docs]; // trigger change detection
+
+          if (idDocListToSelect && idDocListToSelect.length > 0) {
+            const index = this.docs.findIndex(d => d.id === idDocListToSelect[0]);
+            if (index) {
+              this.docSelected = this.docs[index];
+            }
+          }
         },
         error: (err) => {
           if(err.error.message == "Persona senza permesso su Archivio"){
@@ -725,11 +772,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    */
   public filterPersone(event: any) {
     const filtersAndSorts = new FiltersAndSorts();
-    filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.containsIgnoreCase, event.query));
+    filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.startsWith, event.query));
     this.aziendeFiltrabili.forEach(a => {
       if ((typeof a.value) === "number")
         filtersAndSorts.addFilter(new FilterDefinition("utenteList.idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
     });
+    
+    filtersAndSorts.addSort(new SortDefinition("descrizione", SORT_MODES.asc));
     this.personaService.getData(null, filtersAndSorts, null)
       .subscribe(res => {
         if (res && res.results) {
@@ -807,6 +856,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       if ((typeof a.value) === "number")
         filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
     });
+    filtersAndSorts.addFilter(new FilterDefinition("ufficio", FILTER_TYPES.not_string.equals, false));
+    filtersAndSorts.addSort(new SortDefinition("attiva", SORT_MODES.desc));
+    filtersAndSorts.addSort(new SortDefinition("nome", SORT_MODES.asc));
     this.strutturaService.getData("StrutturaWithIdAzienda", filtersAndSorts, null)
       .subscribe(res => {
         if (res && res.results) {
@@ -1228,13 +1280,49 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     }
   }
   
+  /*funzioncina per fare il tooltip carino*/
+	public tooltipsUtenti(destString : string[]):string {
+		let temp:string = ``;
+      for(let i = 0; i <  destString.length  ; i++){
+		if(i == destString.length - 1){
+			temp+=`<span>${destString[i]}</span><br>`;
+		}
+		else{
+			temp+=`<span>${destString[i]},</span><br>`;
+		}
+      }
+	  return temp;
+	}
+
   /**
    * Apre il tab per l'archivio corrisondente alla fasciolazione
    * @param f 
    */
-  public openArchive(archivioDoc: ArchivioDoc, doc: ExtendedDocDetailView) {
+  public openArchive(archivioDoc: ArchivioDoc, doc: ExtendedDocDetailView): void {
     this.navigationTabsService.addTabArchivio(archivioDoc.idArchivio);
 		this.appService.appNameSelection("Fascicolo "+ archivioDoc.idArchivio.numerazioneGerarchica + " [" + archivioDoc.idArchivio.idAzienda.aoo + "]");
+  }
+
+  public openDetailAndPreview(doc: ExtendedDocDetailView): void {
+    this.showRightPanel.emit({
+      showPanel: true,
+      rowSelected: doc
+    });
+  }
+
+  public onRowSelect(event: any): void {
+    if (this.archivio) {
+      this.openDetailAndPreview(event.data);
+    }
+  }
+
+  public onRowUnselect(event: any): void {
+    if (this.archivio) {
+      this.showRightPanel.emit({
+        showPanel: false,
+        rowSelected: null
+      });
+    }
   }
 
   /**
