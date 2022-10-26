@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteService, UtenteStruttura, UtenteStrutturaService } from '@bds/internauta-model';
+import { AfferenzaStruttura, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteService, UtenteStruttura, UtenteStrutturaService } from '@bds/internauta-model';
 import { AppService } from '../../app.service';
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { Subscription, combineLatestWith } from 'rxjs';
@@ -1150,19 +1150,20 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		archivioBozza.numerazioneGerarchica = "x/x";
 		archivioBozza.idAzienda = {id: idAzienda} as Azienda;
 		archivioBozza.attoriList = [];
-		let strutturaCreatore = new Struttura();
+		const strutturaCreatore = new Struttura();
 		const filterAndSort = new FiltersAndSorts();
 		filterAndSort.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, idAzienda));
 		filterAndSort.addFilter(new FilterDefinition("idUtente.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().id));
-		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.id", FILTER_TYPES.not_string.equals, 1));
-		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.id", FILTER_TYPES.not_string.equals, 9));
-		this.utenteStrutturaService.getData("UtenteStrutturaWithPlainFields",filterAndSort,null,null).subscribe((utenteStruttura ) =>  
-			{
-			if(utenteStruttura.results.some((a: UtenteStruttura) => a.fk_idAfferenzaStruttura.id === 1)) {
-				let utenteStrutturaResp = utenteStruttura.results.find((a: UtenteStruttura) => a.fk_idAfferenzaStruttura.id == 1)
-				 strutturaCreatore.id = utenteStrutturaResp.fk_idStruttura.id;
-			} else {
-				strutturaCreatore.id = utenteStruttura.results.find((a: UtenteStruttura) => a.fk_idAfferenzaStruttura.id == 9).fk_idStruttura.id;
+		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "DIRETTA"));
+		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "UNIFICATA"));
+		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "FUNZIONALE"));
+		this.utenteStrutturaService.getData("UtenteStrutturaWithIdAfferenzaStruttura", filterAndSort, null, null).subscribe((res) => {
+			strutturaCreatore.id = (res.results as UtenteStruttura[]).find((a: UtenteStruttura) => a.idAfferenzaStruttura.codice === "DIRETTA")?.fk_idStruttura?.id;
+			if (!strutturaCreatore.id) {
+				strutturaCreatore.id = (res.results as UtenteStruttura[]).find((a: UtenteStruttura) => a.idAfferenzaStruttura.codice === "UNIFICATA")?.fk_idStruttura?.id;
+			}
+			if (!strutturaCreatore.id) {
+				strutturaCreatore.id = (res.results as UtenteStruttura[]).find((a: UtenteStruttura) => a.idAfferenzaStruttura.codice === "FUNZIONALE")?.fk_idStruttura?.id;
 			}
 			
 			const idPersonaCreazione = new AttoreArchivio();
