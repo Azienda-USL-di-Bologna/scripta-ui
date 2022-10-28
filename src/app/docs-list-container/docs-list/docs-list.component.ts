@@ -146,31 +146,33 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.subscriptions.push(
       this.loginService.loggedUser$.pipe(first()).subscribe(
         (utenteUtilities: UtenteUtilities) => {
-          console.log(utenteUtilities);
-          this.utenteUtilitiesLogin = utenteUtilities;
-          this.isSegretario = this.utenteUtilitiesLogin.getUtente().struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
-          this.calcDocListModeItem();
-          this.selectedButtonItem = this.selectButtonItems.filter(element => element.queryParams.mode === this.docsListMode)[0];
-          if (this.docsListMode) {
-            this.calcolaAziendeFiltrabili();
-          }
-        
-          if (!!!this.archivio) { 
-            this.loadConfigurationAndSetItUp();
-          } else { 
-            this.setColumnsPerDetailArchivio();
+          console.log("MIAO",utenteUtilities);
+          if (utenteUtilities) {
+            this.utenteUtilitiesLogin = utenteUtilities;
+            this.isSegretario = this.utenteUtilitiesLogin.getUtente().struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
+            this.calcDocListModeItem();
+            this.selectedButtonItem = this.selectButtonItems.filter(element => element.queryParams.mode === this.docsListMode)[0];
+            if (this.docsListMode) {
+              this.calcolaAziendeFiltrabili();
+            }
 
-            const bit = this.archivio.permessiEspliciti.find((permessoArchivio: PermessoArchivio) => permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit;
-            this.loggedUserCanRestoreArchiviation = bit >= DecimalePredicato.VICARIO;
-            this.loggedUserCanDeleteArchiviation = bit >= DecimalePredicato.ELIMINA;
+            if (this.utenteUtilitiesLogin.isCA() === false && this.utenteUtilitiesLogin.isCI() === false) {
+              this.tipologiaVisualizzazioneObj = this.tipologiaVisualizzazioneObj.filter(item => item.value !== TipologiaDoc.DOCUMENT_REGISTRO);
+            }
+          
+            if (!!!this.archivio) { 
+              this.loadConfigurationAndSetItUp();
+            } else { 
+              this.setColumnsPerDetailArchivio();
+              const bit = this.archivio.permessiEspliciti.find((permessoArchivio: PermessoArchivio) => permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit;
+              this.loggedUserCanRestoreArchiviation = bit >= DecimalePredicato.VICARIO;
+              this.loggedUserCanDeleteArchiviation = bit >= DecimalePredicato.ELIMINA;
+            }
           }
         }
       )
-      
     );
-    if(this.utenteUtilitiesLogin.isCA() === false && this.utenteUtilitiesLogin.isCI() === false) {
-      this.tipologiaVisualizzazioneObj = this.tipologiaVisualizzazioneObj.filter(item => item.nome != "Registro giornaliero");
-    }
+    
    
    
     /* this.subscriptions.push(
