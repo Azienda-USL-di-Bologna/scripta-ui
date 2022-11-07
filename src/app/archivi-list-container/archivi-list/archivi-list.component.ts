@@ -1,15 +1,16 @@
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio } from '@bds/internauta-model';
+import { AfferenzaStruttura, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteService, UtenteStruttura, UtenteStrutturaService } from '@bds/internauta-model';
 import { AppService } from '../../app.service';
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
-import { Subscription, combineLatest } from 'rxjs';
+import { Subscription, combineLatestWith } from 'rxjs';
+import { first } from 'rxjs/operators'
 import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
 import { ArchiviListMode, cols, colsCSV, TipoArchivioTraduzioneVisualizzazione, StatoArchivioTraduzioneVisualizzazione } from './archivi-list-constants';
 import { ActivatedRoute } from '@angular/router';
 import { ValueAndLabelObj } from '../../docs-list-container/docs-list/docs-list.component';
-import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf } from '@bds/next-sdr';
+import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from '@bds/next-sdr';
 import { ColumnFilter, Table } from 'primeng/table';
-import { Impostazioni } from '../../utilities/utils';
+import { Impostazioni, ImpostazioniArchiviList } from '../../utilities/utils';
 import { ConfirmationService, FilterOperator, LazyLoadEvent, MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListService } from './archivi-list.service';
 import { Calendar } from 'primeng/calendar';
@@ -71,6 +72,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		{ value: [1,2,3], label: "Tutti" }
 	];
 	public exportCsvInProgress: boolean = false;
+	public rowCountInProgress: boolean = false;
+  public rowCount: number;
 	public selectableColumns: ColonnaBds[] = [];
 	private mandatoryColumns: string[] = [];
 	public rowsNumber: number = 20;
@@ -80,6 +83,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public filtriPuliti: boolean = true;
 	private storedLazyLoadEvent: LazyLoadEvent;
 	private loadArchiviListSubscription: Subscription;
+	private loadArchiviListCountSubscription: Subscription;
 	private serviceToGetData: NextSDREntityProvider = null;
 	private projectionToGetData: string = null;
 	private lastDataCreazioneFilterValue: Date[];
@@ -132,7 +136,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		private strutturaService: StrutturaService,
 		private personaService: PersonaService,
 		private configurazioneService: ConfigurazioneService,
-		private datepipe: DatePipe
+		private datepipe: DatePipe,
+		private utenteStrutturaService: UtenteStrutturaService
 	) { }
 
 	ngOnInit(): void {
@@ -142,14 +147,21 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		if (!Object.values(ArchiviListMode).includes(this.archiviListMode)) {
 			this.archiviListMode = ArchiviListMode.VISIBILI;
 		}
+		
 		//this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } });
-
+		const loggeduser$ = this.loginService.loggedUser$.pipe(first());
+		const parametroFascicoliParlanti$ = this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null).pipe(first());
 		this.subscriptions.push(
-			combineLatest(
-				this.loginService.loggedUser$,
-				this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null)
-			).subscribe(
-				([utenteUtilities, parametriAziende]: [UtenteUtilities, ParametroAziende[]]) => {
+			loggeduser$.pipe(combineLatestWith(parametroFascicoliParlanti$))
+			.subscribe(
+				/* [
+					this.loginService.loggedUser$,
+					this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null)
+				], */
+				([
+					utenteUtilities/* : UtenteUtilities */, 
+					parametriAziende/* : ParametroAziende[] */
+				]) => {
 					// Parte relativa al parametro aziendale
 					if (parametriAziende && parametriAziende[0]) {
 						this.fascicoliParlanti = JSON.parse(parametriAziende[0].valore || false);
@@ -224,7 +236,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.mandatoryColumns.push("idAzienda");
 		}
 		
-
 		this.selectableColumns = cols.map(e => {
 			if (this.mandatoryColumns.includes(e.field)) {
 				e.selectionDisabled = true;
@@ -247,11 +258,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				});
 			}
 		}
-
 		// Configurazione non presente o errata. Uso quella di default.
 		if (!this._selectedColumns || this._selectedColumns.length === 0) {
 			this._selectedColumns = this.cols.filter(c => c.default);
 		}
+		
+		
 	}
 
 	/**
@@ -337,7 +349,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				// icon: "pi pi-fw pi-list", 
 				routerLink: ["./" + ARCHIVI_LIST_ROUTE],
 				queryParams: { "mode": ArchiviListMode.RECENTI },
-				disabled: true
+				disabled: false
 			},
 			{
 				title: "I miei fascicoli preferiti",
@@ -345,7 +357,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				// icon: "pi pi-fw pi-list", 
 				routerLink: ["./" + ARCHIVI_LIST_ROUTE],
 				queryParams: { "mode": ArchiviListMode.PREFERITI },
-				disabled: true
+				disabled: false
 			},
 			// {
 			//   title: "I fascicoli frequenti",
@@ -404,6 +416,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		let impostazioniVisualizzazioneObj: Impostazioni;
 		if (impostazioniVisualizzazione && impostazioniVisualizzazione !== "") {
 			impostazioniVisualizzazioneObj = JSON.parse(impostazioniVisualizzazione) as Impostazioni;
+			if (!impostazioniVisualizzazioneObj["scripta.archiviList"]) {
+				impostazioniVisualizzazioneObj["scripta.archiviList"] = {} as ImpostazioniArchiviList;
+			}
 		} else {
 			impostazioniVisualizzazioneObj = {
 				"scripta.archiviList": {}
@@ -523,6 +538,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				if (this.archivioPadre) {
 					// Nel caso di dettaglio archivio non voglio imporre un filtro sul livello
 					this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
+					
 				} else {
 					this.livelloValue = [1];
 				}
@@ -550,6 +566,29 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		}
 	}
 
+	private loadCount(serviceToUse: NextSDREntityProvider, projectionFotGetData: string, filtersAndSorts: FiltersAndSorts, lazyFiltersAndSorts: FiltersAndSorts): void {
+    this.rowCountInProgress = true;
+    if (this.loadArchiviListCountSubscription) {
+      this.loadArchiviListCountSubscription.unsubscribe();
+      this.loadArchiviListCountSubscription = null;
+    }
+    const pageConf: PagingConf = { mode: "LIMIT_OFFSET", conf: { limit: 1, offset: 0 } };
+    //private pageConfNoLimit: PagingConf = {conf: {page: 0,size: 999999},mode: "PAGE_NO_COUNT"};
+    this.loadArchiviListCountSubscription = serviceToUse.getData(
+      projectionFotGetData,
+      filtersAndSorts,
+      lazyFiltersAndSorts,
+      pageConf).subscribe({
+        next: (data: any) => {
+          this.rowCount = data.page.totalElements;
+          this.rowCountInProgress = false;
+        },
+        error: (err) => {
+          console.log("Non sono riuscito a fare il count")
+        }
+      });
+  }
+
 	/**
 	 * Builda i filtri della tabella. Aggiunge eventuali altri filtri.
 	 * Carica i docs per la lista.
@@ -567,10 +606,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.loadArchiviListSubscription = null;
 		}
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
+		this.loadCount(this.serviceToGetData, this.projectionToGetData, filtersAndSorts, lazyFiltersAndSorts);
 		this.loadArchiviListSubscription = this.serviceToGetData.getData(
 			this.projectionToGetData,
 			filtersAndSorts,
-			buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
+			lazyFiltersAndSorts,
 			this.pageConf).subscribe((data: any) => {
 				console.log(data);
 				this.totalRecords = data.page.totalElements;
@@ -758,11 +799,13 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
  */
 	public filterPersone(event: any) {
 		const filtersAndSorts = new FiltersAndSorts();
-		filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.containsIgnoreCase, event.query));
+		filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.startsWith, event.query));
 		this.aziendeFiltrabili.forEach(a => {
 			if ((typeof a.value) === "number")
 				filtersAndSorts.addFilter(new FilterDefinition("utenteList.idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
 		});
+		
+		filtersAndSorts.addSort(new SortDefinition("nome", SORT_MODES.asc));
 		this.personaService.getData(null, filtersAndSorts, null)
 			.subscribe(res => {
 				if (res && res.results) {
@@ -1107,58 +1150,95 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		archivioBozza.numerazioneGerarchica = "x/x";
 		archivioBozza.idAzienda = {id: idAzienda} as Azienda;
 		archivioBozza.attoriList = [];
-
-		const idPersonaCreazione = new AttoreArchivio();
-		idPersonaCreazione.idPersona = {
-			id: this.utenteUtilitiesLogin.getUtente().idPersona.id
-		} as Persona;
-		idPersonaCreazione.ruolo = RuoloAttoreArchivio.CREATORE;
-		archivioBozza.attoriList.push(idPersonaCreazione);
-
-		if (this.archivioPadre) {
-			archivioBozza.livello = this.archivioPadre.livello + 1;
-			archivioBozza.idTitolo = { id: this.archivioPadre.idTitolo.id } as Titolo;
-			if (this.archivioPadre.idMassimario) {
-				archivioBozza.idMassimario = { id: this.archivioPadre.idMassimario.id } as Massimario;
+		const strutturaCreatore = new Struttura();
+		const filterAndSort = new FiltersAndSorts();
+		filterAndSort.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, idAzienda));
+		filterAndSort.addFilter(new FilterDefinition("idUtente.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().id));
+		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "DIRETTA"));
+		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "UNIFICATA"));
+		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "FUNZIONALE"));
+		this.utenteStrutturaService.getData("UtenteStrutturaWithIdAfferenzaStruttura", filterAndSort, null, null).subscribe((res) => {
+			strutturaCreatore.id = (res.results as UtenteStruttura[]).find((a: UtenteStruttura) => a.idAfferenzaStruttura.codice === "DIRETTA")?.fk_idStruttura?.id;
+			if (!strutturaCreatore.id) {
+				strutturaCreatore.id = (res.results as UtenteStruttura[]).find((a: UtenteStruttura) => a.idAfferenzaStruttura.codice === "UNIFICATA")?.fk_idStruttura?.id;
 			}
-			archivioBozza.anniTenuta = this.archivioPadre.anniTenuta;
-			archivioBozza.tipo =  this.archivioPadre.tipo;
-			archivioBozza.idAzienda = { id: this.archivioPadre?.idAzienda.id } as Azienda;
-			archivioBozza.numerazioneGerarchica = this.archivioPadre.numerazioneGerarchica.replace("/", "-x/");
-			archivioBozza.idArchivioPadre = { id: this.archivioPadre.id } as Archivio;
-			if (this.archivioPadre.fk_idArchivioRadice?.id) {
-				archivioBozza.idArchivioRadice = { id: this.archivioPadre.fk_idArchivioRadice.id } as Archivio;
+			if (!strutturaCreatore.id) {
+				strutturaCreatore.id = (res.results as UtenteStruttura[]).find((a: UtenteStruttura) => a.idAfferenzaStruttura.codice === "FUNZIONALE")?.fk_idStruttura?.id;
 			}
-			this.archivioPadre.attoriList.filter(a => [RuoloAttoreArchivio.RESPONSABILE, RuoloAttoreArchivio.RESPONSABILE_PROPOSTO, RuoloAttoreArchivio.VICARIO].includes(a.ruolo)).forEach(attore => {
-				const newAttore = new AttoreArchivio();
-				newAttore.idPersona = {
-					id: attore.fk_idPersona.id
-				} as Persona;
-				if (attore.fk_idStruttura && attore.fk_idStruttura.id) {
-					newAttore.idStruttura = {
-						id: attore.fk_idStruttura.id
-					} as Struttura;
-				}
-				newAttore.ruolo = attore.ruolo;
-				archivioBozza.attoriList.push(newAttore);
-			});
-		} else {
-			const idPersonaResponsabile = new AttoreArchivio();
-			idPersonaResponsabile.idPersona = {
+			
+			const idPersonaCreazione = new AttoreArchivio();
+			idPersonaCreazione.idPersona = {
 				id: this.utenteUtilitiesLogin.getUtente().idPersona.id
 			} as Persona;
-			idPersonaResponsabile.ruolo = RuoloAttoreArchivio.RESPONSABILE;
-			//debugger;
-			//idPersonaResponsabile.idStruttura = this.utenteUtilitiesLogin.getUtente().utenteStrutturaList.find(us => us.idAfferenzaStruttura.codice === )
-			archivioBozza.attoriList.push(idPersonaResponsabile);
-		}   
+			idPersonaCreazione.ruolo = RuoloAttoreArchivio.CREATORE;
+			archivioBozza.attoriList.push(idPersonaCreazione);
 
-		this.subscriptions.push(this.archivioService.postHttpCall(
+			if (this.archivioPadre) {
+				archivioBozza.livello = this.archivioPadre.livello + 1;
+				archivioBozza.idTitolo = { id: this.archivioPadre.idTitolo.id } as Titolo;
+				if (this.archivioPadre.idMassimario) {
+					archivioBozza.idMassimario = { id: this.archivioPadre.idMassimario.id } as Massimario;
+				}
+				archivioBozza.anniTenuta = this.archivioPadre.anniTenuta;
+				archivioBozza.tipo =  this.archivioPadre.tipo;
+				archivioBozza.idAzienda = { id: this.archivioPadre?.idAzienda.id } as Azienda;
+				archivioBozza.numerazioneGerarchica = this.archivioPadre.numerazioneGerarchica.replace("/", "-x/");
+				archivioBozza.idArchivioPadre = { id: this.archivioPadre.id } as Archivio;
+				if (this.archivioPadre.fk_idArchivioRadice?.id) {
+					archivioBozza.idArchivioRadice = { id: this.archivioPadre.fk_idArchivioRadice.id } as Archivio;
+				}
+				this.archivioPadre.attoriList.filter(a => [RuoloAttoreArchivio.RESPONSABILE, RuoloAttoreArchivio.RESPONSABILE_PROPOSTO, RuoloAttoreArchivio.VICARIO].includes(a.ruolo)).forEach(attore => {
+					const newAttore = new AttoreArchivio();
+					newAttore.idPersona = {
+						id: attore.fk_idPersona.id
+					} as Persona;
+					// non si vuole più che il vicario abbia la struttura 
+					if (attore.fk_idStruttura && attore.fk_idStruttura.id && attore.ruolo != "VICARIO") {
+						newAttore.idStruttura = {
+							id: attore.fk_idStruttura.id
+						} as Struttura;
+					}
+					newAttore.ruolo = attore.ruolo;
+					archivioBozza.attoriList.push(newAttore);
+				});
+			} else {
+				const idPersonaResponsabile = new AttoreArchivio();
+				idPersonaResponsabile.idPersona = {
+					id: this.utenteUtilitiesLogin.getUtente().idPersona.id
+				} as Persona;
+				idPersonaResponsabile.idStruttura = {
+					id: strutturaCreatore.id
+				} as Struttura;
+				idPersonaResponsabile.ruolo = RuoloAttoreArchivio.RESPONSABILE;
+				//debugger;
+				//idPersonaResponsabile.idStruttura = this.utenteUtilitiesLogin.getUtente().utenteStrutturaList.find(us => us.idAfferenzaStruttura.codice === )
+				archivioBozza.attoriList.push(idPersonaResponsabile);
+			}   
+			this.subscriptions.push(this.archivioService.postHttpCall(
 				archivioBozza, 
 				ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
 				.subscribe((nuovoArchivioCreato: Archivio) => {      
 					this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
 					this.appService.appNameSelection(`Fascicolo ${nuovoArchivioCreato.numerazioneGerarchica} [${nuovoArchivioCreato.idAzienda.aoo}]`);
-		}));
+			}));
+			})
+
+		
+
+		
+	}
+
+	/*funzioncina per fare il tooltip carino*/
+	public tooltipsVicari(vicariString : string[]):string {
+		let temp:string = ``;
+      for(let i = 0; i <  vicariString.length  ; i++){
+		if(i == vicariString.length - 1){
+			temp+=`<span>${vicariString[i]}</span><br>`;
+		}
+		else{
+			temp+=`<span>${vicariString[i]},</span><br>`;
+		}
+      }
+	  return temp;
 	}
 }

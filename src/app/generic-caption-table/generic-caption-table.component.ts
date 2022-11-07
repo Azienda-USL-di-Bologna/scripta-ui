@@ -24,6 +24,8 @@ export class GenericCaptionTableComponent implements OnInit {
   @ViewChild("aziendaSelection", {}) public aziendaSelection: Menu;
 
   public accessibile: boolean = false;
+  public multiple: boolean = false;
+  public maxSizeUpload: Number = 50000000;
 
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
@@ -34,8 +36,10 @@ export class GenericCaptionTableComponent implements OnInit {
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
-          this.utenteUtilitiesLogin = utenteUtilities;
-          this.accessibile = this.utenteUtilitiesLogin.getUtente().idPersona.accessibilita;
+          if (utenteUtilities) {
+            this.utenteUtilitiesLogin = utenteUtilities;
+            this.accessibile = this.utenteUtilitiesLogin.getUtente().idPersona.accessibilita;
+          }
         }
       )
     );

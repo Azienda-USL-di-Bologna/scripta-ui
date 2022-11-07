@@ -29,7 +29,10 @@
           }
         }
         .hide {
-          display: none;
+          //display: none;
+          position: absolute;
+          top: 999999px;
+          left: 0
         }
         .hide-sottoarchivi {
           .p-splitter-panel:first-child,

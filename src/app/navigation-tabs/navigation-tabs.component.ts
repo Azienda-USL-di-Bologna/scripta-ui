@@ -32,15 +32,15 @@ export class NavigationTabsComponent implements OnInit {
   ) {
     console.log(this.router)
     if (this.router.routerState.snapshot.url.includes("archivilist")) {
-      this.navigationTabsService.activeTabByIndex(0);
+      //this.navigationTabsService.activeTabByIndex(0);
       this.tabIndexToActiveAtTheBeginning = 0;
       this.appService.appNameSelection("Elenco Fascicoli")
     } else if (this.router.routerState.snapshot.url.includes("apridascrivania")) {
-      this.navigationTabsService.activeTabByIndex(0);
+      //this.navigationTabsService.activeTabByIndex(0);
       this.tabIndexToActiveAtTheBeginning = 0;
       this.idArchivioAperturaDaScrivania = this.router.parseUrl(this.router.url).queryParams["id"];
     } else {
-      this.navigationTabsService.activeTabByIndex(1);  
+      //this.navigationTabsService.activeTabByIndex(1);  
       this.tabIndexToActiveAtTheBeginning = 1;
       this.appService.appNameSelection("Elenco Documenti")
     }
@@ -69,35 +69,37 @@ export class NavigationTabsComponent implements OnInit {
       this.subscriptions.push(
         this.loginService.loggedUser$.subscribe(
           (utenteUtilities: UtenteUtilities) => {
-            this.utenteUtilitiesLogin = utenteUtilities;
-            // Mostrare il tab fascicoli solo se è acceso il parametro in una delle aziende dell'utente
-            let idAziendaArray: number[] = [];
-            this.utenteUtilitiesLogin.getUtente().aziende.forEach(elem => {
-              idAziendaArray.push(elem.id);
-            });
-            this.subscriptions.push(
-              this.configurazioneService.getParametriAziende("tabFascicoliScriptaActive", null, idAziendaArray).subscribe(
-                (parametriAziende: ParametroAziende[]) => {
-                  console.log(parametriAziende[0].valore);
-                  const showTabFascicoli = JSON.parse(parametriAziende[0].valore || false);
-                  if (showTabFascicoli) {
+            if (utenteUtilities) {
+              this.utenteUtilitiesLogin = utenteUtilities;
+              // Mostrare il tab fascicoli solo se è acceso il parametro in una delle aziende dell'utente
+              let idAziendaArray: number[] = [];
+              this.utenteUtilitiesLogin.getUtente().aziende.forEach(elem => {
+                idAziendaArray.push(elem.id);
+              });
+              this.subscriptions.push(
+                this.configurazioneService.getParametriAziende("tabFascicoliScriptaActive", null, idAziendaArray).subscribe(
+                  (parametriAziende: ParametroAziende[]) => {
+                    console.log(parametriAziende[0].valore);
+                    const showTabFascicoli = JSON.parse(parametriAziende[0].valore || false);
+                    if (showTabFascicoli) {
+                      this.navigationTabsService.addTab(
+                        this.navigationTabsService.buildaTabArchiviList()
+                      );
+                    }
                     this.navigationTabsService.addTab(
-                      this.navigationTabsService.buildaTabArchiviList()
+                      this.navigationTabsService.buildaTabDocsList()
                     );
+                    this.setTabsAndActiveOneOfThem();
+  
+                    // Tolgo subito queste due sottoscrizioni che mi disturbano quando per qualche motivo riscattano.
+                    this.subscriptions.forEach(
+                      s => s.unsubscribe()
+                    );
+                    this.subscriptions = [];
                   }
-                  this.navigationTabsService.addTab(
-                    this.navigationTabsService.buildaTabDocsList()
-                  );
-                  this.setTabsAndActiveOneOfThem();
-
-                  // Tolgo subito queste due sottoscrizioni che mi disturbano quando per qualche motivo riscattano.
-                  this.subscriptions.forEach(
-                    s => s.unsubscribe()
-                  );
-                  this.subscriptions = [];
-                }
-              )  
-            );
+                )  
+              );
+            }
           }
         )
       ); 
@@ -115,6 +117,7 @@ export class NavigationTabsComponent implements OnInit {
     // this.tabItems.unshift(...allTabs)
     setTimeout(() => {
       this.tabItems = allTabs;
+      this.navigationTabsService.activeTabByIndex(this.tabIndexToActiveAtTheBeginning);
       if (this.idArchivioAperturaDaScrivania) {
         this.archivioService.getByIdHttpCall(this.idArchivioAperturaDaScrivania, 'ArchivioWithIdAziendaAndIdMassimarioAndIdTitolo').subscribe( res => {
           this.navigationTabsService.addTabArchivio(res, true, false);
@@ -136,6 +139,7 @@ export class NavigationTabsComponent implements OnInit {
     } else {
       this.appService.appNameSelection("Fascicolo "+ this.navigationTabsService.getTabs()[tabIndex].label);
     } */
+    console.log("ma scatta subito?")
     this.navigationTabsService.addTabToHistory(tabIndex);
     this.appService.appNameSelection(this.navigationTabsService.getTabs()[tabIndex].labelForAppName);
   }

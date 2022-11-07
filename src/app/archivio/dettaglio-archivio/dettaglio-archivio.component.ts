@@ -4,6 +4,7 @@ import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES , BatchOperation, NextSdrEntity, BatchOperationTypes} from '@bds/next-sdr';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TreeNode } from 'primeng/api/treenode';
+import { AutoComplete } from 'primeng/autocomplete';
 import { TreeSelect } from 'primeng/treeselect';
 import { Subscription } from 'rxjs/internal/Subscription';
 import { AppService } from 'src/app/app.service';
@@ -37,12 +38,14 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public subscriptions: Subscription[] = [];
   public colsResponsabili: any[];
   public aziendeConFascicoliParlanti: number[];
+  public isParlante: boolean = false;
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public selectedClassificazione: TreeNode;
   public selectedArchivioCollegato: Archivio;
   public titoli: TreeNode[];
   public selectedTitolo: TreeNode;
   public filteredMassimari: Massimario[] = [];
+  private massimariPerTittolo: Massimario[] = [];
   public filteredTitoli: Titolo[] = [];
   public tipiArchivioObj: any[] = TipoArchivioTraduzioneVisualizzazione;
   private classificazioneAllaFoglia: boolean = false;
@@ -58,7 +61,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
   private attoreArchivioProjection = ENTITIES_STRUCTURE.scripta.attorearchivio.standardProjections.AttoreArchivioWithIdPersonaAndIdStruttura;
 
-
+  @ViewChild("autocompleteCategoria") public autocompleteCategoria: AutoComplete;
+  
   @ViewChild("noteArea") public noteArea: ElementRef;
   @ViewChild("titoliTreeSelect") public titoliTreeSelect: TreeSelect;
   @Output() public updateArchivio = new EventEmitter<Archivio>();
@@ -96,7 +100,10 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE 
       || a.ruolo === RuoloAttoreArchivio.VICARIO 
       || a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
-      this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
+      // this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
+      if(this.archivio.tipo !== TipoArchivio.SPECIALE) {
+        this.tipiArchivioObj = this.tipiArchivioObj.filter(a => a.value !== TipoArchivio.SPECIALE)
+      }
      this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[]).some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id  && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
     this.loadParametroAziendaleFascicoliParlanti()
   }
@@ -134,14 +141,18 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         this.fascicoliParlanti = JSON.parse(parametriAziende[0].valore || false);
         if (this.fascicoliParlanti) {
           this.aziendeConFascicoliParlanti = parametriAziende[0].idAziende;
+          if(this.aziendeConFascicoliParlanti.includes(this.archivio.idAzienda.id)) {
+            this.isParlante = true;
+          }
         }
       }
+      
     }));
   }
 
 
   public changeVisibilita(): void {
-    if (this.loggedUserIsResponsbaileOrVicario && !this.aziendeConFascicoliParlanti.includes(this.archivio.idAzienda.id)) {
+    if (this.loggedUserIsResponsbaileOrVicario && !this.aziendeConFascicoliParlanti?.includes(this.archivio.idAzienda.id)) {
       this.archivio.riservato = !(this.archivio.riservato);
       const archivioToUpdate: Archivio = new Archivio();
       archivioToUpdate.riservato = this.archivio.riservato
@@ -300,8 +311,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     node.label = inizioLabel + " " + titolo.classificazione + ": " + titolo.nome;
     node.data = titolo;
     node.key = titolo.id.toString();
-    node.expandedIcon = "pi pi-folder-open";
-    node.collapsedIcon = "pi pi-folder";
+    node.expandedIcon = "pi pi-tag";
+    node.collapsedIcon = "pi pi-tags";
     node.expanded = false;
     return node;
   }
@@ -337,10 +348,11 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
           this.archivio.version = res.version;
           this.archivio.idTitolo = titolo;
           this.selectedTitolo = this.buildNodeTitolo(titolo);
+          this.archivio.idMassimario = res.idMassimario;
         }
       ))
   }
-
+  
   /**
    * Metodo che serve per filtrare le categorie.
    * Riempie la proprietà filteredMassimari

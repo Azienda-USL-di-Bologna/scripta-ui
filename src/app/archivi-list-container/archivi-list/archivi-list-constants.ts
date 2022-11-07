@@ -57,7 +57,7 @@ export const cols: ColonnaBds[] = [
   },
   {
     field: "dataCreazione",
-    header: "Creazione",
+    header: "Anno creazione",
     filterField: "dataCreazione",
     sortField: "dataCreazione",
     style: {},
