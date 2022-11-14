@@ -8,6 +8,8 @@ import { CaptionReferenceTableComponent } from './caption-reference-table.compon
 import { CaptionSelectButtonsComponent } from './caption-select-buttons.component';
 import { MenuItem } from 'primeng/api';
 import { Azienda, AziendaService } from '@bds/internauta-model';
+import {DialogService, DynamicDialogRef} from 'primeng/dynamicdialog';
+import { TipComponent } from '@bds/common-components';
 
 @Component({
   selector: 'generic-caption-table',
@@ -26,11 +28,14 @@ export class GenericCaptionTableComponent implements OnInit {
   public accessibile: boolean = false;
   public multiple: boolean = false;
   public maxSizeUpload: Number = 50000000;
+  public ref: DynamicDialogRef;
 
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
 
-  constructor(private loginService: JwtLoginService,) { }
+  constructor(private loginService: JwtLoginService, public dialogService: DialogService) { }
+
+  
 
   ngOnInit(): void {
     this.subscriptions.push(
@@ -43,5 +48,16 @@ export class GenericCaptionTableComponent implements OnInit {
         }
       )
     );
+  }
+  
+  show() {
+    this.ref = this.dialogService.open(TipComponent, {
+        header: 'Tool Importazione Pregressi',
+        width: '70%',
+        contentStyle: {"max-height": "500px", "overflow": "auto"},
+        baseZIndex: 10000
+    });
+
+    
   }
 }
