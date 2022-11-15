@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { ApplicationModule, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Menu } from 'primeng/menu';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { Subscription } from 'rxjs';
@@ -54,7 +54,8 @@ export class GenericCaptionTableComponent implements OnInit {
     this.ref = this.dialogService.open(TipComponent, {
         header: 'Tool Importazione Pregressi',
         width: '70%',
-        contentStyle: {"max-height": "500px", "overflow": "auto"},
+        height: '69%',
+        //contentStyle: {"overflow": "auto"},
         baseZIndex: 10000
     });
 
