@@ -233,7 +233,7 @@ export class ResponsabiliComponent implements OnInit {
             delete this.dictAttoriClonePerRipristino[attore.id];
             this.messageService.add({
               severity: "success",
-              summary: "Aggiornamento viario",
+              summary: "Aggiornamento vicario",
               detail: "Vicario aggiornato con successo"
             });
             this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
