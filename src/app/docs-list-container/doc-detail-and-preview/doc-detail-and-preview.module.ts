@@ -3,14 +3,15 @@ import { CommonModule } from "@angular/common";
 import { PrimeNgModule } from "../../primeng.module";
 import { ScriptaCommonModule } from "../../scripta-common.module";
 import { DocDetailAndPreviewComponent } from "./doc-detail-and-preview.component";
-import { AttachmentsBoxModule } from "@bds/common-components";
+import { AttachmentsBoxModule, VersamentiModule } from "@bds/common-components";
 
 @NgModule({
   imports: [
     CommonModule,
     PrimeNgModule,
     ScriptaCommonModule,
-    AttachmentsBoxModule
+    AttachmentsBoxModule,
+    VersamentiModule
   ],
   declarations: [
     DocDetailAndPreviewComponent

@@ -167,6 +167,6 @@ p-splitter {
 .p-treetable .p-treetable-tbody > tr:focus {
   outline: none !important;
 }
-body p-table .p-datatable .p-datatable-wrapper table .p-datatable-tbody .p-highlight {
+body p-table .p-datatable .p-datatable-wrapper table .p-datatable-tbody>.p-highlight {
   background-color: #ffc4e1;
 }
