@@ -1,5 +1,5 @@
 import { ArchivioDoc, DocDetailView, /* Fascicolazione,  */Persona, TipologiaDoc } from "@bds/internauta-model";
-import { StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione } from "./docs-list-constants";
+import { StatiVersamentoTraduzioneVisualizzazione, StatoDocTraduzioneVisualizzazione, StatoUfficioAttiTraduzioneVisualizzazione } from "./docs-list-constants";
 
 export class ExtendedDocDetailView extends DocDetailView {
   private _oggettoVisualizzazione: string;
@@ -7,6 +7,7 @@ export class ExtendedDocDetailView extends DocDetailView {
   private _registrazioneVisualizzazione: string;
   private _propostaVisualizzazione: string;
   private _statoVisualizzazione: string;
+  private _statoUltimoVersamentoVisualizzazione: string;
   private _statoUfficioAttiVisualizzazione: string;
   private _codiceRegistro: string;
   private _fascicolazioniVisualizzazione: string[];
@@ -93,6 +94,17 @@ export class ExtendedDocDetailView extends DocDetailView {
     this._statoUfficioAttiVisualizzazione = "";
     if (statoUfficioAttiVisualizzazione) {
       this._statoUfficioAttiVisualizzazione = StatoUfficioAttiTraduzioneVisualizzazione.find(e => e.value === statoUfficioAttiVisualizzazione).nome;
+    }
+  }
+
+  public get statoUltimoVersamentoVisualizzazione(): string {
+    return this._statoUltimoVersamentoVisualizzazione;
+  }
+
+  public set statoUltimoVersamentoVisualizzazione(statoUltimoVersamentoVisualizzazione: string) {
+    this._statoUltimoVersamentoVisualizzazione = "";
+    if (statoUltimoVersamentoVisualizzazione) {
+      this._statoUltimoVersamentoVisualizzazione = StatiVersamentoTraduzioneVisualizzazione.find(e => e.value === statoUltimoVersamentoVisualizzazione).nome;
     }
   }
 
