@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
-import { AttivitaService } from '@bds/internauta-model';
+import { AttivitaService, StatoArchivio } from '@bds/internauta-model';
 import { Applicazione, ApplicazioneService, Archivio, Attivita, AttoreArchivio, AttoreArchivioService, Azienda, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, Persona, Ruolo, RuoloAttoreArchivio, Struttura, UtenteStruttura } from '@bds/internauta-model';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { BatchOperation, BatchOperationTypes, NextSdrEntity, PagingConf, SortDefinition, SORT_MODES } from '@bds/next-sdr';
@@ -26,6 +26,7 @@ export class ResponsabiliComponent implements OnInit {
   public ruoliList: { value: RuoloAttoreArchivio; label: string }[] = [];
   public struttureAttoreInEditing: Struttura[] = [];
   public inEditing: boolean = false;
+  public isArchivioClosed : boolean = false;
   public ruoloAttoreLoggedUser: RuoloAttoreArchivio;
   
   @ViewChild("tableResponsabiliArchivi", {}) private dt: Table;
@@ -80,6 +81,10 @@ export class ResponsabiliComponent implements OnInit {
       if (resp.ruolo === "VICARIO"){
         this.loadStruttureAttore(resp);
       }})
+    if(this._archivio.stato == StatoArchivio.CHIUSO || this._archivio.stato == StatoArchivio.PRECHIUSO)
+      this.isArchivioClosed = true;
+    else
+      this.isArchivioClosed = false;
   }
 
 
@@ -233,7 +238,7 @@ export class ResponsabiliComponent implements OnInit {
             delete this.dictAttoriClonePerRipristino[attore.id];
             this.messageService.add({
               severity: "success",
-              summary: "Aggiornamento vicario",
+              summary: "Aggiornamento viario",
               detail: "Vicario aggiornato con successo"
             });
             this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);

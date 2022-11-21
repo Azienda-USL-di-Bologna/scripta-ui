@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
-import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio, BaseUrls, BaseUrlType, Attivita, Applicazione, Persona, Azienda, AttivitaService, AttivitaFatta } from '@bds/internauta-model';
+import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio, BaseUrls, BaseUrlType, Attivita, Applicazione, Persona, Azienda, AttivitaService, AttivitaFatta, StatoArchivio, ArchivioDetail } from '@bds/internauta-model';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES , BatchOperation, NextSdrEntity, BatchOperationTypes} from '@bds/next-sdr';
+import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES , BatchOperation, NextSdrEntity, BatchOperationTypes, AdditionalDataDefinition} from '@bds/next-sdr';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TreeNode } from 'primeng/api/treenode';
 import { AutoComplete } from 'primeng/autocomplete';
@@ -56,6 +56,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public anniTenutaSelezionabili: any[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
   public loggedUserIsResponsbaileOrVicario = false;
+  public isArchivioChiuso = false;
   loggedUserIsResponsbaileProposto = false;
   public fascicoliParlanti: boolean = false;
   private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
@@ -95,6 +96,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     console.log("Archivio test: ", this.archivio);
     this.updateAnniTenuta();
     // this.getResponsabili();
+    this.isArchivioClosed();
     this.loggedUserIsResponsbaileOrVicario = (this.archivio["attoriList"] as AttoreArchivio[])
     .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id 
     && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE 
@@ -120,6 +122,150 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     );
   }
 
+  public chiudiRiapriArchivio(archivio: Archivio) {
+    if(this.archivio.idMassimario === null) {
+      this.messageService.add({
+        severity: "error",
+        key: "dettaglioArchivioToast",
+        summary: "Attenzione",
+        detail: `Non è possibile chiudere un archivio senza aver prima assegnato una tipologia documentale`
+      });
+      return;
+    }
+    this.extendedArchivioService.getByIdHttpCall(
+      archivio.id,
+      'ArchivioWithArchiviFigliListAndAttoriListAndIdAziendaAndIdMassimarioAndIdTitolo')
+      .subscribe((res: Archivio) => {
+        res.archiviFigliList.forEach( sottoarchivio => {
+          console.log("Archivio dentro ai figli:", res);
+          if(sottoarchivio.idMassimario === null) {
+            this.messageService.add({
+              severity: "error",
+              key: "dettaglioArchivioToast",
+              summary: "Attenzione",
+              detail: `Non è possibile chiudere l'archivio, alcuni sottoarchivi o inserti sono senza una tipologia documentale`
+            });
+            return;
+          }
+            this.extendedArchivioService.getByIdHttpCall(
+              sottoarchivio.id,
+              'ArchivioWithArchiviFigliListAndAttoriListAndIdAziendaAndIdMassimarioAndIdTitolo')
+              .subscribe((res: Archivio) => {
+                console.log("Archivio dentro ai figli:", res);
+                res.archiviFigliList.forEach( sottoarchivio => {
+                  if(sottoarchivio.idMassimario === null) {
+                    this.messageService.add({
+                      severity: "error",
+                      key: "dettaglioArchivioToast",
+                      summary: "Attenzione",
+                      detail: `Non è possibile chiudere l'archivio, alcuni sottoarchivi o inserti sono senza una tipologia documentale`
+                    });
+                    return;
+                    
+                  }
+                })
+              });
+          }
+        )});
+
+    console.log("Archivio dentro la chiudiRiapri: ", archivio)
+    const archivioUpdate = new Archivio();
+    archivioUpdate.version = archivio.version;
+    archivioUpdate.idTitolo = archivio.idTitolo;
+    archivioUpdate.anniTenuta = archivio.anniTenuta;
+    archivioUpdate.idMassimario = archivio.idMassimario;
+    if(archivio.stato == StatoArchivio.PRECHIUSO) {
+      archivioUpdate.stato = StatoArchivio.APERTO;
+      let additionalData : Array<AdditionalDataDefinition> = new Array;
+      let additionalDato = new AdditionalDataDefinition("OperationRequested", "CloseArchivio");
+      additionalData.push(additionalDato);
+      this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioUpdate, archivio.id, null, additionalData)
+      .subscribe(
+        res => {
+          console.log("Update archivio: ", res);
+          archivio.version = res.version;
+          // for (let index = 0; index < archivio.archiviFigliList.length; index++) {
+          //   archivio.archiviFigliList[index].version = res.version;
+          // }
+          this.messageService.add({
+            severity: "success",
+            key: "dettaglioArchivioToast",
+            summary: "OK",
+            detail: "Stato dell'archivio " + archivio.numerazioneGerarchica + " cambiato correttamente"
+          });
+          window.location.reload();
+          // if(archivio.archiviFigliList) {
+          //   archivio.archiviFigliList.forEach(sottoarchivio => {
+          //     console.log("Sottoarchivio pre ricorsione: ", sottoarchivio)
+          //     this.chiudiRiapriArchivio(sottoarchivio);
+          //    })
+          // }
+        },
+        err => {
+          this.messageService.add({
+            severity: "error",
+            key: "dettaglioArchivioToast",
+            summary: "Attenzione",
+            detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`
+          });
+        }
+      ))
+    } 
+    else {
+      let chiusuraArchivio: boolean;
+    this.subscriptions.push(
+      this.configurazioneService.getParametriAziende("chiusuraArchivio", ["scripta"], [archivio.idAzienda.id]).subscribe(
+        (parametriAziende: ParametroAziende[]) => {
+          if (parametriAziende && parametriAziende[0]) {
+            chiusuraArchivio = JSON.parse(parametriAziende[0].valore )
+          }
+          if(chiusuraArchivio) 
+            archivioUpdate.stato = StatoArchivio.CHIUSO;
+          else
+            archivioUpdate.stato = StatoArchivio.PRECHIUSO;
+          let additionalData : Array<AdditionalDataDefinition> = new Array;
+          let additionalDato = new AdditionalDataDefinition("OperationRequested", "CloseArchivio");
+          additionalData.push(additionalDato);
+          console.log("Versione archivio update: ", archivioUpdate.version);
+          console.log("Version archivio orig:", archivio.version)
+          this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioUpdate, archivio.id, null, additionalData)
+          .subscribe(
+            res => {
+              console.log("Update archivio: ", res);
+              archivio = res;
+              // for (let index = 0; index < archivio.archiviFigliList.length; index++) {
+              //   archivio.archiviFigliList[index].version = res.version;
+              // }
+              this.messageService.add({
+                severity: "success",
+                key: "dettaglioArchivioToast",
+                summary: "OK",
+                detail: "Stato dell'archivio " + archivio.numerazioneGerarchica + " cambiato correttamente"
+              });
+              window.location.reload();              
+              // if(archivio.archiviFigliList) {
+              //   archivio.archiviFigliList.forEach(sottoarchivio => {
+              //     console.log("Sottoarchivio pre ricorsione: ", sottoarchivio)
+              //     this.chiudiRiapriArchivio(sottoarchivio);
+              //    })
+              //}
+            },
+            err => {
+              this.messageService.add({
+                severity: "error",
+                key: "dettaglioArchivioToast",
+                summary: "Attenzione",
+                detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`
+              });
+            }
+          ))
+        }));
+      } 
+
+      //this.archivio = archivio;
+    
+  }
+
   private updateAnniTenuta() {
     if(this.archivio.anniTenuta === undefined) {
       this.anniTenutaSelezionabili = this.possibleAnniTenuta;
@@ -133,6 +279,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       console.log("Anni tenuta: ", this.anniTenutaSelezionabili);
     }
   }
+
 
   private loadParametroAziendaleFascicoliParlanti(){
     this.subscriptions.push(this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null).subscribe((parametriAziende: ParametroAziende[]) => {
@@ -185,6 +332,13 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
           }
         ))
     }
+  }
+
+  private isArchivioClosed() {
+    if(this.archivio.stato == StatoArchivio.PRECHIUSO || this.archivio.stato == StatoArchivio.CHIUSO)
+      this.isArchivioChiuso = true;
+    else
+      this.isArchivioChiuso = false;
   }
 
   /**

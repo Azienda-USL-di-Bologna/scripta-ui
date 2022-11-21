@@ -9,6 +9,9 @@ $min-width-label: 155px;
   flex-direction: column;
   overflow: hidden;
 }
+.bottoneChiudi {
+  left: 0px;
+}
 ::ng-deep .box-campi-dettaglio {
   display: flex;
   flex-direction: row;

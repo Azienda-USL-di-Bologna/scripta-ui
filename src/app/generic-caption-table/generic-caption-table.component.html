@@ -58,6 +58,13 @@
     </div>
   </div>
   <div class="right-content">
+    <i
+      class="pi pi-lock lucchettoChiuso" 
+      [pTooltip]="'Archivio chiuso'" 
+      *ngIf="functionalButtonsComponent?.newArchivoButton?.isChiuso"
+      tooltipPosition="bottom">
+    </i>
+
     <!-- BOTTONE PREFERITO -->
     <span *ngIf="configuration.preferitoButton">
       <i 
@@ -75,7 +82,7 @@
         type="button" 
         pButton 
         pRipple 
-        [disabled] = "!functionalButtonsComponent.newArchivoButton?.hasPermessi"
+        [disabled] = "!functionalButtonsComponent.newArchivoButton?.hasPermessi && functionalButtonsComponent?.newArchivoButton?.isChiuso"
         icon="pi pi-plus" 
         (click)="functionalButtonsComponent.newArchivoButton.aziendeItems.length > 1 ? 
           aziendaSelection.toggle($event) : 
@@ -100,7 +107,7 @@
         pTooltip="Carica documenti nell'archivio"
         class="upload-document-button"
         multiple="true"
-        [disabled]="!functionalButtonsComponent.newArchivoButton?.hasPermessi"
+        [disabled]="!functionalButtonsComponent.newArchivoButton?.hasPermessi && functionalButtonsComponent?.newArchivoButton?.isChiuso"
         mode="basic" 
         name="document[]"
         maxFileSize="5000000" 

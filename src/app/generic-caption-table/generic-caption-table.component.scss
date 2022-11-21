@@ -119,6 +119,13 @@
           outline: none !important;
         }
       }
+      .lucchettoChiuso {
+        font-size: 2rem;
+        color: #2e4a65 !important; 
+        &:target{
+          outline: none !important;
+        }
+      }
       .empty{
         color: #2e4a65  !important;
       }
