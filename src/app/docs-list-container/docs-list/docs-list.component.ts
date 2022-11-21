@@ -1334,18 +1334,14 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public onRowSelect(event: any): void {
-    if (this.archivio) {
       this.openDetailAndPreview(event.data);
-    }
   }
 
   public onRowUnselect(event: any): void {
-    if (this.archivio) {
       this.showRightPanel.emit({
         showPanel: false,
         rowSelected: null
       });
-    }
   }
 
   /**
