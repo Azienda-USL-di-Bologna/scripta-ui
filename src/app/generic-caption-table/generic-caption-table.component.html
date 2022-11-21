@@ -38,7 +38,7 @@
         [options]="selectButtonsComponent.selectButtonItems" 
         [(ngModel)]="selectButtonsComponent.selectedButtonItem" 
         optionLabel="label"
-        (onOptionClick)="inputGobalFilter.value = ''; selectButtonsComponent.onSelectButtonItemSelection($event)">
+        (onOptionClick)="selectButtonsComponent.onSelectButtonItemSelection($event)">
       </p-selectButton>
       <!-- Conteggio elementi trovati -->
       <span *ngIf="configuration.rowCount"
