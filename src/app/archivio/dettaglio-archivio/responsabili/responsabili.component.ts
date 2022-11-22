@@ -238,8 +238,8 @@ export class ResponsabiliComponent implements OnInit {
             delete this.dictAttoriClonePerRipristino[attore.id];
             this.messageService.add({
               severity: "success",
-              summary: "Aggiornamento viario",
-              detail: "Vicario aggiornato con successo"
+              summary: "Aggiornamento " + attoreToOperate.ruolo.toLowerCase().replace("_"," "),
+              detail: attoreToOperate.ruolo.charAt(0) + attoreToOperate.ruolo.slice(1).toLowerCase().replace("_"," ") + " aggiornato con successo"
             });
             this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
             this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
@@ -248,7 +248,7 @@ export class ResponsabiliComponent implements OnInit {
             this.messageService.add({
               severity: "error",
               summary: "Errore",
-              detail: "Errore nell'aggiornamento del vicario. Contattare Babelcare"
+              detail: "Errore nell'aggiornamento del " + attoreToOperate.ruolo.toLowerCase().replace("_"," ") + ". Contattare Babelcare"
             });
             this.onRowEditCancel(attore, index);
           }
