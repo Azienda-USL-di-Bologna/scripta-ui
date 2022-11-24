@@ -690,8 +690,9 @@
         [ngClass]="{'logically-deleted' : rowData.archiviation?.dataEliminazione != null}"
           [pTooltip]="rowData.oggettoVisualizzazione" tooltipPosition="top">
           <i *ngIf="rowData.visibilitaLimitata && !rowData.riservato" class="pi pi-eye"></i>
-          <i *ngIf="rowData.riservato" class="pi pi-eye-slash"></i>
-          {{rowData.oggettoVisualizzazione}}
+          <i *ngIf="!rowData.visibilitaLimitata && rowData.riservato" class="pi pi-eye-slash"></i>
+          {{!rowData.visibilitaLimitata && rowData.riservato ? "[Riservato]" : ""}}
+          {{!rowData.riservato ? rowData.oggettoVisualizzazione : ""}}
         </div>
         <div *ngSwitchCase="'stato'">
           {{rowData.statoVisualizzazione}}
