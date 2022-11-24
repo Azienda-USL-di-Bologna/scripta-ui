@@ -682,6 +682,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     }
     const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
     const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
+    if(this.storedLazyLoadEvent.sortField === "dataRegistrazione"){
+      lazyFiltersAndSorts.addSort( new SortDefinition("dataCreazione", this.storedLazyLoadEvent.sortOrder === 1 ? SORT_MODES.asc : SORT_MODES.desc))
+    }
     this.loadCount(this.serviceForGetData, this.projectionFotGetData, filtersAndSorts, lazyFiltersAndSorts);
     this.loadDocsListSubscription = this.serviceForGetData.getData(
       this.projectionFotGetData,
@@ -1331,18 +1334,14 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public onRowSelect(event: any): void {
-    if (this.archivio) {
       this.openDetailAndPreview(event.data);
-    }
   }
 
   public onRowUnselect(event: any): void {
-    if (this.archivio) {
       this.showRightPanel.emit({
         showPanel: false,
         rowSelected: null
       });
-    }
   }
 
   /**
