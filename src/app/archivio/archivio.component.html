@@ -52,8 +52,8 @@
     </docs-list> -->
     <p-splitter *ngIf="contenutoDiviso && loggedUserCanVisualizeArchive" 
       styleClass="splitter-docs-list"
-      [panelSizes]="[60,40]"
-      [minSizes]="[50,30]"
+      [panelSizes]="[50,50]"
+      [minSizes]="[30,30]"
       [ngClass]="{ 'hiderightside': !showRightSide, 'hide': selectedButtonItem && selectedButtonItem.id !== 'DOCUMENTI' }">
       <ng-template pTemplate>
         <docs-list #doclist

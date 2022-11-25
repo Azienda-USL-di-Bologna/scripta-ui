@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc } from "@bds/internauta-model";
+import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatiVersamento } from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { buildLazyEventFiltersAndSorts } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from "@bds/next-sdr";
@@ -14,7 +14,7 @@ import { Subscription } from "rxjs";
 import { first } from 'rxjs/operators'
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
 import { Impostazioni, ImpostazioniDocList } from "../../utilities/utils";
-import { cols, colsCSV, DocsListMode, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
+import { cols, colsCSV, DocsListMode, StatiVersamentoTraduzioneVisualizzazione, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
@@ -76,6 +76,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public rowsNumber: number = 20;
   public tipologiaVisualizzazioneObj = TipologiaDocTraduzioneVisualizzazione;
   public statoVisualizzazioneObj = StatoDocDetailPerFiltro;
+  public statiVersamentoObj = StatiVersamentoTraduzioneVisualizzazione;
   // public statoVisualizzazioneObj = StatoDocTraduzioneVisualizzazione;
   public statoUfficioAttiVisualizzazioneObj = StatoUfficioAttiTraduzioneVisualizzazione;
   public mieiDocumenti: boolean = true;
@@ -102,6 +103,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   private mandatoryColumns: string[] = [];
   public selectableColumns: ColonnaBds[] = [];
   public filteredTipologia: any[];
+  public filteredStatiVersamento: any[];
   public filteredStati: any[];
   public filteredStatoUfficioAtti: any[];
   public aziendeFiltrabiliFiltered: any[];
@@ -680,6 +682,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     }
     const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
     const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
+    if(this.storedLazyLoadEvent.sortField === "dataRegistrazione"){
+      lazyFiltersAndSorts.addSort( new SortDefinition("dataCreazione", this.storedLazyLoadEvent.sortOrder === 1 ? SORT_MODES.asc : SORT_MODES.desc))
+    }
     this.loadCount(this.serviceForGetData, this.projectionFotGetData, filtersAndSorts, lazyFiltersAndSorts);
     this.loadDocsListSubscription = this.serviceForGetData.getData(
       this.projectionFotGetData,
@@ -758,6 +763,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       doc.destinatariVisualizzazione = null;
       doc.firmatariVisualizzazione = null;
       doc.sullaScrivaniaDiVisualizzazione = null;
+      doc.statoUltimoVersamentoVisualizzazione = doc.statoUltimoVersamento;
     });
     return extendedDocsList;
   }
@@ -1168,6 +1174,21 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   this.filteredTipologia = filtered;
 }
 
+/**
+  * Filtering per gli autocomplete della versione accessibile
+  */
+ public filterStatiVersamento(event:any) {
+  let filtered: any[] = [];
+  let query = event.query;
+  for (let i = 0; i < this.statiVersamentoObj.length; i++) {
+    let statoVersamento = this.statiVersamentoObj[i];
+    if (statoVersamento.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+      filtered.push(statoVersamento);
+    }
+  }
+  this.filteredStatiVersamento = filtered;
+}
+
   public filterStatoAccessibile(event:any) {
     let filtered: any[] = [];
     let query = event.query;
@@ -1313,18 +1334,14 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public onRowSelect(event: any): void {
-    if (this.archivio) {
       this.openDetailAndPreview(event.data);
-    }
   }
 
   public onRowUnselect(event: any): void {
-    if (this.archivio) {
       this.showRightPanel.emit({
         showPanel: false,
         rowSelected: null
       });
-    }
   }
 
   /**
