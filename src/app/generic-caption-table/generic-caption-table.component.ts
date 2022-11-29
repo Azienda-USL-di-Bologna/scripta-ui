@@ -7,9 +7,10 @@ import { CaptionConfiguration } from './caption-configuration';
 import { CaptionReferenceTableComponent } from './caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from './caption-select-buttons.component';
 import { MenuItem } from 'primeng/api';
-import { Azienda, AziendaService } from '@bds/internauta-model';
+import { Azienda, AziendaService, CODICI_RUOLO } from '@bds/internauta-model';
 import {DialogService, DynamicDialogRef} from 'primeng/dynamicdialog';
 import { TipComponent } from '@bds/common-components';
+import { FiltersAndSorts } from '@bds/next-sdr';
 
 @Component({
   selector: 'generic-caption-table',
@@ -29,6 +30,7 @@ export class GenericCaptionTableComponent implements OnInit {
   public multiple: boolean = false;
   public maxSizeUpload: Number = 50000000;
   public ref: DynamicDialogRef;
+  public canUseTip: boolean = false;
 
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
@@ -48,6 +50,11 @@ export class GenericCaptionTableComponent implements OnInit {
         }
       )
     );
+    if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CA) ||
+      this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CI) ||
+      this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CA)) {
+        this.canUseTip = true;
+      }
   }
   
   show() {
