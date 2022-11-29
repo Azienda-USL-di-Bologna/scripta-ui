@@ -50,11 +50,9 @@ export class GenericCaptionTableComponent implements OnInit {
         }
       )
     );
-    if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CA) ||
+    this.canUseTip = (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CA) ||
       this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CI) ||
-      this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CA)) {
-        this.canUseTip = true;
-      }
+      this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD))
   }
   
   show() {
