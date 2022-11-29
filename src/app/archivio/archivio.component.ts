@@ -220,6 +220,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * non sarà presente l'opzione sottoarchvi.
    */
   public buildSelectButtonItems(archivio: Archivio | ArchivioDetail): void {
+    this.buildNewArchivioButton(this.archivio);
     this.selectButtonItems = [];
     let labelDati: string;
     switch (archivio.livello) {
@@ -275,6 +276,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         label: labelDati + (this.archivio.stato === StatoArchivio.BOZZA ? " (Bozza)" : "")
       }
     );
+    
   }
 
   /**
@@ -287,24 +289,50 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       disabled: false,
       command: () => this.archivilist.newArchivio(this.archivio.idAzienda.id)
     } as MenuItem;
-
-    switch (archivio.livello) {
-      case 1:
-        this.newArchivoButton = {
-          tooltip: "Crea nuovo sottofascicolo",
-          livello: 1,
-          aziendeItems: [aziendaItem],
-          hasPermessi: this.canCreateSottoarchivio()
-        };
-        break;
-      case 2:
-        this.newArchivoButton = {
-          tooltip: "Crea nuovo inserto",
-          livello: 2,
-          aziendeItems: [aziendaItem],
-          hasPermessi: this.canCreateSottoarchivio()
-        };
-        break;
+    if(this.isArchivioChiuso()) {
+      console.log("Nella build Archivio Button è chiuso")
+      switch (archivio.livello) {
+        case 1:
+          this.newArchivoButton = {
+            tooltip: "Crea nuovo sottofascicolo",
+            livello: 1,
+            aziendeItems: [aziendaItem],
+            hasPermessi: false,
+            isChiuso: true
+          };
+          break;
+        case 2:
+          this.newArchivoButton = {
+            tooltip: "Crea nuovo inserto",
+            livello: 2,
+            aziendeItems: [aziendaItem],
+            hasPermessi: false,
+            isChiuso: true
+          };
+          break;
+      }
+    }
+    else {
+      switch (archivio.livello) {
+        case 1:
+          this.newArchivoButton = {
+            tooltip: "Crea nuovo sottofascicolo",
+            livello: 1,
+            aziendeItems: [aziendaItem],
+            hasPermessi: this.canCreateSottoarchivio(),
+            isChiuso: false
+          };
+          break;
+        case 2:
+          this.newArchivoButton = {
+            tooltip: "Crea nuovo inserto",
+            livello: 2,
+            aziendeItems: [aziendaItem],
+            hasPermessi: this.canCreateSottoarchivio(),
+            isChiuso: false
+          };
+          break;
+      }
     }
   }
 
@@ -460,6 +488,13 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     } else {
       this.addUserInArchivioDiInteresse();
     }
+  }
+
+  public isArchivioChiuso() : boolean {
+    if(this.archivio.stato == StatoArchivio.CHIUSO || this.archivio.stato == StatoArchivio.PRECHIUSO)
+      return true;
+    else
+      return false;
   }
 
   public addUserInArchivioDiInteresse() {

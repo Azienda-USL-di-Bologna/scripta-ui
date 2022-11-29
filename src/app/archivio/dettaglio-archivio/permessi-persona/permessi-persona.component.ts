@@ -1,11 +1,12 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, UtenteStruttura, UtenteStrutturaService, Struttura, PermessoEntitaStoredProcedure } from '@bds/internauta-model';
+import { Archivio, ArchivioDetail, UtenteStruttura, UtenteStrutturaService, Struttura, PermessoEntitaStoredProcedure, StatoArchivio } from '@bds/internauta-model';
 import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/common-tools';
 import { AdditionalDataDefinition, PagingConf } from '@bds/next-sdr';
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { AzioniPossibili, EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
+
 // import * as FileSaver from 'file-saver';
 
 @Component({
@@ -32,6 +33,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
   private _archivio: Archivio;
   //private lazyLoadFiltersAndSorts: FiltersAndSorts = new FiltersAndSorts();
   public livello: number;
+  public isArchivioClosed : boolean = false;
 
   @ViewChild("dt", {}) private dt: Table;
   get archivio(): Archivio { return this._archivio; }
@@ -76,6 +78,10 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
         this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
       }
      }));
+    if(this._archivio.stato == StatoArchivio.CHIUSO || this._archivio.stato == StatoArchivio.PRECHIUSO)
+      this.isArchivioClosed = true;
+    else
+      this.isArchivioClosed = false; 
   }
 
   ngOnDestroy() {
