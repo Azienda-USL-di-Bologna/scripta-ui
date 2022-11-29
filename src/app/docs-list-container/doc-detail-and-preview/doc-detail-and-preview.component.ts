@@ -1,6 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ExtendedDocDetailView } from '../docs-list/extended-doc-detail-view';
 import { AttachmentsBoxConfig } from '@bds/common-components';
+import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
+import { first, Subscription } from 'rxjs';
+import { Utente } from '@bds/internauta-model';
+
 
 @Component({
   selector: 'doc-detail-and-preview',
@@ -9,6 +13,10 @@ import { AttachmentsBoxConfig } from '@bds/common-components';
 })
 export class DocDetailAndPreviewComponent implements OnInit {
   public accordionSelected: boolean[] = [true, false];
+  public isResponsabileVersamento: boolean = false;
+  private subscriptions: Subscription[] = [];
+  private utenteUtilitiesLogin: UtenteUtilities;
+  
   @Output('closeRightPanel') closeRightPanel = new EventEmitter();
   _doc: ExtendedDocDetailView;
   get doc(): ExtendedDocDetailView {
@@ -20,6 +28,7 @@ export class DocDetailAndPreviewComponent implements OnInit {
   public attachmentsBoxConfig: AttachmentsBoxConfig;
 
   constructor(
+    private loginService: JwtLoginService
   ) {
     this.attachmentsBoxConfig = new AttachmentsBoxConfig();
     this.attachmentsBoxConfig.showPreview = true;
@@ -28,5 +37,16 @@ export class DocDetailAndPreviewComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.subscriptions.push(
+      this.loginService.loggedUser$.pipe(first()).subscribe(
+        (utenteUtilities: UtenteUtilities) => {
+          if (utenteUtilities) {
+            this.utenteUtilitiesLogin = utenteUtilities;
+            this.isResponsabileVersamento = this.utenteUtilitiesLogin.isRV();
+          }
+        }
+      )
+    );
+    
   }
 }
