@@ -110,6 +110,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public loggedUserCanRestoreArchiviation: boolean = false;
   public loggedUserCanDeleteArchiviation: boolean = false;
   public docSelected: ExtendedDocDetailView;
+  public isResponsabileVersamento: boolean = false;
 
   private _archivio: Archivio;
   get archivio(): Archivio { return this._archivio; }
@@ -161,7 +162,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
             if (this.utenteUtilitiesLogin.isCA() === false && this.utenteUtilitiesLogin.isCI() === false) {
               this.tipologiaVisualizzazioneObj = this.tipologiaVisualizzazioneObj.filter(item => item.value !== TipologiaDoc.DOCUMENT_REGISTRO);
             }
-          
+            this.isResponsabileVersamento = this.utenteUtilitiesLogin.isRV();
             if (!!!this.archivio) { 
               this.loadConfigurationAndSetItUp();
             } else { 
@@ -281,6 +282,10 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (!this.archivio) {
       this.saveConfiguration();
     }
+    if(!this.isResponsabileVersamento) {
+      this.selectableColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
+      this.selectedColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
+    }
   }
 
   /**
@@ -322,6 +327,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     // this.selectableColumns = cols.filter(e => !this.mandatoryColumns.includes(e.field));
     this.selectableColumns = cols.map(e => {
       if (this.mandatoryColumns.includes(e.field)) {
+        e.selectionDisabled = true;
+      }
+      if( this.isResponsabileVersamento=== false && (e.field === "dataUltimoVersamento" )) {
         e.selectionDisabled = true;
       }
       return e;
@@ -386,6 +394,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     }
     impostazioniVisualizzazioneObj["scripta.docList"].mieiDocumenti = this.mieiDocumenti;
     impostazioniVisualizzazioneObj["scripta.docList"].selectedColumn = this.selectedColumns.map(c => c.field);
+    
     this.utenteUtilitiesLogin.setImpostazioniApplicazione(this.loginService, impostazioniVisualizzazioneObj);
   }
 
