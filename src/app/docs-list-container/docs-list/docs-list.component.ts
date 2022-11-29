@@ -283,8 +283,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.saveConfiguration();
     }
     if(!this.isResponsabileVersamento) {
-      this.selectableColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" || value.field === "statoUltimoVersamento") this.selectedColumns.splice(index, 1)});
-      this.selectedColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" || value.field === "statoUltimoVersamento") this.selectedColumns.splice(index, 1)});
+      this.selectableColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
+      this.selectedColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
     }
   }
 
@@ -329,7 +329,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       if (this.mandatoryColumns.includes(e.field)) {
         e.selectionDisabled = true;
       }
-      if( this.isResponsabileVersamento=== false && (e.field === "dataUltimoVersamento" || e.field === "statoUltimoVersamento" )) {
+      if( this.isResponsabileVersamento=== false && (e.field === "dataUltimoVersamento" )) {
         e.selectionDisabled = true;
       }
       return e;

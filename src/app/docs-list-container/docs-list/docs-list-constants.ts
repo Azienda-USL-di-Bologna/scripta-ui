@@ -318,7 +318,7 @@ export const cols: ColonnaBds[] = [
   // },
   {
     field: "statoUltimoVersamento",
-    header: "Stato ultimo",
+    header: "Stato ultimo versamento",
     filterField: "statoUltimoVersamento",
     // sortField: "sullaScrivaniaDi.descrizione",
     style: {},
