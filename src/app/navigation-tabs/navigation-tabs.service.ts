@@ -177,7 +177,7 @@ export class NavigationTabsService {
     return new TabItem(
       ArchivioComponent,
       { 
-        archivio: archivio,
+        archivio: this.projectionArchivioPerSessionStorage(archivio),
         id: archivio.id,
       },
       true,
@@ -187,6 +187,20 @@ export class NavigationTabsService {
       archivio.fk_idArchivioRadice.id.toString(),
       labelForAppName
     );
+  }
+
+  private projectionArchivioPerSessionStorage(archivio: Archivio | ArchivioDetail | ExtendedArchiviView): Archivio {
+    const a = new Archivio();
+    a.id = archivio.id;
+    a.numerazioneGerarchica = archivio.numerazioneGerarchica;
+    a.fk_idArchivioPadre = archivio.fk_idArchivioPadre;
+    a.fk_idArchivioRadice = archivio.fk_idArchivioRadice;
+    a.tipo = archivio.tipo;
+    a.stato = archivio.stato;
+    a.livello = archivio.livello;
+    a.fk_idAzienda = archivio.fk_idAzienda;
+    a.version = archivio.version;
+    return a;
   }
 
   /**
@@ -203,7 +217,7 @@ export class NavigationTabsService {
       this.updateTab(
         tabIndex, 
         `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
-        {archivio: archivio, id: archivio.id},
+        {archivio: this.projectionArchivioPerSessionStorage(archivio), id: archivio.id},
         `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
       );
       if (active) {
@@ -213,7 +227,7 @@ export class NavigationTabsService {
       this.updateTab(
         this.activeTabIndex, 
         `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
-        {archivio: archivio, id: archivio.id}, 
+        {archivio: this.projectionArchivioPerSessionStorage(archivio), id: archivio.id}, 
         `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
         archivio.fk_idArchivioRadice.id.toString()
       );
