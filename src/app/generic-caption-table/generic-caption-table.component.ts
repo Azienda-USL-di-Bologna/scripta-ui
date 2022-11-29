@@ -1,4 +1,4 @@
-import { ApplicationModule, Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Menu } from 'primeng/menu';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { Subscription } from 'rxjs';
@@ -6,11 +6,10 @@ import { CaptionFunctionalButtonsComponent } from './caption-functional-buttons.
 import { CaptionConfiguration } from './caption-configuration';
 import { CaptionReferenceTableComponent } from './caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from './caption-select-buttons.component';
-import { MenuItem } from 'primeng/api';
-import { Azienda, AziendaService, CODICI_RUOLO } from '@bds/internauta-model';
-import {DialogService, DynamicDialogRef} from 'primeng/dynamicdialog';
+import { CODICI_RUOLO } from '@bds/internauta-model';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { NavigationTabsService } from '../navigation-tabs/navigation-tabs.service';
 import { TipComponent } from '@bds/common-components';
-import { FiltersAndSorts } from '@bds/next-sdr';
 
 @Component({
   selector: 'generic-caption-table',
@@ -35,9 +34,9 @@ export class GenericCaptionTableComponent implements OnInit {
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
 
-  constructor(private loginService: JwtLoginService, public dialogService: DialogService) { }
+  constructor(private loginService: JwtLoginService, public dialogService: DialogService, public navigationTabsService: NavigationTabsService,) { }
 
-  
+
 
   ngOnInit(): void {
     this.subscriptions.push(
@@ -54,16 +53,18 @@ export class GenericCaptionTableComponent implements OnInit {
       this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CI) ||
       this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD))
   }
-  
+
   show() {
     this.ref = this.dialogService.open(TipComponent, {
-        header: 'Tool Importazione Pregressi',
-        width: '70%',
-        height: '69%',
-        //contentStyle: {"overflow": "auto"},
-        baseZIndex: 10000
+      data: {
+        tabname: this.navigationTabsService.getTabs()[this.navigationTabsService.activeTabIndex].labelForAppName,
+        utenteUtilitiesLogin: this.utenteUtilitiesLogin,
+      },
+      header: 'Tool Importazione Pregressi',
+      width: '70%',
+      height: '69%',
+      //contentStyle: {"overflow": "auto"},
+      baseZIndex: 10000
     });
-
-    
   }
 }
