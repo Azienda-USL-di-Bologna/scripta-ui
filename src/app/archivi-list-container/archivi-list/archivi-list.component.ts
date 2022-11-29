@@ -1158,6 +1158,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "DIRETTA"));
 		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "UNIFICATA"));
 		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "FUNZIONALE"));
+		filterAndSort.addFilter(new FilterDefinition("attivo", FILTER_TYPES.not_string.equals, true));
 		this.utenteStrutturaService.getData("UtenteStrutturaWithIdAfferenzaStruttura", filterAndSort, null, null).subscribe((res) => {
 			strutturaCreatore.id = (res.results as UtenteStruttura[]).find((a: UtenteStruttura) => a.idAfferenzaStruttura.codice === "DIRETTA")?.fk_idStruttura?.id;
 			if (!strutturaCreatore.id) {
@@ -1217,7 +1218,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			}   
 			this.subscriptions.push(this.archivioService.postHttpCall(
 				archivioBozza, 
-				ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
+				ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo,
+				null,
+				true)
 				.subscribe((nuovoArchivioCreato: Archivio) => {      
 					this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
 					this.appService.appNameSelection(`Fascicolo ${nuovoArchivioCreato.numerazioneGerarchica} [${nuovoArchivioCreato.idAzienda.aoo}]`);
