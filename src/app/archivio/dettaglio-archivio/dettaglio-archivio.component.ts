@@ -132,48 +132,15 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       });
       return;
     }
-    this.extendedArchivioService.getByIdHttpCall(
-      archivio.id,
-      'ArchivioWithArchiviFigliListAndAttoriListAndIdAziendaAndIdMassimarioAndIdTitolo')
-      .subscribe((res: Archivio) => {
-        res.archiviFigliList.forEach( sottoarchivio => {
-          console.log("Archivio dentro ai figli:", res);
-          if(sottoarchivio.idMassimario === null) {
-            this.messageService.add({
-              severity: "error",
-              key: "dettaglioArchivioToast",
-              summary: "Attenzione",
-              detail: `Non è possibile chiudere l'archivio, alcuni sottoarchivi o inserti sono senza una tipologia documentale`
-            });
-            return;
-          }
-            this.extendedArchivioService.getByIdHttpCall(
-              sottoarchivio.id,
-              'ArchivioWithArchiviFigliListAndAttoriListAndIdAziendaAndIdMassimarioAndIdTitolo')
-              .subscribe((res: Archivio) => {
-                console.log("Archivio dentro ai figli:", res);
-                res.archiviFigliList.forEach( sottoarchivio => {
-                  if(sottoarchivio.idMassimario === null) {
-                    this.messageService.add({
-                      severity: "error",
-                      key: "dettaglioArchivioToast",
-                      summary: "Attenzione",
-                      detail: `Non è possibile chiudere l'archivio, alcuni sottoarchivi o inserti sono senza una tipologia documentale`
-                    });
-                    return;
-                    
-                  }
-                })
-              });
-          }
-        )});
 
     console.log("Archivio dentro la chiudiRiapri: ", archivio)
-    const archivioUpdate = new Archivio();
+    let archivioUpdate = new Archivio();
     archivioUpdate.version = archivio.version;
-    archivioUpdate.idTitolo = archivio.idTitolo;
-    archivioUpdate.anniTenuta = archivio.anniTenuta;
-    archivioUpdate.idMassimario = archivio.idMassimario;
+    archivioUpdate.idTitolo = this.archivio.idTitolo;
+    archivioUpdate.idMassimario = this.archivio.idMassimario;
+    archivioUpdate.fk_idMassimario = archivio.fk_idMassimario;
+    archivioUpdate.fk_idTitolo = archivio.fk_idTitolo;
+    //archivioUpdate = archivio;
     if(archivio.stato == StatoArchivio.PRECHIUSO) {
       archivioUpdate.stato = StatoArchivio.APERTO;
       let additionalData : Array<AdditionalDataDefinition> = new Array;
@@ -184,86 +151,69 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         res => {
           console.log("Update archivio: ", res);
           archivio.version = res.version;
-          // for (let index = 0; index < archivio.archiviFigliList.length; index++) {
-          //   archivio.archiviFigliList[index].version = res.version;
-          // }
           this.messageService.add({
             severity: "success",
             key: "dettaglioArchivioToast",
             summary: "OK",
-            detail: "Stato dell'archivio " + archivio.numerazioneGerarchica + " cambiato correttamente"
+            detail: "Stato del fascicolo " + archivio.numerazioneGerarchica + " cambiato correttamente"
           });
-          window.location.reload();
-          // if(archivio.archiviFigliList) {
-          //   archivio.archiviFigliList.forEach(sottoarchivio => {
-          //     console.log("Sottoarchivio pre ricorsione: ", sottoarchivio)
-          //     this.chiudiRiapriArchivio(sottoarchivio);
-          //    })
-          // }
+          this.archivio.version = archivio.version;
+          this.archivio.stato = res.stato;
+          this.updateArchivio.emit(this.archivio);
         },
         err => {
           this.messageService.add({
             severity: "error",
             key: "dettaglioArchivioToast",
             summary: "Attenzione",
-            detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`
+            detail: `Si è verificato un errore nel cambio di stato del fascicolo, contattare Babelcare`
           });
         }
       ))
     } 
     else {
       let chiusuraArchivio: boolean;
-    this.subscriptions.push(
-      this.configurazioneService.getParametriAziende("chiusuraArchivio", ["scripta"], [archivio.idAzienda.id]).subscribe(
-        (parametriAziende: ParametroAziende[]) => {
-          if (parametriAziende && parametriAziende[0]) {
-            chiusuraArchivio = JSON.parse(parametriAziende[0].valore )
-          }
-          if(chiusuraArchivio) 
-            archivioUpdate.stato = StatoArchivio.CHIUSO;
-          else
-            archivioUpdate.stato = StatoArchivio.PRECHIUSO;
-          let additionalData : Array<AdditionalDataDefinition> = new Array;
-          let additionalDato = new AdditionalDataDefinition("OperationRequested", "CloseArchivio");
-          additionalData.push(additionalDato);
-          console.log("Versione archivio update: ", archivioUpdate.version);
-          console.log("Version archivio orig:", archivio.version)
-          this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioUpdate, archivio.id, null, additionalData)
-          .subscribe(
-            res => {
-              console.log("Update archivio: ", res);
-              archivio = res;
-              // for (let index = 0; index < archivio.archiviFigliList.length; index++) {
-              //   archivio.archiviFigliList[index].version = res.version;
-              // }
-              this.messageService.add({
-                severity: "success",
-                key: "dettaglioArchivioToast",
-                summary: "OK",
-                detail: "Stato dell'archivio " + archivio.numerazioneGerarchica + " cambiato correttamente"
-              });
-              window.location.reload();              
-              // if(archivio.archiviFigliList) {
-              //   archivio.archiviFigliList.forEach(sottoarchivio => {
-              //     console.log("Sottoarchivio pre ricorsione: ", sottoarchivio)
-              //     this.chiudiRiapriArchivio(sottoarchivio);
-              //    })
-              //}
-            },
-            err => {
-              this.messageService.add({
-                severity: "error",
-                key: "dettaglioArchivioToast",
-                summary: "Attenzione",
-                detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`
-              });
+      this.subscriptions.push(
+        this.configurazioneService.getParametriAziende("chiusuraArchivio", ["scripta"], [archivio.idAzienda.id]).subscribe(
+          (parametriAziende: ParametroAziende[]) => {
+            if (parametriAziende && parametriAziende[0]) {
+              chiusuraArchivio = JSON.parse(parametriAziende[0].valore )
             }
-          ))
-        }));
-      } 
+            if(chiusuraArchivio) 
+              archivioUpdate.stato = StatoArchivio.CHIUSO;
+            else
+              archivioUpdate.stato = StatoArchivio.PRECHIUSO;
+            let additionalData : Array<AdditionalDataDefinition> = new Array;
+            let additionalDato = new AdditionalDataDefinition("OperationRequested", "CloseArchivio");
+            additionalData.push(additionalDato);
+            this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioUpdate, archivio.id, null, additionalData)
+            .subscribe(
+              res => {
+                console.log("Update archivio: ", res);
+                archivio = res;
+                this.messageService.add({
+                  severity: "success",
+                  key: "dettaglioArchivioToast",
+                  summary: "OK",
+                  detail: "Stato dell'archivio " + archivio.numerazioneGerarchica + " cambiato correttamente"
+                });
+                this.archivio.version = archivio.version;
+                this.archivio.stato = res.stato;
+                this.updateArchivio.emit(this.archivio);
+              },
+              err => {
+                this.messageService.add({
+                  severity: "error",
+                  key: "dettaglioArchivioToast",
+                  summary: "Attenzione",
+                  detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`
+                });
+              }
+            ))
+          }));
+        } 
 
-      //this.archivio = archivio;
-    
+      
   }
 
   private updateAnniTenuta() {

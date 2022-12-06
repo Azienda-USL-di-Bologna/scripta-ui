@@ -39,7 +39,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
   get archivio(): Archivio { return this._archivio; }
   @Input() set archivio(archivio: Archivio) {
     this._archivio = archivio;
-    this.livello = archivio.livello
+    this.livello = archivio.livello;
     this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
   }
   public _loggedUserIsResponsbaileOrVicario: Boolean;

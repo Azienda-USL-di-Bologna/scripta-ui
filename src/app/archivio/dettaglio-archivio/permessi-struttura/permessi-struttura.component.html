@@ -16,7 +16,7 @@
 				(click)="inEditing = true; addPermesso()" 
 				class="mr-2" 
 				label="Aggiungi permesso"
-				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario || isArchivioClosed">
+				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
 			</button>
 		</div>
 	</ng-template>
@@ -124,13 +124,13 @@
 			</td>
 			<td *ngIf="loggedUserIsResponsbaileOrVicario" class="azione-column" >
 				<button pButton pRipple pInitEditableRow class="p-button-rounded p-button-text"
-					*ngIf="!editing && !permesso.barrato && !permesso.ereditato && !isArchivioClosed"
+					*ngIf="!editing && !permesso.barrato && !permesso.ereditato && !(archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')"
 					type="button"  
 					pTooltip="Modifica permesso"
 					icon="pi pi-pencil" 
 					(click)="inEditing = true;onRowEditInit(permesso)"></button> 
 				<button pButton class="p-button-rounded p-button-text"
-					*ngIf="!editing && !permesso.barrato && !permesso.ereditato && !isArchivioClosed" 
+					*ngIf="!editing && !permesso.barrato && !permesso.ereditato && !(archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')" 
 					pTooltip="Elimina permesso"
 					type="button"  
 					icon="pi pi-trash" 
