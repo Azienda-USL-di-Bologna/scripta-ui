@@ -33,7 +33,7 @@
           optionLabel="nome" 
           appendTo="body" 
           class="dropdown"
-          [disabled]="archivio.tipo === 'SPECIALE' || archivio.livello > 1 || !loggedUserIsResponsbaileOrVicario || (archivio.statO == 'CHIUSO' || archivio.stato == 'PRECHIUSO')">
+          [disabled]="archivio.tipo === 'SPECIALE' || archivio.livello > 1 || !loggedUserIsResponsbaileOrVicario || (archivio.stato == 'CHIUSO' || archivio.stato == 'PRECHIUSO')">
         </p-dropdown>
       </div>
       <!-- Campo riservato -->
@@ -53,7 +53,7 @@
       <label for="oggetto">Nome</label>
       <input 
         id="oggetto" 
-        [disabled]="!loggedUserIsResponsbaileOrVicario || (archivio.statO == 'CHIUSO' || archivio.stato == 'PRECHIUSO')"
+        [disabled]="!loggedUserIsResponsbaileOrVicario || (archivio.stato == 'CHIUSO' || archivio.stato == 'PRECHIUSO')"
         type="text" 
         placeholder="Inserisci il nome dell'archivio"
         (keyup)="timeOutAndSaveArchivio(archivio, 'oggetto')" 
@@ -67,7 +67,7 @@
         id="classificazione" 
         [(ngModel)]="selectedTitolo" 
         [options]="titoli"
-        [disabled]="archivio.livello > 1 || !loggedUserIsResponsbaileOrVicario || (archivio.statO == 'CHIUSO' || archivio.stato == 'PRECHIUSO')"
+        [disabled]="archivio.livello > 1 || !loggedUserIsResponsbaileOrVicario || (archivio.stato == 'CHIUSO' || archivio.stato == 'PRECHIUSO')"
         (onShow)="onShowTitoli()" 
         (onNodeExpand)="onShowTitoli($event)"
         (onNodeSelect)="onSelectTitolo($event.node.data)" 
@@ -104,7 +104,7 @@
         <p-autoComplete id="categoria" #autocompleteCategoria 
           ariaLabel="tipologia documentale"
           [(ngModel)]="archivio.idMassimario"
-          [disabled]="!archivio.idTitolo || archivio.livello > 1 || !loggedUserIsResponsbaileOrVicario || (archivio.statO == 'CHIUSO' || archivio.stato == 'PRECHIUSO')"
+          [disabled]="!archivio.idTitolo || archivio.livello > 1 || !loggedUserIsResponsbaileOrVicario || (archivio.stato == 'CHIUSO' || archivio.stato == 'PRECHIUSO')"
           (onSelect)="archivio.anniTenuta = archivio.idMassimario.anniTenuta; onSelectMassimario($event)"
           [suggestions]="filteredMassimari" 
           (completeMethod)="filterMassimario($event)" 
@@ -123,7 +123,7 @@
         <label for="conservazione">Conservazione</label>
         <p-dropdown 
           [autoDisplayFirst]="true" 
-          [disabled]="!archivio.idMassimario || archivio.livello > 1 || !loggedUserIsResponsbaileOrVicario || (archivio.statO == 'CHIUSO' || archivio.stato == 'PRECHIUSO')" 
+          [disabled]="!archivio.idMassimario || archivio.livello > 1 || !loggedUserIsResponsbaileOrVicario || (archivio.stato == 'CHIUSO' || archivio.stato == 'PRECHIUSO')" 
           optionLabel="name" 
           optionValue="value"
           [options]="anniTenutaSelezionabili" 
@@ -162,11 +162,12 @@
         class="p-mr-2" 
         pTooltip="Numera Fascicolo" 
         aria-label="Numera Fascicolo"
-        [disabled]="!archivio.oggetto || !archivio.tipo || !archivio.idTitolo || (archivio.statO == 'CHIUSO' || archivio.stato == 'PRECHIUSO')" 
+        [disabled]="!archivio.oggetto || !archivio.tipo || !archivio.idTitolo || (archivio.stato == 'CHIUSO' || archivio.stato == 'PRECHIUSO')" 
         tooltipPosition="bottom">
       </button>
       <p-button class="p-mr-2" *ngIf="!loggedUserIsResponsabileOrVicario && !(archivio.stato == 'BOZZA') && archivio.livello == 1"  
-        (click)="chiudiRiapriArchivio(archivio)" 
+        (click)="chiudiRiapriArchivio(archivio, $event)" 
+        [disabled]="archivio.stato == 'CHIUSO'"
         >{{archivio.stato == 'APERTO' ? 'Chiudi' : 'Riapri'}}
       </p-button>
 
@@ -204,3 +205,13 @@
 <p-toast key="dettaglioArchivioToast"></p-toast>
 <p-confirmDialog [baseZIndex]="10000" acceptLabel="Sì"></p-confirmDialog>
 <p-confirmPopup key="confirm-popup"></p-confirmPopup>
+<p-confirmPopup key="confirm-popup-chiusura" class="popupChiusura" 
+  style="position: left;
+        padding: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 50% !important;
+        left: 50%;
+        transform: translate(-50%, -50%);"></p-confirmPopup>

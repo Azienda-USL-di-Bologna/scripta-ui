@@ -122,7 +122,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     );
   }
 
-  public chiudiRiapriArchivio(archivio: Archivio) {
+  public chiudiRiapriArchivio(archivio: Archivio, event: Event) {
     if(this.archivio.idMassimario === null) {
       this.messageService.add({
         severity: "error",
@@ -140,7 +140,6 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     archivioUpdate.idMassimario = this.archivio.idMassimario;
     archivioUpdate.fk_idMassimario = archivio.fk_idMassimario;
     archivioUpdate.fk_idTitolo = archivio.fk_idTitolo;
-    //archivioUpdate = archivio;
     if(archivio.stato == StatoArchivio.PRECHIUSO) {
       archivioUpdate.stato = StatoArchivio.APERTO;
       let additionalData : Array<AdditionalDataDefinition> = new Array;
@@ -183,37 +182,79 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
               archivioUpdate.stato = StatoArchivio.CHIUSO;
             else
               archivioUpdate.stato = StatoArchivio.PRECHIUSO;
-            let additionalData : Array<AdditionalDataDefinition> = new Array;
-            let additionalDato = new AdditionalDataDefinition("OperationRequested", "CloseArchivio");
-            additionalData.push(additionalDato);
-            this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioUpdate, archivio.id, null, additionalData)
-            .subscribe(
-              res => {
-                console.log("Update archivio: ", res);
-                archivio = res;
-                this.messageService.add({
-                  severity: "success",
-                  key: "dettaglioArchivioToast",
-                  summary: "OK",
-                  detail: "Stato dell'archivio " + archivio.numerazioneGerarchica + " cambiato correttamente"
-                });
-                this.archivio.version = archivio.version;
-                this.archivio.stato = res.stato;
-                this.updateArchivio.emit(this.archivio);
-              },
-              err => {
-                this.messageService.add({
-                  severity: "error",
-                  key: "dettaglioArchivioToast",
-                  summary: "Attenzione",
-                  detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`
-                });
-              }
-            ))
+            if(chiusuraArchivio) {
+              this.confirmationService.confirm({
+                key: "confirm-popup",
+                target: event.target,
+                message: "Il fascicolo non potrà essere riaperto. Si vuole procedere?",
+                icon: 'pi pi-exclamation-triangle',
+                accept: () => {
+                  // L'utente conferma di voler chiudere definitivamente il fascicolo, faccio partire la chiusura
+                  let additionalData : Array<AdditionalDataDefinition> = new Array;
+                  let additionalDato = new AdditionalDataDefinition("OperationRequested", "CloseArchivio");
+                  additionalData.push(additionalDato);
+                  this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioUpdate, archivio.id, null, additionalData)
+                  .subscribe(
+                    res => {
+                      console.log("Update archivio: ", res);
+                      archivio = res;
+                      this.messageService.add({
+                        severity: "success",
+                        key: "dettaglioArchivioToast",
+                        summary: "OK",
+                        detail: "Stato dell'archivio " + archivio.numerazioneGerarchica + " cambiato correttamente"
+                      });
+                      this.archivio.version = archivio.version;
+                      this.archivio.stato = res.stato;
+                      this.updateArchivio.emit(this.archivio);
+                    },
+                    err => {
+                      this.messageService.add({
+                        severity: "error",
+                        key: "dettaglioArchivioToast",
+                        summary: "Attenzione",
+                        detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`
+                      });
+                    }
+                  ))
+                },
+                reject: () => {
+                  // L'utente ha cambaito idea. Non faccio nulla
+                  
+                }
+              });
+            }
+            else {
+              let additionalData : Array<AdditionalDataDefinition> = new Array;
+              let additionalDato = new AdditionalDataDefinition("OperationRequested", "CloseArchivio");
+              additionalData.push(additionalDato);
+              this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioUpdate, archivio.id, null, additionalData)
+              .subscribe(
+                res => {
+                  console.log("Update archivio: ", res);
+                  archivio = res;
+                  this.messageService.add({
+                    severity: "success",
+                    key: "dettaglioArchivioToast",
+                    summary: "OK",
+                    detail: "Stato dell'archivio " + archivio.numerazioneGerarchica + " cambiato correttamente"
+                  });
+                  this.archivio.version = archivio.version;
+                  this.archivio.stato = res.stato;
+                  this.updateArchivio.emit(this.archivio);
+                },
+                err => {
+                  this.messageService.add({
+                    severity: "error",
+                    key: "dettaglioArchivioToast",
+                    summary: "Attenzione",
+                    detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`
+                  });
+                }
+              ))
+            }
           }));
-        } 
-
-      
+        }   
   }
 
   private updateAnniTenuta() {
