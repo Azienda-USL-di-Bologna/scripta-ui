@@ -16,7 +16,7 @@
 				(click)="inEditing = true; addResponsabile()" 
 				class="mr-2" 
 				label="Aggiungi responsabile o vicario"
-				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario || isArchivioClosed">
+				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
 			</button>
 		</div>
 	</ng-template>
@@ -91,7 +91,7 @@
         <!-- Bottone di editing.
           Se la riga riguarda il resp o il proposto allora devo essere RESPONSABILE -->
         <button *ngIf="(!editing && (ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE 
-              || (attore.ruolo !== ruoliEnum.RESPONSABILE && attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO))) && !isArchivioClosed" 
+              || (attore.ruolo !== ruoliEnum.RESPONSABILE && attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO))) && !(archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')" 
           type="button" 
           pButton 
           pRipple
@@ -104,7 +104,7 @@
         <!-- Bottone di cancellazione. 
           Non si può cancellare il responsabile. E per cancellare un proposto devo essere RESPONSABILE -->
         <button *ngIf="(!editing && attore.ruolo !== ruoliEnum.RESPONSABILE && 
-              (attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO || ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE)) && !isArchivioClosed"
+              (attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO || ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE)) && !(archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')"
 					pButton 
 					pRipple
 					pTooltip="Elimina"

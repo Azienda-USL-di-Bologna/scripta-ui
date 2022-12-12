@@ -114,7 +114,6 @@
       &.data-creazione-column,
       &.data-registrazione-column,
       &.data-ultimo-versameno-column,
-      &.conservazione-column,
       &.stato-ultimo-versamento-column {
         div {
           justify-content: center;
@@ -186,8 +185,8 @@
     max-width: 165px;
   }
   .stato-column {
-    min-width: 134px;
-    max-width: 134px;
+    min-width: 165px;
+    max-width: 165px;
   }
   .oggetto-column {
     width: 100%;
@@ -307,10 +306,6 @@
       }
     }
   }
-  .conservazione-column {
-    width: 170px;
-    max-width: 170px;
-  }
   .stato-ultimo-versamento-column {
     width: 200px;
     max-width: 200px;
@@ -357,25 +352,25 @@
 }
 
 
-::ng-deep .conservazione-icon {
-  .p-checkbox {
-    cursor: default;
-    .p-checkbox-box.p-highlight {
-      background-color: white !important;
-      color: #203244;
-      height: 30px !important;
-      width: 30px !important;
-      border-color: white !important;
-      cursor: default;
-    }
-    .p-checkbox-box {
-      border-color: white !important;
-      .p-checkbox-icon {
-        color: #203244;
-      }
-    }
-  }
-}
+// ::ng-deep .conservazione-icon {
+//   .p-checkbox {
+//     cursor: default;
+//     .p-checkbox-box.p-highlight {
+//       background-color: white !important;
+//       color: #203244;
+//       height: 30px !important;
+//       width: 30px !important;
+//       border-color: white !important;
+//       cursor: default;
+//     }
+//     .p-checkbox-box {
+//       border-color: white !important;
+//       .p-checkbox-icon {
+//         color: #203244;
+//       }
+//     }
+//   }
+// }
 
 
 ::ng-deep .stato-ultimo-versamento-icon {

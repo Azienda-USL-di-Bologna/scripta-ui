@@ -37,6 +37,7 @@
   <p-accordionTab 
     header="Versamenti"
     [(selected)]="accordionSelected[1]"
+    *ngIf = "isResponsabileVersamento === true"
     [ngClass]="accordionSelected[1] ? 'tab-accordion-selected' : ''">
     <versamenti [idDoc]="doc.id"></versamenti>
   </p-accordionTab>

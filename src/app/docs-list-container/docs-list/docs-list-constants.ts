@@ -302,23 +302,23 @@ export const cols: ColonnaBds[] = [
     useFilterMatchMode: true,
     default: false
   },
-  {
-    field: "conservazione",
-    header: "In conservazione",
-    filterField: "conservazione",
-    // sortField: "sullaScrivaniaDi.descrizione",
-    style: {},
-    headerClass: ["header-column", "conservazione-column"],
-    filterClass: ["filter-column", "conservazione-column"],
-    bodyClass: ["conservazione-column"],
-    fieldType: "boolean",
-    filterMatchMode: FILTER_TYPES.not_string.equals,
-    useFilterMatchMode: true,
-    default: false
-  },
+  // {
+  //   field: "conservazione",
+  //   header: "In conservazione",
+  //   filterField: "conservazione",
+  //   // sortField: "sullaScrivaniaDi.descrizione",
+  //   style: {},
+  //   headerClass: ["header-column", "conservazione-column"],
+  //   filterClass: ["filter-column", "conservazione-column"],
+  //   bodyClass: ["conservazione-column"],
+  //   fieldType: "boolean",
+  //   filterMatchMode: FILTER_TYPES.not_string.equals,
+  //   useFilterMatchMode: true,
+  //   default: false
+  // },
   {
     field: "statoUltimoVersamento",
-    header: "Stato ultimo",
+    header: "Stato ultimo versamento",
     filterField: "statoUltimoVersamento",
     // sortField: "sullaScrivaniaDi.descrizione",
     style: {},
@@ -328,7 +328,7 @@ export const cols: ColonnaBds[] = [
     fieldType: "string",
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: true,
-    default: true
+    default: false
   },
   // {
   //   field: "statoVersamentoVisto",
@@ -377,6 +377,9 @@ export const cols: ColonnaBds[] = [
 //   additionalData?: any;
 //   selectionDisabled?: boolean;
 // }
+
+
+
 
 export const TipologiaDocTraduzioneVisualizzazione = [
   { value: TipologiaDoc.PROTOCOLLO_IN_USCITA, nome: "Protocollo in uscita" },
@@ -632,12 +635,12 @@ export const colsCSV: any[] = [
     fieldType: "string",
     fieldId: "protocolloEsterno"
   },
-  {
-    field: "conservazione",
-    header: "In conservazione",
-    fieldType: "boolean",
-    fieldId: "conservazione"
-  }, 
+  // {
+  //   field: "conservazione",
+  //   header: "In conservazione",
+  //   fieldType: "boolean",
+  //   fieldId: "conservazione"
+  // }, 
   {
     field: "statoUltimoVersamento",
     header: "Stato ultimo versamento",

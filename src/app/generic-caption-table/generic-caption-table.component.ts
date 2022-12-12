@@ -7,7 +7,7 @@ import { CaptionConfiguration } from './caption-configuration';
 import { CaptionReferenceTableComponent } from './caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from './caption-select-buttons.component';
 import { MenuItem } from 'primeng/api';
-import { Azienda, AziendaService } from '@bds/internauta-model';
+import { Archivio, Azienda, AziendaService } from '@bds/internauta-model';
 
 @Component({
   selector: 'generic-caption-table',
@@ -43,5 +43,12 @@ export class GenericCaptionTableComponent implements OnInit {
         }
       )
     );
+  }
+
+  isArchivioChiuso(archivio : Archivio) : boolean {
+    if(archivio.stato == 'PRECHIUSO' || archivio.stato == 'CHIUSO')
+      return true;
+    else
+      return false;
   }
 }
