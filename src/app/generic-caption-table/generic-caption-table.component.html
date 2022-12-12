@@ -138,6 +138,18 @@
         aria-label="Scarica il csv della tabella"
         tooltipPosition="bottom">
       </button>
+      <!-- BOTTONE TIP -->
+      <button *ngIf = "canUseTip"
+        type="button" 
+        pButton 
+        pRipple 
+        icon="pi pi-file" 
+        (click)="show()" 
+        class="p-mr-2" 
+        pTooltip="TIP"
+        aria-label="Tool di importazione pregressi"
+        tooltipPosition="bottom">
+      </button>
       <!-- <p-menu
         #exportCsvSelection
         [model]="functionalButtonsComponent.newArchivoButton.aziendeItems"

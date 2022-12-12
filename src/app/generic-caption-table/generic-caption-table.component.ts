@@ -8,6 +8,10 @@ import { CaptionReferenceTableComponent } from './caption-reference-table.compon
 import { CaptionSelectButtonsComponent } from './caption-select-buttons.component';
 import { MenuItem } from 'primeng/api';
 import { Archivio, Azienda, AziendaService } from '@bds/internauta-model';
+import { CODICI_RUOLO } from '@bds/internauta-model';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { NavigationTabsService } from '../navigation-tabs/navigation-tabs.service';
+import { TipComponent } from '@bds/common-components';
 
 @Component({
   selector: 'generic-caption-table',
@@ -26,11 +30,15 @@ export class GenericCaptionTableComponent implements OnInit {
   public accessibile: boolean = false;
   public multiple: boolean = false;
   public maxSizeUpload: Number = 50000000;
+  public ref: DynamicDialogRef;
+  public canUseTip: boolean = false;
 
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
 
-  constructor(private loginService: JwtLoginService,) { }
+  constructor(private loginService: JwtLoginService, public dialogService: DialogService, public navigationTabsService: NavigationTabsService,) { }
+
+
 
   ngOnInit(): void {
     this.subscriptions.push(
@@ -43,6 +51,23 @@ export class GenericCaptionTableComponent implements OnInit {
         }
       )
     );
+    this.canUseTip = (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CA) ||
+      this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CI) ||
+      this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD))
+  }
+
+  show() {
+    this.ref = this.dialogService.open(TipComponent, {
+      data: {
+        tabname: this.navigationTabsService.getTabs()[this.navigationTabsService.activeTabIndex].labelForAppName,
+        utenteUtilitiesLogin: this.utenteUtilitiesLogin,
+      },
+      header: 'Tool Importazione Pregressi',
+      width: '70%',
+      height: '69%',
+      //contentStyle: {"overflow": "auto"},
+      baseZIndex: 10000
+    });
   }
 
   isArchivioChiuso(archivio : Archivio) : boolean {
