@@ -38,7 +38,8 @@
 							class="autocomplete-utenti" 
 							[additionalFilters]="additionalFilterComboUtenti" 
 							[azienda]="archivio.idAzienda"
-              [showPool]="false"
+              				[showPool]="false"
+							[afferenzaDiretta]="true"
 							[showOnlyUser]="true"
 							(utenteStrutturaSelezionatoEmit)="onUtenteStrutturaSelected($event, attore)">
 						</lib-users-autocomplete>
