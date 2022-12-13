@@ -340,9 +340,9 @@ export class ResponsabiliComponent implements OnInit {
    public onUtenteStrutturaSelected(utenteStruttura: UtenteStruttura, attore: AttoreArchivio) {
     if (utenteStruttura) {
       attore.idPersona =  utenteStruttura.idUtente.idPersona;
-      if( attore.ruolo !== "VICARIO") {
+      //if( attore.ruolo !== "VICARIO") {
         attore.idStruttura = utenteStruttura.idStruttura;
-      }
+      //}
       console.log("attore", attore)
       this.loadStruttureAttore(attore);
     }
@@ -383,8 +383,7 @@ export class ResponsabiliComponent implements OnInit {
               
               this.struttureAttoreInEditing = [];
               utentiStruttura
-                .filter((us: UtenteStruttura) => us.attivo === true && (
-                  us.idAfferenzaStruttura.id === 1 || us.idAfferenzaStruttura.id == 9))
+                .filter((us: UtenteStruttura) => us.attivo === true)
                 .forEach((us: UtenteStruttura) => { this.struttureAttoreInEditing.push(us.idStruttura) });
                 console.log("Strutture nelle onLoadStrutture",this.struttureAttoreInEditing)
             }
