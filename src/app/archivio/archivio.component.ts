@@ -341,10 +341,11 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * @returns 
    */
   public canCreateSottoarchivio(): boolean {
+
     return this._archivio.permessiEspliciti.some((permessoArchivio: PermessoArchivio) => 
       permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id
       &&
-      permessoArchivio.bit >= DecimalePredicato.VICARIO
+      (permessoArchivio.bit == DecimalePredicato.MODIFICA || permessoArchivio.bit >= DecimalePredicato.VICARIO)
     );
   }
 
