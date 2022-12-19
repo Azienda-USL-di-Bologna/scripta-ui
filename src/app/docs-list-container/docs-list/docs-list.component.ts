@@ -789,7 +789,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    */
   public filterPersone(event: any) {
     const filtersAndSorts = new FiltersAndSorts();
-    filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.startsWith, event.query));
+    filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.startsWithIgnoreCase, event.query));
     this.aziendeFiltrabili.forEach(a => {
       if ((typeof a.value) === "number")
         filtersAndSorts.addFilter(new FilterDefinition("utenteList.idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
@@ -869,10 +869,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public filterStrutture(event: any) {
     const filtersAndSorts = new FiltersAndSorts();
     filtersAndSorts.addFilter(new FilterDefinition("nome", FILTER_TYPES.string.containsIgnoreCase, event.query));
-    this.aziendeFiltrabili.forEach(a => {
+    /* this.aziendeFiltrabili.forEach(a => {
       if ((typeof a.value) === "number")
         filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
-    });
+    }); */
+    (this.dataTable.filters["idAzienda.id"] as any).value.forEach((idAzienda: number) => {
+			filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, idAzienda));
+		});
     filtersAndSorts.addFilter(new FilterDefinition("ufficio", FILTER_TYPES.not_string.equals, false));
     filtersAndSorts.addSort(new SortDefinition("attiva", SORT_MODES.desc));
     filtersAndSorts.addSort(new SortDefinition("nome", SORT_MODES.asc));

@@ -58,6 +58,16 @@
     </div>
   </div>
   <div class="right-content">
+    <!-- SPINNER GENERICO DA ATTIVARE ALL'OCCORRENZA, IN PARITCOLARE PER OPERAZIONI ATTIVATE DAI BOTTONI DELLA PARTE DESTRA -->
+    <span *ngIf="referenceTableComponent.exportCsvInProgress">
+      <p-progressSpinner 
+        [style]="{width: '2em', height: '2em', marginRight: '7px'}"
+        strokeWidth="8" 
+        fill="#FFFFFF" 
+        animationDuration=".5s">
+      </p-progressSpinner>
+    </span>
+
     <i
       class="pi pi-lock lucchettoChiuso" 
       [pTooltip]="'Archivio chiuso'" 
@@ -118,14 +128,6 @@
     </span>
     <!-- PROGRESS SPINNER -->
     <span *ngIf="configuration.exportButton">
-      <span *ngIf="referenceTableComponent.exportCsvInProgress">
-        <p-progressSpinner 
-          [style]="{width: '2em', height: '2em', marginRight: '7px'}"
-          strokeWidth="8" 
-          fill="#FFFFFF" 
-          animationDuration=".5s">
-        </p-progressSpinner>
-      </span>
       <!-- BOTTONE ESPORTA -->
       <button
         type="button" 
@@ -139,7 +141,7 @@
         tooltipPosition="bottom">
       </button>
       <!-- BOTTONE TIP -->
-      <button *ngIf = "canUseTip"
+      <button *ngIf="canUseTip"
         type="button" 
         pButton 
         pRipple 
@@ -170,9 +172,9 @@
       placeholder="Scegli le colonne da visualizzare"
       aria-label="Scegli le colonne da visualizzare">
       <ng-template let-column pTemplate="item"  >
-          <div class="column-item">
-            <span >{{column.header}}</span>
-          </div>
+        <div class="column-item">
+          <span >{{column.header}}</span>
+        </div>
       </ng-template>
     </p-multiSelect>
   </div>

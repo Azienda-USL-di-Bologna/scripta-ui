@@ -800,7 +800,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
  */
 	public filterPersone(event: any) {
 		const filtersAndSorts = new FiltersAndSorts();
-		filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.startsWith, event.query));
+		filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.startsWithIgnoreCase, event.query));
 		this.aziendeFiltrabili.forEach(a => {
 			if ((typeof a.value) === "number")
 				filtersAndSorts.addFilter(new FilterDefinition("utenteList.idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
@@ -832,9 +832,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public filterStrutture(event: any) {
 		const filtersAndSorts = new FiltersAndSorts();
 		filtersAndSorts.addFilter(new FilterDefinition("nome", FILTER_TYPES.string.containsIgnoreCase, event.query));
-		this.aziendeFiltrabili.forEach(a => {
+		/* this.aziendeFiltrabili.forEach(a => {
 			if ((typeof a.value) === "number")
 				filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
+		}); */
+		(this.dataTable.filters["idAzienda.id"] as any).value.forEach((idAzienda: number) => {
+			filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, idAzienda));
 		});
 		this.strutturaService.getData("StrutturaWithIdAzienda", filtersAndSorts, null)
 			.subscribe(res => {
