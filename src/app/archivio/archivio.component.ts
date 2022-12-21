@@ -47,7 +47,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public loggedUserCanVisualizeArchive = false;
   public showRightSide: boolean = false;
   public docForDetailAndPreview: ExtendedDocDetailView;
-  public exportCsvInProgress: boolean = false;
+  public rightContentProgressSpinner: boolean = false;
   public rowCountInProgress: boolean = false;
   public rowCount: number;
 
@@ -381,9 +381,11 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     event.files.forEach((file: File) => {
       formData.append("documents", file);
     });
+    this.rightContentProgressSpinner = true;
     this.extendedArchivioService.uploadDocument(formData).subscribe(
       res => {
         console.log("res", res)
+        this.rightContentProgressSpinner = false;
         this.referenceTableComponent.resetPaginationAndLoadData(res as number[]);
       }
     );
@@ -411,7 +413,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.doclist.clear();
   }
   public exportCSV(dataTable: Table) {
-    this.exportCsvInProgress = this.doclist.exportCsvInProgress;
+    this.rightContentProgressSpinner = this.doclist.rightContentProgressSpinner;
     this.doclist.exportCSV(this.doclist.dataTable);
   }
 
@@ -459,8 +461,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       archivioDiInteresseToSave.version = this.utenteArchivioDiInteresse.version;
       archivioDiInteresseToSave.idArchiviPreferiti = this.utenteArchivioDiInteresse.idArchiviPreferiti;
       console.log("Utente Archivio Di Interesse", archivioDiInteresseToSave);
+      this.rightContentProgressSpinner = true;
       this.subscriptions.push(this.archivioDiInteresseService.patchHttpCall(archivioDiInteresseToSave, this.utenteArchivioDiInteresse.id, null, null).subscribe({
         next: (res: ArchivioDiInteresse) => {
+          this.rightContentProgressSpinner = false;
           this.archivioPreferito = !this.archivioPreferito;
           //console.log("Update archivio Preferito: ", res);
           this.utenteArchivioDiInteresse.version = res.version;

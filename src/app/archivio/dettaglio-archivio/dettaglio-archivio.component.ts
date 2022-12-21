@@ -25,6 +25,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   get archivio(): Archivio { return this._archivio; }
   @Input() set archivio(archivio: Archivio) {
     this._archivio = archivio;
+    this.setAnniTenutaSelezionabili();
+
     if (this.archivio.idTitolo) {
       this.selectedTitolo = this.buildNodeTitolo(this.archivio.idTitolo as Titolo);
     } else {
@@ -32,6 +34,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     }
     this.loadConfigurations();
   }
+  
   private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
   private pageConfNoCountLimit20: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 20, offset: 0 } };
   public responsabiliArchivi: AttoreArchivio[] = [];
@@ -94,7 +97,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     console.log("Archivio test: ", this.archivio);
-    this.updateAnniTenuta();
+    //this.updateAnniTenuta();
     // this.getResponsabili();
     this.isArchivioClosed();
     this.loggedUserIsResponsbaileOrVicario = (this.archivio["attoriList"] as AttoreArchivio[])
@@ -257,17 +260,14 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         }   
   }
 
-  private updateAnniTenuta() {
-    if(this.archivio.anniTenuta === undefined) {
-      this.anniTenutaSelezionabili = this.possibleAnniTenuta;
-      console.log("Anni tenuta: ", this.anniTenutaSelezionabili);
-      
-    } else {
-      this.possibleAnniTenuta.forEach(elem => {
-        if(this.archivio.anniTenuta <= elem.value ) 
-          this.anniTenutaSelezionabili.push(elem);
-      });  
-      console.log("Anni tenuta: ", this.anniTenutaSelezionabili);
+  /**
+   * Aggiorno la variabile che contiene le varie opzioni degli anni di conservazione.
+   * Le opzioni sono definite in base al massimario, se gli anni del massimario sono ad es
+   * 10, allora la conservazione sarà di minimo 10.
+   */
+  private setAnniTenutaSelezionabili() {
+    if (this.archivio.idMassimario) {
+      this.anniTenutaSelezionabili = this.possibleAnniTenuta.filter(a => a.value >= this.archivio.idMassimario.anniTenuta);
     }
   }
 
@@ -517,6 +517,12 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       ));
   }
 
+  /**
+   * Salvo la tipologia documentale scelta dall'utente.
+   * Salvo anche gli anni tenuta che dipendono dal massimario selezionato.
+   * Oltre questo vado anche ad impostare la variabile anniTenutaSelezionabili
+   * @param massimario 
+   */
   public onSelectMassimario(massimario: Massimario): void {
     console.log("onSelectMassimario: ", event);
     const archivioToUpdate: Archivio = new Archivio();
@@ -526,22 +532,19 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     archivioToUpdate.anniTenuta = massimario.anniTenuta;
     archivioToUpdate.version = this.archivio.version;
     this.patchArchivio(archivioToUpdate);
+    this.setAnniTenutaSelezionabili();
   }
 
+  /**
+   * Salvo gli anni di conservazione selezionati dall'utente
+   * @param anni 
+   */
   public saveAnniTenuta(anni: any): void {
     console.log("selezionata anni tenuta fascicolo ", anni)
-    this.anniTenutaSelezionabili = [];
     const archivioToUpdate: Archivio = new Archivio();
     archivioToUpdate.anniTenuta = anni;
     archivioToUpdate.version = this.archivio.version;
-    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
-      .subscribe(
-        res => {
-          console.log("Update archivio: ", res);
-          this.archivio.version = res.version;
-        }
-      ))
-      this.updateAnniTenuta();
+    this.patchArchivio(archivioToUpdate);
   }
 
 
