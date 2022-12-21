@@ -7,15 +7,26 @@
 	scrollHeight="flex">
   <ng-template pTemplate="caption">
 		<div class="">
-			<button *ngIf="archivio.livello === 1"
+			<button *ngIf="archivio.livello === 1 && loggedUserIsOnlyResponsabile"
 				id="aggiungiResponsabile"
 				type="button"
 				pButton 
 				pRipple 
 				icon="pi pi-plus" 
 				(click)="inEditing = true; addResponsabile()" 
-				class="mr-2" 
-				label="Aggiungi responsabile o vicario"
+				class="mr-2 bottoneVicari" 
+				label="Proponi nuovo responsabile"
+				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario || responsabilePropostoSelected || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
+			</button>
+			<button *ngIf="archivio.livello === 1"
+				id="aggiungiResponsabile"
+				type="button"
+				pButton 
+				pRipple 
+				icon="pi pi-plus" 
+				(click)="inEditing = true; addVicario()" 
+				class="mr-2 bottoneVicari" 
+				label="Aggiungi vicario"
 				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
 			</button>
 		</div>
@@ -38,8 +49,7 @@
 							class="autocomplete-utenti" 
 							[additionalFilters]="additionalFilterComboUtenti" 
 							[azienda]="archivio.idAzienda"
-              [showPool]="false"
-							
+              				[showPool]="false"
 							[showOnlyUser]="true"
 							(utenteStrutturaSelezionatoEmit)="onUtenteStrutturaSelected($event, attore)">
 						</lib-users-autocomplete><!-- [afferenzaDiretta]="true" -->
@@ -76,7 +86,8 @@
 						<p-dropdown *ngIf="!attore.id"
 							appendTo="body" 
 							[options]="ruoliList" 
-							[(ngModel)]="attore.ruolo">
+							[(ngModel)]="attore.ruolo"
+							disabled="true">
 						</p-dropdown>
             <div *ngIf="attore.id">
               {{attore.ruolo === ruoliEnum.RESPONSABILE_PROPOSTO ? "Responsabile proposto" : attore.ruolo | titlecase}}

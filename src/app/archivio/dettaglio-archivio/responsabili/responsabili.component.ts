@@ -28,7 +28,8 @@ export class ResponsabiliComponent implements OnInit {
   public inEditing: boolean = false;
   public isArchivioClosed : boolean = false;
   public ruoloAttoreLoggedUser: RuoloAttoreArchivio;
-  
+  public responsabilePropostoSelected: boolean = false;
+  public loggedUserIsOnlyResponsabile: boolean;
   @ViewChild("tableResponsabiliArchivi", {}) private dt: Table;
   
 
@@ -73,14 +74,19 @@ export class ResponsabiliComponent implements OnInit {
       this.ruoliList = [
         { value: RuoloAttoreArchivio.VICARIO, label: "Vicario"}, 
         { value: RuoloAttoreArchivio.RESPONSABILE_PROPOSTO, label: "Responsabile proposto"}];
+        this.loggedUserIsOnlyResponsabile = true;
     } else {
       this.ruoliList = [{ value: RuoloAttoreArchivio.VICARIO, label: "Vicario"}];
+      this.loggedUserIsOnlyResponsabile = false;
     }
     //voglio che i vicari che non hanno struttura, vengano mostrati con la struttura di appartenenza diretta/unificata
     this.responsabiliArchivi.forEach( resp => {
       if (resp.ruolo === "VICARIO"){
         this.loadStruttureAttore(resp);
       }})
+    let responsabileProposto = this.responsabiliArchivi.find(a => a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO)
+    if(responsabileProposto)
+      this.responsabilePropostoSelected = true;  
     if(this._archivio.stato == StatoArchivio.CHIUSO || this._archivio.stato == StatoArchivio.PRECHIUSO)
       this.isArchivioClosed = true;
     else
@@ -89,12 +95,25 @@ export class ResponsabiliComponent implements OnInit {
 
 
   /**
-   * Metodo chiamato dall'html per l'insertimento di un nuovo permesso
+   * Metodo chiamato dall'html per l'insertimento di un nuovo permesso per un responsabile proposto
    */
   public addResponsabile(): void {
     this.struttureAttoreInEditing = [];
     const newAttore = new AttoreArchivio();
+    newAttore.ruolo = RuoloAttoreArchivio.RESPONSABILE_PROPOSTO;
     this.responsabiliArchivi.push(newAttore);
+    this.dt.initRowEdit(newAttore);
+  }
+
+  /**
+   * Metodo chiamato dall'html per l'insertimento di un nuovo permesso per un responsabile proposto
+   */
+   public addVicario(): void {
+    this.struttureAttoreInEditing = [];
+    const newAttore = new AttoreArchivio();
+    newAttore.ruolo = RuoloAttoreArchivio.VICARIO;
+    this.responsabiliArchivi.push(newAttore);
+    console.log("Attore in addResponsabile:", newAttore);
     this.dt.initRowEdit(newAttore);
   }
 
@@ -168,7 +187,7 @@ export class ResponsabiliComponent implements OnInit {
           attoreArchivioBody.dataInserimentoRiga = attoreToOperate.dataInserimentoRiga;
           attoreArchivioBody.ruolo= RuoloAttoreArchivio.RESPONSABILE_PROPOSTO;
           attoreArchivioBody.idStruttura = attoreToOperate?.idStruttura;
-
+          this.responsabilePropostoSelected = true;
           batchOperations.push({
             operation: BatchOperationTypes.INSERT,
             entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.attorearchivio.path,
@@ -261,6 +280,7 @@ export class ResponsabiliComponent implements OnInit {
       case "DELETE":
         if(attoreToOperate.ruolo === "RESPONSABILE_PROPOSTO"){
           const batchOperations: BatchOperation[] = [];
+          
           batchOperations.push({
             operation: BatchOperationTypes.DELETE,
             entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.attorearchivio.path,
@@ -282,7 +302,7 @@ export class ResponsabiliComponent implements OnInit {
             }
           
             )
-           
+            this.responsabilePropostoSelected = false;
         } else {
           this.subscriptions.push(this.attoreArchivioService.deleteHttpCall(attoreToOperate.id)
         .subscribe({
