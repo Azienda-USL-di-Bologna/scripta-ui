@@ -85,7 +85,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public filteredStrutture: Struttura[] = [];
   public loading: boolean = false;
   public initialSortField: string = "dataCreazione";
-  public exportCsvInProgress: boolean = false;
+  public rightContentProgressSpinner: boolean = false;
   public rowCountInProgress: boolean = false;
   public rowCount: number;
   public selectButtonItems: SelectButtonItem[];
@@ -948,7 +948,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * La PageConf è senza limite
    */
   public exportCSV(table: Table) {
-    this.exportCsvInProgress = true;
+    this.rightContentProgressSpinner = true;
     const tableTemp = {} as Table;
     Object.assign(tableTemp, table);
     const pageConfNoLimit: PagingConf = {
@@ -973,10 +973,10 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
             extractor.exportCsv(tableTemp);
           }
 
-          this.exportCsvInProgress = false;
+          this.rightContentProgressSpinner = false;
         },
         err => {
-          this.exportCsvInProgress = false;
+          this.rightContentProgressSpinner = false;
         }
       );
   }

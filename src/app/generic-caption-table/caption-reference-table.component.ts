@@ -10,7 +10,7 @@ export interface CaptionReferenceTableComponent {
   applyFilterGlobal: (event: Event, matchMode: string) => void;
   resetPaginationAndLoadData: (x?: number[]) => void;
   clear: () => void;
-  exportCsvInProgress: boolean;
+  rightContentProgressSpinner: boolean;
   exportCSV: (table: Table) => void;
   selectableColumns?: ColonnaBds[];
   selectedColumns?: ColonnaBds[];

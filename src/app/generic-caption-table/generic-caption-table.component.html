@@ -59,7 +59,7 @@
   </div>
   <div class="right-content">
     <!-- SPINNER GENERICO DA ATTIVARE ALL'OCCORRENZA, IN PARITCOLARE PER OPERAZIONI ATTIVATE DAI BOTTONI DELLA PARTE DESTRA -->
-    <span *ngIf="referenceTableComponent.exportCsvInProgress">
+    <span *ngIf="referenceTableComponent.rightContentProgressSpinner || functionalButtonsComponent?.rightContentProgressSpinner">
       <p-progressSpinner 
         [style]="{width: '2em', height: '2em', marginRight: '7px'}"
         strokeWidth="8" 

@@ -71,7 +71,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		{ value: [3], label: "Inserti" },
 		{ value: [1,2,3], label: "Tutti" }
 	];
-	public exportCsvInProgress: boolean = false;
+	public rightContentProgressSpinner: boolean = false;
 	public rowCountInProgress: boolean = false;
   public rowCount: number;
 	public selectableColumns: ColonnaBds[] = [];
@@ -457,7 +457,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 * La PageConf è senza limite
 	 */
 	public exportCSV(table: Table) {
-		this.exportCsvInProgress = true;
+		this.rightContentProgressSpinner = true;
 		const tableTemp = {} as Table;
 		Object.assign(tableTemp, table);
 		const pageConfNoLimit: PagingConf = {
@@ -482,7 +482,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						extractor.exportCsv(tableTemp);
 					}
 
-					this.exportCsvInProgress = false;
+					this.rightContentProgressSpinner = false;
 				},
 				err => {
 					this.messageService.add({
@@ -491,7 +491,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						summary: "Attenzione",
 						detail: `Si è verificato un errore nello scaricamento del csv, contattare Babelcare`
 					});
-					this.exportCsvInProgress = false;
+					this.rightContentProgressSpinner = false;
 				}
 			);
 	}

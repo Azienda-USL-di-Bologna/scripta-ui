@@ -3,6 +3,7 @@ import { UploadDocumentButton } from "./functional-buttons/upload-document-butto
 
 export interface CaptionFunctionalButtonsComponent {
     //newArchivio: (codiceAzienda: number) => void;
+    rightContentProgressSpinner: boolean;
     newArchivoButton: NewArchivoButton;
     uploadDocumentButton?: UploadDocumentButton;
 }
