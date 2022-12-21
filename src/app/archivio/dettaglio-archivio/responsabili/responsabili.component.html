@@ -38,11 +38,11 @@
 							class="autocomplete-utenti" 
 							[additionalFilters]="additionalFilterComboUtenti" 
 							[azienda]="archivio.idAzienda"
-              				[showPool]="false"
-							[afferenzaDiretta]="true"
+              [showPool]="false"
+							
 							[showOnlyUser]="true"
 							(utenteStrutturaSelezionatoEmit)="onUtenteStrutturaSelected($event, attore)">
-						</lib-users-autocomplete>
+						</lib-users-autocomplete><!-- [afferenzaDiretta]="true" -->
 						<div *ngIf="attore.idPersona">{{attore.idPersona.descrizione}}</div>
 					</ng-template>
 					<ng-template pTemplate="output">

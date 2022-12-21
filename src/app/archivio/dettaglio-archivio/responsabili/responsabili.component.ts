@@ -125,7 +125,9 @@ export class ResponsabiliComponent implements OnInit {
     console.log(attoreToOperate.id)
     attoreToOperate.idArchivio = { id: this.archivio.id } as Archivio;
     attoreToOperate.idPersona = { id: attore.idPersona.id } as Persona;
-    attoreToOperate.idStruttura = attore.idStruttura;
+    if (attore.idStruttura) {
+      attoreToOperate.idStruttura = { id: attore.idStruttura.id } as Struttura;
+    }
     attoreToOperate.ruolo = attore.ruolo;
     attoreToOperate.version = attore.version;
     switch (operation) {
@@ -228,8 +230,8 @@ export class ResponsabiliComponent implements OnInit {
         }
         break;
       case "UPDATE":
-        if(attoreToOperate.ruolo === "VICARIO") {
-          //attoreToOperate.idStruttura = null;
+        if (attoreToOperate.ruolo === "VICARIO") {
+          attoreToOperate.idStruttura = null;
         }
         this.subscriptions.push(this.attoreArchivioService.patchHttpCall(attoreToOperate, attoreToOperate.id, this.attoreArchivioProjection)
         .subscribe({
@@ -340,9 +342,9 @@ export class ResponsabiliComponent implements OnInit {
    public onUtenteStrutturaSelected(utenteStruttura: UtenteStruttura, attore: AttoreArchivio) {
     if (utenteStruttura) {
       attore.idPersona =  utenteStruttura.idUtente.idPersona;
-      //if( attore.ruolo !== "VICARIO") {
+      if (attore.ruolo !== "VICARIO") {
         attore.idStruttura = utenteStruttura.idStruttura;
-      //}
+      }
       console.log("attore", attore)
       this.loadStruttureAttore(attore);
     }
@@ -370,22 +372,22 @@ export class ResponsabiliComponent implements OnInit {
                 .filter((us: UtenteStruttura) => us.attivo === true)
                 .forEach((us: UtenteStruttura) => { this.struttureAttoreInEditing.push(us.idStruttura) });
             } else {
-              // attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
-              //   return us.idAfferenzaStruttura.id === 1 
-              // })?.idStruttura;
-              // if (attore.idStruttura == null) {
-              //   attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
-              //     return us.idAfferenzaStruttura.id === 9;
-              //   })?.idStruttura;
-              // }
-              // this.struttureAttoreInEditing = []
-              // this.struttureAttoreInEditing.push(attore.idStruttura);
+              attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
+                return us.idAfferenzaStruttura.codice === "DIRETTA" 
+              })?.idStruttura;
+              if (attore.idStruttura == null) {
+                attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
+                  return us.idAfferenzaStruttura.codice === "UNIFICATA";
+                })?.idStruttura;
+              }
+              this.struttureAttoreInEditing = []
+              this.struttureAttoreInEditing.push(attore.idStruttura);
               
-              this.struttureAttoreInEditing = [];
+              /* this.struttureAttoreInEditing = [];
               utentiStruttura
                 .filter((us: UtenteStruttura) => us.attivo === true)
                 .forEach((us: UtenteStruttura) => { this.struttureAttoreInEditing.push(us.idStruttura) });
-                console.log("Strutture nelle onLoadStrutture",this.struttureAttoreInEditing)
+                console.log("Strutture nelle onLoadStrutture",this.struttureAttoreInEditing) */
             }
             
           }
