@@ -28,8 +28,8 @@ export class ResponsabiliComponent implements OnInit {
   public inEditing: boolean = false;
   public isArchivioClosed : boolean = false;
   public ruoloAttoreLoggedUser: RuoloAttoreArchivio;
-  public responsabilePropostoSelected: boolean = false;
-  public loggedUserIsOnlyResponsabile: boolean;
+  public responsabilePropostoGiaPresente: boolean = false;
+  public loggedUserIsResponsabile: boolean = false;
   @ViewChild("tableResponsabiliArchivi", {}) private dt: Table;
   
 
@@ -54,7 +54,7 @@ export class ResponsabiliComponent implements OnInit {
     private permessiDettaglioArchivioService: PermessiDettaglioArchivioService,
     private applicazioneService: ApplicazioneService,
     private router: Router,
-    private attivitaService: AttivitaService) { 
+    private attivitaService: AttivitaService) {
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -73,21 +73,21 @@ export class ResponsabiliComponent implements OnInit {
     if (this.ruoloAttoreLoggedUser === RuoloAttoreArchivio.RESPONSABILE) {
       this.ruoliList = [
         { value: RuoloAttoreArchivio.VICARIO, label: "Vicario"}, 
-        { value: RuoloAttoreArchivio.RESPONSABILE_PROPOSTO, label: "Responsabile proposto"}];
-        this.loggedUserIsOnlyResponsabile = true;
+        { value: RuoloAttoreArchivio.RESPONSABILE_PROPOSTO, label: "Responsabile proposto"}
+      ];
+        this.loggedUserIsResponsabile = true;
     } else {
       this.ruoliList = [{ value: RuoloAttoreArchivio.VICARIO, label: "Vicario"}];
-      this.loggedUserIsOnlyResponsabile = false;
     }
-    //voglio che i vicari che non hanno struttura, vengano mostrati con la struttura di appartenenza diretta/unificata
+    // Voglio che i vicari che non hanno struttura, vengano mostrati con la struttura di appartenenza diretta/unificata
     this.responsabiliArchivi.forEach( resp => {
       if (resp.ruolo === "VICARIO"){
         this.loadStruttureAttore(resp);
       }})
-    let responsabileProposto = this.responsabiliArchivi.find(a => a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO)
-    if(responsabileProposto)
-      this.responsabilePropostoSelected = true;  
-    if(this._archivio.stato == StatoArchivio.CHIUSO || this._archivio.stato == StatoArchivio.PRECHIUSO)
+    if (this.responsabiliArchivi.some(a => a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO)) {
+      this.responsabilePropostoGiaPresente = true;  
+    }
+    if (this.archivio.stato == StatoArchivio.CHIUSO || this.archivio.stato == StatoArchivio.PRECHIUSO)
       this.isArchivioClosed = true;
     else
       this.isArchivioClosed = false;
@@ -95,25 +95,13 @@ export class ResponsabiliComponent implements OnInit {
 
 
   /**
-   * Metodo chiamato dall'html per l'insertimento di un nuovo permesso per un responsabile proposto
+   * Metodo chiamato dall'html per l'insertimento di un responsabile proposto o di un vicario
    */
-  public addResponsabile(): void {
+  public addResponsabile(ruolo: RuoloAttoreArchivio): void {
     this.struttureAttoreInEditing = [];
     const newAttore = new AttoreArchivio();
-    newAttore.ruolo = RuoloAttoreArchivio.RESPONSABILE_PROPOSTO;
+    newAttore.ruolo = ruolo;
     this.responsabiliArchivi.push(newAttore);
-    this.dt.initRowEdit(newAttore);
-  }
-
-  /**
-   * Metodo chiamato dall'html per l'insertimento di un nuovo permesso per un responsabile proposto
-   */
-   public addVicario(): void {
-    this.struttureAttoreInEditing = [];
-    const newAttore = new AttoreArchivio();
-    newAttore.ruolo = RuoloAttoreArchivio.VICARIO;
-    this.responsabiliArchivi.push(newAttore);
-    console.log("Attore in addResponsabile:", newAttore);
     this.dt.initRowEdit(newAttore);
   }
 
@@ -151,8 +139,8 @@ export class ResponsabiliComponent implements OnInit {
     attoreToOperate.version = attore.version;
     switch (operation) {
       case "INSERT":
-        if(attoreToOperate.ruolo === "VICARIO") {
-          //attoreToOperate.idStruttura = null;
+        if (attoreToOperate.ruolo === "VICARIO") {
+          attoreToOperate.idStruttura = null; // Non voglio salvare la struttua del vicario.
           this.subscriptions.push(this.attoreArchivioService.postHttpCall(attoreToOperate, this.attoreArchivioProjection)
             .subscribe({
               next: (attoreRes: AttoreArchivio) => {
@@ -187,7 +175,7 @@ export class ResponsabiliComponent implements OnInit {
           attoreArchivioBody.dataInserimentoRiga = attoreToOperate.dataInserimentoRiga;
           attoreArchivioBody.ruolo= RuoloAttoreArchivio.RESPONSABILE_PROPOSTO;
           attoreArchivioBody.idStruttura = attoreToOperate?.idStruttura;
-          this.responsabilePropostoSelected = true;
+          
           batchOperations.push({
             operation: BatchOperationTypes.INSERT,
             entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.attorearchivio.path,
@@ -227,6 +215,7 @@ export class ResponsabiliComponent implements OnInit {
           this.subscriptions.push(
             this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
               (res: BatchOperation[]) => {
+                this.responsabilePropostoGiaPresente = true;
                 res.forEach(a  => {
                   if (a.returnProjection === "AttoreArchivioWithIdPersonaAndIdStruttura")
                   {
@@ -249,36 +238,35 @@ export class ResponsabiliComponent implements OnInit {
         }
         break;
       case "UPDATE":
-        if (attoreToOperate.ruolo === "VICARIO") {
+        if (attoreToOperate.ruolo === "VICARIO") { // NB: Attualmente l'update dei vicari non è possibile. quindi in questo if non entriamo mai
           attoreToOperate.idStruttura = null;
         }
         this.subscriptions.push(this.attoreArchivioService.patchHttpCall(attoreToOperate, attoreToOperate.id, this.attoreArchivioProjection)
-        .subscribe({
-          next: (attoreRes: AttoreArchivio) => {
-            attore.version = attoreRes.version;
-            delete this.dictAttoriClonePerRipristino[attore.id];
-            this.messageService.add({
-              severity: "success",
-              summary: "Aggiornamento " + attoreToOperate.ruolo.toLowerCase().replace("_"," "),
-              detail: attoreToOperate.ruolo.charAt(0) + attoreToOperate.ruolo.slice(1).toLowerCase().replace("_"," ") + " aggiornato con successo"
-            });
-            this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
-            this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
-          },
-          error: () => {
-            this.messageService.add({
-              severity: "error",
-              summary: "Errore",
-              detail: "Errore nell'aggiornamento del " + attoreToOperate.ruolo.toLowerCase().replace("_"," ") + ". Contattare Babelcare"
-            });
-            this.onRowEditCancel(attore, index);
-          }
-        })
-      );
-
-      break;
+          .subscribe({
+            next: (attoreRes: AttoreArchivio) => {
+              attore.version = attoreRes.version;
+              delete this.dictAttoriClonePerRipristino[attore.id];
+              this.messageService.add({
+                severity: "success",
+                summary: "Aggiornamento " + attoreToOperate.ruolo.toLowerCase().replace("_"," "),
+                detail: attoreToOperate.ruolo.charAt(0) + attoreToOperate.ruolo.slice(1).toLowerCase().replace("_"," ") + " aggiornato con successo"
+              });
+              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+              this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+            },
+            error: () => {
+              this.messageService.add({
+                severity: "error",
+                summary: "Errore",
+                detail: "Errore nell'aggiornamento del " + attoreToOperate.ruolo.toLowerCase().replace("_"," ") + ". Contattare Babelcare"
+              });
+              this.onRowEditCancel(attore, index);
+            }
+          })
+        );
+        break;
       case "DELETE":
-        if(attoreToOperate.ruolo === "RESPONSABILE_PROPOSTO"){
+        if (attoreToOperate.ruolo === "RESPONSABILE_PROPOSTO"){
           const batchOperations: BatchOperation[] = [];
           
           batchOperations.push({
@@ -298,43 +286,36 @@ export class ResponsabiliComponent implements OnInit {
               });
               this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
               this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
-              
+              this.responsabilePropostoGiaPresente = false;
             }
-          
-            )
-            this.responsabilePropostoSelected = false;
+          );
         } else {
           this.subscriptions.push(this.attoreArchivioService.deleteHttpCall(attoreToOperate.id)
-        .subscribe({
-          next: () => {
-            this.responsabiliArchivi.splice(index, 1);
-            this.messageService.add({
-              severity: "success",
-              summary: "Eliminazione responsabile",
-              detail: "Responsabile eliminato con successo"
-            });
-            this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
-            this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
-          },
-          error: () => {
-            this.messageService.add({
-              severity: "error",
-              summary: "Errore",
-              detail: "Errore nell'eliminazione del responsabile. Contattare Babelcare"
-            });
-            this.onRowEditCancel(attore, index);
-          }
-        })
-        );
+            .subscribe({
+              next: () => {
+                this.responsabiliArchivi.splice(index, 1);
+                this.messageService.add({
+                  severity: "success",
+                  summary: "Eliminazione responsabile",
+                  detail: "Responsabile eliminato con successo"
+                });
+                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+                this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+              },
+              error: () => {
+                this.messageService.add({
+                  severity: "error",
+                  summary: "Errore",
+                  detail: "Errore nell'eliminazione del responsabile. Contattare Babelcare"
+                });
+                this.onRowEditCancel(attore, index);
+              }
+            })
+          );
       }
       console.log(attoreToOperate)
-        
-      
-
-        
-     
-     break;
-      }
+      break;
+    }
   }
 
 
@@ -372,11 +353,12 @@ export class ResponsabiliComponent implements OnInit {
 
   /**
    * Carico le strutture dell'attore e popolo la variabile "struttureAttoreInEditing"
+   * NB: Per il VICARIO non voglio far scegliere la struttura, quindi gli metto la struttura di afferenza diretta/unificata
    * @param perm 
    * @param idSoggetto 
    */
   private loadStruttureAttore(attore: AttoreArchivio) {
-    this.subscriptions.push(this.permessiDettaglioArchivioService.loadStruttureOfPersona(attore.idPersona.id, this._archivio.idAzienda.id)
+    this.subscriptions.push(this.permessiDettaglioArchivioService.loadStruttureOfPersona(attore.idPersona.id, this.archivio.idAzienda.id, true)
       .subscribe(
         (data: any) => {
           if (data && data.results) {
@@ -393,23 +375,16 @@ export class ResponsabiliComponent implements OnInit {
                 .forEach((us: UtenteStruttura) => { this.struttureAttoreInEditing.push(us.idStruttura) });
             } else {
               attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
-                return us.idAfferenzaStruttura.codice === "DIRETTA" 
+                return us.idAfferenzaStruttura.codice === "DIRETTA";
               })?.idStruttura;
               if (attore.idStruttura == null) {
                 attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
                   return us.idAfferenzaStruttura.codice === "UNIFICATA";
                 })?.idStruttura;
               }
-              this.struttureAttoreInEditing = []
+              this.struttureAttoreInEditing = [];
               this.struttureAttoreInEditing.push(attore.idStruttura);
-              
-              /* this.struttureAttoreInEditing = [];
-              utentiStruttura
-                .filter((us: UtenteStruttura) => us.attivo === true)
-                .forEach((us: UtenteStruttura) => { this.struttureAttoreInEditing.push(us.idStruttura) });
-                console.log("Strutture nelle onLoadStrutture",this.struttureAttoreInEditing) */
             }
-            
           }
         }
       ));

@@ -278,11 +278,13 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
    * @param idAzienda 
    * @returns 
    */
-  public loadStruttureOfPersona(idPersona: number, idAzienda: number) {
+  public loadStruttureOfPersona(idPersona: number, idAzienda: number, escludiUffici = false) {
     const initialFiltersAndSorts = new FiltersAndSorts();
     initialFiltersAndSorts.addFilter(new FilterDefinition("idUtente.idPersona.id", FILTER_TYPES.not_string.equals, idPersona));
     initialFiltersAndSorts.addFilter(new FilterDefinition("idStruttura.idAzienda.id", FILTER_TYPES.not_string.equals, idAzienda));
-    //initialFiltersAndSorts.addFilter(new FilterDefinition("idStruttura.ufficio", FILTER_TYPES.not_string.equals, false));
+    if (escludiUffici) {
+      initialFiltersAndSorts.addFilter(new FilterDefinition("idStruttura.ufficio", FILTER_TYPES.not_string.equals, false));
+    }
     return this.utenteStrutturaService.getData(
       ENTITIES_STRUCTURE.baborg.utentestruttura.customProjections.UtenteStrutturaWithIdAfferenzaStrutturaCustom,
       initialFiltersAndSorts,
