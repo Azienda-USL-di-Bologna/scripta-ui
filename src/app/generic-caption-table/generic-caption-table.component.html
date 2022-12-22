@@ -92,7 +92,7 @@
         type="button" 
         pButton 
         pRipple 
-        [disabled] = "!functionalButtonsComponent.newArchivoButton?.hasPermessi || functionalButtonsComponent?.newArchivoButton?.isChiuso"
+        [disabled]="!functionalButtonsComponent.newArchivoButton.enable"
         icon="pi pi-plus" 
         (click)="functionalButtonsComponent.newArchivoButton.aziendeItems.length > 1 ? 
           aziendaSelection.toggle($event) : 
@@ -111,13 +111,13 @@
     </span>
     <!-- BOTTONE UPLOAD DOCUMENT -->
     <!--fileUploaderDocumentsAuto.clear() serve a svuotare il componente altrimenti si carica sempre lo stesso file--> 
-    <span  *ngIf="configuration.uploadDocumentButton" class="span-fileUpload-button">
+    <span *ngIf="configuration.uploadDocument && functionalButtonsComponent.uploadDocumentButton" class="span-fileUpload-button">
       <p-fileUpload #fileUploaderDocumentsAuto
         chooseIcon="pi pi-upload"
         pTooltip="Carica documenti nell'archivio"
         class="upload-document-button"
         multiple="true"
-        [disabled]="!functionalButtonsComponent.newArchivoButton?.hasPermessi || functionalButtonsComponent?.newArchivoButton?.isChiuso"
+        [disabled]="!functionalButtonsComponent.uploadDocumentButton.enable"
         mode="basic" 
         name="document[]"
         maxFileSize="5000000" 

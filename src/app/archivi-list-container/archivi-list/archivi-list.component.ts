@@ -174,8 +174,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					this.newArchivoButton = {
 						tooltip: "Crea nuovo fascicolo",
 						livello: 0,
-						hasPermessi: true,
-						isChiuso: false,
+						enable: true,
 						aziendeItems: this.utenteUtilitiesLogin.getUtente().aziendeAttive.map(a => {
 							return {
 								label: a.nome,

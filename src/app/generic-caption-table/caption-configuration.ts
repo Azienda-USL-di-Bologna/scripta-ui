@@ -7,7 +7,7 @@ export class CaptionConfiguration {
     public selectableColumns: boolean,
     public newArchivio: boolean,
     public preferitoButton: boolean,
-    public uploadDocumentButton: boolean,
+    public uploadDocument: boolean,
     public rowCount: boolean
     ) {}
 }

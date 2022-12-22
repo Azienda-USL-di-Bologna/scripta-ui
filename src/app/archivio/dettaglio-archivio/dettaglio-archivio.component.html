@@ -39,12 +39,14 @@
       <!-- Campo riservato -->
       <div class="input-box campo-riservato" *ngIf="isParlante == false">
         <label for="riservato">Riservato</label>
-        <i id="riservato" 
+        <i id="riservato" #riservato
           type="button" 
-          (click)="changeVisibilita()" 
+          (click)="archivio.livello === 1 ? changeVisibilita() : null" 
           class="pi icona-riservato" 
           title="Riservato"
-          [ngClass]="{'pi-eye': !archivio.riservato, 'pi-ban': archivio.riservato}">
+          [ngClass]="{'pi-eye': !archivio.riservato, 'pi-ban': archivio.riservato}"
+          [pTooltip]="archivio.livello === 1 ? archivio.riservato ? 'Rendi visibile il fascicolo' : 'Rendi riservato il fascicolo' : 
+            'Puoi modificare la riservatezza sul fascicolo radice'">
         </i>
       </div>
     </div>

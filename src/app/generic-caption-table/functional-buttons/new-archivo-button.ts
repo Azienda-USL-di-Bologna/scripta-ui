@@ -4,6 +4,5 @@ export interface NewArchivoButton {
   tooltip: string;
   livello: number;
   aziendeItems: MenuItem[];
-  hasPermessi: boolean;
-  isChiuso: boolean;
+  enable: boolean;
 }

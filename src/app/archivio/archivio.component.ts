@@ -149,7 +149,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   private inizializeAll(): void {
     this.buildSelectButtonItems(this.archivio);
     this.buildNewArchivioButton(this.archivio);
-    this.uploadDocumentButton = { command: this.uploadDocument};
+    this.buildUploadDocumentButton(this.archivio);
+    
     if (this.archivio.attoriList.find(a => a.ruolo === 'RESPONSABILE_PROPOSTO' && a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id )) {
       this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
       this.setForDettaglio();
@@ -220,7 +221,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * non sarà presente l'opzione sottoarchvi.
    */
   public buildSelectButtonItems(archivio: Archivio | ArchivioDetail): void {
-    this.buildNewArchivioButton(this.archivio);
     this.selectButtonItems = [];
     let labelDati: string;
     switch (archivio.livello) {
@@ -289,63 +289,47 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       disabled: false,
       command: () => this.archivilist.newArchivio(this.archivio.idAzienda.id)
     } as MenuItem;
-    if(this.isArchivioChiuso()) {
-      console.log("Nella build Archivio Button è chiuso")
-      switch (archivio.livello) {
-        case 1:
-          this.newArchivoButton = {
-            tooltip: "Crea nuovo sottofascicolo",
-            livello: 1,
-            aziendeItems: [aziendaItem],
-            hasPermessi: false,
-            isChiuso: true
-          };
-          break;
-        case 2:
-          this.newArchivoButton = {
-            tooltip: "Crea nuovo inserto",
-            livello: 2,
-            aziendeItems: [aziendaItem],
-            hasPermessi: false,
-            isChiuso: true
-          };
-          break;
-      }
-    }
-    else {
-      switch (archivio.livello) {
-        case 1:
-          this.newArchivoButton = {
-            tooltip: "Crea nuovo sottofascicolo",
-            livello: 1,
-            aziendeItems: [aziendaItem],
-            hasPermessi: this.canCreateSottoarchivio(),
-            isChiuso: false
-          };
-          break;
-        case 2:
-          this.newArchivoButton = {
-            tooltip: "Crea nuovo inserto",
-            livello: 2,
-            aziendeItems: [aziendaItem],
-            hasPermessi: this.canCreateSottoarchivio(),
-            isChiuso: false
-          };
-          break;
-      }
+    console.log("Nella build Archivio Button è chiuso")
+    switch (archivio.livello) {
+      case 1:
+        this.newArchivoButton = {
+          tooltip: "Crea nuovo sottofascicolo",
+          livello: 1,
+          aziendeItems: [aziendaItem],
+          enable: !this.isArchivioChiuso() && this.canCreateSottoarchivio(DecimalePredicato.VICARIO)
+        };
+        break;
+      case 2:
+        this.newArchivoButton = {
+          tooltip: "Crea nuovo inserto",
+          livello: 2,
+          aziendeItems: [aziendaItem],
+          enable: !this.isArchivioChiuso() && this.canCreateSottoarchivio(DecimalePredicato.VICARIO)
+        };
+        break;
     }
   }
 
   /**
-   * Ritorna true se l'utente può creare il sottoarchivio e cioè se è responsabile/vicario o ha permesso di almeno modifica
+   * Creo il bottone per caricare documnti sull'archivio
+   * @param archivio 
+   */
+   public buildUploadDocumentButton(archivio: Archivio | ArchivioDetail): void {
+    this.uploadDocumentButton = { 
+      command: this.uploadDocument,
+      enable:  !this.isArchivioChiuso() && this.canCreateSottoarchivio(DecimalePredicato.MODIFICA)
+    };
+  }
+
+  /**
+   * Ritorna true se l'utente come permesso minimo quello passato come parametro
    * @returns 
    */
-  public canCreateSottoarchivio(): boolean {
-
+  public canCreateSottoarchivio(permessoMinimo: DecimalePredicato): boolean {
     return this._archivio.permessiEspliciti.some((permessoArchivio: PermessoArchivio) => 
       permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id
       &&
-      (permessoArchivio.bit == DecimalePredicato.MODIFICA || permessoArchivio.bit >= DecimalePredicato.VICARIO)
+      (permessoArchivio.bit >= permessoMinimo)
     );
   }
 
