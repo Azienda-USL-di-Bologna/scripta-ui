@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { AttivitaService, StatoArchivio } from '@bds/internauta-model';
 import { Applicazione, ApplicazioneService, Archivio, Attivita, AttoreArchivio, AttoreArchivioService, Azienda, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, Persona, Ruolo, RuoloAttoreArchivio, Struttura, UtenteStruttura } from '@bds/internauta-model';
@@ -33,6 +33,7 @@ export class ResponsabiliComponent implements OnInit {
   @ViewChild("tableResponsabiliArchivi", {}) private dt: Table;
   
 
+
   // private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
 
 
@@ -46,7 +47,6 @@ export class ResponsabiliComponent implements OnInit {
   @Input() set loggedUserIsResponsbaileOrVicario(loggedUserIsResponsbaileOrVicario: Boolean) {
     this._loggedUserIsResponsbaileOrVicario = loggedUserIsResponsbaileOrVicario;
   }
-  
   constructor(
     private attoreArchivioService: AttoreArchivioService,
     private loginService: JwtLoginService,
@@ -152,6 +152,7 @@ export class ResponsabiliComponent implements OnInit {
                   summary: "Nuovo vicario",
                   detail: "Nuovo vicario inserito con successo"
                 });
+                this.archivio.attoriList.push(attoreRes);
                 this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
                 this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
               },
@@ -222,6 +223,8 @@ export class ResponsabiliComponent implements OnInit {
                     const attoreArchivio : AttoreArchivio = a.entityBody as AttoreArchivio;
                     attore.version =attoreArchivio.version;
                     attore.id = attoreArchivio.id;
+                    this.archivio.attoriList.push(attoreArchivio);
+
                   }
               })
                 this.messageService.add({
@@ -284,6 +287,7 @@ export class ResponsabiliComponent implements OnInit {
                 summary: "Eliminata proposta responsabilità", 
                 detail: "Hai eliminato il responsabile proposto"
               });
+              this.archivio.attoriList.splice(this.archivio.attoriList.indexOf(attoreToOperate),1);
               this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
               this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
               this.responsabilePropostoGiaPresente = false;
@@ -299,6 +303,7 @@ export class ResponsabiliComponent implements OnInit {
                   summary: "Eliminazione responsabile",
                   detail: "Responsabile eliminato con successo"
                 });
+                this.archivio.attoriList.splice(this.archivio.attoriList.indexOf(attoreToOperate),1);
                 this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
                 this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
               },

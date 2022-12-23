@@ -574,45 +574,55 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
    * @param event 
    */
   public numeraFasicoloClicked(event: Event): void {
-    this.confirmationService.confirm({
-      key: "confirm-popup",
-      target: event.target,
-      message: "Stai per numerare il fascicolo: confermi?",
-      accept: () => {
-        this.subscriptions.push(
-          this.extendedArchivioService.numeraArchivio(
-            this.archivio,
-            this.ARCHIVIO_PROJECTION)
-            .subscribe({
-                next: (resArchivio: Archivio) => {
-                  console.log("Archivio aggiornato", resArchivio);
-                  this.archivio.version = resArchivio.version;
-                  this.archivio.numerazioneGerarchica = resArchivio.numerazioneGerarchica;
-                  this.archivio.stato = resArchivio.stato;
-                  this.navigationTabsService.addTabArchivio(resArchivio, true, true);
-                  this.updateArchivio.emit(resArchivio);
-                  this.appService.appNameSelection(`Fascicolo ${resArchivio.numerazioneGerarchica} [${resArchivio.idAzienda.aoo}]`);
-                  this.messageService.add({
-                    severity: "success",
-                    key: "dettaglioArchivioToast",
-                    summary: "OK",
-                    detail: `${resArchivio.numerazioneGerarchica}: Numerazione avvenuta con successo`
-                  });
-                },
-                error: (e) => {
-                  console.error(e);
-                  this.messageService.add({
-                    severity: "error",
-                    key: "dettaglioArchivioToast",
-                    summary: "Attenzione",
-                    detail: `Si è verificato un errore nella numerazione dell'archivio, contattare Babelcare`
-                  });
+    if( this.archivio.attoriList.some(a => a.ruolo === RuoloAttoreArchivio.VICARIO)){
+      this.confirmationService.confirm({
+        key: "confirm-popup",
+        target: event.target,
+        message: "Stai per numerare il fascicolo: confermi?",
+        accept: () => {
+          this.subscriptions.push(
+            this.extendedArchivioService.numeraArchivio(
+              this.archivio,
+              this.ARCHIVIO_PROJECTION)
+              .subscribe({
+                  next: (resArchivio: Archivio) => {
+                    console.log("Archivio aggiornato", resArchivio);
+                    this.archivio.version = resArchivio.version;
+                    this.archivio.numerazioneGerarchica = resArchivio.numerazioneGerarchica;
+                    this.archivio.stato = resArchivio.stato;
+                    this.navigationTabsService.addTabArchivio(resArchivio, true, true);
+                    this.updateArchivio.emit(resArchivio);
+                    this.appService.appNameSelection(`Fascicolo ${resArchivio.numerazioneGerarchica} [${resArchivio.idAzienda.aoo}]`);
+                    this.messageService.add({
+                      severity: "success",
+                      key: "dettaglioArchivioToast",
+                      summary: "OK",
+                      detail: `${resArchivio.numerazioneGerarchica}: Numerazione avvenuta con successo`
+                    });
+                  },
+                  error: (e) => {
+                    console.error(e);
+                    this.messageService.add({
+                      severity: "error",
+                      key: "dettaglioArchivioToast",
+                      summary: "Attenzione",
+                      detail: `Si è verificato un errore nella numerazione dell'archivio, contattare Babelcare`
+                    });
+                  }
                 }
-              }
-            )
-        );
-      }
-    });
+              )
+          );
+        }
+      });
+    } else {
+      this.messageService.add({
+        severity: "warn",
+        key: "dettaglioArchivioToast",
+        summary: "Attenzione",
+        detail: `Inserire almeno un vicario per poter numerare il fascicolo`
+      });
+    }
+    
   }
 
   public accettaResponsabilita() {
@@ -766,6 +776,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       )
     );
   }
+
+ 
 
   public ngOnDestroy(): void {
     if (this.subscriptions) {
