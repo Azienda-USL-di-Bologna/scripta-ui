@@ -172,22 +172,26 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
    */
   public buildPermessoPerBlackbox(
     permesso: PermessoTabella, //permesso sulla riga che ho premuto
-    oggettone: PermessoEntitaStoredProcedure[], //oggettone da ridare alla blackbox per generare l'oggetto che modifica bene i permessi
+    oggettone: PermessoEntitaStoredProcedure[], //oggettone da ridare alla blackbox per generare l'oggetto che modifica bene i permessi, contiene i soli permessi del soggetto su cui stiamo lavorando
     oggettoneOperation: OggettoneOperation, // operazione che sto svolgendo (modifica / aggiunta oppure rimozione )
     operazioneRichiesta: AzioniPossibili, // aggiunto per chiarezza di lettura mi serve a capire che operazione sto svolgendo sul frontend
     archivio: Archivio | ArchivioDetail): OggettonePermessiEntitaGenerator {
       oggettone = this.filtraVirtuali(oggettone);
+      
       const permessoPerBlackbox: OggettonePermessiEntitaGenerator = new OggettonePermessiEntitaGenerator(operazioneRichiesta === AzioniPossibili.BAN ? null: oggettone );
       let entitaVeicolante: EntitaStoredProcedure = null;
       let soggetto: EntitaStoredProcedure = null;
       let predicato: EnumPredicatoPermessoArchivio = permesso.predicato;
       let trasmetti: boolean = permesso.trasmetti;
+      if (permesso.veicolo) {
+        permesso.idProvenienzaVeicolo = permesso.veicolo.id; // L'idProvenienzaVeicolo viene impostato alla creazione della riga, va pero preso quello dell'effettiva struttura scelta
+        permesso.descrizioneVeicolo = permesso.veicolo.nome;
+      }
       if (permesso.idProvenienzaVeicolo) {
         entitaVeicolante = permessoPerBlackbox.buildEntita(permesso.idProvenienzaVeicolo, EntitaBlackbox.STRUTTURE);
         soggetto = permessoPerBlackbox.buildEntita(permesso.idProvenienzaSoggetto, EntitaBlackbox.PERSONE);
       } else {
         soggetto = permessoPerBlackbox.buildEntita(permesso.idProvenienzaSoggetto, EntitaBlackbox.STRUTTURE);
-
       }
       let oggetto: EntitaStoredProcedure = permessoPerBlackbox.buildEntita(archivio.id, EntitaBlackbox.ARCHIVI);
       let id_permesso_bloccato: number = null; 
@@ -210,7 +214,21 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
         predicato = EnumPredicatoPermessoArchivio.NON_PROPAGATO;
         trasmetti = entitaVeicolante === null;
       }
-    
+
+      if (oggettone) {
+        /* Se sto editando un permesso che già c'era semplicemente modifcando il predicato o la struttura veicolante, allora voglio spegnere il vecchio e accenderne uno nuovo */
+        const permessoPregresso = oggettone[0].categorie[0].permessi.find(p => p.id === permesso.idPermesso && (p.predicato !== predicato || p.entita_veicolante.id_provenienza !== permesso.idProvenienzaVeicolo));
+        if (permessoPregresso) {
+          permessoPerBlackbox.managePermessoOggettone(
+            soggetto,
+            oggetto,
+            this.AMBITO,
+            this.TIPO,
+            [permessoPregresso],
+            OggettoneOperation.REMOVE
+          );
+        }
+      }
       const permessoDaAggiungereORimuovere: PermessoStoredProcedure = permessoPerBlackbox.buildPermesso(
         predicato,
         trasmetti, //il trasmetti ha senso per le strutture che trasmettono la conscenza del permesso ai figli è sempre false per le persone

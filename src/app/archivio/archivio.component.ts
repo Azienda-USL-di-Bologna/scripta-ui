@@ -296,7 +296,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           tooltip: "Crea nuovo sottofascicolo",
           livello: 1,
           aziendeItems: [aziendaItem],
-          enable: !this.isArchivioChiuso() && this.canCreateSottoarchivio(DecimalePredicato.VICARIO)
+          enable: !this.isArchivioChiuso() && this.hasPermessoMinimo(DecimalePredicato.VICARIO)
         };
         break;
       case 2:
@@ -304,7 +304,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           tooltip: "Crea nuovo inserto",
           livello: 2,
           aziendeItems: [aziendaItem],
-          enable: !this.isArchivioChiuso() && this.canCreateSottoarchivio(DecimalePredicato.VICARIO)
+          enable: !this.isArchivioChiuso() && this.hasPermessoMinimo(DecimalePredicato.VICARIO)
         };
         break;
     }
@@ -317,7 +317,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    public buildUploadDocumentButton(archivio: Archivio | ArchivioDetail): void {
     this.uploadDocumentButton = { 
       command: this.uploadDocument,
-      enable:  !this.isArchivioChiuso() && this.canCreateSottoarchivio(DecimalePredicato.MODIFICA)
+      enable:  !this.isArchivioChiuso() && this.hasPermessoMinimo(DecimalePredicato.MODIFICA)
     };
   }
 
@@ -325,7 +325,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * Ritorna true se l'utente come permesso minimo quello passato come parametro
    * @returns 
    */
-  public canCreateSottoarchivio(permessoMinimo: DecimalePredicato): boolean {
+  public hasPermessoMinimo(permessoMinimo: DecimalePredicato): boolean {
     return this._archivio.permessiEspliciti.some((permessoArchivio: PermessoArchivio) => 
       permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id
       &&
