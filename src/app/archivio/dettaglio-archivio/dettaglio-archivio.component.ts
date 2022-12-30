@@ -60,7 +60,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   private utenteUtilitiesLogin: UtenteUtilities;
   public loggedUserIsResponsbaileOrVicario = false;
   public isArchivioChiuso = false;
-  loggedUserIsResponsbaileProposto = false;
+  public loggedUserIsResponsbaileProposto = false;
   public fascicoliParlanti: boolean = false;
   private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
   private attoreArchivioProjection = ENTITIES_STRUCTURE.scripta.attorearchivio.standardProjections.AttoreArchivioWithIdPersonaAndIdStruttura;
@@ -95,22 +95,25 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     );
   }
 
+  
+
   ngOnInit(): void {
     console.log("Archivio test: ", this.archivio);
     //this.updateAnniTenuta();
     // this.getResponsabili();
     this.isArchivioClosed();
     this.loggedUserIsResponsbaileOrVicario = (this.archivio["attoriList"] as AttoreArchivio[])
-    .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id 
-    && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE 
-      || a.ruolo === RuoloAttoreArchivio.VICARIO 
-      || a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
+      .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id 
+        && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE 
+          || a.ruolo === RuoloAttoreArchivio.VICARIO 
+          || a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
       // this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
-      if(this.archivio.tipo !== TipoArchivio.SPECIALE) {
-        this.tipiArchivioObj = this.tipiArchivioObj.filter(a => a.value !== TipoArchivio.SPECIALE)
-      }
-     this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[]).some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id  && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
-    this.loadParametroAziendaleFascicoliParlanti()
+    if (this.archivio.tipo !== TipoArchivio.SPECIALE) {
+      this.tipiArchivioObj = this.tipiArchivioObj.filter(a => a.value !== TipoArchivio.SPECIALE);
+    }
+    this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[])
+      .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id  && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
+    this.loadParametroAziendaleFascicoliParlanti();
   }
 
   private loadConfigurations() {
@@ -125,8 +128,14 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     );
   }
 
-  public chiudiRiapriArchivio(archivio: Archivio, event: Event) {
-    if(this.archivio.idMassimario === null) {
+  /**
+   * Funzione che si occupa della prechiusura/chiusura e apertura dell'archivio radice e quindi dei vari figli
+   * @param archivio 
+   * @param event 
+   * @returns 
+   */
+  public chiudiRiapriArchivio(event: Event): void {
+    if (!this.archivio.idMassimario) {
       this.messageService.add({
         severity: "error",
         key: "dettaglioArchivioToast",
@@ -136,128 +145,112 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       return;
     }
 
-    console.log("Archivio dentro la chiudiRiapri: ", archivio)
-    let archivioUpdate = new Archivio();
-    archivioUpdate.version = archivio.version;
-    archivioUpdate.idTitolo = this.archivio.idTitolo;
-    archivioUpdate.idMassimario = this.archivio.idMassimario;
-    archivioUpdate.fk_idMassimario = archivio.fk_idMassimario;
-    archivioUpdate.fk_idTitolo = archivio.fk_idTitolo;
-    if(archivio.stato == StatoArchivio.PRECHIUSO) {
+    const archivioUpdate = new Archivio();
+    archivioUpdate.version = this.archivio.version;
+    const additionalData = [new AdditionalDataDefinition("OperationRequested", "CloseOrReopenArchive")];
+
+    if (this.archivio.stato == StatoArchivio.PRECHIUSO) {
       archivioUpdate.stato = StatoArchivio.APERTO;
-      let additionalData : Array<AdditionalDataDefinition> = new Array;
-      let additionalDato = new AdditionalDataDefinition("OperationRequested", "CloseArchivio");
-      additionalData.push(additionalDato);
-      this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioUpdate, archivio.id, null, additionalData)
-      .subscribe(
-        res => {
-          console.log("Update archivio: ", res);
-          archivio.version = res.version;
-          this.messageService.add({
-            severity: "success",
-            key: "dettaglioArchivioToast",
-            summary: "OK",
-            detail: "Stato del fascicolo " + archivio.numerazioneGerarchica + " cambiato correttamente"
-          });
-          this.archivio.version = archivio.version;
-          this.archivio.stato = res.stato;
-          this.updateArchivio.emit(this.archivio);
-        },
-        err => {
-          this.messageService.add({
-            severity: "error",
-            key: "dettaglioArchivioToast",
-            summary: "Attenzione",
-            detail: `Si è verificato un errore nel cambio di stato del fascicolo, contattare Babelcare`
-          });
-        }
-      ))
-    } 
-    else {
-      let chiusuraArchivio: boolean;
+      this.archivio.stato = StatoArchivio.APERTO;
+      this.patchArchivio(
+        archivioUpdate,
+        additionalData,
+        "Archivio " + this.archivio.numerazioneGerarchica + " riaperto correttamente",
+        `Si è verificato un errore nella riapertura dell'archivio, contattare Babelcare`,
+        () => {this.updateArchivio.emit(this.archivio)}
+      );
+    } else {
       this.subscriptions.push(
-        this.configurazioneService.getParametriAziende("chiusuraArchivio", ["scripta"], [archivio.idAzienda.id]).subscribe(
+        this.configurazioneService.getParametriAziende("chiusuraArchivio", ["scripta"], [this.archivio.idAzienda.id]).subscribe(
           (parametriAziende: ParametroAziende[]) => {
+            let chiusuraArchivio: boolean = false;
             if (parametriAziende && parametriAziende[0]) {
-              chiusuraArchivio = JSON.parse(parametriAziende[0].valore )
+              chiusuraArchivio = JSON.parse(parametriAziende[0].valore)
             }
-            if(chiusuraArchivio) 
-              archivioUpdate.stato = StatoArchivio.CHIUSO;
-            else
-              archivioUpdate.stato = StatoArchivio.PRECHIUSO;
-            if(chiusuraArchivio) {
+            if (chiusuraArchivio) {
               this.confirmationService.confirm({
                 key: "confirm-popup",
                 target: event.target,
-                message: "Il fascicolo non potrà essere riaperto. Si vuole procedere?",
+                message: "Eventuali bozze di sottofascicoli o inserti saranno eliminate. Inoltre il fascicolo non potrà essere riaperto. Si vuole procedere?",
                 icon: 'pi pi-exclamation-triangle',
                 accept: () => {
                   // L'utente conferma di voler chiudere definitivamente il fascicolo, faccio partire la chiusura
-                  let additionalData : Array<AdditionalDataDefinition> = new Array;
-                  let additionalDato = new AdditionalDataDefinition("OperationRequested", "CloseArchivio");
-                  additionalData.push(additionalDato);
-                  this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioUpdate, archivio.id, null, additionalData)
-                  .subscribe(
-                    res => {
-                      console.log("Update archivio: ", res);
-                      archivio = res;
-                      this.messageService.add({
-                        severity: "success",
-                        key: "dettaglioArchivioToast",
-                        summary: "OK",
-                        detail: "Stato dell'archivio " + archivio.numerazioneGerarchica + " cambiato correttamente"
-                      });
-                      this.archivio.version = archivio.version;
-                      this.archivio.stato = res.stato;
-                      this.updateArchivio.emit(this.archivio);
-                    },
-                    err => {
-                      this.messageService.add({
-                        severity: "error",
-                        key: "dettaglioArchivioToast",
-                        summary: "Attenzione",
-                        detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`
-                      });
-                    }
-                  ))
+                  archivioUpdate.stato = StatoArchivio.CHIUSO;
+                  this.archivio.stato = StatoArchivio.CHIUSO;
+                  this.patchArchivio(
+                    archivioUpdate,
+                    additionalData,
+                    "Archivio " + this.archivio.numerazioneGerarchica + " chiuso correttamente",
+                    `Si è verificato un errore nella chiusura dell'archivio, contattare Babelcare`,
+                    () => {this.updateArchivio.emit(this.archivio)}
+                  );
                 },
                 reject: () => {
                   // L'utente ha cambaito idea. Non faccio nulla
-                  
+                }
+              });
+            } else {
+              this.confirmationService.confirm({
+                key: "confirm-popup",
+                target: event.target,
+                message: "Eventuali bozze di sottofascicoli o inserti saranno eliminate. Si vuole procedere?",
+                icon: 'pi pi-exclamation-triangle',
+                accept: () => {
+                  // L'utente conferma di voler chiudere definitivamente il fascicolo, faccio partire la chiusura
+                  archivioUpdate.stato = StatoArchivio.PRECHIUSO;
+                  this.archivio.stato = StatoArchivio.PRECHIUSO;
+                  this.patchArchivio(
+                    archivioUpdate,
+                    additionalData,
+                    "Archivio " + this.archivio.numerazioneGerarchica + " chiuso correttamente",
+                    `Si è verificato un errore nella chiusura dell'archivio, contattare Babelcare`,
+                    () => {this.updateArchivio.emit(this.archivio)}
+                  );
+                },
+                reject: () => {
+                  // L'utente ha cambaito idea. Non faccio nulla
                 }
               });
             }
-            else {
-              let additionalData : Array<AdditionalDataDefinition> = new Array;
-              let additionalDato = new AdditionalDataDefinition("OperationRequested", "CloseArchivio");
-              additionalData.push(additionalDato);
-              this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioUpdate, archivio.id, null, additionalData)
-              .subscribe(
-                res => {
-                  console.log("Update archivio: ", res);
-                  archivio = res;
-                  this.messageService.add({
-                    severity: "success",
-                    key: "dettaglioArchivioToast",
-                    summary: "OK",
-                    detail: "Stato dell'archivio " + archivio.numerazioneGerarchica + " cambiato correttamente"
-                  });
-                  this.archivio.version = archivio.version;
-                  this.archivio.stato = res.stato;
-                  this.updateArchivio.emit(this.archivio);
-                },
-                err => {
-                  this.messageService.add({
-                    severity: "error",
-                    key: "dettaglioArchivioToast",
-                    summary: "Attenzione",
-                    detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`
-                  });
-                }
-              ))
-            }
           }));
         }   
+  }
+
+
+  /**
+   * Un semplice update dell'archivio così come passato. Viene aggiornato poi il version
+   * Mostra gli eventuali messaggi passati in caso di successo o fallimento dell'update.
+   * @param archivioToUpdate 
+   */
+   public patchArchivio(archivioToUpdate: Archivio, additionalData?: AdditionalDataDefinition[], messageSuccess?: string, messageError?: string, exe?: () => void): void {
+    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id,  null/* this.ARCHIVIO_PROJECTION */, additionalData)
+      .subscribe(
+        res => {
+          console.log("Update archivio: ", res);
+          this.archivio.version = res.version;
+          if (messageSuccess) {
+            this.messageService.add({
+              severity: "success",
+              key: "dettaglioArchivioToast",
+              summary: "OK",
+              detail: messageSuccess
+            });
+          }
+          if (exe) {
+            exe();
+          }
+        },
+        err => {
+          if (messageError) {
+            this.messageService.add({
+              severity: "error",
+              key: "dettaglioArchivioToast",
+              summary: "Attenzione",
+              detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`
+            });
+          }
+        }
+      ));
   }
 
   /**
@@ -555,19 +548,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     this.patchArchivio(archivioToUpdate);
   }
 
-  /**
-   * Un semplice update dell'archivio così come passato. Viene aggiornato poi il version
-   * @param archivioToUpdate 
-   */
-  public patchArchivio(archivioToUpdate: Archivio): void {
-    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
-      .subscribe(
-        res => {
-          console.log("Update archivio: ", res);
-          this.archivio.version = res.version;
-        }
-      ));
-  }
+  
 
   /**
    * Funzione che si occupa della numerazione di un archivio

@@ -156,6 +156,7 @@
   </div>
   <div class="right-side">
     <div class="numeraFasicolo">
+      <!-- Bottone numera archivio -->
       <button *ngIf="archivio.stato == 'BOZZA'" 
         type="button" 
         pButton 
@@ -167,10 +168,12 @@
         [disabled]="!archivio.oggetto || !archivio.tipo || !archivio.idTitolo || (archivio.stato == 'CHIUSO' || archivio.stato == 'PRECHIUSO')" 
         tooltipPosition="bottom">
       </button>
-      <p-button class="p-mr-2" *ngIf="!(archivio.stato == 'BOZZA') && archivio.livello == 1"  
-        (click)="chiudiRiapriArchivio(archivio, $event)" 
-        [disabled]="archivio.stato === 'CHIUSO' || !loggedUserIsResponsbaileOrVicario"
-        >{{archivio.stato == 'APERTO' ? 'Chiudi' : 'Riapri'}}
+      <!-- Bottone chiudi o riapri -->
+      <p-button *ngIf="archivio.stato !== 'BOZZA' && archivio.livello == 1 && archivio.stato !== 'CHIUSO'"  
+        class="p-mr-2"
+        (click)="chiudiRiapriArchivio($event)" 
+        [disabled]="!loggedUserIsResponsbaileOrVicario">
+        {{archivio.stato === 'APERTO' ? 'Chiudi' : 'Riapri'}}
       </p-button>
 
     </div>

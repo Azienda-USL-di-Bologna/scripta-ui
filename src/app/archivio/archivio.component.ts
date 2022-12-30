@@ -171,25 +171,52 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         this.setForContenuto();
       }
     }
+    
+
   }
 
   private setForSottoarchivi(): void {
-    this.captionConfiguration = new CaptionConfiguration(CaptionComponent.ARCHIVI_LIST, true, true, true, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, false, true);
+    this.captionConfiguration = new CaptionConfiguration(
+      CaptionComponent.ARCHIVI_LIST, true, true, true, false, 
+      this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, 
+      true, false, true,
+      this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO);
+    /* if (this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO) {
+      this.captionConfiguration.showIconArchiveClosed = true;
+    } */
     this.referenceTableComponent = this.archivilist;
   }
 
   public setForContenuto(): void {
-    this.captionConfiguration = new CaptionConfiguration(CaptionComponent.ARCHIVIO, true, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, false, false);
+    this.captionConfiguration = new CaptionConfiguration(
+      CaptionComponent.ARCHIVIO, true, true, false, false, 
+      this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, false, false,
+      this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO);
+    /* if (this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO) {
+      this.captionConfiguration.showIconArchiveClosed = true;
+    } */
     this.referenceTableComponent = this;
   }
 
   private setForDocumenti(): void {
-    this.captionConfiguration = new CaptionConfiguration(CaptionComponent.DOCS_LIST, true, true, true, true, false, true, true, true);
+    this.captionConfiguration = new CaptionConfiguration(
+      CaptionComponent.DOCS_LIST, true, true, true, true, false, true, true, true,
+      this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO);
+    /* if (this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO) {
+      this.captionConfiguration.showIconArchiveClosed = true;
+    } */
     this.referenceTableComponent = this.doclist;
   }
 
   private setForDettaglio(): void {
-    this.captionConfiguration = new CaptionConfiguration(CaptionComponent.ARCHIVIO, false, true, false, false, this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, false, false);
+    this.captionConfiguration = new CaptionConfiguration(
+      CaptionComponent.ARCHIVIO, false, true, false, false, 
+      this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, 
+      true, false, false,
+      this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO);
+    /* if (this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO) {
+      this.captionConfiguration.showIconArchiveClosed = true;
+    } */
     this.referenceTableComponent = {} as CaptionReferenceTableComponent;
   }
 

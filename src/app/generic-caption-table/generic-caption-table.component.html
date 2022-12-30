@@ -68,10 +68,9 @@
       </p-progressSpinner>
     </span>
 
-    <i
+    <i *ngIf="configuration.showIconArchiveClosed"
       class="pi pi-lock lucchettoChiuso" 
-      [pTooltip]="'Archivio chiuso'" 
-      *ngIf="functionalButtonsComponent?.newArchivoButton?.isChiuso"
+      [pTooltip]="'Fascicolo chiuso'" 
       tooltipPosition="bottom">
     </i>
 
