@@ -682,9 +682,8 @@
         [ngClass]="{'logically-deleted' : rowData.archiviation?.dataEliminazione != null}"
           [pTooltip]="rowData.oggettoVisualizzazione" tooltipPosition="top">
           <i *ngIf="rowData.visibilitaLimitata && !rowData.riservato" class="pi pi-eye"></i>
-          <i *ngIf="!rowData.visibilitaLimitata && rowData.riservato" class="pi pi-eye-slash"></i>
-          {{!rowData.visibilitaLimitata && rowData.riservato ? "[Riservato]" : ""}}
-          {{!rowData.riservato ? rowData.oggettoVisualizzazione : ""}}
+          <i *ngIf="rowData.riservato" class="pi pi-eye-slash"></i>
+          {{rowData.oggettoVisualizzazione}}
         </div>
         <div *ngSwitchCase="'stato'">
           {{rowData.statoVisualizzazione}}
@@ -765,13 +764,13 @@
         alignFrozen="right"  
         pFrozenColumn 
         [frozen]="true">
-        <i *ngIf="loggedUserCanRestoreArchiviation && rowData.archiviation.dataEliminazione"
+        <i *ngIf="loggedUserCanRestoreArchiviation && rowData.archiviation?.dataEliminazione"
           class="pi pi-undo" 
           pTooltip="Ripristina fascicolazione"
           (click)="$event.stopPropagation(); restoreArchiviation(rowData)"
         >
         </i>
-        <i *ngIf="loggedUserCanDeleteArchiviation && !!!rowData.archiviation.dataEliminazione"
+        <i *ngIf="loggedUserCanDeleteArchiviation && !!!rowData.archiviation?.dataEliminazione"
           #iconaEliminazioneArchiviazione
           class="pi pi-times" 
           pTooltip="Elimina fascicolazione"

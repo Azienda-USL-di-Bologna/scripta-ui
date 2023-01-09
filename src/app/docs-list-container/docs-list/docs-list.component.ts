@@ -111,6 +111,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public loggedUserCanDeleteArchiviation: boolean = false;
   public docSelected: ExtendedDocDetailView;
   public isResponsabileVersamento: boolean = false;
+  public hasPienaVisibilita: boolean = false;
 
   private _archivio: Archivio;
   get archivio(): Archivio { return this._archivio; }
@@ -1355,6 +1356,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         rowSelected: null
       });
   }
+
 
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
