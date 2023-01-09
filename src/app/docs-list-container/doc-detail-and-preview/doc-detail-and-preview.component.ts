@@ -3,7 +3,8 @@ import { ExtendedDocDetailView } from '../docs-list/extended-doc-detail-view';
 import { AttachmentsBoxConfig } from '@bds/common-components';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { first, Subscription } from 'rxjs';
-import { Utente } from '@bds/internauta-model';
+import { DocDetail, Persona, Utente } from '@bds/internauta-model';
+import { disableDebugTools } from '@angular/platform-browser';
 
 
 @Component({
@@ -16,6 +17,9 @@ export class DocDetailAndPreviewComponent implements OnInit {
   public isResponsabileVersamento: boolean = false;
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
+  private idPersona: Persona;
+  public hasPienaVisibilita: boolean = false;
+
   
   @Output('closeRightPanel') closeRightPanel = new EventEmitter();
   _doc: ExtendedDocDetailView;
@@ -43,10 +47,23 @@ export class DocDetailAndPreviewComponent implements OnInit {
           if (utenteUtilities) {
             this.utenteUtilitiesLogin = utenteUtilities;
             this.isResponsabileVersamento = this.utenteUtilitiesLogin.isRV();
+            this.idPersona = this.utenteUtilitiesLogin.getUtente().idPersona;
+            
           }
         }
       )
     );
+
+    
     
   }
+
+
+  public hasUserPienaVisibilita(doc: DocDetail):boolean {
+    if(doc.personeVedentiList.find(pv => pv.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id).pienaVisibilita){
+      this.hasPienaVisibilita = true;
+    }
+    return this.hasPienaVisibilita;
+  }
+
 }
