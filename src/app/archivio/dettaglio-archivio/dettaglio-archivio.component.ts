@@ -479,7 +479,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       id: titolo.id
     } as Titolo;
     archivioToUpdate.version = this.archivio.version;
-    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
+    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, this.ARCHIVIO_PROJECTION, null)
       .subscribe(
         res => {
           console.log("Update archivio: ", res);
