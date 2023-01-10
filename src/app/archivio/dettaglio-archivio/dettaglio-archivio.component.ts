@@ -517,7 +517,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
    * @param massimario 
    */
   public onSelectMassimario(massimario: Massimario): void {
-    console.log("onSelectMassimario: ", event);
+    //console.log("onSelectMassimario: ", event);
     const archivioToUpdate: Archivio = new Archivio();
     archivioToUpdate.idMassimario = {
       id: massimario.id
