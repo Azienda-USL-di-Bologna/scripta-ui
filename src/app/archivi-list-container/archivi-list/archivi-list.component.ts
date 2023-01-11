@@ -203,8 +203,13 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						this.setColumnsPerDetailArchivio();
 						let found = this._archivioPadre.attoriList.find(
 							e => e.idPersona.id == this.utenteUtilitiesLogin.getUtente().idPersona.id);
-						if(found !== undefined)
+						if(found !== undefined){
+							console.log("Ho i permessi");
 							this.loggedUserCanDeleteArchivio = true;
+						}
+						else
+							this.loggedUserCanDeleteArchivio = false;
+							
 					}
 
 					//this.instanziaTabellaArchiviList = true;

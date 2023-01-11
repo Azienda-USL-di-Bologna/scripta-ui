@@ -397,7 +397,7 @@
           </span>
         </div>
         <div *ngSwitchCase="'eliminazione'">
-            <i *ngIf="rowData.livello != 1 || loggedUserCanDeleteArchivio" class="pi pi-times" style="font-size: 22px;"
+            <i *ngIf="rowData.livello != 1 && loggedUserCanDeleteArchivio" class="pi pi-times" style="font-size: 22px;"
               [pTooltip]="rowData.livello == 2 ? 'Elimina sottofascicolo' : 'Elimina inserto'" (click)="eliminaSottoarchivio(rowData, $event)"></i> <!--disabled="isLoggedUserResponsabileOrVicario(rowData)""-->     
         </div>
       </td>
