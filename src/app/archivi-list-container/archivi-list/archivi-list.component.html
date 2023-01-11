@@ -30,7 +30,7 @@
         [ngSwitch]="col.field" 
         [ngClass]="col.headerClass"
         [pSortableColumn]="col.sortField"
-        [ngStyle]="{'cursor': col.sortField ? null  : 'move' }">
+        [ngStyle]="{'cursor': col.sortField && col.field !== 'eliminazione' ? null : 'move' }">
         <span class="header-box" 
           [attr.aria-label]="col.label">
           {{col.header}}
@@ -306,7 +306,7 @@
   <!-- BODY -->
   <ng-template pTemplate="body" let-rowData let-columns="columns">
     <tr class="row-height">
-      <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
+      <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass" [frozen]="col.field === 'eliminazione'" alignFrozen="right">
         <div *ngSwitchCase="'idAzienda'">
           {{rowData.idAzienda.nome}}
         </div>
@@ -396,7 +396,12 @@
             {{v}} 
           </span>
         </div>
+        <div *ngSwitchCase="'eliminazione'">
+            <i *ngIf="rowData.livello != 1 || loggedUserCanDeleteArchivio" class="pi pi-times" style="font-size: 22px;"
+              [pTooltip]="rowData.livello == 2 ? 'Elimina sottofascicolo' : 'Elimina inserto'" (click)="eliminaSottoarchivio(rowData, $event)"></i> <!--disabled="isLoggedUserResponsabileOrVicario(rowData)""-->     
+        </div>
       </td>
+      
     </tr>
   </ng-template>
   <ng-template pTemplate="loadingbody" let-columns="columns">

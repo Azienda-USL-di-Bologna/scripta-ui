@@ -56,4 +56,18 @@ export class ExtendedArchivioService extends ArchivioService {
     formData.append("idArchivioRadice", idArchivioRadice.toString());
     this._http.post(apiUrl, formData).subscribe();
   }
+
+  public archivioHasDoc(idArchivio: number) : Observable<any> {
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "archivioHasDoc";
+    let formData: FormData = new FormData();
+    formData.append("idArchivio", idArchivio.toString());
+    return this._http.post(apiUrl, formData);
+  }
+
+  public deleteArchivio(idArchivio: number){
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "deleteArchivio";
+    let formData: FormData = new FormData();
+    formData.append("idArchivio", idArchivio.toString());
+    return this._http.post(apiUrl, formData);
+  }
 }

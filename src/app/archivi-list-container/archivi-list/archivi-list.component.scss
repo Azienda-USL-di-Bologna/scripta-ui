@@ -144,6 +144,7 @@
     
   }
 
+
   .cdk-virtual-scroll-viewport {
     overflow: scroll !important; // Questo lo prende firefox
     overflow: overlay !important; // Questo lo prende chrome
@@ -205,10 +206,24 @@
     font-weight: 600;
     color: #993366;
     cursor: pointer;
-  }
+    .oggetto-content { 
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      i {
+        font-size: 28px;
+        margin-right: 7px;
+      }
+    }
+}
   .struttura-column {
     min-width: 250px;
     max-width: 250px;
+  }
+  .eliminazione-column {
+    min-width: 50px;
+    max-width: 50px;
+    //position: fixed;
   }
   .vicari-column {
     min-width: 160px;
