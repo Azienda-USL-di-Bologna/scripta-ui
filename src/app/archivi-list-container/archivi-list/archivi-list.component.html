@@ -306,7 +306,7 @@
   <!-- BODY -->
   <ng-template pTemplate="body" let-rowData let-columns="columns">
     <tr class="row-height">
-      <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass" [frozen]="col.field === 'eliminazione'" alignFrozen="right">
+      <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
         <div *ngSwitchCase="'idAzienda'">
           {{rowData.idAzienda.nome}}
         </div>

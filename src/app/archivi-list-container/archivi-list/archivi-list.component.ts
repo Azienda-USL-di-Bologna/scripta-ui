@@ -200,7 +200,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					if (!!!this.archivioPadre) {
 						this.loadConfiguration();
 					} else {
-						this.setColumnsPerDetailArchivio();
 						let found = this._archivioPadre.attoriList.find(
 							e => e.idPersona.id == this.utenteUtilitiesLogin.getUtente().idPersona.id);
 						if(found !== undefined){
@@ -210,6 +209,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						else
 							this.loggedUserCanDeleteArchivio = false;
 							
+						this.setColumnsPerDetailArchivio(this.loggedUserCanDeleteArchivio);
+						
 					}
 
 					//this.instanziaTabellaArchiviList = true;
@@ -284,8 +285,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 * settare delle colonne predefinite per la lista archivi nella modalità dettaglio archivio.
 	 * NB: In questa modalità l'utente non potrà modifcare le colonne
 	 */
-	public setColumnsPerDetailArchivio(): void {
-		const colonneDaVisualizzare = ["numerazioneGerarchica", "dataCreazione", "oggetto", "idPersonaCreazione", "eliminazione"];
+	public setColumnsPerDetailArchivio(canDeleteArchivio: boolean): void {
+		let colonneDaVisualizzare;
+		if(canDeleteArchivio)
+			colonneDaVisualizzare = ["numerazioneGerarchica", "dataCreazione", "oggetto", "idPersonaCreazione", "eliminazione"];
+		else
+			colonneDaVisualizzare = ["numerazioneGerarchica", "dataCreazione", "oggetto", "idPersonaCreazione"];
 		// this._selectedColumns = this.cols.filter(c => colonneDaVisualizzare.includes(c.field));
 		this._selectedColumns = [];
 		colonneDaVisualizzare.forEach(c => {
