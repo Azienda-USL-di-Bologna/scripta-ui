@@ -58,10 +58,19 @@
     </div>
   </div>
   <div class="right-content">
-    <i
+    <!-- SPINNER GENERICO DA ATTIVARE ALL'OCCORRENZA, IN PARITCOLARE PER OPERAZIONI ATTIVATE DAI BOTTONI DELLA PARTE DESTRA -->
+    <span *ngIf="referenceTableComponent.rightContentProgressSpinner || functionalButtonsComponent?.rightContentProgressSpinner">
+      <p-progressSpinner 
+        [style]="{width: '2em', height: '2em', marginRight: '7px'}"
+        strokeWidth="8" 
+        fill="#FFFFFF" 
+        animationDuration=".5s">
+      </p-progressSpinner>
+    </span>
+
+    <i *ngIf="configuration.showIconArchiveClosed"
       class="pi pi-lock lucchettoChiuso" 
-      [pTooltip]="'Archivio chiuso'" 
-      *ngIf="functionalButtonsComponent?.newArchivoButton?.isChiuso"
+      [pTooltip]="'Fascicolo chiuso'" 
       tooltipPosition="bottom">
     </i>
 
@@ -82,7 +91,7 @@
         type="button" 
         pButton 
         pRipple 
-        [disabled] = "!functionalButtonsComponent.newArchivoButton?.hasPermessi && functionalButtonsComponent?.newArchivoButton?.isChiuso"
+        [disabled]="!functionalButtonsComponent.newArchivoButton.enable"
         icon="pi pi-plus" 
         (click)="functionalButtonsComponent.newArchivoButton.aziendeItems.length > 1 ? 
           aziendaSelection.toggle($event) : 
@@ -101,13 +110,13 @@
     </span>
     <!-- BOTTONE UPLOAD DOCUMENT -->
     <!--fileUploaderDocumentsAuto.clear() serve a svuotare il componente altrimenti si carica sempre lo stesso file--> 
-    <span  *ngIf="configuration.uploadDocumentButton" class="span-fileUpload-button">
+    <span *ngIf="configuration.uploadDocument && functionalButtonsComponent.uploadDocumentButton" class="span-fileUpload-button">
       <p-fileUpload #fileUploaderDocumentsAuto
         chooseIcon="pi pi-upload"
         pTooltip="Carica documenti nell'archivio"
         class="upload-document-button"
         multiple="true"
-        [disabled]="!functionalButtonsComponent.newArchivoButton?.hasPermessi && functionalButtonsComponent?.newArchivoButton?.isChiuso"
+        [disabled]="!functionalButtonsComponent.uploadDocumentButton.enable"
         mode="basic" 
         name="document[]"
         maxFileSize="5000000" 
@@ -118,14 +127,6 @@
     </span>
     <!-- PROGRESS SPINNER -->
     <span *ngIf="configuration.exportButton">
-      <span *ngIf="referenceTableComponent.exportCsvInProgress">
-        <p-progressSpinner 
-          [style]="{width: '2em', height: '2em', marginRight: '7px'}"
-          strokeWidth="8" 
-          fill="#FFFFFF" 
-          animationDuration=".5s">
-        </p-progressSpinner>
-      </span>
       <!-- BOTTONE ESPORTA -->
       <button
         type="button" 
@@ -136,6 +137,18 @@
         class="p-mr-2" 
         pTooltip="CSV"
         aria-label="Scarica il csv della tabella"
+        tooltipPosition="bottom">
+      </button>
+      <!-- BOTTONE TIP -->
+      <button *ngIf="canUseTip"
+        type="button" 
+        pButton 
+        pRipple 
+        icon="pi pi-file" 
+        (click)="show()" 
+        class="p-mr-2" 
+        pTooltip="TIP"
+        aria-label="Tool di importazione pregressi"
         tooltipPosition="bottom">
       </button>
       <!-- <p-menu
@@ -158,9 +171,9 @@
       placeholder="Scegli le colonne da visualizzare"
       aria-label="Scegli le colonne da visualizzare">
       <ng-template let-column pTemplate="item"  >
-          <div class="column-item">
-            <span >{{column.header}}</span>
-          </div>
+        <div class="column-item">
+          <span >{{column.header}}</span>
+        </div>
       </ng-template>
     </p-multiSelect>
   </div>

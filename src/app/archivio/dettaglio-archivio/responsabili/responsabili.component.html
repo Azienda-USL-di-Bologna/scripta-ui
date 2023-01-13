@@ -7,15 +7,26 @@
 	scrollHeight="flex">
   <ng-template pTemplate="caption">
 		<div class="">
+			<button *ngIf="archivio.livello === 1 && loggedUserIsResponsabile"
+				id="aggiungiResponsabile"
+				type="button"
+				pButton 
+				pRipple 
+				icon="pi pi-plus" 
+				(click)="inEditing = true; addResponsabile('RESPONSABILE_PROPOSTO')" 
+				class="mr-2 bottoneVicari" 
+				label="Proponi nuovo responsabile"
+				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario || responsabilePropostoGiaPresente || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
+			</button>
 			<button *ngIf="archivio.livello === 1"
 				id="aggiungiResponsabile"
 				type="button"
 				pButton 
 				pRipple 
 				icon="pi pi-plus" 
-				(click)="inEditing = true; addResponsabile()" 
-				class="mr-2" 
-				label="Aggiungi responsabile o vicario"
+				(click)="inEditing = true; addResponsabile('VICARIO')" 
+				class="mr-2 bottoneVicari" 
+				label="Aggiungi vicario"
 				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
 			</button>
 		</div>
@@ -41,7 +52,7 @@
               [showPool]="false"
 							[showOnlyUser]="true"
 							(utenteStrutturaSelezionatoEmit)="onUtenteStrutturaSelected($event, attore)">
-						</lib-users-autocomplete>
+						</lib-users-autocomplete><!-- [afferenzaDiretta]="true" -->
 						<div *ngIf="attore.idPersona">{{attore.idPersona.descrizione}}</div>
 					</ng-template>
 					<ng-template pTemplate="output">
@@ -72,12 +83,12 @@
       <td class="ruolo-column">
         <p-cellEditor>
 					<ng-template pTemplate="input">
-						<p-dropdown *ngIf="!attore.id"
+						<!-- <p-dropdown *ngIf="!attore.id"
 							appendTo="body" 
 							[options]="ruoliList" 
 							[(ngModel)]="attore.ruolo">
-						</p-dropdown>
-            <div *ngIf="attore.id">
+						</p-dropdown> -->
+            <div><!-- *ngIf="attore.id" -->
               {{attore.ruolo === ruoliEnum.RESPONSABILE_PROPOSTO ? "Responsabile proposto" : attore.ruolo | titlecase}}
             </div>
 					</ng-template>
@@ -89,9 +100,11 @@
       <td *ngIf="archivio.livello === 1 && loggedUserIsResponsbaileOrVicario"
         class="azione-column">
         <!-- Bottone di editing.
-          Se la riga riguarda il resp o il proposto allora devo essere RESPONSABILE -->
-        <button *ngIf="(!editing && (ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE 
-              || (attore.ruolo !== ruoliEnum.RESPONSABILE && attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO))) && !(archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')" 
+          Se la riga riguarda il resp o il proposto allora devo essere RESPONSABILE 
+					Inoltre non voglio poter editare un vicario mai, dato che non c'è nessun campo modificabile-->
+        <button *ngIf="(!editing && (ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE || (attore.ruolo !== ruoliEnum.RESPONSABILE && attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO))) 
+							&& !(archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')
+							&& (attore.ruolo !== ruoliEnum.VICARIO)" 
           type="button" 
           pButton 
           pRipple

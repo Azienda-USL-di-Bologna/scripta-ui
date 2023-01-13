@@ -104,7 +104,7 @@ export class ExtendedDocDetailView extends DocDetailView {
   public set statoUltimoVersamentoVisualizzazione(statoUltimoVersamentoVisualizzazione: string) {
     this._statoUltimoVersamentoVisualizzazione = "";
     if (statoUltimoVersamentoVisualizzazione) {
-      this._statoUltimoVersamentoVisualizzazione = StatiVersamentoTraduzioneVisualizzazione.find(e => e.value === statoUltimoVersamentoVisualizzazione).nome;
+      this._statoUltimoVersamentoVisualizzazione = StatiVersamentoTraduzioneVisualizzazione.find(e => e.value === statoUltimoVersamentoVisualizzazione)?.nome;
     }
   }
 

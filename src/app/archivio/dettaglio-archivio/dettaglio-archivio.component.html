@@ -39,12 +39,14 @@
       <!-- Campo riservato -->
       <div class="input-box campo-riservato" *ngIf="isParlante == false">
         <label for="riservato">Riservato</label>
-        <i id="riservato" 
+        <i id="riservato" #riservato
           type="button" 
-          (click)="changeVisibilita()" 
+          (click)="archivio.livello === 1 ? changeVisibilita() : null" 
           class="pi icona-riservato" 
           title="Riservato"
-          [ngClass]="{'pi-eye': !archivio.riservato, 'pi-ban': archivio.riservato}">
+          [ngClass]="{'pi-eye': !archivio.riservato, 'pi-ban': archivio.riservato}"
+          [pTooltip]="archivio.livello === 1 ? archivio.riservato ? 'Rendi visibile il fascicolo' : 'Rendi riservato il fascicolo' : 
+            'Puoi modificare la riservatezza sul fascicolo radice'">
         </i>
       </div>
     </div>
@@ -154,6 +156,7 @@
   </div>
   <div class="right-side">
     <div class="numeraFasicolo">
+      <!-- Bottone numera archivio -->
       <button *ngIf="archivio.stato == 'BOZZA'" 
         type="button" 
         pButton 
@@ -165,10 +168,12 @@
         [disabled]="!archivio.oggetto || !archivio.tipo || !archivio.idTitolo || (archivio.stato == 'CHIUSO' || archivio.stato == 'PRECHIUSO')" 
         tooltipPosition="bottom">
       </button>
-      <p-button class="p-mr-2" *ngIf="!loggedUserIsResponsabileOrVicario && !(archivio.stato == 'BOZZA') && archivio.livello == 1"  
-        (click)="chiudiRiapriArchivio(archivio, $event)" 
-        [disabled]="archivio.stato == 'CHIUSO'"
-        >{{archivio.stato == 'APERTO' ? 'Chiudi' : 'Riapri'}}
+      <!-- Bottone chiudi o riapri -->
+      <p-button *ngIf="archivio.stato !== 'BOZZA' && archivio.livello == 1 && archivio.stato !== 'CHIUSO'"  
+        class="p-mr-2"
+        (click)="chiudiRiapriArchivio($event)" 
+        [disabled]="!loggedUserIsResponsbaileOrVicario">
+        {{archivio.stato === 'APERTO' ? 'Chiudi' : 'Riapri'}}
       </p-button>
 
     </div>

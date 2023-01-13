@@ -151,6 +151,19 @@ export const cols: ColonnaBds[] = [
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: true,
     default: true
+  },
+  {
+    field: "eliminazione",
+    header: "",
+    filterField: "",
+    style: {},
+    headerClass: ["header-column", "eliminazione-column"],
+    filterClass: ["filter-column", "eliminazione-column"],
+    bodyClass: ["scrollable-column", "eliminazione-column"],
+    fieldType: "string",
+    filterMatchMode: FILTER_TYPES.not_string.equals,
+    useFilterMatchMode: false,
+    default: false
   }
 ];
 

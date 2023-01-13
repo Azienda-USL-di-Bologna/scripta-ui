@@ -117,21 +117,22 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
         data => {
           if (data && data.results && data.page) {
             const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]>data.results;
-            perm.veicolo = utentiStruttura.find((us: UtenteStruttura) => {
-              return us.idStruttura.id === perm.idProvenienzaVeicolo
-            })?.idStruttura;
             this.strutture = [];
             utentiStruttura.filter((us: UtenteStruttura) => us.attivo === true)
               .forEach((us: UtenteStruttura) => { this.strutture.push(us.idStruttura) });
+            perm.veicolo = utentiStruttura.find((us: UtenteStruttura) => {
+              return us.idStruttura.id === perm.idProvenienzaVeicolo
+            })?.idStruttura;
           }
         }
       ));
   }
 
+
   public getPermessiFiltratiPerSoggetto(oggettoni: PermessoEntitaStoredProcedure[], idProvenienzaSoggetto: number): PermessoEntitaStoredProcedure[] {
-    var permessiPerSoggetto: PermessoEntitaStoredProcedure[] = [];
+    const permessiPerSoggetto: PermessoEntitaStoredProcedure[] = [];
     oggettoni?.forEach((oggettone: PermessoEntitaStoredProcedure) => {
-      if(oggettone.soggetto.id_provenienza === idProvenienzaSoggetto){
+      if (oggettone.soggetto.id_provenienza === idProvenienzaSoggetto) {
         permessiPerSoggetto.push(oggettone);
       }
     })
@@ -152,7 +153,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
       perm.idProvenienzaSoggetto = perm.soggetto.id; 
     }
 
-    var permessiDelSoggetto = this.getPermessiFiltratiPerSoggetto(this._archivio.permessi, perm.idProvenienzaSoggetto);    
+    const permessiDelSoggetto = this.getPermessiFiltratiPerSoggetto(this._archivio.permessi, perm.idProvenienzaSoggetto);    
 
     const oggettoToSave: OggettonePermessiEntitaGenerator =
       this.permessiDettaglioArchivioService.buildPermessoPerBlackbox(
