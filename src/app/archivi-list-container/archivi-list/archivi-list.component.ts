@@ -200,16 +200,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					if (!!!this.archivioPadre) {
 						this.loadConfiguration();
 					} else {
-						let found = this._archivioPadre.attoriList.find(
-							e => e.idPersona.id == this.utenteUtilitiesLogin.getUtente().idPersona.id);
-						if(found !== undefined){
-							console.log("Ho i permessi");
-							this.loggedUserCanDeleteArchivio = true;
-						}
-						else
-							this.loggedUserCanDeleteArchivio = false;
+						this.loggedUserCanDeleteArchivio = !!this.archivioPadre.attoriList.find(
+							e => e.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id
+							&& e.ruolo !== RuoloAttoreArchivio.CREATORE);
 							
-						this.setColumnsPerDetailArchivio(this.loggedUserCanDeleteArchivio);
+						this.setColumnsPerDetailArchivio();
 						
 					}
 
@@ -285,11 +280,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 * settare delle colonne predefinite per la lista archivi nella modalità dettaglio archivio.
 	 * NB: In questa modalità l'utente non potrà modifcare le colonne
 	 */
-	public setColumnsPerDetailArchivio(canDeleteArchivio: boolean): void {
+	public setColumnsPerDetailArchivio(): void {
 		let colonneDaVisualizzare;
-		if(canDeleteArchivio)
-			colonneDaVisualizzare = ["numerazioneGerarchica", "dataCreazione", "oggetto", "idPersonaCreazione", "eliminazione"];
-		else
 			colonneDaVisualizzare = ["numerazioneGerarchica", "dataCreazione", "oggetto", "idPersonaCreazione"];
 		// this._selectedColumns = this.cols.filter(c => colonneDaVisualizzare.includes(c.field));
 		this._selectedColumns = [];
@@ -1254,55 +1246,55 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	}
 
 	public eliminaSottoarchivio(rowData: any, event: Event) : void {
-		console.log("Sono dentro all'elimina, rowData:", rowData);
-		let message : string;
-		if(rowData.livello == 2)
-			message = "Si sta per eliminare il sottofascicolo. Procedere?";
-		else
-			message = "Si sta per eliminare l'inserto. Procedere?";
-		this.confirmationService.confirm({
-			key: "confirm-popup",
-			target: event.target,
-			message: message,
-			icon: 'pi pi-exclamation-triangle',
-			accept: () => {
-				if(rowData.numeroSottoarchivi > 0) {
-					if(rowData.livello == 2) {
+		if (rowData.numeroSottoarchivi > 0) {
+			if (rowData.livello == 2) {
+				this.messageService.add({
+					severity: "warn",
+					key: "archiviListToast",
+					summary: "Attenzione",
+					detail: `Il sottofascicolo che si vuole eliminare contiene inserti`
+					});
+					return;
+			}
+		}
+
+		this.extendedArchivioService.archivioHasDoc(rowData.id).subscribe((
+			res: boolean) => {
+				if (res == true) {
+					// Contiene dei doc quindi avviso l'utente e mi fermo
+					if (rowData.livello == 2){
 						this.messageService.add({
 							severity: "warn",
 							key: "archiviListToast",
 							summary: "Attenzione",
-							detail: `Il sottofascicolo che si vuole eliminare contiene inserti`
-						  });
-						  return;
+							detail: `Il sottofascicolo che si vuole eliminare contiene documenti`
+							});
+							return;
+					} else {
+						this.messageService.add({
+							severity: "warn",
+							key: "archiviListToast",
+							summary: "Attenzione",
+							detail: `L'inserto che si vuole eliminare contiene documenti`
+							});
+							return;
 					}
-				}		
-				this.extendedArchivioService.archivioHasDoc(rowData.id).subscribe((
-					res: boolean) => {
-						if(res == true) {
-							if(rowData.livello == 2){
-								this.messageService.add({
-									severity: "warn",
-									key: "archiviListToast",
-									summary: "Attenzione",
-									detail: `Il sottofascicolo che si vuole eliminare contiene documenti`
-								  });
-								  return;
-							}
-							else {
-								this.messageService.add({
-									severity: "warn",
-									key: "archiviListToast",
-									summary: "Attenzione",
-									detail: `L'inserto che si vuole eliminare contiene documenti`
-								  });
-								  return;
-							}
-		
-						}
-						else {
+
+				} else {
+					// L'utente può procedere con l'eliminazione, prima chiedo conferma
+					let message : string;
+					if (rowData.livello == 2)
+						message = "Si sta per eliminare il sottofascicolo. Procedere?";
+					else
+						message = "Si sta per eliminare l'inserto. Procedere?";
+					this.confirmationService.confirm({
+						key: "confirm-popup",
+						target: event.target,
+						message: message,
+						icon: 'pi pi-exclamation-triangle',
+						accept: () => {
 							let stringa : string;
-							if(rowData.livello == 2)
+							if (rowData.livello == 2)
 								stringa = 'Sottofascicolo eliminato correttamente';
 							else
 								stringa = 'Inserto eliminato correttamente';
@@ -1329,14 +1321,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 									}
 								)
 							)
-						}
-					}	
-				)
-			},
-			reject: () => {
-				return;
-			}
-		});
+						},
+						reject: () => {	}
+					});
+				}
+			}	
+		)
 	}
 
 	/*funzioncina per fare il tooltip carino*/
