@@ -30,7 +30,7 @@
         [ngSwitch]="col.field" 
         [ngClass]="col.headerClass"
         [pSortableColumn]="col.sortField"
-        [ngStyle]="{'cursor': col.sortField && col.field !== 'eliminazione' ? null : 'move' }">
+        [ngStyle]="{'cursor': col.sortField ? null : 'move' }">
         <span class="header-box" 
           [attr.aria-label]="col.label">
           {{col.header}}
@@ -56,6 +56,12 @@
             </ng-template>
           </p-overlayPanel>
         </span>
+      </th>
+      <th *ngIf="loggedUserCanDeleteArchivio"
+        class="delete-archive-column"
+        alignFrozen="right" 
+        pFrozenColumn 
+        [frozen]="true">
       </th>
     </tr>
     <!-------FILTRI -->
@@ -301,6 +307,12 @@
           </button>
         </div>
       </th>
+      <th *ngIf="loggedUserCanDeleteArchivio"
+        class="delete-archive-column"
+        alignFrozen="right" 
+        pFrozenColumn 
+        [frozen]="true">
+      </th>
     </tr>
   </ng-template>
   <!-- BODY -->
@@ -396,12 +408,19 @@
             {{v}} 
           </span>
         </div>
-        <div *ngSwitchCase="'eliminazione'">
-            <i *ngIf="rowData.livello != 1 && loggedUserCanDeleteArchivio" class="pi pi-times" style="font-size: 22px;"
-              [pTooltip]="rowData.livello == 2 ? 'Elimina sottofascicolo' : 'Elimina inserto'" (click)="eliminaSottoarchivio(rowData, $event)"></i> <!--disabled="isLoggedUserResponsabileOrVicario(rowData)""-->     
-        </div>
       </td>
-      
+      <td *ngIf="loggedUserCanDeleteArchivio"
+        class="delete-archive-column"
+        alignFrozen="right"  
+        pFrozenColumn 
+        [frozen]="true">
+        <i
+          class="pi pi-times" 
+          [pTooltip]="rowData.livello == 2 ? 'Elimina sottofascicolo' : 'Elimina inserto'"
+          (click)="$event.stopPropagation(); eliminaSottoarchivio(rowData, $event)"
+        >
+        </i>
+      </td>
     </tr>
   </ng-template>
   <ng-template pTemplate="loadingbody" let-columns="columns">

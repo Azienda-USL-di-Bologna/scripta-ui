@@ -220,10 +220,18 @@
     min-width: 250px;
     max-width: 250px;
   }
-  .eliminazione-column {
-    min-width: 50px;
+  .delete-archive-column {
+    width: 50px;
     max-width: 50px;
-    //position: fixed;
+    justify-content: center;
+    padding-right: 10px !important;
+    i {
+      cursor: pointer;
+      font-size: 22px;
+      &:hover {
+        color: #936;
+      }
+    }
   }
   .vicari-column {
     min-width: 160px;

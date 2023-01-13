@@ -152,7 +152,7 @@ export const cols: ColonnaBds[] = [
     useFilterMatchMode: true,
     default: true
   },
-  {
+  /* {
     field: "eliminazione",
     header: "",
     filterField: "",
@@ -164,7 +164,7 @@ export const cols: ColonnaBds[] = [
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: false,
     default: false
-  }
+  } */
 ];
 
 export const TipoArchivioTraduzioneVisualizzazione = [
