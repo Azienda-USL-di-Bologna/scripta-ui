@@ -37,6 +37,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
   public filteredMittente: DettaglioContatto[] = [];
   public filteredMezzo: any[] = [];
   public actualOrigine: string ;
+  public pregresso: boolean = false;
 
 
   @Input() set doc(value: Doc) {
