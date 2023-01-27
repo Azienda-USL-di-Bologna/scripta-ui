@@ -1,9 +1,10 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
-import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio, BaseUrls, BaseUrlType, Attivita, Applicazione, Persona, Azienda, AttivitaService, AttivitaFatta, StatoArchivio, ArchivioDetail } from '@bds/internauta-model';
+import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio, BaseUrls, BaseUrlType, Attivita, Applicazione, Persona, Azienda, AttivitaService, AttivitaFatta, StatoArchivio, ArchivioDetail, KrintFilterOptions } from '@bds/internauta-model';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES , BatchOperation, NextSdrEntity, BatchOperationTypes, AdditionalDataDefinition} from '@bds/next-sdr';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TreeNode } from 'primeng/api/treenode';
+import { LogViewerComponent } from "@bds/common-components";
 import { AutoComplete } from 'primeng/autocomplete';
 import { TreeSelect } from 'primeng/treeselect';
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -35,6 +36,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     this.loadConfigurations();
   }
   
+  public krintFilterOptions: KrintFilterOptions;
   private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
   private pageConfNoCountLimit20: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 20, offset: 0 } };
   public responsabiliArchivi: AttoreArchivio[] = [];
@@ -59,6 +61,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public anniTenutaSelezionabili: any[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
   public loggedUserIsResponsbaileOrVicario = false;
+  public showLogs: boolean = false;
   public isArchivioChiuso = false;
   public loggedUserIsResponsbaileProposto = false;
   public fascicoliParlanti: boolean = false;
@@ -98,9 +101,10 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   
 
   ngOnInit(): void {
-    console.log("Archivio test: ", this.archivio);
+    //console.log("Archivio test: ", this.archivio);
     //this.updateAnniTenuta();
     // this.getResponsabili();
+    this.showLogs = false;
     this.isArchivioClosed();
     this.loggedUserIsResponsbaileOrVicario = (this.archivio["attoriList"] as AttoreArchivio[])
       .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id 
@@ -324,6 +328,25 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     else
       this.isArchivioChiuso = false;
   }
+
+  public loadLogs() {
+		this.krintFilterOptions = {
+			codiciOperazioni: null,
+			idOggetto: this.archivio.id,
+			tipoOggetto: null,
+			idUtente: null,
+			idOggettoContenitore: null,
+			tipoOggettoContenitore: null,
+			dataDa: null,
+			dataA: null
+		} as KrintFilterOptions;
+		this.showLogs = true;
+	}
+
+  public removeZoneFromTime(date: string): string {
+		return date.replace(/\[\w+\/\w+\]$/, "");
+	}
+
 
   /**
    * Questa funzione carica i responsabili dell'archivio 

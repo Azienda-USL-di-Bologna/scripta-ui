@@ -6,7 +6,7 @@ import { DettaglioArchivioComponent } from "../dettaglio-archivio/dettaglio-arch
 import { ResponsabiliComponent } from "./responsabili/responsabili.component";
 import { PermessiStrutturaComponent } from './permessi-struttura/permessi-struttura.component';
 import { PermessiPersonaComponent } from './permessi-persona/permessi-persona.component';
-import { CommonComponentsModule } from "@bds/common-components";
+import { CommonComponentsModule, LogViewerComponent } from "@bds/common-components";
 
 @NgModule({
   imports: [
@@ -14,6 +14,7 @@ import { CommonComponentsModule } from "@bds/common-components";
     PrimeNgModule,
     ScriptaCommonModule,
     CommonComponentsModule
+    
   ],
   declarations: [
     DettaglioArchivioComponent,
@@ -22,7 +23,8 @@ import { CommonComponentsModule } from "@bds/common-components";
     PermessiPersonaComponent
   ],
   exports: [
-    DettaglioArchivioComponent
+    DettaglioArchivioComponent,
+    LogViewerComponent
   ],
   providers: [
   ]
