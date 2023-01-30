@@ -13,7 +13,8 @@
       class="p-col input"
       [ngModelOptions]="{standalone: true}"
       [required]="true"
-      type="text">
+      type="text"
+      [disabled]="pregresso">
       <ng-template let-contatto pTemplate="item">
         <div>{{contatto.descrizioneCustom}}</div>
       </ng-template>

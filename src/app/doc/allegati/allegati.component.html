@@ -8,6 +8,7 @@
   uploadLabel="Carica"
   cancelLabel="Cancella"
   [customUpload]="true"
+  [disabled]="pregresso"
   >
   <!-- <ng-template pTemplate="content">
     <ul *ngIf="uploadedFiles.length">
@@ -63,7 +64,7 @@
           (click)="onDownloadAttachment(allegato)">
         </i>
       </td>
-      <td class="colonna-elimina">
+      <td class="colonna-elimina" *ngIf="!pregresso">
         <i class="material-icons-outlined bds-icon-btn"
           role="button"
           aria-label="Elimina allegato"

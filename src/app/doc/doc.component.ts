@@ -30,6 +30,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public numeroVisualizzazione: string;
   private projection: string = ENTITIES_STRUCTURE.scripta.doc.customProjections.DocWithAll;
   public yearOfProposta: string;
+  public pregresso: boolean = true; //TODO: assicurarsi che sia false, e togliere questo commento.
 
   constructor(
     private router: Router,

@@ -37,7 +37,15 @@ export class MittenteComponent implements OnInit, OnDestroy {
   public filteredMittente: DettaglioContatto[] = [];
   public filteredMezzo: any[] = [];
   public actualOrigine: string ;
-  public pregresso: boolean = false;
+  
+  private _pregresso: boolean = false;
+  public get pregresso(): boolean {
+    return this._pregresso;
+  }
+  @Input() public set pregresso(value: boolean) {
+    this._pregresso = value;
+  }
+  
 
 
   @Input() set doc(value: Doc) {

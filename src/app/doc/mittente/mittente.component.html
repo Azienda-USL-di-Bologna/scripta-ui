@@ -1,88 +1,175 @@
-<div class="mittente-box p-grid">
-  <label class="p-col-3" for="mittente">Mittente</label>
-  <form class="box">
-    <p-autoComplete 
-      id="mittente"
-      [(ngModel)]="selectedMittente"
-      (onSelect)="saveMittente($event)"
-      [suggestions]="filteredMittente"
-      (completeMethod)="searchMittente($event)"
-      ariaLabel="Descrizione del mittente"
-      field="descrizione"
+<div *ngIf="!pregresso">
+  <div class="mittente-box p-grid">
+    <label class="p-col-3" for="mittente">Mittente</label>
+    <form class="box">
+      <p-autoComplete 
+        id="mittente"
+        [(ngModel)]="selectedMittente"
+        (onSelect)="saveMittente($event)"
+        [suggestions]="filteredMittente"
+        (completeMethod)="searchMittente($event)"
+        ariaLabel="Descrizione del mittente"
+        field="descrizione"
+        appendTo="body"
+        class="p-col input"
+        [required]="true"
+        type="text"
+        [ngModelOptions]="{standalone: true}"
+        (onClear)="onDeleteMittente()">
+        <ng-template let-contatto pTemplate="item">
+          <span>{{contatto.descrizioneCustom}}</span>
+        </ng-template>
+      </p-autoComplete>
+      <button class="material-icons close-icon" type="reset" aria-label= "Cancella ricerca" (click)="onDeleteMittente()"
+      *ngIf="actualMittente != null">close</button>
+    </form> 
+    <span class="p-col">
+      <input id="Indirizzo"
+        aria-label="indirizzo"
+        type="text" 
+        pInputText 
+        [(ngModel)]="indirizzo"> 
+      </span>
+  </div>
+  <div class="mittente-box p-grid">
+    <label class="p-col-3" for="origine">Origine</label>
+    <span class="p-col">
+      <input id="Origine"
+        aria-label="Origine"
+        type="text" 
+        pInputText 
+        [(ngModel)]="actualOrigine"
+        [disabled]="true"
+        > 
+      </span>
+    <!-- <p-autoComplete id="Origine"
+      ariaLabel="origine"
+      [(ngModel)]="selectedOrigine"
+      [suggestions]="filteredOrigine"
+      (completeMethod)="searchTipo($event)"
+      [dropdown]="true"
+      field="name"
       appendTo="body"
-      class="p-col input"
-      [required]="true"
-      type="text"
-      [ngModelOptions]="{standalone: true}"
-      (onClear)="onDeleteMittente()">
-      <ng-template let-contatto pTemplate="item">
-        <span>{{contatto.descrizioneCustom}}</span>
-      </ng-template>
+      class="p-col">
+    </p-autoComplete> -->
+    <label class="p-col-2" for="mezzo">Mezzo</label><!-- _doc.mittenti[0].spedizioneList[0].idMezzo -->
+    <p-autoComplete id="mezzo"
+      [(ngModel)]="actualMezzo"
+      (onSelect)="saveMezzo($event)"
+      [suggestions]="filteredMezzo"
+      (completeMethod)="searchMezzo($event)"
+      field="descrizione"
+      [dropdown]="true"
+      appendTo="body"
+      class="p-col">
     </p-autoComplete>
-    <button class="material-icons close-icon" type="reset" aria-label= "Cancella ricerca" (click)="onDeleteMittente()"
-    *ngIf="actualMittente != null">close</button>
-  </form> 
-  <span class="p-col">
-    <input id="Indirizzo"
-      aria-label="indirizzo"
-      type="text" 
-      pInputText 
-      [(ngModel)]="indirizzo"
-      [disabled]="true"> 
-    </span>
+  </div>
+  <div class="mittente-box p-grid">
+    <label class="p-col-3" for="dataArrivo">Data di arrivo</label>
+    <p-calendar
+      id="dataArrivo"
+      aria-label="data di arrivo"
+      [(ngModel)]="actualDataDiArrivo"
+      (onSelect)="dateSelected($event)"
+      dateFormat="dd/mm/yy"
+      [showIcon]="true"
+      inputId="icon"
+      appendTo="body"
+      class="p-col-3">
+    </p-calendar>
+    <span  class="p-col"></span>
+    <!-- Per il momento la funzione non è implementata quindi lo teniamo nascosto
+      <p-button
+      label="pec di origine"
+      styleClass="p-button-link"
+      class="p-col">
+    </p-button> -->
+  </div>
 </div>
-<div class="mittente-box p-grid">
-  <label class="p-col-3" for="origine">Origine</label>
-  <span class="p-col">
-    <input id="Origine"
-      aria-label="Origine"
-      type="text" 
-      pInputText 
-      [(ngModel)]="actualOrigine"
-      [disabled]="true"
-      > 
-    </span>
-  <!-- <p-autoComplete id="Origine"
-    ariaLabel="origine"
-    [(ngModel)]="selectedOrigine"
-    [suggestions]="filteredOrigine"
-    (completeMethod)="searchTipo($event)"
-    [dropdown]="true"
-    field="name"
-    appendTo="body"
-    class="p-col">
-  </p-autoComplete> -->
-  <label class="p-col-2" for="mezzo">Mezzo</label><!-- _doc.mittenti[0].spedizioneList[0].idMezzo -->
-  <p-autoComplete id="mezzo"
-    [(ngModel)]="actualMezzo"
-    (onSelect)="saveMezzo($event)"
-    [suggestions]="filteredMezzo"
-    (completeMethod)="searchMezzo($event)"
-    field="descrizione"
-    [dropdown]="true"
-    appendTo="body"
-    class="p-col">
-  </p-autoComplete>
+<div *ngIf="pregresso" *ngFor="let mittente of mittenti; index as i">
+  <div class="mittente-box p-grid">
+    <label class="p-col-3" for="mittente">Mittente {{i+1}}</label>
+    <form class="box">
+      <p-autoComplete 
+        id="mittente"
+        [(ngModel)]="selectedMittente"
+        (onSelect)="saveMittente($event)"
+        [suggestions]="filteredMittente"
+        (completeMethod)="searchMittente($event)"
+        ariaLabel="Descrizione del mittente"
+        field="descrizione"
+        appendTo="body"
+        class="p-col input"
+        [required]="true"
+        type="text"
+        [ngModelOptions]="{standalone: true}"
+        (onClear)="onDeleteMittente()"
+        [disabled]="true">
+        <ng-template let-contatto pTemplate="item">
+          <span>{{contatto.descrizioneCustom}}</span>
+        </ng-template>
+      </p-autoComplete>
+    </form> 
+    <span class="p-col">
+      <input id="Indirizzo"
+        aria-label="indirizzo"
+        type="text" 
+        pInputText 
+        [(ngModel)]="indirizzo"> 
+      </span>
+  </div>
+  <div class="mittente-box p-grid">
+    <label class="p-col-3" for="origine">Origine</label>
+    <span class="p-col">
+      <input id="Origine"
+        aria-label="Origine"
+        type="text" 
+        pInputText 
+        [(ngModel)]="actualOrigine"
+        [disabled]="true"
+        > 
+      </span>
+    <!-- <p-autoComplete id="Origine"
+      ariaLabel="origine"
+      [(ngModel)]="selectedOrigine"
+      [suggestions]="filteredOrigine"
+      (completeMethod)="searchTipo($event)"
+      [dropdown]="true"
+      field="name"
+      appendTo="body"
+      class="p-col">
+    </p-autoComplete> -->
+    <label class="p-col-2" for="mezzo">Mezzo</label><!-- _doc.mittenti[0].spedizioneList[0].idMezzo -->
+    <p-autoComplete id="mezzo"
+      [(ngModel)]="actualMezzo"
+      (onSelect)="saveMezzo($event)"
+      [suggestions]="filteredMezzo"
+      (completeMethod)="searchMezzo($event)"
+      field="descrizione"
+      [dropdown]="true"
+      appendTo="body"
+      class="p-col">
+    </p-autoComplete>
+  </div>
+  <div class="mittente-box p-grid">
+    <label class="p-col-3" for="dataArrivo">Data di arrivo</label>
+    <p-calendar
+      id="dataArrivo"
+      aria-label="data di arrivo"
+      [(ngModel)]="actualDataDiArrivo"
+      (onSelect)="dateSelected($event)"
+      dateFormat="dd/mm/yy"
+      [showIcon]="true"
+      inputId="icon"
+      appendTo="body"
+      class="p-col-3">
+    </p-calendar>
+    <span  class="p-col"></span>
+    <!-- Per il momento la funzione non è implementata quindi lo teniamo nascosto
+      <p-button
+      label="pec di origine"
+      styleClass="p-button-link"
+      class="p-col">
+    </p-button> -->
+  </div>
 </div>
-<div class="mittente-box p-grid">
-  <label class="p-col-3" for="dataArrivo">Data di arrivo</label>
-  <p-calendar
-    id="dataArrivo"
-    aria-label="data di arrivo"
-    [(ngModel)]="actualDataDiArrivo"
-    (onSelect)="dateSelected($event)"
-    dateFormat="dd/mm/yy"
-    [showIcon]="true"
-    inputId="icon"
-    appendTo="body"
-    class="p-col-3">
-  </p-calendar>
-  <span  class="p-col"></span>
-  <!-- Per il momento la funzione non è implementata quindi lo teniamo nascosto
-    <p-button
-    label="pec di origine"
-    styleClass="p-button-link"
-    class="p-col">
-  </p-button> -->
-</div>
-

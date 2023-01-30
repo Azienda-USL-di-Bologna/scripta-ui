@@ -26,6 +26,14 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
   public filteredCompetenti: DettaglioContatto[];
   public filteredCoinvolti: DettaglioContatto[];
 
+  private _pregresso: boolean = false;
+  public get pregresso(): boolean {
+    return this._pregresso;
+  }
+  @Input() public set pregresso(value: boolean) {
+    this._pregresso = value;
+  }
+
   @ViewChild('autocompleteCompetenti') autocompleteCompetenti: AutoComplete;
   @ViewChild('autocompleteCoinvolti') autocompleteCoinvolti: AutoComplete;
 

@@ -357,6 +357,20 @@ export const cols: ColonnaBds[] = [
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: true,
     default: false
+  },
+
+  {
+    field: "pregresso",
+    header: "Documento pregresso",
+    filterField: "pregresso",
+    style: {},
+    headerClass: ["header-column", "pregresso"],
+    filterClass: ["filter-column", "pregresso"],
+    bodyClass: ["pregresso"],
+    fieldType: "boolean",
+    filterMatchMode: FILTER_TYPES.not_string.equals,
+    useFilterMatchMode: true,
+    default: false
   }
 ];
 // SPOSTATA IN PRIMENG PLUGIN

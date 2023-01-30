@@ -622,6 +622,39 @@
             </ng-template>
           </p-columnFilter>
         </div>
+        <div *ngSwitchCase="'pregresso'">
+          <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-multiSelect
+                *ngIf = "isAccessibile() !== true"
+                [showHeader]="false" 
+                [ngModel]="value" 
+                [options]="[true, false]" 
+                optionValue="value" 
+                optionLabel="nome" 
+                (onChange)="filter($event.value)" 
+                appendTo="body"
+                >
+                <ng-template let-option pTemplate="item">
+                  <div class="p-multiselect-representative-option">
+                    <span class="p-ml-1">{{option.nome}}</span>
+                  </div>
+                </ng-template>
+              </p-multiSelect>
+              <p-autoComplete 
+                *ngIf = "isAccessibile() == true"
+                [suggestions]="filteredStatiVersamento" 
+                (completeMethod)="filterStatiVersamento($event)"
+                (onClear)="filter(null)"
+                field = "nome"
+                type="search"
+                appendTo="body"
+                (onSelect)="filter($event.value)"
+                >
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+        </div>
       </th>
       <th  *ngIf="!archivio"
         class="open-detail-and-preview-column"

@@ -6,6 +6,7 @@
       label="Protocolla" 
       icon="material-icons-outlined person_add"
       (click)="doButtonProtocolla()"
+      [disabled]="pregresso"
       ><!-- [disabled]="doc?.dataRegistrazione || !document.oggetto" -->
     </button>
   </div>
@@ -76,7 +77,10 @@
   </div> -->
   <p-accordion class="accodion-box">
     <p-accordionTab header="Mittente" [selected]="true">
-      <mittente [doc]="doc" (saveMittenteEvent)="saveDoc($event,'mittenti')"></mittente>
+      <mittente
+        [doc]="doc"
+        (saveMittenteEvent)="saveDoc($event,'mittenti')"
+        [pregresso] = "pregresso"></mittente>
     </p-accordionTab>
     <p-accordionTab header="Destinatari">
       <ng-template pTemplate="content">
