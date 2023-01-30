@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { TipComponent } from '@bds/common-components';
 import { Archivio, ArchivioDetail } from '@bds/internauta-model';
 import { ArchiviListContainerComponent } from '../archivi-list-container/archivi-list-container.component';
 import { ExtendedArchiviView } from '../archivi-list-container/archivi-list/extendend-archivi-view';
@@ -186,6 +187,19 @@ export class NavigationTabsService {
       TabType.ARCHIVIO,
       archivio.fk_idArchivioRadice.id.toString(),
       labelForAppName
+    );
+  }
+
+  public buildaTIP(): TabItem {
+    return new TabItem(
+      TipComponent,
+      {  },
+      true,
+      "Tool Importazione Pregressi",
+      "pi pi-fw pi-list",
+      TabType.TIP,
+      TabType.TIP, // Lo uso come id univoco di questo tab
+      "TIP"
     );
   }
 
