@@ -27,7 +27,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   @Input() set archivio(archivio: Archivio) {
     this._archivio = archivio;
     this.setAnniTenutaSelezionabili();
-
+    this.labelLivelloArchivio = this.getLabelLivelloByIdLivello(archivio.livello);
     if (this.archivio.idTitolo) {
       this.selectedTitolo = this.buildNodeTitolo(this.archivio.idTitolo as Titolo);
     } else {
@@ -65,6 +65,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public isArchivioChiuso = false;
   public loggedUserIsResponsbaileProposto = false;
   public fascicoliParlanti: boolean = false;
+  public labelLivelloArchivio: string = null;
   private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
   private attoreArchivioProjection = ENTITIES_STRUCTURE.scripta.attorearchivio.standardProjections.AttoreArchivioWithIdPersonaAndIdStruttura;
 
@@ -779,6 +780,18 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         }
       )
     );
+  }
+
+  public getLabelLivelloByIdLivello(livello: number): string{
+    switch(livello){
+      case 1:
+        return "Fascicolo";
+      case 2:
+        return "Sottofascicolo";
+      case 3:
+        return "Inserto";
+    }
+    return null;
   }
 
  
