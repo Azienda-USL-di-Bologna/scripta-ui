@@ -21,6 +21,7 @@ import { DatePipe } from '@angular/common';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { UploadDocumentButton } from '../generic-caption-table/functional-buttons/upload-document-button';
 import { ExtendedDocDetailView } from '../docs-list-container/docs-list/extended-doc-detail-view';
+import { FunctionButton } from '../generic-caption-table/functional-buttons/functions-button';
 
 @Component({
   selector: 'app-archivio',
@@ -37,6 +38,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public permessiArchivio: PermessoArchivio[] = [];
   public colsResponsabili: any[];
   public newArchivoButton: NewArchivoButton;
+  public functionButton: FunctionButton;
   public uploadDocumentButton: UploadDocumentButton;
   public contenutoDiviso = true;
   public archivioPreferito: boolean
@@ -149,6 +151,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   private inizializeAll(): void {
     this.buildSelectButtonItems(this.archivio);
     this.buildNewArchivioButton(this.archivio);
+    this.buildFunctionButton(this.archivio);
     this.buildUploadDocumentButton(this.archivio);
     
     if (this.archivio.attoriList.find(a => a.ruolo === 'RESPONSABILE_PROPOSTO' && a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id )) {
@@ -180,7 +183,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       CaptionComponent.ARCHIVI_LIST, true, true, true, false, 
       this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, 
       true, false, true,
-      this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO);
+      this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO, false);
     /* if (this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO) {
       this.captionConfiguration.showIconArchiveClosed = true;
     } */
@@ -191,7 +194,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.captionConfiguration = new CaptionConfiguration(
       CaptionComponent.ARCHIVIO, true, true, false, false, 
       this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, true, false, false,
-      this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO);
+      this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO, false);
     /* if (this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO) {
       this.captionConfiguration.showIconArchiveClosed = true;
     } */
@@ -200,8 +203,17 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
 
   private setForDocumenti(): void {
     this.captionConfiguration = new CaptionConfiguration(
-      CaptionComponent.DOCS_LIST, true, true, true, true, false, true, true, true,
-      this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO);
+      CaptionComponent.DOCS_LIST,
+      true, 
+      true, 
+      true, 
+      true, 
+      false, 
+      true, 
+      true, 
+      true,
+      this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO,
+      false);
     /* if (this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO) {
       this.captionConfiguration.showIconArchiveClosed = true;
     } */
@@ -213,7 +225,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       CaptionComponent.ARCHIVIO, false, true, false, false, 
       this.archivio?.stato !== StatoArchivio.BOZZA && this.archivio?.livello < 3, 
       true, false, false,
-      this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO);
+      this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO,
+      true);
     /* if (this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO) {
       this.captionConfiguration.showIconArchiveClosed = true;
     } */
@@ -337,6 +350,42 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   /**
+   * Creo il bottone funzioni
+   * @param archivio 
+   */
+  public buildFunctionButton(archivio: Archivio | ArchivioDetail): void {
+    const funzioniItems: MenuItem[] = [{
+      label: "Copia/Sposta",
+      disabled: !!!this.canVisualizeArchive(this.archivio) && !!!(this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO),
+      command: () => console.log("qui dovrò eseguire la Copia/Sposta")
+    },
+    {
+      label: "Genera",
+      items: [
+        {  
+          label: "Frontespizio",
+          command: () => console.log("qui dovrò generare il Frontespizio") 
+        },
+        {  
+          label: "Dorso",
+          command: () => console.log("qui dovrò generare il Dorso")
+        }
+      ],
+      disabled: false
+    },
+    {
+      label: "Scarica zip",
+      command: () => console.log("qui dovrò scaricare lo zip")
+    }] as MenuItem[];
+
+    this.functionButton = {
+      tooltip: "Funzioni",
+      functionItems: funzioniItems,
+      enable: true,
+    };
+  }
+
+  /**
    * Creo il bottone per caricare documnti sull'archivio
    * @param archivio 
    */
@@ -363,7 +412,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * Ritorna true se l'utente può creare il sottoarchivio e cioè se è responsabile/vicario o ha permesso di almeno modifica
    * @returns 
    */
-   public canVisualizeArchive(archivio: Archivio): boolean {
+  public canVisualizeArchive(archivio: Archivio): boolean {
     return archivio.permessiEspliciti?.find((p: PermessoArchivio) => 
       p.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit > DecimalePredicato.PASSAGGIO;
   }

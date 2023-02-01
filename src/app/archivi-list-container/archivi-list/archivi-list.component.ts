@@ -34,7 +34,6 @@ import { ColonnaBds, CsvExtractor } from '@bds/common-tools';
 import { ExtendedArchivioService } from 'src/app/archivio/extended-archivio.service';
 import { ArchivioUtilsService } from 'src/app/archivio/archivio-utils.service';
 
-
 @Component({
 	selector: 'archivi-list',
 	templateUrl: './archivi-list.component.html',
@@ -114,6 +113,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public fieldNumerazioneGerarchica: string = "numerazioneGerarchica";
 	public matchModeNumerazioneGerarchica: string = FILTER_TYPES.string.startsWith;
 	public newArchivoButton: NewArchivoButton;
+	
 	//public instanziaTabellaArchiviList = true;
 	public loggedUserCanDeleteArchivio : boolean = false; 
 
