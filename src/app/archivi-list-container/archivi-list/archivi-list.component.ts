@@ -32,6 +32,7 @@ import { ConfigurazioneService } from '@bds/internauta-model';
 import { ParametroAziende } from '@bds/internauta-model/lib/entities/configurazione/ParametroAziende';
 import { ColonnaBds, CsvExtractor } from '@bds/common-tools';
 import { ExtendedArchivioService } from 'src/app/archivio/extended-archivio.service';
+import { FunctionButton } from 'src/app/generic-caption-table/functional-buttons/functions-button';
 
 
 @Component({
@@ -113,6 +114,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public fieldNumerazioneGerarchica: string = "numerazioneGerarchica";
 	public matchModeNumerazioneGerarchica: string = FILTER_TYPES.string.startsWith;
 	public newArchivoButton: NewArchivoButton;
+	
 	//public instanziaTabellaArchiviList = true;
 	public loggedUserCanDeleteArchivio : boolean = false; 
 
