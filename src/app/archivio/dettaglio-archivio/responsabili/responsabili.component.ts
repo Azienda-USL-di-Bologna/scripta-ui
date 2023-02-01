@@ -345,14 +345,43 @@ export class ResponsabiliComponent implements OnInit {
    * @param utenteStruttura 
    * @param perm 
    */
-   public onUtenteStrutturaSelected(utenteStruttura: UtenteStruttura, attore: AttoreArchivio) {
+   public onUtenteStrutturaSelected(utenteStruttura: UtenteStruttura, attore: AttoreArchivio, rowIndex: number) {
     if (utenteStruttura) {
       attore.idPersona =  utenteStruttura.idUtente.idPersona;
-      if (attore.ruolo !== "VICARIO") {
+      if (attore.ruolo !== RuoloAttoreArchivio.VICARIO) {
         attore.idStruttura = utenteStruttura.idStruttura;
+        this.loadStruttureAttore(attore);
+      } else {
+        // Prima controllo che questo vicario non ci sia già.
+        if (this.archivio.attoriList.some(a => a.fk_idPersona.id === attore.idPersona.id && a.ruolo === RuoloAttoreArchivio.VICARIO)) {
+          // Vicario già presente, ci fermiamo qua
+          this.messageService.add({
+            severity: "warn",
+            summary: "Attenzione",
+            detail: "Il vicario selezionato è già presente"
+          });
+          this.inEditing = false; 
+          this.onRowEditCancel(attore, rowIndex);
+          return;
+        } else if (this.archivio.attoriList.some(a => a.fk_idPersona.id === attore.idPersona.id && a.ruolo === RuoloAttoreArchivio.RESPONSABILE)) {
+          // Vicario già presente, ci fermiamo qua
+          this.messageService.add({
+            severity: "warn",
+            summary: "Attenzione",
+            detail: "Il vicario selezionato è già presente come responsabile"
+          });
+          this.inEditing = false; 
+          this.onRowEditCancel(attore, rowIndex);
+          return;
+        } else {
+          // Il vicario va inserito
+          // Qui finisce l'editing del vicario, vogliamo salvarlo subito dopo la scelta
+          this.inEditing = false; 
+          this.onRowEditSave(attore, rowIndex, "INSERT");
+          this.loadStruttureAttore(attore); // Carichiamo una struttura per la visualizzazione non editing del vicario
+        }
       }
-      console.log("attore", attore)
-      this.loadStruttureAttore(attore);
+      
     }
   }
 
@@ -379,6 +408,7 @@ export class ResponsabiliComponent implements OnInit {
                 .filter((us: UtenteStruttura) => us.attivo === true)
                 .forEach((us: UtenteStruttura) => { this.struttureAttoreInEditing.push(us.idStruttura) });
             } else {
+              // Qui nel caso si tratti di un vicario, per il quale la struttura non è importante e voglio mostrare la diretta/unificata
               attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
                 return us.idAfferenzaStruttura.codice === "DIRETTA";
               })?.idStruttura;

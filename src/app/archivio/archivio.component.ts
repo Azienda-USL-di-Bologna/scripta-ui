@@ -316,7 +316,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       disabled: false,
       command: () => this.archivilist.newArchivio(this.archivio.idAzienda.id)
     } as MenuItem;
-    console.log("Nella build Archivio Button è chiuso")
     switch (archivio.livello) {
       case 1:
         this.newArchivoButton = {

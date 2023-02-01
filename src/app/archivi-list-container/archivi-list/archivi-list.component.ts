@@ -32,6 +32,7 @@ import { ConfigurazioneService } from '@bds/internauta-model';
 import { ParametroAziende } from '@bds/internauta-model/lib/entities/configurazione/ParametroAziende';
 import { ColonnaBds, CsvExtractor } from '@bds/common-tools';
 import { ExtendedArchivioService } from 'src/app/archivio/extended-archivio.service';
+import { ArchivioUtilsService } from 'src/app/archivio/archivio-utils.service';
 
 
 @Component({
@@ -141,7 +142,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		private configurazioneService: ConfigurazioneService,
 		private datepipe: DatePipe,
 		private extendedArchivioService: ExtendedArchivioService,
-		private utenteStrutturaService: UtenteStrutturaService
+		private utenteStrutturaService: UtenteStrutturaService,
+		private archivioUtilsService: ArchivioUtilsService
 	) { }
 
 	ngOnInit(): void {
@@ -1308,6 +1310,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 											summary: "OK",
 											detail: stringa
 										});
+										this.archivioUtilsService.deletedArchiveSelection(rowData.id);
 										this.loadData();
 									},
 									err => {
