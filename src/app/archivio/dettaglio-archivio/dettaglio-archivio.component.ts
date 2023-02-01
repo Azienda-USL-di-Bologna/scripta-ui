@@ -104,7 +104,6 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     //console.log("Archivio test: ", this.archivio);
     //this.updateAnniTenuta();
     // this.getResponsabili();
-    this.showLogs = false;
     this.isArchivioClosed();
     this.loggedUserIsResponsbaileOrVicario = (this.archivio["attoriList"] as AttoreArchivio[])
       .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id 
