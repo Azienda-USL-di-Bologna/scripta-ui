@@ -53,7 +53,7 @@ export class ExtendedArchivioService extends ArchivioService {
   public aggiungiArchivioRecente(idArchivioRadice: number) {
     const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "aggiungiArchivioRecente";
     const formData: FormData = new FormData();
-    formData.append("idArchivioRadice", idArchivioRadice.toString());
+    formData.append("idArchivio", idArchivioRadice.toString());
     this._http.post(apiUrl, formData).subscribe();
   }
 

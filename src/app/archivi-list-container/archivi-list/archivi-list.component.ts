@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { AfferenzaStruttura, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioDoc, ArchivioService, ArchivioDocService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteService, UtenteStruttura, UtenteStrutturaService } from '@bds/internauta-model';
+import { AfferenzaStruttura, ArchiviRecentiService, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioDoc, ArchivioRecente, ArchivioService, ArchivioDocService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteService, UtenteStruttura, UtenteStrutturaService } from '@bds/internauta-model';
 import { AppService } from '../../app.service';
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { Subscription, combineLatestWith } from 'rxjs';
@@ -142,6 +142,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		private configurazioneService: ConfigurazioneService,
 		private datepipe: DatePipe,
 		private extendedArchivioService: ExtendedArchivioService,
+		private archiviRecentiService: ArchiviRecentiService,
 		private utenteStrutturaService: UtenteStrutturaService,
 		private archivioUtilsService: ArchivioUtilsService
 	) { }
@@ -618,16 +619,53 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.loadArchiviListSubscription = null;
 		}
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
-		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
-		this.loadCount(this.serviceToGetData, this.projectionToGetData, filtersAndSorts, lazyFiltersAndSorts);
+
+		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
+		if (this.archiviListMode === ArchiviListMode.RECENTI) {
+			//let index = 0;
+			//const length = lazyFiltersAndSorts.filters.length;
+			//for(index; index < length; index++) {
+			//	if (lazyFiltersAndSorts.filters[index].field == "dataCreazione" || lazyFiltersAndSorts.filters[index].field == "idAzienda.id")
+			//		lazyFiltersAndSorts.filters.splice(index, 1);
+			//}
+			lazyFiltersAndSorts.filters.forEach((f, index) => {
+				//debugger;
+				if(f.field == "dataCreazione")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+				if(f.field == "idAzienda.id")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+				if(f.field == "livello")
+				lazyFiltersAndSorts.filters.splice(index, 1);
+			});
+			lazyFiltersAndSorts.filters.forEach((f, index) => {
+				if(f.field == "dataCreazione")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+			});
+			debugger;
+			// lazyFiltersAndSorts.filters.find(function(f) {
+			// 	return f.field !== "dataCreazione" && f.field !== "idAzienda.id";  
+			// })
+			lazyFiltersAndSorts.filters.forEach(f => f.field = "idArchivio." + f.field);
+			lazyFiltersAndSorts.sorts.forEach(s => s.field = "dataRecentezza");
+		}
+		//this.archiviListMode !== ArchiviListMode.RECENTI ? : buildLazyEventFiltersAndSorts(recentiLazyLoadEvent, this.cols, this.datepipe)  
+		//this.loadCount(this.serviceToGetData, this.projectionToGetData, filtersAndSorts, lazyFiltersAndSorts);
 		this.loadArchiviListSubscription = this.serviceToGetData.getData(
 			this.projectionToGetData,
 			filtersAndSorts,
+			//null,
 			lazyFiltersAndSorts,
 			this.pageConf).subscribe((data: any) => {
 				console.log(data);
 				this.totalRecords = data.page.totalElements;
 				this.loading = false;
+				//let resultSort = data.results;
+				//if(this.archiviListMode === ArchiviListMode.RECENTI) {
+				//	resultSort.sort(function(a : ArchivioRecente, b : ArchivioRecente) {
+				//		return new Date(b.dataRecentezza).getTime() - new Date(a.dataRecentezza).getTime();
+				//	});
+				//}
+				const results = this.archiviListMode === ArchiviListMode.RECENTI ? data.results.map((r: ArchivioRecente) => r.idArchivio) : data.results;
 
 				if (this.resetArchiviArrayLenght) {
 					/* Ho bisogno di far capire alla tabella quanto l'array docs è virtualmente grande
@@ -641,9 +679,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
 					/* Questo meccanismo serve per cancellare i risultati di troppo della tranche precedente.
 					Se entro qui probabilmente ho fatto una ricerca */
-					Array.prototype.splice.apply(this.archivi, [0, this.archivi.length, ...this.setCustomProperties(data.results)]);
+					Array.prototype.splice.apply(this.archivi, [0, this.archivi.length, ...this.setCustomProperties(results)]);
 				} else {
-					Array.prototype.splice.apply(this.archivi, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
+					Array.prototype.splice.apply(this.archivi, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(results)]);
 				}
 				this.archivi = [...this.archivi]; // trigger change detection
 			},
@@ -758,6 +796,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			case ArchiviListMode.FREQUENTI:
 				break;
 			case ArchiviListMode.RECENTI:
+				this.serviceToGetData = this.archiviRecentiService;
+				this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviorecente.customProjections.CustomArchivioRecenteWithIdArchivioDetail;
+				filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+				filterAndSort.addSort(new SortDefinition("dataRecentezza", "asc"))
 				filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRecenti"));
 				break;
 		}
