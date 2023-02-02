@@ -622,12 +622,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 
 		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
 		if (this.archiviListMode === ArchiviListMode.RECENTI) {
-			//let index = 0;
-			//const length = lazyFiltersAndSorts.filters.length;
-			//for(index; index < length; index++) {
-			//	if (lazyFiltersAndSorts.filters[index].field == "dataCreazione" || lazyFiltersAndSorts.filters[index].field == "idAzienda.id")
-			//		lazyFiltersAndSorts.filters.splice(index, 1);
-			//}
+
 			lazyFiltersAndSorts.filters.forEach((f, index) => {
 				//debugger;
 				if(f.field == "dataCreazione")
@@ -641,15 +636,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				if(f.field == "dataCreazione")
 					lazyFiltersAndSorts.filters.splice(index, 1);
 			});
-			debugger;
-			// lazyFiltersAndSorts.filters.find(function(f) {
-			// 	return f.field !== "dataCreazione" && f.field !== "idAzienda.id";  
-			// })
+			
 			lazyFiltersAndSorts.filters.forEach(f => f.field = "idArchivio." + f.field);
 			lazyFiltersAndSorts.sorts.forEach(s => s.field = "dataRecentezza");
 		}
-		//this.archiviListMode !== ArchiviListMode.RECENTI ? : buildLazyEventFiltersAndSorts(recentiLazyLoadEvent, this.cols, this.datepipe)  
-		//this.loadCount(this.serviceToGetData, this.projectionToGetData, filtersAndSorts, lazyFiltersAndSorts);
+		
 		this.loadArchiviListSubscription = this.serviceToGetData.getData(
 			this.projectionToGetData,
 			filtersAndSorts,
@@ -659,12 +650,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				console.log(data);
 				this.totalRecords = data.page.totalElements;
 				this.loading = false;
-				//let resultSort = data.results;
-				//if(this.archiviListMode === ArchiviListMode.RECENTI) {
-				//	resultSort.sort(function(a : ArchivioRecente, b : ArchivioRecente) {
-				//		return new Date(b.dataRecentezza).getTime() - new Date(a.dataRecentezza).getTime();
-				//	});
-				//}
+
 				const results = this.archiviListMode === ArchiviListMode.RECENTI ? data.results.map((r: ArchivioRecente) => r.idArchivio) : data.results;
 
 				if (this.resetArchiviArrayLenght) {
