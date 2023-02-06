@@ -269,7 +269,7 @@ export class ResponsabiliComponent implements OnInit {
         );
         break;
       case "DELETE":
-        if (attoreToOperate.ruolo === "RESPONSABILE_PROPOSTO"){
+        if (attoreToOperate.ruolo === "RESPONSABILE_PROPOSTO") {
           const batchOperations: BatchOperation[] = [];
           
           batchOperations.push({
@@ -287,7 +287,7 @@ export class ResponsabiliComponent implements OnInit {
                 summary: "Eliminata proposta responsabilità", 
                 detail: "Hai eliminato il responsabile proposto"
               });
-              this.archivio.attoriList.splice(this.archivio.attoriList.indexOf(attoreToOperate),1);
+              this.archivio.attoriList.splice(this.archivio.attoriList.findIndex((a: AttoreArchivio)=> a.id === attoreToOperate.id), 1);
               this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
               this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
               this.responsabilePropostoGiaPresente = false;
@@ -300,10 +300,10 @@ export class ResponsabiliComponent implements OnInit {
                 this.responsabiliArchivi.splice(index, 1);
                 this.messageService.add({
                   severity: "success",
-                  summary: "Eliminazione responsabile",
-                  detail: "Responsabile eliminato con successo"
+                  summary: attoreToOperate.ruolo === RuoloAttoreArchivio.VICARIO ? "Eliminazione vicario" : "Eliminazione responsabile",
+                  detail:  attoreToOperate.ruolo === RuoloAttoreArchivio.VICARIO ? "Vicario eliminato con successo" : "Responsabile eliminato con successo"
                 });
-                this.archivio.attoriList.splice(this.archivio.attoriList.indexOf(attoreToOperate),1);
+                this.archivio.attoriList.splice(this.archivio.attoriList.findIndex((a: AttoreArchivio)=> a.id === attoreToOperate.id), 1);
                 this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
                 this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
               },
@@ -353,7 +353,7 @@ export class ResponsabiliComponent implements OnInit {
         this.loadStruttureAttore(attore);
       } else {
         // Prima controllo che questo vicario non ci sia già.
-        if (this.archivio.attoriList.some(a => a.fk_idPersona.id === attore.idPersona.id && a.ruolo === RuoloAttoreArchivio.VICARIO)) {
+        if (this.archivio.attoriList.some((a: AttoreArchivio) => a.fk_idPersona.id === attore.idPersona.id && a.ruolo === RuoloAttoreArchivio.VICARIO)) {
           // Vicario già presente, ci fermiamo qua
           this.messageService.add({
             severity: "warn",
@@ -363,7 +363,7 @@ export class ResponsabiliComponent implements OnInit {
           this.inEditing = false; 
           this.onRowEditCancel(attore, rowIndex);
           return;
-        } else if (this.archivio.attoriList.some(a => a.fk_idPersona.id === attore.idPersona.id && a.ruolo === RuoloAttoreArchivio.RESPONSABILE)) {
+        } else if (this.archivio.attoriList.some((a: AttoreArchivio) => a.fk_idPersona.id === attore.idPersona.id && a.ruolo === RuoloAttoreArchivio.RESPONSABILE)) {
           // Vicario già presente, ci fermiamo qua
           this.messageService.add({
             severity: "warn",

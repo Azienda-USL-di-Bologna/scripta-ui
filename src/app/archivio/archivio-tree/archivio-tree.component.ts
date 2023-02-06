@@ -8,8 +8,6 @@ import { AppService } from 'src/app/app.service';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from '@bds/next-sdr';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { ArchivioFieldUpdating, ArchivioUtilsService } from '../archivio-utils.service';
-import { TouchSequence } from 'selenium-webdriver';
-import { ThisReceiver } from '@angular/compiler';
 
 @Component({
   selector: 'archivio-tree',
