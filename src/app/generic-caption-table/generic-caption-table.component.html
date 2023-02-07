@@ -115,11 +115,11 @@
         chooseIcon="pi pi-upload"
         pTooltip="Carica documenti nell'archivio"
         class="upload-document-button"
-        multiple="true"
+        [multiple]="true"
         [disabled]="!functionalButtonsComponent.uploadDocumentButton.enable"
         mode="basic" 
         name="document[]"
-        maxFileSize="5000000" 
+        [maxFileSize]="5000000" 
         [customUpload]="true"
         [auto]="true"
         (uploadHandler)="functionalButtonsComponent.uploadDocument($event);fileUploaderDocumentsAuto.clear()">

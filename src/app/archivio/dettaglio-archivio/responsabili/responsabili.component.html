@@ -13,7 +13,7 @@
 				pButton 
 				pRipple 
 				icon="pi pi-plus" 
-				(click)="inEditing = true; addResponsabile('RESPONSABILE_PROPOSTO')" 
+				(click)="inEditing = true; addResponsabile(ruoliEnum.RESPONSABILE_PROPOSTO)" 
 				class="mr-2 bottoneVicari" 
 				label="Proponi nuovo responsabile"
 				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario || responsabilePropostoGiaPresente || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
@@ -24,7 +24,7 @@
 				pButton 
 				pRipple 
 				icon="pi pi-plus" 
-				(click)="inEditing = true; addResponsabile('VICARIO')" 
+				(click)="inEditing = true; addResponsabile(ruoliEnum.VICARIO)" 
 				class="mr-2 bottoneVicari" 
 				label="Aggiungi vicario"
 				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
@@ -47,7 +47,6 @@
 					<ng-template pTemplate="input">
 						<lib-users-autocomplete *ngIf="!attore.idPersona" 
 							class="autocomplete-utenti" 
-							[additionalFilters]="additionalFilterComboUtenti" 
 							[azienda]="archivio.idAzienda"
               [showPool]="false"
 							[showOnlyUser]="true"

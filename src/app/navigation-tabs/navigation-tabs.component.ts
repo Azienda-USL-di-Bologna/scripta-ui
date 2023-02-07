@@ -90,7 +90,7 @@ export class NavigationTabsComponent implements OnInit {
                       this.navigationTabsService.buildaTabDocsList()
                     );
                     this.navigationTabsService.addTab(
-                      this.navigationTabsService.buildaTIP()
+                      this.navigationTabsService.buildaTabTIP()
                     )
                     this.setTabsAndActiveOneOfThem();
   

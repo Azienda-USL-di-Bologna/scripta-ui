@@ -28,7 +28,7 @@
         <p-dropdown #dropdownTipo 
           [options]="tipiArchivioObj" 
           [(ngModel)]="archivio.tipo"
-          (onChange)="onChangeTipo($event.value)" 
+          (onChange)="onChangeTipo()" 
           optionValue="value" 
           optionLabel="nome" 
           appendTo="body" 
@@ -165,7 +165,7 @@
         class="p-mr-2" 
         pTooltip="Numera Fascicolo" 
         aria-label="Numera Fascicolo"
-        [disabled]="!archivio.oggetto || !archivio.tipo || !archivio.idTitolo || (archivio.stato == 'CHIUSO' || archivio.stato == 'PRECHIUSO')" 
+        [disabled]="!archivio.oggetto || !archivio.tipo || !archivio.idTitolo" 
         tooltipPosition="bottom">
       </button>
       <!-- Bottone chiudi o riapri -->

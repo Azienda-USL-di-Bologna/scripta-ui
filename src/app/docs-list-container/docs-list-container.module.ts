@@ -16,7 +16,8 @@ import { DocsListModule } from './docs-list/docs-list.module';
     GenericCaptionTableModule,
     CommonModule,
     PrimeNgModule,
-    ScriptaCommonModule
+    ScriptaCommonModule,
+    DocDetailAndPreviewModule
   ],
   exports: [
     DocsListModule,

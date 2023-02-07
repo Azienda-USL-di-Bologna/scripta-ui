@@ -30,7 +30,6 @@
     <!-- HEADER & ORDINAMENTO -->
     <tr class="header-row"> 
       <th *ngFor="let col of columns" pReorderableColumn
-        [ngSwitch]="col.field" 
         [ngClass]="col.headerClass"
         [pSortableColumn]="col.sortField"
         [ngStyle]="{'cursor': col.sortField ? null  : 'move' }">
@@ -741,7 +740,7 @@
         </div> -->
         <div *ngSwitchCase="'statoUltimoVersamento'">
           {{rowData.statoUltimoVersamentoVisualizzazione}} 
-          <p-triStateCheckbox  *ngIf="!(rowData.statoUltimoVersamento == null) && isResponsabileVersamento === true" [(ngModel)]="rowData.statoVersamentoVisto"  pTooltip="Visto" [tooltipDisabled]="!rowData.statoVersamentoVisto" readonly = "true" class = "stato-ultimo-versamento-icon" checkboxFalseIcon="blank"></p-triStateCheckbox>
+          <p-triStateCheckbox  *ngIf="!(rowData.statoUltimoVersamento == null) && isResponsabileVersamento === true" [(ngModel)]="rowData.statoVersamentoVisto"  pTooltip="Visto" [tooltipDisabled]="!rowData.statoVersamentoVisto" [readonly]="true" class = "stato-ultimo-versamento-icon" checkboxFalseIcon="blank"></p-triStateCheckbox>
         </div>
         <div *ngSwitchCase="'dataUltimoVersamento'">
           {{rowData.dataUltimoVersamento | date:'dd/MM/yyyy'}}

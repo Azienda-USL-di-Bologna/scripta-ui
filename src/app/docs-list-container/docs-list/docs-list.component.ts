@@ -268,11 +268,11 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.resetPaginationAndLoadData();
   }
 
-  @Input() get selectedColumns(): any[] {
+  get selectedColumns(): ColonnaBds[] {
     return this._selectedColumns;
   }
 
-  set selectedColumns(colsSelected: ColonnaBds[]) {
+  @Input() set selectedColumns(colsSelected: ColonnaBds[]) {
     // restore original order
     // this._selectedColumns = this.cols.filter(col => val.includes(col));
     if (this._selectedColumns.length > colsSelected.length) {
@@ -286,6 +286,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if(!this.isResponsabileVersamento) {
       this.selectableColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
       this.selectedColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
+    }
+    if (this._selectedColumns[this._selectedColumns.length-1] === undefined) {
+      this._selectedColumns.pop();
     }
   }
 
@@ -1334,7 +1337,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Apre il tab per l'archivio corrisondente alla fasciolazione
    * @param f 
    */
-  public openArchive(archivioDoc: ArchivioDoc, doc: ExtendedDocDetailView): void {
+  public openArchive(archivioDoc: ArchivioDoc): void {
     this.navigationTabsService.addTabArchivio(archivioDoc.idArchivio);
 		this.appService.appNameSelection("Fascicolo "+ archivioDoc.idArchivio.numerazioneGerarchica + " [" + archivioDoc.idArchivio.idAzienda.aoo + "]");
   }
