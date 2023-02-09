@@ -175,10 +175,10 @@
             type="button" 
             pButton 
             (click)="numeraFasicoloClicked($event)"
-            label="Numera Fascicolo"  
+            label="Numera {{labelLivelloArchivio}}"  
             class="p-mr-2"
-            pTooltip="Numera Fascicolo"  
-            aria-label="Numera Fascicolo"
+            pTooltip="Numera {{labelLivelloArchivio}}"  
+            aria-label="Numera {{labelLivelloArchivio}}"
             [disabled]="!archivio.oggetto || !archivio.tipo || !archivio.idTitolo || (archivio.stato == 'CHIUSO' || archivio.stato == 'PRECHIUSO')" 
             tooltipPosition="bottom">
           </button>

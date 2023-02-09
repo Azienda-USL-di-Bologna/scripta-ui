@@ -28,6 +28,7 @@ import { SplitterModule } from 'primeng/splitter';
 import { TreeModule } from 'primeng/tree';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { MenuModule } from 'primeng/menu';
+import { TieredMenuModule } from 'primeng/tieredmenu';
 import { MessageModule } from 'primeng/message';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { TreeSelectModule } from 'primeng/treeselect';
@@ -66,6 +67,7 @@ import {TriStateCheckboxModule} from 'primeng/tristatecheckbox';
     TreeModule,
     BreadcrumbModule,
     MenuModule,
+    TieredMenuModule,
     MessageModule,
     OverlayPanelModule,
     TreeSelectModule,
@@ -101,6 +103,7 @@ import {TriStateCheckboxModule} from 'primeng/tristatecheckbox';
     TreeModule,
     BreadcrumbModule,
     MenuModule,
+    TieredMenuModule,
     MessageModule,
     OverlayPanelModule,
     TreeSelectModule,
