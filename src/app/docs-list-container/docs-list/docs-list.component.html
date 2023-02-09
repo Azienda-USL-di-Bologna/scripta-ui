@@ -786,9 +786,14 @@
         alignFrozen="right"  
         pFrozenColumn 
         [frozen]="true">
-        <i class="pi pi-arrow-up-right" 
+        <i *ngIf="false" class="pi pi-arrow-up-right" 
           pTooltip="Vedi dettagli e anteprime"
           (click)="openDetailAndPreview(rowData)"
+        >
+        </i>
+        <i *ngIf="true" class="pi pi-arrow-up-right" 
+          pTooltip="Visualizzazione semplificata pregresso"
+          (click)="openDocPregresso(rowData)"
         >
         </i>
       </td>

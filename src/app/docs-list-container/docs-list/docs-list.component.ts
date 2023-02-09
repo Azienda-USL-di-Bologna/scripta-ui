@@ -1362,7 +1362,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
    * desottoscrivo anche dalla specifica loadDocsListSubscription
    * Che appositamente è separata in quanto viene spesso desottoscritta
-   * e risottroscritta.
+   * e risottoscritta.
    */
   public ngOnDestroy(): void {
     if (this.subscriptions) {
@@ -1374,6 +1374,16 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (this.loadDocsListSubscription) {
       this.loadDocsListSubscription.unsubscribe();
     }
+  }
+
+  public openDocPregresso(doc: ExtendedDocDetailView): void {
+    if (doc instanceof ExtendedDocDetailView){
+      console.log("ecco", doc); //TODO: rimuovere
+    }
+    this.showRightPanel.emit({
+      showPanel: true,
+      rowSelected: doc
+    });
   }
 }
 

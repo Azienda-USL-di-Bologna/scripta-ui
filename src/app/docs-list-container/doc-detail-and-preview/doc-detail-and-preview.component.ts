@@ -4,7 +4,7 @@ import { AttachmentsBoxConfig } from '@bds/common-components';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { first, Subscription } from 'rxjs';
 import { DocDetail, Persona, Utente } from '@bds/internauta-model';
-import { disableDebugTools } from '@angular/platform-browser';
+//import { disableDebugTools } from '@angular/platform-browser';
 
 
 @Component({

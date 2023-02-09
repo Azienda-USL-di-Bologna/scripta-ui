@@ -31,6 +31,9 @@ import { ExtendedAllegatoService } from "./allegati/extended-allegato.service";
     ExtendedDestinatariService,
     ExtendedMittenteService,
     ExtendedAllegatoService
+  ],
+  exports: [
+    DocComponent
   ]
 })
 export class DocModule { }

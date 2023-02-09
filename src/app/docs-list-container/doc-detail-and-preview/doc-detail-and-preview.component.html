@@ -18,7 +18,7 @@
 <!-- *ngIf="(!doc.visibilitaLimitata && !doc.riservato) " -->
 
 <p-accordion>
-  <p-accordionTab 
+  <p-accordionTab *ngIf="false"
     header="Allegati" 
     [(selected)]="accordionSelected[0]"
     [ngClass]="accordionSelected[0] ? 'tab-accordion-selected' : ''">
@@ -32,6 +32,15 @@
       <!-- {{!doc.visibilitaLimitata && doc.riservato && !hasUserPienaVisibilita(doc) ? "[Riservato]" : ""}} -->
       <!-- {{doc.visibilitaLimitata && !doc.riservato  ? "Visibilita limitata" : ""}} -->
     </h4>
+  </p-accordionTab>
+  <p-accordionTab *ngIf="true"
+    header="Peis" 
+    [(selected)]="accordionSelected[0]"
+    [ngClass]="accordionSelected[0] ? 'tab-accordion-selected' : ''">
+    <doc 
+      [doc]="doc">
+    </doc>
+
   </p-accordionTab>
   <p-accordionTab 
     header="Versamenti"

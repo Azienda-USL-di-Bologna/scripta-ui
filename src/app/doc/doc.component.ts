@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
 import { Doc, ENTITIES_STRUCTURE, Persona, Allegato, CODICI_REGISTRO } from "@bds/internauta-model";
 import { LOCAL_IT } from "@bds/common-tools";
@@ -9,6 +9,7 @@ import { Observable, Subscription } from "rxjs";
 import { switchMap } from "rxjs/operators";
 import { AppService } from "../app.service";
 import { ExtendedDocService } from "./extended-doc.service";
+import { ExtendedDocDetailView } from "../docs-list-container/docs-list/extended-doc-detail-view";
 
 @Component({
   selector: "doc",
@@ -22,7 +23,8 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public localIt = LOCAL_IT;
   @ViewChild("pageStart") public pageStart: any;
-  public doc: Doc;
+  @Input() public doc: Doc;
+  
   public descrizioneUtenteRegistrante: string | undefined;
   public utenteUtilitiesLogin: UtenteUtilities;
   public DatiProtocolloEsterno: Number;
@@ -31,6 +33,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   private projection: string = ENTITIES_STRUCTURE.scripta.doc.customProjections.DocWithAll;
   public yearOfProposta: string;
   public pregresso: boolean = true; //TODO: assicurarsi che sia false, e togliere questo commento.
+  @Input() public docDetailView?: ExtendedDocDetailView;
 
   constructor(
     private router: Router,
@@ -173,7 +176,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
       const d: Doc = res;
       const registrazione = d.registriList[0];
       const messageHeader = 'Registrazione ' +  registrazione.idRegistro.nomeRegistro + ' ' + registrazione.numero;
-      this.messageService.showMessageSuccessfulMessage(messageHeader, 'Resgistrazione avvenuta con successo');
+      this.messageService.showMessageSuccessfulMessage(messageHeader, 'Registrazione avvenuta con successo');
     }); */
   }
 
