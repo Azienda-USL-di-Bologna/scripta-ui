@@ -67,7 +67,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         this.loggedUserCanVisualizeArchive = this.canVisualizeArchive(res);
         this._archivio = res;
         console.log("Archivio nell'archivio component: ", this._archivio);
-        this.extendedArchivioService.aggiungiArchivioRecente(this._archivio.id);
+        this.extendedArchivioService.aggiungiArchivioRecente(this._archivio.fk_idArchivioRadice.id);
         setTimeout(() => {
           if (this.utenteUtilitiesLogin) {
             this.inizializeAll();
@@ -166,7 +166,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DOCUMENTI);
           this.setForDocumenti();
         } else {
-          this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.SOTTOARCHIVI);
+          this.selectedButtonItem = 
+          this.selectButtonItems.find(x => x.label === this.selectedButtonItem?.label && !this.selectedButtonItem?.disabled)
+          || this.selectButtonItems.find(x => x.id === SelectButton.SOTTOARCHIVI);
           this.setForSottoarchivi();
         }
       } else {
@@ -356,7 +358,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public buildFunctionButton(archivio: Archivio | ArchivioDetail): void {
     const funzioniItems: MenuItem[] = [{
       label: "Copia/Sposta",
-      disabled: !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO) && !!!(this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO),
+      disabled: !!!this.canVisualizeArchive(this.archivio) && !!!(this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO),
       command: () => console.log("qui dovrò eseguire la Copia/Sposta")
     },
     {
