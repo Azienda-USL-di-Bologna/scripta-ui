@@ -170,3 +170,20 @@ p-splitter {
 body p-table .p-datatable .p-datatable-wrapper table .p-datatable-tbody>.p-highlight {
   background-color: #ffc4e1;
 }
+
+
+
+// STILI CHE POI VOGLIO SPOSTARE SU COMMON-COMPONENTS
+// Schermi sotto i 1600
+
+// Schermi sotto i 1400
+
+// Schermi sotto i 1200
+@media screen and (max-width: 1200px) {
+  .p-component {
+    font-size: 0.8rem;
+  }
+  .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+    padding: 0.5rem 0.4rem;
+  }
+}

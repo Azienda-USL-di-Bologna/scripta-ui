@@ -19,7 +19,7 @@
     .left-content {
       height: 33px;
       .box-ricerca {
-        width: 400px;
+        width: 33.3%;
         display: flex;
         flex-wrap: nowrap;
         .p-input-icon-left {
@@ -27,6 +27,7 @@
         }
       }
       .tabs {
+        width: 66.6%;
         margin-left: 0.5vw;
         align-self: center;
         .p-selectbutton {
@@ -41,6 +42,9 @@
               background-color: #993366 !important;
               border-color: #993366 !important;
 
+            }
+            .p-button-label {
+              white-space: nowrap;
             }
           }
           .p-highlight {
@@ -71,24 +75,24 @@
         border: 1px solid darkorange !important;
         color: black;
       }
-      @media screen and (max-width: 1280px) {
-        font-size: 10pt;
+      /* @media screen and (max-width: 1280px) {
+        //font-size: 10pt;
         .p-inputtext {
           align-self: center;
           height: 33.72px;
-          font-size: 10px;
+          //font-size: 10px;
         }
         .p-buttonselect {
-          font-size: 10px;
+          //font-size: 10px;
           .p-selectbutton {
             display: flex;
             font-size: small;
             flex-wrap: nowrap;
             align-self: center;
-            font-size: 10px;
+            //font-size: 10px;
           }
         }
-      }
+      } */
     }
     .right-content {
       display: flex;
