@@ -480,15 +480,47 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			mode: "PAGE_NO_COUNT"
 		};
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
+		if (this.archiviListMode === ArchiviListMode.RECENTI) {
+
+			lazyFiltersAndSorts.filters.forEach((f, index) => {
+				//debugger;
+				if(f.field == "dataCreazione")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+				if(f.field == "idAzienda.id")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+				if(f.field == "livello")
+				lazyFiltersAndSorts.filters.splice(index, 1);
+			});
+			lazyFiltersAndSorts.filters.forEach((f, index) => {
+				if(f.field == "dataCreazione")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+			});
+			
+			lazyFiltersAndSorts.filters.forEach(f => f.field = "idArchivio." + f.field);
+			lazyFiltersAndSorts.sorts.forEach(s => s.field = "dataRecentezza");
+		}
 		this.serviceToGetData.getData(
 			this.projectionToGetData,
 			filtersAndSorts,
-			buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
+			lazyFiltersAndSorts,
 			pageConfNoLimit)
 			.subscribe(
 				res => {
 					if (res && res.results) {
-						tableTemp.value = this.setCustomProperties(res.results);
+						if(this.archiviListMode !== ArchiviListMode.RECENTI)
+							tableTemp.value = this.setCustomProperties(res.results);
+						else {
+							let archiviListView : ArchivioDetailView[] = [];
+							res.results.forEach((a : any) => {
+								const archivioDetailRecente = a.idArchivio;
+								archiviListView.push(archivioDetailRecente);
+								tableTemp.value = this.setCustomProperties(archiviListView);
+							});
+							
+						}
+							
+						
 						tableTemp.columns = colsCSV.filter(c => this.selectedColumns.some(e => e.field === c.fieldId));
 						const extractor = new CsvExtractor();
 						extractor.exportCsv(tableTemp);
@@ -644,7 +676,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		this.loadArchiviListSubscription = this.serviceToGetData.getData(
 			this.projectionToGetData,
 			filtersAndSorts,
-			//null,
 			lazyFiltersAndSorts,
 			this.pageConf).subscribe((data: any) => {
 				console.log(data);

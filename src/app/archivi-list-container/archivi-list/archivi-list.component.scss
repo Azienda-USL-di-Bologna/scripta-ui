@@ -4,7 +4,6 @@
 }
 ::ng-deep .p-table-scripta-archivi-list {
   .archiviolist-table-body {
-    //overflow: initial !important;
     /* HEADER */
     .header-row {
       height: 41px;
@@ -15,7 +14,9 @@
           justify-content: space-between;
           width: 100%;
         }
+
       }
+
       .info-numerazione-gerarchica {
         cursor: pointer;
         color:#203244;
@@ -24,6 +25,7 @@
         }
       }
     }
+    
     /* FILTER */
     .filter-row {
       @media screen and (max-width: 1280px) {
