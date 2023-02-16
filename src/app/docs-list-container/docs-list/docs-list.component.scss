@@ -23,9 +23,6 @@
     }
     /* FILTER */
     .filter-row {
-      @media screen and (max-width: 1280px) {
-        font-size: 11pt;
-      }
       .filter-column {
         padding: 1px;
         border: transparent;
@@ -140,16 +137,16 @@
     max-height: 53px;
   }
   .ente-column {
-    min-width: 103px;
-    max-width: 103px;
+    min-width: 6.438rem;
+    max-width: 6.438rem;
   }
   .tipologia-column {
-    min-width: 171px;
-    max-width: 171px;
+    min-width: 10.688rem;
+    max-width: 10.688rem;
   }
   .registrazione-column {
-    min-width: 180px;
-    max-width: 180px;
+    min-width: 11.25rem;
+    max-width: 11.25rem;
   }
   .proposta-column {
     min-width: 146px;
@@ -181,16 +178,16 @@
   .data-registrazione-column,
   .data-pubblicazione-column,
   .data-ultimo-versameno-column {
-    min-width: 165px;
-    max-width: 165px;
+    min-width: 10.313rem;
+    max-width: 10.313rem;
   }
   .stato-column {
-    min-width: 165px;
-    max-width: 165px;
+    min-width: 10.313rem;
+    max-width: 10.313rem;
   }
   .oggetto-column {
     width: 100%;
-    min-width: 350px;
+    min-width: 21.875rem;
     cursor: pointer;
     font-weight: 600;
     color: #993366;
@@ -205,8 +202,8 @@
     }
   }
   .fascicolazioni-column {
-    min-width: 230px;
-    max-width: 230px;
+    min-width: 14.375rem;
+    max-width: 14.375rem;
     .fascicolazione-item {
       display: inline-block;
       padding: 3px 5px;
@@ -222,28 +219,28 @@
     }
   }
   .stato-ufficio-atti-column {
-    min-width: 184px;
-    max-width: 184px;
+    min-width: 11.5rem;
+    max-width: 11.5rem;
   }
   .responsabile-column {
-    min-width: 204px;
-    max-width: 204px;
+    min-width: 12.75rem;
+    max-width: 12.75rem;
   }
   .redattore-column {
-    min-width: 204px;
-    max-width: 204px;
+    min-width: 12.75rem;
+    max-width: 12.75rem;
   }
   .adottato-da-column {
-    min-width: 204px;
-    max-width: 204px;
+    min-width: 12.75rem;
+    max-width: 12.75rem;
   }
   .mittente-column {
-    min-width: 204px;
-    max-width: 204px;
+    min-width: 12.75rem;
+    max-width: 12.75rem;
   }
   .destinatari-column {
-    min-width: 230px;
-    max-width: 230px;
+    min-width: 14.375rem;
+    max-width: 14.375rem;
     .destinatari-item {
       display: inline-block;
       padding: 3px 5px;
@@ -258,8 +255,8 @@
     }
   }
   .firmatari-column {
-    min-width: 230px;
-    max-width: 230px;
+    min-width: 14.375rem;
+    max-width: 14.375rem;
     .firmatari-item {
       display: inline-block;
       padding: 3px 5px;
@@ -274,8 +271,8 @@
     }
   }
   .sulla-scrivania-di-column {
-    min-width: 230px;
-    max-width: 230px;
+    min-width: 14.375rem;
+    max-width: 14.375rem;
     .sulla-scrivania-di-item {
       display: inline-block;
       padding: 3px 5px;
@@ -290,8 +287,8 @@
     }
   }
   .protocollo-esterno-column {
-    min-width: 230px;
-    max-width: 230px;
+    min-width: 14.375rem;
+    max-width: 14.375rem;
   }
   .edit-archiviation-column, .open-detail-and-preview-column {
     width: 50px;
@@ -319,19 +316,16 @@
     color:  red !important;
   }
 }
-
 ::ng-deep .table-zero-rows {
   .p-datatable-scrollable-header {
     overflow: scroll !important;
   }
 }
-
 :host ::ng-deep .p-datatable {
     .p-datatable-thead > tr > th {
       background: #AFC1DE !important; 
   }
 }
-
 /* EFFETTO CARICAMENTO RIGHE */
 .loading-cell {
   padding: 0.571rem 0.857rem !important;
@@ -344,35 +338,11 @@
     overflow: hidden;
   }
 }
-
 .calendar-filter-footer-button-container {
   display: flex;
   justify-content: space-around;
 
 }
-
-
-// ::ng-deep .conservazione-icon {
-//   .p-checkbox {
-//     cursor: default;
-//     .p-checkbox-box.p-highlight {
-//       background-color: white !important;
-//       color: #203244;
-//       height: 30px !important;
-//       width: 30px !important;
-//       border-color: white !important;
-//       cursor: default;
-//     }
-//     .p-checkbox-box {
-//       border-color: white !important;
-//       .p-checkbox-icon {
-//         color: #203244;
-//       }
-//     }
-//   }
-// }
-
-
 ::ng-deep .stato-ultimo-versamento-icon {
   .p-checkbox {
     cursor: default;

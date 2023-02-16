@@ -27,12 +27,12 @@
         }
       }
       .tabs {
-        width: 66.6%;
+        //width: 66.6%;
         margin-left: 0.5vw;
         align-self: center;
         .p-selectbutton {
           flex-wrap: nowrap;
-          
+          display: flex;
           .p-button {
             border: 1px solid #9da3a9 !important;;
             color: #333333;

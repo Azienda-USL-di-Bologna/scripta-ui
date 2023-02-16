@@ -43,7 +43,7 @@
       <!-- Conteggio elementi trovati -->
       <span *ngIf="configuration.rowCount"
         class="row-count">
-        <span *ngIf="!referenceTableComponent.rowCountInProgress && referenceTableComponent.rowCount >= 0">
+        <span *ngIf="!referenceTableComponent.rowCountInProgress && referenceTableComponent.rowCount >= 0" style="white-space: nowrap;">
           Trovati {{referenceTableComponent.rowCount}} {{configuration.component === "DOCS_LIST" ? 'documenti' : 'fascicoli'}}
         </span>
         <span *ngIf="referenceTableComponent.rowCountInProgress">
@@ -68,13 +68,14 @@
       </p-progressSpinner>
     </span>
 
+    <!-- ICONA INFORMATIVA, ARCHIVIO CHIUSO -->
     <i *ngIf="configuration.showIconArchiveClosed"
       class="pi pi-lock lucchettoChiuso" 
       [pTooltip]="'Fascicolo chiuso'" 
       tooltipPosition="bottom">
     </i>
 
-    <!-- BOTTONE FUNZIONI -->
+    <!-- BOTTONE FUNZIONI (SPOSTA/COPIA/SCARICA ETC) -->
     <span *ngIf="configuration.functionButton && functionalButtonsComponent.functionButton">
       <i 
         class="pi p-mr-2 pi-cog funzioniGear"
@@ -102,6 +103,7 @@
         [popup]="true">
       </p-tieredMenu>
     </span>
+
     <!-- BOTTONE PREFERITO -->
     <span *ngIf="configuration.preferitoButton">
       <i 
@@ -113,6 +115,7 @@
         tooltipPosition="bottom">
       </i>
     </span>
+
     <!-- BOTTONE NUOVO ARCHIVIO [disabled] = "archivio.canCreateSottoarchivio()"-->
     <span *ngIf="configuration.newArchivio && functionalButtonsComponent.newArchivoButton">
       <button
@@ -136,6 +139,7 @@
         [popup]="true">
       </p-menu>
     </span>
+
     <!-- BOTTONE UPLOAD DOCUMENT -->
     <!--fileUploaderDocumentsAuto.clear() serve a svuotare il componente altrimenti si carica sempre lo stesso file--> 
     <span *ngIf="configuration.uploadDocument && functionalButtonsComponent.uploadDocumentButton" class="span-fileUpload-button">
@@ -153,9 +157,9 @@
         (uploadHandler)="functionalButtonsComponent.uploadDocument($event);fileUploaderDocumentsAuto.clear()">
       </p-fileUpload>
     </span>
-    <!-- PROGRESS SPINNER -->
+    
+    <!-- BOTTONE ESPORTA -->
     <span *ngIf="configuration.exportButton">
-      <!-- BOTTONE ESPORTA -->
       <button
         type="button" 
         pButton 
@@ -167,24 +171,21 @@
         aria-label="Scarica il csv della tabella"
         tooltipPosition="bottom">
       </button>
-      <!-- BOTTONE TIP -->
-      <button *ngIf="canUseTip"
-        type="button" 
-        pButton 
-        pRipple 
-        icon="pi pi-file" 
-        (click)="show()" 
-        class="p-mr-2" 
-        pTooltip="TIP"
-        aria-label="Tool di importazione pregressi"
-        tooltipPosition="bottom">
-      </button>
-      <!-- <p-menu
-        #exportCsvSelection
-        [model]="functionalButtonsComponent.newArchivoButton.aziendeItems"
-        [popup]="true">
-      </p-menu> -->
     </span>
+
+     <!-- BOTTONE TIP -->
+     <button *ngIf="canUseTip"
+      type="button" 
+      pButton 
+      pRipple 
+      icon="pi pi-server" 
+      (click)="show()" 
+      class="p-mr-2" 
+      pTooltip="TIP"
+      aria-label="Tool di importazione pregressi"
+      tooltipPosition="bottom">
+    </button>
+
     <!-- SELEZIONE COLONNE -->
     <p-multiSelect #ms
       *ngIf="configuration.selectableColumns && !accessibile"
@@ -195,7 +196,7 @@
       optionDisabled="selectionDisabled"
       [showHeader]="false"
       selectedItemsLabel="{0} colonne selezionate"
-      [style]="{minWidth: '250px', maxWidth: '250px'}" 
+      
       placeholder="Scegli le colonne da visualizzare"
       aria-label="Scegli le colonne da visualizzare">
       <ng-template let-column pTemplate="item"  >
@@ -203,6 +204,6 @@
           <span >{{column.header}}</span>
         </div>
       </ng-template>
-    </p-multiSelect>
+    </p-multiSelect><!-- [style]="{minWidth: '250px', maxWidth: '250px'}"  -->
   </div>
 </div>
