@@ -4,6 +4,8 @@ import { AttachmentsBoxConfig } from '@bds/common-components';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { first, Subscription } from 'rxjs';
 import { DocDetail, Persona, Utente } from '@bds/internauta-model';
+import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
+import { AppService } from 'src/app/app.service';
 //import { disableDebugTools } from '@angular/platform-browser';
 
 
@@ -23,6 +25,7 @@ export class DocDetailAndPreviewComponent implements OnInit {
   
   @Output('closeRightPanel') closeRightPanel = new EventEmitter();
   _doc: ExtendedDocDetailView;
+
   get doc(): ExtendedDocDetailView {
     return this._doc;
   }
@@ -32,7 +35,9 @@ export class DocDetailAndPreviewComponent implements OnInit {
   public attachmentsBoxConfig: AttachmentsBoxConfig;
 
   constructor(
-    private loginService: JwtLoginService
+    private loginService: JwtLoginService,
+    private navigationTabsService: NavigationTabsService,
+    private appService: AppService,
   ) {
     this.attachmentsBoxConfig = new AttachmentsBoxConfig();
     this.attachmentsBoxConfig.showPreview = true;
@@ -64,6 +69,11 @@ export class DocDetailAndPreviewComponent implements OnInit {
       this.hasPienaVisibilita = true;
     }
     return this.hasPienaVisibilita;
+  }
+
+  public openPregresso(doc: ExtendedDocDetailView) {
+    this.navigationTabsService.addTabDoc(doc);
+		this.appService.appNameSelection("Pregresso");
   }
 
 }

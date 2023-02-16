@@ -405,30 +405,35 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * @param doc
    */
   public openDoc(doc: DocDetailView) {
-    const filtersAndSorts = new FiltersAndSorts();
-    filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
-    filtersAndSorts.addFilter(new FilterDefinition("idDocDetail.id", FILTER_TYPES.not_string.equals, doc.id));
-    this.personaVedenteSerice.getData("PersonaVedenteWithPlainFields", filtersAndSorts, null)
-      .subscribe(res => {
-        if (res && res.results) {
-          if (res.results.length > 0) {
-            const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
-              doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
-            const addRichiestaParam = true;
-            const addPassToken = true;
-            this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
-              console.log("urlAperto:", url);
-            });
-          } else {
-            this.messageService.add({
-              severity: "info",
-              summary: "Attenzione",
-              key: "docsListToast",
-              detail: `Apertura del documento non consentita`
-            });
+    if (/* !!doc.annoRegistrazione && doc.annoRegistrazione <= 2023 */ true) { //TODO: modificare
+      this.openPregresso(doc as ExtendedDocDetailView);
+    }
+    else {
+      const filtersAndSorts = new FiltersAndSorts();
+      filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+      filtersAndSorts.addFilter(new FilterDefinition("idDocDetail.id", FILTER_TYPES.not_string.equals, doc.id));
+      this.personaVedenteSerice.getData("PersonaVedenteWithPlainFields", filtersAndSorts, null)
+        .subscribe(res => {
+          if (res && res.results) {
+            if (res.results.length > 0) {
+              const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
+                doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
+              const addRichiestaParam = true;
+              const addPassToken = true;
+              this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
+                console.log("urlAperto:", url);
+              });
+            } else {
+              this.messageService.add({
+                severity: "info",
+                summary: "Attenzione",
+                key: "docsListToast",
+                detail: `Apertura del documento non consentita`
+              });
+            }
           }
-        }
-      });
+        });
+    }
   }
 
   /**
@@ -1376,14 +1381,19 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     }
   }
 
-  public openDocPregresso(doc: ExtendedDocDetailView): void {
-    if (doc instanceof ExtendedDocDetailView){
-      console.log("ecco", doc); //TODO: rimuovere
-    }
-    this.showRightPanel.emit({
-      showPanel: true,
-      rowSelected: doc
-    });
+  // public openDocPregresso(doc: ExtendedDocDetailView): void {
+  //   if (doc instanceof ExtendedDocDetailView){
+  //     console.log("ecco", doc); //TODO: rimuovere
+  //   }
+  //   this.showRightPanel.emit({
+  //     showPanel: true,
+  //     rowSelected: doc
+  //   });
+  // }
+
+  public openPregresso(doc: ExtendedDocDetailView) {
+    this.navigationTabsService.addTabDoc(doc);
+		this.appService.appNameSelection("Pregresso");
   }
 }
 

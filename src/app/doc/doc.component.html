@@ -1,12 +1,11 @@
 <p-toast #pageStart position="top-right" (onClose)="clearMessages()"></p-toast>
-<p-toolbar>
+<p-toolbar *ngIf="!pregresso">
   <div class="classe-temporanea">
     <button pButton 
       type="button" 
       label="Protocolla" 
       icon="material-icons-outlined person_add"
       (click)="doButtonProtocolla()"
-      [disabled]="pregresso"
       ><!-- [disabled]="doc?.dataRegistrazione || !document.oggetto" -->
     </button>
   </div>
@@ -34,7 +33,8 @@
       rows="2" 
       cols="30"
       (keyup)="timeOutAndSaveDoc(doc, 'oggetto')"
-      [(ngModel)]="doc!.oggetto">
+      [(ngModel)]="doc!.oggetto"
+      [disabled]="pregresso">
     </textarea>
     <div class="protocollato-da-box">
       <label for="protocollatoda">Protocollato da</label>

@@ -23,7 +23,15 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public localIt = LOCAL_IT;
   @ViewChild("pageStart") public pageStart: any;
-  @Input() public doc: Doc;
+  private _doc: Doc;
+  public get doc(): Doc {
+    return this._doc;
+  }
+  public set doc(value: Doc) {
+    this._doc = value;
+    console.log("setto doc a ", this.doc);
+
+  }
   
   public descrizioneUtenteRegistrante: string | undefined;
   public utenteUtilitiesLogin: UtenteUtilities;
@@ -32,8 +40,12 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public numeroVisualizzazione: string;
   private projection: string = ENTITIES_STRUCTURE.scripta.doc.customProjections.DocWithAll;
   public yearOfProposta: string;
-  public pregresso: boolean = true; //TODO: assicurarsi che sia false, e togliere questo commento.
-  @Input() public docDetailView?: ExtendedDocDetailView;
+  @Input() public pregresso: boolean = true;
+  @Input() set data(data: any) {
+    console.log("ciao", data);
+
+    this.doc = data.doc;
+  }
 
   constructor(
     private router: Router,
@@ -46,6 +58,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
   ngOnInit(): void {
+    console.log("entro nell'oninit");
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -58,37 +71,51 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     /**
      * Questa sottoscrizione serve a popolare this.doc
      */
-    this.subscriptions.push(
-      this.route.queryParamMap.pipe(
-        switchMap((params: ParamMap) =>
-          this.handleCommand(params)
-      )).subscribe((res: Doc) => {
-        this.setFreezeDocumento(false);
-        console.log("res", res);
-        this.doc = res;  
-        if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG).length > 0) {
-          this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
-        }
-        this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
-        this.appService.appNameSelection("PEIS - " + this.doc.idAzienda.descrizione);
-        this.router.navigate(
-          [], 
-          {
-            relativeTo: this.route,
-            queryParams: { command: 'OPEN', id: this.doc.id }
-          });
-        },  error => {
-        this.setFreezeDocumento(false);
-        
-        console.log("errore", error);
-
-        this.messageService.add({
-          severity:'error', 
-          summary:'Creazione proposta', 
-          detail:'Errore nell\'avviare la proposta di protocollazione. Contattare Babelcare'
-        });
+    if (this.pregresso) {
+      console.log("pregressando");
+      console.log(this.doc);
+      this.subscriptions.push(
+        this.loadDocument(this.doc.id).subscribe((res:Doc) => {
+          console.log("res", res)
+          this.doc = res;
+          console.log("doc è:", this.doc);
       })
-    );
+      )
+    }
+    else {
+      this.subscriptions.push(
+        this.route.queryParamMap.pipe(
+          switchMap((params: ParamMap) =>
+            this.handleCommand(params)
+        )).subscribe((res: Doc) => {
+          this.setFreezeDocumento(false);
+          console.log("res", res);
+          this.doc = res;  
+          if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG).length > 0) {
+            this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
+          }
+          this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
+          this.appService.appNameSelection("PEIS - " + this.doc.idAzienda.descrizione);
+          this.router.navigate(
+            [], 
+            {
+              relativeTo: this.route,
+              queryParams: { command: 'OPEN', id: this.doc.id }
+            });
+          },  error => {
+          this.setFreezeDocumento(false);
+          
+          console.log("errore", error);
+  
+          this.messageService.add({
+            severity:'error', 
+            summary:'Creazione proposta', 
+            detail:'Errore nell\'avviare la proposta di protocollazione. Contattare Babelcare'
+          });
+        })
+      );
+    }
+    
     
   }
 

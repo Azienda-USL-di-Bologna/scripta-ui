@@ -8,6 +8,7 @@ import {JwtLoginService, UtenteUtilities} from "@bds/jwt-login";
 import { MessageService } from "primeng/api";
 import { enumOrigine } from "./mittente-constants";
 import { DatePipe } from "@angular/common";
+import { Table } from 'primeng/table/table';
 
 @Component({
   selector: "mittente",
@@ -22,13 +23,13 @@ export class MittenteComponent implements OnInit, OnDestroy {
   public actualMittente: Related;
 
   public _doc: Doc | undefined;
-  public _mittenti: Related[] | undefined;
+  public mittenti: Related[];
 
 
   public enumOrigine: any = enumOrigine;
 
   // Variabili per le autocomplete
-  public selectedMittente: Related;
+  public selectedMittenti: Related[];
 
   public indirizzo: string;
   public actualMezzo: Mezzo;
@@ -38,50 +39,39 @@ export class MittenteComponent implements OnInit, OnDestroy {
   public filteredMezzo: any[] = [];
   public actualOrigine: string ;
   
-  private _pregresso: boolean = false;
-  public get pregresso(): boolean {
-    return this._pregresso;
-  }
-  @Input() public set pregresso(value: boolean) {
-    this._pregresso = value;
-  }
+  @Input() public pregresso: boolean = true;
+  @ViewChild("dt") dt?: Table;
   
 
+  get doc(): Doc {
+    return this._doc;
+  }
 
   @Input() set doc(value: Doc) {
     this._doc = value;
-    if (this._doc.mittenti != null && this._doc.mittenti.length > 0) {
-      this.actualMittente = this._doc.mittenti[0];
-      this.selectedMittente = this._doc.mittenti[0];
-      this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
-      this.indirizzo = this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
-      this.actualDataDiArrivo = new Date(this._doc.mittenti[0].spedizioneList[0].data);
-      this.actualOrigine = this._doc.mittenti[0].origine;
+    if (this.doc.mittenti != null && this.doc.mittenti.length > 0) {
+      this.mittenti = this.doc.mittenti;
     } else {
-      this.selectedMittente = null;
-      this.actualMezzo = null;
-      this.indirizzo = "";
-      this.actualDataDiArrivo = null;
-      this.actualOrigine = null;
+      this.selectedMittenti = [];
     }
   }
 
   public saveSpedizione<K extends keyof Spedizione>(field: K, value: any) {
     const spedizione: Spedizione = new Spedizione();
-    spedizione.id = this._doc.mittenti[0].spedizioneList[0].id;
+    spedizione.id = this.doc.mittenti[0].spedizioneList[0].id;
     spedizione[field] = value;
-    spedizione.version = this._doc.mittenti[0].spedizioneList[0].version;
+    spedizione.version = this.doc.mittenti[0].spedizioneList[0].version;
 
     const mittente: Related = new Related();
-    mittente.id = this._doc.mittenti[0].id;
+    mittente.id = this.doc.mittenti[0].id;
     mittente.spedizioneList = [spedizione];
-    mittente.version = this._doc.mittenti[0].version;
+    mittente.version = this.doc.mittenti[0].version;
 
-    this.subscriptions.push(this.mittenteService.patchHttpCall(mittente, this._doc.mittenti[0].id, ENTITIES_STRUCTURE.scripta.related.standardProjections.RelatedWithSpedizioneList)
+    this.subscriptions.push(this.mittenteService.patchHttpCall(mittente, this.doc.mittenti[0].id, ENTITIES_STRUCTURE.scripta.related.standardProjections.RelatedWithUltimaSpedizione)
     .subscribe((res: Related) => {
-      console.log(this._doc.mittenti[0]);
+      console.log(this.doc.mittenti[0]);
       console.log(res);
-      this._doc.mittenti[0] = res;
+      this.doc.mittenti[0] = res;
     }));
   }
 
@@ -109,7 +99,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
    * 2- Elenco mezzi
    */
   ngOnInit(): void {
-
+    console.log("mittentiamo");
     this.subscriptions.push(this.loginService.loggedUser$.subscribe((utenteUtilities: UtenteUtilities) => {
           this.loggedUtenteUtilities = utenteUtilities;
         })
@@ -188,12 +178,12 @@ export class MittenteComponent implements OnInit, OnDestroy {
       this.mittenteService.batchHttpCall(batchOperations).subscribe(
         (res: BatchOperation[]) => {
           const related = res.find(f => f.operation === BatchOperationTypes.INSERT).entityBody as Related;
-          this._doc.mittenti = [];
-          this._doc.mittenti.push(related);
+          this.doc.mittenti = [];
+          this.doc.mittenti.push(related);
           this.actualMittente = related;
-          this.selectedMittente = related;
-          this.actualMezzo = this._doc.mittenti[0].spedizioneList[0].idMezzo;
-          this.indirizzo=  this._doc.mittenti[0].spedizioneList[0].indirizzo.completo;
+          this.selectedMittenti.push(related);
+          this.actualMezzo = this.doc.mittenti[0].spedizioneList[0].idMezzo;
+          this.indirizzo=  this.doc.mittenti[0].spedizioneList[0].indirizzo.completo;
           this.messageService.add({
             severity: "success",
             summary: "Mittente",
@@ -214,7 +204,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
     mittenteRelated.descrizione = dettaglioContatto.idContatto.descrizione;
     mittenteRelated.tipo = TipoRelated.MITTENTE;
     mittenteRelated.idPersonaInserente = {id: this.loggedUtenteUtilities.getUtente().idPersona.id} as Persona;
-    mittenteRelated.idDoc = {id: this._doc.id} as Doc;
+    mittenteRelated.idDoc = {id: this.doc.id} as Doc;
     switch (dettaglioContatto.tipo) {
       case TipoDettaglio.UTENTE_STRUTTURA:
         mittenteRelated.origine = OrigineRelated.INTERNO;
@@ -304,14 +294,14 @@ export class MittenteComponent implements OnInit, OnDestroy {
             summary:"Mittente",
             detail:"Mittente eliminato con successo"
           });
-          this._doc.mittenti.splice(0, 1);
+          this.doc.mittenti.splice(0, 1);
         }
       )
       this.actualMittente= null;
       this.actualMezzo = null;
       this.indirizzo = "";
       this.actualOrigine= null;
-      this.selectedMittente= null;
+      this.selectedMittenti= [];
     }
 
   /**

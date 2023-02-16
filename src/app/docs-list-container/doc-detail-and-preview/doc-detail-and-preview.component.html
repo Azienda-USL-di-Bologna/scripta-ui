@@ -18,7 +18,7 @@
 <!-- *ngIf="(!doc.visibilitaLimitata && !doc.riservato) " -->
 
 <p-accordion>
-  <p-accordionTab *ngIf="false"
+  <p-accordionTab
     header="Allegati" 
     [(selected)]="accordionSelected[0]"
     [ngClass]="accordionSelected[0] ? 'tab-accordion-selected' : ''">
@@ -32,15 +32,11 @@
       <!-- {{!doc.visibilitaLimitata && doc.riservato && !hasUserPienaVisibilita(doc) ? "[Riservato]" : ""}} -->
       <!-- {{doc.visibilitaLimitata && !doc.riservato  ? "Visibilita limitata" : ""}} -->
     </h4>
-  </p-accordionTab>
-  <p-accordionTab *ngIf="true"
-    header="Peis" 
-    [(selected)]="accordionSelected[0]"
-    [ngClass]="accordionSelected[0] ? 'tab-accordion-selected' : ''">
-    <doc 
-      [doc]="doc">
-    </doc>
+    <p-button *ngIf="true"
+    label="Visualizza Pregresso"
+    (onClick)="openPregresso(doc)">
 
+    </p-button>
   </p-accordionTab>
   <p-accordionTab 
     header="Versamenti"
