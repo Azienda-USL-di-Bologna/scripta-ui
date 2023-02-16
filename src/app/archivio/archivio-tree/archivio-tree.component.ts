@@ -8,8 +8,6 @@ import { AppService } from 'src/app/app.service';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from '@bds/next-sdr';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { ArchivioFieldUpdating, ArchivioUtilsService } from '../archivio-utils.service';
-import { TouchSequence } from 'selenium-webdriver';
-import { ThisReceiver } from '@angular/compiler';
 
 @Component({
   selector: 'archivio-tree',
@@ -77,6 +75,13 @@ export class ArchivioTreeComponent implements OnInit {
           if (archivioFieldUpdating.field === "oggetto" && archivioFieldUpdating.archivio.fk_idArchivioRadice.id === this.archivio.fk_idArchivioRadice.id) {
             this.addTreeNode(archivioFieldUpdating.archivio);
           }
+        }
+      )
+    );
+    this.subscriptions.push(
+      this.archivioUtilsService.deletedArchiveEvent.subscribe(
+        (idArchivioCancellato: number) => {
+          this.deleteNode(this.archivi, idArchivioCancellato);
         }
       )
     );
@@ -466,5 +471,28 @@ export class ArchivioTreeComponent implements OnInit {
     this.navigationTabsService.addTabArchivio(event.node.data, false);
     this.appService.appNameSelection("Fascicolo "+ event.node.data.numerazioneGerarchica  + " [" + event.node.data.idAzienda.aoo + "]");
     //this.archivioSelectedEvent.emit(event.node.data);
+  }
+
+  /**
+   * Dato un idArchivio elimino il nodo che lo rappresenta se lo trovo.
+   * @param alberatura 
+   * @param idArchivioDelNodoDaEliminare 
+   * @returns 
+   */
+  private deleteNode(alberatura: TreeNode[], idArchivioDelNodoDaEliminare: number): boolean {
+    const indexNodoDaEliminare = alberatura.findIndex(a => a.key === idArchivioDelNodoDaEliminare.toString());
+    if (indexNodoDaEliminare > -1) {
+      alberatura.splice(indexNodoDaEliminare, 1);
+      return true;
+    }
+    for (const subAlberatura of alberatura) {
+      if (subAlberatura.children) {
+        const eliminato = this.deleteNode(subAlberatura.children, idArchivioDelNodoDaEliminare);
+        if (eliminato) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

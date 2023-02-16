@@ -74,12 +74,40 @@
       tooltipPosition="bottom">
     </i>
 
+    <!-- BOTTONE FUNZIONI -->
+    <span *ngIf="configuration.functionButton && functionalButtonsComponent.functionButton">
+      <i 
+        class="pi p-mr-2 pi-cog funzioniGear"
+        (click)="functionsSelection.toggle($event)" 
+        [pTooltip]="functionalButtonsComponent.functionButton.tooltip"
+        [attr.aria-label]="functionalButtonsComponent.functionButton.tooltip"
+        tooltipPosition="bottom">
+      </i>
+      <!-- <button
+        type="button" 
+        pButton 
+        pRipple 
+        [disabled]="false"
+        icon="pi pi-cog" 
+        (click)="functionsSelection.toggle($event)" 
+        class="p-mr-2" 
+        [pTooltip]="functionalButtonsComponent.functionButton.tooltip"
+        [attr.aria-label]="functionalButtonsComponent.functionButton.tooltip"
+        tooltipPosition="bottom">
+      </button> -->
+      <p-tieredMenu 
+        appendTo="body"
+        #functionsSelection
+        [model]="functionalButtonsComponent.functionButton.functionItems"
+        [popup]="true">
+      </p-tieredMenu>
+    </span>
     <!-- BOTTONE PREFERITO -->
     <span *ngIf="configuration.preferitoButton">
       <i 
         class="pi p-mr-2 p-button-icon-only preferitoStar"
         (click)="functionalButtonsComponent.updateOrAddPreferito()" 
-        [ngClass]="{'pi-star-fill': functionalButtonsComponent.archivioPreferito, 'pi-star empty': !functionalButtonsComponent.archivioPreferito}"
+        [ngClass]="{'pi-heart-fill': functionalButtonsComponent.archivioPreferito, 'pi-heart empty': !functionalButtonsComponent.archivioPreferito}"
         [pTooltip]="functionalButtonsComponent.archivioPreferito ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'"
         [attr.aria-label]="functionalButtonsComponent.archivioPreferito ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'"
         tooltipPosition="bottom">

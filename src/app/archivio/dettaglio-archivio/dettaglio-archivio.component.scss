@@ -9,6 +9,23 @@ $min-width-label: 155px;
   flex-direction: column;
   overflow: hidden;
 }
+::ng-deep .splitter-dettaglio-archivio {
+  .p-splitter-panel {
+    display: flex;
+    flex-direction: column;
+    
+  }
+}
+
+.ultima-modifica:hover {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.content {
+  font-size: 90%;
+}
+
 .bottoneChiudi {
   left: 0px;
 }
@@ -114,3 +131,39 @@ $min-width-label: 155px;
 ::ng-deep .box-autocomplete-classificazione {
   padding: 4px 10px 0 10px;
 }
+
+
+.log-container {
+  position: absolute;
+  flex: auto;
+  transition: height 1s;
+  //transform: translateX(148%);
+  //z-index: 99;
+  height: auto;
+  width: auto;
+  background-color: #f4f4f4;
+  &.showLogs {
+    flex: auto;
+    overflow-y: scroll;
+    overflow-x: scroll;
+    font-size: 15px;
+    height: 80%;
+  }
+  .header-cronology {
+    //margin: 13px;
+    cursor: pointer;
+    text-align: left;
+    text-decoration: underline;
+    position: relative;
+    font-size: medium;
+    &:hover {
+      font-weight: bold;
+    }
+    i {
+      position: absolute;
+      right: 124px;
+      font-size: 20px;
+    }
+  }
+}
+
