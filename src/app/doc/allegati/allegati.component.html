@@ -1,4 +1,5 @@
-<p-fileUpload #fubauto *ngIf="!pregresso"
+<p-fileUpload #fubauto
+  *ngIf="!pregresso"
   name="demo[]" 
   accept=".csv, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .pdf, .txt, .eml, .zip" 
   (uploadHandler)="onUpload($event)"

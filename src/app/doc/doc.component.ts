@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
-import { Doc, ENTITIES_STRUCTURE, Persona, Allegato, CODICI_REGISTRO } from "@bds/internauta-model";
+import { Doc, ENTITIES_STRUCTURE, Persona, Allegato, CODICI_REGISTRO, TipologiaDoc } from "@bds/internauta-model";
 import { LOCAL_IT } from "@bds/common-tools";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { AdditionalDataDefinition } from "@bds/next-sdr";
@@ -40,11 +40,17 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public numeroVisualizzazione: string;
   private projection: string = ENTITIES_STRUCTURE.scripta.doc.customProjections.DocWithAll;
   public yearOfProposta: string;
+  public detailDoc: ExtendedDocDetailView;
+  public tipoDocumento: TipologiaDoc;
+  public visualizzazioneTipoDocumento: string;
+
   @Input() public pregresso: boolean = true;
   @Input() set data(data: any) {
     console.log("ciao", data);
 
-    this.doc = data.doc;
+    this.detailDoc = data.doc;
+    this.tipoDocumento = this.detailDoc.tipologia;
+    this.visualizzazioneTipoDocumento = this.detailDoc.tipologiaVisualizzazione;
   }
 
   constructor(
@@ -53,9 +59,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     private loginService: JwtLoginService,
     private messageService: MessageService,
     private route: ActivatedRoute,
-    private appService: AppService) { 
-      
-    }
+    private appService: AppService) {}
 
   ngOnInit(): void {
     console.log("entro nell'oninit");
@@ -73,12 +77,13 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
      */
     if (this.pregresso) {
       console.log("pregressando");
-      console.log(this.doc);
+      console.log(this.detailDoc);
       this.subscriptions.push(
-        this.loadDocument(this.doc.id).subscribe((res:Doc) => {
+        this.loadDocument(this.detailDoc.id).subscribe((res:Doc) => {
           console.log("res", res)
           this.doc = res;
           console.log("doc è:", this.doc);
+          this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
       })
       )
     }
