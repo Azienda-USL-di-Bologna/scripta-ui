@@ -1,4 +1,4 @@
-<p-fileUpload #fubauto
+<p-fileUpload #fubauto *ngIf="!pregresso"
   name="demo[]" 
   accept=".csv, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .pdf, .txt, .eml, .zip" 
   (uploadHandler)="onUpload($event)"
@@ -8,7 +8,6 @@
   uploadLabel="Carica"
   cancelLabel="Cancella"
   [customUpload]="true"
-  [disabled]="pregresso"
   >
   <!-- <ng-template pTemplate="content">
     <ul *ngIf="uploadedFiles.length">
@@ -36,17 +35,17 @@
   </ng-template>
   <ng-template pTemplate="header">
     <tr class="row">
-      <th class="colonna-principale"><span class="sr-only">Principale</span></th>
+      <th class="colonna-principale" *ngIf="!pregresso"><span class="sr-only">Principale</span></th>
       <!-- <th class="colonna-numero"></th> -->
       <th class="colonna-nome">Nome</th>
       <th class="colonna-estensione">Estensione</th>
       <th class="colonna-download"><span class="sr-only">Download</span></th>
-      <th class="colonna-elimina"><span class="sr-only">Elimina</span></th>
+      <th class="colonna-elimina" *ngIf="!pregresso"><span class="sr-only">Elimina</span></th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-allegato let-rowIndex="rowIndex">
     <tr class="row">
-      <td class="colonna-principale">
+      <td class="colonna-principale" *ngIf="!pregresso">
         <p-tableRadioButton 
           [value]="allegato" 
           ariaLabel="Setta l'allegato come principale">

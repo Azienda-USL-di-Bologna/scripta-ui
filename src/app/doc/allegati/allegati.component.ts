@@ -26,7 +26,7 @@ export class AllegatiComponent implements OnInit, OnDestroy {
   public selectedTipo: string;
   public uploadedFiles: File[] = [];
 
-  private _pregresso: boolean = false;
+  private _pregresso: boolean = true;
   public get pregresso(): boolean {
     return this._pregresso;
   }
