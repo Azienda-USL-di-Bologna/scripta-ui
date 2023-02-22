@@ -197,6 +197,10 @@ body p-table .p-datatable .p-datatable-wrapper table .p-datatable-tbody>.p-highl
     font-size: 70%;
   }
 }
+// Modifiche a stili default
 .material-icons {
   font-size: 1.5rem;
+}
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  padding: 0.557rem 1rem;
 }

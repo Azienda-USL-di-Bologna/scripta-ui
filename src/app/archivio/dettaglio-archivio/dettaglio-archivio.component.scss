@@ -114,7 +114,8 @@ $min-width-label: 9.688rem;
     .note-box {
       display: flex;
       flex-direction: column;
-      padding: 1.25rem;
+      padding-right: 1.25rem;
+      padding-left: 1.25rem;
       label {
         align-self: flex-start;
         font-size: $font-size-label;
