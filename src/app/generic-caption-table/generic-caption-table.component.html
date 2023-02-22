@@ -117,8 +117,17 @@
     </span>
 
     <!-- BOTTONE NUOVO ARCHIVIO [disabled] = "archivio.canCreateSottoarchivio()"-->
-    <span *ngIf="configuration.newArchivio && functionalButtonsComponent.newArchivoButton">
-      <button
+    <span *ngIf="configuration.newArchivio && functionalButtonsComponent.newArchivoButton && functionalButtonsComponent.newArchivoButton.enable">
+      <i
+        (click)="functionalButtonsComponent.newArchivoButton.aziendeItems.length > 1 ? 
+          aziendaSelection.toggle($event) : 
+          functionalButtonsComponent.newArchivoButton.aziendeItems[0].command()" 
+        class="pi pi-plus button-icon" 
+        [pTooltip]="functionalButtonsComponent.newArchivoButton.tooltip"
+        [attr.aria-label]="functionalButtonsComponent.newArchivoButton.tooltip"
+        tooltipPosition="bottom">
+      </i>
+      <!-- <button
         type="button" 
         pButton 
         pRipple 
@@ -131,7 +140,7 @@
         [pTooltip]="functionalButtonsComponent.newArchivoButton.tooltip"
         [attr.aria-label]="functionalButtonsComponent.newArchivoButton.tooltip"
         tooltipPosition="bottom">
-      </button>
+      </button> -->
       <p-menu
         appendTo="body"
         #aziendaSelection
@@ -160,7 +169,14 @@
     
     <!-- BOTTONE ESPORTA -->
     <span *ngIf="configuration.exportButton">
-      <button
+      <i
+        (click)="referenceTableComponent.exportCSV(referenceTableComponent.dataTable)" 
+        class="pi pi-file-o button-icon" 
+        pTooltip="CSV"
+        aria-label="Scarica il csv della tabella"
+        tooltipPosition="bottom">
+      </i>
+      <!-- <button
         type="button" 
         pButton 
         pRipple 
@@ -170,7 +186,7 @@
         pTooltip="CSV"
         aria-label="Scarica il csv della tabella"
         tooltipPosition="bottom">
-      </button>
+      </button> -->
     </span>
 
      <!-- BOTTONE TIP -->

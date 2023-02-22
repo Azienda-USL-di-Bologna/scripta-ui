@@ -361,7 +361,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       disabled: !!!this.canVisualizeArchive(this.archivio) && !!!(this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO),
       command: () => console.log("qui dovrò eseguire la Copia/Sposta")
     },
-    {
+    /* {
       label: "Genera",
       items: [
         {  
@@ -374,11 +374,11 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         }
       ],
       disabled: false
-    },
-    {
+    }, */
+    /* {
       label: "Scarica zip",
       command: () => console.log("qui dovrò scaricare lo zip")
-    }] as MenuItem[];
+    } */] as MenuItem[];
 
     this.functionButton = {
       tooltip: "Funzioni",

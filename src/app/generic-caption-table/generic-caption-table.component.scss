@@ -75,17 +75,43 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      &>span {
+        margin-right: 5px;
+      }
       .p-field-checkbox {
         margin-bottom: 0 !important;
       }
-      .p-button{
-        &:hover {
+      .p-button {
+        /* &:hover {
           background-color: #7e7e7e !important;
           border-color: #aeaaac !important;
+        } */
+        &.p-fileupload-choose {
+          background-color: transparent !important;
+          border: none !important;
+          font-size: 2rem !important;
+          color: #406284 !important;
+          padding: 0;
+          &:hover {
+            background-color: transparent !important;
+            border: none !important;
+          }
+          &:focus-visible {
+            background-color: transparent !important;
+            border: none !important;
+          }
+          .p-button-icon {
+            font-size: 2rem;
+          }
         }
         &:target{
           outline: none !important;
         }
+      }
+      .button-icon {
+        font-size: 2rem;
+        cursor: pointer;
+        color: #406284;
       }
       .preferitoStar {
         font-size: 2rem;
@@ -134,7 +160,21 @@
   margin-right: 5px !important;
 }
 ::ng-deep .upload-document-button {
-    .p-fileupload-choose {
+  .p-fileupload-choose {
     height: 2.188rem;
   }
+  /* .p-button {
+    background-color: transparent !important;
+    border: none !important;
+    font-size: 2rem !important;
+    color: #406284 !important;
+    &:hover {
+      background-color: transparent !important;
+      border: none !important;
+    }
+    &:focus-visible {
+      background-color: transparent !important;
+      border: none !important;
+    }
+  } */
 }
