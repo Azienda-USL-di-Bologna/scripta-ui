@@ -7,7 +7,7 @@
     padding: 0.857rem 1rem;
     font-weight: 700;
     box-sizing: border-box;
-    padding: 5px 10px !important;
+    padding: 5px 0.625rem !important;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -17,7 +17,7 @@
       color: white;
     }
     .left-content {
-      height: 33px;
+      height: 2.063rem;
       .box-ricerca {
         width: 33.3%;
         display: flex;
@@ -57,14 +57,9 @@
         align-self: center;
         margin-left: 0.5vw;
       }
-      /* .p-progress-spinner {
-        height: 21px !important;
-        width: 21px !important;
-        vertical-align: sub;
-      } */
       .p-inputtext {
         align-self: center;
-        height: 33.72px;
+        height: 2.063rem;
       }
       .refresh-button {
         margin-left: 1px;
@@ -75,24 +70,6 @@
         border: 1px solid darkorange !important;
         color: black;
       }
-      /* @media screen and (max-width: 1280px) {
-        //font-size: 10pt;
-        .p-inputtext {
-          align-self: center;
-          height: 33.72px;
-          //font-size: 10px;
-        }
-        .p-buttonselect {
-          //font-size: 10px;
-          .p-selectbutton {
-            display: flex;
-            font-size: small;
-            flex-wrap: nowrap;
-            align-self: center;
-            //font-size: 10px;
-          }
-        }
-      } */
     }
     .right-content {
       display: flex;
@@ -157,10 +134,7 @@
   margin-right: 5px !important;
 }
 ::ng-deep .upload-document-button {
-  /* height: 34.72px !important;
-  width: 37.7px;
-   */
     .p-fileupload-choose {
-    height: 35px;
+    height: 2.188rem;
   }
 }

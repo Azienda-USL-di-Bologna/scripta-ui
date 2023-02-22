@@ -48,7 +48,7 @@
         </span>
         <span *ngIf="referenceTableComponent.rowCountInProgress">
           <p-progressSpinner 
-            [style]="{width: '2em', height: '2em', marginRight: '7px'}"
+            [style]="{width: '2rem', height: '2rem', marginRight: '7px'}"
             strokeWidth="8" 
             fill="#FFFFFF" 
             animationDuration=".5s">
@@ -61,7 +61,7 @@
     <!-- SPINNER GENERICO DA ATTIVARE ALL'OCCORRENZA, IN PARITCOLARE PER OPERAZIONI ATTIVATE DAI BOTTONI DELLA PARTE DESTRA -->
     <span *ngIf="referenceTableComponent.rightContentProgressSpinner || functionalButtonsComponent?.rightContentProgressSpinner">
       <p-progressSpinner 
-        [style]="{width: '2em', height: '2em', marginRight: '7px'}"
+        [style]="{width: '2rem', height: '2rem', marginRight: '7px'}"
         strokeWidth="8" 
         fill="#FFFFFF" 
         animationDuration=".5s">
@@ -204,6 +204,6 @@
           <span >{{column.header}}</span>
         </div>
       </ng-template>
-    </p-multiSelect><!-- [style]="{minWidth: '250px', maxWidth: '250px'}"  -->
+    </p-multiSelect><!-- [style]="{minWidth: '23.125rem', maxWidth: '23.125rem'}"  -->
   </div>
 </div>

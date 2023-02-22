@@ -1,41 +1,41 @@
 ::ng-deep.tabella-permessi-archivio {
   .struttura-column {
-    min-width: 400px;
+    min-width: 25rem;
     p-celleditor {
       width: 100%;
     }
   }
   .ereditato-column {
-    min-width: 130px;
-    width: 130px;
-    max-width: 130px;
+    min-width: 8.125rem;
+    width: 8.125rem;
+    max-width: 8.125rem;
     justify-content: center;
   }
   .propaga-column {
-    min-width: 112px;
-    width: 112px;
-    max-width: 112px;
+    min-width: 7rem;
+    width: 7rem;
+    max-width: 7rem;
     justify-content: center;
   }
   .trasmetti-column {
-    min-width: 137px;
-    width: 137px;
-    max-width: 137px;
+    min-width: 8.563rem;
+    width: 8.563rem;
+    max-width: 8.563rem;
     justify-content: center;
   }
   .permesso-column {
-    min-width: 170px;
-    width: 170px;
-    max-width: 170px;
+    min-width: 10.625rem;
+    width: 10.625rem;
+    max-width: 10.625rem;
     justify-content: center;
   }
   .barrato{
     text-decoration: line-through;
   }
   .azione-column {
-    min-width: 112px;
-    width: 112px;
-    max-width: 112px;
+    min-width: 7rem;
+    width: 7rem;
+    max-width: 7rem;
     display: flex;
     justify-content: space-around;
     flex-wrap: nowrap;

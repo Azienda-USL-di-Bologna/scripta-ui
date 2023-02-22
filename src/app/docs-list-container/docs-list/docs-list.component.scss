@@ -9,9 +9,9 @@
     
     /* HEADER */
     .header-row {
-      height: 41px;
+      height: 2.563rem;
       .header-column {
-        padding: 2px 13px;
+        padding: 2px 0.813rem;
         .header-box {
           display: flex;
           justify-content: space-between;
@@ -38,13 +38,13 @@
         .p-dropdown-label, 
         .p-multiselect-label,
         p-calendar .p-inputtext {
-          font-size: 12px;
+          font-size: 0.75rem;
           text-align: center;          
           color: #936 !important;
           font-weight: bold;
         }
         .p-inputtext {
-          font-size: 12px;                  
+          font-size: 0.75rem;                  
           color: #936 !important;
           font-weight: bold;
         }
@@ -67,7 +67,7 @@
       }
       .close-icon {
         align-self: center;
-        font-size: 15px;
+        font-size: 0.938rem;
         border: 1px solid transparent;
         background-color: white;
         display: inline-block;
@@ -83,8 +83,8 @@
       padding: 0;
       div {
         color: #2e4a65;
-        height: 54px;
-        padding: 9px 13px;
+        height: 3.375rem;
+        padding: 9px 0.813rem;
         width: 100%; 
         &:hover {
           color: #7e7e7e !important;
@@ -133,8 +133,8 @@
 
   /* HEADER, FILTER E BODY */
   .row-height {
-    height: 53px;
-    max-height: 53px;
+    height: 3.313rem;
+    max-height: 3.313rem;
   }
   .ente-column {
     min-width: 6.438rem;
@@ -149,13 +149,13 @@
     max-width: 11.25rem;
   }
   .proposta-column {
-    min-width: 146px;
-    max-width: 146px;
+    min-width: 8.75rem;
+    max-width: 8.75rem;
     .proposta-box {
       padding: 0 !important;
       .box-elimina {
-        min-width: 30px;
-        max-width: 30px;
+        min-width: 1.875rem;
+        max-width: 1.875rem;
         background-color: #406284;
         border-right: 1px solid #c8c8c8;
         border-radius: 0 5px 5px 0;
@@ -170,7 +170,7 @@
       }
       .box-numero-proposta {
   
-        padding: 9px 13px;
+        padding: 9px 0.813rem;
       }
     }
   }
@@ -196,7 +196,7 @@
       flex-direction: row;
       flex-wrap: nowrap;
       i {
-        font-size: 28px;
+        font-size: 1.75rem;
         margin-right: 7px;
       }
     }
@@ -210,7 +210,7 @@
       margin-bottom: 2px;
       cursor: pointer;
       border: 1px solid #203244;
-      font-size: 13px;
+      font-size: 0.813rem;
       border-radius: 3px;
       word-break: break-word;
       &:hover {
@@ -246,7 +246,7 @@
       padding: 3px 5px;
       margin-bottom: 2px;
       border: 1px solid #203244;
-      font-size: 13px;
+      font-size: 0.813rem;
       border-radius: 3px;
       word-break: break-word;
       &:hover {
@@ -262,7 +262,7 @@
       padding: 3px 5px;
       margin-bottom: 2px;
       border: 1px solid #203244;
-      font-size: 13px;
+      font-size: 0.813rem;
       border-radius: 3px;
       word-break: break-word;
       &:hover {
@@ -278,7 +278,7 @@
       padding: 3px 5px;
       margin-bottom: 2px;
       border: 1px solid #203244;
-      font-size: 13px;
+      font-size: 0.813rem;
       border-radius: 3px;
       word-break: break-word;
       &:hover {
@@ -291,21 +291,21 @@
     max-width: 14.375rem;
   }
   .edit-archiviation-column, .open-detail-and-preview-column {
-    width: 50px;
-    max-width: 50px;
+    width: 3.125rem;
+    max-width: 3.125rem;
     justify-content: center;
-    padding-right: 10px !important;
+    padding-right:0.625rem !important;
     i {
       cursor: pointer;
-      font-size: 22px;
+      font-size: 1.375rem;
       &:hover {
         color: #936;
       }
     }
   }
   .stato-ultimo-versamento-column {
-    width: 200px;
-    max-width: 200px;
+    width: 12.5rem;
+    max-width: 12.5rem;
   }
   .logically-deleted {
     text-decoration: line-through;
@@ -332,7 +332,7 @@
   .loading-text {
     display: block;
     background-color: #f1f1f1;
-    min-height: 19px;
+    min-height: 1.125rem;
     animation: pulse 1s infinite ease-in-out;
     text-indent: -99999px;
     overflow: hidden;
@@ -349,8 +349,8 @@
     .p-checkbox-box.p-highlight {
       background-color: white !important;
       color: #203244;
-      height: 30px !important;
-      width: 30px !important;
+      height: 1.875rem !important;
+      width: 1.875rem !important;
       border-color: white !important;
       cursor: default;
     }
