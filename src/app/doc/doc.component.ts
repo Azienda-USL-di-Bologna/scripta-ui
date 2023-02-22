@@ -49,8 +49,6 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log("ciao", data);
 
     this.detailDoc = data.doc;
-    this.tipoDocumento = this.detailDoc.tipologia;
-    this.visualizzazioneTipoDocumento = this.detailDoc.tipologiaVisualizzazione;
   }
 
   constructor(
@@ -84,6 +82,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
           this.doc = res;
           console.log("doc è:", this.doc);
           this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
+          this.tipoDocumento = this.doc.tipologia;
       })
       )
     }

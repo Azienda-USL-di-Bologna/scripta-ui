@@ -26,9 +26,8 @@
   styleClass="scripta-doc-allegati-table"
   (onRowSelect)="onRowSelect($event)"
   (onRowUnselect)="onRowUnselect()">
-  <ng-template pTemplate="caption" >
+  <ng-template pTemplate="caption" *ngIf="_doc.allegati && _doc.allegati.length > 1">
     <p-button 
-      *ngIf="_doc.allegati && _doc.allegati.length > 1"
       label="Scarica allegati su zip"
       icon="pi pi-download" 
       (click)="downloadAllAttachments()">

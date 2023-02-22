@@ -11,6 +11,7 @@ import { AllegatiComponent } from "./allegati/allegati.component";
 import { ExtendedDestinatariService } from "./destinatari/extended-destinatari.service";
 import { ExtendedMittenteService } from "./mittente/extended-mittente.service";
 import { ExtendedAllegatoService } from "./allegati/extended-allegato.service";
+import { AttoriComponent } from './attori/attori.component';
 
 
 @NgModule({
@@ -24,7 +25,8 @@ import { ExtendedAllegatoService } from "./allegati/extended-allegato.service";
     DocComponent,
     MittenteComponent,
     DestinatariComponent,
-    AllegatiComponent
+    AllegatiComponent,
+    AttoriComponent
   ],
   providers: [
     ExtendedDocService,

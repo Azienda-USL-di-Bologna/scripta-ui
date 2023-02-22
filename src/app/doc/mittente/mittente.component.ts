@@ -1,7 +1,7 @@
 import {Component, Input, OnDestroy, OnInit, Output, EventEmitter, ViewChild} from "@angular/core";
 import {ExtendedMittenteService} from "./extended-mittente.service";
 import {BaseUrls, BaseUrlType, CodiceMezzo, Contatto, DettaglioContatto, DettaglioContattoService, Doc, ENTITIES_STRUCTURE, 
-  IndirizzoSpedizione, Mezzo, MezzoService, OrigineRelated, Persona, Related, Spedizione, TipoDettaglio, TipoRelated} from "@bds/internauta-model";
+  IndirizzoSpedizione, Mezzo, MezzoService, OrigineRelated, Persona, Related, Spedizione, TipoDettaglio, TipologiaDoc, TipoRelated} from "@bds/internauta-model";
 import {AdditionalDataDefinition, FILTER_TYPES, FilterDefinition, FiltersAndSorts, BatchOperationTypes, NextSdrEntity, BatchOperation} from "@bds/next-sdr";
 import {Subscription} from "rxjs";
 import {JwtLoginService, UtenteUtilities} from "@bds/jwt-login";
@@ -40,6 +40,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
   public actualOrigine: string ;
   
   @Input() public pregresso: boolean = true;
+  @Input() public tipoDocumento: TipologiaDoc;
   @ViewChild("dt") dt?: Table;
   
 

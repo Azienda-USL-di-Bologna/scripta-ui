@@ -405,7 +405,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * @param doc
    */
   public openDoc(doc: DocDetailView) {
-    if (/* !!doc.annoRegistrazione && doc.annoRegistrazione <= 2023 */ true) { //TODO: modificare
+    if (/* !!doc.annoRegistrazione && doc.annoRegistrazione <= 2023 */ true) { //TODO (m.bandini): modificare
       this.openPregresso(doc as ExtendedDocDetailView);
     }
     else {

@@ -84,8 +84,10 @@
     <p-accordionTab header="Mittente" [selected]="true">
       <mittente
         [doc]="doc"
+        [tipoDocumento]="tipoDocumento"
         (saveMittenteEvent)="saveDoc($event,'mittenti')"
-        [pregresso] = "pregresso"></mittente>
+        [pregresso] = "pregresso">
+      </mittente>
     </p-accordionTab>
     <p-accordionTab header="Destinatari">
       <ng-template pTemplate="content">
@@ -97,5 +99,12 @@
         <allegati [doc]="doc"></allegati>
       </ng-template>
     </p-accordionTab>
+    <p-accordionTab header="Attori" *ngIf="tipoDocumento != 'PROTOCOLLO_IN_ENTRATA'">
+      <ng-template pTemplate="content">
+        <attori [doc]="doc"></attori>
+      </ng-template>
+    </p-accordionTab>
   </p-accordion>
+
+
 </main>
