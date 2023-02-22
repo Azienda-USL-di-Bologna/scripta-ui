@@ -273,7 +273,7 @@ export class NavigationTabsService {
         this.buildaTabDoc(
           doc.id, 
           doc,
-          "Pregresso"
+          doc.id.toString()
         )
       );
       if (active) {

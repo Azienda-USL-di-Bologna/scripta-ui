@@ -1393,7 +1393,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
 
   public openPregresso(doc: ExtendedDocDetailView) {
     this.navigationTabsService.addTabDoc(doc);
-		this.appService.appNameSelection("Pregresso");
+		this.appService.appNameSelection(doc.id.toString());
   }
 }
 
