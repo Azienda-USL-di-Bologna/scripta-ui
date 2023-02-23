@@ -75,35 +75,6 @@
       tooltipPosition="bottom">
     </i>
 
-    <!-- BOTTONE FUNZIONI (SPOSTA/COPIA/SCARICA ETC) -->
-    <span *ngIf="configuration.functionButton && functionalButtonsComponent.functionButton">
-      <i 
-        class="pi p-mr-2 pi-cog funzioniGear"
-        (click)="functionsSelection.toggle($event)" 
-        [pTooltip]="functionalButtonsComponent.functionButton.tooltip"
-        [attr.aria-label]="functionalButtonsComponent.functionButton.tooltip"
-        tooltipPosition="bottom">
-      </i>
-      <!-- <button
-        type="button" 
-        pButton 
-        pRipple 
-        [disabled]="false"
-        icon="pi pi-cog" 
-        (click)="functionsSelection.toggle($event)" 
-        class="p-mr-2" 
-        [pTooltip]="functionalButtonsComponent.functionButton.tooltip"
-        [attr.aria-label]="functionalButtonsComponent.functionButton.tooltip"
-        tooltipPosition="bottom">
-      </button> -->
-      <p-tieredMenu 
-        appendTo="body"
-        #functionsSelection
-        [model]="functionalButtonsComponent.functionButton.functionItems"
-        [popup]="true">
-      </p-tieredMenu>
-    </span>
-
     <!-- BOTTONE PREFERITO -->
     <span *ngIf="configuration.preferitoButton">
       <i 
@@ -122,7 +93,7 @@
         (click)="functionalButtonsComponent.newArchivoButton.aziendeItems.length > 1 ? 
           aziendaSelection.toggle($event) : 
           functionalButtonsComponent.newArchivoButton.aziendeItems[0].command()" 
-        class="pi pi-plus button-icon" 
+        class="pi pi-plus-circle button-icon" 
         [pTooltip]="functionalButtonsComponent.newArchivoButton.tooltip"
         [attr.aria-label]="functionalButtonsComponent.newArchivoButton.tooltip"
         tooltipPosition="bottom">
@@ -171,7 +142,7 @@
     <span *ngIf="configuration.exportButton">
       <i
         (click)="referenceTableComponent.exportCSV(referenceTableComponent.dataTable)" 
-        class="pi pi-file-o button-icon" 
+        class="pi pi-file-excel button-icon" 
         pTooltip="CSV"
         aria-label="Scarica il csv della tabella"
         tooltipPosition="bottom">
@@ -190,7 +161,16 @@
     </span>
 
      <!-- BOTTONE TIP -->
-     <button *ngIf="canUseTip"
+    <span *ngIf="canUseTip">
+      <i 
+        (click)="show()" 
+        class="pi pi-file-import button-icon" 
+        pTooltip="TIP"
+        aria-label="Tool di importazione pregressi"
+        tooltipPosition="bottom">
+      </i>
+    </span>
+     <!-- <button *ngIf="canUseTip"
       type="button" 
       pButton 
       pRipple 
@@ -200,7 +180,36 @@
       pTooltip="TIP"
       aria-label="Tool di importazione pregressi"
       tooltipPosition="bottom">
-    </button>
+    </button> -->
+
+    <!-- BOTTONE FUNZIONI (SPOSTA/COPIA/SCARICA ETC) -->
+    <span *ngIf="configuration.functionButton && functionalButtonsComponent.functionButton">
+      <i 
+        class="pi p-mr-2 pi-cog funzioniGear"
+        (click)="functionsSelection.toggle($event)" 
+        [pTooltip]="functionalButtonsComponent.functionButton.tooltip"
+        [attr.aria-label]="functionalButtonsComponent.functionButton.tooltip"
+        tooltipPosition="bottom">
+      </i>
+      <!-- <button
+        type="button" 
+        pButton 
+        pRipple 
+        [disabled]="false"
+        icon="pi pi-cog" 
+        (click)="functionsSelection.toggle($event)" 
+        class="p-mr-2" 
+        [pTooltip]="functionalButtonsComponent.functionButton.tooltip"
+        [attr.aria-label]="functionalButtonsComponent.functionButton.tooltip"
+        tooltipPosition="bottom">
+      </button> -->
+      <p-tieredMenu 
+        appendTo="body"
+        #functionsSelection
+        [model]="functionalButtonsComponent.functionButton.functionItems"
+        [popup]="true">
+      </p-tieredMenu>
+    </span>
 
     <!-- SELEZIONE COLONNE -->
     <p-multiSelect #ms
