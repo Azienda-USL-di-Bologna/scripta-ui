@@ -358,7 +358,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public buildFunctionButton(archivio: Archivio | ArchivioDetail): void {
     const funzioniItems: MenuItem[] = [{
       label: "Copia/Sposta",
-      disabled: !!!this.canVisualizeArchive(this.archivio) && !!!(this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO),
+      disabled: this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO),
       command: () => console.log("qui dovrò eseguire la Copia/Sposta")
     },
     /* {
