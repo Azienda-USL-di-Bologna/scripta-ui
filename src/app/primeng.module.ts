@@ -33,12 +33,14 @@ import { MessageModule } from 'primeng/message';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { TreeSelectModule } from 'primeng/treeselect';
 import {TriStateCheckboxModule} from 'primeng/tristatecheckbox';
+import { RadioButtonModule } from 'primeng/radiobutton';
 
 @NgModule({
   declarations: [
   ],
   imports: [
     ButtonModule,
+    RadioButtonModule,
     InputTextareaModule,
     ToastModule,
     DialogModule,
@@ -75,6 +77,7 @@ import {TriStateCheckboxModule} from 'primeng/tristatecheckbox';
   ],
   exports: [
     ButtonModule,
+    RadioButtonModule,
     InputTextareaModule,
     ToastModule,
     DialogModule,

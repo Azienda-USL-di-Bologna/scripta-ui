@@ -44,3 +44,14 @@
     }
   }
 }
+
+::ng-deep .organizzaPopup{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  app-archivio-ricerca{
+    margin: 1rem;
+    width: 80%;
+  }
+}

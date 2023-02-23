@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, ArchivioDiInteresse, ArchivioDiInteresseService, DecimalePredicato, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/internauta-model';
+import { Archivio, ArchivioDetail, ArchivioDetailView, ArchivioDiInteresse, ArchivioDiInteresseService, DecimalePredicato, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/internauta-model';
 import { MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListComponent } from '../archivi-list-container/archivi-list/archivi-list.component';
 import { DocsListComponent } from '../docs-list-container/docs-list/docs-list.component';
@@ -52,6 +52,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public rightContentProgressSpinner: boolean = false;
   public rowCountInProgress: boolean = false;
   public rowCount: number;
+  public showOrganizzaPopUp: boolean = false;
+  public operazioneOrganizza: string;
+  public organizzaTarget: string[] = [];
+  public archivioDestinazioneOrganizza: ArchivioDetailView;
 
   get archivio(): Archivio { return this._archivio; }
 
@@ -359,7 +363,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     const funzioniItems: MenuItem[] = [{
       label: "Copia/Sposta",
       disabled: this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO),
-      command: () => console.log("qui dovrò eseguire la Copia/Sposta")
+      command: () => this.showOrganizzaPopUp = true
     },
     /* {
       label: "Genera",
@@ -595,6 +599,49 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         }
       })
     );
+  }
+
+  /**
+   * Dall'html è stato scelto un archivio su cui poi verrà archiviata la pec.
+   * @param arch 
+   */
+  public archivioSelectedEvent(arch: any) {
+    this.archivioDestinazioneOrganizza = arch as ArchivioDetailView;
+  }
+
+  public organizza(): void{
+    
+    switch(this.operazioneOrganizza){
+      case "Sposta":
+        //controlla che il check fascicolo sia false se this.archivio.livello == 1 && this.operazioneOrganizza == 'Sposta'
+          this.extendedArchivioService.spostaArchivio(this.archivio.id, this.archivioDestinazioneOrganizza.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto")).subscribe(
+            res => {
+              console.log("res", res)
+            }
+          );
+        break;
+      case "Copia":
+          this.extendedArchivioService.copiaArchivio(this.archivio.id, this.archivioDestinazioneOrganizza.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto")).subscribe(
+            res => {
+              console.log("res", res)
+            }
+          );
+        break;
+      case "Duplica":
+          this.extendedArchivioService.duplicaArchivio(this.archivio.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto")).subscribe(
+            res => {
+              console.log("res", res)
+            }
+          );
+        break;
+      case "Rendi fascicolo":
+          this.extendedArchivioService.rendiFascicolo(this.archivio.id).subscribe(
+            res => {
+              console.log("res", res)
+            }
+          );
+        break;
+    }
   }
   
   public ngOnDestroy(): void {
