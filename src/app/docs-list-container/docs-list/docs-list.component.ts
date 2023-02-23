@@ -164,7 +164,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
               this.tipologiaVisualizzazioneObj = this.tipologiaVisualizzazioneObj.filter(item => item.value !== TipologiaDoc.DOCUMENT_REGISTRO);
             }
             this.isResponsabileVersamento = this.utenteUtilitiesLogin.isRV();
-            if (!!!this.archivio) { 
+            if (!!!this.archivio) {
               this.loadConfigurationAndSetItUp();
             } else { 
               this.setColumnsPerDetailArchivio();
@@ -273,8 +273,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   set selectedColumns(colsSelected: ColonnaBds[]) {
-    // restore original order
-    // this._selectedColumns = this.cols.filter(col => val.includes(col));
     if (this._selectedColumns.length > colsSelected.length) {
       this._selectedColumns = this._selectedColumns.filter(sc => colsSelected.includes(sc));
     } else if (this._selectedColumns.length < colsSelected.length) {
@@ -283,7 +281,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (!this.archivio) {
       this.saveConfiguration();
     }
-    if(!this.isResponsabileVersamento) {
+    if (!this.isResponsabileVersamento) {
       this.selectableColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
       this.selectedColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
     }
@@ -325,12 +323,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (this.aziendeFiltrabili.length > 1) {
       this.mandatoryColumns.push("idAzienda");
     }
+
     // this.selectableColumns = cols.filter(e => !this.mandatoryColumns.includes(e.field));
     this.selectableColumns = cols.map(e => {
       if (this.mandatoryColumns.includes(e.field)) {
         e.selectionDisabled = true;
       }
-      if( this.isResponsabileVersamento=== false && (e.field === "dataUltimoVersamento" )) {
+      if (!this.isResponsabileVersamento && (e.field === "dataUltimoVersamento" )) {
         e.selectionDisabled = true;
       }
       return e;
@@ -1347,14 +1346,18 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public onRowSelect(event: any): void {
+    if (this.archivio) {
       this.openDetailAndPreview(event.data);
+    }
   }
 
   public onRowUnselect(event: any): void {
+    if (this.archivio) {
       this.showRightPanel.emit({
         showPanel: false,
         rowSelected: null
       });
+    }
   }
 
 

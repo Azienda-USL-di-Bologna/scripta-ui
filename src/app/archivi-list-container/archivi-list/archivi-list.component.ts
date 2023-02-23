@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { AfferenzaStruttura, ArchiviRecentiService, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioDoc, ArchivioRecente, ArchivioService, ArchivioDocService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteService, UtenteStruttura, UtenteStrutturaService } from '@bds/internauta-model';
+import {  ArchiviRecentiService, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioRecente, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteService, UtenteStruttura, UtenteStrutturaService } from '@bds/internauta-model';
 import { AppService } from '../../app.service';
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { Subscription, combineLatestWith } from 'rxjs';
@@ -25,11 +25,10 @@ import { CaptionReferenceTableComponent } from '../../generic-caption-table/capt
 import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
 import { SelectButtonItem } from '../../generic-caption-table/select-button-item';
 import { NewArchivoButton } from 'src/app/generic-caption-table/functional-buttons/new-archivo-button';
-import { CaptionFunctionalButtonsComponent } from 'src/app/generic-caption-table/caption-functional-buttons.component';
+import { CaptionFunctionalOperationsComponent } from 'src/app/generic-caption-table/caption-functional-operations.component';
 import { Titolo } from '@bds/internauta-model';
 import { Massimario } from '@bds/internauta-model';
 import { ConfigurazioneService } from '@bds/internauta-model';
-import { ParametroAziende } from '@bds/internauta-model/lib/entities/configurazione/ParametroAziende';
 import { ColonnaBds, CsvExtractor } from '@bds/common-tools';
 import { ExtendedArchivioService } from 'src/app/archivio/extended-archivio.service';
 import { ArchivioUtilsService } from 'src/app/archivio/archivio-utils.service';
@@ -39,7 +38,7 @@ import { ArchivioUtilsService } from 'src/app/archivio/archivio-utils.service';
 	templateUrl: './archivi-list.component.html',
 	styleUrls: ['./archivi-list.component.scss']
 })
-export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, CaptionReferenceTableComponent, CaptionSelectButtonsComponent, CaptionFunctionalButtonsComponent {
+export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, CaptionReferenceTableComponent, CaptionSelectButtonsComponent, CaptionFunctionalOperationsComponent {
 	@Input() data: any;
 	@ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>;
 
@@ -237,6 +236,20 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		}); */
 	}
 
+
+	@Input() get selectedColumns(): ColonnaBds[] {
+		return this._selectedColumns;
+	}
+
+	set selectedColumns(colsSelected: ColonnaBds[]) {
+		if (this._selectedColumns.length > colsSelected.length) {
+			this._selectedColumns = this._selectedColumns.filter(sc => colsSelected.includes(sc));
+		} else if (this._selectedColumns.length < colsSelected.length) {
+			this._selectedColumns.push(colsSelected.find(cs => !this._selectedColumns.includes(cs)));
+		}
+		this.saveConfiguration();
+	}
+
 	/**
 	 * Questa funzione si occupa di caricare la configurazione personale
 	 * dell'utente per il componente.
@@ -284,8 +297,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 * NB: In questa modalità l'utente non potrà modifcare le colonne
 	 */
 	public setColumnsPerDetailArchivio(): void {
-		let colonneDaVisualizzare;
-			colonneDaVisualizzare = ["numerazioneGerarchica", "dataCreazione", "oggetto", "idPersonaCreazione"];
+		const colonneDaVisualizzare = ["numerazioneGerarchica", "dataCreazione", "oggetto", "idPersonaCreazione"];
 		// this._selectedColumns = this.cols.filter(c => colonneDaVisualizzare.includes(c.field));
 		this._selectedColumns = [];
 		colonneDaVisualizzare.forEach(c => {
@@ -294,18 +306,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		console.log(this._selectedColumns)
 	}
 
-	@Input() get selectedColumns(): ColonnaBds[] {
-		return this._selectedColumns;
-	}
-
-	set selectedColumns(colsSelected: ColonnaBds[]) {
-		if (this._selectedColumns.length > colsSelected.length) {
-			this._selectedColumns = this._selectedColumns.filter(sc => colsSelected.includes(sc));
-		} else if (this._selectedColumns.length < colsSelected.length) {
-			this._selectedColumns.push(colsSelected.find(cs => !this._selectedColumns.includes(cs)));
-		}
-		this.saveConfiguration();
-	}
 
 
 	/**

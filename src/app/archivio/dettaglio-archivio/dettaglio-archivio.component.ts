@@ -68,6 +68,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public labelLivelloArchivio: string = null;
   private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
   private attoreArchivioProjection = ENTITIES_STRUCTURE.scripta.attorearchivio.standardProjections.AttoreArchivioWithIdPersonaAndIdStruttura;
+  public saving: any = {};
 
   @ViewChild("autocompleteCategoria") public autocompleteCategoria: AutoComplete;
   
@@ -389,6 +390,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
             if (field === "oggetto") {
               this.archivioUtilsService.updateArchivioFieldSelection({field: field, archivio: this.archivio} as ArchivioFieldUpdating);
             }
+            this.saving = {};
           }
         )
       );
