@@ -357,7 +357,8 @@ export const cols: ColonnaBds[] = [
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: true,
     default: false
-  }
+  },
+
 ];
 // SPOSTATA IN PRIMENG PLUGIN
 // export interface ColonnaBds {

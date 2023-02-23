@@ -404,30 +404,35 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * @param doc
    */
   public openDoc(doc: DocDetailView) {
-    const filtersAndSorts = new FiltersAndSorts();
-    filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
-    filtersAndSorts.addFilter(new FilterDefinition("idDocDetail.id", FILTER_TYPES.not_string.equals, doc.id));
-    this.personaVedenteSerice.getData("PersonaVedenteWithPlainFields", filtersAndSorts, null)
-      .subscribe(res => {
-        if (res && res.results) {
-          if (res.results.length > 0) {
-            const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
-              doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
-            const addRichiestaParam = true;
-            const addPassToken = true;
-            this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
-              console.log("urlAperto:", url);
-            });
-          } else {
-            this.messageService.add({
-              severity: "info",
-              summary: "Attenzione",
-              key: "docsListToast",
-              detail: `Apertura del documento non consentita`
-            });
+    if (doc.pregresso) {
+      this.openPregresso(doc as ExtendedDocDetailView);
+    }
+    else {
+      const filtersAndSorts = new FiltersAndSorts();
+      filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+      filtersAndSorts.addFilter(new FilterDefinition("idDocDetail.id", FILTER_TYPES.not_string.equals, doc.id));
+      this.personaVedenteSerice.getData("PersonaVedenteWithPlainFields", filtersAndSorts, null)
+        .subscribe(res => {
+          if (res && res.results) {
+            if (res.results.length > 0) {
+              const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
+                doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
+              const addRichiestaParam = true;
+              const addPassToken = true;
+              this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
+                console.log("urlAperto:", url);
+              });
+            } else {
+              this.messageService.add({
+                severity: "info",
+                summary: "Attenzione",
+                key: "docsListToast",
+                detail: `Apertura del documento non consentita`
+              });
+            }
           }
-        }
-      });
+        });
+    }
   }
 
   /**
@@ -1333,7 +1338,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Apre il tab per l'archivio corrisondente alla fasciolazione
    * @param f 
    */
-  public openArchive(archivioDoc: ArchivioDoc, doc: ExtendedDocDetailView): void {
+  public openArchive(archivioDoc: ArchivioDoc, doc?: ExtendedDocDetailView): void {
     this.navigationTabsService.addTabArchivio(archivioDoc.idArchivio);
 		this.appService.appNameSelection("Fascicolo "+ archivioDoc.idArchivio.numerazioneGerarchica + " [" + archivioDoc.idArchivio.idAzienda.aoo + "]");
   }
@@ -1365,7 +1370,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
    * desottoscrivo anche dalla specifica loadDocsListSubscription
    * Che appositamente è separata in quanto viene spesso desottoscritta
-   * e risottroscritta.
+   * e risottoscritta.
    */
   public ngOnDestroy(): void {
     if (this.subscriptions) {
@@ -1377,6 +1382,21 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (this.loadDocsListSubscription) {
       this.loadDocsListSubscription.unsubscribe();
     }
+  }
+
+  // public openDocPregresso(doc: ExtendedDocDetailView): void {
+  //   if (doc instanceof ExtendedDocDetailView){
+  //     console.log("ecco", doc); //TODO: rimuovere
+  //   }
+  //   this.showRightPanel.emit({
+  //     showPanel: true,
+  //     rowSelected: doc
+  //   });
+  // }
+
+  public openPregresso(doc: ExtendedDocDetailView) {
+    this.navigationTabsService.addTabDoc(doc);
+		this.appService.appNameSelection(doc.tipologiaVisualizzazione+ " - pregresso");
   }
 }
 

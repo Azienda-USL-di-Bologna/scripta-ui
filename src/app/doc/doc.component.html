@@ -1,5 +1,5 @@
 <p-toast #pageStart position="top-right" (onClose)="clearMessages()"></p-toast>
-<p-toolbar>
+<p-toolbar *ngIf="!pregresso">
   <div class="classe-temporanea">
     <button pButton 
       type="button" 
@@ -14,11 +14,16 @@
 <p-blockUI [blocked]="blockedDocument">
   <i class="pi pi-lock" style="font-size: 3rem"></i>
 </p-blockUI>
-<main aria-level="2" *ngIf="doc">
+<main aria-level="2" *ngIf="!!doc">
   <section class="info-documento">
     <span class="dati-creazione">
-      <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del {{yearOfProposta}}</span>
-      <span *ngIf="numeroVisualizzazione">{{numeroVisualizzazione}}</span>
+      <div *ngIf="!visualizzazioneDocumento">
+        <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del {{yearOfProposta}}</span>
+        <span *ngIf="numeroVisualizzazione">{{numeroVisualizzazione}}</span>
+      </div>
+      <div *ngIf="!!visualizzazioneDocumento">
+        {{visualizzazioneDocumento}}
+      </div>
       <span>
         Creato il giorno {{ removeZoneFromTime(doc?.dataCreazione?.toString()) | date: 'EE d MMM y, H:mm' | titlecase}}
         da: {{doc?.idPersonaCreazione?.descrizione}}
@@ -33,7 +38,8 @@
       rows="2" 
       cols="30"
       (keyup)="timeOutAndSaveDoc(doc, 'oggetto')"
-      [(ngModel)]="doc!.oggetto">
+      [(ngModel)]="doc!.oggetto"
+      [disabled]="pregresso">
     </textarea>
     <div class="protocollato-da-box">
       <label for="protocollatoda">Protocollato da</label>
@@ -76,7 +82,12 @@
   </div> -->
   <p-accordion class="accodion-box">
     <p-accordionTab header="Mittente" [selected]="true">
-      <mittente [doc]="doc" (saveMittenteEvent)="saveDoc($event,'mittenti')"></mittente>
+      <mittente
+        [doc]="doc"
+        [tipoDocumento]="tipoDocumento"
+        (saveMittenteEvent)="saveDoc($event,'mittenti')"
+        [pregresso] = "pregresso">
+      </mittente>
     </p-accordionTab>
     <p-accordionTab header="Destinatari">
       <ng-template pTemplate="content">
@@ -88,5 +99,12 @@
         <allegati [doc]="doc"></allegati>
       </ng-template>
     </p-accordionTab>
+    <p-accordionTab header="Attori" *ngIf="tipoDocumento != 'PROTOCOLLO_IN_ENTRATA'">
+      <ng-template pTemplate="content">
+        <attori [doc]="doc"></attori>
+      </ng-template>
+    </p-accordionTab>
   </p-accordion>
+
+
 </main>

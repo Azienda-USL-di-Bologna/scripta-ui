@@ -4,6 +4,7 @@ import { PrimeNgModule } from "../../primeng.module";
 import { ScriptaCommonModule } from "../../scripta-common.module";
 import { DocDetailAndPreviewComponent } from "./doc-detail-and-preview.component";
 import { AttachmentsBoxModule, VersamentiModule } from "@bds/common-components";
+import { DocModule } from "src/app/doc/doc.module";
 
 @NgModule({
   imports: [
@@ -11,7 +12,8 @@ import { AttachmentsBoxModule, VersamentiModule } from "@bds/common-components";
     PrimeNgModule,
     ScriptaCommonModule,
     AttachmentsBoxModule,
-    VersamentiModule
+    VersamentiModule,
+    DocModule
   ],
   declarations: [
     DocDetailAndPreviewComponent

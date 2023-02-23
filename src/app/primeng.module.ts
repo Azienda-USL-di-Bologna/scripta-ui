@@ -32,7 +32,8 @@ import { TieredMenuModule } from 'primeng/tieredmenu';
 import { MessageModule } from 'primeng/message';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { TreeSelectModule } from 'primeng/treeselect';
-import {TriStateCheckboxModule} from 'primeng/tristatecheckbox';
+import { TriStateCheckboxModule } from 'primeng/tristatecheckbox';
+import { ListboxModule } from 'primeng/listbox';
 
 @NgModule({
   declarations: [
@@ -71,7 +72,8 @@ import {TriStateCheckboxModule} from 'primeng/tristatecheckbox';
     MessageModule,
     OverlayPanelModule,
     TreeSelectModule,
-    TriStateCheckboxModule
+    TriStateCheckboxModule,
+    ListboxModule
   ],
   exports: [
     ButtonModule,
@@ -107,7 +109,8 @@ import {TriStateCheckboxModule} from 'primeng/tristatecheckbox';
     MessageModule,
     OverlayPanelModule,
     TreeSelectModule,
-    TriStateCheckboxModule
+    TriStateCheckboxModule,
+    ListboxModule
   ],
   providers: [MessageService, DialogService, ConfirmationService]
 })
