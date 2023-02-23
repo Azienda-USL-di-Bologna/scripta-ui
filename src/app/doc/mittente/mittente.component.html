@@ -86,7 +86,7 @@
   </div>
 </div>
 <div *ngIf="pregresso">
-  <p-table
+  <p-table *ngIf="tipoDocumento === 'PROTOCOLLO_IN_ENTRATA'"
     [value]="mittenti"
     >
     <ng-template pTemplate="header">
@@ -109,4 +109,8 @@
       </tr>
     </ng-template>
   </p-table>
+  <div *ngIf="tipoDocumento !== 'PROTOCOLLO_IN_ENTRATA'">
+    <label class="p-col-2" for="mittente">Mittenti</label>
+    <p-listbox [options]="doc.mittenti" optionLabel="descrizione" [disabled]="true"></p-listbox>
+  </div>
 </div>

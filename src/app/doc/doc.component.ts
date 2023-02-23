@@ -42,13 +42,14 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public yearOfProposta: string;
   public detailDoc: ExtendedDocDetailView;
   public tipoDocumento: TipologiaDoc;
-  public visualizzazioneTipoDocumento: string;
+  public visualizzazioneDocumento: string;
 
   @Input() public pregresso: boolean = true;
   @Input() set data(data: any) {
     console.log("ciao", data);
 
     this.detailDoc = data.doc;
+    this.visualizzazioneDocumento = this.detailDoc.registrazioneVisualizzazione;
   }
 
   constructor(

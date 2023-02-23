@@ -405,7 +405,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * @param doc
    */
   public openDoc(doc: DocDetailView) {
-    if (/* !!doc.annoRegistrazione && doc.annoRegistrazione <= 2023 */ true) { //TODO (m.bandini): modificare
+    if (doc.pregresso) {
       this.openPregresso(doc as ExtendedDocDetailView);
     }
     else {
@@ -1393,7 +1393,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
 
   public openPregresso(doc: ExtendedDocDetailView) {
     this.navigationTabsService.addTabDoc(doc);
-		this.appService.appNameSelection(doc.id.toString());
+		this.appService.appNameSelection(doc.tipologiaVisualizzazione+ " - pregresso");
   }
 }
 

@@ -248,7 +248,7 @@ export class NavigationTabsService {
 
   public addTabDoc(doc: ExtendedDocDetailView, active: boolean = true, reuseActiveTab: boolean = false): void {
     const tabIndex: number = this.tabs.findIndex(t => {
-      return t.type === TabType.DOC && t.id === doc.id.toString()
+      return t.type === TabType.DOC && t.id === doc.id.toString();
     });
     // if (tabIndex !== -1) {
     //   this.updateTab(
@@ -273,7 +273,7 @@ export class NavigationTabsService {
         this.buildaTabDoc(
           doc.id, 
           doc,
-          doc.id.toString()
+          doc.registrazioneVisualizzazione
         )
       );
       if (active) {
