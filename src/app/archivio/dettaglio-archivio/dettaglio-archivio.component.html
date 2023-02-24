@@ -59,14 +59,20 @@
         <div class="row">
           <!-- Campo Oggetto -->
           <label for="oggetto">Nome</label>
-          <input 
-            id="oggetto" 
-            [disabled]="!loggedUserIsResponsbaileOrVicario || (archivio.stato == 'CHIUSO' || archivio.stato == 'PRECHIUSO')"
-            type="text" 
-            placeholder="Inserisci il nome dell'archivio"
-            (keyup)="timeOutAndSaveArchivio(archivio, 'oggetto')" 
-            pInputText 
-            [(ngModel)]="archivio.oggetto" />
+          <span class="p-input-icon-right span-oggetto">
+            <i *ngIf="saving.oggetto" >
+              <i class="pi pi-spin pi-spinner"></i>
+              <span> Salvataggio</span>
+            </i>
+            <input 
+              id="oggetto" 
+              [disabled]="!loggedUserIsResponsbaileOrVicario || (archivio.stato == 'CHIUSO' || archivio.stato == 'PRECHIUSO')"
+              type="text" 
+              placeholder="Inserisci il nome dell'archivio"
+              (keyup)="saving.oggetto = true; timeOutAndSaveArchivio(archivio, 'oggetto')" 
+              pInputText 
+              [(ngModel)]="archivio.oggetto" />
+          </span>
         </div>
         <div class="row">
           <!-- Campo Classificazione -->
@@ -192,11 +198,11 @@
     
         </div>
         <div class="note-box">
-          <label>Note</label>
+          <!-- <label>Note</label> -->
           <textarea #noteArea
             pInputTextarea
             [disabled]="!loggedUserIsResponsbaileOrVicario"  
-            rows="7" 
+            rows="5" 
             cols="22" 
             [(ngModel)]="archivio.note"
             (keyup)="timeOutAndSaveArchivio(archivio, 'note')"

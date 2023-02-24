@@ -7,7 +7,7 @@
     padding: 0.857rem 1rem;
     font-weight: 700;
     box-sizing: border-box;
-    padding: 5px 10px !important;
+    padding: 5px 0.625rem !important;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -17,9 +17,9 @@
       color: white;
     }
     .left-content {
-      height: 33px;
+      height: 2.063rem;
       .box-ricerca {
-        width: 400px;
+        width: 33.3%;
         display: flex;
         flex-wrap: nowrap;
         .p-input-icon-left {
@@ -27,11 +27,12 @@
         }
       }
       .tabs {
+        //width: 66.6%;
         margin-left: 0.5vw;
         align-self: center;
         .p-selectbutton {
           flex-wrap: nowrap;
-          
+          display: flex;
           .p-button {
             border: 1px solid #9da3a9 !important;;
             color: #333333;
@@ -41,6 +42,9 @@
               background-color: #993366 !important;
               border-color: #993366 !important;
 
+            }
+            .p-button-label {
+              white-space: nowrap;
             }
           }
           .p-highlight {
@@ -53,14 +57,9 @@
         align-self: center;
         margin-left: 0.5vw;
       }
-      /* .p-progress-spinner {
-        height: 21px !important;
-        width: 21px !important;
-        vertical-align: sub;
-      } */
       .p-inputtext {
         align-self: center;
-        height: 33.72px;
+        height: 2.063rem;
       }
       .refresh-button {
         margin-left: 1px;
@@ -71,40 +70,48 @@
         border: 1px solid darkorange !important;
         color: black;
       }
-      @media screen and (max-width: 1280px) {
-        font-size: 10pt;
-        .p-inputtext {
-          align-self: center;
-          height: 33.72px;
-          font-size: 10px;
-        }
-        .p-buttonselect {
-          font-size: 10px;
-          .p-selectbutton {
-            display: flex;
-            font-size: small;
-            flex-wrap: nowrap;
-            align-self: center;
-            font-size: 10px;
-          }
-        }
-      }
     }
     .right-content {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      &>span {
+        margin-right: 5px;
+      }
       .p-field-checkbox {
         margin-bottom: 0 !important;
       }
-      .p-button{
-        &:hover {
+      .p-button {
+        /* &:hover {
           background-color: #7e7e7e !important;
           border-color: #aeaaac !important;
+        } */
+        &.p-fileupload-choose {
+          background-color: transparent !important;
+          border: none !important;
+          font-size: 2rem !important;
+          color: #406284 !important;
+          padding: 0;
+          &:hover {
+            background-color: transparent !important;
+            border: none !important;
+          }
+          &:focus-visible {
+            background-color: transparent !important;
+            border: none !important;
+          }
+          .p-button-icon {
+            font-size: 2rem;
+          }
         }
         &:target{
           outline: none !important;
         }
+      }
+      .button-icon {
+        font-size: 2rem;
+        cursor: pointer;
+        color: #406284;
       }
       .preferitoStar {
         font-size: 2rem;
@@ -153,10 +160,21 @@
   margin-right: 5px !important;
 }
 ::ng-deep .upload-document-button {
-  /* height: 34.72px !important;
-  width: 37.7px;
-   */
-    .p-fileupload-choose {
-    height: 35px;
+  .p-fileupload-choose {
+    height: 2.188rem;
   }
+  /* .p-button {
+    background-color: transparent !important;
+    border: none !important;
+    font-size: 2rem !important;
+    color: #406284 !important;
+    &:hover {
+      background-color: transparent !important;
+      border: none !important;
+    }
+    &:focus-visible {
+      background-color: transparent !important;
+      border: none !important;
+    }
+  } */
 }

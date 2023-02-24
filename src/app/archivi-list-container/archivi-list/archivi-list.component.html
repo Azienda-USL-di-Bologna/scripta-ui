@@ -30,11 +30,14 @@
         [ngSwitch]="col.field" 
         [ngClass]="col.headerClass"
         [pSortableColumn]="col.sortField"
-        [ngStyle]="{'cursor': col.sortField ? null : 'move' }">
+        [pSortableColumnDisabled]="archiviListMode === 'RECENTI' && col.field == 'dataCreazione'"
+        [ngStyle]="{'cursor': col.sortField ? null : 'move',
+         'background-color': col.field == 'dataCreazione' && archiviListMode == 'RECENTI' ? '#f4f4f4' : null,
+         'background-color': col.field == 'dataCreazione' && archiviListMode !== 'RECENTI' ? '#203244' : null }">
         <span class="header-box" 
-          [attr.aria-label]="col.label">
+          [attr.aria-label]="col.label" [ngStyle]="{}">
           {{col.header}}
-          <p-sortIcon *ngIf="col.sortField" [field]="col.sortField"></p-sortIcon>
+          <p-sortIcon *ngIf="col.sortField && archiviListMode !== 'RECENTI'" [field]="col.sortField" ></p-sortIcon>
 
           <i *ngIf="col.field === 'numerazioneGerarchica'" 
             class="pi pi-info-circle info-numerazione-gerarchica" 
@@ -68,7 +71,7 @@
     <tr class="filter-row">
       <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
         <div *ngSwitchCase="'idAzienda'" #filteraziendacontainer>
-          <p-columnFilter #columnFilterAzienda [field]="col.filterField" matchMode="in" [showMenu]="false">
+          <p-columnFilter #columnFilterAzienda [field]="col.filterField" matchMode="in" [showMenu]="false" *ngIf="archiviListMode !== 'RECENTI'">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-dropdown #dropdownAzienda *ngIf="isAccessibile() !== true" [options]="aziendeFiltrabili"
                 [ngModel]="value" (onChange)="filterAzienda(filter, $event.value, filteraziendacontainer)"
@@ -87,6 +90,7 @@
             type="date" 
             matchMode="is"
             [showMenu]="false"
+            *ngIf="archiviListMode !== 'RECENTI'"
             >
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-calendar #calendarcreazione 

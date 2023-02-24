@@ -25,6 +25,14 @@ export class AllegatiComponent implements OnInit, OnDestroy {
   public display: boolean = false;
   public selectedTipo: string;
   public uploadedFiles: File[] = [];
+
+  private _pregresso: boolean = true;
+  public get pregresso(): boolean {
+    return this._pregresso;
+  }
+  @Input() public set pregresso(value: boolean) {
+    this._pregresso = value;
+  }
   
 
   @ViewChild("fubauto") fileUploadInput: FileUpload;

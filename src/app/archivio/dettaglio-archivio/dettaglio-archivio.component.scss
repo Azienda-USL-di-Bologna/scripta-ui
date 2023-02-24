@@ -1,5 +1,5 @@
-$font-size-label: 13px;
-$min-width-label: 155px;
+$font-size-label: 0.813rem;
+$min-width-label: 9.688rem;
 
 :host {
   padding: 5px;
@@ -55,6 +55,9 @@ $min-width-label: 155px;
           width: 100%;
         }
       }
+      .span-oggetto {
+        width: 100%;
+      }
     }
     .multielements {
       justify-content: flex-start;
@@ -67,13 +70,13 @@ $min-width-label: 155px;
         }
         &.campo-tipo {
           label {
-            min-width: 60px;
+            min-width: 3.75rem;
           }
         }
         &.campo-riservato {
-          padding-right: 10px;
+          padding-right:0.625rem;
           label {
-            min-width: 90px;
+            min-width: 5.625rem;
           }
           .icona-riservato {
             cursor: pointer;
@@ -81,7 +84,7 @@ $min-width-label: 155px;
         }
         &.campo-conservazione {
           label {
-            min-width: 120px;
+            min-width: 7.5rem;
           }
         }
       }
@@ -96,13 +99,13 @@ $min-width-label: 155px;
   }
   .right-side {
     //flex-grow: 1;
-    width: 280px;
+    width: 17.5rem;
     .numeraFasicolo {
       display: flex;
       flex-direction: row;
       justify-content: center;
       align-items: center;
-      padding: 10px;
+      padding:0.625rem;
     }
     /* .flag-box {
       display: flex;
@@ -114,7 +117,8 @@ $min-width-label: 155px;
     .note-box {
       display: flex;
       flex-direction: column;
-      padding: 20px;
+      padding-right: 1.25rem;
+      padding-left: 1.25rem;
       label {
         align-self: flex-start;
         font-size: $font-size-label;
@@ -129,7 +133,7 @@ $min-width-label: 155px;
   }
 }
 ::ng-deep .box-autocomplete-classificazione {
-  padding: 4px 10px 0 10px;
+  padding: 4px0.625rem 00.625rem;
 }
 
 
@@ -146,11 +150,11 @@ $min-width-label: 155px;
     flex: auto;
     overflow-y: scroll;
     overflow-x: scroll;
-    font-size: 15px;
+    font-size: 0.938rem;
     height: 80%;
   }
   .header-cronology {
-    //margin: 13px;
+    //margin: 0.813rem;
     cursor: pointer;
     text-align: left;
     text-decoration: underline;
@@ -162,7 +166,7 @@ $min-width-label: 155px;
     i {
       position: absolute;
       right: 124px;
-      font-size: 20px;
+      font-size: 1.25rem;
     }
   }
 }

@@ -15,9 +15,9 @@
       }
     }
     .p-tabview-nav {
-      .p-tabview-nav-link {
+      /* .p-tabview-nav-link {
         padding: 0.657rem 1rem;
-      }
+      } */
       i, span { 
         vertical-align: middle; 
       } 
@@ -26,7 +26,7 @@
         flex-wrap: nowrap;
         display: flex;
         .sottoelemento-tab {
-          font-size: 10px;
+          font-size:0.625rem;
           align-self: center;
           margin: 0;
         }

@@ -164,7 +164,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
               this.tipologiaVisualizzazioneObj = this.tipologiaVisualizzazioneObj.filter(item => item.value !== TipologiaDoc.DOCUMENT_REGISTRO);
             }
             this.isResponsabileVersamento = this.utenteUtilitiesLogin.isRV();
-            if (!!!this.archivio) { 
+            if (!!!this.archivio) {
               this.loadConfigurationAndSetItUp();
             } else { 
               this.setColumnsPerDetailArchivio();
@@ -273,8 +273,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   set selectedColumns(colsSelected: ColonnaBds[]) {
-    // restore original order
-    // this._selectedColumns = this.cols.filter(col => val.includes(col));
     if (this._selectedColumns.length > colsSelected.length) {
       this._selectedColumns = this._selectedColumns.filter(sc => colsSelected.includes(sc));
     } else if (this._selectedColumns.length < colsSelected.length) {
@@ -283,7 +281,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (!this.archivio) {
       this.saveConfiguration();
     }
-    if(!this.isResponsabileVersamento) {
+    if (!this.isResponsabileVersamento) {
       this.selectableColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
       this.selectedColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
     }
@@ -325,12 +323,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (this.aziendeFiltrabili.length > 1) {
       this.mandatoryColumns.push("idAzienda");
     }
+
     // this.selectableColumns = cols.filter(e => !this.mandatoryColumns.includes(e.field));
     this.selectableColumns = cols.map(e => {
       if (this.mandatoryColumns.includes(e.field)) {
         e.selectionDisabled = true;
       }
-      if( this.isResponsabileVersamento=== false && (e.field === "dataUltimoVersamento" )) {
+      if (!this.isResponsabileVersamento && (e.field === "dataUltimoVersamento" )) {
         e.selectionDisabled = true;
       }
       return e;
@@ -405,30 +404,34 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * @param doc
    */
   public openDoc(doc: DocDetailView) {
-    const filtersAndSorts = new FiltersAndSorts();
-    filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
-    filtersAndSorts.addFilter(new FilterDefinition("idDocDetail.id", FILTER_TYPES.not_string.equals, doc.id));
-    this.personaVedenteSerice.getData("PersonaVedenteWithPlainFields", filtersAndSorts, null)
-      .subscribe(res => {
-        if (res && res.results) {
-          if (res.results.length > 0) {
-            const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
-              doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
-            const addRichiestaParam = true;
-            const addPassToken = true;
-            this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
-              console.log("urlAperto:", url);
-            });
-          } else {
-            this.messageService.add({
-              severity: "info",
-              summary: "Attenzione",
-              key: "docsListToast",
-              detail: `Apertura del documento non consentita`
-            });
+    if (doc.pregresso) {
+      this.openPregresso(doc as ExtendedDocDetailView);
+    } else {
+      const filtersAndSorts = new FiltersAndSorts();
+      filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+      filtersAndSorts.addFilter(new FilterDefinition("idDocDetail.id", FILTER_TYPES.not_string.equals, doc.id));
+      this.personaVedenteSerice.getData("PersonaVedenteWithPlainFields", filtersAndSorts, null)
+        .subscribe(res => {
+          if (res && res.results) {
+            if (res.results.length > 0) {
+              const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
+                doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
+              const addRichiestaParam = true;
+              const addPassToken = true;
+              this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
+                console.log("urlAperto:", url);
+              });
+            } else {
+              this.messageService.add({
+                severity: "info",
+                summary: "Attenzione",
+                key: "docsListToast",
+                detail: `Apertura del documento non consentita`
+              });
+            }
           }
-        }
-      });
+        });
+    }
   }
 
   /**
@@ -1334,7 +1337,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Apre il tab per l'archivio corrisondente alla fasciolazione
    * @param f 
    */
-  public openArchive(archivioDoc: ArchivioDoc, doc: ExtendedDocDetailView): void {
+  public openArchive(archivioDoc: ArchivioDoc, doc?: ExtendedDocDetailView): void {
     this.navigationTabsService.addTabArchivio(archivioDoc.idArchivio);
 		this.appService.appNameSelection("Fascicolo "+ archivioDoc.idArchivio.numerazioneGerarchica + " [" + archivioDoc.idArchivio.idAzienda.aoo + "]");
   }
@@ -1347,14 +1350,18 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public onRowSelect(event: any): void {
+    if (this.archivio) {
       this.openDetailAndPreview(event.data);
+    }
   }
 
   public onRowUnselect(event: any): void {
+    if (this.archivio) {
       this.showRightPanel.emit({
         showPanel: false,
         rowSelected: null
       });
+    }
   }
 
 
@@ -1362,7 +1369,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
    * desottoscrivo anche dalla specifica loadDocsListSubscription
    * Che appositamente è separata in quanto viene spesso desottoscritta
-   * e risottroscritta.
+   * e risottoscritta.
    */
   public ngOnDestroy(): void {
     if (this.subscriptions) {
@@ -1374,6 +1381,21 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (this.loadDocsListSubscription) {
       this.loadDocsListSubscription.unsubscribe();
     }
+  }
+
+  // public openDocPregresso(doc: ExtendedDocDetailView): void {
+  //   if (doc instanceof ExtendedDocDetailView){
+  //     console.log("ecco", doc); //TODO: rimuovere
+  //   }
+  //   this.showRightPanel.emit({
+  //     showPanel: true,
+  //     rowSelected: doc
+  //   });
+  // }
+
+  public openPregresso(doc: ExtendedDocDetailView) {
+    this.navigationTabsService.addTabDoc(doc);
+		this.appService.appNameSelection(doc.tipologiaVisualizzazione+ " - pregresso");
   }
 }
 

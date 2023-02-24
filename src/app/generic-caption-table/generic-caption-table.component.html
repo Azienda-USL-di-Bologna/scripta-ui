@@ -43,12 +43,12 @@
       <!-- Conteggio elementi trovati -->
       <span *ngIf="configuration.rowCount"
         class="row-count">
-        <span *ngIf="!referenceTableComponent.rowCountInProgress && referenceTableComponent.rowCount >= 0">
+        <span *ngIf="!referenceTableComponent.rowCountInProgress && referenceTableComponent.rowCount >= 0" style="white-space: nowrap;">
           Trovati {{referenceTableComponent.rowCount}} {{configuration.component === "DOCS_LIST" ? 'documenti' : 'fascicoli'}}
         </span>
         <span *ngIf="referenceTableComponent.rowCountInProgress">
           <p-progressSpinner 
-            [style]="{width: '2em', height: '2em', marginRight: '7px'}"
+            [style]="{width: '2rem', height: '2rem', marginRight: '7px'}"
             strokeWidth="8" 
             fill="#FFFFFF" 
             animationDuration=".5s">
@@ -59,28 +59,136 @@
   </div>
   <div class="right-content">
     <!-- SPINNER GENERICO DA ATTIVARE ALL'OCCORRENZA, IN PARITCOLARE PER OPERAZIONI ATTIVATE DAI BOTTONI DELLA PARTE DESTRA -->
-    <span *ngIf="referenceTableComponent.rightContentProgressSpinner || functionalButtonsComponent?.rightContentProgressSpinner">
+    <span *ngIf="referenceTableComponent.rightContentProgressSpinner || functionalOperationsComponent?.rightContentProgressSpinner">
       <p-progressSpinner 
-        [style]="{width: '2em', height: '2em', marginRight: '7px'}"
+        [style]="{width: '2rem', height: '2rem', marginRight: '7px'}"
         strokeWidth="8" 
         fill="#FFFFFF" 
         animationDuration=".5s">
       </p-progressSpinner>
     </span>
 
+    <!-- ICONA INFORMATIVA, ARCHIVIO CHIUSO -->
     <i *ngIf="configuration.showIconArchiveClosed"
       class="pi pi-lock lucchettoChiuso" 
       [pTooltip]="'Fascicolo chiuso'" 
       tooltipPosition="bottom">
     </i>
 
-    <!-- BOTTONE FUNZIONI -->
-    <span *ngIf="configuration.functionButton && functionalButtonsComponent.functionButton">
+    <!-- BOTTONE PREFERITO -->
+    <span *ngIf="configuration.preferitoButton">
+      <i 
+        class="pi p-mr-2 p-button-icon-only preferitoStar"
+        (click)="functionalOperationsComponent.updateOrAddPreferito()" 
+        [ngClass]="{'pi-heart-fill': functionalOperationsComponent.archivioPreferito, 'pi-heart empty': !functionalOperationsComponent.archivioPreferito}"
+        [pTooltip]="functionalOperationsComponent.archivioPreferito ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'"
+        [attr.aria-label]="functionalOperationsComponent.archivioPreferito ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'"
+        tooltipPosition="bottom">
+      </i>
+    </span>
+
+    <!-- BOTTONE NUOVO ARCHIVIO [disabled] = "archivio.canCreateSottoarchivio()"-->
+    <span *ngIf="configuration.newArchivio && functionalOperationsComponent.newArchivoButton && functionalOperationsComponent.newArchivoButton.enable">
+      <i
+        (click)="functionalOperationsComponent.newArchivoButton.aziendeItems.length > 1 ? 
+          aziendaSelection.toggle($event) : 
+          functionalOperationsComponent.newArchivoButton.aziendeItems[0].command()" 
+        class="pi pi-plus-circle button-icon" 
+        [pTooltip]="functionalOperationsComponent.newArchivoButton.tooltip"
+        [attr.aria-label]="functionalOperationsComponent.newArchivoButton.tooltip"
+        tooltipPosition="bottom">
+      </i>
+      <!-- <button
+        type="button" 
+        pButton 
+        pRipple 
+        [disabled]="!functionalOperationsComponent.newArchivoButton.enable"
+        icon="pi pi-plus" 
+        (click)="functionalOperationsComponent.newArchivoButton.aziendeItems.length > 1 ? 
+          aziendaSelection.toggle($event) : 
+          functionalOperationsComponent.newArchivoButton.aziendeItems[0].command()" 
+        class="p-mr-2" 
+        [pTooltip]="functionalOperationsComponent.newArchivoButton.tooltip"
+        [attr.aria-label]="functionalOperationsComponent.newArchivoButton.tooltip"
+        tooltipPosition="bottom">
+      </button> -->
+      <p-menu
+        appendTo="body"
+        #aziendaSelection
+        [model]="functionalOperationsComponent.newArchivoButton.aziendeItems"
+        [popup]="true">
+      </p-menu>
+    </span>
+
+    <!-- BOTTONE UPLOAD DOCUMENT -->
+    <!--fileUploaderDocumentsAuto.clear() serve a svuotare il componente altrimenti si carica sempre lo stesso file--> 
+    <span *ngIf="configuration.uploadDocument && functionalOperationsComponent.uploadDocumentButton" class="span-fileUpload-button">
+      <p-fileUpload #fileUploaderDocumentsAuto
+        chooseIcon="pi pi-upload"
+        pTooltip="Carica documenti nell'archivio"
+        class="upload-document-button"
+        multiple="true"
+        [disabled]="!functionalOperationsComponent.uploadDocumentButton.enable"
+        mode="basic" 
+        name="document[]"
+        maxFileSize="5000000" 
+        [customUpload]="true"
+        [auto]="true"
+        (uploadHandler)="functionalOperationsComponent.uploadDocument($event);fileUploaderDocumentsAuto.clear()">
+      </p-fileUpload>
+    </span>
+    
+    <!-- BOTTONE ESPORTA -->
+    <span *ngIf="configuration.exportButton">
+      <i
+        (click)="referenceTableComponent.exportCSV(referenceTableComponent.dataTable)" 
+        class="pi pi-file-excel button-icon" 
+        pTooltip="CSV"
+        aria-label="Scarica il csv della tabella"
+        tooltipPosition="bottom">
+      </i>
+      <!-- <button
+        type="button" 
+        pButton 
+        pRipple 
+        icon="pi pi-file-o" 
+        (click)="referenceTableComponent.exportCSV(referenceTableComponent.dataTable)" 
+        class="p-mr-2" 
+        pTooltip="CSV"
+        aria-label="Scarica il csv della tabella"
+        tooltipPosition="bottom">
+      </button> -->
+    </span>
+
+     <!-- BOTTONE TIP -->
+    <span *ngIf="canUseTip">
+      <i 
+        (click)="show()" 
+        class="pi pi-file-import button-icon" 
+        pTooltip="TIP"
+        aria-label="Tool di importazione pregressi"
+        tooltipPosition="bottom">
+      </i>
+    </span>
+     <!-- <button *ngIf="canUseTip"
+      type="button" 
+      pButton 
+      pRipple 
+      icon="pi pi-server" 
+      (click)="show()" 
+      class="p-mr-2" 
+      pTooltip="TIP"
+      aria-label="Tool di importazione pregressi"
+      tooltipPosition="bottom">
+    </button> -->
+
+    <!-- BOTTONE FUNZIONI (SPOSTA/COPIA/SCARICA ETC) -->
+    <span *ngIf="configuration.functionButton && functionalOperationsComponent.functionButton">
       <i 
         class="pi p-mr-2 pi-cog funzioniGear"
         (click)="functionsSelection.toggle($event)" 
-        [pTooltip]="functionalButtonsComponent.functionButton.tooltip"
-        [attr.aria-label]="functionalButtonsComponent.functionButton.tooltip"
+        [pTooltip]="functionalOperationsComponent.functionButton.tooltip"
+        [attr.aria-label]="functionalOperationsComponent.functionButton.tooltip"
         tooltipPosition="bottom">
       </i>
       <!-- <button
@@ -91,100 +199,18 @@
         icon="pi pi-cog" 
         (click)="functionsSelection.toggle($event)" 
         class="p-mr-2" 
-        [pTooltip]="functionalButtonsComponent.functionButton.tooltip"
-        [attr.aria-label]="functionalButtonsComponent.functionButton.tooltip"
+        [pTooltip]="functionalOperationsComponent.functionButton.tooltip"
+        [attr.aria-label]="functionalOperationsComponent.functionButton.tooltip"
         tooltipPosition="bottom">
       </button> -->
       <p-tieredMenu 
         appendTo="body"
         #functionsSelection
-        [model]="functionalButtonsComponent.functionButton.functionItems"
+        [model]="functionalOperationsComponent.functionButton.functionItems"
         [popup]="true">
       </p-tieredMenu>
     </span>
-    <!-- BOTTONE PREFERITO -->
-    <span *ngIf="configuration.preferitoButton">
-      <i 
-        class="pi p-mr-2 p-button-icon-only preferitoStar"
-        (click)="functionalButtonsComponent.updateOrAddPreferito()" 
-        [ngClass]="{'pi-heart-fill': functionalButtonsComponent.archivioPreferito, 'pi-heart empty': !functionalButtonsComponent.archivioPreferito}"
-        [pTooltip]="functionalButtonsComponent.archivioPreferito ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'"
-        [attr.aria-label]="functionalButtonsComponent.archivioPreferito ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'"
-        tooltipPosition="bottom">
-      </i>
-    </span>
-    <!-- BOTTONE NUOVO ARCHIVIO [disabled] = "archivio.canCreateSottoarchivio()"-->
-    <span *ngIf="configuration.newArchivio && functionalButtonsComponent.newArchivoButton">
-      <button
-        type="button" 
-        pButton 
-        pRipple 
-        [disabled]="!functionalButtonsComponent.newArchivoButton.enable"
-        icon="pi pi-plus" 
-        (click)="functionalButtonsComponent.newArchivoButton.aziendeItems.length > 1 ? 
-          aziendaSelection.toggle($event) : 
-          functionalButtonsComponent.newArchivoButton.aziendeItems[0].command()" 
-        class="p-mr-2" 
-        [pTooltip]="functionalButtonsComponent.newArchivoButton.tooltip"
-        [attr.aria-label]="functionalButtonsComponent.newArchivoButton.tooltip"
-        tooltipPosition="bottom">
-      </button>
-      <p-menu
-        appendTo="body"
-        #aziendaSelection
-        [model]="functionalButtonsComponent.newArchivoButton.aziendeItems"
-        [popup]="true">
-      </p-menu>
-    </span>
-    <!-- BOTTONE UPLOAD DOCUMENT -->
-    <!--fileUploaderDocumentsAuto.clear() serve a svuotare il componente altrimenti si carica sempre lo stesso file--> 
-    <span *ngIf="configuration.uploadDocument && functionalButtonsComponent.uploadDocumentButton" class="span-fileUpload-button">
-      <p-fileUpload #fileUploaderDocumentsAuto
-        chooseIcon="pi pi-upload"
-        pTooltip="Carica documenti nell'archivio"
-        class="upload-document-button"
-        multiple="true"
-        [disabled]="!functionalButtonsComponent.uploadDocumentButton.enable"
-        mode="basic" 
-        name="document[]"
-        maxFileSize="5000000" 
-        [customUpload]="true"
-        [auto]="true"
-        (uploadHandler)="functionalButtonsComponent.uploadDocument($event);fileUploaderDocumentsAuto.clear()">
-      </p-fileUpload>
-    </span>
-    <!-- PROGRESS SPINNER -->
-    <span *ngIf="configuration.exportButton">
-      <!-- BOTTONE ESPORTA -->
-      <button
-        type="button" 
-        pButton 
-        pRipple 
-        icon="pi pi-file-o" 
-        (click)="referenceTableComponent.exportCSV(referenceTableComponent.dataTable)" 
-        class="p-mr-2" 
-        pTooltip="CSV"
-        aria-label="Scarica il csv della tabella"
-        tooltipPosition="bottom">
-      </button>
-      <!-- BOTTONE TIP -->
-      <button *ngIf="canUseTip"
-        type="button" 
-        pButton 
-        pRipple 
-        icon="pi pi-file" 
-        (click)="show()" 
-        class="p-mr-2" 
-        pTooltip="TIP"
-        aria-label="Tool di importazione pregressi"
-        tooltipPosition="bottom">
-      </button>
-      <!-- <p-menu
-        #exportCsvSelection
-        [model]="functionalButtonsComponent.newArchivoButton.aziendeItems"
-        [popup]="true">
-      </p-menu> -->
-    </span>
+
     <!-- SELEZIONE COLONNE -->
     <p-multiSelect #ms
       *ngIf="configuration.selectableColumns && !accessibile"
@@ -195,7 +221,7 @@
       optionDisabled="selectionDisabled"
       [showHeader]="false"
       selectedItemsLabel="{0} colonne selezionate"
-      [style]="{minWidth: '250px', maxWidth: '250px'}" 
+      dataKey="field"
       placeholder="Scegli le colonne da visualizzare"
       aria-label="Scegli le colonne da visualizzare">
       <ng-template let-column pTemplate="item"  >
@@ -203,6 +229,6 @@
           <span >{{column.header}}</span>
         </div>
       </ng-template>
-    </p-multiSelect>
+    </p-multiSelect><!-- [style]="{minWidth: '23.125rem', maxWidth: '23.125rem'}"  -->
   </div>
 </div>
