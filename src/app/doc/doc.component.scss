@@ -1,7 +1,10 @@
-:host {
+:host::ng-deep {
     height: 100%;
     display: flex;
     flex-direction: column;
+    .p-disabled, .p-component:disabled {
+        opacity: 1;
+    }
 }
 .classe-temporanea {
     width: 62.5rem;

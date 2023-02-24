@@ -406,8 +406,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public openDoc(doc: DocDetailView) {
     if (doc.pregresso) {
       this.openPregresso(doc as ExtendedDocDetailView);
-    }
-    else {
+    } else {
       const filtersAndSorts = new FiltersAndSorts();
       filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
       filtersAndSorts.addFilter(new FilterDefinition("idDocDetail.id", FILTER_TYPES.not_string.equals, doc.id));
