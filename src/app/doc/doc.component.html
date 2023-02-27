@@ -21,9 +21,6 @@
         <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del {{yearOfProposta}}</span>
         <span *ngIf="numeroVisualizzazione"></span>
       </div>
-      <div *ngIf="!!visualizzazioneDocumento">
-        {{visualizzazioneDocumento}}
-      </div>
       <span>
         Creato il giorno {{ removeZoneFromTime(doc?.dataCreazione?.toString()) | date: 'EE d MMM y, H:mm' | titlecase}}
         da: {{doc?.idPersonaCreazione?.descrizione}}
@@ -102,6 +99,11 @@
     <p-accordionTab header="Attori" *ngIf="tipoDocumento != 'PROTOCOLLO_IN_ENTRATA'">
       <ng-template pTemplate="content">
         <attori [doc]="doc"></attori>
+      </ng-template>
+    </p-accordionTab>
+    <p-accordionTab header="Fascicolazioni">
+      <ng-template pTemplate="content">
+        <archivio-doc [doc]="doc"></archivio-doc>
       </ng-template>
     </p-accordionTab>
   </p-accordion>

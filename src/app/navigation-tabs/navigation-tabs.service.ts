@@ -159,7 +159,7 @@ export class NavigationTabsService {
     );
   }
 
-  private buildaTabDoc(idDoc: number, doc:ExtendedDocDetailView, label: string): TabItem {
+  private buildaTabDoc(idDoc: number, doc:ExtendedDocDetailView, label: string, labelForAppName: string): TabItem {
     return new TabItem(
       DocComponent,
       {
@@ -170,7 +170,7 @@ export class NavigationTabsService {
       "pi pi-fw pi-folder",
       TabType.DOC,
       idDoc.toString(),
-      label + 'ciao'
+      labelForAppName
     );
   }
 
@@ -282,7 +282,8 @@ export class NavigationTabsService {
         this.buildaTabDoc(
           doc.id, 
           doc,
-          `${doc.registrazioneVisualizzazione}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`
+          `${doc.registrazioneVisualizzazione}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`,
+          `Protocollo generale ${pregresso ? 'pregresso ': ''}${doc.registrazioneVisualizzazione} [${doc.idAzienda.aoo}]`,
         )
       );
       if (active) {
