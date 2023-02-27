@@ -71,9 +71,4 @@ export class DocDetailAndPreviewComponent implements OnInit {
     return this.hasPienaVisibilita;
   }
 
-  public openPregresso(doc: ExtendedDocDetailView) {
-    this.navigationTabsService.addTabDoc(doc);
-		this.appService.appNameSelection("Pregresso");
-  }
-
 }

@@ -170,7 +170,7 @@ export class NavigationTabsService {
       "pi pi-fw pi-folder",
       TabType.DOC,
       idDoc.toString(),
-      label
+      label + 'ciao'
     );
   }
 
@@ -246,39 +246,48 @@ export class NavigationTabsService {
     }
   }
 
-  public addTabDoc(doc: ExtendedDocDetailView, active: boolean = true, reuseActiveTab: boolean = false): void {
+
+
+  /**
+   * Quando un doc viene cliccato va controllato se esiste già il tab
+   * per la sua alberatura. Altrimenti si apre nuovo tab.
+   * NOTA: viene solo usata per i pregressi, per ora.
+   * @param archivio 
+   * @param active 
+   */
+  public addTabDoc(doc: ExtendedDocDetailView, active: boolean = true, reuseActiveTab: boolean = false, pregresso: boolean = true): void {
     const tabIndex: number = this.tabs.findIndex(t => {
       return t.type === TabType.DOC && t.id === doc.id.toString();
     });
-    // if (tabIndex !== -1) {
-    //   this.updateTab(
-    //     tabIndex, 
-    //     `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
-    //     {archivio: this.projectionArchivioPerSessionStorage(archivio), id: archivio.id},
-    //     `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
-    //   );
-    //   if (active) {
-    //     this.activeTabByIndex(tabIndex);
-    //   }
-    // } else if (reuseActiveTab) {
-    //   this.updateTab(
-    //     this.activeTabIndex, 
-    //     `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
-    //     {archivio: this.projectionArchivioPerSessionStorage(archivio), id: archivio.id}, 
-    //     `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
-    //     archivio.fk_idArchivioRadice.id.toString()
-    //   );
-    // } else {
+    if (tabIndex !== -1) {
+      this.updateTab(
+        tabIndex, 
+        `${doc.registrazioneVisualizzazione}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`, 
+        {doc: doc},
+        `${doc.codiceRegistro === 'PG' ? "Protocollo generale" : doc.tipologiaVisualizzazione} ${pregresso ? 'pregresso ': ''}${doc.registrazioneVisualizzazione} [${doc.idAzienda.aoo}]`, 
+      );
+      if (active) {
+        this.activeTabByIndex(tabIndex);
+      }
+    } else if (reuseActiveTab) {
+      this.updateTab(
+        this.activeTabIndex, 
+        `${doc.registrazioneVisualizzazione}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`, 
+        {doc: doc},
+        `Protocollo generale ${pregresso ? 'pregresso ': ''}${doc.registrazioneVisualizzazione} [${doc.idAzienda.aoo}]`, 
+        undefined // segnaposto per ricordare che c'è un parametro forse utile
+      );
+    } else {
       this.addTab(
         this.buildaTabDoc(
           doc.id, 
           doc,
-          doc.registrazioneVisualizzazione
+          `${doc.registrazioneVisualizzazione}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`
         )
       );
       if (active) {
         this.activeLastTab();
       }
-    // }
+    }
   }
 }

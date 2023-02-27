@@ -19,7 +19,7 @@
     <span class="dati-creazione">
       <div *ngIf="!visualizzazioneDocumento">
         <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del {{yearOfProposta}}</span>
-        <span *ngIf="numeroVisualizzazione">{{numeroVisualizzazione}}</span>
+        <span *ngIf="numeroVisualizzazione"></span>
       </div>
       <div *ngIf="!!visualizzazioneDocumento">
         {{visualizzazioneDocumento}}
