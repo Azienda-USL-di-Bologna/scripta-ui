@@ -62,5 +62,5 @@ main {
 }
 
 ::ng-deep .preview-inner {
-    overflow-y: visible !important;
+    overflow-y: visible !important; //senza, non si vede la preview degli allegati. Esistono modi migliori?
 }

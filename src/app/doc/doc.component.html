@@ -86,27 +86,28 @@
         [pregresso] = "pregresso">
       </mittente>
     </p-accordionTab>
-    <p-accordionTab header="Destinatari">
+    <p-accordionTab *ngIf="pregresso" header="Destinatari">
       <ng-template pTemplate="content">
         <destinatari [doc]="doc"> </destinatari>
       </ng-template>    
     </p-accordionTab>
-    <p-accordionTab header="Allegati">
-      <ng-template pTemplate="content">
-        <attachments-box 
-          [idDoc]="doc.id"
-          [config]="attachmentsBoxConfig">
-        </attachments-box>
-      </ng-template>
-    </p-accordionTab>
-    <p-accordionTab header="Attori" *ngIf="tipoDocumento != 'PROTOCOLLO_IN_ENTRATA'">
+    <p-accordionTab *ngIf="pregresso && tipoDocumento != 'PROTOCOLLO_IN_ENTRATA'" header="Attori">
       <ng-template pTemplate="content">
         <attori [doc]="doc"></attori>
       </ng-template>
     </p-accordionTab>
-    <p-accordionTab header="Fascicolazioni">
+    <p-accordionTab *ngIf="pregresso" header="Fascicolazioni">
       <ng-template pTemplate="content">
         <archivio-doc [doc]="doc"></archivio-doc>
+      </ng-template>
+    </p-accordionTab>
+    <p-accordionTab header="Allegati" class="allegati-tab">
+      <ng-template pTemplate="content">
+        <attachments-box *ngIf="pregresso"
+          [idDoc]="doc.id"
+          [config]="attachmentsBoxConfig">
+        </attachments-box>
+        <allegati *ngIf="!pregresso" [doc]="doc"></allegati>
       </ng-template>
     </p-accordionTab>
   </p-accordion>
