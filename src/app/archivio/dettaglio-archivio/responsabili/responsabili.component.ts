@@ -185,7 +185,7 @@ export class ResponsabiliComponent implements OnInit {
           } as BatchOperation);
 
           const attivita = new Attivita();
-          attivita.idApplicazione = {id: "scripta"} as Applicazione;
+          attivita.idApplicazione = {id: "gediInt"} as Applicazione;
           attivita.idAzienda = {id: this.archivio.idAzienda.id} as Azienda;
           attivita.idPersona = {id:attoreToOperate.idPersona.id }as Persona;
           attivita.tipo = "attivita";

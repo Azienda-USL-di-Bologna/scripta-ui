@@ -665,7 +665,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
     
     const attivita = new Attivita();
-    attivita.idApplicazione = {id: "scripta"} as Applicazione;
+    attivita.idApplicazione = {id: "gediInt"} as Applicazione;
     attivita.idAzienda = {id: this.archivio.idAzienda.id} as Azienda;
     attivita.idPersona = {id: responsabileVecchio.idPersona.id} as Persona;
     attivita.tipo = "notifica";
@@ -740,7 +740,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
     const responsabile = this.archivio.attoriList.find((a:AttoreArchivio) => a.ruolo === 'RESPONSABILE');
     const attivita = new Attivita();
-    attivita.idApplicazione = {id: "scripta"} as Applicazione;
+    attivita.idApplicazione = {id: "gediInt"} as Applicazione;
     attivita.idAzienda = {id: this.archivio.idAzienda.id} as Azienda;
     attivita.idPersona = {id: responsabile.idPersona.id} as Persona;
     attivita.tipo = "notifica";
