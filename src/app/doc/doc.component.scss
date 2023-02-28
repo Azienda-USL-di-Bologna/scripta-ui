@@ -17,9 +17,6 @@ main {
     display: flex;
     flex-direction: column;
 
-    p-toolbar {
-
-    }
     .info-documento {
         display: flex; 
         flex-direction: column;
@@ -61,4 +58,9 @@ main {
 }
 .accodion-box{
     padding:0.625rem;
+    
+}
+
+::ng-deep .preview-inner {
+    overflow-y: visible !important;
 }

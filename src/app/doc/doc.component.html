@@ -93,7 +93,10 @@
     </p-accordionTab>
     <p-accordionTab header="Allegati">
       <ng-template pTemplate="content">
-        <allegati [doc]="doc"></allegati>
+        <attachments-box 
+          [idDoc]="doc.id"
+          [config]="attachmentsBoxConfig">
+        </attachments-box>
       </ng-template>
     </p-accordionTab>
     <p-accordionTab header="Attori" *ngIf="tipoDocumento != 'PROTOCOLLO_IN_ENTRATA'">
