@@ -1,10 +1,9 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
-import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio, BaseUrls, BaseUrlType, Attivita, Applicazione, Persona, Azienda, AttivitaService, AttivitaFatta, StatoArchivio, ArchivioDetail, KrintFilterOptions } from '@bds/internauta-model';
+import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio, BaseUrls, BaseUrlType, Attivita, Applicazione, Persona, Azienda, AttivitaService, StatoArchivio, KrintFilterOptions } from '@bds/internauta-model';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES , BatchOperation, NextSdrEntity, BatchOperationTypes, AdditionalDataDefinition} from '@bds/next-sdr';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TreeNode } from 'primeng/api/treenode';
-import { LogViewerComponent } from "@bds/common-components";
 import { AutoComplete } from 'primeng/autocomplete';
 import { TreeSelect } from 'primeng/treeselect';
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -35,7 +34,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     }
     this.loadConfigurations();
   }
-  
+  public panelSize:number[]=[85,15];
   public krintFilterOptions: KrintFilterOptions;
   private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
   private pageConfNoCountLimit20: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 20, offset: 0 } };
@@ -50,7 +49,6 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public titoli: TreeNode[];
   public selectedTitolo: TreeNode;
   public filteredMassimari: Massimario[] = [];
-  private massimariPerTittolo: Massimario[] = [];
   public filteredTitoli: Titolo[] = [];
   public tipiArchivioObj: any[] = TipoArchivioTraduzioneVisualizzazione;
   private classificazioneAllaFoglia: boolean = false;
@@ -99,8 +97,6 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       )
     );
   }
-
-  
 
   ngOnInit(): void {
     //console.log("Archivio test: ", this.archivio);
@@ -331,6 +327,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   }
 
   public loadLogs() {
+    
 		this.krintFilterOptions = {
 			codiciOperazioni: null,
 			idOggetto: this.archivio.id,
@@ -342,6 +339,9 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 			dataA: null
 		} as KrintFilterOptions;
 		this.showLogs = true;
+    
+
+
 	}
 
   public removeZoneFromTime(date: string): string {

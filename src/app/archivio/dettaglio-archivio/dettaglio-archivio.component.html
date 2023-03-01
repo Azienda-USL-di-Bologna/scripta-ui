@@ -1,6 +1,6 @@
 <p-splitter 
   styleClass="splitter-dettaglio-archivio"
-  [panelSizes]="[55,45]"
+  [panelSizes]="panelSize"
   [minSizes]="[30,30]"
   [ngClass]="{ hiderightside: !showLogs }">
   <ng-template pTemplate>
@@ -172,8 +172,8 @@
         tooltipPosition="left" 
         (click)="loadLogs()" 
         class="ultima-modifica"
-        style="transform: translateX(8%); cursor: pointer;">
-        Ultima modifica: {{removeZoneFromTime(archivio.version?.toString()) | date:  'EE d MMM y, H:mm' | titlecase}} <!-- -->
+        style="transform: translateX(8%); cursor: pointer; font-size: small;">
+        Ultima modifica: {{removeZoneFromTime(archivio.version?.toString()) | date: 'EE d MMM y' | titlecase}}
       </div>
         <div class="numeraFasicolo">
           <!-- Bottone numera archivio -->
@@ -208,7 +208,8 @@
             (keyup)="timeOutAndSaveArchivio(archivio, 'note')"
             placeholder="Qui è possibile inserire note come: descrizione, ubicazione fisica, etc..."
             pTooltip="Qui è possibile inserire note come: descrizione, ubicazione fisica, etc..." 
-            tooltipPosition="bottom">
+            tooltipPosition="bottom"
+            style="resize:none">
           </textarea>
         </div>
       </div>
