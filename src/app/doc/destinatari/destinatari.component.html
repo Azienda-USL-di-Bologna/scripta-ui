@@ -82,16 +82,18 @@
   <label class="p-col-2" for="coinvolti">Coinvolti</label>
   <p-listbox [options]="doc.coinvolti" optionLabel="descrizione" [disabled]="true"></p-listbox> -->
 
+  <label class="p-col-2" for="competenti">Competenti</label>
   <p-table [value]="doc.competenti">
     <ng-template pTemplate="header">
       <tr>
-        <th> Competenti </th>
+        <th> Descrizione </th>
         <th> Indirizzo </th>
         <th> Mezzo </th>
       </tr>
     </ng-template>
 
-    <ng-template let-rowdata pTemplate="body">
+  <label class="p-col-2" for="coinvolti">Coinvolti</label>
+  <ng-template let-rowdata pTemplate="body">
       <tr>
         <td> {{rowdata.descrizione}} </td>
         <td> {{rowdata.ultimaSpedizione.indirizzo.completo}} </td>
@@ -102,7 +104,7 @@
   <p-table [value]="doc.coinvolti">
     <ng-template pTemplate="header">
       <tr>
-        <th> Coinvolti </th>
+        <th> Descrizione </th>
         <th> Indirizzo </th>
         <th> Mezzo </th>
       </tr>

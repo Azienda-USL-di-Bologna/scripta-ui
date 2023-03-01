@@ -67,3 +67,23 @@ main {
 ::ng-deep .preview-inner {
     overflow-y: visible !important; //senza, non si vede la preview degli allegati. Esistono modi migliori?
 }
+
+.main-left {
+    // display: inline-block;
+    float: left;
+    width: 60%;
+    margin-left: 1rem;
+}
+
+.right-attachments {
+    // display: inline-block;
+    float: left;
+    width: 40%;
+    margin-left: 1rem;
+
+}
+
+.pregresso {
+    height: 100%;
+    text-align: center;
+}

@@ -4,7 +4,7 @@
     <form class="box">
       <p-autoComplete 
         id="mittente"
-        [(ngModel)]="selectedMittente"
+        [(ngModel)]="selectedMittenti"
         (onSelect)="saveMittente($event)"
         [suggestions]="filteredMittente"
         (completeMethod)="searchMittente($event)"

@@ -1,116 +1,98 @@
 <p-toast #pageStart position="top-right" (onClose)="clearMessages()"></p-toast>
-<p-toolbar *ngIf="!pregresso">
-  <div class="classe-temporanea">
-    <button pButton 
-      type="button" 
-      label="Protocolla" 
-      icon="material-icons-outlined person_add"
-      (click)="doButtonProtocolla()"
-      ><!-- [disabled]="doc?.dataRegistrazione || !document.oggetto" -->
-    </button>
-  </div>
-</p-toolbar>
-<p-progressBar *ngIf="inProtocollazione" mode="indeterminate"></p-progressBar>
-<p-blockUI [blocked]="blockedDocument">
-  <i class="pi pi-lock" style="font-size: 3rem"></i>
-</p-blockUI>
-<main aria-level="2" *ngIf="!!doc">
-  <section class="info-documento">
-    <span class="dati-creazione">
-      <div *ngIf="!visualizzazioneDocumento">
-        <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del {{yearOfProposta}}</span>
-        <span *ngIf="numeroVisualizzazione"></span>
-      </div>
-      <span>
-        Creato il giorno {{ removeZoneFromTime(doc?.dataCreazione?.toString()) | date: 'EE d MMM y, H:mm' | titlecase}}
-        da: {{doc?.idPersonaCreazione?.descrizione}}
-      </span>
-    </span>
-    <label for="oggetto" class="label-oggetto">Oggetto</label>
-    <textarea  id="oggetto"
-      aria-label="oggetto"
-      class="oggetto"
-      pInputTextarea 
-      placeholder="Inserisci l'oggetto"
-      rows="2" 
-      cols="30"
-      (keyup)="timeOutAndSaveDoc(doc, 'oggetto')"
-      [(ngModel)]="doc!.oggetto"
-      [disabled]="pregresso">
-    </textarea>
-    <div class="protocollato-da-box">
-      <label for="protocollatoda">Protocollato da</label>
-      <input id="protocollatoda"
-             aria-label="protocollato da"
-             disabled="true"
-        pInputText 
-        type="text" 
-        [disabled]="false"
-        [(ngModel)]="descrizioneUtenteRegistrante">
+<div [ngClass]="{'pregresso': pregresso}">
+  <p-toolbar *ngIf="!pregresso">
+    <div class="classe-temporanea">
+      <button pButton type="button" label="Protocolla" icon="material-icons-outlined person_add"
+        (click)="doButtonProtocolla()"><!-- [disabled]="doc?.dataRegistrazione || !document.oggetto" -->
+      </button>
     </div>
-  </section>
-  <!-- 
-    Commento da non cancellare. Sono campi che in futuro potremmo voler utilizzare
-    <div class="protocollo-esterno-box p-grid">
-    <label class="p-col-3" id="datiProtocolloEsterno">Dati protocollo Esterno</label>
-    <p-inputNumber
-            ariaLabel="numero protocollo esterno"
-            [disabled]="false"
-            id="p-datiProtocolloEsterno"
-            inputId="datiProtocolloEsterno"
-            [(ngModel)]="DatiProtocolloEsterno"
-            class="p-col">
-    </p-inputNumber>
-    <label class="p-col-2" for="c-dataProtocollazione">del</label>
-    <span class="p-col-2" id="dataProtocollazione" style ="display:none;" >data di protocollazione esterna</span>
-    <p-calendar
-            #CdataProtocolloEsterno
-            id="c-dataProtocollazione"
-            attr.aria-labelledby="dataProtocollazione"
-            [ariaLabelledBy]="'dataProtocollazione'"
-            [(ngModel)]="dataProtocolloEsterno"
-            dateFormat="dd/mm/yy"
-            [locale]="localIt"
-            [showIcon]="true"
-            inputId="dataProtocollazione"
-            appendTo="body"
-            class="p-col">
-    </p-calendar>
-  </div> -->
-  <p-accordion class="accodion-box">
-    <p-accordionTab header="Mittente" [selected]="true">
-      <mittente
-        [doc]="doc"
-        [tipoDocumento]="tipoDocumento"
-        (saveMittenteEvent)="saveDoc($event,'mittenti')"
-        [pregresso] = "pregresso">
-      </mittente>
-    </p-accordionTab>
-    <p-accordionTab *ngIf="pregresso" header="Destinatari">
-      <ng-template pTemplate="content">
-        <destinatari [doc]="doc"> </destinatari>
-      </ng-template>    
-    </p-accordionTab>
-    <p-accordionTab *ngIf="pregresso && tipoDocumento != 'PROTOCOLLO_IN_ENTRATA'" header="Attori">
-      <ng-template pTemplate="content">
-        <attori [doc]="doc"></attori>
-      </ng-template>
-    </p-accordionTab>
-    <p-accordionTab *ngIf="pregresso" header="Fascicolazioni">
-      <ng-template pTemplate="content">
-        <archivio-doc [doc]="doc"></archivio-doc>
-      </ng-template>
-    </p-accordionTab>
-    <p-accordionTab header="Allegati" class="allegati-tab">
-      <ng-template pTemplate="content">
-        <attachments-box *ngIf="pregresso"
-          [idDoc]="doc.id"
-          [config]="attachmentsBoxConfig">
-        </attachments-box>
-        <allegati *ngIf="!pregresso" [doc]="doc"></allegati>
-      </ng-template>
-    </p-accordionTab>
-  </p-accordion>
-
-
-</main>
+  </p-toolbar>
+  <p-progressBar *ngIf="inProtocollazione" mode="indeterminate"></p-progressBar>
+  <p-blockUI [blocked]="blockedDocument">
+    <i class="pi pi-lock" style="font-size: 3rem"></i>
+  </p-blockUI>
+  <main aria-level="2" *ngIf="!!doc" [ngClass]="{'main-left' : pregresso}">
+    <section class="info-documento">
+      <span class="dati-creazione">
+        <div *ngIf="!visualizzazioneDocumento">
+          <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del {{yearOfProposta}}</span>
+          <span *ngIf="numeroVisualizzazione"></span>
+        </div>
+        <span>
+          Creato il giorno {{ removeZoneFromTime(doc?.dataCreazione?.toString()) | date: 'EE d MMM y, H:mm' | titlecase}}
+          da: {{doc?.idPersonaCreazione?.descrizione}}
+        </span>
+      </span>
+      <label for="oggetto" class="label-oggetto">Oggetto</label>
+      <textarea id="oggetto" aria-label="oggetto" class="oggetto" pInputTextarea placeholder="Inserisci l'oggetto"
+        rows="2" cols="30" (keyup)="timeOutAndSaveDoc(doc, 'oggetto')" [(ngModel)]="doc!.oggetto" [disabled]="pregresso">
+      </textarea>
+      <div class="protocollato-da-box">
+        <label for="protocollatoda">Protocollato da</label>
+        <input id="protocollatoda" aria-label="protocollato da" disabled="true" pInputText type="text" [disabled]="false"
+          [(ngModel)]="descrizioneUtenteRegistrante">
+      </div>
+    </section>
+    <!-- 
+      Commento da non cancellare. Sono campi che in futuro potremmo voler utilizzare
+      <div class="protocollo-esterno-box p-grid">
+      <label class="p-col-3" id="datiProtocolloEsterno">Dati protocollo Esterno</label>
+      <p-inputNumber
+              ariaLabel="numero protocollo esterno"
+              [disabled]="false"
+              id="p-datiProtocolloEsterno"
+              inputId="datiProtocolloEsterno"
+              [(ngModel)]="DatiProtocolloEsterno"
+              class="p-col">
+      </p-inputNumber>
+      <label class="p-col-2" for="c-dataProtocollazione">del</label>
+      <span class="p-col-2" id="dataProtocollazione" style ="display:none;" >data di protocollazione esterna</span>
+      <p-calendar
+              #CdataProtocolloEsterno
+              id="c-dataProtocollazione"
+              attr.aria-labelledby="dataProtocollazione"
+              [ariaLabelledBy]="'dataProtocollazione'"
+              [(ngModel)]="dataProtocolloEsterno"
+              dateFormat="dd/mm/yy"
+              [locale]="localIt"
+              [showIcon]="true"
+              inputId="dataProtocollazione"
+              appendTo="body"
+              class="p-col">
+      </p-calendar>
+    </div> -->
+    <p-accordion class="accodion-box">
+      <p-accordionTab header="Mittente" [selected]="true">
+        <mittente [doc]="doc" [tipoDocumento]="tipoDocumento" (saveMittenteEvent)="saveDoc($event,'mittenti')"
+          [pregresso]="pregresso">
+        </mittente>
+      </p-accordionTab>
+      <p-accordionTab *ngIf="pregresso" header="Destinatari">
+        <ng-template pTemplate="content">
+          <destinatari [doc]="doc"> </destinatari>
+        </ng-template>
+      </p-accordionTab>
+      <p-accordionTab *ngIf="pregresso && tipoDocumento != 'PROTOCOLLO_IN_ENTRATA'" header="Attori">
+        <ng-template pTemplate="content">
+          <attori [doc]="doc"></attori>
+        </ng-template>
+      </p-accordionTab>
+      <p-accordionTab *ngIf="pregresso" header="Fascicolazioni">
+        <ng-template pTemplate="content">
+          <archivio-doc [doc]="doc"></archivio-doc>
+        </ng-template>
+      </p-accordionTab>
+      <p-accordionTab *ngIf="!pregresso" header="Allegati" class="allegati-tab">
+        <ng-template pTemplate="content">
+          <allegati [doc]="doc"></allegati>
+        </ng-template>
+      </p-accordionTab>
+    </p-accordion>
+  </main>
+  
+  
+  <attachments-box *ngIf="!!doc && pregresso" class="right-attachments"
+    [idDoc]="doc.id"
+    [config]="attachmentsBoxConfig">
+  </attachments-box>
+</div>
