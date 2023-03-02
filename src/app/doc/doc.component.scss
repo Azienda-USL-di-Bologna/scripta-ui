@@ -69,14 +69,12 @@ main {
 }
 
 .main-left {
-    // display: inline-block;
     float: left;
     width: 60%;
     margin-left: 1rem;
 }
 
 .right-attachments {
-    // display: inline-block;
     float: left;
     width: 40%;
     margin-left: 1rem;
@@ -86,4 +84,5 @@ main {
 .pregresso {
     height: 100%;
     text-align: center;
+    margin: auto;
 }

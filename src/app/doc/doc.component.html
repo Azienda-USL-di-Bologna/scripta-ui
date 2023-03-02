@@ -14,9 +14,8 @@
   <main aria-level="2" *ngIf="!!doc" [ngClass]="{'main-left' : pregresso}">
     <section class="info-documento">
       <span class="dati-creazione">
-        <div *ngIf="!visualizzazioneDocumento">
+        <div *ngIf="!pregresso && !visualizzazioneDocumento">
           <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del {{yearOfProposta}}</span>
-          <span *ngIf="numeroVisualizzazione"></span>
         </div>
         <span>
           Creato il giorno {{ removeZoneFromTime(doc?.dataCreazione?.toString()) | date: 'EE d MMM y, H:mm' | titlecase}}
