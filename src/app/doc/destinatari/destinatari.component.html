@@ -91,9 +91,7 @@
         <th> Mezzo </th>
       </tr>
     </ng-template>
-
-  <label class="p-col-2" for="coinvolti">Coinvolti</label>
-  <ng-template let-rowdata pTemplate="body">
+    <ng-template let-rowdata pTemplate="body">
       <tr>
         <td> {{rowdata.descrizione}} </td>
         <td> {{rowdata.ultimaSpedizione.indirizzo.completo}} </td>
@@ -101,6 +99,8 @@
       </tr>
     </ng-template>
   </p-table>
+
+  <label class="p-col-2" for="coinvolti">Coinvolti</label>
   <p-table [value]="doc.coinvolti">
     <ng-template pTemplate="header">
       <tr>
