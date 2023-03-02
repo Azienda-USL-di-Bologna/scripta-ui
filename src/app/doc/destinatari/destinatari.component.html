@@ -83,7 +83,7 @@
   <p-listbox [options]="doc.coinvolti" optionLabel="descrizione" [disabled]="true"></p-listbox> -->
 
   <label class="p-col-2" for="competenti">Competenti</label>
-  <p-table [value]="doc.competenti">
+  <p-table class="destinatari-table" [value]="doc.competenti">
     <ng-template pTemplate="header">
       <tr>
         <th> Descrizione </th>
@@ -101,7 +101,7 @@
   </p-table>
 
   <label class="p-col-2" for="coinvolti">Coinvolti</label>
-  <p-table [value]="doc.coinvolti">
+  <p-table class="destinatari-table" [value]="doc.coinvolti">
     <ng-template pTemplate="header">
       <tr>
         <th> Descrizione </th>
