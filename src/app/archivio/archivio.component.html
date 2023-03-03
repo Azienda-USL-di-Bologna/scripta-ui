@@ -93,12 +93,13 @@
     <p-radioButton name="operazioneOrganizza" value="Duplica" label="Duplica" [(ngModel)]="operazioneOrganizza" ></p-radioButton> 
     <p-radioButton *ngIf="this.archivio.livello > 1" name="operazioneOrganizza" value="Rendi fascicolo" label="Rendi fascicolo" [(ngModel)]="operazioneOrganizza"></p-radioButton> 
   </div>
-  <h1>Selezionare una o entrambe le voci</h1>
-  <div>
-    <p-checkbox name="organizzaTarget" value="fascicolo" label="fascicolo" [(ngModel)]="organizzaTarget" [disabled]="this.archivio.livello == 1 && this.operazioneOrganizza == 'Sposta'"></p-checkbox>
-    <p-checkbox name="organizzaTarget" value="contenuto" label="contenuto" [(ngModel)]="organizzaTarget"></p-checkbox>
+  <h1 *ngIf="this.operazioneOrganizza != 'Rendi fascicolo'">Selezionare una o entrambe le voci</h1>
+  <div *ngIf="this.operazioneOrganizza != 'Rendi fascicolo'">
+    <p-radioButton name="organizzaTarget" value="fascicolo" label="fascicolo" [(ngModel)]="organizzaTarget" [disabled]="this.archivio.livello == 1 && this.operazioneOrganizza == 'Sposta'"></p-radioButton>
+    <p-radioButton name="organizzaTarget" value="contenuto" label="contenuto" [(ngModel)]="organizzaTarget"></p-radioButton>
   </div>
   <app-archivio-ricerca 
+        *ngIf="this.operazioneOrganizza != 'Rendi fascicolo' && this.operazioneOrganizza != 'Duplica'"
         #archivioRicerca 
         [idAzienda]="this.archivio.idAzienda.id" 
         [livello]="2"
