@@ -33,6 +33,7 @@ import { MessageModule } from 'primeng/message';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { TriStateCheckboxModule } from 'primeng/tristatecheckbox';
+import { RadioButtonModule } from 'primeng/radiobutton';
 import { ListboxModule } from 'primeng/listbox';
 
 @NgModule({
@@ -40,6 +41,7 @@ import { ListboxModule } from 'primeng/listbox';
   ],
   imports: [
     ButtonModule,
+    RadioButtonModule,
     InputTextareaModule,
     ToastModule,
     DialogModule,
@@ -77,6 +79,7 @@ import { ListboxModule } from 'primeng/listbox';
   ],
   exports: [
     ButtonModule,
+    RadioButtonModule,
     InputTextareaModule,
     ToastModule,
     DialogModule,
