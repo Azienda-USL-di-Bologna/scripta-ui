@@ -299,4 +299,14 @@ export class NavigationTabsService {
       }
     // }
   }
+
+  public addTabTip(active: boolean = true): void {
+    this.addTab(
+      this.buildaTabTIP(
+      )
+    );
+    if (active) {
+      this.activeLastTab();
+    }
+  }
 }

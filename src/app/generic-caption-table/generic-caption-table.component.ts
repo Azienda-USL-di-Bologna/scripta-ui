@@ -71,9 +71,6 @@ export class GenericCaptionTableComponent implements OnInit {
   }
 
   isArchivioChiuso(archivio : Archivio) : boolean {
-    if(archivio.stato == 'PRECHIUSO' || archivio.stato == 'CHIUSO')
-      return true;
-    else
-      return false;
+    return archivio.stato == 'PRECHIUSO' || archivio.stato == 'CHIUSO'
   }
 }
