@@ -6,12 +6,12 @@
   justify-content: center;
   border-bottom: 2px solid #c8c8c8;
   border-radius: 5px;
-  margin: 10px;
-  padding: 10px;
-  font-size: 18px;
+  margin:0.625rem;
+  padding:0.625rem;
+  font-size: 1.125rem;
   font-weight: bold;
   background-color: #f4f4f4;
-  box-shadow: 2px 2px 10px 5px #e1e1e1;
+  box-shadow: 2px 2px0.625rem 5px #e1e1e1;
 }
 
 ::ng-deep .archivi-breadcrumb {
@@ -30,7 +30,7 @@
     .p-menuitem-text {
       white-space: pre;
       margin-left: 2px;
-      font-size: 15px;
+      font-size: 0.938rem;
     }
   }
 }
@@ -54,8 +54,8 @@
   display: flex;
   align-items: baseline;
   justify-content: flex-end;
-  font-size: 12px;
+  font-size: 0.75rem;
   .alert-text{
-    padding: 0px 15px 0px 8px;
+    padding: 0px 0.938rem 0px 8px;
   }
 }

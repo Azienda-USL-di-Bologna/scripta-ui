@@ -5,6 +5,7 @@ import { ExtendedArchiviView } from '../archivi-list-container/archivi-list/exte
 import { ArchivioComponent } from '../archivio/archivio.component';
 import { DocComponent } from '../doc/doc.component';
 import { DocsListContainerComponent } from '../docs-list-container/docs-list-container.component';
+import { ExtendedDocDetailView } from '../docs-list-container/docs-list/extended-doc-detail-view';
 import { TipContainerComponent } from '../tip-container/tip-container.component';
 import { TabItem, TabType } from './tab-item';
 
@@ -162,11 +163,11 @@ export class NavigationTabsService {
     );
   }
 
-  private buildaTabDoc(idDoc: number, label: string): TabItem {
+  private buildaTabDoc(idDoc: number, doc:ExtendedDocDetailView, label: string): TabItem {
     return new TabItem(
       DocComponent,
-      { 
-        id: idDoc
+      {
+        doc: doc
       },
       true,
       label,
@@ -261,5 +262,41 @@ export class NavigationTabsService {
         this.activeLastTab();
       }
     }
+  }
+
+  public addTabDoc(doc: ExtendedDocDetailView, active: boolean = true, reuseActiveTab: boolean = false): void {
+    const tabIndex: number = this.tabs.findIndex(t => {
+      return t.type === TabType.DOC && t.id === doc.id.toString();
+    });
+    // if (tabIndex !== -1) {
+    //   this.updateTab(
+    //     tabIndex, 
+    //     `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
+    //     {archivio: this.projectionArchivioPerSessionStorage(archivio), id: archivio.id},
+    //     `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
+    //   );
+    //   if (active) {
+    //     this.activeTabByIndex(tabIndex);
+    //   }
+    // } else if (reuseActiveTab) {
+    //   this.updateTab(
+    //     this.activeTabIndex, 
+    //     `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
+    //     {archivio: this.projectionArchivioPerSessionStorage(archivio), id: archivio.id}, 
+    //     `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
+    //     archivio.fk_idArchivioRadice.id.toString()
+    //   );
+    // } else {
+      this.addTab(
+        this.buildaTabDoc(
+          doc.id, 
+          doc,
+          doc.registrazioneVisualizzazione
+        )
+      );
+      if (active) {
+        this.activeLastTab();
+      }
+    // }
   }
 }

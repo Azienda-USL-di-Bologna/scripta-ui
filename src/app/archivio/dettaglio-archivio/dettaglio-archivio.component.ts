@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
-import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio, BaseUrls, BaseUrlType, Attivita, Applicazione, Persona, Azienda, AttivitaService, AttivitaFatta, StatoArchivio, ArchivioDetail } from '@bds/internauta-model';
+import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio, BaseUrls, BaseUrlType, Attivita, Applicazione, Persona, Azienda, AttivitaService, StatoArchivio, KrintFilterOptions } from '@bds/internauta-model';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES , BatchOperation, NextSdrEntity, BatchOperationTypes, AdditionalDataDefinition} from '@bds/next-sdr';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -26,7 +26,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   @Input() set archivio(archivio: Archivio) {
     this._archivio = archivio;
     this.setAnniTenutaSelezionabili();
-
+    this.labelLivelloArchivio = this.getLabelLivelloByIdLivello(archivio.livello);
     if (this.archivio.idTitolo) {
       this.selectedTitolo = this.buildNodeTitolo(this.archivio.idTitolo as Titolo);
     } else {
@@ -34,7 +34,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     }
     this.loadConfigurations();
   }
-  
+  public panelSize:number[]=[85,15];
+  public krintFilterOptions: KrintFilterOptions;
   private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
   private pageConfNoCountLimit20: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 20, offset: 0 } };
   public responsabiliArchivi: AttoreArchivio[] = [];
@@ -48,7 +49,6 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public titoli: TreeNode[];
   public selectedTitolo: TreeNode;
   public filteredMassimari: Massimario[] = [];
-  private massimariPerTittolo: Massimario[] = [];
   public filteredTitoli: Titolo[] = [];
   public tipiArchivioObj: any[] = TipoArchivioTraduzioneVisualizzazione;
   private classificazioneAllaFoglia: boolean = false;
@@ -59,11 +59,14 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public anniTenutaSelezionabili: any[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
   public loggedUserIsResponsbaileOrVicario = false;
+  public showLogs: boolean = false;
   public isArchivioChiuso = false;
   public loggedUserIsResponsbaileProposto = false;
   public fascicoliParlanti: boolean = false;
+  public labelLivelloArchivio: string = null;
   private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
   private attoreArchivioProjection = ENTITIES_STRUCTURE.scripta.attorearchivio.standardProjections.AttoreArchivioWithIdPersonaAndIdStruttura;
+  public saving: any = {};
 
   @ViewChild("autocompleteCategoria") public autocompleteCategoria: AutoComplete;
   
@@ -95,10 +98,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     );
   }
 
-  
-
   ngOnInit(): void {
-    console.log("Archivio test: ", this.archivio);
+    //console.log("Archivio test: ", this.archivio);
     //this.updateAnniTenuta();
     // this.getResponsabili();
     this.isArchivioClosed();
@@ -325,6 +326,29 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       this.isArchivioChiuso = false;
   }
 
+  public loadLogs() {
+    
+		this.krintFilterOptions = {
+			codiciOperazioni: null,
+			idOggetto: this.archivio.id,
+			tipoOggetto: null,
+			idUtente: null,
+			idOggettoContenitore: null,
+			tipoOggettoContenitore: null,
+			dataDa: null,
+			dataA: null
+		} as KrintFilterOptions;
+		this.showLogs = true;
+    
+
+
+	}
+
+  public removeZoneFromTime(date: string): string {
+		return date.replace(/\[\w+\/\w+\]$/, "");
+	}
+
+
   /**
    * Questa funzione carica i responsabili dell'archivio 
    * ordinati per ruolo
@@ -366,6 +390,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
             if (field === "oggetto") {
               this.archivioUtilsService.updateArchivioFieldSelection({field: field, archivio: this.archivio} as ArchivioFieldUpdating);
             }
+            this.saving = {};
           }
         )
       );
@@ -640,7 +665,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
     
     const attivita = new Attivita();
-    attivita.idApplicazione = {id: "scripta"} as Applicazione;
+    attivita.idApplicazione = {id: "gediInt"} as Applicazione;
     attivita.idAzienda = {id: this.archivio.idAzienda.id} as Azienda;
     attivita.idPersona = {id: responsabileVecchio.idPersona.id} as Persona;
     attivita.tipo = "notifica";
@@ -715,7 +740,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
     const responsabile = this.archivio.attoriList.find((a:AttoreArchivio) => a.ruolo === 'RESPONSABILE');
     const attivita = new Attivita();
-    attivita.idApplicazione = {id: "scripta"} as Applicazione;
+    attivita.idApplicazione = {id: "gediInt"} as Applicazione;
     attivita.idAzienda = {id: this.archivio.idAzienda.id} as Azienda;
     attivita.idPersona = {id: responsabile.idPersona.id} as Persona;
     attivita.tipo = "notifica";
@@ -756,6 +781,18 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         }
       )
     );
+  }
+
+  public getLabelLivelloByIdLivello(livello: number): string{
+    switch(livello){
+      case 1:
+        return "Fascicolo";
+      case 2:
+        return "Sottofascicolo";
+      case 3:
+        return "Inserto";
+    }
+    return null;
   }
 
  

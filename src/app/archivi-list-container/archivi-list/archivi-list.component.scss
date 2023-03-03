@@ -4,18 +4,19 @@
 }
 ::ng-deep .p-table-scripta-archivi-list {
   .archiviolist-table-body {
-    //overflow: initial !important;
     /* HEADER */
     .header-row {
-      height: 41px;
+      height: 2.563rem;
       .header-column {
-        padding: 2px 13px;
+        padding: 2px 0.813rem;
         .header-box {
           display: flex;
           justify-content: space-between;
           width: 100%;
         }
+
       }
+
       .info-numerazione-gerarchica {
         cursor: pointer;
         color:#203244;
@@ -24,11 +25,9 @@
         }
       }
     }
+    
     /* FILTER */
     .filter-row {
-      @media screen and (max-width: 1280px) {
-        font-size: 11pt;
-      }
       .filter-column {
         padding: 1px;
         border: transparent;
@@ -44,13 +43,13 @@
         .p-dropdown-label, 
         .p-multiselect-label,
         p-calendar .p-inputtext {
-          font-size: 12px;
+          font-size: 0.75rem;
           text-align: center;
           color: #2e4a65 !important;
           font-weight: bold;
         }
         .p-inputtext {
-          font-size: 12px;
+          font-size: 0.75rem;
           color: #2e4a65 !important;
           font-weight: bold;
         }
@@ -85,14 +84,14 @@
             width: fit-content;
             .p-dropdown-label {
               padding: 0;
-              max-width: 27px;
+              max-width: 1.688rem;
             }
           }
         }
       }
       .close-icon {
         align-self: center;
-        font-size: 15px;
+        font-size: 0.938rem;
         border: 1px solid transparent;
         background-color: white;
         display: inline-block;
@@ -106,8 +105,8 @@
     .p-datatable-tbody > tr > td {
       padding: 0;
       div {
-        height: 54px;
-        padding: 9px 13px;
+        height: 3.375rem;
+        padding: 9px 0.813rem;
         width: 100%;
       }
       &:not(.scrollable-column) {
@@ -152,30 +151,30 @@
 
     /* HEADER, FILTER E BODY */
   .row-height {
-    height: 53px;
-    max-height: 53px;
+    height: 3.313rem;
+    max-height: 3.313rem;
   }
   .data-creazione-column {
-    min-width: 193px;
-    max-width: 193px;
+    min-width: 12.063rem;
+    max-width: 12.063rem;
   }
   .ente-column {
-    min-width: 103px;
-    max-width: 103px;
+    min-width: 6.438rem;
+    max-width: 6.438rem;
   }
   .tipo-column {
-    min-width: 171px;
-    max-width: 171px;
+    min-width: 10.625rem;
+    max-width: 10.625rem;
   }
   .numerazione-gerarchica-column {
-    min-width: 244px;
-    max-width: 244px;
+    min-width: 15.25rem;
+    max-width: 15.25rem;
     cursor: pointer;
     .numerazione-box {
       padding: 0px !important;
       .left-side {
-        min-width: 30px;
-        max-width: 30px;
+        min-width: 1.875rem;
+        max-width: 1.875rem;
         display: flex;
         flex-direction: column;
         justify-content: space-around;
@@ -186,19 +185,19 @@
         }
       }
       .box-numerazione {
-        padding: 9px 13px;
+        padding: 0.563rem 0.813rem;
         font-weight: 600;
         color: #993366;
       }
     }
   }
   .responsabile-column {
-    min-width: 180px;
-    max-width: 180px;
+    min-width: 11.25rem;
+    max-width: 11.25rem;
   }
   .creatore-column {
-    min-width: 180px;
-    max-width: 180px;
+    min-width: 11.25rem;
+    max-width: 11.25rem;
   }
   .oggetto-column {
     width: 100%;
@@ -211,37 +210,37 @@
       flex-direction: row;
       flex-wrap: nowrap;
       i {
-        font-size: 28px;
+        font-size: 1.75rem;
         margin-right: 7px;
       }
     }
 }
   .struttura-column {
-    min-width: 250px;
-    max-width: 250px;
+    min-width: 15.625rem;
+    max-width: 15.625rem;
   }
   .delete-archive-column {
-    width: 50px;
-    max-width: 50px;
+    width: 3.125rem;
+    max-width: 3.125rem;
     justify-content: center;
-    padding-right: 10px !important;
+    padding-right:0.625rem !important;
     i {
       cursor: pointer;
-      font-size: 22px;
+      font-size: 1.375rem;
       &:hover {
         color: #936;
       }
     }
   }
   .vicari-column {
-    min-width: 160px;
-    max-width: 160px;
+    min-width: 10rem;
+    max-width: 10rem;
     .vicari-item {
       display: inline-block;
       padding: 3px 5px;
       margin-bottom: 2px;
       border: 1px solid #203244;
-      font-size: 13px;
+      font-size: 0.813rem;
       border-radius: 3px;
       word-break: break-word;
       &:hover {
@@ -250,8 +249,8 @@
     }
   }
   .stato-column {
-    min-width: 100px;
-    max-width: 100px;
+    min-width: 6.25rem;
+    max-width: 6.25rem;
   }  
 }
 
@@ -259,7 +258,7 @@
   .p-datatable-scrollable-header {
     overflow-x: scroll !important;
     overflow-y: hidden !important;
-    padding-bottom: 20px;
+    padding-bottom: 1.25rem;
   }
 }
 
@@ -268,14 +267,14 @@
     align-items: center;
     display: flex;
     .folder_outline-icon {
-      font-size: 18px;
+      font-size: 1.125rem;
       margin-right: 4px;
     }
   }
 }
 ::ng-deep {
   .overlaypanel-info-numerazione {
-    width: 500px;
+    width: 31.25rem;
   }
 }
   
@@ -285,7 +284,7 @@
   .loading-text {
     display: block;
     background-color: #f1f1f1;
-    min-height: 19px;
+    min-height: 1.125rem;
     animation: pulse 1s infinite ease-in-out;
     text-indent: -99999px;
     overflow: hidden;
@@ -297,13 +296,13 @@
   display: flex;
   justify-content: space-around;
   .p-button{
-    width: 110px !important;
+    width: 6.875rem !important;
     justify-content: center;
   }
 }
 
 ::ng-deep .p-datepicker{
-  width: 420px !important;
+  width: 26.25rem !important;
   .p-highlight {
     color: #ffffff;
     background: #2e4a65 !important;

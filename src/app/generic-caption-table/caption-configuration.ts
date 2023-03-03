@@ -11,7 +11,8 @@ export class CaptionConfiguration {
     public preferitoButton: boolean,
     public uploadDocument: boolean,
     public rowCount: boolean,
-    public showIconArchiveClosed: boolean
+    public showIconArchiveClosed: boolean,
+    public functionButton: boolean
     ) {}
 
   /* get showIconArchiveClosed() { return this._showIconArchiveClosed}

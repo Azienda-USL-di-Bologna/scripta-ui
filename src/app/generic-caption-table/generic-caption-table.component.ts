@@ -2,7 +2,7 @@ import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Menu } from 'primeng/menu';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { Subscription } from 'rxjs';
-import { CaptionFunctionalButtonsComponent } from './caption-functional-buttons.component';
+import { CaptionFunctionalOperationsComponent } from './caption-functional-operations.component';
 import { CaptionConfiguration } from './caption-configuration';
 import { CaptionReferenceTableComponent } from './caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from './caption-select-buttons.component';
@@ -23,7 +23,7 @@ export class GenericCaptionTableComponent implements OnInit {
   @Input() configuration: CaptionConfiguration;
   @Input() referenceTableComponent: CaptionReferenceTableComponent;
   @Input() selectButtonsComponent: CaptionSelectButtonsComponent;
-  @Input() functionalButtonsComponent: CaptionFunctionalButtonsComponent;
+  @Input() functionalOperationsComponent: CaptionFunctionalOperationsComponent;
 
   @ViewChild("aziendaSelection", {}) public aziendaSelection: Menu;
 

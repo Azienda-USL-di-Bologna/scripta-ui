@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { AfferenzaStruttura, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioDoc, ArchivioService, ArchivioDocService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteService, UtenteStruttura, UtenteStrutturaService } from '@bds/internauta-model';
+import {  ArchiviRecentiService, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioRecente, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteService, UtenteStruttura, UtenteStrutturaService } from '@bds/internauta-model';
 import { AppService } from '../../app.service';
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { Subscription, combineLatestWith } from 'rxjs';
@@ -25,21 +25,20 @@ import { CaptionReferenceTableComponent } from '../../generic-caption-table/capt
 import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
 import { SelectButtonItem } from '../../generic-caption-table/select-button-item';
 import { NewArchivoButton } from 'src/app/generic-caption-table/functional-buttons/new-archivo-button';
-import { CaptionFunctionalButtonsComponent } from 'src/app/generic-caption-table/caption-functional-buttons.component';
+import { CaptionFunctionalOperationsComponent } from 'src/app/generic-caption-table/caption-functional-operations.component';
 import { Titolo } from '@bds/internauta-model';
 import { Massimario } from '@bds/internauta-model';
 import { ConfigurazioneService } from '@bds/internauta-model';
-import { ParametroAziende } from '@bds/internauta-model/lib/entities/configurazione/ParametroAziende';
 import { ColonnaBds, CsvExtractor } from '@bds/common-tools';
 import { ExtendedArchivioService } from 'src/app/archivio/extended-archivio.service';
-
+import { ArchivioUtilsService } from 'src/app/archivio/archivio-utils.service';
 
 @Component({
 	selector: 'archivi-list',
 	templateUrl: './archivi-list.component.html',
 	styleUrls: ['./archivi-list.component.scss']
 })
-export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, CaptionReferenceTableComponent, CaptionSelectButtonsComponent, CaptionFunctionalButtonsComponent {
+export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, CaptionReferenceTableComponent, CaptionSelectButtonsComponent, CaptionFunctionalOperationsComponent {
 	@Input() data: any;
 	@ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>;
 
@@ -113,6 +112,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public fieldNumerazioneGerarchica: string = "numerazioneGerarchica";
 	public matchModeNumerazioneGerarchica: string = FILTER_TYPES.string.startsWith;
 	public newArchivoButton: NewArchivoButton;
+	
 	//public instanziaTabellaArchiviList = true;
 	public loggedUserCanDeleteArchivio : boolean = false; 
 
@@ -141,7 +141,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		private configurazioneService: ConfigurazioneService,
 		private datepipe: DatePipe,
 		private extendedArchivioService: ExtendedArchivioService,
-		private utenteStrutturaService: UtenteStrutturaService
+		private archiviRecentiService: ArchiviRecentiService,
+		private utenteStrutturaService: UtenteStrutturaService,
+		private archivioUtilsService: ArchivioUtilsService
 	) { }
 
 	ngOnInit(): void {
@@ -234,6 +236,20 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		}); */
 	}
 
+
+	@Input() get selectedColumns(): ColonnaBds[] {
+		return this._selectedColumns;
+	}
+
+	set selectedColumns(colsSelected: ColonnaBds[]) {
+		if (this._selectedColumns.length > colsSelected.length) {
+			this._selectedColumns = this._selectedColumns.filter(sc => colsSelected.includes(sc));
+		} else if (this._selectedColumns.length < colsSelected.length) {
+			this._selectedColumns.push(colsSelected.find(cs => !this._selectedColumns.includes(cs)));
+		}
+		this.saveConfiguration();
+	}
+
 	/**
 	 * Questa funzione si occupa di caricare la configurazione personale
 	 * dell'utente per il componente.
@@ -281,8 +297,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 * NB: In questa modalità l'utente non potrà modifcare le colonne
 	 */
 	public setColumnsPerDetailArchivio(): void {
-		let colonneDaVisualizzare;
-			colonneDaVisualizzare = ["numerazioneGerarchica", "dataCreazione", "oggetto", "idPersonaCreazione"];
+		const colonneDaVisualizzare = ["numerazioneGerarchica", "dataCreazione", "oggetto", "idPersonaCreazione"];
 		// this._selectedColumns = this.cols.filter(c => colonneDaVisualizzare.includes(c.field));
 		this._selectedColumns = [];
 		colonneDaVisualizzare.forEach(c => {
@@ -291,18 +306,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		console.log(this._selectedColumns)
 	}
 
-	@Input() get selectedColumns(): ColonnaBds[] {
-		return this._selectedColumns;
-	}
-
-	set selectedColumns(colsSelected: ColonnaBds[]) {
-		if (this._selectedColumns.length > colsSelected.length) {
-			this._selectedColumns = this._selectedColumns.filter(sc => colsSelected.includes(sc));
-		} else if (this._selectedColumns.length < colsSelected.length) {
-			this._selectedColumns.push(colsSelected.find(cs => !this._selectedColumns.includes(cs)));
-		}
-		this.saveConfiguration();
-	}
 
 
 	/**
@@ -477,15 +480,47 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			mode: "PAGE_NO_COUNT"
 		};
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
+		if (this.archiviListMode === ArchiviListMode.RECENTI) {
+
+			lazyFiltersAndSorts.filters.forEach((f, index) => {
+				//debugger;
+				if(f.field == "dataCreazione")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+				if(f.field == "idAzienda.id")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+				if(f.field == "livello")
+				lazyFiltersAndSorts.filters.splice(index, 1);
+			});
+			lazyFiltersAndSorts.filters.forEach((f, index) => {
+				if(f.field == "dataCreazione")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+			});
+			
+			lazyFiltersAndSorts.filters.forEach(f => f.field = "idArchivio." + f.field);
+			lazyFiltersAndSorts.sorts.forEach(s => s.field = "dataRecentezza");
+		}
 		this.serviceToGetData.getData(
 			this.projectionToGetData,
 			filtersAndSorts,
-			buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
+			lazyFiltersAndSorts,
 			pageConfNoLimit)
 			.subscribe(
 				res => {
 					if (res && res.results) {
-						tableTemp.value = this.setCustomProperties(res.results);
+						if(this.archiviListMode !== ArchiviListMode.RECENTI)
+							tableTemp.value = this.setCustomProperties(res.results);
+						else {
+							let archiviListView : ArchivioDetailView[] = [];
+							res.results.forEach((a : any) => {
+								const archivioDetailRecente = a.idArchivio;
+								archiviListView.push(archivioDetailRecente);
+								tableTemp.value = this.setCustomProperties(archiviListView);
+							});
+							
+						}
+							
+						
 						tableTemp.columns = colsCSV.filter(c => this.selectedColumns.some(e => e.field === c.fieldId));
 						const extractor = new CsvExtractor();
 						extractor.exportCsv(tableTemp);
@@ -616,8 +651,28 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.loadArchiviListSubscription = null;
 		}
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
-		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
-		this.loadCount(this.serviceToGetData, this.projectionToGetData, filtersAndSorts, lazyFiltersAndSorts);
+
+		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
+		if (this.archiviListMode === ArchiviListMode.RECENTI) {
+
+			lazyFiltersAndSorts.filters.forEach((f, index) => {
+				//debugger;
+				if(f.field == "dataCreazione")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+				if(f.field == "idAzienda.id")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+				if(f.field == "livello")
+				lazyFiltersAndSorts.filters.splice(index, 1);
+			});
+			lazyFiltersAndSorts.filters.forEach((f, index) => {
+				if(f.field == "dataCreazione")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+			});
+			
+			lazyFiltersAndSorts.filters.forEach(f => f.field = "idArchivio." + f.field);
+			lazyFiltersAndSorts.sorts.forEach(s => s.field = "dataRecentezza");
+		}
+		
 		this.loadArchiviListSubscription = this.serviceToGetData.getData(
 			this.projectionToGetData,
 			filtersAndSorts,
@@ -626,6 +681,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				console.log(data);
 				this.totalRecords = data.page.totalElements;
 				this.loading = false;
+
+				const results = this.archiviListMode === ArchiviListMode.RECENTI ? data.results.map((r: ArchivioRecente) => r.idArchivio) : data.results;
 
 				if (this.resetArchiviArrayLenght) {
 					/* Ho bisogno di far capire alla tabella quanto l'array docs è virtualmente grande
@@ -639,9 +696,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
 					/* Questo meccanismo serve per cancellare i risultati di troppo della tranche precedente.
 					Se entro qui probabilmente ho fatto una ricerca */
-					Array.prototype.splice.apply(this.archivi, [0, this.archivi.length, ...this.setCustomProperties(data.results)]);
+					Array.prototype.splice.apply(this.archivi, [0, this.archivi.length, ...this.setCustomProperties(results)]);
 				} else {
-					Array.prototype.splice.apply(this.archivi, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
+					Array.prototype.splice.apply(this.archivi, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(results)]);
 				}
 				this.archivi = [...this.archivi]; // trigger change detection
 			},
@@ -756,6 +813,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			case ArchiviListMode.FREQUENTI:
 				break;
 			case ArchiviListMode.RECENTI:
+				this.serviceToGetData = this.archiviRecentiService;
+				this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviorecente.customProjections.CustomArchivioRecenteWithIdArchivioDetail;
+				filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+				filterAndSort.addSort(new SortDefinition("dataRecentezza", "asc"))
 				filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRecenti"));
 				break;
 		}
@@ -1308,6 +1369,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 											summary: "OK",
 											detail: stringa
 										});
+										this.archivioUtilsService.deletedArchiveSelection(rowData.id);
 										this.loadData();
 									},
 									err => {

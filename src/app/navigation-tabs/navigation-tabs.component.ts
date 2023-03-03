@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { AfterViewInit, Component, OnInit, ViewChild } from "@angular/core";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { Subscription } from "rxjs";
 import { Archivio, ConfigurazioneService, ParametroAziende } from "@bds/internauta-model";
@@ -7,19 +7,21 @@ import { TabItem } from "./tab-item";
 import { Router } from "@angular/router";
 import { AppService } from "../app.service";
 import { ExtendedArchivioService } from "../archivio/extended-archivio.service";
+import { TabView } from "primeng/tabview";
 
 @Component({
   selector: "navigation-tabs",
   templateUrl: "./navigation-tabs.component.html",
   styleUrls: ["./navigation-tabs.component.scss"]
 })
-export class NavigationTabsComponent implements OnInit {
+export class NavigationTabsComponent implements OnInit, AfterViewInit {
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
   //private tabName: any;
   public tabItems: TabItem[] = [];
   private tabIndexToActiveAtTheBeginning = 0;
   private idArchivioAperturaDaScrivania: number;
+  @ViewChild("tabview") private tabview: TabView;
 
   constructor(
     private appService: AppService,
@@ -58,6 +60,7 @@ export class NavigationTabsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    
     const tabLoadedFromSessionStorage = this.navigationTabsService.loadTabsFromSessionStorage();
 
     if (tabLoadedFromSessionStorage) {
@@ -107,6 +110,10 @@ export class NavigationTabsComponent implements OnInit {
         )
       ); 
     }
+  }
+
+  ngAfterViewInit(): void {
+    this.tabview.forwardIsDisabled = true;
   }
 
   /**

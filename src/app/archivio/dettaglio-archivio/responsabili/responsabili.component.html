@@ -50,7 +50,7 @@
 							[azienda]="archivio.idAzienda"
               [showPool]="false"
 							[showOnlyUser]="true"
-							(utenteStrutturaSelezionatoEmit)="onUtenteStrutturaSelected($event, attore)">
+							(utenteStrutturaSelezionatoEmit)="onUtenteStrutturaSelected($event, attore, ri)">
 						</lib-users-autocomplete><!-- [afferenzaDiretta]="true" -->
 						<div *ngIf="attore.idPersona">{{attore.idPersona.descrizione}}</div>
 					</ng-template>
@@ -126,7 +126,7 @@
           (click)="onRowEditSave(attore, ri, 'DELETE')">
         </button>
         <!-- Bottone di salvataggio dell'editing. -->
-        <button *ngIf="editing"
+        <button *ngIf="editing && (attore.ruolo !== ruoliEnum.VICARIO)"
 					pButton 
 					pRipple 
 					pSaveEditableRow 

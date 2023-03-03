@@ -1,74 +1,84 @@
-<div class="p-grid competente-box">
-  <label class="p-col-2" for="competenti">Competente</label>
-  <form class="box">
-    <p-autoComplete id="competenti" #autocompleteCompetenti
-      [(ngModel)]="selectedCompetente"
-      ariaLabel="competenti"
-      (onSelect)="saveDestinatario($event, 'competente')"
-      [suggestions]="filteredCompetenti"
-      (completeMethod)="searchDestinatario($event, 'competente')"
-      (onClear)= "onDeleteCompetente()"
+<div *ngIf="!pregresso">
+  <div class="p-grid competente-box">
+    <label class="p-col-2" for="competenti">Competente</label>
+    <form class="box">
+      <p-autoComplete id="competenti" #autocompleteCompetenti
+        [(ngModel)]="selectedCompetente"
+        ariaLabel="competenti"
+        (onSelect)="saveDestinatario($event, 'competente')"
+        [suggestions]="filteredCompetenti"
+        (completeMethod)="searchDestinatario($event, 'competente')"
+        (onClear)= "onDeleteCompetente()"
+        field="descrizione"
+        appendTo="body"
+        class="p-col input"
+        [ngModelOptions]="{standalone: true}"
+        [required]="true"
+        type="text"
+        [disabled]="pregresso">
+        <ng-template let-contatto pTemplate="item">
+          <div>{{contatto.descrizioneCustom}}</div>
+        </ng-template>
+      </p-autoComplete>
+      <button class="material-icons close-icon" type="reset" aria-label= "Cancella ricerca" (click)="onDeleteCompetente()"
+        *ngIf="actualCompetente != null">close</button>
+    </form>
+  </div>
+  <div class="p-grid">
+    <label class="p-col-2" for="coinvolti">Coinvolti</label>
+    <p-autoComplete id="coinvolti"  #autocompleteCoinvolti
+      ariaLabel="coinvolti"
+      [(ngModel)]="selectedCoinvolto"
+      (onSelect)="saveDestinatario($event, 'coinvolto')"
+      [suggestions]="filteredCoinvolti"
+      (completeMethod)="searchDestinatario($event, 'coinvolto')"
       field="descrizione"
       appendTo="body"
-      class="p-col input"
-      [ngModelOptions]="{standalone: true}"
-      [required]="true"
-      type="text">
+      class="p-col">
       <ng-template let-contatto pTemplate="item">
         <div>{{contatto.descrizioneCustom}}</div>
       </ng-template>
     </p-autoComplete>
-    <button class="material-icons close-icon" type="reset" aria-label= "Cancella ricerca" (click)="onDeleteCompetente()"
-      *ngIf="actualCompetente != null">close</button>
-  </form>
-</div>
-<div class="p-grid">
-  <label class="p-col-2" for="coinvolti">Coinvolti</label>
-  <p-autoComplete id="coinvolti"  #autocompleteCoinvolti
-    ariaLabel="coinvolti"
-    [(ngModel)]="selectedCoinvolto"
-    (onSelect)="saveDestinatario($event, 'coinvolto')"
-    [suggestions]="filteredCoinvolti"
-    (completeMethod)="searchDestinatario($event, 'coinvolto')"
-    field="descrizione"
-    appendTo="body"
-    class="p-col">
-    <ng-template let-contatto pTemplate="item">
-      <div>{{contatto.descrizioneCustom}}</div>
-    </ng-template>
-  </p-autoComplete>
-</div>
+  </div>
 
-<p-table tabindex="0"
-  ariaLabel="tabella coinvolti"
-  [columns]="columnCoinvolti" 
-  [value]="_doc.coinvolti" 
-  styleClass="coinvolti-table">
-  <!-- scrollHeight="100%"
-  [scrollable]="true"   -->
-  <ng-template pTemplate="header" let-columns>
-  <tr class="row">
-    <th *ngFor="let col of columns">
-      {{col.header}}
-    </th>
-    <th class="column-icon"><span class="sr-only">Elimina</span></th>
-  </tr>
-  </ng-template>
-  <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
+  <p-table tabindex="0"
+    ariaLabel="tabella coinvolti"
+    [columns]="columnCoinvolti" 
+    [value]="doc.coinvolti" 
+    styleClass="coinvolti-table">
+    <!-- scrollHeight="100%"
+    [scrollable]="true"   -->
+    <ng-template pTemplate="header" let-columns>
     <tr class="row">
-      <td>
-        {{rowData.descrizione}}
-      </td>
-      <td class="column-icon">
-        <i class="material-icons-outlined bds-icon-btn"
-          role="button"
-          aria-label="Elimina destinatario coinvolto"
-          pTooltip="Elimina" 
-          tooltipPosition="top" 
-          (click)="onDeleteRelated(rowData, rowIndex)">
-          delete
-        </i>
-      </td>
+      <th *ngFor="let col of columns">
+        {{col.header}}
+      </th>
+      <th class="column-icon"><span class="sr-only">Elimina</span></th>
     </tr>
-  </ng-template>
-</p-table> 
+    </ng-template>
+    <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
+      <tr class="row">
+        <td>
+          {{rowData.descrizione}}
+        </td>
+        <td class="column-icon">
+          <i class="material-icons-outlined bds-icon-btn"
+            role="button"
+            aria-label="Elimina destinatario coinvolto"
+            pTooltip="Elimina" 
+            tooltipPosition="top" 
+            (click)="onDeleteRelated(rowData, rowIndex)">
+            delete
+          </i>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table> 
+</div>
+<div *ngIf="pregresso" class="related-pregressi">
+  <label class="p-col-2" for="competenti">Competenti</label>
+  <p-listbox [options]="doc.competenti" optionLabel="descrizione" [disabled]="true"></p-listbox>
+
+  <label class="p-col-2" for="coinvolti">Coinvolti</label>
+  <p-listbox [options]="doc.coinvolti" optionLabel="descrizione" [disabled]="true"></p-listbox>
+</div>
