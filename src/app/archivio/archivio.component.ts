@@ -162,12 +162,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       this.setForDettaglio();
     } else {
       if (this.contenutoDiviso) {
-        if (this.archivio.livello === 3 || this.selectedButtonItem?.id === SelectButton.DOCUMENTI ) {
-          this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DOCUMENTI);
-          this.setForDocumenti();
-        } else if (this.selectedButtonItem?.id === SelectButton.DETTAGLIO) {
+        if (this.selectedButtonItem?.id === SelectButton.DETTAGLIO) {
           this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
           this.setForDettaglio();
+        } else if (this.selectedButtonItem?.id === SelectButton.DOCUMENTI || this.archivio.livello === 3) {
+          this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DOCUMENTI);
+          this.setForDocumenti();
         } else {
           this.selectedButtonItem = 
           this.selectButtonItems.find(x => x.label === this.selectedButtonItem?.label && !this.selectedButtonItem?.disabled)
