@@ -126,7 +126,7 @@
           (click)="onRowEditSave(attore, ri, 'DELETE')">
         </button>
         <!-- Bottone di salvataggio dell'editing. -->
-        <button *ngIf="editing && (attore.ruolo !== ruoliEnum.VICARIO)"
+        <button *ngIf="editing && (attore.ruolo !== ruoliEnum.VICARIO && !(attore.ruolo === ruoliEnum.RESPONSABILE_PROPOSTO && struttureAttoreInEditing.length === 1))"
 					pButton 
 					pRipple 
 					pSaveEditableRow 

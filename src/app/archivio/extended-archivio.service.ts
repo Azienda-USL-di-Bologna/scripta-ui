@@ -70,4 +70,40 @@ export class ExtendedArchivioService extends ArchivioService {
     formData.append("idArchivio", idArchivio.toString());
     return this._http.post(apiUrl, formData);
   }
+
+  public spostaArchivio(idArchivio: number, idArchivioDestinazione: number, fascicolo: boolean, contenuto: boolean){
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "spostaArchivio";
+    const formData: FormData = new FormData();
+    formData.append("idArchivio", idArchivio.toString());
+    formData.append("idArchivioDestinazione", idArchivioDestinazione.toString());
+    formData.append("fascicolo", fascicolo.toString());
+    formData.append("contenuto", contenuto.toString());
+    return this._http.post(apiUrl, formData);
+  }
+
+  public copiaArchivio(idArchivio: number, idArchivioDestinazione: number, fascicolo: boolean, contenuto: boolean){
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "copiaArchivio";
+    const formData: FormData = new FormData();
+    formData.append("idArchivio", idArchivio.toString());
+    formData.append("idArchivioDestinazione", idArchivioDestinazione.toString());
+    formData.append("fascicolo", fascicolo.toString());
+    formData.append("contenuto", contenuto.toString());
+    return this._http.post(apiUrl, formData);
+  }
+
+  public duplicaArchivio(idArchivio: number, fascicolo: boolean, contenuto: boolean){
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "duplicaArchivio";
+    const formData: FormData = new FormData();
+    formData.append("idArchivio", idArchivio.toString());
+    formData.append("fascicolo", fascicolo.toString());
+    formData.append("contenuto", contenuto.toString());
+    return this._http.post(apiUrl, formData);
+  }
+
+  public rendiFascicolo(idArchivio: number){
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "rendiFascicolo";
+    const formData: FormData = new FormData();
+    formData.append("idArchivio", idArchivio.toString());
+    return this._http.post(apiUrl, formData);
+  }
 }

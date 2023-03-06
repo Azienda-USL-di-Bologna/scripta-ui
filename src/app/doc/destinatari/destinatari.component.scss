@@ -61,3 +61,13 @@
   margin: auto;
   line-height: 200%;
 }
+
+.destinatari-table { //brutto modo per formattare la tabella, migliorabile
+  tr :last-child{
+    width: 12rem;
+  }
+  tr :nth-child(2){
+    width: 20rem;
+  }
+  overflow: auto;
+}
