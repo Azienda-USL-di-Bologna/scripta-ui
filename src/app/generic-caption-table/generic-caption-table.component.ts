@@ -32,7 +32,7 @@ export class GenericCaptionTableComponent implements OnInit {
   public maxSizeUpload: Number = 50000000;
   public ref: DynamicDialogRef;
   public canUseTip: boolean = false;
-
+  public canCreateArchivio: boolean = false;
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
 
@@ -53,7 +53,13 @@ export class GenericCaptionTableComponent implements OnInit {
     );
     this.canUseTip = (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CA) ||
       this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CI) ||
-      this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD))
+      this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD));
+      const tempMap : Map<String, boolean> = new Map(Object.entries(this.utenteUtilitiesLogin.getUtente().permessiGediByCodiceAzienda));      this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach(a => {
+        if(tempMap.has(a.codice))
+           this.canCreateArchivio = tempMap.get(a.codice);
+           return;
+      })
+    //this.canCreateArchivio = this.utenteUtilitiesLogin.getUtente().permessiGediByCodiceAzienda.has;
   }
 
   show() {

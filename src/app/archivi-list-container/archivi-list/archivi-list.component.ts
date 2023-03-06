@@ -177,14 +177,16 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					}
 					// Parte relativa al utenteUtilities
 					this.utenteUtilitiesLogin = utenteUtilities;
+					const tempMap : Map<String, boolean> = new Map(Object.entries(this.utenteUtilitiesLogin.getUtente().permessiGediByCodiceAzienda));
 					this.newArchivoButton = {
 						tooltip: "Crea nuovo fascicolo",
 						livello: 0,
 						enable: true,
 						aziendeItems: this.utenteUtilitiesLogin.getUtente().aziendeAttive.map(a => {
+
 							return {
 								label: a.nome,
-								disabled: false,
+								disabled: !tempMap.get(a.codice),
 								command: () => this.newArchivio(a.id)
 							} as MenuItem
 						})
