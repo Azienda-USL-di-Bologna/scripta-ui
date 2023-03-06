@@ -89,9 +89,11 @@
     </p-accordion>
   </main>
   
-  
-  <attachments-box *ngIf="!!doc && pregresso" class="right-attachments"
-    [idDoc]="doc.id"
-    [config]="attachmentsBoxConfig">
-  </attachments-box>
+  <div class="right-attachments">
+    <h2>Allegati</h2>
+    <attachments-box *ngIf="!!doc && pregresso"
+      [idDoc]="doc.id"
+      [config]="attachmentsBoxConfig">
+    </attachments-box>
+  </div>
 </div>
