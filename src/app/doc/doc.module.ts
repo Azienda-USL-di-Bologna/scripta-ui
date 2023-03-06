@@ -12,6 +12,8 @@ import { ExtendedDestinatariService } from "./destinatari/extended-destinatari.s
 import { ExtendedMittenteService } from "./mittente/extended-mittente.service";
 import { ExtendedAllegatoService } from "./allegati/extended-allegato.service";
 import { AttoriComponent } from './attori/attori.component';
+import { ArchivioDocComponent } from './archivio-doc/archivio-doc.component';
+import { AttachmentsBoxModule } from "@bds/common-components";
 
 
 @NgModule({
@@ -19,14 +21,16 @@ import { AttoriComponent } from './attori/attori.component';
     CommonModule,
     DocRoutingModule,
     PrimeNgModule,
-    ScriptaCommonModule
+    ScriptaCommonModule,
+    AttachmentsBoxModule
   ],
   declarations: [
     DocComponent,
     MittenteComponent,
     DestinatariComponent,
     AllegatiComponent,
-    AttoriComponent
+    AttoriComponent,
+    ArchivioDocComponent
   ],
   providers: [
     ExtendedDocService,

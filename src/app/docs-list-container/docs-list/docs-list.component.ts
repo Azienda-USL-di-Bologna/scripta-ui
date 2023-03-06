@@ -1395,7 +1395,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
 
   public openPregresso(doc: ExtendedDocDetailView) {
     this.navigationTabsService.addTabDoc(doc);
-		this.appService.appNameSelection(doc.tipologiaVisualizzazione+ " - pregresso");
+		this.appService.appNameSelection(`${doc.codiceRegistro === 'PG' ? "Protocollo generale" : doc.tipologiaVisualizzazione} pregresso ${doc.registrazioneVisualizzazione} [${doc.idAzienda.aoo}]`);
   }
 }
 

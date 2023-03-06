@@ -10,6 +10,7 @@ import { switchMap } from "rxjs/operators";
 import { AppService } from "../app.service";
 import { ExtendedDocService } from "./extended-doc.service";
 import { ExtendedDocDetailView } from "../docs-list-container/docs-list/extended-doc-detail-view";
+import { AttachmentsBoxConfig } from "@bds/common-components";
 
 @Component({
   selector: "doc",
@@ -43,6 +44,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public detailDoc: ExtendedDocDetailView;
   public tipoDocumento: TipologiaDoc;
   public visualizzazioneDocumento: string;
+  public attachmentsBoxConfig: AttachmentsBoxConfig;
 
   @Input() public pregresso: boolean = true;
   @Input() set data(data: any) {
@@ -58,7 +60,12 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     private loginService: JwtLoginService,
     private messageService: MessageService,
     private route: ActivatedRoute,
-    private appService: AppService) {}
+    private appService: AppService) {
+      this.attachmentsBoxConfig = new AttachmentsBoxConfig();
+      this.attachmentsBoxConfig.showPreview = true;
+      this.attachmentsBoxConfig.showInfoVersamento = false;
+      this.attachmentsBoxConfig.showHeader = false;
+    }
 
   ngOnInit(): void {
     console.log("entro nell'oninit");

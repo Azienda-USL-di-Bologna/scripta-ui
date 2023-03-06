@@ -20,9 +20,6 @@ main {
     display: flex;
     flex-direction: column;
 
-    p-toolbar {
-
-    }
     .info-documento {
         display: flex; 
         flex-direction: column;
@@ -64,4 +61,32 @@ main {
 }
 .accodion-box{
     padding:0.625rem;
+    
+}
+
+::ng-deep .preview-inner {
+    overflow-y: visible !important; //senza, non si vede la preview degli allegati. Esistono modi migliori?
+}
+
+.main-left {
+    float: left;
+    width: 60%;
+    margin: auto;
+}
+
+.right-attachments {
+    h2 {
+        text-align: center;
+    }
+    float: left;
+    width: 33%;
+    margin-left: 4%;
+
+}
+
+.pregresso {
+    width: 100%;
+    height: 100%;
+    margin-left: 2%;
+    overflow: auto;
 }
