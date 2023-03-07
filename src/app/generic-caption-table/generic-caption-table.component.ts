@@ -52,9 +52,12 @@ export class GenericCaptionTableComponent implements OnInit {
             this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CI) ||
             this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD));
             const tempMap : Map<String, boolean> = new Map(Object.entries(this.utenteUtilitiesLogin.getUtente().permessiGediByCodiceAzienda));      this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach(a => {
-              if(tempMap.has(a.codice))
-                 this.canCreateArchivio = tempMap.get(a.codice);
-                 return;
+              if(tempMap.has(a.codice)) {
+                if(tempMap.get(a.codice)) {
+                  this.canCreateArchivio = tempMap.get(a.codice);
+                  return;
+                }
+              }
             })
           }
         }
