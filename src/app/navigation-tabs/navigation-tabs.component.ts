@@ -92,9 +92,6 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
                     this.navigationTabsService.addTab(
                       this.navigationTabsService.buildaTabDocsList()
                     );
-                    this.navigationTabsService.addTab(
-                      this.navigationTabsService.buildaTabTIP()
-                    )
                     this.setTabsAndActiveOneOfThem();
   
                     // Tolgo subito queste due sottoscrizioni che mi disturbano quando per qualche motivo riscattano.

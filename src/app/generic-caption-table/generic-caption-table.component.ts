@@ -56,21 +56,22 @@ export class GenericCaptionTableComponent implements OnInit {
       this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD))
   }
 
-  show() {
-    this.ref = this.dialogService.open(TipComponent, {
-      data: {
-        tabname: this.navigationTabsService.getTabs()[this.navigationTabsService.activeTabIndex].labelForAppName,
-        utenteUtilitiesLogin: this.utenteUtilitiesLogin,
-      },
-      header: 'Tool Importazione Pregressi',
-      width: '70%',
-      height: '69%',
-      //contentStyle: {"overflow": "auto"},
-      baseZIndex: 10000
-    });
+  public show() {
+    // this.ref = this.dialogService.open(TipComponent, {
+    //   data: {
+    //     tabname: this.navigationTabsService.getTabs()[this.navigationTabsService.activeTabIndex].labelForAppName,
+    //     utenteUtilitiesLogin: this.utenteUtilitiesLogin,
+    //   },
+    //   header: 'Tool Importazione Pregressi',
+    //   width: '70%',
+    //   height: '69%',
+    //   //contentStyle: {"overflow": "auto"},
+    //   baseZIndex: 10000
+    // });
+    this.navigationTabsService.addTabTip();
   }
 
-  isArchivioChiuso(archivio : Archivio) : boolean {
+  public isArchivioChiuso(archivio : Archivio) : boolean {
     return archivio.stato == 'PRECHIUSO' || archivio.stato == 'CHIUSO'
   }
 }

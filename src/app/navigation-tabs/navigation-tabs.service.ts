@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Archivio, ArchivioDetail } from '@bds/internauta-model';
+import { UtenteUtilities } from '@bds/jwt-login';
 import { ArchiviListContainerComponent } from '../archivi-list-container/archivi-list-container.component';
 import { ExtendedArchiviView } from '../archivi-list-container/archivi-list/extendend-archivi-view';
 import { ArchivioComponent } from '../archivio/archivio.component';
@@ -195,11 +196,10 @@ export class NavigationTabsService {
   }
 
   public buildaTabTIP(): TabItem {
-    debugger;
     return new TabItem(
       TipContainerComponent,
-      {  },
-      false,
+      {},
+      true,
       "Import Pregressi",
       "pi pi-file-excel",
       TabType.TIP,
@@ -312,8 +312,7 @@ export class NavigationTabsService {
 
   public addTabTip(active: boolean = true): void {
     this.addTab(
-      this.buildaTabTIP(
-      )
+      this.buildaTabTIP()
     );
     if (active) {
       this.activeLastTab();
