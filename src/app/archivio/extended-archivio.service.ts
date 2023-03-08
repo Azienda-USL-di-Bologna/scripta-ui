@@ -16,6 +16,17 @@ export class ExtendedArchivioService extends ArchivioService {
     super(_http, _datepipe);
   }
 
+  /**
+   * Scarica l'archivio con tutto il suo contenuto in formato zip.
+   * @param archivio L'archivio da scaricare.
+   * @returns Il file zip.
+   */
+  public downloadArchivioZip(archivio: Archivio | ArchivioDetail): Observable<any> {
+    const url = getInternautaUrl(BaseUrlType.Scripta) + `/downloadArchivioZip/${archivio.id}`;
+    console.log(url);
+    return this._http.get(url, {observe: 'response', responseType: "blob"});
+  }
+
   public updateArchivio<K extends keyof Archivio>(archivio: Archivio, fields: K[], projection?: string, additionalData?: AdditionalDataDefinition[]): Observable<Archivio> {
     const archivioToSave: Archivio = new Archivio();
     fields.forEach(
