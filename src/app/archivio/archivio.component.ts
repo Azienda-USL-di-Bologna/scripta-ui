@@ -445,7 +445,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         }
       }
     }
-    return `${archivio.numero}-${archivio.anno}-${archivio.oggetto}.zip`;
+    const numero: string = archivio.numerazioneGerarchica.substring(0, archivio.numerazioneGerarchica.indexOf("/"));
+    return `${numero}-${archivio.anno}-${archivio.oggetto}.zip`;
   }
 
   /**
