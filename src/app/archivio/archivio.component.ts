@@ -409,7 +409,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.extendedArchivioService.downloadArchivioZip(archivio).subscribe({
       next: (res) => {
         let filename = this.getFilenameFromResponse(res, archivio);
-        UtilityFunctions.downLoadFile(res, "application/zip", filename);
+        this.extendedArchivioService.downloadFile(res, "application/zip", filename);
         this.rightContentProgressSpinner = false;
       },
       error: (err) => {
