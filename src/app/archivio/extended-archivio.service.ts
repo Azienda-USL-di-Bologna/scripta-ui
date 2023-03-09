@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Archivio, ArchivioDetail, ArchivioService } from '@bds/internauta-model';
 import { getInternautaUrl, BaseUrlType } from "@bds/internauta-model";
@@ -14,6 +14,38 @@ export class ExtendedArchivioService extends ArchivioService {
   
   constructor(protected _http: HttpClient, protected _datepipe: DatePipe) {
     super(_http, _datepipe);
+  }
+
+  /**
+   * Scarica l'archivio con tutto il suo contenuto in formato zip.
+   * @param archivio L'archivio da scaricare.
+   * @returns Il file zip.
+   */
+  public downloadArchivioZip(archivio: Archivio | ArchivioDetail): Observable<any> {
+    const url = getInternautaUrl(BaseUrlType.Scripta) + `/downloadArchivioZip/${archivio.id}`;
+    console.log(url);
+    return this._http.get(url, {observe: 'response', responseType: "blob"});
+  }
+
+  /**
+   * Fa partire il download dell'allegato passato. 
+   * Questo metodo è una versione breve di quello generico che viene normalmente usato che si trova su common-tools.
+   * Questo fa il controllo se esiste il blob nel body.
+   * @param data è il blob dell'allegato
+   * @param type è il content-type dell'allegato
+   * @param filename Il nome del file.
+   * @param preview dice se l'allegato deve essere scaricato o aperto in anteprima (laddove sia consentita l'anteprima)
+   */
+  public downloadFile(data: any, type: string, filename: string) {
+    const blob = new Blob([data?.body || data], { type: type });
+    const url = window.URL.createObjectURL(blob,);
+    const anchor = document.createElement("a");
+    anchor.setAttribute("type", "hidden");
+    anchor.download = filename;
+    anchor.href = url;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
   }
 
   public updateArchivio<K extends keyof Archivio>(archivio: Archivio, fields: K[], projection?: string, additionalData?: AdditionalDataDefinition[]): Observable<Archivio> {
