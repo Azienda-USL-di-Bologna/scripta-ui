@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, ArchivioDiInteresse, ArchivioDiInteresseService, DecimalePredicato, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/internauta-model';
+import { Archivio, ArchivioDetail, ArchivioDetailView, ArchivioDiInteresse, ArchivioDiInteresseService, DecimalePredicato, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/internauta-model';
 import { MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListComponent } from '../archivi-list-container/archivi-list/archivi-list.component';
 import { DocsListComponent } from '../docs-list-container/docs-list/docs-list.component';
@@ -22,6 +22,10 @@ import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { UploadDocumentButton } from '../generic-caption-table/functional-buttons/upload-document-button';
 import { ExtendedDocDetailView } from '../docs-list-container/docs-list/extended-doc-detail-view';
 import { FunctionButton } from '../generic-caption-table/functional-buttons/functions-button';
+import { NavigationTabsService } from '../navigation-tabs/navigation-tabs.service';
+import { AppService } from '../app.service';
+import { ExtendedArchiviView } from '../archivi-list-container/archivi-list/extendend-archivi-view';
+import { UtilityFunctions } from '@bds/common-tools';
 
 @Component({
   selector: 'app-archivio',
@@ -52,6 +56,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public rightContentProgressSpinner: boolean = false;
   public rowCountInProgress: boolean = false;
   public rowCount: number;
+  public showOrganizzaPopUp: boolean = false;
+  public operazioneOrganizza: string;
+  public organizzaTarget: string[] = [];
+  public archivioDestinazioneOrganizza: ArchivioDetailView;
 
   get archivio(): Archivio { return this._archivio; }
 
@@ -112,8 +120,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     private archivioDiInteresseService: ArchivioDiInteresseService,
     private appComponent: AppComponent,
     private messageService: MessageService,
-    private datepipe: DatePipe,
+    private navigationTabsService: NavigationTabsService,
     private loginService: JwtLoginService,
+		private appService: AppService
   ) {
     this.loginService.loggedUser$.pipe(first()).subscribe(
       (utenteUtilities: UtenteUtilities) => {
@@ -162,7 +171,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       this.setForDettaglio();
     } else {
       if (this.contenutoDiviso) {
-        if (this.archivio.livello === 3) {
+        if (this.selectedButtonItem?.id === SelectButton.DETTAGLIO) {
+          this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
+          this.setForDettaglio();
+        } else if (this.selectedButtonItem?.id === SelectButton.DOCUMENTI || this.archivio.livello === 3) {
           this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DOCUMENTI);
           this.setForDocumenti();
         } else {
@@ -359,9 +371,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     const funzioniItems: MenuItem[] = [{
       label: "Copia/Sposta",
       disabled: this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO),
-      command: () => console.log("qui dovrò eseguire la Copia/Sposta")
+      command: () => this.showOrganizzaPopUp = true
     },
-    /* {
+    {
       label: "Genera",
       items: [
         {  
@@ -374,17 +386,67 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         }
       ],
       disabled: false
-    }, */
-    /* {
+    },
+    {
       label: "Scarica zip",
-      command: () => console.log("qui dovrò scaricare lo zip")
-    } */] as MenuItem[];
+      disabled: !this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA),
+      command: () => this.downloadArchivioZip(archivio as Archivio)
+    }] as MenuItem[];
 
     this.functionButton = {
       tooltip: "Funzioni",
       functionItems: funzioniItems,
       enable: true,
     };
+  }
+
+  /**
+   * Effettua il download del fascicolo in formato zip.
+   * @param archivio Il fascicolo da scaricare.
+   */
+  private downloadArchivioZip(archivio: Archivio) {
+    this.rightContentProgressSpinner = true;
+    this.extendedArchivioService.downloadArchivioZip(archivio).subscribe({
+      next: (res) => {
+        let filename = this.getFilenameFromResponse(res, archivio);
+        this.extendedArchivioService.downloadFile(res, "application/zip", filename);
+        this.rightContentProgressSpinner = false;
+      },
+      error: (err) => {
+        this.rightContentProgressSpinner = false;
+        let message = "Errore durante il download. Riprovare oppure contattare BabelCare.";
+        if (err.error.code === 1) {
+          message = err.error.message;
+        }
+        this.messageService.add({
+          severity: "error",
+          key: "ArchivioToast",
+          summary: "Errore download",
+          detail: message
+        });
+      }
+    });
+  }
+
+  /**
+   * Metodo che prende il nome del file dall'header della response.
+   * @param response La response http.
+   * @param archivio Il fascicolo per prendere il nome in caso non venga passato dal service.
+   * @returns Il nome del file.
+   */
+  private getFilenameFromResponse(response: any, archivio: Archivio) {
+    const contentDispositionHeader = response?.headers?.get('Content-Disposition');
+    if (contentDispositionHeader != null) {
+      const parts = contentDispositionHeader.split(';');
+      for (const part of parts) {
+        if (part.trim().startsWith('filename')) {
+          const filename = part.substring(part.indexOf('=') + 1).trim();
+          return filename.replace(/"/g, '');
+        }
+      }
+    }
+    const numero: string = archivio.numerazioneGerarchica.substring(0, archivio.numerazioneGerarchica.indexOf("/"));
+    return `${numero}-${archivio.anno}-${archivio.oggetto}.zip`;
   }
 
   /**
@@ -595,6 +657,66 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         }
       })
     );
+  }
+
+  /**
+   * Dall'html è stato scelto un archivio su cui poi verrà archiviata la pec.
+   * @param arch 
+   */
+  public archivioSelectedEvent(arch: any) {
+    this.archivioDestinazioneOrganizza = arch as ArchivioDetailView;
+  }
+
+  	/* 
+	 * L'utente ha cliccato su un archivio. Apriamolo
+	 */
+	public openArchive(archivio: ExtendedArchiviView): void {
+		this.navigationTabsService.addTabArchivio(archivio);
+		this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
+	}
+
+
+  public organizza(): void{
+    
+    switch(this.operazioneOrganizza){
+      case "Sposta":
+        //controlla che il check fascicolo sia false se this.archivio.livello == 1 && this.operazioneOrganizza == 'Sposta'
+          this.extendedArchivioService.spostaArchivio(this.archivio.id, this.archivioDestinazioneOrganizza.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto")).subscribe(
+            res => {
+              console.log("res", res)
+              this.openArchive(res as ExtendedArchiviView);
+            }
+          );
+        break;
+      case "Copia":
+          this.extendedArchivioService.copiaArchivio(this.archivio.id, this.archivioDestinazioneOrganizza.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto")).subscribe(
+            res => {
+              console.log("res", res)
+              this.openArchive(res as ExtendedArchiviView);
+            }
+          );
+        break;
+      case "Duplica":
+          this.extendedArchivioService.duplicaArchivio(this.archivio.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto")).subscribe(
+            res => {
+              console.log("res", res)
+              this.openArchive(res as ExtendedArchiviView);
+            }
+          );
+        break;
+      case "Rendi fascicolo":
+          this.extendedArchivioService.rendiFascicolo(this.archivio.id).subscribe(
+            res => {
+              console.log("res", res)
+              this.openArchive(res as ExtendedArchiviView);
+            }
+          );
+        break;
+    }
+    this.organizzaTarget = null;
+    this.operazioneOrganizza = null;
+    this.archivioDestinazioneOrganizza = null;
+    this.showOrganizzaPopUp = false
   }
   
   public ngOnDestroy(): void {

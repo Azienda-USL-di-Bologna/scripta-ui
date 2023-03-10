@@ -89,14 +89,15 @@
 
     <!-- BOTTONE NUOVO ARCHIVIO [disabled] = "archivio.canCreateSottoarchivio()"-->
     <span *ngIf="configuration.newArchivio && functionalOperationsComponent.newArchivoButton && functionalOperationsComponent.newArchivoButton.enable">
-      <i
+      <i *ngIf="canCreateArchivio"
         (click)="functionalOperationsComponent.newArchivoButton.aziendeItems.length > 1 ? 
           aziendaSelection.toggle($event) : 
           functionalOperationsComponent.newArchivoButton.aziendeItems[0].command()" 
         class="pi pi-plus-circle button-icon" 
         [pTooltip]="functionalOperationsComponent.newArchivoButton.tooltip"
         [attr.aria-label]="functionalOperationsComponent.newArchivoButton.tooltip"
-        tooltipPosition="bottom">
+        tooltipPosition="bottom"
+        >
       </i>
       <!-- <button
         type="button" 

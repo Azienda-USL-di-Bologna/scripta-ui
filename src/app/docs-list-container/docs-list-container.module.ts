@@ -13,6 +13,7 @@ import { DocsListModule } from './docs-list/docs-list.module';
   ],
   imports: [
     DocsListModule,
+    DocDetailAndPreviewModule,
     GenericCaptionTableModule,
     CommonModule,
     PrimeNgModule,

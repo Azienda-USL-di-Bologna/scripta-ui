@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import {  ArchiviRecentiService, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioRecente, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteService, UtenteStruttura, UtenteStrutturaService } from '@bds/internauta-model';
+import {  ArchiviRecentiService, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioRecente, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteService, UtenteStruttura, UtenteStrutturaService, PermessoEntitaStoredProcedure } from '@bds/internauta-model';
 import { AppService } from '../../app.service';
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { Subscription, combineLatestWith } from 'rxjs';
@@ -153,7 +153,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		if (!Object.values(ArchiviListMode).includes(this.archiviListMode)) {
 			this.archiviListMode = ArchiviListMode.VISIBILI;
 		}
-		
 		//this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } });
 		const loggeduser$ = this.loginService.loggedUser$.pipe(first());
 		const parametroFascicoliParlanti$ = this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null).pipe(first());
@@ -177,6 +176,23 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					}
 					// Parte relativa al utenteUtilities
 					this.utenteUtilitiesLogin = utenteUtilities;
+					const tempCanCreateArchivio: Map<String, boolean> = new Map();
+					const tempMap : Map<String, PermessoEntitaStoredProcedure[]> = new Map(Object.entries(this.utenteUtilitiesLogin.getUtente().permessiGediByCodiceAzienda));
+					this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach(a => {
+						if(tempMap.has(a.codice)) {
+							//this.canCreateArchivio = tempMap.get(a.codice);
+							const permessi : PermessoEntitaStoredProcedure[] = tempMap.get(a.codice);
+							permessi.forEach(p => {
+							  p.categorie.forEach(categoria => {
+								categoria.permessi.forEach(permesso => {
+								  if(permesso.predicato == "CREA") {
+									tempCanCreateArchivio.set(a.codice, true);
+								  }
+								});
+							  });
+							});
+						  }
+						});
 					this.newArchivoButton = {
 						tooltip: "Crea nuovo fascicolo",
 						livello: 0,
@@ -184,7 +200,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						aziendeItems: this.utenteUtilitiesLogin.getUtente().aziendeAttive.map(a => {
 							return {
 								label: a.nome,
-								disabled: false,
+								disabled: !tempCanCreateArchivio.has(a.codice),
 								command: () => this.newArchivio(a.id)
 							} as MenuItem
 						})

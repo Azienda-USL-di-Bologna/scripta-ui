@@ -185,7 +185,7 @@ export class ResponsabiliComponent implements OnInit {
           } as BatchOperation);
 
           const attivita = new Attivita();
-          attivita.idApplicazione = {id: "scripta"} as Applicazione;
+          attivita.idApplicazione = {id: "gediInt"} as Applicazione;
           attivita.idAzienda = {id: this.archivio.idAzienda.id} as Azienda;
           attivita.idPersona = {id:attoreToOperate.idPersona.id }as Persona;
           attivita.tipo = "attivita";
@@ -348,37 +348,45 @@ export class ResponsabiliComponent implements OnInit {
    public onUtenteStrutturaSelected(utenteStruttura: UtenteStruttura, attore: AttoreArchivio, rowIndex: number) {
     if (utenteStruttura) {
       attore.idPersona =  utenteStruttura.idUtente.idPersona;
-      if (attore.ruolo !== RuoloAttoreArchivio.VICARIO) {
+      if (attore.ruolo !== RuoloAttoreArchivio.VICARIO && attore.ruolo !== RuoloAttoreArchivio.RESPONSABILE_PROPOSTO) {
         attore.idStruttura = utenteStruttura.idStruttura;
         this.loadStruttureAttore(attore);
       } else {
-        // Prima controllo che questo vicario non ci sia già.
-        if (this.archivio.attoriList.some((a: AttoreArchivio) => a.fk_idPersona.id === attore.idPersona.id && a.ruolo === RuoloAttoreArchivio.VICARIO)) {
-          // Vicario già presente, ci fermiamo qua
-          this.messageService.add({
-            severity: "warn",
-            summary: "Attenzione",
-            detail: "Il vicario selezionato è già presente"
-          });
-          this.inEditing = false; 
-          this.onRowEditCancel(attore, rowIndex);
-          return;
-        } else if (this.archivio.attoriList.some((a: AttoreArchivio) => a.fk_idPersona.id === attore.idPersona.id && a.ruolo === RuoloAttoreArchivio.RESPONSABILE)) {
-          // Vicario già presente, ci fermiamo qua
-          this.messageService.add({
-            severity: "warn",
-            summary: "Attenzione",
-            detail: "Il vicario selezionato è già presente come responsabile"
-          });
-          this.inEditing = false; 
-          this.onRowEditCancel(attore, rowIndex);
-          return;
-        } else {
-          // Il vicario va inserito
-          // Qui finisce l'editing del vicario, vogliamo salvarlo subito dopo la scelta
-          this.inEditing = false; 
-          this.onRowEditSave(attore, rowIndex, "INSERT");
-          this.loadStruttureAttore(attore); // Carichiamo una struttura per la visualizzazione non editing del vicario
+        switch(attore.ruolo){
+          case RuoloAttoreArchivio.VICARIO:
+            // Prima controllo che questo vicario non ci sia già.
+            if (this.archivio.attoriList.some((a: AttoreArchivio) => a.fk_idPersona.id === attore.idPersona.id && a.ruolo === RuoloAttoreArchivio.VICARIO)) {
+              // Vicario già presente, ci fermiamo qua
+              this.messageService.add({
+                severity: "warn",
+                summary: "Attenzione",
+                detail: "Il vicario selezionato è già presente"
+              });
+              this.inEditing = false; 
+              this.onRowEditCancel(attore, rowIndex);
+              return;
+            } else if (this.archivio.attoriList.some((a: AttoreArchivio) => a.fk_idPersona.id === attore.idPersona.id && a.ruolo === RuoloAttoreArchivio.RESPONSABILE)) {
+              // Vicario già presente, ci fermiamo qua
+              this.messageService.add({
+                severity: "warn",
+                summary: "Attenzione",
+                detail: "Il vicario selezionato è già presente come responsabile"
+              });
+              this.inEditing = false; 
+              this.onRowEditCancel(attore, rowIndex);
+              return;
+            } else {
+              // Il vicario va inserito
+              // Qui finisce l'editing del vicario, vogliamo salvarlo subito dopo la scelta
+              this.inEditing = false; 
+              this.onRowEditSave(attore, rowIndex, "INSERT");
+              this.loadStruttureAttore(attore); // Carichiamo una struttura per la visualizzazione non editing del vicario
+            }
+            break;
+          case RuoloAttoreArchivio.RESPONSABILE_PROPOSTO:
+            // Il responsabile proposto va inserito
+            // Qui finisce l'editing del vicario, vogliamo salvarlo subito dopo la scelta
+            this.loadStruttureAttore(attore, rowIndex); // Carichiamo una struttura per la visualizzazione non editing del vicario
         }
       }
       
@@ -391,13 +399,13 @@ export class ResponsabiliComponent implements OnInit {
    * @param perm 
    * @param idSoggetto 
    */
-  private loadStruttureAttore(attore: AttoreArchivio) {
+  private loadStruttureAttore(attore: AttoreArchivio, rowIndex?: number) {
     this.subscriptions.push(this.permessiDettaglioArchivioService.loadStruttureOfPersona(attore.idPersona.id, this.archivio.idAzienda.id, true)
       .subscribe(
         (data: any) => {
           if (data && data.results) {
             const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]> data.results;
-            if (attore.ruolo !== "VICARIO") {
+            if (attore.ruolo !== "VICARIO" && attore.ruolo !== RuoloAttoreArchivio.RESPONSABILE_PROPOSTO) {
               if (attore.idStruttura) {
                 attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
                   return us.idStruttura.id === attore.idStruttura.id
@@ -407,7 +415,7 @@ export class ResponsabiliComponent implements OnInit {
               utentiStruttura
                 .filter((us: UtenteStruttura) => us.attivo === true)
                 .forEach((us: UtenteStruttura) => { this.struttureAttoreInEditing.push(us.idStruttura) });
-            } else {
+            } else if (attore.ruolo === "VICARIO"){
               // Qui nel caso si tratti di un vicario, per il quale la struttura non è importante e voglio mostrare la diretta/unificata
               attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
                 return us.idAfferenzaStruttura.codice === "DIRETTA";
@@ -419,6 +427,30 @@ export class ResponsabiliComponent implements OnInit {
               }
               this.struttureAttoreInEditing = [];
               this.struttureAttoreInEditing.push(attore.idStruttura);
+            } else if ( attore.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO){
+              // Qui nel caso si tratti di un reposnsabile proposto, se ha una sola afferenza allora il responsabile proposto viene subito salvato e si esce dall'editing
+              if (utentiStruttura.length === 1){
+                attore.idStruttura = utentiStruttura[0].idStruttura;
+                this.inEditing = false; 
+                this.onRowEditSave(attore, rowIndex, "INSERT");
+                this.struttureAttoreInEditing = [];
+                this.struttureAttoreInEditing.push(attore.idStruttura);
+              }else{
+                this.messageService.add({
+                  severity: "warn",
+                  summary: "Attenzione",
+                  detail: "Scegliere la struttura di afferenza e confermare"
+                });
+                if (attore.idStruttura) {
+                  attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
+                    return us.idStruttura.id === attore.idStruttura.id
+                  })?.idStruttura;
+                }
+                this.struttureAttoreInEditing = [];
+                utentiStruttura
+                  .filter((us: UtenteStruttura) => us.attivo === true)
+                  .forEach((us: UtenteStruttura) => { this.struttureAttoreInEditing.push(us.idStruttura) });
+              }
             }
           }
         }
