@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { TipComponent } from '@bds/common-components';
 import { Archivio, ArchivioDetail } from '@bds/internauta-model';
 import { UtenteUtilities } from '@bds/jwt-login';
 import { ArchiviListContainerComponent } from '../archivi-list-container/archivi-list-container.component';
@@ -197,7 +198,7 @@ export class NavigationTabsService {
 
   public buildaTabTIP(): TabItem {
     return new TabItem(
-      TipContainerComponent,
+      TipComponent,
       {},
       true,
       "Import Pregressi",
