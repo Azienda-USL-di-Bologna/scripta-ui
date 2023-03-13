@@ -948,8 +948,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 * L'utente ha cliccato su un archivio. Apriamolo
 	 */
 	public openArchive(archivio: ExtendedArchiviView): void {
+		if (archivio.pregresso) {
+			this.openPregresso(archivio);
+		} else {
 		this.navigationTabsService.addTabArchivio(archivio);
 		this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
+		}
 	}
 
 	public isArchivioChiuso(archivio: ExtendedArchiviView): boolean {
@@ -1420,4 +1424,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       }
 	  return temp;
 	}
+
+	public openPregresso(archivio: ExtendedArchiviView) {
+		this.navigationTabsService.addTabArchivio(archivio);
+			this.appService.appNameSelection(`${archivio.id}`);
+	  }
 }
