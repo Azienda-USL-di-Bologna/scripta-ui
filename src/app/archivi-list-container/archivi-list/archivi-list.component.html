@@ -27,7 +27,6 @@
     <tr class="header-row">
       <th *ngFor="let col of columns" 
         pReorderableColumn 
-        [ngSwitch]="col.field" 
         [ngClass]="col.headerClass"
         [pSortableColumn]="col.sortField"
         [pSortableColumnDisabled]="archiviListMode === 'RECENTI' && col.field == 'dataCreazione'"
@@ -235,7 +234,7 @@
                   [options]="livelliFiltrabili"
                   [(ngModel)]="livelloValue"
                   (onChange)="filter($event.value)"
-                  [disabled]="(archiviListMode === archiviListModeEnum.TUTTI || archiviListMode === archiviListModeEnum.RECENTI || archivioPadre)"
+                  [disabled]="(archiviListMode === archiviListModeEnum.TUTTI || archiviListMode === archiviListModeEnum.RECENTI || !!archivioPadre)"
                   optionValue="value" 
                   optionLabel="label" 
                   panelStyleClass="dropdown-panel-livello"

@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
+import { TipComponent } from '@bds/common-components';
 import { Archivio, ArchivioDetail } from '@bds/internauta-model';
+import { UtenteUtilities } from '@bds/jwt-login';
 import { ArchiviListContainerComponent } from '../archivi-list-container/archivi-list-container.component';
 import { ExtendedArchiviView } from '../archivi-list-container/archivi-list/extendend-archivi-view';
 import { ArchivioComponent } from '../archivio/archivio.component';
 import { DocComponent } from '../doc/doc.component';
 import { DocsListContainerComponent } from '../docs-list-container/docs-list-container.component';
 import { ExtendedDocDetailView } from '../docs-list-container/docs-list/extended-doc-detail-view';
+import { TipContainerComponent } from '../tip-container/tip-container.component';
 import { TabItem, TabType } from './tab-item';
 
 @Injectable()
@@ -124,6 +127,9 @@ export class NavigationTabsService {
           case TabType.ARCHIVIO:
             tab.component = ArchivioComponent;
             break;
+          case TabType.TIP:
+            tab.component = TipContainerComponent;
+            break;
         }
         this.tabs.push(tab);
       }
@@ -187,6 +193,19 @@ export class NavigationTabsService {
       TabType.ARCHIVIO,
       archivio.fk_idArchivioRadice.id.toString(),
       labelForAppName
+    );
+  }
+
+  public buildaTabTIP(): TabItem {
+    return new TabItem(
+      TipComponent,
+      {},
+      true,
+      "Import Pregressi",
+      "pi pi-file-excel",
+      TabType.TIP,
+      TabType.TIP, // Lo uso come id univoco di questo tab
+      "Tool Importazione Pregressi"
     );
   }
 
@@ -289,6 +308,15 @@ export class NavigationTabsService {
       if (active) {
         this.activeLastTab();
       }
+    }
+  }
+
+  public addTabTip(active: boolean = true): void {
+    this.addTab(
+      this.buildaTabTIP()
+    );
+    if (active) {
+      this.activeLastTab();
     }
   }
 }

@@ -12,7 +12,7 @@
   </ng-template>
   <ng-template pTemplate>
     <!-- Contenuto (lista archivi + lista documenti)-->
-    <p-splitter *ngIf="!contenutoDiviso" layout="vertical" gutterSize="6" [ngClass]="{
+    <p-splitter *ngIf="!contenutoDiviso" layout="vertical" [gutterSize]="6" [ngClass]="{
         'hide': selectedButtonItem && selectedButtonItem.id !== 'CONTENUTO', 
         'hide-sottoarchivi': archivio.livello === 3 
       }">
