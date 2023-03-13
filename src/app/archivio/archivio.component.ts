@@ -27,6 +27,7 @@ import { AppService } from '../app.service';
 import { ExtendedArchiviView } from '../archivi-list-container/archivi-list/extendend-archivi-view';
 import { NgModel } from '@angular/forms';
 import { ArchivioUtilsService } from './archivio-utils.service';
+import { UtilityFunctions } from '@bds/common-tools';
 
 @Component({
   selector: 'app-archivio',
@@ -407,7 +408,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     },
     {
       label: "Scarica zip",
-      command: () => console.log("qui dovrò scaricare lo zip")
+      disabled: !this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA),
+      command: () => this.downloadArchivioZip(archivio as Archivio)
     }] as MenuItem[];
 
     this.functionButton = {
@@ -415,6 +417,55 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       functionItems: funzioniItems,
       enable: true,
     };
+  }
+
+  /**
+   * Effettua il download del fascicolo in formato zip.
+   * @param archivio Il fascicolo da scaricare.
+   */
+  private downloadArchivioZip(archivio: Archivio) {
+    this.rightContentProgressSpinner = true;
+    this.extendedArchivioService.downloadArchivioZip(archivio).subscribe({
+      next: (res) => {
+        let filename = this.getFilenameFromResponse(res, archivio);
+        this.extendedArchivioService.downloadFile(res, "application/zip", filename);
+        this.rightContentProgressSpinner = false;
+      },
+      error: (err) => {
+        this.rightContentProgressSpinner = false;
+        let message = "Errore durante il download. Riprovare oppure contattare BabelCare.";
+        if (err.error.code === 1) {
+          message = err.error.message;
+        }
+        this.messageService.add({
+          severity: "error",
+          key: "ArchivioToast",
+          summary: "Errore download",
+          detail: message
+        });
+      }
+    });
+  }
+
+  /**
+   * Metodo che prende il nome del file dall'header della response.
+   * @param response La response http.
+   * @param archivio Il fascicolo per prendere il nome in caso non venga passato dal service.
+   * @returns Il nome del file.
+   */
+  private getFilenameFromResponse(response: any, archivio: Archivio) {
+    const contentDispositionHeader = response?.headers?.get('Content-Disposition');
+    if (contentDispositionHeader != null) {
+      const parts = contentDispositionHeader.split(';');
+      for (const part of parts) {
+        if (part.trim().startsWith('filename')) {
+          const filename = part.substring(part.indexOf('=') + 1).trim();
+          return filename.replace(/"/g, '');
+        }
+      }
+    }
+    const numero: string = archivio.numerazioneGerarchica.substring(0, archivio.numerazioneGerarchica.indexOf("/"));
+    return `${numero}-${archivio.anno}-${archivio.oggetto}.zip`;
   }
 
   /**

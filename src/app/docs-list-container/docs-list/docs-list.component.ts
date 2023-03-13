@@ -269,7 +269,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.resetPaginationAndLoadData();
   }
 
-  @Input() get selectedColumns(): any[] {
+  get selectedColumns(): ColonnaBds[] {
     return this._selectedColumns;
   }
 
@@ -293,6 +293,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (!this.isResponsabileVersamento) {
       this.selectableColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
       this.selectedColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
+    }
+    if (this._selectedColumns[this._selectedColumns.length-1] === undefined) {
+      this._selectedColumns.pop();
     }
   }
 

@@ -21,5 +21,6 @@ export class CaptionConfiguration {
 export enum CaptionComponent {
   DOCS_LIST = "DOCS_LIST",
   ARCHIVI_LIST = "ARCHIVI_LIST",
-  ARCHIVIO = "ARCHIVIO"
+  ARCHIVIO = "ARCHIVIO",
+  TIP = "TIP"
 }

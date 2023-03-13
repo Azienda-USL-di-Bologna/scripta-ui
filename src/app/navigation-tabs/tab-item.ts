@@ -16,5 +16,6 @@ export enum TabType {
   DOCS_LIST = "DOCS_LIST",
   ARCHIVI_LIST = "ARCHIVI_LIST",
   DOC = "DOC",
-  ARCHIVIO = "ARCHIVIO"
+  ARCHIVIO = "ARCHIVIO",
+  TIP = "TIP"
 }
