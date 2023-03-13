@@ -112,6 +112,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public docSelected: ExtendedDocDetailView;
   public isResponsabileVersamento: boolean = false;
   public hasPienaVisibilita: boolean = false;
+  private _reloadDataFalg: boolean = false;
 
   private _archivio: Archivio;
   get archivio(): Archivio { return this._archivio; }
@@ -270,6 +271,14 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
 
   @Input() get selectedColumns(): any[] {
     return this._selectedColumns;
+  }
+
+  @Input() set reloadData(reloadDataFalg: boolean){
+    this._reloadDataFalg = reloadDataFalg;
+    if(this._reloadDataFalg){
+      this.loadData();
+      this._reloadDataFalg = false;
+    }
   }
 
   set selectedColumns(colsSelected: ColonnaBds[]) {

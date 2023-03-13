@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, ArchivioDetailView, ArchivioDiInteresse, ArchivioDiInteresseService, DecimalePredicato, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio } from '@bds/internauta-model';
+import { Archivio, ArchivioDetail, ArchivioDetailView, ArchivioDiInteresse, ArchivioDiInteresseService, DecimalePredicato, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio, ArchivioDetailViewService } from '@bds/internauta-model';
 import { MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListComponent } from '../archivi-list-container/archivi-list/archivi-list.component';
 import { DocsListComponent } from '../docs-list-container/docs-list/docs-list.component';
@@ -14,7 +14,7 @@ import { RichiestaAccessoArchiviComponent } from './richiesta-accesso-archivi/ri
 import { ExtendedArchivioService } from './extended-archivio.service';
 import { Table } from 'primeng/table';
 import { AppComponent } from '../app.component';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@bds/next-sdr';
+import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from '@bds/next-sdr';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators'
 import { DatePipe } from '@angular/common';
@@ -25,6 +25,8 @@ import { FunctionButton } from '../generic-caption-table/functional-buttons/func
 import { NavigationTabsService } from '../navigation-tabs/navigation-tabs.service';
 import { AppService } from '../app.service';
 import { ExtendedArchiviView } from '../archivi-list-container/archivi-list/extendend-archivi-view';
+import { NgModel } from '@angular/forms';
+import { ArchivioUtilsService } from './archivio-utils.service';
 
 @Component({
   selector: 'app-archivio',
@@ -56,9 +58,21 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public rowCountInProgress: boolean = false;
   public rowCount: number;
   public showOrganizzaPopUp: boolean = false;
-  public operazioneOrganizza: string;
+  public reloadDataDocList: boolean = false;
+  public operazioneOrganizza: string = null;
   public organizzaTarget: string[] = [];
-  public archivioDestinazioneOrganizza: ArchivioDetailView;
+  public archivioDestinazioneOrganizza: ArchivioDetailView = null;
+  public profonditaArchivio: number;
+
+  private ARCHIVIO_DETAIL_PROJECTION = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
+
+  public pageConfNoLimit: PagingConf = {
+    conf: {
+      page: 0,
+      size: 999999
+    },
+    mode: "PAGE_NO_COUNT"
+  };
 
   get archivio(): Archivio { return this._archivio; }
 
@@ -117,11 +131,13 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   constructor(
     private extendedArchivioService: ExtendedArchivioService,
     private archivioDiInteresseService: ArchivioDiInteresseService,
+    private achivioDetailViewService: ArchivioDetailViewService,
     private appComponent: AppComponent,
     private messageService: MessageService,
     private navigationTabsService: NavigationTabsService,
     private loginService: JwtLoginService,
-		private appService: AppService
+    private appService: AppService,
+		private archivioUtilsService: ArchivioUtilsService
   ) {
     this.loginService.loggedUser$.pipe(first()).subscribe(
       (utenteUtilities: UtenteUtilities) => {
@@ -161,6 +177,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.buildNewArchivioButton(this.archivio);
     this.buildFunctionButton(this.archivio);
     this.buildUploadDocumentButton(this.archivio);
+    this.setProfonditaArchivio(this.archivio);
     
     if (this.archivio.attoriList.find(a => a.ruolo === 'RESPONSABILE_PROPOSTO' && a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id )) {
       this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DETTAGLIO);
@@ -266,6 +283,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         this.setForContenuto();
         break;
     }
+    this.reloadDataDocList = false;
   }
 
   /**
@@ -370,7 +388,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     const funzioniItems: MenuItem[] = [{
       label: "Copia/Sposta",
       disabled: this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO),
-      command: () => this.showOrganizzaPopUp = true
+      command: () => {this.showOrganizzaPopUp = true; console.log(this.profonditaArchivio);}
+      
     },
     {
       label: "Genera",
@@ -616,56 +635,180 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.archivioDestinazioneOrganizza = arch as ArchivioDetailView;
   }
 
-  	/* 
-	 * L'utente ha cliccato su un archivio. Apriamolo
-	 */
-	public openArchive(archivio: ExtendedArchiviView): void {
-		this.navigationTabsService.addTabArchivio(archivio);
-		this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
-	}
-
+  
+  public setProfonditaArchivio(arch: Archivio | ArchivioDetail): void{
+    this.profonditaArchivio = 1;
+    if (arch.numeroSottoarchivi > 0){
+      this.profonditaArchivio = 2;
+      if (arch.livello === 1){
+        const filtersAndSorts =  this.buildFilterToLoadChildren(arch);
+        this.achivioDetailViewService.getData(this.ARCHIVIO_DETAIL_PROJECTION, filtersAndSorts, null, this.pageConfNoLimit)
+        .subscribe((res: any) => {
+            const children = res.results;
+            if (children.some((x: any) => x.numeroSottoarchivi > 0)){
+              this.profonditaArchivio = 3;
+            }
+          });
+        }
+      }
+    }
+    
+  public getLivelloForAutocompliteArchivioDestinazione(): number{
+    if (this.organizzaTarget.includes("contenuto") && !!!this.organizzaTarget.includes("fascicolo")){
+      return 3;
+    }else{
+      return 3 - this.profonditaArchivio;
+    }
+  }
+  
+  private buildFilterToLoadChildren(archivio: Archivio | ArchivioDetail):  FiltersAndSorts {
+    const filtersAndSorts: FiltersAndSorts = new FiltersAndSorts();
+    filtersAndSorts.addFilter(new FilterDefinition("idArchivioPadre.id", FILTER_TYPES.not_string.equals, archivio.id));
+    filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals,archivio.fk_idAzienda.id));
+    filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+    return filtersAndSorts;
+  }
+  
+    /* 
+  * L'utente ha cliccato su un archivio. Apriamolo
+  */
+  public openArchive(archivio: ExtendedArchiviView): void {
+    const arch: Archivio = archivio as any as Archivio;
+    this.navigationTabsService.addTabArchivio(archivio);
+    // this.archivioUtilsService.updatedArchiveSelection(arch);
+    this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
+  }
 
   public organizza(): void{
-    
+    this.rightContentProgressSpinner = true;
     switch(this.operazioneOrganizza){
       case "Sposta":
-        //controlla che il check fascicolo sia false se this.archivio.livello == 1 && this.operazioneOrganizza == 'Sposta'
-          this.extendedArchivioService.spostaArchivio(this.archivio.id, this.archivioDestinazioneOrganizza.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto")).subscribe(
-            res => {
+          this.extendedArchivioService.spostaArchivio(this.archivio.id, this.archivioDestinazioneOrganizza.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto"))
+          .subscribe({
+            next: (res: any) => {
               console.log("res", res)
+              this.messageService.add({
+                severity: "success",
+                key: "ArchivioToast",
+                summary: "OK",
+                detail: "Archivio spostato con successo"
+              });
+              if (this.organizzaTarget.includes("contenuto")){
+                this.reloadDataDocList = true;
+              }
               this.openArchive(res as ExtendedArchiviView);
+            },
+            error: (e: any) => {
+              this.messageService.add({
+                severity: "error",
+                key: "ArchivioToast",
+                summary: "Attenzione",
+                detail: `Error, ` + e.error.message 
+              });
             }
-          );
+          }).add(() => {
+            //Called when operation is complete (both success and error)
+            this.rightContentProgressSpinner = false;
+          });
         break;
       case "Copia":
-          this.extendedArchivioService.copiaArchivio(this.archivio.id, this.archivioDestinazioneOrganizza.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto")).subscribe(
-            res => {
+          this.extendedArchivioService.copiaArchivio(this.archivio.id, this.archivioDestinazioneOrganizza.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto"))
+          .subscribe({
+            next: (res: any) => {
               console.log("res", res)
+              this.messageService.add({
+                severity: "success",
+                key: "ArchivioToast",
+                summary: "OK",
+                detail: "Archivio copiato con successo"
+              });
               this.openArchive(res as ExtendedArchiviView);
+            },
+            error: (e: any) => {
+              this.messageService.add({
+                severity: "error",
+                key: "ArchivioToast",
+                summary: "Attenzione",
+                detail: `Error, ` + e.error.message 
+              });
             }
-          );
+          }).add(() => {
+            //Called when operation is complete (both success and error)
+            this.rightContentProgressSpinner = false;
+          });
         break;
       case "Duplica":
-          this.extendedArchivioService.duplicaArchivio(this.archivio.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto")).subscribe(
-            res => {
+          this.extendedArchivioService.duplicaArchivio(this.archivio.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto"))
+          .subscribe({
+            next: (res: any) => {
               console.log("res", res)
+              this.messageService.add({
+                severity: "success",
+                key: "ArchivioToast",
+                summary: "OK",
+                detail: "Archivio duplicato con successo"
+              });
               this.openArchive(res as ExtendedArchiviView);
+            },
+            error: (e: any) => {
+              this.messageService.add({
+                severity: "error",
+                key: "ArchivioToast",
+                summary: "Attenzione",
+                detail: `Error, ` + e.error.message 
+              });
             }
-          );
+          }).add(() => {
+            //Called when operation is complete (both success and error)
+            this.rightContentProgressSpinner = false;
+          });
         break;
       case "Rendi fascicolo":
-          this.extendedArchivioService.rendiFascicolo(this.archivio.id).subscribe(
-            res => {
-              console.log("res", res)
-              this.openArchive(res as ExtendedArchiviView);
-            }
-          );
+        this.extendedArchivioService.rendiFascicolo(this.archivio.id)
+        .subscribe({
+          next: (res: any) => {
+            console.log("res", res)
+            this.messageService.add({
+              severity: "success",
+              key: "ArchivioToast",
+              summary: "OK",
+              detail: "Archivio reso fascicolo con successo"
+            });
+            this.openArchive(res as ExtendedArchiviView);
+          },
+          error: (e: any) => {
+            this.messageService.add({
+              severity: "error",
+              key: "ArchivioToast",
+              summary: "Attenzione",
+              detail: `Error, ` + e.error.message 
+            });
+          }
+        }).add(() => {
+          //Called when operation is complete (both success and error)
+          this.rightContentProgressSpinner = false;
+        });
         break;
     }
-    this.organizzaTarget = null;
+    this.organizzaTarget = [];
     this.operazioneOrganizza = null;
     this.archivioDestinazioneOrganizza = null;
     this.showOrganizzaPopUp = false
+  }
+
+  public canOrganizzare(): boolean{
+    if (this.archivioDestinazioneOrganizza !== null && this.organizzaTarget.length > 0 && this.operazioneOrganizza !== null && this.operazioneOrganizza !== 'Rendi fascicolo'  && this.operazioneOrganizza !== 'Duplica'){
+      return true;
+    }
+    if (this.organizzaTarget.length > 0 && this.operazioneOrganizza === 'Duplica'){
+      console.log(this.organizzaTarget);
+      
+      return true;
+    }
+    if (this.operazioneOrganizza === 'Rendi fascicolo'){
+      return true;
+    }
+    return false
   }
   
   public ngOnDestroy(): void {
