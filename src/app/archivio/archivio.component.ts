@@ -74,6 +74,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     },
     mode: "PAGE_NO_COUNT"
   };
+  private pregresso: boolean = false;
 
   get archivio(): Archivio { return this._archivio; }
 
@@ -174,6 +175,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * - Si posizione sul corretto selctedButton e mostra il corretto sottocomponente
    */
   private inizializeAll(): void {
+    if (this.archivio.pregresso) {
+      this.pregressaArchivio();
+    }
     this.buildSelectButtonItems(this.archivio);
     this.buildNewArchivioButton(this.archivio);
     this.buildFunctionButton(this.archivio);
@@ -389,8 +393,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     const funzioniItems: MenuItem[] = [{
       label: "Copia/Sposta",
       disabled: this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO),
-      command: () => {this.showOrganizzaPopUp = true; console.log(this.profonditaArchivio);}
-      
+      command: () => this.showOrganizzaPopUp = true
     },
     {
       label: "Genera",
@@ -868,6 +871,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       return true;
     }
     return false
+  }
+
+  private pregressaArchivio(): void {
+    // se è pregresso, il massimo che si può fare è visualizzare
+    this.archivio.permessiEspliciti.forEach(pe => {if (pe.bit > 2) pe.bit=2})
+    this.pregresso = this.archivio.pregresso; //TODO: impedisci che sembri tutto chiuso
   }
   
   public ngOnDestroy(): void {
