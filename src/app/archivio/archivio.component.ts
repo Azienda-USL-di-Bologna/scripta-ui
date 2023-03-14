@@ -158,6 +158,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * - Si posizione sul corretto selctedButton e mostra il corretto sottocomponente
    */
   private inizializeAll(): void {
+    // se è pregresso, il massimo che si può fare è visualizzare
+    if (this.archivio.pregresso) {
+      this.archivio.permessiEspliciti.forEach(pe => {if (pe.bit > 2) pe.bit=2})
+    }
     this.buildSelectButtonItems(this.archivio);
     this.buildNewArchivioButton(this.archivio);
     this.buildFunctionButton(this.archivio);
