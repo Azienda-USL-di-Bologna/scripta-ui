@@ -60,6 +60,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public operazioneOrganizza: string;
   public organizzaTarget: string[] = [];
   public archivioDestinazioneOrganizza: ArchivioDetailView;
+  private pregresso: boolean = false;
 
   get archivio(): Archivio { return this._archivio; }
 
@@ -158,9 +159,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * - Si posizione sul corretto selctedButton e mostra il corretto sottocomponente
    */
   private inizializeAll(): void {
-    // se è pregresso, il massimo che si può fare è visualizzare
     if (this.archivio.pregresso) {
-      this.archivio.permessiEspliciti.forEach(pe => {if (pe.bit > 2) pe.bit=2})
+      this.pregressaArchivio();
     }
     this.buildSelectButtonItems(this.archivio);
     this.buildNewArchivioButton(this.archivio);
@@ -374,7 +374,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public buildFunctionButton(archivio: Archivio | ArchivioDetail): void {
     const funzioniItems: MenuItem[] = [{
       label: "Copia/Sposta",
-      disabled: this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO),
+      disabled: this.isArchivioChiuso() && !this.hasPermessoMinimo(DecimalePredicato.VICARIO) || this.pregresso,
       command: () => this.showOrganizzaPopUp = true
     },
     {
@@ -721,6 +721,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.operazioneOrganizza = null;
     this.archivioDestinazioneOrganizza = null;
     this.showOrganizzaPopUp = false
+  }
+
+  private pregressaArchivio(): void {
+    // se è pregresso, il massimo che si può fare è visualizzare
+    this.archivio.permessiEspliciti.forEach(pe => {if (pe.bit > 2) pe.bit=2})
+    this.pregresso = this.archivio.pregresso; //TODO: impedisci che sembri tutto chiuso
   }
   
   public ngOnDestroy(): void {
