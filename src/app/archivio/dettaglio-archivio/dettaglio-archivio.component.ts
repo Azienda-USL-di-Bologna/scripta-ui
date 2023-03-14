@@ -58,7 +58,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     {name: "50", value: 50 }, {name: "60", value: 60 }, {name: "Illimitata", value: 999}];
   public anniTenutaSelezionabili: any[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
-  public loggedUserIsResponsbaileOrVicario = false;
+  public loggedUserCanEditDetails = false;
   public showLogs: boolean = false;
   public isArchivioChiuso = false;
   public loggedUserIsResponsbaileProposto = false;
@@ -103,11 +103,12 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     //this.updateAnniTenuta();
     // this.getResponsabili();
     this.isArchivioClosed();
-    this.loggedUserIsResponsbaileOrVicario = (this.archivio["attoriList"] as AttoreArchivio[])
+    this.loggedUserCanEditDetails = (this.archivio["attoriList"] as AttoreArchivio[])
       .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id 
         && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE 
           || a.ruolo === RuoloAttoreArchivio.VICARIO 
-          || a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
+          || a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO))
+          && !this.archivio.pregresso;
       // this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
     if (this.archivio.tipo !== TipoArchivio.SPECIALE) {
       this.tipiArchivioObj = this.tipiArchivioObj.filter(a => a.value !== TipoArchivio.SPECIALE);
@@ -284,7 +285,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
 
   public changeVisibilita(): void {
-    if (this.loggedUserIsResponsbaileOrVicario && !this.aziendeConFascicoliParlanti?.includes(this.archivio.idAzienda.id)) {
+    if (this.loggedUserCanEditDetails && !this.aziendeConFascicoliParlanti?.includes(this.archivio.idAzienda.id)) {
       this.archivio.riservato = !(this.archivio.riservato);
       const archivioToUpdate: Archivio = new Archivio();
       archivioToUpdate.riservato = this.archivio.riservato
