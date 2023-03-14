@@ -759,6 +759,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
             }
           }).add(() => {
             //Called when operation is complete (both success and error)
+            this.resetOrganizzaPopup();
             this.rightContentProgressSpinner = false;
           });
         break;
@@ -785,6 +786,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
             }
           }).add(() => {
             //Called when operation is complete (both success and error)
+            this.resetOrganizzaPopup();
             this.rightContentProgressSpinner = false;
           });
         break;
@@ -811,6 +813,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
             }
           }).add(() => {
             //Called when operation is complete (both success and error)
+            this.resetOrganizzaPopup();
             this.rightContentProgressSpinner = false;
           });
         break;
@@ -837,14 +840,19 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           }
         }).add(() => {
           //Called when operation is complete (both success and error)
+          this.resetOrganizzaPopup();
+
           this.rightContentProgressSpinner = false;
         });
         break;
     }
+  }
+
+  public resetOrganizzaPopup():void {
     this.organizzaTarget = [];
     this.operazioneOrganizza = null;
     this.archivioDestinazioneOrganizza = null;
-    this.showOrganizzaPopUp = false
+    this.showOrganizzaPopUp = false;
   }
 
   public canOrganizzare(): boolean{
