@@ -138,27 +138,17 @@ $min-width-label: 9.688rem;
 
 
 .log-container {
-  position: absolute;
-  flex: auto;
+  height: 100%;
   transition: height 1s;
-  //transform: translateX(148%);
-  //z-index: 99;
-  height: auto;
-  width: auto;
   background-color: #f4f4f4;
   &.showLogs {
-    flex: auto;
-    overflow-y: scroll;
-    overflow-x: scroll;
     font-size: 0.938rem;
-    height: 80%;
   }
   .header-cronology {
-    //margin: 0.813rem;
+    height: 20px;
     cursor: pointer;
     text-align: left;
     text-decoration: underline;
-    position: relative;
     font-size: medium;
     &:hover {
       font-weight: bold;
@@ -168,6 +158,11 @@ $min-width-label: 9.688rem;
       right: 124px;
       font-size: 1.25rem;
     }
+  }
+  .logger {
+    height: calc( 100% - 20px); // 20px è l'height di header-cronology
+    display: flex;
+    overflow: auto;
   }
 }
 
