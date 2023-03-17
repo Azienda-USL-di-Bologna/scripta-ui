@@ -23,7 +23,6 @@ export class ExtendedArchivioService extends ArchivioService {
    */
   public downloadArchivioZip(archivio: Archivio | ArchivioDetail): Observable<any> {
     const url = getInternautaUrl(BaseUrlType.Scripta) + `/downloadArchivioZip/${archivio.id}`;
-    console.log(url);
     return this._http.get(url, {observe: 'response', responseType: "blob"});
   }
 
