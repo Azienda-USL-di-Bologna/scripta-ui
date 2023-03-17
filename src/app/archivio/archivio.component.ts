@@ -17,7 +17,6 @@ import { AppComponent } from '../app.component';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@bds/next-sdr';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators'
-import { DatePipe } from '@angular/common';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { UploadDocumentButton } from '../generic-caption-table/functional-buttons/upload-document-button';
 import { ExtendedDocDetailView } from '../docs-list-container/docs-list/extended-doc-detail-view';
@@ -25,7 +24,6 @@ import { FunctionButton } from '../generic-caption-table/functional-buttons/func
 import { NavigationTabsService } from '../navigation-tabs/navigation-tabs.service';
 import { AppService } from '../app.service';
 import { ExtendedArchiviView } from '../archivi-list-container/archivi-list/extendend-archivi-view';
-import { UtilityFunctions } from '@bds/common-tools';
 
 @Component({
   selector: 'app-archivio',
@@ -389,7 +387,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     },
     {
       label: "Scarica zip",
-      disabled: !this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA),
+      disabled: !this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA) ||
+        archivio.stato === StatoArchivio.BOZZA,
       command: () => this.downloadArchivioZip(archivio as Archivio)
     }] as MenuItem[];
 
@@ -412,16 +411,21 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         this.extendedArchivioService.downloadFile(res, "application/zip", filename);
         this.rightContentProgressSpinner = false;
       },
-      error: (err) => {
+      error: async (err) => {
         this.rightContentProgressSpinner = false;
+        const error = JSON.parse(await err?.error?.text());
+        let severity = "error";
         let message = "Errore durante il download. Riprovare oppure contattare BabelCare.";
-        if (err.error.code === 1) {
-          message = err.error.message;
-        }
+        if (error) {
+          // error code: 1.403 2.404 3.500 
+          if (["1", "2"].includes(error.code))
+            severity = "warn";
+          message = error.message;
+        } 
         this.messageService.add({
-          severity: "error",
+          severity: severity,
           key: "ArchivioToast",
-          summary: "Errore download",
+          summary: "Attenzione",
           detail: message
         });
       }
