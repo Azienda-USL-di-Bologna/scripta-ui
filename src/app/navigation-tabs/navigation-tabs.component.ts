@@ -146,7 +146,6 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
     } else {
       this.appService.appNameSelection("Fascicolo "+ this.navigationTabsService.getTabs()[tabIndex].label);
     } */
-    console.log("ma scatta subito?")
     this.navigationTabsService.addTabToHistory(tabIndex);
     this.appService.appNameSelection(this.navigationTabsService.getTabs()[tabIndex].labelForAppName);
   }

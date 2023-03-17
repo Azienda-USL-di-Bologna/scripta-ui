@@ -85,6 +85,14 @@ export class ArchivioTreeComponent implements OnInit {
         }
       )
     );
+    this.subscriptions.push(
+      this.archivioUtilsService.updatedArchiveEvent.subscribe(
+        (archivioAggiornato: Archivio) => {
+          this.deleteNode(this.archivi, archivioAggiornato.id);
+          this.addTreeNode(archivioAggiornato);
+        }
+      )
+    );
   }
 
   //Todo: BreadCrumbs is not used for now but the code for it is still present (bricioleArchivi is commented)
