@@ -113,6 +113,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public isResponsabileVersamento: boolean = false;
   public hasPienaVisibilita: boolean = false;
   private _reloadDataFalg: boolean = false;
+  public showAnteprima: boolean = false;
+
 
   private _archivio: Archivio;
   get archivio(): Archivio { return this._archivio; }
@@ -122,6 +124,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.loadData();
     }
   }
+
+  @Input('showAnteprimaInit') set showAnteprimaInit(showAnteprimaInit: boolean) {
+    if(showAnteprimaInit != undefined)
+      this.showAnteprima = showAnteprimaInit;
+  }
+
+  
 
   constructor(
     private messageService: MessageService,
@@ -178,6 +187,11 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       )
     );
     
+    this.subscriptions.push(
+      this.showRightPanel.subscribe(event =>{
+        this.showAnteprima = event.showPanel;
+      })
+    );
    
    
     /* this.subscriptions.push(
@@ -1355,6 +1369,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public openDetailAndPreview(doc: ExtendedDocDetailView): void {
+    this.showAnteprima = true;
     this.showRightPanel.emit({
       showPanel: true,
       rowSelected: doc
@@ -1362,18 +1377,17 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public onRowSelect(event: any): void {
-    if (this.archivio) {
+    if (this.showAnteprima == true) {
       this.openDetailAndPreview(event.data);
     }
   }
 
   public onRowUnselect(event: any): void {
-    if (this.archivio) {
       this.showRightPanel.emit({
         showPanel: false,
         rowSelected: null
       });
-    }
+      this.showAnteprima = false;
   }
 
 

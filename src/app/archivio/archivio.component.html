@@ -170,3 +170,33 @@
 </p-dialog>
 
 <richiesta-accesso-archivi #richiestaaccessoarchivi *ngIf="archivio?.isArchivioNero"></richiesta-accesso-archivi>
+
+<p-confirmPopup key="confirm-popup"></p-confirmPopup>
+
+<p-dialog 
+  appendTo="body"
+  header="Chiudi fascicolo"
+  [(visible)]="this.showChiudiPopup"
+  [modal]="true"
+  [responsive]="false"
+  [focusOnShow]="false"
+  contentStyleClass="organizzaPopup">
+Attenzione! Eventuali bozze di sottofascicoli o inserti saranno eliminate. Si vuole procedere?
+  <br>
+  <br>
+  <button
+    type="button"
+    (click)="chiudiRiapriArchivio($event); this.showChiudiPopup = false;"
+    pButton
+    label="Chiudi"
+    class="mr-2 chiudiBottoni"
+    icon="pi pi-check"
+  ></button>
+  <!-- <button
+    type="button"
+    (click)="this.showChiudiPopup = false;"
+    pButton
+    label="Annulla"
+    class="mr-2"
+  ></button> -->
+</p-dialog>

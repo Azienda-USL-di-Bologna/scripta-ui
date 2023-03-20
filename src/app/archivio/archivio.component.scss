@@ -60,3 +60,10 @@
     margin-top: 1rem;
   }
 }
+
+
+::ng-deep .chiudiPopup {
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}

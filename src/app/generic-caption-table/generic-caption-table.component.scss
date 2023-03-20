@@ -112,6 +112,11 @@
         font-size: 2rem;
         cursor: pointer;
         color: #406284;
+        &:hover {
+          color: #936 !important;
+          background-color: transparent !important;
+          border-color: transparent !important;
+        }
       }
       .preferitoStar {
         font-size: 2rem;
@@ -131,7 +136,7 @@
         cursor: pointer;
         color: #2e4a65 !important; 
         &:hover {
-          color: #7e7e7e !important;
+          color: #936 !important;
           background-color: transparent !important;
           border-color: transparent !important;
         }
@@ -146,6 +151,11 @@
         color: #2e4a65 !important; 
         &:target{
           outline: none !important;
+        }
+        &:hover {
+          color: #936 !important;
+          background-color: transparent !important;
+          border-color: transparent !important;
         }
       }
       .empty{

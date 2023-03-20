@@ -32,7 +32,9 @@
         [pSortableColumnDisabled]="archiviListMode === 'RECENTI' && col.field == 'dataCreazione'"
         [ngStyle]="{'cursor': col.sortField ? null : 'move',
          'background-color': col.field == 'dataCreazione' && archiviListMode == 'RECENTI' ? '#f4f4f4' : null,
-         'background-color': col.field == 'dataCreazione' && archiviListMode !== 'RECENTI' ? '#203244' : null }">
+         'background-color': col.field == 'dataCreazione' && archiviListMode !== 'RECENTI' ? '#203244' : null,
+        'color' : col.field == 'dataCreazione' && archiviListMode == 'RECENTI' ? '#000000' : null,
+        'color' : col.field == 'dataCreazione' && archiviListMode !== 'RECENTI' ? '#f4f4f4' : null}">
         <span class="header-box" 
           [attr.aria-label]="col.label" [ngStyle]="{}">
           {{col.header}}
