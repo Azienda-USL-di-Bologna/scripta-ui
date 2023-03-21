@@ -59,12 +59,17 @@
   p-button{
     margin-top: 1rem;
   }
+
 }
 
+::ng-deep  .chiudiBottoni{
 
+  transform: translateX(9.875rem);
+}
 
 ::ng-deep .chiudiPopup {
   flex-direction: column;
   align-items: center;
   overflow: hidden;
+
 }
