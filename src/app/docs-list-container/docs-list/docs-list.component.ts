@@ -385,14 +385,14 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public setColumnsPerDetailArchivio(): void {
-    const colonneDaVisualizzare = ["registrazione", "dataRegistrazione", "oggetto", "tipologia", "idArchivi"];
+    const colonneDaVisualizzare = ["registrazione", "dataRegistrazione", "oggetto", "tipologia", "idArchivi", "idAzienda", "dataCreazione"];
     this.cols[this.cols.findIndex(c => c.field === "idArchivi")].header = "Altre fascicolazioni"; // Modifica custom all'header delle fascicolazioni.
     // this._selectedColumns = this.cols.filter(c => colonneDaVisualizzare.includes(c.field));
     this._selectedColumns = [];
     colonneDaVisualizzare.forEach(c => {
       this._selectedColumns.push(this.cols.find(e => e.field === c));
     })
-    console.log(this._selectedColumns);
+    console.log("Colonne", this._selectedColumns);
 
     this.selectableColumns = cols.map(e => {
       if (colonneDaVisualizzare.includes(e.field)) {

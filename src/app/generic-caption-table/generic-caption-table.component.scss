@@ -123,9 +123,9 @@
         cursor: pointer;
         color: #936 !important; 
         &:hover {
-          color: #7e7e7e !important;
+          color: #936 !important;
           background-color: transparent !important;
-          border-color: transparent !important;
+          border-color: #7e7e7e !important;
         }
         &:target{
           outline: none !important;
@@ -166,13 +166,21 @@
 
 }
 
-::ng-deep .span-fileUpload-button {
+::ng-deep .span-fileUpload-button:hover {
   margin-right: 5px !important;
-}
-::ng-deep .upload-document-button {
-  .p-fileupload-choose {
-    height: 2.188rem;
+  .upload-document-button {
+    :hover{
+      color: #936 !important;
+      background-color: transparent !important;
+      border-color: transparent !important;
+    }
   }
+}
+
+.p-fileupload-choose {
+  height: 2.188rem;
+}
+
   /* .p-button {
     background-color: transparent !important;
     border: none !important;
@@ -187,4 +195,4 @@
       border: none !important;
     }
   } */
-}
+
