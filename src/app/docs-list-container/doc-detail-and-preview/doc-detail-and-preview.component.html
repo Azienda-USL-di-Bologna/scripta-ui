@@ -38,6 +38,6 @@
     [(selected)]="accordionSelected[1]"
     *ngIf = "isResponsabileVersamento === true"
     [ngClass]="accordionSelected[1] ? 'tab-accordion-selected' : ''">
-    <versamenti [idDoc]="doc.id"></versamenti>
+    <versamenti [doc]="doc"></versamenti>
   </p-accordionTab>
 </p-accordion>
