@@ -1,11 +1,12 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, UtenteStruttura, UtenteStrutturaService, Struttura, PermessoEntitaStoredProcedure } from '@bds/internauta-model';
+import { Archivio, ArchivioDetail, UtenteStruttura, UtenteStrutturaService, Struttura, PermessoEntitaStoredProcedure, StatoArchivio } from '@bds/internauta-model';
 import { OggettoneOperation, OggettonePermessiEntitaGenerator } from '@bds/common-tools';
 import { AdditionalDataDefinition, PagingConf } from '@bds/next-sdr';
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { AzioniPossibili, EnumPredicatoPermessoArchivio, PermessiDettaglioArchivioService, PermessoTabella } from '../permessi-dettaglio-archivio.service';
+
 // import * as FileSaver from 'file-saver';
 
 @Component({
@@ -32,12 +33,13 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
   private _archivio: Archivio;
   //private lazyLoadFiltersAndSorts: FiltersAndSorts = new FiltersAndSorts();
   public livello: number;
+  public isArchivioClosed : boolean = false;
 
   @ViewChild("dt", {}) private dt: Table;
   get archivio(): Archivio { return this._archivio; }
   @Input() set archivio(archivio: Archivio) {
     this._archivio = archivio;
-    this.livello = archivio.livello
+    this.livello = archivio.livello;
     this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
   }
   public _loggedUserIsResponsbaileOrVicario: Boolean;
@@ -76,6 +78,10 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
         this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
       }
      }));
+    if(this._archivio.stato == StatoArchivio.CHIUSO || this._archivio.stato == StatoArchivio.PRECHIUSO)
+      this.isArchivioClosed = true;
+    else
+      this.isArchivioClosed = false; 
   }
 
   ngOnDestroy() {
@@ -111,21 +117,22 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
         data => {
           if (data && data.results && data.page) {
             const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]>data.results;
-            perm.veicolo = utentiStruttura.find((us: UtenteStruttura) => {
-              return us.idStruttura.id === perm.idProvenienzaVeicolo
-            })?.idStruttura;
             this.strutture = [];
             utentiStruttura.filter((us: UtenteStruttura) => us.attivo === true)
               .forEach((us: UtenteStruttura) => { this.strutture.push(us.idStruttura) });
+            perm.veicolo = utentiStruttura.find((us: UtenteStruttura) => {
+              return us.idStruttura.id === perm.idProvenienzaVeicolo
+            })?.idStruttura;
           }
         }
       ));
   }
 
+
   public getPermessiFiltratiPerSoggetto(oggettoni: PermessoEntitaStoredProcedure[], idProvenienzaSoggetto: number): PermessoEntitaStoredProcedure[] {
-    var permessiPerSoggetto: PermessoEntitaStoredProcedure[] = [];
+    const permessiPerSoggetto: PermessoEntitaStoredProcedure[] = [];
     oggettoni?.forEach((oggettone: PermessoEntitaStoredProcedure) => {
-      if(oggettone.soggetto.id_provenienza === idProvenienzaSoggetto){
+      if (oggettone.soggetto.id_provenienza === idProvenienzaSoggetto) {
         permessiPerSoggetto.push(oggettone);
       }
     })
@@ -146,7 +153,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
       perm.idProvenienzaSoggetto = perm.soggetto.id; 
     }
 
-    var permessiDelSoggetto = this.getPermessiFiltratiPerSoggetto(this._archivio.permessi, perm.idProvenienzaSoggetto);    
+    const permessiDelSoggetto = this.getPermessiFiltratiPerSoggetto(this._archivio.permessi, perm.idProvenienzaSoggetto);    
 
     const oggettoToSave: OggettonePermessiEntitaGenerator =
       this.permessiDettaglioArchivioService.buildPermessoPerBlackbox(

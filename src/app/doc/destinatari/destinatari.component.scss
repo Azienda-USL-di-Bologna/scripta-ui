@@ -14,7 +14,7 @@
       border: none !important;
     }
     .column-icon {
-      width: 60px;
+      width: 3.75rem;
       i {
         vertical-align: middle;
       }
@@ -32,18 +32,18 @@
   }
   .close-icon {
     align-self: center;
-    font-size: 15px;
+    font-size: 0.938rem;
     border:1px solid transparent;
     background-color: #fff;
     display: inline-block;
     outline: 0;
     cursor: pointer;
     display: block;
-    width: 15px;
-    height: 15px;
+    width: 0.938rem;
+    height: 0.938rem;
     position: absolute;
     z-index:1;
-    right: 20px;
+    right: 1.25rem;
     top: 0;
     bottom: 0;
     margin: auto;
@@ -55,4 +55,19 @@
   display: flex;
   justify-content: space-between;
   flex-wrap: nowrap;
+}
+.related-pregressi{
+  align-items: center;
+  margin: auto;
+  line-height: 200%;
+}
+
+.destinatari-table { //brutto modo per formattare la tabella, migliorabile
+  tr :last-child{
+    width: 12rem;
+  }
+  tr :nth-child(2){
+    width: 20rem;
+  }
+  overflow: auto;
 }

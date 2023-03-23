@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
-import { Doc, ENTITIES_STRUCTURE, Persona, Allegato, CODICI_REGISTRO } from "@bds/internauta-model";
+import { Doc, ENTITIES_STRUCTURE, Persona, Allegato, CODICI_REGISTRO, TipologiaDoc } from "@bds/internauta-model";
 import { LOCAL_IT } from "@bds/common-tools";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { AdditionalDataDefinition } from "@bds/next-sdr";
@@ -9,6 +9,8 @@ import { Observable, Subscription } from "rxjs";
 import { switchMap } from "rxjs/operators";
 import { AppService } from "../app.service";
 import { ExtendedDocService } from "./extended-doc.service";
+import { ExtendedDocDetailView } from "../docs-list-container/docs-list/extended-doc-detail-view";
+import { AttachmentsBoxConfig } from "@bds/common-components";
 
 @Component({
   selector: "doc",
@@ -22,7 +24,16 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public localIt = LOCAL_IT;
   @ViewChild("pageStart") public pageStart: any;
-  public doc: Doc;
+  private _doc: Doc;
+  public get doc(): Doc {
+    return this._doc;
+  }
+  public set doc(value: Doc) {
+    this._doc = value;
+    console.log("setto doc a ", this.doc);
+
+  }
+  
   public descrizioneUtenteRegistrante: string | undefined;
   public utenteUtilitiesLogin: UtenteUtilities;
   public DatiProtocolloEsterno: Number;
@@ -30,6 +41,18 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public numeroVisualizzazione: string;
   private projection: string = ENTITIES_STRUCTURE.scripta.doc.customProjections.DocWithAll;
   public yearOfProposta: string;
+  public detailDoc: ExtendedDocDetailView;
+  public tipoDocumento: TipologiaDoc;
+  public visualizzazioneDocumento: string;
+  public attachmentsBoxConfig: AttachmentsBoxConfig;
+
+  @Input() public pregresso: boolean = true;
+  @Input() set data(data: any) {
+    console.log("ciao", data);
+
+    this.detailDoc = data.doc;
+    this.visualizzazioneDocumento = this.detailDoc.registrazioneVisualizzazione;
+  }
 
   constructor(
     private router: Router,
@@ -37,11 +60,15 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     private loginService: JwtLoginService,
     private messageService: MessageService,
     private route: ActivatedRoute,
-    private appService: AppService) { 
-      
+    private appService: AppService) {
+      this.attachmentsBoxConfig = new AttachmentsBoxConfig();
+      this.attachmentsBoxConfig.showPreview = true;
+      this.attachmentsBoxConfig.showInfoVersamento = false;
+      this.attachmentsBoxConfig.showHeader = false;
     }
 
   ngOnInit(): void {
+    console.log("entro nell'oninit");
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -54,37 +81,53 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     /**
      * Questa sottoscrizione serve a popolare this.doc
      */
-    this.subscriptions.push(
-      this.route.queryParamMap.pipe(
-        switchMap((params: ParamMap) =>
-          this.handleCommand(params)
-      )).subscribe((res: Doc) => {
-        this.setFreezeDocumento(false);
-        console.log("res", res);
-        this.doc = res;  
-        if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG).length > 0) {
-          this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
-        }
-        this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
-        this.appService.appNameSelection("PEIS - " + this.doc.idAzienda.descrizione);
-        this.router.navigate(
-          [], 
-          {
-            relativeTo: this.route,
-            queryParams: { command: 'OPEN', id: this.doc.id }
-          });
-        },  error => {
-        this.setFreezeDocumento(false);
-        
-        console.log("errore", error);
-
-        this.messageService.add({
-          severity:'error', 
-          summary:'Creazione proposta', 
-          detail:'Errore nell\'avviare la proposta di protocollazione. Contattare Babelcare'
-        });
+    if (this.pregresso) {
+      console.log("pregressando");
+      console.log(this.detailDoc);
+      this.subscriptions.push(
+        this.loadDocument(this.detailDoc.id).subscribe((res:Doc) => {
+          console.log("res", res)
+          this.doc = res;
+          console.log("doc è:", this.doc);
+          this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
+          this.tipoDocumento = this.doc.tipologia;
       })
-    );
+      )
+    }
+    else {
+      this.subscriptions.push(
+        this.route.queryParamMap.pipe(
+          switchMap((params: ParamMap) =>
+            this.handleCommand(params)
+        )).subscribe((res: Doc) => {
+          this.setFreezeDocumento(false);
+          console.log("res", res);
+          this.doc = res;  
+          if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG).length > 0) {
+            this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
+          }
+          this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
+          this.appService.appNameSelection("PEIS - " + this.doc.idAzienda.descrizione);
+          this.router.navigate(
+            [], 
+            {
+              relativeTo: this.route,
+              queryParams: { command: 'OPEN', id: this.doc.id }
+            });
+          },  error => {
+          this.setFreezeDocumento(false);
+          
+          console.log("errore", error);
+  
+          this.messageService.add({
+            severity:'error', 
+            summary:'Creazione proposta', 
+            detail:'Errore nell\'avviare la proposta di protocollazione. Contattare Babelcare'
+          });
+        })
+      );
+    }
+    
     
   }
 
@@ -172,7 +215,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
       const d: Doc = res;
       const registrazione = d.registriList[0];
       const messageHeader = 'Registrazione ' +  registrazione.idRegistro.nomeRegistro + ' ' + registrazione.numero;
-      this.messageService.showMessageSuccessfulMessage(messageHeader, 'Resgistrazione avvenuta con successo');
+      this.messageService.showMessageSuccessfulMessage(messageHeader, 'Registrazione avvenuta con successo');
     }); */
   }
 

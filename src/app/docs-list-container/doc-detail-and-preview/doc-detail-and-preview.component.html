@@ -1,5 +1,43 @@
 <span class="title-box">
-  <h4>{{doc.oggetto}}</h4>
+  <!-- <h4>{{doc.oggetto}}</h4> -->
+  <h4>
+    <i *ngIf="doc.visibilitaLimitata && !doc.riservato " pTooltip="Visibilità limitata" class="pi pi-eye"></i>
+    <i *ngIf=" doc.riservato " pTooltip="Riservato" class="pi pi-eye-slash"></i>
+    {{doc.oggetto}}
+  </h4>
+
+
+
+
+<!-- 
+  <h4 *ngIf="doc.visibilitaLimitata && !doc.riservato" class="pi pi-eye"></h4>
+  <h4 *ngIf="doc.riservato" class="pi pi-eye-slash"></h4>
+  <h4 *ngIf="!doc.visibilitaLimitata && !doc.riservato">{{doc.oggettoVisualizzazione}}</h4> -->
   <p-button icon="pi pi-times" (onClick)="closeRightPanel.emit()"></p-button>
 </span>
-<attachments-box [idDoc]="doc.id"></attachments-box>
+<!-- *ngIf="(!doc.visibilitaLimitata && !doc.riservato) " -->
+
+<p-accordion>
+  <p-accordionTab
+    header="Allegati" 
+    [(selected)]="accordionSelected[0]"
+    [ngClass]="accordionSelected[0] ? 'tab-accordion-selected' : ''">
+    <attachments-box 
+      [idDoc]="doc.id"
+      [config]="attachmentsBoxConfig">
+    </attachments-box>
+    <h4>
+      <!-- <i *ngIf="doc.visibilitaLimitata && !doc.riservato  " class="pi pi-eye"></i>
+      <i *ngIf="!doc.visibilitaLimitata && doc.riservato " class="pi pi-eye-slash"></i> -->
+      <!-- {{!doc.visibilitaLimitata && doc.riservato && !hasUserPienaVisibilita(doc) ? "[Riservato]" : ""}} -->
+      <!-- {{doc.visibilitaLimitata && !doc.riservato  ? "Visibilita limitata" : ""}} -->
+    </h4>
+  </p-accordionTab>
+  <p-accordionTab 
+    header="Versamenti"
+    [(selected)]="accordionSelected[1]"
+    *ngIf = "isResponsabileVersamento === true"
+    [ngClass]="accordionSelected[1] ? 'tab-accordion-selected' : ''">
+    <versamenti [idDoc]="doc.id"></versamenti>
+  </p-accordionTab>
+</p-accordion>

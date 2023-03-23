@@ -5,6 +5,7 @@ import { ExtendedArchiviView } from '../archivi-list-container/archivi-list/exte
 import { ArchivioComponent } from '../archivio/archivio.component';
 import { DocComponent } from '../doc/doc.component';
 import { DocsListContainerComponent } from '../docs-list-container/docs-list-container.component';
+import { ExtendedDocDetailView } from '../docs-list-container/docs-list/extended-doc-detail-view';
 import { TabItem, TabType } from './tab-item';
 
 @Injectable()
@@ -158,18 +159,18 @@ export class NavigationTabsService {
     );
   }
 
-  private buildaTabDoc(idDoc: number, label: string): TabItem {
+  private buildaTabDoc(idDoc: number, doc:ExtendedDocDetailView, label: string, labelForAppName: string): TabItem {
     return new TabItem(
       DocComponent,
-      { 
-        id: idDoc
+      {
+        doc: doc
       },
       true,
       label,
       "pi pi-fw pi-folder",
       TabType.DOC,
       idDoc.toString(),
-      label
+      labelForAppName
     );
   }
 
@@ -177,16 +178,30 @@ export class NavigationTabsService {
     return new TabItem(
       ArchivioComponent,
       { 
-        archivio: archivio,
+        archivio: this.projectionArchivioPerSessionStorage(archivio),
         id: archivio.id,
       },
       true,
       label,
       "pi pi-fw pi-folder",
       TabType.ARCHIVIO,
-      archivio.fk_idArchivioRadice?.id?.toString(),
+      archivio.fk_idArchivioRadice.id.toString(),
       labelForAppName
     );
+  }
+
+  private projectionArchivioPerSessionStorage(archivio: Archivio | ArchivioDetail | ExtendedArchiviView): Archivio {
+    const a = new Archivio();
+    a.id = archivio.id;
+    a.numerazioneGerarchica = archivio.numerazioneGerarchica;
+    a.fk_idArchivioPadre = archivio.fk_idArchivioPadre;
+    a.fk_idArchivioRadice = archivio.fk_idArchivioRadice;
+    a.tipo = archivio.tipo;
+    a.stato = archivio.stato;
+    a.livello = archivio.livello;
+    a.fk_idAzienda = archivio.fk_idAzienda;
+    a.version = archivio.version;
+    return a;
   }
 
   /**
@@ -197,13 +212,13 @@ export class NavigationTabsService {
    */
   public addTabArchivio(archivio: Archivio | ArchivioDetail | ExtendedArchiviView, active: boolean = true, reuseActiveTab: boolean = false): void {
     const tabIndex: number = this.tabs.findIndex(t => {
-      return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id?.toString()
+      return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id.toString()
     });
     if (tabIndex !== -1) {
       this.updateTab(
         tabIndex, 
         `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
-        {archivio: archivio, id: archivio.id},
+        {archivio: this.projectionArchivioPerSessionStorage(archivio), id: archivio.id},
         `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
       );
       if (active) {
@@ -213,7 +228,7 @@ export class NavigationTabsService {
       this.updateTab(
         this.activeTabIndex, 
         `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
-        {archivio: archivio, id: archivio.id}, 
+        {archivio: this.projectionArchivioPerSessionStorage(archivio), id: archivio.id}, 
         `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
         archivio.fk_idArchivioRadice.id.toString()
       );
@@ -223,6 +238,52 @@ export class NavigationTabsService {
           archivio, 
           `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
           `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`
+        )
+      );
+      if (active) {
+        this.activeLastTab();
+      }
+    }
+  }
+
+
+
+  /**
+   * Quando un doc viene cliccato va controllato se esiste già il tab
+   * per la sua alberatura. Altrimenti si apre nuovo tab.
+   * NOTA: viene solo usata per i pregressi, per ora.
+   * @param archivio 
+   * @param active 
+   */
+  public addTabDoc(doc: ExtendedDocDetailView, active: boolean = true, reuseActiveTab: boolean = false, pregresso: boolean = true): void {
+    const tabIndex: number = this.tabs.findIndex(t => {
+      return t.type === TabType.DOC && t.id === doc.id.toString();
+    });
+    if (tabIndex !== -1) {
+      this.updateTab(
+        tabIndex, 
+        `${doc.registrazioneVisualizzazione}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`, 
+        {doc: doc},
+        `${doc.codiceRegistro === 'PG' ? "Protocollo generale" : doc.tipologiaVisualizzazione} ${pregresso ? 'pregresso ': ''}${doc.registrazioneVisualizzazione} [${doc.idAzienda.aoo}]`, 
+      );
+      if (active) {
+        this.activeTabByIndex(tabIndex);
+      }
+    } else if (reuseActiveTab) {
+      this.updateTab(
+        this.activeTabIndex, 
+        `${doc.registrazioneVisualizzazione}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`, 
+        {doc: doc},
+        `Protocollo generale ${pregresso ? 'pregresso ': ''}${doc.registrazioneVisualizzazione} [${doc.idAzienda.aoo}]`, 
+        undefined // segnaposto per ricordare che c'è un parametro forse utile
+      );
+    } else {
+      this.addTab(
+        this.buildaTabDoc(
+          doc.id, 
+          doc,
+          `${doc.registrazioneVisualizzazione}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`,
+          `Protocollo generale ${pregresso ? 'pregresso ': ''}${doc.registrazioneVisualizzazione} [${doc.idAzienda.aoo}]`,
         )
       );
       if (active) {

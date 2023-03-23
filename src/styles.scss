@@ -9,21 +9,21 @@
 
 *:focus {
   box-shadow: none !important;
+  box-sizing: border-box;
 }
-
-prp-header {
+/* prp-header {
   div {
-    height: 42px !important;
+    height: 4.2rem !important;
     .logo {
-      height: 36px !important;
+      height: 3.6rem !important;
     }
   }
-}
+} */
 .p-datatable-header {
-  padding: 5px 10px !important;
+  padding: 0.313rem 0.625313rem !important;
 }
 .p-menuitem-link {
-  padding: 10px 17px !important;
+  padding: 0.625313rem 1.063313rem !important;
 }
 
 .custom-primary-button {
@@ -36,8 +36,6 @@ prp-header {
   color: #ffffff !important;
   font-weight: normal !important;
 }
-
-
 
 .p-button {
   border: 1px solid #203244 !important;
@@ -61,8 +59,8 @@ prp-header {
 // CHROME
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width:0.625rem;
+  height:0.625rem;
 }
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
@@ -141,11 +139,9 @@ prova-p-accordiontab {
     }
   }
 }
-
 ::-webkit-search-cancel-button {
   cursor: pointer;
 }
-
 p-splitter {
   height: 100%; 
   flex: 1 1 0;
@@ -163,10 +159,48 @@ p-splitter {
     display: none !important;
   }
 }
-
 .p-treetable .p-treetable-tbody > tr:focus {
   outline: none !important;
 }
-body p-table .p-datatable .p-datatable-wrapper table .p-datatable-tbody .p-highlight {
+body p-table .p-datatable .p-datatable-wrapper table .p-datatable-tbody>.p-highlight {
   background-color: #ffc4e1;
+}
+
+// Responsive
+@media screen and (max-width: 1600px) {
+  html {
+    font-size: 95%;
+  }
+}
+@media screen and (max-width: 1500px) {
+  html {
+    font-size: 90%;
+  }
+}
+@media screen and (max-width: 1400px) {
+  html {
+    font-size: 85%;
+  }
+}
+@media screen and (max-width: 1300px) {
+  html {
+    font-size: 80%;
+  }
+}
+@media screen and (max-width: 1200px) {
+  html {
+    font-size: 75%;
+  }
+}
+@media screen and (max-width: 1100px) {
+  html {
+    font-size: 70%;
+  }
+}
+// Modifiche a stili default
+.material-icons {
+  font-size: 1.5rem;
+}
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  padding: 0.557rem 1rem;
 }

@@ -1,0 +1,22 @@
+<p-table 
+    [value]="archiviDoc"
+    >
+    <ng-template pTemplate="header">
+      <tr>
+        <th> Numerazione gerarchica </th>
+        <th> Oggetto </th>
+        <th> Titolo </th>
+        <th> Classificazione </th>
+
+      </tr>
+    </ng-template>
+
+    <ng-template let-rowdata pTemplate="body">
+      <tr>
+        <td> {{rowdata.idArchivio.numerazioneGerarchica}} </td>
+        <td> {{rowdata.idArchivio.oggetto}} </td>
+        <td> {{rowdata.idArchivio.idTitolo.nome}} </td>
+        <td> {{rowdata.idArchivio.idTitolo.classificazione}} </td>
+      </tr>
+    </ng-template>
+</p-table>

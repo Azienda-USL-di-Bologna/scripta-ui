@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, Azienda, Struttura } from '@bds/internauta-model';
+import { Archivio, ArchivioDetail, Azienda, StatoArchivio, Struttura } from '@bds/internauta-model';
 import {Table} from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
@@ -20,6 +20,7 @@ export class PermessiStrutturaComponent implements OnInit {
   private _archivio: Archivio | ArchivioDetail;
   public azienda: Azienda;
   public inEditing: boolean = false;
+  public isArchivioClosed: boolean = false;
   public _dataRiferimento: Date = new Date();
   public predicati: EnumPredicatoPermessoArchivio[] = [];
   private permClone: { [s: number]: PermessoTabella; } = {};
@@ -78,6 +79,10 @@ export class PermessiStrutturaComponent implements OnInit {
         this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "strutture");
       }
      }));
+    if(this._archivio.stato == StatoArchivio.CHIUSO || this._archivio.stato == StatoArchivio.PRECHIUSO)
+      this.isArchivioClosed = true;
+    else
+      this.isArchivioClosed = false; 
   }
  
   

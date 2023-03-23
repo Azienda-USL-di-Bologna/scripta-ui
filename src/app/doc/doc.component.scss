@@ -1,30 +1,30 @@
-:host {
+:host::ng-deep {
     height: 100%;
     display: flex;
     flex-direction: column;
+    .p-disabled, .p-component:disabled {
+        opacity: 1;
+    }
 }
 .classe-temporanea {
-    width: 1000px;
+    width: 62.5rem;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
 }
 main {
-    max-width: 1000px;
+    max-width: 62.5rem;
     width: 100%;
     margin: 0 auto;
     height: 100%;
     display: flex;
     flex-direction: column;
 
-    p-toolbar {
-
-    }
     .info-documento {
         display: flex; 
         flex-direction: column;
         justify-content:space-between;
-        padding: 10px;
+        padding:0.625rem;
         .dati-creazione {
             display: flex;
             justify-content:space-between;
@@ -35,14 +35,14 @@ main {
         resize: none;
     }
     .label-oggetto {
-        padding: 10px 0;
+        padding:0.625rem 0;
     }
     .protocollato-da-box {
         display: flex;
-        padding: 10px 0;
+        padding:0.625rem 0;
         label {
             align-self: center;
-            width: 144px;
+            width: 8.75rem;
         }
     }
 
@@ -51,14 +51,42 @@ main {
         align-self: baseline;
     }
 .protocollo-esterno-box{
-    padding: 0 10px;
+    padding: 00.625rem;
     display: flex;
     justify-content: space-between;
     label {
         align-self: center;
-        padding: 10px;
+        padding:0.625rem;
     }
 }
 .accodion-box{
-    padding: 10px;
+    padding:0.625rem;
+    
+}
+
+::ng-deep .preview-inner {
+    overflow-y: visible !important; //senza, non si vede la preview degli allegati. Esistono modi migliori?
+}
+
+.main-left {
+    float: left;
+    width: 60%;
+    margin: auto;
+}
+
+.right-attachments {
+    h2 {
+        text-align: center;
+    }
+    float: left;
+    width: 33%;
+    margin-left: 4%;
+
+}
+
+.pregresso {
+    width: 100%;
+    height: 100%;
+    margin-left: 2%;
+    overflow: auto;
 }

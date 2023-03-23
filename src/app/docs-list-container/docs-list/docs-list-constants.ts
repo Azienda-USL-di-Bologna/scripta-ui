@@ -1,5 +1,5 @@
 import { ColonnaBds } from "@bds/common-tools";
-import { StatoDoc, StatoUfficioAtti, TipologiaDoc } from "@bds/internauta-model";
+import { StatoDoc, StatoUfficioAtti, TipologiaDoc, StatiVersamento } from "@bds/internauta-model";
 import { FILTER_TYPES, NextSDRDateTypes } from "@bds/next-sdr";
 import { Utils } from "src/app/utilities/utils";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
@@ -302,20 +302,63 @@ export const cols: ColonnaBds[] = [
     useFilterMatchMode: true,
     default: false
   },
+  // {
+  //   field: "conservazione",
+  //   header: "In conservazione",
+  //   filterField: "conservazione",
+  //   // sortField: "sullaScrivaniaDi.descrizione",
+  //   style: {},
+  //   headerClass: ["header-column", "conservazione-column"],
+  //   filterClass: ["filter-column", "conservazione-column"],
+  //   bodyClass: ["conservazione-column"],
+  //   fieldType: "boolean",
+  //   filterMatchMode: FILTER_TYPES.not_string.equals,
+  //   useFilterMatchMode: true,
+  //   default: false
+  // },
   {
-    field: "conservazione",
-    header: "In conservazione",
-    filterField: "conservazione",
+    field: "statoUltimoVersamento",
+    header: "Stato ultimo versamento",
+    filterField: "statoUltimoVersamento",
     // sortField: "sullaScrivaniaDi.descrizione",
     style: {},
-    headerClass: ["header-column", "conservazione-column"],
-    filterClass: ["filter-column", "conservazione-column"],
-    bodyClass: ["conservazione-column"],
-    fieldType: "boolean",
+    headerClass: ["header-column", "stato-ultimo-versamento-column"],
+    filterClass: ["filter-column", "stato-ultimo-versamento-column"],
+    bodyClass: ["stato-ultimo-versamento-column"],
+    fieldType: "string",
     filterMatchMode: FILTER_TYPES.not_string.equals,
     useFilterMatchMode: true,
     default: false
-  }
+  },
+  // {
+  //   field: "statoVersamentoVisto",
+  //   header: "visto",
+  //   filterField: "statoVersamentoVisto",
+  //   // sortField: "sullaScrivaniaDi.descrizione",
+  //   style: {},
+  //   headerClass: ["header-column", "stato-versamento-visto-column"],
+  //   filterClass: ["filter-column", "stato-versamento-visto-column"],
+  //   bodyClass: ["stato-versamento-visto-column"],
+  //   fieldType: "boolean",
+  //   filterMatchMode: FILTER_TYPES.not_string.equals,
+  //   useFilterMatchMode: true,
+  //   default: false
+  // },
+  {
+    field: "dataUltimoVersamento",
+    header: "Data ultimo versamento",
+    filterField: "dataUltimoVersamento",
+    // sortField: "sullaScrivaniaDi.descrizione",
+    style: {},
+    headerClass: ["header-column", "data-ultimo-versamento-column"],
+    filterClass: ["filter-column", "data-ultimo-versamento-column"],
+    bodyClass: ["data-ultimo-versamento-column"],
+    fieldType: NextSDRDateTypes.ZonedDateTime,
+    filterMatchMode: FILTER_TYPES.not_string.equals,
+    useFilterMatchMode: true,
+    default: false
+  },
+
 ];
 // SPOSTATA IN PRIMENG PLUGIN
 // export interface ColonnaBds {
@@ -335,6 +378,9 @@ export const cols: ColonnaBds[] = [
 //   additionalData?: any;
 //   selectionDisabled?: boolean;
 // }
+
+
+
 
 export const TipologiaDocTraduzioneVisualizzazione = [
   { value: TipologiaDoc.PROTOCOLLO_IN_USCITA, nome: "Protocollo in uscita" },
@@ -416,6 +462,16 @@ export const StatoUfficioAttiTraduzioneVisualizzazione = [
   { value: StatoUfficioAtti.ELABORATA, nome: "Elaborata"},
   { value: StatoUfficioAtti.SOSPESA, nome: "Sospesa"},
   { value: StatoUfficioAtti.NON_RILEVANTE, nome: "Non rilevante"},
+]
+
+export const StatiVersamentoTraduzioneVisualizzazione = [
+  { value: StatiVersamento.DA_VERSARE, nome: "Da versare"},
+  { value: StatiVersamento.VERSAMENTO_PARZIALE, nome: "Versamento parziale"},
+  { value: StatiVersamento.VERSATO, nome: "Versato"},
+  { value: StatiVersamento.VERSAMENTO_ANNULLATO, nome: "Versamento annullato"},
+  { value: StatiVersamento.ERRORE_NON_FORZABILE, nome: "Errore non forzabile"},
+  { value: StatiVersamento.ERRORE_FORZABILE, nome: "Errore forzabile"},
+  { value: StatiVersamento.ERRORE_CRITTOGRAFICO, nome: "Errore crittografico"}
 ]
 
 export enum DocsListMode {
@@ -580,10 +636,24 @@ export const colsCSV: any[] = [
     fieldType: "string",
     fieldId: "protocolloEsterno"
   },
+  // {
+  //   field: "conservazione",
+  //   header: "In conservazione",
+  //   fieldType: "boolean",
+  //   fieldId: "conservazione"
+  // }, 
   {
-    field: "conservazione",
-    header: "In conservazione",
-    fieldType: "boolean",
-    fieldId: "conservazione"
+    field: "statoUltimoVersamento",
+    header: "Stato ultimo versamento",
+    fieldType: "string",
+    fieldId: "statoUltimoVersamento"
+  },
+  {
+    field: (doc: ExtendedDocDetailView) => {
+      return doc.dataUltimoVersamento ? Utils.dateFormatter(doc.dataUltimoVersamento) : "";
+    },
+    header: "Data Ultimo Versamento",
+    fieldType: "date",
+    fieldId: "dataUltimoVersamento"
   }
 ]

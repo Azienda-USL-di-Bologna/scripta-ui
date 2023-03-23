@@ -1,6 +1,6 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
-import { AttivitaService } from '@bds/internauta-model';
+import { AttivitaService, StatoArchivio } from '@bds/internauta-model';
 import { Applicazione, ApplicazioneService, Archivio, Attivita, AttoreArchivio, AttoreArchivioService, Azienda, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, Persona, Ruolo, RuoloAttoreArchivio, Struttura, UtenteStruttura } from '@bds/internauta-model';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { BatchOperation, BatchOperationTypes, NextSdrEntity, PagingConf, SortDefinition, SORT_MODES } from '@bds/next-sdr';
@@ -26,10 +26,13 @@ export class ResponsabiliComponent implements OnInit {
   public ruoliList: { value: RuoloAttoreArchivio; label: string }[] = [];
   public struttureAttoreInEditing: Struttura[] = [];
   public inEditing: boolean = false;
+  public isArchivioClosed : boolean = false;
   public ruoloAttoreLoggedUser: RuoloAttoreArchivio;
-  
+  public responsabilePropostoGiaPresente: boolean = false;
+  public loggedUserIsResponsabile: boolean = false;
   @ViewChild("tableResponsabiliArchivi", {}) private dt: Table;
   
+
 
   // private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
 
@@ -44,7 +47,6 @@ export class ResponsabiliComponent implements OnInit {
   @Input() set loggedUserIsResponsbaileOrVicario(loggedUserIsResponsbaileOrVicario: Boolean) {
     this._loggedUserIsResponsbaileOrVicario = loggedUserIsResponsbaileOrVicario;
   }
-  
   constructor(
     private attoreArchivioService: AttoreArchivioService,
     private loginService: JwtLoginService,
@@ -52,7 +54,7 @@ export class ResponsabiliComponent implements OnInit {
     private permessiDettaglioArchivioService: PermessiDettaglioArchivioService,
     private applicazioneService: ApplicazioneService,
     private router: Router,
-    private attivitaService: AttivitaService) { 
+    private attivitaService: AttivitaService) {
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -71,24 +73,34 @@ export class ResponsabiliComponent implements OnInit {
     if (this.ruoloAttoreLoggedUser === RuoloAttoreArchivio.RESPONSABILE) {
       this.ruoliList = [
         { value: RuoloAttoreArchivio.VICARIO, label: "Vicario"}, 
-        { value: RuoloAttoreArchivio.RESPONSABILE_PROPOSTO, label: "Responsabile proposto"}];
+        { value: RuoloAttoreArchivio.RESPONSABILE_PROPOSTO, label: "Responsabile proposto"}
+      ];
+        this.loggedUserIsResponsabile = true;
     } else {
       this.ruoliList = [{ value: RuoloAttoreArchivio.VICARIO, label: "Vicario"}];
     }
-    //voglio che i vicari che non hanno struttura, vengano mostrati con la struttura di appartenenza diretta/unificata
+    // Voglio che i vicari che non hanno struttura, vengano mostrati con la struttura di appartenenza diretta/unificata
     this.responsabiliArchivi.forEach( resp => {
       if (resp.ruolo === "VICARIO"){
         this.loadStruttureAttore(resp);
       }})
+    if (this.responsabiliArchivi.some(a => a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO)) {
+      this.responsabilePropostoGiaPresente = true;  
+    }
+    if (this.archivio.stato == StatoArchivio.CHIUSO || this.archivio.stato == StatoArchivio.PRECHIUSO)
+      this.isArchivioClosed = true;
+    else
+      this.isArchivioClosed = false;
   }
 
 
   /**
-   * Metodo chiamato dall'html per l'insertimento di un nuovo permesso
+   * Metodo chiamato dall'html per l'insertimento di un responsabile proposto o di un vicario
    */
-  public addResponsabile(): void {
+  public addResponsabile(ruolo: RuoloAttoreArchivio): void {
     this.struttureAttoreInEditing = [];
     const newAttore = new AttoreArchivio();
+    newAttore.ruolo = ruolo;
     this.responsabiliArchivi.push(newAttore);
     this.dt.initRowEdit(newAttore);
   }
@@ -120,13 +132,15 @@ export class ResponsabiliComponent implements OnInit {
     console.log(attoreToOperate.id)
     attoreToOperate.idArchivio = { id: this.archivio.id } as Archivio;
     attoreToOperate.idPersona = { id: attore.idPersona.id } as Persona;
-    attoreToOperate.idStruttura = { id: attore.idStruttura?.id } as Struttura;
+    if (attore.idStruttura) {
+      attoreToOperate.idStruttura = { id: attore.idStruttura.id } as Struttura;
+    }
     attoreToOperate.ruolo = attore.ruolo;
     attoreToOperate.version = attore.version;
     switch (operation) {
       case "INSERT":
-        if(attoreToOperate.ruolo === "VICARIO") {
-          attoreToOperate.idStruttura = null;
+        if (attoreToOperate.ruolo === "VICARIO") {
+          attoreToOperate.idStruttura = null; // Non voglio salvare la struttua del vicario.
           this.subscriptions.push(this.attoreArchivioService.postHttpCall(attoreToOperate, this.attoreArchivioProjection)
             .subscribe({
               next: (attoreRes: AttoreArchivio) => {
@@ -138,6 +152,7 @@ export class ResponsabiliComponent implements OnInit {
                   summary: "Nuovo vicario",
                   detail: "Nuovo vicario inserito con successo"
                 });
+                this.archivio.attoriList.push(attoreRes);
                 this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
                 this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
               },
@@ -161,7 +176,7 @@ export class ResponsabiliComponent implements OnInit {
           attoreArchivioBody.dataInserimentoRiga = attoreToOperate.dataInserimentoRiga;
           attoreArchivioBody.ruolo= RuoloAttoreArchivio.RESPONSABILE_PROPOSTO;
           attoreArchivioBody.idStruttura = attoreToOperate?.idStruttura;
-
+          
           batchOperations.push({
             operation: BatchOperationTypes.INSERT,
             entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.attorearchivio.path,
@@ -170,7 +185,7 @@ export class ResponsabiliComponent implements OnInit {
           } as BatchOperation);
 
           const attivita = new Attivita();
-          attivita.idApplicazione = {id: "scripta"} as Applicazione;
+          attivita.idApplicazione = {id: "gediInt"} as Applicazione;
           attivita.idAzienda = {id: this.archivio.idAzienda.id} as Azienda;
           attivita.idPersona = {id:attoreToOperate.idPersona.id }as Persona;
           attivita.tipo = "attivita";
@@ -201,12 +216,15 @@ export class ResponsabiliComponent implements OnInit {
           this.subscriptions.push(
             this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
               (res: BatchOperation[]) => {
+                this.responsabilePropostoGiaPresente = true;
                 res.forEach(a  => {
                   if (a.returnProjection === "AttoreArchivioWithIdPersonaAndIdStruttura")
                   {
                     const attoreArchivio : AttoreArchivio = a.entityBody as AttoreArchivio;
                     attore.version =attoreArchivio.version;
                     attore.id = attoreArchivio.id;
+                    this.archivio.attoriList.push(attoreArchivio);
+
                   }
               })
                 this.messageService.add({
@@ -223,37 +241,37 @@ export class ResponsabiliComponent implements OnInit {
         }
         break;
       case "UPDATE":
-        if(attoreToOperate.ruolo === "VICARIO") {
+        if (attoreToOperate.ruolo === "VICARIO") { // NB: Attualmente l'update dei vicari non è possibile. quindi in questo if non entriamo mai
           attoreToOperate.idStruttura = null;
         }
         this.subscriptions.push(this.attoreArchivioService.patchHttpCall(attoreToOperate, attoreToOperate.id, this.attoreArchivioProjection)
-        .subscribe({
-          next: (attoreRes: AttoreArchivio) => {
-            attore.version = attoreRes.version;
-            delete this.dictAttoriClonePerRipristino[attore.id];
-            this.messageService.add({
-              severity: "success",
-              summary: "Aggiornamento viario",
-              detail: "Vicario aggiornato con successo"
-            });
-            this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
-            this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
-          },
-          error: () => {
-            this.messageService.add({
-              severity: "error",
-              summary: "Errore",
-              detail: "Errore nell'aggiornamento del vicario. Contattare Babelcare"
-            });
-            this.onRowEditCancel(attore, index);
-          }
-        })
-      );
-
-      break;
+          .subscribe({
+            next: (attoreRes: AttoreArchivio) => {
+              attore.version = attoreRes.version;
+              delete this.dictAttoriClonePerRipristino[attore.id];
+              this.messageService.add({
+                severity: "success",
+                summary: "Aggiornamento " + attoreToOperate.ruolo.toLowerCase().replace("_"," "),
+                detail: attoreToOperate.ruolo.charAt(0) + attoreToOperate.ruolo.slice(1).toLowerCase().replace("_"," ") + " aggiornato con successo"
+              });
+              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+              this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+            },
+            error: () => {
+              this.messageService.add({
+                severity: "error",
+                summary: "Errore",
+                detail: "Errore nell'aggiornamento del " + attoreToOperate.ruolo.toLowerCase().replace("_"," ") + ". Contattare Babelcare"
+              });
+              this.onRowEditCancel(attore, index);
+            }
+          })
+        );
+        break;
       case "DELETE":
-        if(attoreToOperate.ruolo === "RESPONSABILE_PROPOSTO"){
+        if (attoreToOperate.ruolo === "RESPONSABILE_PROPOSTO") {
           const batchOperations: BatchOperation[] = [];
+          
           batchOperations.push({
             operation: BatchOperationTypes.DELETE,
             entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.attorearchivio.path,
@@ -269,45 +287,40 @@ export class ResponsabiliComponent implements OnInit {
                 summary: "Eliminata proposta responsabilità", 
                 detail: "Hai eliminato il responsabile proposto"
               });
+              this.archivio.attoriList.splice(this.archivio.attoriList.findIndex((a: AttoreArchivio)=> a.id === attoreToOperate.id), 1);
               this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
               this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
-              
+              this.responsabilePropostoGiaPresente = false;
             }
-          
-            )
-           
+          );
         } else {
           this.subscriptions.push(this.attoreArchivioService.deleteHttpCall(attoreToOperate.id)
-        .subscribe({
-          next: () => {
-            this.responsabiliArchivi.splice(index, 1);
-            this.messageService.add({
-              severity: "success",
-              summary: "Eliminazione responsabile",
-              detail: "Responsabile eliminato con successo"
-            });
-            this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
-            this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
-          },
-          error: () => {
-            this.messageService.add({
-              severity: "error",
-              summary: "Errore",
-              detail: "Errore nell'eliminazione del responsabile. Contattare Babelcare"
-            });
-            this.onRowEditCancel(attore, index);
-          }
-        })
-        );
+            .subscribe({
+              next: () => {
+                this.responsabiliArchivi.splice(index, 1);
+                this.messageService.add({
+                  severity: "success",
+                  summary: attoreToOperate.ruolo === RuoloAttoreArchivio.VICARIO ? "Eliminazione vicario" : "Eliminazione responsabile",
+                  detail:  attoreToOperate.ruolo === RuoloAttoreArchivio.VICARIO ? "Vicario eliminato con successo" : "Responsabile eliminato con successo"
+                });
+                this.archivio.attoriList.splice(this.archivio.attoriList.findIndex((a: AttoreArchivio)=> a.id === attoreToOperate.id), 1);
+                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+                this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+              },
+              error: () => {
+                this.messageService.add({
+                  severity: "error",
+                  summary: "Errore",
+                  detail: "Errore nell'eliminazione del responsabile. Contattare Babelcare"
+                });
+                this.onRowEditCancel(attore, index);
+              }
+            })
+          );
       }
       console.log(attoreToOperate)
-        
-      
-
-        
-     
-     break;
-      }
+      break;
+    }
   }
 
 
@@ -332,29 +345,67 @@ export class ResponsabiliComponent implements OnInit {
    * @param utenteStruttura 
    * @param perm 
    */
-   public onUtenteStrutturaSelected(utenteStruttura: UtenteStruttura, attore: AttoreArchivio) {
+   public onUtenteStrutturaSelected(utenteStruttura: UtenteStruttura, attore: AttoreArchivio, rowIndex: number) {
     if (utenteStruttura) {
       attore.idPersona =  utenteStruttura.idUtente.idPersona;
-      if( attore.ruolo !== "VICARIO") {
+      if (attore.ruolo !== RuoloAttoreArchivio.VICARIO && attore.ruolo !== RuoloAttoreArchivio.RESPONSABILE_PROPOSTO) {
         attore.idStruttura = utenteStruttura.idStruttura;
+        this.loadStruttureAttore(attore);
+      } else {
+        switch(attore.ruolo){
+          case RuoloAttoreArchivio.VICARIO:
+            // Prima controllo che questo vicario non ci sia già.
+            if (this.archivio.attoriList.some((a: AttoreArchivio) => a.fk_idPersona.id === attore.idPersona.id && a.ruolo === RuoloAttoreArchivio.VICARIO)) {
+              // Vicario già presente, ci fermiamo qua
+              this.messageService.add({
+                severity: "warn",
+                summary: "Attenzione",
+                detail: "Il vicario selezionato è già presente"
+              });
+              this.inEditing = false; 
+              this.onRowEditCancel(attore, rowIndex);
+              return;
+            } else if (this.archivio.attoriList.some((a: AttoreArchivio) => a.fk_idPersona.id === attore.idPersona.id && a.ruolo === RuoloAttoreArchivio.RESPONSABILE)) {
+              // Vicario già presente, ci fermiamo qua
+              this.messageService.add({
+                severity: "warn",
+                summary: "Attenzione",
+                detail: "Il vicario selezionato è già presente come responsabile"
+              });
+              this.inEditing = false; 
+              this.onRowEditCancel(attore, rowIndex);
+              return;
+            } else {
+              // Il vicario va inserito
+              // Qui finisce l'editing del vicario, vogliamo salvarlo subito dopo la scelta
+              this.inEditing = false; 
+              this.onRowEditSave(attore, rowIndex, "INSERT");
+              this.loadStruttureAttore(attore); // Carichiamo una struttura per la visualizzazione non editing del vicario
+            }
+            break;
+          case RuoloAttoreArchivio.RESPONSABILE_PROPOSTO:
+            // Il responsabile proposto va inserito
+            // Qui finisce l'editing del vicario, vogliamo salvarlo subito dopo la scelta
+            this.loadStruttureAttore(attore, rowIndex); // Carichiamo una struttura per la visualizzazione non editing del vicario
+        }
       }
-      console.log("attore", attore)
-      this.loadStruttureAttore(attore);
+      
     }
   }
 
   /**
    * Carico le strutture dell'attore e popolo la variabile "struttureAttoreInEditing"
+   * NB: Per il VICARIO non voglio far scegliere la struttura, quindi gli metto la struttura di afferenza diretta/unificata
    * @param perm 
    * @param idSoggetto 
    */
-  private loadStruttureAttore(attore: AttoreArchivio) {
-    this.subscriptions.push(this.permessiDettaglioArchivioService.loadStruttureOfPersona(attore.idPersona.id, this._archivio.idAzienda.id)
+  private loadStruttureAttore(attore: AttoreArchivio, rowIndex?: number) {
+    this.subscriptions.push(this.permessiDettaglioArchivioService.loadStruttureOfPersona(attore.idPersona.id, this.archivio.idAzienda.id, true)
       .subscribe(
         (data: any) => {
           if (data && data.results) {
             const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]> data.results;
-            if (attore.ruolo !== "VICARIO") {
+            if (attore.ruolo !== "VICARIO" && attore.ruolo !== RuoloAttoreArchivio.RESPONSABILE_PROPOSTO) {
               if (attore.idStruttura) {
                 attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
                   return us.idStruttura.id === attore.idStruttura.id
@@ -364,20 +415,43 @@ export class ResponsabiliComponent implements OnInit {
               utentiStruttura
                 .filter((us: UtenteStruttura) => us.attivo === true)
                 .forEach((us: UtenteStruttura) => { this.struttureAttoreInEditing.push(us.idStruttura) });
-            } else {
+            } else if (attore.ruolo === "VICARIO"){
+              // Qui nel caso si tratti di un vicario, per il quale la struttura non è importante e voglio mostrare la diretta/unificata
               attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
-                return us.idAfferenzaStruttura.id === 1 
+                return us.idAfferenzaStruttura.codice === "DIRETTA";
               })?.idStruttura;
               if (attore.idStruttura == null) {
                 attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
-                  return us.idAfferenzaStruttura.id === 9;
+                  return us.idAfferenzaStruttura.codice === "UNIFICATA";
                 })?.idStruttura;
               }
-              this.struttureAttoreInEditing = []
+              this.struttureAttoreInEditing = [];
               this.struttureAttoreInEditing.push(attore.idStruttura);
-              console.log(this.struttureAttoreInEditing)
+            } else if ( attore.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO){
+              // Qui nel caso si tratti di un reposnsabile proposto, se ha una sola afferenza allora il responsabile proposto viene subito salvato e si esce dall'editing
+              if (utentiStruttura.length === 1){
+                attore.idStruttura = utentiStruttura[0].idStruttura;
+                this.inEditing = false; 
+                this.onRowEditSave(attore, rowIndex, "INSERT");
+                this.struttureAttoreInEditing = [];
+                this.struttureAttoreInEditing.push(attore.idStruttura);
+              }else{
+                this.messageService.add({
+                  severity: "warn",
+                  summary: "Attenzione",
+                  detail: "Scegliere la struttura di afferenza e confermare"
+                });
+                if (attore.idStruttura) {
+                  attore.idStruttura = utentiStruttura.find((us: UtenteStruttura) => {
+                    return us.idStruttura.id === attore.idStruttura.id
+                  })?.idStruttura;
+                }
+                this.struttureAttoreInEditing = [];
+                utentiStruttura
+                  .filter((us: UtenteStruttura) => us.attivo === true)
+                  .forEach((us: UtenteStruttura) => { this.struttureAttoreInEditing.push(us.idStruttura) });
+              }
             }
-            
           }
         }
       ));

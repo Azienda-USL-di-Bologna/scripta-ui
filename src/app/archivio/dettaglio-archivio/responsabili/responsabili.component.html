@@ -7,16 +7,27 @@
 	scrollHeight="flex">
   <ng-template pTemplate="caption">
 		<div class="">
+			<button *ngIf="archivio.livello === 1 && loggedUserIsResponsabile"
+				id="aggiungiResponsabile"
+				type="button"
+				pButton 
+				pRipple 
+				icon="pi pi-plus" 
+				(click)="inEditing = true; addResponsabile('RESPONSABILE_PROPOSTO')" 
+				class="mr-2 bottoneVicari" 
+				label="Proponi nuovo responsabile"
+				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario || responsabilePropostoGiaPresente || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
+			</button>
 			<button *ngIf="archivio.livello === 1"
 				id="aggiungiResponsabile"
 				type="button"
 				pButton 
 				pRipple 
 				icon="pi pi-plus" 
-				(click)="inEditing = true; addResponsabile()" 
-				class="mr-2" 
-				label="Aggiungi responsabile o vicario"
-				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario">
+				(click)="inEditing = true; addResponsabile('VICARIO')" 
+				class="mr-2 bottoneVicari" 
+				label="Aggiungi vicario"
+				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
 			</button>
 		</div>
 	</ng-template>
@@ -40,8 +51,8 @@
 							[azienda]="archivio.idAzienda"
               [showPool]="false"
 							[showOnlyUser]="true"
-							(utenteStrutturaSelezionatoEmit)="onUtenteStrutturaSelected($event, attore)">
-						</lib-users-autocomplete>
+							(utenteStrutturaSelezionatoEmit)="onUtenteStrutturaSelected($event, attore, ri)">
+						</lib-users-autocomplete><!-- [afferenzaDiretta]="true" -->
 						<div *ngIf="attore.idPersona">{{attore.idPersona.descrizione}}</div>
 					</ng-template>
 					<ng-template pTemplate="output">
@@ -72,12 +83,12 @@
       <td class="ruolo-column">
         <p-cellEditor>
 					<ng-template pTemplate="input">
-						<p-dropdown *ngIf="!attore.id"
+						<!-- <p-dropdown *ngIf="!attore.id"
 							appendTo="body" 
 							[options]="ruoliList" 
 							[(ngModel)]="attore.ruolo">
-						</p-dropdown>
-            <div *ngIf="attore.id">
+						</p-dropdown> -->
+            <div><!-- *ngIf="attore.id" -->
               {{attore.ruolo === ruoliEnum.RESPONSABILE_PROPOSTO ? "Responsabile proposto" : attore.ruolo | titlecase}}
             </div>
 					</ng-template>
@@ -89,9 +100,11 @@
       <td *ngIf="archivio.livello === 1 && loggedUserIsResponsbaileOrVicario"
         class="azione-column">
         <!-- Bottone di editing.
-          Se la riga riguarda il resp o il proposto allora devo essere RESPONSABILE -->
-        <button *ngIf="!editing && (ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE 
-              || (attore.ruolo !== ruoliEnum.RESPONSABILE && attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO))" 
+          Se la riga riguarda il resp o il proposto allora devo essere RESPONSABILE 
+					Inoltre non voglio poter editare un vicario mai, dato che non c'è nessun campo modificabile-->
+        <button *ngIf="(!editing && (ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE || (attore.ruolo !== ruoliEnum.RESPONSABILE && attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO))) 
+							&& !(archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')
+							&& (attore.ruolo !== ruoliEnum.VICARIO)" 
           type="button" 
           pButton 
           pRipple
@@ -103,8 +116,8 @@
         </button>
         <!-- Bottone di cancellazione. 
           Non si può cancellare il responsabile. E per cancellare un proposto devo essere RESPONSABILE -->
-        <button *ngIf="!editing && attore.ruolo !== ruoliEnum.RESPONSABILE && 
-              (attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO || ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE)"
+        <button *ngIf="(!editing && attore.ruolo !== ruoliEnum.RESPONSABILE && 
+              (attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO || ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE)) && !(archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')"
 					pButton 
 					pRipple
 					pTooltip="Elimina"
@@ -114,7 +127,7 @@
           (click)="onRowEditSave(attore, ri, 'DELETE')">
         </button>
         <!-- Bottone di salvataggio dell'editing. -->
-        <button *ngIf="editing"
+        <button *ngIf="editing && (attore.ruolo !== ruoliEnum.VICARIO && !(attore.ruolo === ruoliEnum.RESPONSABILE_PROPOSTO && struttureAttoreInEditing.length === 1))"
 					pButton 
 					pRipple 
 					pSaveEditableRow 

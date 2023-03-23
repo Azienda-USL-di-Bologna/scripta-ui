@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { AfferenzaStruttura, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteService, UtenteStruttura, UtenteStrutturaService } from '@bds/internauta-model';
+import {  ArchiviRecentiService, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioRecente, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteService, UtenteStruttura, UtenteStrutturaService, PermessoEntitaStoredProcedure } from '@bds/internauta-model';
 import { AppService } from '../../app.service';
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { Subscription, combineLatestWith } from 'rxjs';
@@ -25,19 +25,20 @@ import { CaptionReferenceTableComponent } from '../../generic-caption-table/capt
 import { CaptionSelectButtonsComponent } from '../../generic-caption-table/caption-select-buttons.component';
 import { SelectButtonItem } from '../../generic-caption-table/select-button-item';
 import { NewArchivoButton } from 'src/app/generic-caption-table/functional-buttons/new-archivo-button';
-import { CaptionFunctionalButtonsComponent } from 'src/app/generic-caption-table/caption-functional-buttons.component';
+import { CaptionFunctionalOperationsComponent } from 'src/app/generic-caption-table/caption-functional-operations.component';
 import { Titolo } from '@bds/internauta-model';
 import { Massimario } from '@bds/internauta-model';
 import { ConfigurazioneService } from '@bds/internauta-model';
-import { ParametroAziende } from '@bds/internauta-model/lib/entities/configurazione/ParametroAziende';
 import { ColonnaBds, CsvExtractor } from '@bds/common-tools';
+import { ExtendedArchivioService } from 'src/app/archivio/extended-archivio.service';
+import { ArchivioUtilsService } from 'src/app/archivio/archivio-utils.service';
 
 @Component({
 	selector: 'archivi-list',
 	templateUrl: './archivi-list.component.html',
 	styleUrls: ['./archivi-list.component.scss']
 })
-export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, CaptionReferenceTableComponent, CaptionSelectButtonsComponent, CaptionFunctionalButtonsComponent {
+export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, CaptionReferenceTableComponent, CaptionSelectButtonsComponent, CaptionFunctionalOperationsComponent {
 	@Input() data: any;
 	@ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>;
 
@@ -71,7 +72,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		{ value: [3], label: "Inserti" },
 		{ value: [1,2,3], label: "Tutti" }
 	];
-	public exportCsvInProgress: boolean = false;
+	public rightContentProgressSpinner: boolean = false;
 	public rowCountInProgress: boolean = false;
   public rowCount: number;
 	public selectableColumns: ColonnaBds[] = [];
@@ -111,7 +112,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public fieldNumerazioneGerarchica: string = "numerazioneGerarchica";
 	public matchModeNumerazioneGerarchica: string = FILTER_TYPES.string.startsWith;
 	public newArchivoButton: NewArchivoButton;
+	
 	//public instanziaTabellaArchiviList = true;
+	public loggedUserCanDeleteArchivio : boolean = false; 
 
 	private _archivioPadre: Archivio;
 	get archivioPadre(): Archivio { return this._archivioPadre; }
@@ -137,7 +140,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		private personaService: PersonaService,
 		private configurazioneService: ConfigurazioneService,
 		private datepipe: DatePipe,
-		private utenteStrutturaService: UtenteStrutturaService
+		private extendedArchivioService: ExtendedArchivioService,
+		private archiviRecentiService: ArchiviRecentiService,
+		private utenteStrutturaService: UtenteStrutturaService,
+		private archivioUtilsService: ArchivioUtilsService
 	) { }
 
 	ngOnInit(): void {
@@ -147,7 +153,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		if (!Object.values(ArchiviListMode).includes(this.archiviListMode)) {
 			this.archiviListMode = ArchiviListMode.VISIBILI;
 		}
-		
 		//this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } });
 		const loggeduser$ = this.loginService.loggedUser$.pipe(first());
 		const parametroFascicoliParlanti$ = this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null).pipe(first());
@@ -171,14 +176,31 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					}
 					// Parte relativa al utenteUtilities
 					this.utenteUtilitiesLogin = utenteUtilities;
+					const tempCanCreateArchivio: Map<String, boolean> = new Map();
+					const tempMap : Map<String, PermessoEntitaStoredProcedure[]> = new Map(Object.entries(this.utenteUtilitiesLogin.getUtente().permessiGediByCodiceAzienda));
+					this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach(a => {
+						if(tempMap.has(a.codice)) {
+							//this.canCreateArchivio = tempMap.get(a.codice);
+							const permessi : PermessoEntitaStoredProcedure[] = tempMap.get(a.codice);
+							permessi.forEach(p => {
+							  p.categorie.forEach(categoria => {
+								categoria.permessi.forEach(permesso => {
+								  if(permesso.predicato == "CREA") {
+									tempCanCreateArchivio.set(a.codice, true);
+								  }
+								});
+							  });
+							});
+						  }
+						});
 					this.newArchivoButton = {
 						tooltip: "Crea nuovo fascicolo",
 						livello: 0,
-						hasPermessi: true,
+						enable: true,
 						aziendeItems: this.utenteUtilitiesLogin.getUtente().aziendeAttive.map(a => {
 							return {
 								label: a.nome,
-								disabled: false,
+								disabled: !tempCanCreateArchivio.has(a.codice),
 								command: () => this.newArchivio(a.id)
 							} as MenuItem
 						})
@@ -196,7 +218,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					if (!!!this.archivioPadre) {
 						this.loadConfiguration();
 					} else {
+						this.loggedUserCanDeleteArchivio = !!this.archivioPadre.attoriList.find(
+							e => e.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id
+							&& e.ruolo !== RuoloAttoreArchivio.CREATORE);
+							
 						this.setColumnsPerDetailArchivio();
+						
 					}
 
 					//this.instanziaTabellaArchiviList = true;
@@ -223,6 +250,20 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			if (this.utenteUtilitiesLogin) this.calcAziendeFiltrabili();
 			this.resetPaginationAndLoadData();
 		}); */
+	}
+
+
+	@Input() get selectedColumns(): ColonnaBds[] {
+		return this._selectedColumns;
+	}
+
+	set selectedColumns(colsSelected: ColonnaBds[]) {
+		if (this._selectedColumns.length > colsSelected.length) {
+			this._selectedColumns = this._selectedColumns.filter(sc => colsSelected.includes(sc));
+		} else if (this._selectedColumns.length < colsSelected.length) {
+			this._selectedColumns.push(colsSelected.find(cs => !this._selectedColumns.includes(cs)));
+		}
+		this.saveConfiguration();
 	}
 
 	/**
@@ -281,18 +322,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		console.log(this._selectedColumns)
 	}
 
-	@Input() get selectedColumns(): ColonnaBds[] {
-		return this._selectedColumns;
-	}
-
-	set selectedColumns(colsSelected: ColonnaBds[]) {
-		if (this._selectedColumns.length > colsSelected.length) {
-			this._selectedColumns = this._selectedColumns.filter(sc => colsSelected.includes(sc));
-		} else if (this._selectedColumns.length < colsSelected.length) {
-			this._selectedColumns.push(colsSelected.find(cs => !this._selectedColumns.includes(cs)));
-		}
-		this.saveConfiguration();
-	}
 
 
 	/**
@@ -456,7 +485,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 * La PageConf è senza limite
 	 */
 	public exportCSV(table: Table) {
-		this.exportCsvInProgress = true;
+		this.rightContentProgressSpinner = true;
 		const tableTemp = {} as Table;
 		Object.assign(tableTemp, table);
 		const pageConfNoLimit: PagingConf = {
@@ -467,21 +496,53 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			mode: "PAGE_NO_COUNT"
 		};
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
+		if (this.archiviListMode === ArchiviListMode.RECENTI) {
+
+			lazyFiltersAndSorts.filters.forEach((f, index) => {
+				//debugger;
+				if(f.field == "dataCreazione")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+				if(f.field == "idAzienda.id")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+				if(f.field == "livello")
+				lazyFiltersAndSorts.filters.splice(index, 1);
+			});
+			lazyFiltersAndSorts.filters.forEach((f, index) => {
+				if(f.field == "dataCreazione")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+			});
+			
+			lazyFiltersAndSorts.filters.forEach(f => f.field = "idArchivio." + f.field);
+			lazyFiltersAndSorts.sorts.forEach(s => s.field = "dataRecentezza");
+		}
 		this.serviceToGetData.getData(
 			this.projectionToGetData,
 			filtersAndSorts,
-			buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe),
+			lazyFiltersAndSorts,
 			pageConfNoLimit)
 			.subscribe(
 				res => {
 					if (res && res.results) {
-						tableTemp.value = this.setCustomProperties(res.results);
+						if(this.archiviListMode !== ArchiviListMode.RECENTI)
+							tableTemp.value = this.setCustomProperties(res.results);
+						else {
+							let archiviListView : ArchivioDetailView[] = [];
+							res.results.forEach((a : any) => {
+								const archivioDetailRecente = a.idArchivio;
+								archiviListView.push(archivioDetailRecente);
+								tableTemp.value = this.setCustomProperties(archiviListView);
+							});
+							
+						}
+							
+						
 						tableTemp.columns = colsCSV.filter(c => this.selectedColumns.some(e => e.field === c.fieldId));
 						const extractor = new CsvExtractor();
 						extractor.exportCsv(tableTemp);
 					}
 
-					this.exportCsvInProgress = false;
+					this.rightContentProgressSpinner = false;
 				},
 				err => {
 					this.messageService.add({
@@ -490,7 +551,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						summary: "Attenzione",
 						detail: `Si è verificato un errore nello scaricamento del csv, contattare Babelcare`
 					});
-					this.exportCsvInProgress = false;
+					this.rightContentProgressSpinner = false;
 				}
 			);
 	}
@@ -606,8 +667,28 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.loadArchiviListSubscription = null;
 		}
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
-		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
-		this.loadCount(this.serviceToGetData, this.projectionToGetData, filtersAndSorts, lazyFiltersAndSorts);
+
+		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
+		if (this.archiviListMode === ArchiviListMode.RECENTI) {
+
+			lazyFiltersAndSorts.filters.forEach((f, index) => {
+				//debugger;
+				if(f.field == "dataCreazione")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+				if(f.field == "idAzienda.id")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+				if(f.field == "livello")
+				lazyFiltersAndSorts.filters.splice(index, 1);
+			});
+			lazyFiltersAndSorts.filters.forEach((f, index) => {
+				if(f.field == "dataCreazione")
+					lazyFiltersAndSorts.filters.splice(index, 1);
+			});
+			
+			lazyFiltersAndSorts.filters.forEach(f => f.field = "idArchivio." + f.field);
+			lazyFiltersAndSorts.sorts.forEach(s => s.field = "dataRecentezza");
+		}
+		
 		this.loadArchiviListSubscription = this.serviceToGetData.getData(
 			this.projectionToGetData,
 			filtersAndSorts,
@@ -616,6 +697,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				console.log(data);
 				this.totalRecords = data.page.totalElements;
 				this.loading = false;
+
+				const results = this.archiviListMode === ArchiviListMode.RECENTI ? data.results.map((r: ArchivioRecente) => r.idArchivio) : data.results;
 
 				if (this.resetArchiviArrayLenght) {
 					/* Ho bisogno di far capire alla tabella quanto l'array docs è virtualmente grande
@@ -629,9 +712,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
 					/* Questo meccanismo serve per cancellare i risultati di troppo della tranche precedente.
 					Se entro qui probabilmente ho fatto una ricerca */
-					Array.prototype.splice.apply(this.archivi, [0, this.archivi.length, ...this.setCustomProperties(data.results)]);
+					Array.prototype.splice.apply(this.archivi, [0, this.archivi.length, ...this.setCustomProperties(results)]);
 				} else {
-					Array.prototype.splice.apply(this.archivi, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(data.results)]);
+					Array.prototype.splice.apply(this.archivi, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(results)]);
 				}
 				this.archivi = [...this.archivi]; // trigger change detection
 			},
@@ -746,6 +829,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			case ArchiviListMode.FREQUENTI:
 				break;
 			case ArchiviListMode.RECENTI:
+				this.serviceToGetData = this.archiviRecentiService;
+				this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviorecente.customProjections.CustomArchivioRecenteWithIdArchivioDetail;
+				filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+				filterAndSort.addSort(new SortDefinition("dataRecentezza", "asc"))
 				filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRecenti"));
 				break;
 		}
@@ -799,7 +886,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
  */
 	public filterPersone(event: any) {
 		const filtersAndSorts = new FiltersAndSorts();
-		filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.startsWith, event.query));
+		filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.startsWithIgnoreCase, event.query));
 		this.aziendeFiltrabili.forEach(a => {
 			if ((typeof a.value) === "number")
 				filtersAndSorts.addFilter(new FilterDefinition("utenteList.idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
@@ -831,9 +918,13 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public filterStrutture(event: any) {
 		const filtersAndSorts = new FiltersAndSorts();
 		filtersAndSorts.addFilter(new FilterDefinition("nome", FILTER_TYPES.string.containsIgnoreCase, event.query));
-		this.aziendeFiltrabili.forEach(a => {
+		filtersAndSorts.addFilter(new FilterDefinition("ufficio", FILTER_TYPES.not_string.equals, false));
+		/* this.aziendeFiltrabili.forEach(a => {
 			if ((typeof a.value) === "number")
 				filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
+		}); */
+		(this.dataTable.filters["idAzienda.id"] as any).value.forEach((idAzienda: number) => {
+			filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, idAzienda));
 		});
 		this.strutturaService.getData("StrutturaWithIdAzienda", filtersAndSorts, null)
 			.subscribe(res => {
@@ -1157,6 +1248,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "DIRETTA"));
 		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "UNIFICATA"));
 		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "FUNZIONALE"));
+		filterAndSort.addFilter(new FilterDefinition("attivo", FILTER_TYPES.not_string.equals, true));
 		this.utenteStrutturaService.getData("UtenteStrutturaWithIdAfferenzaStruttura", filterAndSort, null, null).subscribe((res) => {
 			strutturaCreatore.id = (res.results as UtenteStruttura[]).find((a: UtenteStruttura) => a.idAfferenzaStruttura.codice === "DIRETTA")?.fk_idStruttura?.id;
 			if (!strutturaCreatore.id) {
@@ -1216,7 +1308,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			}   
 			this.subscriptions.push(this.archivioService.postHttpCall(
 				archivioBozza, 
-				ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
+				ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo,
+				null,
+				true)
 				.subscribe((nuovoArchivioCreato: Archivio) => {      
 					this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
 					this.appService.appNameSelection(`Fascicolo ${nuovoArchivioCreato.numerazioneGerarchica} [${nuovoArchivioCreato.idAzienda.aoo}]`);
@@ -1226,6 +1320,91 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		
 
 		
+	}
+
+	public eliminaSottoarchivio(rowData: any, event: Event) : void {
+		if (rowData.numeroSottoarchivi > 0) {
+			if (rowData.livello == 2) {
+				this.messageService.add({
+					severity: "warn",
+					key: "archiviListToast",
+					summary: "Attenzione",
+					detail: `Il sottofascicolo che si vuole eliminare contiene inserti`
+					});
+					return;
+			}
+		}
+
+		this.extendedArchivioService.archivioHasDoc(rowData.id).subscribe((
+			res: boolean) => {
+				if (res == true) {
+					// Contiene dei doc quindi avviso l'utente e mi fermo
+					if (rowData.livello == 2){
+						this.messageService.add({
+							severity: "warn",
+							key: "archiviListToast",
+							summary: "Attenzione",
+							detail: `Il sottofascicolo che si vuole eliminare contiene documenti`
+							});
+							return;
+					} else {
+						this.messageService.add({
+							severity: "warn",
+							key: "archiviListToast",
+							summary: "Attenzione",
+							detail: `L'inserto che si vuole eliminare contiene documenti`
+							});
+							return;
+					}
+
+				} else {
+					// L'utente può procedere con l'eliminazione, prima chiedo conferma
+					let message : string;
+					if (rowData.livello == 2)
+						message = "Si sta per eliminare il sottofascicolo. Procedere?";
+					else
+						message = "Si sta per eliminare l'inserto. Procedere?";
+					this.confirmationService.confirm({
+						key: "confirm-popup",
+						target: event.target,
+						message: message,
+						icon: 'pi pi-exclamation-triangle',
+						accept: () => {
+							let stringa : string;
+							if (rowData.livello == 2)
+								stringa = 'Sottofascicolo eliminato correttamente';
+							else
+								stringa = 'Inserto eliminato correttamente';
+					
+							this.subscriptions.push(
+								this.extendedArchivioService.deleteArchivio(rowData.id).subscribe(
+									res => {
+										this.messageService.add({
+											severity: "success",
+											key: "archiviListToast",
+											summary: "OK",
+											detail: stringa
+										});
+										this.archivioUtilsService.deletedArchiveSelection(rowData.id);
+										this.loadData();
+									},
+									err => {
+										this.messageService.add({
+											severity: "error",
+											key: "archiviListToast",
+											summary: "Errore",
+											detail: `É avvenuto un errore durante la cancellazione `
+										});
+										return;
+									}
+								)
+							)
+						},
+						reject: () => {	}
+					});
+				}
+			}	
+		)
 	}
 
 	/*funzioncina per fare il tooltip carino*/

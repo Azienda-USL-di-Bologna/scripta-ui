@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc } from "@bds/internauta-model";
+import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatiVersamento } from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { buildLazyEventFiltersAndSorts } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from "@bds/next-sdr";
@@ -14,7 +14,7 @@ import { Subscription } from "rxjs";
 import { first } from 'rxjs/operators'
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
 import { Impostazioni, ImpostazioniDocList } from "../../utilities/utils";
-import { cols, colsCSV, DocsListMode, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
+import { cols, colsCSV, DocsListMode, StatiVersamentoTraduzioneVisualizzazione, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
@@ -76,6 +76,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public rowsNumber: number = 20;
   public tipologiaVisualizzazioneObj = TipologiaDocTraduzioneVisualizzazione;
   public statoVisualizzazioneObj = StatoDocDetailPerFiltro;
+  public statiVersamentoObj = StatiVersamentoTraduzioneVisualizzazione;
   // public statoVisualizzazioneObj = StatoDocTraduzioneVisualizzazione;
   public statoUfficioAttiVisualizzazioneObj = StatoUfficioAttiTraduzioneVisualizzazione;
   public mieiDocumenti: boolean = true;
@@ -84,7 +85,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public filteredStrutture: Struttura[] = [];
   public loading: boolean = false;
   public initialSortField: string = "dataCreazione";
-  public exportCsvInProgress: boolean = false;
+  public rightContentProgressSpinner: boolean = false;
   public rowCountInProgress: boolean = false;
   public rowCount: number;
   public selectButtonItems: SelectButtonItem[];
@@ -102,12 +103,15 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   private mandatoryColumns: string[] = [];
   public selectableColumns: ColonnaBds[] = [];
   public filteredTipologia: any[];
+  public filteredStatiVersamento: any[];
   public filteredStati: any[];
   public filteredStatoUfficioAtti: any[];
   public aziendeFiltrabiliFiltered: any[];
   public loggedUserCanRestoreArchiviation: boolean = false;
   public loggedUserCanDeleteArchiviation: boolean = false;
   public docSelected: ExtendedDocDetailView;
+  public isResponsabileVersamento: boolean = false;
+  public hasPienaVisibilita: boolean = false;
 
   private _archivio: Archivio;
   get archivio(): Archivio { return this._archivio; }
@@ -159,8 +163,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
             if (this.utenteUtilitiesLogin.isCA() === false && this.utenteUtilitiesLogin.isCI() === false) {
               this.tipologiaVisualizzazioneObj = this.tipologiaVisualizzazioneObj.filter(item => item.value !== TipologiaDoc.DOCUMENT_REGISTRO);
             }
-          
-            if (!!!this.archivio) { 
+            this.isResponsabileVersamento = this.utenteUtilitiesLogin.isRV();
+            if (!!!this.archivio) {
               this.loadConfigurationAndSetItUp();
             } else { 
               this.setColumnsPerDetailArchivio();
@@ -269,8 +273,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   set selectedColumns(colsSelected: ColonnaBds[]) {
-    // restore original order
-    // this._selectedColumns = this.cols.filter(col => val.includes(col));
     if (this._selectedColumns.length > colsSelected.length) {
       this._selectedColumns = this._selectedColumns.filter(sc => colsSelected.includes(sc));
     } else if (this._selectedColumns.length < colsSelected.length) {
@@ -278,6 +280,10 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     }
     if (!this.archivio) {
       this.saveConfiguration();
+    }
+    if (!this.isResponsabileVersamento) {
+      this.selectableColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
+      this.selectedColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
     }
   }
 
@@ -317,9 +323,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (this.aziendeFiltrabili.length > 1) {
       this.mandatoryColumns.push("idAzienda");
     }
+
     // this.selectableColumns = cols.filter(e => !this.mandatoryColumns.includes(e.field));
     this.selectableColumns = cols.map(e => {
       if (this.mandatoryColumns.includes(e.field)) {
+        e.selectionDisabled = true;
+      }
+      if (!this.isResponsabileVersamento && (e.field === "dataUltimoVersamento" )) {
         e.selectionDisabled = true;
       }
       return e;
@@ -384,6 +394,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     }
     impostazioniVisualizzazioneObj["scripta.docList"].mieiDocumenti = this.mieiDocumenti;
     impostazioniVisualizzazioneObj["scripta.docList"].selectedColumn = this.selectedColumns.map(c => c.field);
+    
     this.utenteUtilitiesLogin.setImpostazioniApplicazione(this.loginService, impostazioniVisualizzazioneObj);
   }
 
@@ -393,30 +404,34 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * @param doc
    */
   public openDoc(doc: DocDetailView) {
-    const filtersAndSorts = new FiltersAndSorts();
-    filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
-    filtersAndSorts.addFilter(new FilterDefinition("idDocDetail.id", FILTER_TYPES.not_string.equals, doc.id));
-    this.personaVedenteSerice.getData("PersonaVedenteWithPlainFields", filtersAndSorts, null)
-      .subscribe(res => {
-        if (res && res.results) {
-          if (res.results.length > 0) {
-            const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
-              doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
-            const addRichiestaParam = true;
-            const addPassToken = true;
-            this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
-              console.log("urlAperto:", url);
-            });
-          } else {
-            this.messageService.add({
-              severity: "info",
-              summary: "Attenzione",
-              key: "docsListToast",
-              detail: `Apertura del documento non consentita`
-            });
+    if (doc.pregresso) {
+      this.openPregresso(doc as ExtendedDocDetailView);
+    } else {
+      const filtersAndSorts = new FiltersAndSorts();
+      filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+      filtersAndSorts.addFilter(new FilterDefinition("idDocDetail.id", FILTER_TYPES.not_string.equals, doc.id));
+      this.personaVedenteSerice.getData("PersonaVedenteWithPlainFields", filtersAndSorts, null)
+        .subscribe(res => {
+          if (res && res.results) {
+            if (res.results.length > 0) {
+              const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
+                doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
+              const addRichiestaParam = true;
+              const addPassToken = true;
+              this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
+                console.log("urlAperto:", url);
+              });
+            } else {
+              this.messageService.add({
+                severity: "info",
+                summary: "Attenzione",
+                key: "docsListToast",
+                detail: `Apertura del documento non consentita`
+              });
+            }
           }
-        }
-      });
+        });
+    }
   }
 
   /**
@@ -680,6 +695,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     }
     const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
     const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
+    if(this.storedLazyLoadEvent.sortField === "dataRegistrazione"){
+      lazyFiltersAndSorts.addSort( new SortDefinition("dataCreazione", this.storedLazyLoadEvent.sortOrder === 1 ? SORT_MODES.asc : SORT_MODES.desc))
+    }
     this.loadCount(this.serviceForGetData, this.projectionFotGetData, filtersAndSorts, lazyFiltersAndSorts);
     this.loadDocsListSubscription = this.serviceForGetData.getData(
       this.projectionFotGetData,
@@ -758,6 +776,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       doc.destinatariVisualizzazione = null;
       doc.firmatariVisualizzazione = null;
       doc.sullaScrivaniaDiVisualizzazione = null;
+      doc.statoUltimoVersamentoVisualizzazione = doc.statoUltimoVersamento;
     });
     return extendedDocsList;
   }
@@ -774,7 +793,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    */
   public filterPersone(event: any) {
     const filtersAndSorts = new FiltersAndSorts();
-    filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.startsWith, event.query));
+    filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.startsWithIgnoreCase, event.query));
     this.aziendeFiltrabili.forEach(a => {
       if ((typeof a.value) === "number")
         filtersAndSorts.addFilter(new FilterDefinition("utenteList.idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
@@ -854,10 +873,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public filterStrutture(event: any) {
     const filtersAndSorts = new FiltersAndSorts();
     filtersAndSorts.addFilter(new FilterDefinition("nome", FILTER_TYPES.string.containsIgnoreCase, event.query));
-    this.aziendeFiltrabili.forEach(a => {
+    /* this.aziendeFiltrabili.forEach(a => {
       if ((typeof a.value) === "number")
         filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
-    });
+    }); */
+    (this.dataTable.filters["idAzienda.id"] as any).value.forEach((idAzienda: number) => {
+			filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, idAzienda));
+		});
     filtersAndSorts.addFilter(new FilterDefinition("ufficio", FILTER_TYPES.not_string.equals, false));
     filtersAndSorts.addSort(new SortDefinition("attiva", SORT_MODES.desc));
     filtersAndSorts.addSort(new SortDefinition("nome", SORT_MODES.asc));
@@ -930,7 +952,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * La PageConf è senza limite
    */
   public exportCSV(table: Table) {
-    this.exportCsvInProgress = true;
+    this.rightContentProgressSpinner = true;
     const tableTemp = {} as Table;
     Object.assign(tableTemp, table);
     const pageConfNoLimit: PagingConf = {
@@ -955,10 +977,10 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
             extractor.exportCsv(tableTemp);
           }
 
-          this.exportCsvInProgress = false;
+          this.rightContentProgressSpinner = false;
         },
         err => {
-          this.exportCsvInProgress = false;
+          this.rightContentProgressSpinner = false;
         }
       );
   }
@@ -1168,6 +1190,21 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   this.filteredTipologia = filtered;
 }
 
+/**
+  * Filtering per gli autocomplete della versione accessibile
+  */
+ public filterStatiVersamento(event:any) {
+  let filtered: any[] = [];
+  let query = event.query;
+  for (let i = 0; i < this.statiVersamentoObj.length; i++) {
+    let statoVersamento = this.statiVersamentoObj[i];
+    if (statoVersamento.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+      filtered.push(statoVersamento);
+    }
+  }
+  this.filteredStatiVersamento = filtered;
+}
+
   public filterStatoAccessibile(event:any) {
     let filtered: any[] = [];
     let query = event.query;
@@ -1300,7 +1337,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Apre il tab per l'archivio corrisondente alla fasciolazione
    * @param f 
    */
-  public openArchive(archivioDoc: ArchivioDoc, doc: ExtendedDocDetailView): void {
+  public openArchive(archivioDoc: ArchivioDoc, doc?: ExtendedDocDetailView): void {
     this.navigationTabsService.addTabArchivio(archivioDoc.idArchivio);
 		this.appService.appNameSelection("Fascicolo "+ archivioDoc.idArchivio.numerazioneGerarchica + " [" + archivioDoc.idArchivio.idAzienda.aoo + "]");
   }
@@ -1327,11 +1364,12 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     }
   }
 
+
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
    * desottoscrivo anche dalla specifica loadDocsListSubscription
    * Che appositamente è separata in quanto viene spesso desottoscritta
-   * e risottroscritta.
+   * e risottoscritta.
    */
   public ngOnDestroy(): void {
     if (this.subscriptions) {
@@ -1343,6 +1381,21 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (this.loadDocsListSubscription) {
       this.loadDocsListSubscription.unsubscribe();
     }
+  }
+
+  // public openDocPregresso(doc: ExtendedDocDetailView): void {
+  //   if (doc instanceof ExtendedDocDetailView){
+  //     console.log("ecco", doc); //TODO: rimuovere
+  //   }
+  //   this.showRightPanel.emit({
+  //     showPanel: true,
+  //     rowSelected: doc
+  //   });
+  // }
+
+  public openPregresso(doc: ExtendedDocDetailView) {
+    this.navigationTabsService.addTabDoc(doc);
+		this.appService.appNameSelection(`${doc.codiceRegistro === 'PG' ? "Protocollo generale" : doc.tipologiaVisualizzazione} pregresso ${doc.registrazioneVisualizzazione} [${doc.idAzienda.aoo}]`);
   }
 }
 

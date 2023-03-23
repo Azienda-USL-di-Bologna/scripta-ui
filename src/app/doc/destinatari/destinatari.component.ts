@@ -19,22 +19,34 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
   public actualCompetente: Related;
 
   public columnCoinvolti: any[] = [];
-  public _doc: Doc;
+  private _doc: Doc;
   public selectedCompetente: Related;
   public selectedCoinvolto: Related;
   
   public filteredCompetenti: DettaglioContatto[];
   public filteredCoinvolti: DettaglioContatto[];
 
+  private _pregresso: boolean = true; //TODO: ovviamente cambiare
+  public get pregresso(): boolean {
+    return this._pregresso;
+  }
+  @Input() public set pregresso(value: boolean) {
+    this._pregresso = value;
+  }
+
   @ViewChild('autocompleteCompetenti') autocompleteCompetenti: AutoComplete;
   @ViewChild('autocompleteCoinvolti') autocompleteCoinvolti: AutoComplete;
 
 
+  get doc() {
+    return this._doc;
+  }
   @Input() set doc(value: Doc) {
     this._doc = value;
-    if (this._doc.competenti.length > 0) {
-      this.actualCompetente = this._doc.competenti[0];
-      this.selectedCompetente = this._doc.competenti[0];
+    if (!!this.doc.competenti && this.doc.competenti.length > 0) {
+      console.log("sto settando il competente")
+      this.actualCompetente = this.doc.competenti[0];
+      this.selectedCompetente = this.doc.competenti[0];
     }
     // if ( value && value.competenti && value.competenti.length > 0 ) {
     //   this.selectedCompetente = value.competenti[0];
@@ -78,7 +90,7 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public searchDestinatario(event: any, modalita: string) {
-    if (this._doc) {
+    if (this.doc) {
       const query = event.query;
       const projection = ENTITIES_STRUCTURE.rubrica.contatto.standardProjections.ContattoWithIdPersonaAndIdPersonaCreazioneAndIdStruttura;
       const filtersAndSorts: FiltersAndSorts = new FiltersAndSorts();
@@ -90,7 +102,7 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
       filtersAndSorts.addFilter(new FilterDefinition("eliminato", FILTER_TYPES.not_string.equals, false));
       filtersAndSorts.addFilter(new FilterDefinition("tipo", FILTER_TYPES.not_string.equals, TipoContatto.ORGANIGRAMMA));
       filtersAndSorts.addFilter(new FilterDefinition("categoria", FILTER_TYPES.not_string.equals, CategoriaContatto.STRUTTURA));
-      filtersAndSorts.addFilter(new FilterDefinition("idStruttura.idAzienda.id", FILTER_TYPES.not_string.equals, this._doc.idAzienda.id));
+      filtersAndSorts.addFilter(new FilterDefinition("idStruttura.idAzienda.id", FILTER_TYPES.not_string.equals, this.doc.idAzienda.id));
       this.subscriptions.push(
           this.contattoService.getData(projection, filtersAndSorts).subscribe(res => {
             if (res) {
@@ -166,12 +178,12 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
           const related = res.find(f => f.operation === BatchOperationTypes.INSERT).entityBody as Related;
           switch (modalita) {
             case "competente":
-              this._doc.competenti = [];
-              this._doc.competenti.push(related);
+              this.doc.competenti = [];
+              this.doc.competenti.push(related);
               this.actualCompetente = related;
             break;
             case "coinvolto":
-              this._doc.coinvolti.push(related);
+              this.doc.coinvolti.push(related);
               this.autocompleteCoinvolti.writeValue(null);
             break;
           }
@@ -197,7 +209,7 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
     destinatario.tipo = tipo;
     destinatario.idPersonaInserente = {id: this.loggedUtenteUtilities.getUtente().idPersona.id} as Persona;
     destinatario.origine = OrigineRelated.INTERNO;
-    destinatario.idDoc = {id: this._doc.id} as Doc;
+    destinatario.idDoc = {id: this.doc.id} as Doc;
     return destinatario;
   }
 
@@ -213,7 +225,7 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
           summary:'Struttura destinatari', 
           detail:'Struttura destinataria eliminata con successo'
         });
-        this._doc.coinvolti.splice(rowIndex, 1);
+        this.doc.coinvolti.splice(rowIndex, 1);
       }
     );
   }
@@ -230,7 +242,7 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
           summary:'Competente',
           detail:'Competente eliminato con successo'
         });
-        this._doc.competenti.splice(0, 1)
+        this.doc.competenti.splice(0, 1)
       }
     )
     this.actualCompetente = null;

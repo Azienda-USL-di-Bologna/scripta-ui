@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
-import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio, BaseUrls, BaseUrlType, Attivita, Applicazione, Persona, Azienda, AttivitaService, AttivitaFatta } from '@bds/internauta-model';
+import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio, BaseUrls, BaseUrlType, Attivita, Applicazione, Persona, Azienda, AttivitaService, StatoArchivio, KrintFilterOptions } from '@bds/internauta-model';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES , BatchOperation, NextSdrEntity, BatchOperationTypes} from '@bds/next-sdr';
+import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES , BatchOperation, NextSdrEntity, BatchOperationTypes, AdditionalDataDefinition} from '@bds/next-sdr';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TreeNode } from 'primeng/api/treenode';
 import { AutoComplete } from 'primeng/autocomplete';
@@ -25,6 +25,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   get archivio(): Archivio { return this._archivio; }
   @Input() set archivio(archivio: Archivio) {
     this._archivio = archivio;
+    this.setAnniTenutaSelezionabili();
+    this.labelLivelloArchivio = this.getLabelLivelloByIdLivello(archivio.livello);
     if (this.archivio.idTitolo) {
       this.selectedTitolo = this.buildNodeTitolo(this.archivio.idTitolo as Titolo);
     } else {
@@ -32,6 +34,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     }
     this.loadConfigurations();
   }
+  public panelSize:number[]=[85,15];
+  public krintFilterOptions: KrintFilterOptions;
   private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
   private pageConfNoCountLimit20: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 20, offset: 0 } };
   public responsabiliArchivi: AttoreArchivio[] = [];
@@ -45,7 +49,6 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public titoli: TreeNode[];
   public selectedTitolo: TreeNode;
   public filteredMassimari: Massimario[] = [];
-  private massimariPerTittolo: Massimario[] = [];
   public filteredTitoli: Titolo[] = [];
   public tipiArchivioObj: any[] = TipoArchivioTraduzioneVisualizzazione;
   private classificazioneAllaFoglia: boolean = false;
@@ -56,10 +59,14 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public anniTenutaSelezionabili: any[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
   public loggedUserIsResponsbaileOrVicario = false;
-  loggedUserIsResponsbaileProposto = false;
+  public showLogs: boolean = false;
+  public isArchivioChiuso = false;
+  public loggedUserIsResponsbaileProposto = false;
   public fascicoliParlanti: boolean = false;
+  public labelLivelloArchivio: string = null;
   private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
   private attoreArchivioProjection = ENTITIES_STRUCTURE.scripta.attorearchivio.standardProjections.AttoreArchivioWithIdPersonaAndIdStruttura;
+  public saving: any = {};
 
   @ViewChild("autocompleteCategoria") public autocompleteCategoria: AutoComplete;
   
@@ -92,20 +99,22 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    console.log("Archivio test: ", this.archivio);
-    this.updateAnniTenuta();
+    //console.log("Archivio test: ", this.archivio);
+    //this.updateAnniTenuta();
     // this.getResponsabili();
+    this.isArchivioClosed();
     this.loggedUserIsResponsbaileOrVicario = (this.archivio["attoriList"] as AttoreArchivio[])
-    .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id 
-    && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE 
-      || a.ruolo === RuoloAttoreArchivio.VICARIO 
-      || a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
+      .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id 
+        && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE 
+          || a.ruolo === RuoloAttoreArchivio.VICARIO 
+          || a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
       // this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
-      if(this.archivio.tipo !== TipoArchivio.SPECIALE) {
-        this.tipiArchivioObj = this.tipiArchivioObj.filter(a => a.value !== TipoArchivio.SPECIALE)
-      }
-     this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[]).some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id  && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
-    this.loadParametroAziendaleFascicoliParlanti()
+    if (this.archivio.tipo !== TipoArchivio.SPECIALE) {
+      this.tipiArchivioObj = this.tipiArchivioObj.filter(a => a.value !== TipoArchivio.SPECIALE);
+    }
+    this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[])
+      .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id  && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
+    this.loadParametroAziendaleFascicoliParlanti();
   }
 
   private loadConfigurations() {
@@ -120,19 +129,142 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     );
   }
 
-  private updateAnniTenuta() {
-    if(this.archivio.anniTenuta === undefined) {
-      this.anniTenutaSelezionabili = this.possibleAnniTenuta;
-      console.log("Anni tenuta: ", this.anniTenutaSelezionabili);
-      
+  /**
+   * Funzione che si occupa della prechiusura/chiusura e apertura dell'archivio radice e quindi dei vari figli
+   * @param archivio 
+   * @param event 
+   * @returns 
+   */
+  public chiudiRiapriArchivio(event: Event): void {
+    if (!this.archivio.idMassimario) {
+      this.messageService.add({
+        severity: "error",
+        key: "dettaglioArchivioToast",
+        summary: "Attenzione",
+        detail: `Non è possibile chiudere un archivio senza aver prima assegnato una tipologia documentale`
+      });
+      return;
+    }
+
+    const archivioUpdate = new Archivio();
+    archivioUpdate.version = this.archivio.version;
+    const additionalData = [new AdditionalDataDefinition("OperationRequested", "CloseOrReopenArchive")];
+
+    if (this.archivio.stato == StatoArchivio.PRECHIUSO) {
+      archivioUpdate.stato = StatoArchivio.APERTO;
+      this.archivio.stato = StatoArchivio.APERTO;
+      this.patchArchivio(
+        archivioUpdate,
+        additionalData,
+        "Archivio " + this.archivio.numerazioneGerarchica + " riaperto correttamente",
+        `Si è verificato un errore nella riapertura dell'archivio, contattare Babelcare`,
+        () => {this.updateArchivio.emit(this.archivio)}
+      );
     } else {
-      this.possibleAnniTenuta.forEach(elem => {
-        if(this.archivio.anniTenuta <= elem.value ) 
-          this.anniTenutaSelezionabili.push(elem);
-      });  
-      console.log("Anni tenuta: ", this.anniTenutaSelezionabili);
+      this.subscriptions.push(
+        this.configurazioneService.getParametriAziende("chiusuraArchivio", ["scripta"], [this.archivio.idAzienda.id]).subscribe(
+          (parametriAziende: ParametroAziende[]) => {
+            let chiusuraArchivio: boolean = false;
+            if (parametriAziende && parametriAziende[0]) {
+              chiusuraArchivio = JSON.parse(parametriAziende[0].valore)
+            }
+            if (chiusuraArchivio) {
+              this.confirmationService.confirm({
+                key: "confirm-popup",
+                target: event.target,
+                message: "Eventuali bozze di sottofascicoli o inserti saranno eliminate. Inoltre il fascicolo non potrà essere riaperto. Si vuole procedere?",
+                icon: 'pi pi-exclamation-triangle',
+                accept: () => {
+                  // L'utente conferma di voler chiudere definitivamente il fascicolo, faccio partire la chiusura
+                  archivioUpdate.stato = StatoArchivio.CHIUSO;
+                  this.archivio.stato = StatoArchivio.CHIUSO;
+                  this.patchArchivio(
+                    archivioUpdate,
+                    additionalData,
+                    "Archivio " + this.archivio.numerazioneGerarchica + " chiuso correttamente",
+                    `Si è verificato un errore nella chiusura dell'archivio, contattare Babelcare`,
+                    () => {this.updateArchivio.emit(this.archivio)}
+                  );
+                },
+                reject: () => {
+                  // L'utente ha cambaito idea. Non faccio nulla
+                }
+              });
+            } else {
+              this.confirmationService.confirm({
+                key: "confirm-popup",
+                target: event.target,
+                message: "Eventuali bozze di sottofascicoli o inserti saranno eliminate. Si vuole procedere?",
+                icon: 'pi pi-exclamation-triangle',
+                accept: () => {
+                  // L'utente conferma di voler chiudere definitivamente il fascicolo, faccio partire la chiusura
+                  archivioUpdate.stato = StatoArchivio.PRECHIUSO;
+                  this.archivio.stato = StatoArchivio.PRECHIUSO;
+                  this.patchArchivio(
+                    archivioUpdate,
+                    additionalData,
+                    "Archivio " + this.archivio.numerazioneGerarchica + " chiuso correttamente",
+                    `Si è verificato un errore nella chiusura dell'archivio, contattare Babelcare`,
+                    () => {this.updateArchivio.emit(this.archivio)}
+                  );
+                },
+                reject: () => {
+                  // L'utente ha cambaito idea. Non faccio nulla
+                }
+              });
+            }
+          }));
+        }   
+  }
+
+
+  /**
+   * Un semplice update dell'archivio così come passato. Viene aggiornato poi il version
+   * Mostra gli eventuali messaggi passati in caso di successo o fallimento dell'update.
+   * @param archivioToUpdate 
+   */
+   public patchArchivio(archivioToUpdate: Archivio, additionalData?: AdditionalDataDefinition[], messageSuccess?: string, messageError?: string, exe?: () => void): void {
+    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id,  null/* this.ARCHIVIO_PROJECTION */, additionalData)
+      .subscribe(
+        res => {
+          console.log("Update archivio: ", res);
+          this.archivio.version = res.version;
+          if (messageSuccess) {
+            this.messageService.add({
+              severity: "success",
+              key: "dettaglioArchivioToast",
+              summary: "OK",
+              detail: messageSuccess
+            });
+          }
+          if (exe) {
+            exe();
+          }
+        },
+        err => {
+          if (messageError) {
+            this.messageService.add({
+              severity: "error",
+              key: "dettaglioArchivioToast",
+              summary: "Attenzione",
+              detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`
+            });
+          }
+        }
+      ));
+  }
+
+  /**
+   * Aggiorno la variabile che contiene le varie opzioni degli anni di conservazione.
+   * Le opzioni sono definite in base al massimario, se gli anni del massimario sono ad es
+   * 10, allora la conservazione sarà di minimo 10.
+   */
+  private setAnniTenutaSelezionabili() {
+    if (this.archivio.idMassimario) {
+      this.anniTenutaSelezionabili = this.possibleAnniTenuta.filter(a => a.value >= this.archivio.idMassimario.anniTenuta);
     }
   }
+
 
   private loadParametroAziendaleFascicoliParlanti(){
     this.subscriptions.push(this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null).subscribe((parametriAziende: ParametroAziende[]) => {
@@ -187,6 +319,36 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     }
   }
 
+  private isArchivioClosed() {
+    if(this.archivio.stato == StatoArchivio.PRECHIUSO || this.archivio.stato == StatoArchivio.CHIUSO)
+      this.isArchivioChiuso = true;
+    else
+      this.isArchivioChiuso = false;
+  }
+
+  public loadLogs() {
+    
+		this.krintFilterOptions = {
+			codiciOperazioni: null,
+			idOggetto: this.archivio.id,
+			tipoOggetto: null,
+			idUtente: null,
+			idOggettoContenitore: null,
+			tipoOggettoContenitore: null,
+			dataDa: null,
+			dataA: null
+		} as KrintFilterOptions;
+		this.showLogs = true;
+    
+
+
+	}
+
+  public removeZoneFromTime(date: string): string {
+		return date.replace(/\[\w+\/\w+\]$/, "");
+	}
+
+
   /**
    * Questa funzione carica i responsabili dell'archivio 
    * ordinati per ruolo
@@ -228,6 +390,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
             if (field === "oggetto") {
               this.archivioUtilsService.updateArchivioFieldSelection({field: field, archivio: this.archivio} as ArchivioFieldUpdating);
             }
+            this.saving = {};
           }
         )
       );
@@ -341,7 +504,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       id: titolo.id
     } as Titolo;
     archivioToUpdate.version = this.archivio.version;
-    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
+    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, this.ARCHIVIO_PROJECTION, null)
       .subscribe(
         res => {
           console.log("Update archivio: ", res);
@@ -372,8 +535,14 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       ));
   }
 
+  /**
+   * Salvo la tipologia documentale scelta dall'utente.
+   * Salvo anche gli anni tenuta che dipendono dal massimario selezionato.
+   * Oltre questo vado anche ad impostare la variabile anniTenutaSelezionabili
+   * @param massimario 
+   */
   public onSelectMassimario(massimario: Massimario): void {
-    console.log("onSelectMassimario: ", event);
+    //console.log("onSelectMassimario: ", event);
     const archivioToUpdate: Archivio = new Archivio();
     archivioToUpdate.idMassimario = {
       id: massimario.id
@@ -381,22 +550,19 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     archivioToUpdate.anniTenuta = massimario.anniTenuta;
     archivioToUpdate.version = this.archivio.version;
     this.patchArchivio(archivioToUpdate);
+    this.setAnniTenutaSelezionabili();
   }
 
+  /**
+   * Salvo gli anni di conservazione selezionati dall'utente
+   * @param anni 
+   */
   public saveAnniTenuta(anni: any): void {
     console.log("selezionata anni tenuta fascicolo ", anni)
-    this.anniTenutaSelezionabili = [];
     const archivioToUpdate: Archivio = new Archivio();
     archivioToUpdate.anniTenuta = anni;
     archivioToUpdate.version = this.archivio.version;
-    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
-      .subscribe(
-        res => {
-          console.log("Update archivio: ", res);
-          this.archivio.version = res.version;
-        }
-      ))
-      this.updateAnniTenuta();
+    this.patchArchivio(archivioToUpdate);
   }
 
 
@@ -407,64 +573,62 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     this.patchArchivio(archivioToUpdate);
   }
 
-  /**
-   * Un semplice update dell'archivio così come passato. Viene aggiornato poi il version
-   * @param archivioToUpdate 
-   */
-  public patchArchivio(archivioToUpdate: Archivio): void {
-    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
-      .subscribe(
-        res => {
-          console.log("Update archivio: ", res);
-          this.archivio.version = res.version;
-        }
-      ));
-  }
+  
 
   /**
    * Funzione che si occupa della numerazione di un archivio
    * @param event 
    */
   public numeraFasicoloClicked(event: Event): void {
-    this.confirmationService.confirm({
-      key: "confirm-popup",
-      target: event.target,
-      message: "Stai per numerare il fascicolo: confermi?",
-      accept: () => {
-        this.subscriptions.push(
-          this.extendedArchivioService.numeraArchivio(
-            this.archivio,
-            this.ARCHIVIO_PROJECTION)
-            .subscribe({
-                next: (resArchivio: Archivio) => {
-                  console.log("Archivio aggiornato", resArchivio);
-                  this.archivio.version = resArchivio.version;
-                  this.archivio.numerazioneGerarchica = resArchivio.numerazioneGerarchica;
-                  this.archivio.stato = resArchivio.stato;
-                  this.navigationTabsService.addTabArchivio(resArchivio, true, true);
-                  this.updateArchivio.emit(resArchivio);
-                  this.appService.appNameSelection(`Fascicolo ${resArchivio.numerazioneGerarchica} [${resArchivio.idAzienda.aoo}]`);
-                  this.messageService.add({
-                    severity: "success",
-                    key: "dettaglioArchivioToast",
-                    summary: "OK",
-                    detail: `${resArchivio.numerazioneGerarchica}: Numerazione avvenuta con successo`
-                  });
-                },
-                error: (e) => {
-                  console.error(e);
-                  this.messageService.add({
-                    severity: "error",
-                    key: "dettaglioArchivioToast",
-                    summary: "Attenzione",
-                    detail: `Si è verificato un errore nella numerazione dell'archivio, contattare Babelcare`
-                  });
+    if( this.archivio.attoriList.some(a => a.ruolo === RuoloAttoreArchivio.VICARIO)){
+      this.confirmationService.confirm({
+        key: "confirm-popup",
+        target: event.target,
+        message: "Stai per numerare il fascicolo: confermi?",
+        accept: () => {
+          this.subscriptions.push(
+            this.extendedArchivioService.numeraArchivio(
+              this.archivio,
+              this.ARCHIVIO_PROJECTION)
+              .subscribe({
+                  next: (resArchivio: Archivio) => {
+                    console.log("Archivio aggiornato", resArchivio);
+                    this.archivio.version = resArchivio.version;
+                    this.archivio.numerazioneGerarchica = resArchivio.numerazioneGerarchica;
+                    this.archivio.stato = resArchivio.stato;
+                    this.navigationTabsService.addTabArchivio(resArchivio, true, true);
+                    this.updateArchivio.emit(resArchivio);
+                    this.appService.appNameSelection(`Fascicolo ${resArchivio.numerazioneGerarchica} [${resArchivio.idAzienda.aoo}]`);
+                    this.messageService.add({
+                      severity: "success",
+                      key: "dettaglioArchivioToast",
+                      summary: "OK",
+                      detail: `${resArchivio.numerazioneGerarchica}: Numerazione avvenuta con successo`
+                    });
+                  },
+                  error: (e) => {
+                    console.error(e);
+                    this.messageService.add({
+                      severity: "error",
+                      key: "dettaglioArchivioToast",
+                      summary: "Attenzione",
+                      detail: `Si è verificato un errore nella numerazione dell'archivio, contattare Babelcare`
+                    });
+                  }
                 }
-              }
-            )
-        );
-      }
-    });
+              )
+          );
+        }
+      });
+    } else {
+      this.messageService.add({
+        severity: "warn",
+        key: "dettaglioArchivioToast",
+        summary: "Attenzione",
+        detail: `Inserire almeno un vicario per poter numerare il fascicolo`
+      });
+    }
+    
   }
 
   public accettaResponsabilita() {
@@ -501,7 +665,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
     
     const attivita = new Attivita();
-    attivita.idApplicazione = {id: "scripta"} as Applicazione;
+    attivita.idApplicazione = {id: "gediInt"} as Applicazione;
     attivita.idAzienda = {id: this.archivio.idAzienda.id} as Azienda;
     attivita.idPersona = {id: responsabileVecchio.idPersona.id} as Persona;
     attivita.tipo = "notifica";
@@ -576,7 +740,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
     const responsabile = this.archivio.attoriList.find((a:AttoreArchivio) => a.ruolo === 'RESPONSABILE');
     const attivita = new Attivita();
-    attivita.idApplicazione = {id: "scripta"} as Applicazione;
+    attivita.idApplicazione = {id: "gediInt"} as Applicazione;
     attivita.idAzienda = {id: this.archivio.idAzienda.id} as Azienda;
     attivita.idPersona = {id: responsabile.idPersona.id} as Persona;
     attivita.tipo = "notifica";
@@ -618,6 +782,20 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       )
     );
   }
+
+  public getLabelLivelloByIdLivello(livello: number): string{
+    switch(livello){
+      case 1:
+        return "Fascicolo";
+      case 2:
+        return "Sottofascicolo";
+      case 3:
+        return "Inserto";
+    }
+    return null;
+  }
+
+ 
 
   public ngOnDestroy(): void {
     if (this.subscriptions) {

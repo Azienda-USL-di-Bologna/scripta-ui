@@ -12,10 +12,12 @@ import { RichiestaAccessoArchiviComponent } from "./richiesta-accesso-archivi/ri
 import { DettaglioArchivioModule } from "./dettaglio-archivio/dettaglio-archivio.module";
 import { BlackboxPermessiService } from "@bds/internauta-model";
 import { DocDetailAndPreviewModule } from "../docs-list-container/doc-detail-and-preview/doc-detail-and-preview.module";
+import { CommonComponentsModule } from "@bds/common-components";
 
 @NgModule({
   imports: [
     CommonModule,
+    CommonComponentsModule,
     ArchivioRoutingModule,
     PrimeNgModule,
     ScriptaCommonModule,
