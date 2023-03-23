@@ -5,6 +5,7 @@
   overflow: hidden;
   p-splitter {
     flex: 1 1 0;
+    height: calc(100% - 44.5px); // 44.5px è l'altezza della generic-caption-table
     .splitter-archivio {
       height: 100%;
       .p-splitter-panel {
@@ -50,6 +51,7 @@
   flex-direction: column;
   align-items: center;
   overflow: hidden;
+  width: 500px;
   app-archivio-ricerca{
     margin: 1rem;
     width: 80%;
@@ -57,4 +59,17 @@
   p-button{
     margin-top: 1rem;
   }
+
+}
+
+::ng-deep  .chiudiBottoni{
+
+  transform: translateX(9.875rem);
+}
+
+::ng-deep .chiudiPopup {
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+
 }

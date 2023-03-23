@@ -10,6 +10,7 @@
   [ngClass]="{ hiderightside: !showRightSide }">
   <ng-template pTemplate>
     <docs-list #doclist
+      [showAnteprimaInit]="showRightSide"
       (showRightPanel)="manageRowSelected($event)" >
     </docs-list>
   </ng-template>

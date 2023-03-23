@@ -62,6 +62,14 @@ export class DocDetailAndPreviewComponent implements OnInit {
     
     
   }
+   
+  public closePanel() {
+    this.closeRightPanel.emit({
+      showPanel: false,
+      rowSelected: null
+      });
+      console.log("Ma io ho l'evento")
+  }
 
 
   public hasUserPienaVisibilita(doc: DocDetail):boolean {

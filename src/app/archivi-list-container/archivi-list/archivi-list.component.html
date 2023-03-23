@@ -27,13 +27,14 @@
     <tr class="header-row">
       <th *ngFor="let col of columns" 
         pReorderableColumn 
-        [ngSwitch]="col.field" 
         [ngClass]="col.headerClass"
         [pSortableColumn]="col.sortField"
         [pSortableColumnDisabled]="archiviListMode === 'RECENTI' && col.field == 'dataCreazione'"
         [ngStyle]="{'cursor': col.sortField ? null : 'move',
          'background-color': col.field == 'dataCreazione' && archiviListMode == 'RECENTI' ? '#f4f4f4' : null,
-         'background-color': col.field == 'dataCreazione' && archiviListMode !== 'RECENTI' ? '#203244' : null }">
+         'background-color': col.field == 'dataCreazione' && archiviListMode !== 'RECENTI' ? '#203244' : null,
+        'color' : col.field == 'dataCreazione' && archiviListMode == 'RECENTI' ? '#000000' : null,
+        'color' : col.field == 'dataCreazione' && archiviListMode !== 'RECENTI' ? '#f4f4f4' : null}">
         <span class="header-box" 
           [attr.aria-label]="col.label" [ngStyle]="{}">
           {{col.header}}
@@ -235,7 +236,7 @@
                   [options]="livelliFiltrabili"
                   [(ngModel)]="livelloValue"
                   (onChange)="filter($event.value)"
-                  [disabled]="(archiviListMode === archiviListModeEnum.TUTTI || archiviListMode === archiviListModeEnum.RECENTI || archivioPadre)"
+                  [disabled]="(archiviListMode === archiviListModeEnum.TUTTI || archiviListMode === archiviListModeEnum.RECENTI || !!archivioPadre)"
                   optionValue="value" 
                   optionLabel="label" 
                   panelStyleClass="dropdown-panel-livello"

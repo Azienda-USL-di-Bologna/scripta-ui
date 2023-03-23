@@ -112,6 +112,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public docSelected: ExtendedDocDetailView;
   public isResponsabileVersamento: boolean = false;
   public hasPienaVisibilita: boolean = false;
+  private _reloadDataFalg: boolean = false;
+  public showAnteprima: boolean = false;
+
 
   private _archivio: Archivio;
   get archivio(): Archivio { return this._archivio; }
@@ -121,6 +124,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.loadData();
     }
   }
+
+  @Input('showAnteprimaInit') set showAnteprimaInit(showAnteprimaInit: boolean) {
+    if(showAnteprimaInit != undefined)
+      this.showAnteprima = showAnteprimaInit;
+  }
+
+  
 
   constructor(
     private messageService: MessageService,
@@ -177,6 +187,11 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       )
     );
     
+    this.subscriptions.push(
+      this.showRightPanel.subscribe(event =>{
+        this.showAnteprima = event.showPanel;
+      })
+    );
    
    
     /* this.subscriptions.push(
@@ -268,8 +283,16 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.resetPaginationAndLoadData();
   }
 
-  @Input() get selectedColumns(): any[] {
+  get selectedColumns(): ColonnaBds[] {
     return this._selectedColumns;
+  }
+
+  @Input() set reloadData(reloadDataFalg: boolean){
+    this._reloadDataFalg = reloadDataFalg;
+    if(this._reloadDataFalg){
+      this.loadData();
+      this._reloadDataFalg = false;
+    }
   }
 
   set selectedColumns(colsSelected: ColonnaBds[]) {
@@ -284,6 +307,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (!this.isResponsabileVersamento) {
       this.selectableColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
       this.selectedColumns.forEach((value,index) => {if(value.field === "dataUltimoVersamento" ) this.selectedColumns.splice(index, 1)});
+    }
+    if (this._selectedColumns[this._selectedColumns.length-1] === undefined) {
+      this._selectedColumns.pop();
     }
   }
 
@@ -359,14 +385,14 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public setColumnsPerDetailArchivio(): void {
-    const colonneDaVisualizzare = ["registrazione", "dataRegistrazione", "oggetto", "tipologia", "idArchivi"];
+    const colonneDaVisualizzare = ["registrazione", "dataRegistrazione", "oggetto", "tipologia", "idArchivi", "idAzienda", "dataCreazione"];
     this.cols[this.cols.findIndex(c => c.field === "idArchivi")].header = "Altre fascicolazioni"; // Modifica custom all'header delle fascicolazioni.
     // this._selectedColumns = this.cols.filter(c => colonneDaVisualizzare.includes(c.field));
     this._selectedColumns = [];
     colonneDaVisualizzare.forEach(c => {
       this._selectedColumns.push(this.cols.find(e => e.field === c));
     })
-    console.log(this._selectedColumns);
+    console.log("Colonne", this._selectedColumns);
 
     this.selectableColumns = cols.map(e => {
       if (colonneDaVisualizzare.includes(e.field)) {
@@ -1343,6 +1369,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public openDetailAndPreview(doc: ExtendedDocDetailView): void {
+    this.showAnteprima = true;
     this.showRightPanel.emit({
       showPanel: true,
       rowSelected: doc
@@ -1350,18 +1377,17 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public onRowSelect(event: any): void {
-    if (this.archivio) {
+    if (this.showAnteprima == true) {
       this.openDetailAndPreview(event.data);
     }
   }
 
   public onRowUnselect(event: any): void {
-    if (this.archivio) {
       this.showRightPanel.emit({
         showPanel: false,
         rowSelected: null
       });
-    }
+      this.showAnteprima = false;
   }
 
 

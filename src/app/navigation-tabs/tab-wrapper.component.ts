@@ -37,15 +37,17 @@ export class TabWrapperComponent implements AfterViewInit {
   
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
-  ngAfterViewInit(): void {
+  ngAfterViewInit() {
     setTimeout(() => {
-      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.item.component);
+      if (!!this.item) {
+        const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.item.component);
 
-      const viewContainerRef = this.tabDirective.viewContainerRef;
-      viewContainerRef.clear();
+        const viewContainerRef = this.tabDirective.viewContainerRef;
+        viewContainerRef.clear();
 
-      this.componentRef = viewContainerRef.createComponent<TabComponent>(componentFactory);
-      this.componentRef.instance.data = this.item.data;
+        this.componentRef = viewContainerRef.createComponent<TabComponent>(componentFactory);
+        this.componentRef.instance.data = this.item.data;
+      }
     }, 0);
   }
 }

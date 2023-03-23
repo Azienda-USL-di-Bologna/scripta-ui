@@ -112,15 +112,20 @@
         font-size: 2rem;
         cursor: pointer;
         color: #406284;
+        &:hover {
+          color: #936 !important;
+          background-color: transparent !important;
+          border-color: transparent !important;
+        }
       }
       .preferitoStar {
         font-size: 2rem;
         cursor: pointer;
         color: #936 !important; 
         &:hover {
-          color: #7e7e7e !important;
+          color: #936 !important;
           background-color: transparent !important;
-          border-color: transparent !important;
+          border-color: #7e7e7e !important;
         }
         &:target{
           outline: none !important;
@@ -131,7 +136,7 @@
         cursor: pointer;
         color: #2e4a65 !important; 
         &:hover {
-          color: #7e7e7e !important;
+          color: #936 !important;
           background-color: transparent !important;
           border-color: transparent !important;
         }
@@ -147,6 +152,11 @@
         &:target{
           outline: none !important;
         }
+        &:hover {
+          color: #936 !important;
+          background-color: transparent !important;
+          border-color: transparent !important;
+        }
       }
       .empty{
         color: #2e4a65  !important;
@@ -156,13 +166,21 @@
 
 }
 
-::ng-deep .span-fileUpload-button {
+::ng-deep .span-fileUpload-button:hover {
   margin-right: 5px !important;
-}
-::ng-deep .upload-document-button {
-  .p-fileupload-choose {
-    height: 2.188rem;
+  .upload-document-button {
+    :hover{
+      color: #936 !important;
+      background-color: transparent !important;
+      border-color: transparent !important;
+    }
   }
+}
+
+.p-fileupload-choose {
+  height: 2.188rem;
+}
+
   /* .p-button {
     background-color: transparent !important;
     border: none !important;
@@ -177,4 +195,4 @@
       border: none !important;
     }
   } */
-}
+

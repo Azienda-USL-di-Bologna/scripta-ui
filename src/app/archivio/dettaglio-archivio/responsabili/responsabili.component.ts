@@ -365,7 +365,7 @@ export class ResponsabiliComponent implements OnInit {
               this.inEditing = false; 
               this.onRowEditCancel(attore, rowIndex);
               return;
-            } else if (this.archivio.attoriList.some((a: AttoreArchivio) => a.fk_idPersona.id === attore.idPersona.id && a.ruolo === RuoloAttoreArchivio.RESPONSABILE)) {
+            } else if (this.archivio.attoriList.some((a: AttoreArchivio) => a.fk_idPersona.id === attore.idPersona.id && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE || a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO))) {
               // Vicario già presente, ci fermiamo qua
               this.messageService.add({
                 severity: "warn",
@@ -384,6 +384,17 @@ export class ResponsabiliComponent implements OnInit {
             }
             break;
           case RuoloAttoreArchivio.RESPONSABILE_PROPOSTO:
+            if (this.archivio.attoriList.some((a: AttoreArchivio) => a.fk_idPersona.id === attore.idPersona.id && a.ruolo === RuoloAttoreArchivio.RESPONSABILE)) {
+              // Responsabile già presente, ci fermiamo qua
+              this.messageService.add({
+                severity: "warn",
+                summary: "Attenzione",
+                detail: "Il responsabile proposto selezionato è già presente come responsabile"
+              });
+              this.inEditing = false; 
+              this.onRowEditCancel(attore, rowIndex);
+              return;
+            }
             // Il responsabile proposto va inserito
             // Qui finisce l'editing del vicario, vogliamo salvarlo subito dopo la scelta
             this.loadStruttureAttore(attore, rowIndex); // Carichiamo una struttura per la visualizzazione non editing del vicario

@@ -8,6 +8,7 @@ import { Observable, Subject } from "rxjs";
 export class ArchivioUtilsService {
   private _updateArchivioField = new Subject<ArchivioFieldUpdating>();
   private _deletedArchive = new Subject<number>();
+  private _updatedArchive = new Subject<Archivio>();
 
   constructor() {  }
 
@@ -22,6 +23,10 @@ export class ArchivioUtilsService {
     return this._deletedArchive.asObservable();
   }
 
+  public get updatedArchiveEvent(): Observable<Archivio> {
+    return this._updatedArchive.asObservable();
+  }
+
   /******************************************************************
    * SETTER DEGLI OBSERVABLE
    */
@@ -31,6 +36,10 @@ export class ArchivioUtilsService {
 
   public deletedArchiveSelection(idArchivioDeleted: number) {
     this._deletedArchive.next(idArchivioDeleted);
+  }
+
+  public updatedArchiveSelection(updateArchivio: Archivio) {
+    this._updatedArchive.next(updateArchivio);
   }
 }
 
