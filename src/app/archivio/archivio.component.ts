@@ -397,24 +397,42 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    */
   public buildFunctionButton(archivio: Archivio | ArchivioDetail): void {
     const funzioniItems: MenuItem[] = [{
-      label: "Copia/Sposta",
-      disabled: this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO),
-      command: () => this.showOrganizzaPopUp = true
-    },
-    {
-      label: "Genera",
+      label: "Organizza",
       items: [
         {  
-          label: "Frontespizio",
-          command: () => console.log("qui dovrò generare il Frontespizio") 
+          label: "Sposta",
+          command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Sposta"}
         },
         {  
-          label: "Dorso",
-          command: () => console.log("qui dovrò generare il Dorso")
+          label: "Copia",
+          command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Copia"}
+        },
+        {  
+          label: "Duplica",
+          command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Duplica"}
+        },
+        {  
+          label: "Rendi fascicolo",
+          disabled: this.archivio?.livello === 1,
+          command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Rendi fascicolo"}
         }
       ],
-      disabled: false
+      disabled: this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO)
     },
+    // {
+    //   label: "Genera",
+    //   items: [
+    //     {  
+    //       label: "Frontespizio",
+    //       command: () => console.log("qui dovrò generare il Frontespizio") 
+    //     },
+    //     {  
+    //       label: "Dorso",
+    //       command: () => console.log("qui dovrò generare il Dorso")
+    //     }
+    //   ],
+    //   disabled: false
+    // },
     {
       label: "Scarica zip",
       disabled: !this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA) ||
@@ -982,6 +1000,33 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         });
         break;
     }
+  }
+
+  public getDescrizioneAzioneTargetText(target: string): string{
+    let res = "";
+    switch(this.operazioneOrganizza){
+      case "Sposta":
+        switch(target){
+          case "fascicolo":
+            res = "Sposta la gerarchia e i suoi contenuti del fascicolo/subfascicolo all'interno di uno di destinazione."
+            break;
+          case "contenuto":
+            res = "Sposta solo il contenuto del fascicolo/subfascicolo all'interno di uno di destinazione."
+            break;
+        }
+        break;
+      case "Duplica":
+        switch(target){
+          case "fascicolo":
+            res = "Duplica solo la gerarchia."
+            break;
+          case "contenuto":
+            res = "Duplica la gerarchia e il contenuto."
+            break;
+        }
+        break;
+    }
+    return res;
   }
 
   public resetOrganizzaPopup():void {
