@@ -63,6 +63,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public organizzaTarget: string[] = [];
   public archivioDestinazioneOrganizza: ArchivioDetailView = null;
   public profonditaArchivio: number = null;
+  public permessoMinimoSuArchivioDestinazioneOrganizza: DecimalePredicato = DecimalePredicato.VICARIO;
 
   private ARCHIVIO_DETAIL_PROJECTION = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
 
@@ -895,7 +896,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   /**
-   *  In base a operazioneOrganizza lancia la chiamata al Back End passandogli tutti i parametri necessari 
+   * In base a operazioneOrganizza lancia la chiamata al Back End passandogli tutti i parametri necessari 
    * e mostra un toast verde con messaggio positivo o rosso con la causa dell'errore relativamente all'esito 
    * della chiamata, in fine chiama la resetOrganizzaPopup e nasconde il PopUp
    */
