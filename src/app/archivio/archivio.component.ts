@@ -1061,6 +1061,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.showOrganizzaPopUp = false;
   }
 
+  public onCloseOrganizzaDialog(): void {
+    debugger
+    this.resetOrganizzaPopup();
+    console.log("jkdsff")
+  }
+
   /**
    * Determina se il bottone Conferma può essere cliccato o deve essere disabilitato.
    * @returns true se ho inserito tutti i dati necessari altrimenti false

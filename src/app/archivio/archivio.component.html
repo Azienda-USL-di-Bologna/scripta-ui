@@ -86,6 +86,7 @@
   [modal]="true"
   [responsive]="false"
   [focusOnShow]="false"
+  (onHide)="onCloseOrganizzaDialog()"
   contentStyleClass="organizzaPopup">
   <div class="organizza-target-container" *ngIf="this.operazioneOrganizza == 'Rendi fascicolo'">
     <h2 *ngIf="this.operazioneOrganizza == 'Rendi fascicolo'">Sei sicuro di voler rendere fascicolo questo archivio?</h2>
@@ -104,7 +105,7 @@
         [(ngModel)]="organizzaTarget"
         [disabled]="this.profonditaArchivio === 3">
       </p-checkbox>
-      <p>Copia la gerarchia del fascicolo/subfascicolo in uno di destinazione.</p>
+      <p class="organizza-target-button-descrizione">Copia la gerarchia del fascicolo/subfascicolo in uno di destinazione.</p>
     </div>
     <div class="organizza-target-button-container">
       <p-checkbox 
@@ -113,7 +114,7 @@
         label="Contenuto" 
         [(ngModel)]="organizzaTarget">
       </p-checkbox>
-      <p>Copia il contenuto del fascicolo/subfascicolo in uno di destinazione.</p>
+      <p class="organizza-target-button-descrizione">Copia il contenuto del fascicolo/subfascicolo in uno di destinazione.</p>
     </div>
   </div>
   <div class="organizza-target-container" *ngIf="this.operazioneOrganizza != 'Rendi fascicolo' && this.operazioneOrganizza != 'Copia'">
@@ -126,7 +127,7 @@
         [(ngModel)]="organizzaTarget" 
         [disabled]="this.profonditaArchivio === 3 && this.operazioneOrganizza === 'Sposta'">
       </p-radioButton>
-      <p>{{this.getDescrizioneAzioneTargetText('fascicolo')}}</p>
+      <p class="organizza-target-button-descrizione">{{this.getDescrizioneAzioneTargetText('fascicolo')}}</p>
     </div>
     <div class="organizza-target-button-container">
       <p-radioButton 
@@ -135,7 +136,7 @@
         label="Contenuto" 
         [(ngModel)]="organizzaTarget">
       </p-radioButton>
-      <p>{{this.getDescrizioneAzioneTargetText('contenuto')}}</p>
+      <p class="organizza-target-button-descrizione">{{this.getDescrizioneAzioneTargetText('contenuto')}}</p>
     </div>
     <div  *ngIf="this.operazioneOrganizza == 'Duplica'" class="organizza-target-button-container">
       <p>* Verrà creato un duplicato del fascicolo/subfascicolo fratello a quello di partenza.</p>
