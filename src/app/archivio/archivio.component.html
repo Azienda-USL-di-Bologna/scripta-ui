@@ -148,6 +148,7 @@
         [idAzienda]="this.archivio?.idAzienda.id" 
         [livello]="getLivelloForAutocompliteArchivioDestinazione()"
         [permessoMinimo]="this.permessoMinimoSuArchivioDestinazioneOrganizza"
+        [archivio]="this.archivioDestinazioneOrganizza"
         (archivioSelectedEvent)="archivioSelectedEvent($event.arch)">
   </app-archivio-ricerca>
   <!-- <p-autoComplete [(ngModel)]="text" placeholder="Fascicolo di desctinazione" [suggestions]="results" (completeMethod)="search($event)"></p-autoComplete> -->

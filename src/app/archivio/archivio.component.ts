@@ -1062,9 +1062,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   public onCloseOrganizzaDialog(): void {
-    debugger
     this.resetOrganizzaPopup();
-    console.log("jkdsff")
   }
 
   /**
