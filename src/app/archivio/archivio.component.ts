@@ -62,7 +62,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public operazioneOrganizza: string = null;
   public organizzaTarget: string[] = [];
   public archivioDestinazioneOrganizza: ArchivioDetailView = null;
-  public profonditaArchivio: number;
+  public profonditaArchivio: number = null;
+  public permessoMinimoSuArchivioDestinazioneOrganizza: DecimalePredicato = DecimalePredicato.VICARIO;
 
   private ARCHIVIO_DETAIL_PROJECTION = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
 
@@ -397,24 +398,42 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    */
   public buildFunctionButton(archivio: Archivio | ArchivioDetail): void {
     const funzioniItems: MenuItem[] = [{
-      label: "Copia/Sposta",
-      disabled: this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO),
-      command: () => this.showOrganizzaPopUp = true
-    },
-    {
-      label: "Genera",
+      label: "Organizza",
       items: [
         {  
-          label: "Frontespizio",
-          command: () => console.log("qui dovrò generare il Frontespizio") 
+          label: "Sposta",
+          command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Sposta"}
         },
         {  
-          label: "Dorso",
-          command: () => console.log("qui dovrò generare il Dorso")
+          label: "Copia",
+          command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Copia"}
+        },
+        {  
+          label: "Duplica",
+          command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Duplica"}
+        },
+        {  
+          label: "Rendi fascicolo",
+          disabled: this.archivio?.livello === 1,
+          command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Rendi fascicolo"}
         }
       ],
-      disabled: false
+      disabled: this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO)
     },
+    // {
+    //   label: "Genera",
+    //   items: [
+    //     {  
+    //       label: "Frontespizio",
+    //       command: () => console.log("qui dovrò generare il Frontespizio") 
+    //     },
+    //     {  
+    //       label: "Dorso",
+    //       command: () => console.log("qui dovrò generare il Dorso")
+    //     }
+    //   ],
+    //   disabled: false
+    // },
     {
       label: "Scarica zip",
       disabled: !this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA) ||
@@ -822,24 +841,33 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.archivioDestinazioneOrganizza = arch as ArchivioDetailView;
   }
 
-  
+  /**
+   * Imposta la l'attributo profonditaArchivio con il corretto livello di profondità dell'archivio corrente
+   * @param arch L'archivio corrente
+   */
   public setProfonditaArchivio(arch: Archivio | ArchivioDetail): void{
     this.profonditaArchivio = 1;
     if (arch.numeroSottoarchivi > 0){
       this.profonditaArchivio = 2;
       if (arch.livello === 1){
         const filtersAndSorts =  this.buildFilterToLoadChildren(arch);
-        this.achivioDetailViewService.getData(this.ARCHIVIO_DETAIL_PROJECTION, filtersAndSorts, null, this.pageConfNoLimit)
+        this.subscriptions.push(this.achivioDetailViewService.getData(this.ARCHIVIO_DETAIL_PROJECTION, filtersAndSorts, null, this.pageConfNoLimit)
         .subscribe((res: any) => {
-            const children = res.results;
-            if (children.some((x: any) => x.numeroSottoarchivi > 0)){
-              this.profonditaArchivio = 3;
-            }
-          });
-        }
+          const children = res.results;
+          if (children.some((x: any) => x.numeroSottoarchivi > 0)){
+            this.profonditaArchivio = 3;
+          }
+        }));
       }
     }
-    
+  }
+  
+  /**
+   * @returns Restituisce il livello di archivio sceglibile massimo
+   * per impedire la generazione di archivi di livello 4, calcolato 
+   * attraverso questo calcolo 
+   * livello massimo sceglibile = 3 - profondità dell'archivio da spostare/copiare.
+   */
   public getLivelloForAutocompliteArchivioDestinazione(): number{
     if (this.organizzaTarget.includes("contenuto") && !!!this.organizzaTarget.includes("fascicolo")){
       return 3;
@@ -856,9 +884,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     return filtersAndSorts;
   }
   
-    /* 
-  * L'utente ha cliccato su un archivio. Apriamolo
-  */
+  /**
+   * Apre un nuovo tab o aggiorna il tab corrente con l'archivio passato come parametro in ingresso.
+   * @param archivio archivio da aprire
+   */
   public openArchive(archivio: ExtendedArchiviView): void {
     const arch: Archivio = archivio as any as Archivio;
     this.navigationTabsService.addTabArchivio(archivio);
@@ -866,92 +895,97 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
   }
 
+  /**
+   * In base a operazioneOrganizza lancia la chiamata al Back End passandogli tutti i parametri necessari 
+   * e mostra un toast verde con messaggio positivo o rosso con la causa dell'errore relativamente all'esito 
+   * della chiamata, in fine chiama la resetOrganizzaPopup e nasconde il PopUp
+   */
   public organizza(): void{
     this.rightContentProgressSpinner = true;
     switch(this.operazioneOrganizza){
       case "Sposta":
-          this.extendedArchivioService.spostaArchivio(this.archivio.id, this.archivioDestinazioneOrganizza.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto"))
-          .subscribe({
-            next: (res: any) => {
-              console.log("res", res)
-              this.messageService.add({
-                severity: "success",
-                key: "ArchivioToast",
-                summary: "OK",
-                detail: "Archivio spostato con successo"
-              });
-              if (this.organizzaTarget.includes("contenuto")){
-                this.reloadDataDocList = true;
-              }
-              this.openArchive(res as ExtendedArchiviView);
-            },
-            error: (e: any) => {
-              this.messageService.add({
-                severity: "error",
-                key: "ArchivioToast",
-                summary: "Attenzione",
-                detail: `Error, ` + e.error.message 
-              });
+        this.extendedArchivioService.spostaArchivio(this.archivio.id, this.archivioDestinazioneOrganizza.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto"))
+        .subscribe({
+          next: (res: any) => {
+            console.log("res", res)
+            this.messageService.add({
+              severity: "success",
+              key: "ArchivioToast",
+              summary: "OK",
+              detail: "Archivio spostato con successo"
+            });
+            if (this.organizzaTarget.includes("contenuto")){
+              this.reloadDataDocList = true;
             }
-          }).add(() => {
-            //Called when operation is complete (both success and error)
-            this.resetOrganizzaPopup();
-            this.rightContentProgressSpinner = false;
-          });
+            this.openArchive(res as ExtendedArchiviView);
+          },
+          error: (e: any) => {
+            this.messageService.add({
+              severity: "error",
+              key: "ArchivioToast",
+              summary: "Attenzione",
+              detail: `Error, ` + e.error.message 
+            });
+          }
+        }).add(() => {
+          //Called when operation is complete (both success and error)
+          this.resetOrganizzaPopup();
+          this.rightContentProgressSpinner = false;
+        });
         break;
       case "Copia":
-          this.extendedArchivioService.copiaArchivio(this.archivio.id, this.archivioDestinazioneOrganizza.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto"))
-          .subscribe({
-            next: (res: any) => {
-              console.log("res", res)
-              this.messageService.add({
-                severity: "success",
-                key: "ArchivioToast",
-                summary: "OK",
-                detail: "Archivio copiato con successo"
-              });
-              this.openArchive(res as ExtendedArchiviView);
-            },
-            error: (e: any) => {
-              this.messageService.add({
-                severity: "error",
-                key: "ArchivioToast",
-                summary: "Attenzione",
-                detail: `Error, ` + e.error.message 
-              });
-            }
-          }).add(() => {
-            //Called when operation is complete (both success and error)
-            this.resetOrganizzaPopup();
-            this.rightContentProgressSpinner = false;
-          });
+        this.extendedArchivioService.copiaArchivio(this.archivio.id, this.archivioDestinazioneOrganizza.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto"))
+        .subscribe({
+          next: (res: any) => {
+            console.log("res", res)
+            this.messageService.add({
+              severity: "success",
+              key: "ArchivioToast",
+              summary: "OK",
+              detail: "Archivio copiato con successo"
+            });
+            this.openArchive(res as ExtendedArchiviView);
+          },
+          error: (e: any) => {
+            this.messageService.add({
+              severity: "error",
+              key: "ArchivioToast",
+              summary: "Attenzione",
+              detail: `Error, ` + e.error.message 
+            });
+          }
+        }).add(() => {
+          //Called when operation is complete (both success and error)
+          this.resetOrganizzaPopup();
+          this.rightContentProgressSpinner = false;
+        });
         break;
       case "Duplica":
-          this.extendedArchivioService.duplicaArchivio(this.archivio.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto"))
-          .subscribe({
-            next: (res: any) => {
-              console.log("res", res)
-              this.messageService.add({
-                severity: "success",
-                key: "ArchivioToast",
-                summary: "OK",
-                detail: "Archivio duplicato con successo"
-              });
-              this.openArchive(res as ExtendedArchiviView);
-            },
-            error: (e: any) => {
-              this.messageService.add({
-                severity: "error",
-                key: "ArchivioToast",
-                summary: "Attenzione",
-                detail: `Error, ` + e.error.message 
-              });
-            }
-          }).add(() => {
-            //Called when operation is complete (both success and error)
-            this.resetOrganizzaPopup();
-            this.rightContentProgressSpinner = false;
-          });
+        this.extendedArchivioService.duplicaArchivio(this.archivio.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto"))
+        .subscribe({
+          next: (res: any) => {
+            console.log("res", res)
+            this.messageService.add({
+              severity: "success",
+              key: "ArchivioToast",
+              summary: "OK",
+              detail: "Archivio duplicato con successo"
+            });
+            this.openArchive(res as ExtendedArchiviView);
+          },
+          error: (e: any) => {
+            this.messageService.add({
+              severity: "error",
+              key: "ArchivioToast",
+              summary: "Attenzione",
+              detail: `Error, ` + e.error.message 
+            });
+          }
+        }).add(() => {
+          //Called when operation is complete (both success and error)
+          this.resetOrganizzaPopup();
+          this.rightContentProgressSpinner = false;
+        });
         break;
       case "Rendi fascicolo":
         this.extendedArchivioService.rendiFascicolo(this.archivio.id)
@@ -984,6 +1018,42 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     }
   }
 
+  /**
+   * Ritorna la descrizione rapida di cosa fa ogni target sceglibile per le operazioni Sposta e Duplica
+   * @param target il target per il quale devo restituire la descrizione
+   * @returns string
+   */
+  public getDescrizioneAzioneTargetText(target: string): string{
+    let res = "";
+    switch(this.operazioneOrganizza){
+      case "Sposta":
+        switch(target){
+          case "fascicolo":
+            res = "Sposta la gerarchia e i suoi contenuti del fascicolo/subfascicolo all'interno di uno di destinazione."
+            break;
+          case "contenuto":
+            res = "Sposta solo il contenuto del fascicolo/subfascicolo all'interno di uno di destinazione."
+            break;
+        }
+        break;
+      case "Duplica":
+        switch(target){
+          case "fascicolo":
+            res = "Duplica solo la gerarchia."
+            break;
+          case "contenuto":
+            res = "Duplica la gerarchia e il contenuto."
+            break;
+        }
+        break;
+    }
+    return res;
+  }
+
+  /**
+   * Ripristina tutti i parametri relativi al PopUp
+   * così da inizializzarlo e non lascare dati "sporchi" alla prossima apertura
+   */
   public resetOrganizzaPopup():void {
     this.organizzaTarget = [];
     this.operazioneOrganizza = null;
@@ -991,6 +1061,14 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.showOrganizzaPopUp = false;
   }
 
+  public onCloseOrganizzaDialog(): void {
+    this.resetOrganizzaPopup();
+  }
+
+  /**
+   * Determina se il bottone Conferma può essere cliccato o deve essere disabilitato.
+   * @returns true se ho inserito tutti i dati necessari altrimenti false
+   */
   public canOrganizzare(): boolean{
     if (this.archivioDestinazioneOrganizza !== null && this.organizzaTarget.length > 0 && this.operazioneOrganizza !== null && this.operazioneOrganizza !== 'Rendi fascicolo'  && this.operazioneOrganizza !== 'Duplica'){
       return true;

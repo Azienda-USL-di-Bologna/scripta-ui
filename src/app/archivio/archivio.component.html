@@ -81,92 +81,78 @@
 
 <p-dialog
   appendTo="body"
-  header="Organizza"
+  header="{{this.operazioneOrganizza}}"
   [(visible)]="this.showOrganizzaPopUp"
   [modal]="true"
   [responsive]="false"
   [focusOnShow]="false"
+  (onHide)="onCloseOrganizzaDialog()"
   contentStyleClass="organizzaPopup">
-  <div>
-    <p-radioButton 
-      pTooltip="Sposta l'alberatura e contenuto o solo contenuto dentro uno specifico archivio." 
-      tooltipPosition="bottom" 
-      name="operazioneOrganizza" 
-      value="Sposta" 
-      label="Sposta" 
-      [(ngModel)]="operazioneOrganizza"
-      (onClick)="this.organizzaTarget = []">
-    </p-radioButton>
-    <p-radioButton 
-      pTooltip="Copia l'alberatura o contenuto o entrambi dentro uno specifico archivio." 
-      tooltipPosition="bottom" 
-      name="operazioneOrganizza" 
-      value="Copia" 
-      label="Copia in" 
-      [(ngModel)]="operazioneOrganizza"
-      (onClick)="this.organizzaTarget = []">
-    </p-radioButton> 
-    <p-radioButton 
-      pTooltip="Duplica solo l'alberatura o anche il contenuto dentro l'archivio padre." 
-      tooltipPosition="bottom" 
-      name="operazioneOrganizza" 
-      value="Duplica" 
-      label="Duplica" 
-      [(ngModel)]="operazioneOrganizza"
-      (onClick)="this.organizzaTarget = []">
-    </p-radioButton> 
-    <p-radioButton 
-      *ngIf="this.archivio?.livello > 1" 
-      pTooltip="Rendi fascicolo questo archivio" 
-      tooltipPosition="bottom" 
-      name="operazioneOrganizza" 
-      value="Rendi fascicolo" 
-      label="Rendi fascicolo" 
-      [(ngModel)]="operazioneOrganizza"
-      (onClick)="this.organizzaTarget = []">
-    </p-radioButton> 
+  <div class="organizza-target-container" *ngIf="this.operazioneOrganizza == 'Rendi fascicolo'">
+    <h2 *ngIf="this.operazioneOrganizza == 'Rendi fascicolo'">Sei sicuro di voler rendere fascicolo questo archivio?</h2>
+    <div class="organizza-confirm-button-container">
+      <p-button [disabled]="!canOrganizzare()" type="button" (click)="this.organizza()" icon="pi pi-check" label="Si"></p-button>
+      <p-button [disabled]="!canOrganizzare()" type="button" (click)="this.resetOrganizzaPopup(); this.rightContentProgressSpinner = false;" icon="pi pi-times" label="No"></p-button>
+    </div>
   </div>
-  <h1 *ngIf="this.operazioneOrganizza == 'Copia'">Selezionare una o più voci</h1>
-  <div *ngIf="this.operazioneOrganizza == 'Copia'">
-    <p-checkbox 
-      name="organizzaTarget" 
-      value="fascicolo" 
-      label="fascicolo" 
-      [(ngModel)]="organizzaTarget"
-      [disabled]="this.profonditaArchivio === 3">
-    </p-checkbox>
-    <p-checkbox 
-      name="organizzaTarget" 
-      value="contenuto" 
-      label="contenuto" 
-      [(ngModel)]="organizzaTarget">
-    </p-checkbox>
+  <div class="organizza-target-container" *ngIf="this.operazioneOrganizza == 'Copia'">
+    <h1 *ngIf="this.operazioneOrganizza == 'Copia'">Selezionare una o più voci</h1>
+    <div class="organizza-target-button-container">
+      <p-checkbox 
+        name="organizzaTarget" 
+        value="fascicolo" 
+        label="Fascicolo" 
+        [(ngModel)]="organizzaTarget"
+        [disabled]="this.profonditaArchivio === 3">
+      </p-checkbox>
+      <p class="organizza-target-button-descrizione">Copia la gerarchia del fascicolo/subfascicolo in uno di destinazione.</p>
+    </div>
+    <div class="organizza-target-button-container">
+      <p-checkbox 
+        name="organizzaTarget" 
+        value="contenuto" 
+        label="Contenuto" 
+        [(ngModel)]="organizzaTarget">
+      </p-checkbox>
+      <p class="organizza-target-button-descrizione">Copia il contenuto del fascicolo/subfascicolo in uno di destinazione.</p>
+    </div>
   </div>
-  <h1 *ngIf="this.operazioneOrganizza != 'Rendi fascicolo' && this.operazioneOrganizza != 'Copia'">Selezionare una voce</h1>
-  <div *ngIf="this.operazioneOrganizza != 'Rendi fascicolo' && this.operazioneOrganizza != 'Copia'">
-    <p-radioButton 
-      name="organizzaTarget" 
-      value="fascicolo" 
-      label="fascicolo" 
-      [(ngModel)]="organizzaTarget" 
-      [disabled]="this.profonditaArchivio === 3 && this.operazioneOrganizza === 'Sposta'">
-    </p-radioButton>
-    <p-radioButton 
-      name="organizzaTarget" 
-      value="contenuto" 
-      label="contenuto" 
-      [(ngModel)]="organizzaTarget">
-    </p-radioButton>
+  <div class="organizza-target-container" *ngIf="this.operazioneOrganizza != 'Rendi fascicolo' && this.operazioneOrganizza != 'Copia'">
+    <h1 *ngIf="this.operazioneOrganizza != 'Rendi fascicolo' && this.operazioneOrganizza != 'Copia'">Selezionare una voce</h1>
+    <div class="organizza-target-button-container">
+      <p-radioButton 
+        name="organizzaTarget" 
+        value="fascicolo" 
+        label="Fascicolo" 
+        [(ngModel)]="organizzaTarget" 
+        [disabled]="this.profonditaArchivio === 3 && this.operazioneOrganizza === 'Sposta'">
+      </p-radioButton>
+      <p class="organizza-target-button-descrizione">{{this.getDescrizioneAzioneTargetText('fascicolo')}}</p>
+    </div>
+    <div class="organizza-target-button-container">
+      <p-radioButton 
+        name="organizzaTarget" 
+        value="contenuto" 
+        label="Contenuto" 
+        [(ngModel)]="organizzaTarget">
+      </p-radioButton>
+      <p class="organizza-target-button-descrizione">{{this.getDescrizioneAzioneTargetText('contenuto')}}</p>
+    </div>
+    <div  *ngIf="this.operazioneOrganizza == 'Duplica'" class="organizza-target-button-container">
+      <p>* Verrà creato un duplicato del fascicolo/subfascicolo fratello a quello di partenza.</p>
+    </div>
   </div>
   <app-archivio-ricerca 
         *ngIf="this.operazioneOrganizza != 'Rendi fascicolo' && this.operazioneOrganizza != 'Duplica'"
         #archivioRicerca 
         [idAzienda]="this.archivio?.idAzienda.id" 
         [livello]="getLivelloForAutocompliteArchivioDestinazione()"
+        [permessoMinimo]="this.permessoMinimoSuArchivioDestinazioneOrganizza"
+        [archivio]="this.archivioDestinazioneOrganizza"
         (archivioSelectedEvent)="archivioSelectedEvent($event.arch)">
   </app-archivio-ricerca>
   <!-- <p-autoComplete [(ngModel)]="text" placeholder="Fascicolo di desctinazione" [suggestions]="results" (completeMethod)="search($event)"></p-autoComplete> -->
-  <p-button [disabled]="!canOrganizzare()" type="button" (click)="organizza()" icon="pi pi-info-circle" label="ok"></p-button>
+  <p-button *ngIf="this.operazioneOrganizza != 'Rendi fascicolo'" [disabled]="!canOrganizzare()" type="button" (click)="organizza()" label="Conferma"></p-button>
 </p-dialog>
 
 <richiesta-accesso-archivi #richiestaaccessoarchivi *ngIf="archivio?.isArchivioNero"></richiesta-accesso-archivi>
