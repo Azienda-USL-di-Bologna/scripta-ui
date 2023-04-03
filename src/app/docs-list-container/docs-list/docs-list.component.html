@@ -740,7 +740,13 @@
         </div> -->
         <div *ngSwitchCase="'statoUltimoVersamento'">
           {{rowData.statoUltimoVersamentoVisualizzazione}} 
-          <p-triStateCheckbox  *ngIf="!(rowData.statoUltimoVersamento == null) && isResponsabileVersamento === true" [(ngModel)]="rowData.statoVersamentoVisto"  pTooltip="Visto" [tooltipDisabled]="!rowData.statoVersamentoVisto" [readonly]="true" class = "stato-ultimo-versamento-icon" checkboxFalseIcon="blank"></p-triStateCheckbox>
+          <p-checkbox *ngIf="isResponsabileVersamento && (rowData.statoUltimoVersamento === 'ERRORE')"
+            [(ngModel)]="rowData.statoVersamentoVisto"  
+            [pTooltip]="rowData.statoVersamentoVisto ? 'Segna come non visto' : 'Segna come visto'" 
+            binary="true"
+            class="stato-ultimo-versamento-icon" 
+            (onChange)="setVersamentoVisto($event, rowData)"
+          ></p-checkbox>
         </div>
         <div *ngSwitchCase="'dataUltimoVersamento'">
           {{rowData.dataUltimoVersamento | date:'dd/MM/yyyy'}}

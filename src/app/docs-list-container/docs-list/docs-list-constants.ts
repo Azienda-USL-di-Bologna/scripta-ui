@@ -471,7 +471,9 @@ export const StatiVersamentoTraduzioneVisualizzazione = [
   { value: StatiVersamento.VERSAMENTO_ANNULLATO, nome: "Versamento annullato"},
   { value: StatiVersamento.ERRORE_NON_FORZABILE, nome: "Errore non forzabile"},
   { value: StatiVersamento.ERRORE_FORZABILE, nome: "Errore forzabile"},
-  { value: StatiVersamento.ERRORE_CRITTOGRAFICO, nome: "Errore crittografico"}
+  { value: StatiVersamento.ERRORE_CRITTOGRAFICO, nome: "Errore crittografico"},
+  { value: StatiVersamento.ERRORE, nome: "Errore"},
+  { value: StatiVersamento.ERRORE_RITENTABILE, nome: "Errore ritentabile"},
 ]
 
 export enum DocsListMode {
@@ -480,7 +482,8 @@ export enum DocsListMode {
   DOCUMENTI_VISIBILI = "DOCUMENTI_VISIBILI",
   IFIRMARIO = "IFIRMARIO",
   IFIRMATO = "IFIRMATO",
-  REGISTRAZIONI = "REGISTRAZIONI"
+  REGISTRAZIONI = "REGISTRAZIONI",
+  ERRORI_VERSAMENTO = "ERRORI_VERSAMENTO"
 }
 
 export const colsCSV: any[] = [
