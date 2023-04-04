@@ -263,6 +263,16 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         queryParams: {"mode": DocsListMode.REGISTRAZIONI}
       }); 
     }
+
+    if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.RV)) {
+      this.selectButtonItems.push({
+        title: "",
+        label: "Errori Versamento", 
+        // icon: "pi pi-fw pi-list", 
+        routerLink: ["./" + DOCS_LIST_ROUTE], 
+        queryParams: {"mode": DocsListMode.ERRORI_VERSAMENTO}
+      }); 
+    }
   }
 
   /**
@@ -671,6 +681,12 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         break;
       case DocsListMode.REGISTRAZIONI:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRegistrazioni"));
+        this.initialSortField = "dataRegistrazione";
+        this.serviceForGetData = this.docDetailService;
+        this.projectionFotGetData = "CustomDocDetailForDocList";
+        break;
+      case DocsListMode.ERRORI_VERSAMENTO:
+        filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabErroriVersamento"));
         this.initialSortField = "dataRegistrazione";
         this.serviceForGetData = this.docDetailService;
         this.projectionFotGetData = "CustomDocDetailForDocList";
@@ -1383,12 +1399,33 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public onRowUnselect(event: any): void {
-      this.showRightPanel.emit({
-        showPanel: false,
-        rowSelected: null
-      });
-      this.showAnteprima = false;
+    this.showRightPanel.emit({
+      showPanel: false,
+      rowSelected: null
+    });
+    this.showAnteprima = false;
   }
+
+  public setVersamentoVisto(event: any, doc: ExtendedDocDetailView): void {
+    const docDetail= new DocDetail();
+    docDetail.statoVersamentoVisto = doc.statoVersamentoVisto;
+    docDetail.id = doc.id;
+    docDetail.version = doc.version;
+    this.docDetailService.patchHttpCall(docDetail, docDetail.id)
+      .subscribe(
+        res => {
+          doc.statoVersamentoVisto = res.statoVersamentoVisto;
+          doc.version = res.version;
+          // this.messageService.add({
+          //   severity: "success",
+          //   key: "docsListToast",
+          //   detail: `Cambiato lo stato di visuali`
+          // });
+        }
+      )
+     
+  }
+
 
 
   /**
