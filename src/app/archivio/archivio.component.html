@@ -170,20 +170,22 @@
 Attenzione! Eventuali bozze di sottofascicoli o inserti saranno eliminate. Si vuole procedere?
   <br>
   <br>
-  <button
-    type="button"
-    (click)="chiudiRiapriArchivio($event); this.showChiudiPopup = false;"
-    pButton
-    label="Conferma chiusura"
-    class="mr-2 chiudiBottoni"
-    icon="pi pi-check"
-  ></button>
-  <button
-    type="button"
-    (click)="this.showChiudiPopup = false;"
-    pButton
-    label="Annulla"
-    icon="pi pi-times"
-    class="mr-2 chiudiBottoni"
-  ></button>
+  <div class="chiudi-fascicolo-footer">
+    <button
+      type="button"
+      (click)="chiudiRiapriArchivio($event); this.showChiudiPopup = false;"
+      pButton
+      label="Conferma"
+      class="mr-2 buttons"
+      icon="pi pi-check"
+    ></button>
+    <button
+      type="button"
+      (click)="this.showChiudiPopup = false;"
+      pButton
+      label="Annulla"
+      icon="pi pi-times"
+      class="mr-2 buttons"
+    ></button>
+  </div>
 </p-dialog>
