@@ -62,9 +62,12 @@
 
 }
 
-::ng-deep  .chiudiBottoni{
-
-  transform: translateX(9.875rem);
+.chiudi-fascicolo-footer {
+  display: flex;
+  justify-content: space-evenly;
+  .buttons {
+    width: 9rem;
+  }
 }
 
 ::ng-deep .chiudiPopup {
