@@ -80,11 +80,15 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
                 idAziendaArray.push(elem.id);
               });
               this.subscriptions.push(
-                this.configurazioneService.getParametriAziende("tabFascicoliScriptaActive", null, idAziendaArray).subscribe(
+                this.configurazioneService.getParametriAziende("usaGediInternauta", null, idAziendaArray).subscribe(
                   (parametriAziende: ParametroAziende[]) => {
                     console.log(parametriAziende[0].valore);
                     const showTabFascicoli = JSON.parse(parametriAziende[0].valore || false);
-                    if (showTabFascicoli) {
+                    let ragazzoDelNovantaNove = false;
+                    if (this.utenteUtilitiesLogin.getUtente() && this.utenteUtilitiesLogin.getUtente().utenteReale) {
+                      ragazzoDelNovantaNove = (this.utenteUtilitiesLogin.getUtente().utenteReale.idInquadramento as unknown as String) === "99";
+                    }
+                    if (showTabFascicoli || ragazzoDelNovantaNove) {
                       this.navigationTabsService.addTab(
                         this.navigationTabsService.buildaTabArchiviList()
                       );
