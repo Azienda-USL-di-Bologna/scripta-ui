@@ -112,6 +112,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public fieldNumerazioneGerarchica: string = "numerazioneGerarchica";
 	public matchModeNumerazioneGerarchica: string = FILTER_TYPES.string.startsWith;
 	public newArchivoButton: NewArchivoButton;
+	private idAziendeConGediInternautaAttivo: number[] = [];
+	private isLoggeduser99: boolean = false;
 	
 	//public instanziaTabellaArchiviList = true;
 	public loggedUserCanDeleteArchivio : boolean = false; 
@@ -156,17 +158,20 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		//this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } });
 		const loggeduser$ = this.loginService.loggedUser$.pipe(first());
 		const parametroFascicoliParlanti$ = this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null).pipe(first());
+		const usaGediInternauta$ = this.configurazioneService.getParametriAziende("usaGediInternauta", null, null).pipe(first());
 		this.subscriptions.push(
-			loggeduser$.pipe(combineLatestWith(parametroFascicoliParlanti$))
+			loggeduser$
+				.pipe(
+					combineLatestWith(parametroFascicoliParlanti$),
+					combineLatestWith(usaGediInternauta$)
+				)
 			.subscribe(
 				/* [
 					this.loginService.loggedUser$,
 					this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null)
 				], */
-				([
-					utenteUtilities/* : UtenteUtilities */, 
-					parametriAziende/* : ParametroAziende[] */
-				]) => {
+				([[utenteUtilities, parametriAziende], usaGediInternauta]
+				) => {
 					// Parte relativa al parametro aziendale
 					if (parametriAziende && parametriAziende[0]) {
 						this.fascicoliParlanti = JSON.parse(parametriAziende[0].valore || false);
@@ -176,23 +181,34 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					}
 					// Parte relativa al utenteUtilities
 					this.utenteUtilitiesLogin = utenteUtilities;
+					if (this.utenteUtilitiesLogin.getUtente() && this.utenteUtilitiesLogin.getUtente().utenteReale) {
+						this.isLoggeduser99 = (this.utenteUtilitiesLogin.getUtente().utenteReale.idInquadramento as unknown as String) === "99";
+					} else if (this.utenteUtilitiesLogin.getUtente()) {
+						this.isLoggeduser99 = (this.utenteUtilitiesLogin.getUtente().idInquadramento as unknown as String) === "99";
+					}
 					const tempCanCreateArchivio: Map<String, boolean> = new Map();
 					const tempMap : Map<String, PermessoEntitaStoredProcedure[]> = new Map(Object.entries(this.utenteUtilitiesLogin.getUtente().permessiGediByCodiceAzienda));
 					this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach(a => {
-						if(tempMap.has(a.codice)) {
-							//this.canCreateArchivio = tempMap.get(a.codice);
+						if (tempMap.has(a.codice)) {
 							const permessi : PermessoEntitaStoredProcedure[] = tempMap.get(a.codice);
 							permessi.forEach(p => {
 							  p.categorie.forEach(categoria => {
-								categoria.permessi.forEach(permesso => {
-								  if(permesso.predicato == "CREA") {
-									tempCanCreateArchivio.set(a.codice, true);
-								  }
-								});
+									categoria.permessi.forEach(permesso => {
+										if(permesso.predicato == "CREA") {
+											tempCanCreateArchivio.set(a.codice, true);
+										}
+									});
 							  });
 							});
-						  }
-						});
+						}
+					});
+					console.log("usaGediInternauta", usaGediInternauta)
+					for (const parametroUsaGediInternauta of usaGediInternauta) {
+						if (JSON.parse(parametroUsaGediInternauta.valore)) {
+							this.idAziendeConGediInternautaAttivo = parametroUsaGediInternauta.idAziende; 
+						}
+					}
+					
 					this.newArchivoButton = {
 						tooltip: "Crea nuovo fascicolo",
 						livello: 0,
@@ -200,7 +216,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						aziendeItems: this.utenteUtilitiesLogin.getUtente().aziendeAttive.map(a => {
 							return {
 								label: a.nome,
-								disabled: !tempCanCreateArchivio.has(a.codice),
+								disabled: !tempCanCreateArchivio.has(a.codice) || !this.idAziendeConGediInternautaAttivo.includes(a.id),
 								command: () => this.newArchivio(a.id)
 							} as MenuItem
 						})
@@ -415,7 +431,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 
 	private calcAziendeFiltrabili() {
 		this.aziendeFiltrabili = [];
-		this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive.map((azienda: Azienda) => {
+		
+		this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive
+		.filter((azienda: Azienda) => this.idAziendeConGediInternautaAttivo.includes(azienda.id) || this.isLoggeduser99)
+		.map((azienda: Azienda) => {
 			return { value: [azienda.id], label: azienda.nome } as ValueAndLabelObj;
 		});
 		/*controllo:
