@@ -52,19 +52,47 @@
   align-items: center;
   overflow: hidden;
   width: 500px;
+  div.organizza-target-container{
+    display: flex;
+    flex-direction: column;
+    h1, h2{
+      text-align: center;
+    }
+    div.organizza-target-button-container{
+      display: flex; 
+      flex-direction: row; 
+      justify-content: flex-start;
+      margin-left: 1rem;
+      .p-checkbox-label, .p-radiobutton-label{
+        font-size: 1.31rem;
+        width: 100px;
+      }
+      p.organizza-target-button-descrizione{
+        padding: 1rem;
+      }
+    }
+    div.organizza-confirm-button-container{
+      display: flex; 
+      flex-direction: row; 
+      justify-content: center;
+    }
+  }
   app-archivio-ricerca{
     margin: 1rem;
     width: 80%;
   }
   p-button{
-    margin-top: 1rem;
+    margin: 1rem;
   }
 
 }
 
-::ng-deep  .chiudiBottoni{
-
-  transform: translateX(9.875rem);
+.chiudi-fascicolo-footer {
+  display: flex;
+  justify-content: space-evenly;
+  .buttons {
+    width: 9rem;
+  }
 }
 
 ::ng-deep .chiudiPopup {
