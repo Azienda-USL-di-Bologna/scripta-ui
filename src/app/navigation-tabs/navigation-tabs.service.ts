@@ -230,28 +230,7 @@ export class NavigationTabsService {
    * @param active 
    */
   public addTabArchivio(archivio: Archivio | ArchivioDetail | ExtendedArchiviView, active: boolean = true, reuseActiveTab: boolean = false, forceReloadTab: boolean = false): void {
-    const tabIndex: number = this.tabs.findIndex(t => {
-      return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id.toString()
-    });
-    if (tabIndex !== -1) {
-      this.updateTab(
-        tabIndex, 
-        `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
-        {archivio: this.projectionArchivioPerSessionStorage(archivio), id: archivio.id},
-        `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
-      );
-      if (active) {
-        this.activeTabByIndex(tabIndex);
-      }
-    } else if (reuseActiveTab) {
-      this.updateTab(
-        this.activeTabIndex, 
-        `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
-        {archivio: this.projectionArchivioPerSessionStorage(archivio), id: archivio.id}, 
-        `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
-        archivio.fk_idArchivioRadice.id.toString()
-      );
-    } else if (forceReloadTab) {
+    if (forceReloadTab) {
       this.removeTab(this.activeTabIndex);
       this.addTab(
         this.buildaTabArchivio(
@@ -264,15 +243,38 @@ export class NavigationTabsService {
         this.activeLastTab();
       }
     } else {
-      this.addTab(
-        this.buildaTabArchivio(
-          archivio, 
+      const tabIndex: number = this.tabs.findIndex(t => {
+        return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id.toString()
+      });
+      if (tabIndex !== -1) {
+        this.updateTab(
+          tabIndex, 
           `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
-          `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`
-        )
-      );
-      if (active) {
-        this.activeLastTab();
+          {archivio: this.projectionArchivioPerSessionStorage(archivio), id: archivio.id},
+          `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
+        );
+        if (active) {
+          this.activeTabByIndex(tabIndex);
+        }
+      } else if (reuseActiveTab) {
+        this.updateTab(
+          this.activeTabIndex, 
+          `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
+          {archivio: this.projectionArchivioPerSessionStorage(archivio), id: archivio.id}, 
+          `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
+          archivio.fk_idArchivioRadice.id.toString()
+        );
+      } else {
+        this.addTab(
+          this.buildaTabArchivio(
+            archivio, 
+            `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
+            `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`
+          )
+        );
+        if (active) {
+          this.activeLastTab();
+        }
       }
     }
   }
