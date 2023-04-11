@@ -890,7 +890,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    */
   public openArchive(archivio: ExtendedArchiviView): void {
     const arch: Archivio = archivio as any as Archivio;
-    this.navigationTabsService.addTabArchivio(archivio);
+    this.navigationTabsService.addTabArchivio(archivio, true, false, true);
     // this.archivioUtilsService.updatedArchiveSelection(arch);
     this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
   }

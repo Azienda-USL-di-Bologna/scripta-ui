@@ -229,7 +229,7 @@ export class NavigationTabsService {
    * @param archivio 
    * @param active 
    */
-  public addTabArchivio(archivio: Archivio | ArchivioDetail | ExtendedArchiviView, active: boolean = true, reuseActiveTab: boolean = false): void {
+  public addTabArchivio(archivio: Archivio | ArchivioDetail | ExtendedArchiviView, active: boolean = true, reuseActiveTab: boolean = false, forceReloadTab: boolean = false): void {
     const tabIndex: number = this.tabs.findIndex(t => {
       return t.type === TabType.ARCHIVIO && t.id === archivio.fk_idArchivioRadice.id.toString()
     });
@@ -251,6 +251,18 @@ export class NavigationTabsService {
         `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`,
         archivio.fk_idArchivioRadice.id.toString()
       );
+    } else if (forceReloadTab) {
+      this.removeTab(this.activeTabIndex);
+      this.addTab(
+        this.buildaTabArchivio(
+          archivio, 
+          `${archivio.numerazioneGerarchica}<span class="sottoelemento-tab">[${archivio.idAzienda.aoo}]</span>`, 
+          `Fascicolo ${archivio.numerazioneGerarchica} [${archivio.idAzienda.aoo}]`
+        )
+      );
+      if (active) {
+        this.activeLastTab();
+      }
     } else {
       this.addTab(
         this.buildaTabArchivio(
