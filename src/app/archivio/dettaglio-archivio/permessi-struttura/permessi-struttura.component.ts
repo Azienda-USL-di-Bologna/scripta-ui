@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, Azienda, StatoArchivio, Struttura } from '@bds/internauta-model';
+import { Archivio, ArchivioDetail, Azienda, PermessoEntitaStoredProcedure, StatoArchivio, Struttura } from '@bds/internauta-model';
 import {Table} from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
@@ -179,13 +179,16 @@ export class PermessiStrutturaComponent implements OnInit {
       Perch� dentro a this.dt.editingRowKeys la chiave di una nuova riga � "undefined" e non matcha con idProvenienzaSoggetto 
       se lo setto subito alla scelta della persona
     */
-      if (!!!perm.idProvenienzaSoggetto) {
-        perm.idProvenienzaSoggetto = perm.soggetto.id; 
-      }
+    if (!!!perm.idProvenienzaSoggetto) {
+      perm.idProvenienzaSoggetto = perm.soggetto.id; 
+    }
+
+    const permessiDelSoggetto = this.getPermessiFiltratiPerSoggetto(this._archivio.permessi, perm.idProvenienzaSoggetto);    
+
     const oggettoToSave: OggettonePermessiEntitaGenerator =
       this.permessiDettaglioArchivioService.buildPermessoPerBlackbox(
         perm, 
-        operation === "ADD" || operation === "BAN"? null : this._archivio.permessi,
+        operation === "ADD" || operation === "BAN" ? null : permessiDelSoggetto,
         operation === "ADD" || operation === "BAN" ? OggettoneOperation.ADD : OggettoneOperation.REMOVE,
         <AzioniPossibili>operation,
         this._archivio
@@ -220,4 +223,13 @@ export class PermessiStrutturaComponent implements OnInit {
     )
   }
 
+  public getPermessiFiltratiPerSoggetto(oggettoni: PermessoEntitaStoredProcedure[], idProvenienzaSoggetto: number): PermessoEntitaStoredProcedure[] {
+    const permessiPerSoggetto: PermessoEntitaStoredProcedure[] = [];
+    oggettoni?.forEach((oggettone: PermessoEntitaStoredProcedure) => {
+      if (oggettone.soggetto.id_provenienza === idProvenienzaSoggetto) {
+        permessiPerSoggetto.push(oggettone);
+      }
+    })
+    return permessiPerSoggetto.length > 0 ? permessiPerSoggetto : null;
+  }
 }
