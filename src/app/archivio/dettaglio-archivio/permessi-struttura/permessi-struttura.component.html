@@ -34,7 +34,7 @@
 		</tr>
 	</ng-template>
 	<ng-template pTemplate="body" let-permesso let-editing="editing" let-ri="rowIndex">
-		<tr [pEditableRow]="permesso">
+		<tr [pEditableRow]="permesso" *ngIf="permesso && permesso.predicato !== 'PASSAGGIO'">
 			<td class="struttura-column" [ngClass]="permesso.barrato ? 'barrato':'' ">
 				<!-- Non si deve poreter editare se perm['struttura'] è pieno -->
 				<p-cellEditor>
@@ -51,7 +51,7 @@
 						<div *ngIf="permesso.descrizioneSoggetto">{{permesso.descrizioneSoggetto}}</div>
 					</ng-template>
 					<ng-template pTemplate="output">
-						{{permesso.idPermesso}} ---- {{permesso.descrizioneSoggetto}}
+					 {{permesso.descrizioneSoggetto}}
 					</ng-template>
 				</p-cellEditor>
 			</td>

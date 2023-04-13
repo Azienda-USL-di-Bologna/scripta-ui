@@ -1393,7 +1393,10 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public onRowSelect(event: any): void {
+    if(this.archivio)
+      this.showAnteprima = true;
     if (this.showAnteprima == true) {
+      console.log("Evento eventissimo:", event);
       this.openDetailAndPreview(event.data);
     }
   }
