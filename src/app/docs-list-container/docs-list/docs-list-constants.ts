@@ -465,13 +465,17 @@ export const StatoUfficioAttiTraduzioneVisualizzazione = [
 ]
 
 export const StatiVersamentoTraduzioneVisualizzazione = [
-  { value: StatiVersamento.DA_VERSARE, nome: "Da versare"},
-  { value: StatiVersamento.VERSAMENTO_PARZIALE, nome: "Versamento parziale"},
+  { value: StatiVersamento.IN_CARICO, nome: "In carico"},
+  { value: StatiVersamento.FORZARE, nome: "Da forzare"},
+  { value: StatiVersamento.VERSARE, nome: "Da versare"},
+  { value: StatiVersamento.AGGIORNARE, nome: "Da aggiornare"},
+  { value: StatiVersamento.PARZIALE, nome: "Versato parzialmente"},
   { value: StatiVersamento.VERSATO, nome: "Versato"},
-  { value: StatiVersamento.VERSAMENTO_ANNULLATO, nome: "Versamento annullato"},
-  { value: StatiVersamento.ERRORE_NON_FORZABILE, nome: "Errore non forzabile"},
-  { value: StatiVersamento.ERRORE_FORZABILE, nome: "Errore forzabile"},
-  { value: StatiVersamento.ERRORE_CRITTOGRAFICO, nome: "Errore crittografico"}
+  { value: StatiVersamento.ANNULLATO, nome: "Annullato"},
+  { value: StatiVersamento.IN_CARICO_CON_ERRORI, nome: "In carico con errori"},
+  { value: StatiVersamento.IN_CARICO_CON_ERRORI_RITENTABILI, nome: "In carico con errori ritentabili"},
+  { value: StatiVersamento.ERRORE, nome: "Errore"},
+  { value: StatiVersamento.ERRORE_RITENTABILE, nome: "Errore ritentabile"},
 ]
 
 export enum DocsListMode {
@@ -480,7 +484,8 @@ export enum DocsListMode {
   DOCUMENTI_VISIBILI = "DOCUMENTI_VISIBILI",
   IFIRMARIO = "IFIRMARIO",
   IFIRMATO = "IFIRMATO",
-  REGISTRAZIONI = "REGISTRAZIONI"
+  REGISTRAZIONI = "REGISTRAZIONI",
+  ERRORI_VERSAMENTO = "ERRORI_VERSAMENTO"
 }
 
 export const colsCSV: any[] = [

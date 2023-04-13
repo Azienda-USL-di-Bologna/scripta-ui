@@ -158,7 +158,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     const oggettoToSave: OggettonePermessiEntitaGenerator =
       this.permessiDettaglioArchivioService.buildPermessoPerBlackbox(
         perm,
-        operation === "ADD" || operation === "BAN" ? permessiDelSoggetto : this._archivio.permessi,
+        permessiDelSoggetto,
         operation === "ADD" || operation === "BAN" || operation === "RESTORE" ? OggettoneOperation.ADD : OggettoneOperation.REMOVE,
         <AzioniPossibili>operation,
         this._archivio

@@ -13,7 +13,7 @@
   <h4 *ngIf="doc.visibilitaLimitata && !doc.riservato" class="pi pi-eye"></h4>
   <h4 *ngIf="doc.riservato" class="pi pi-eye-slash"></h4>
   <h4 *ngIf="!doc.visibilitaLimitata && !doc.riservato">{{doc.oggettoVisualizzazione}}</h4> -->
-  <p-button icon="pi pi-times" (onClick)="closeRightPanel.emit()"></p-button>
+  <p-button icon="pi pi-times" (onClick)="closePanel()"></p-button>
 </span>
 <!-- *ngIf="(!doc.visibilitaLimitata && !doc.riservato) " -->
 
