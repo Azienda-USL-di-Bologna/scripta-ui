@@ -414,9 +414,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Duplica"}
         },
         {  
-          label: "Rendi fascicolo",
+          label: "Trasforma in fascicolo",
           disabled: this.archivio?.livello === 1,
-          command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Rendi fascicolo"}
+          command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Trasforma in fascicolo"}
         }
       ],
       disabled: this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO)
@@ -988,7 +988,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           this.rightContentProgressSpinner = false;
         });
         break;
-      case "Rendi fascicolo":
+      case "Trasforma in fascicolo":
         this.extendedArchivioService.rendiFascicolo(this.archivio.id)
         .subscribe({
           next: (res: any) => {
@@ -1030,7 +1030,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       case "Sposta":
         switch(target){
           case "fascicolo":
-            res = "Sposta la gerarchia e i suoi contenuti del fascicolo/subfascicolo all'interno di uno di destinazione."
+            res = "Sposta la gerarchia e i suoi contenuti del fascicolo/subfascicolo all'interno di un fascicolo di destinazione."
             break;
           case "contenuto":
             res = "Sposta solo il contenuto del fascicolo/subfascicolo all'interno di uno di destinazione."
@@ -1071,7 +1071,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * @returns true se ho inserito tutti i dati necessari altrimenti false
    */
   public canOrganizzare(): boolean{
-    if (this.archivioDestinazioneOrganizza !== null && this.organizzaTarget.length > 0 && this.operazioneOrganizza !== null && this.operazioneOrganizza !== 'Rendi fascicolo'  && this.operazioneOrganizza !== 'Duplica'){
+    if (this.archivioDestinazioneOrganizza !== null && this.organizzaTarget.length > 0 && this.operazioneOrganizza !== null && this.operazioneOrganizza !== 'Trasforma in fascicolo'  && this.operazioneOrganizza !== 'Duplica'){
       return true;
     }
     if (this.organizzaTarget.length > 0 && this.operazioneOrganizza === 'Duplica'){
@@ -1079,7 +1079,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       
       return true;
     }
-    if (this.operazioneOrganizza === 'Rendi fascicolo'){
+    if (this.operazioneOrganizza === 'Trasforma in fascicolo'){
       return true;
     }
     return false
