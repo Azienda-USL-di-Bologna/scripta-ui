@@ -35,6 +35,7 @@ import { TreeSelectModule } from 'primeng/treeselect';
 import { TriStateCheckboxModule } from 'primeng/tristatecheckbox';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ListboxModule } from 'primeng/listbox';
+import { DividerModule } from 'primeng/divider';
 
 @NgModule({
   declarations: [
@@ -75,7 +76,8 @@ import { ListboxModule } from 'primeng/listbox';
     OverlayPanelModule,
     TreeSelectModule,
     TriStateCheckboxModule,
-    ListboxModule
+    ListboxModule,
+    DividerModule
   ],
   exports: [
     ButtonModule,
@@ -113,7 +115,8 @@ import { ListboxModule } from 'primeng/listbox';
     OverlayPanelModule,
     TreeSelectModule,
     TriStateCheckboxModule,
-    ListboxModule
+    ListboxModule,
+    DividerModule
   ],
   providers: [MessageService, DialogService, ConfirmationService]
 })

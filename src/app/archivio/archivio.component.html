@@ -144,16 +144,21 @@
       <p>* Verrà creato un duplicato del fascicolo/subfascicolo fratello a quello di partenza.</p>
     </div>
   </div>
-  <app-archivio-ricerca 
-        *ngIf="this.operazioneOrganizza != 'Trasforma in fascicolo' && this.operazioneOrganizza != 'Duplica'"
-        #archivioRicerca 
-        [idAzienda]="this.archivio?.idAzienda.id" 
-        [livello]="getLivelloForAutocompliteArchivioDestinazione()"
-        [permessoMinimo]="this.permessoMinimoSuArchivioDestinazioneOrganizza"
-        [archivio]="this.archivioDestinazioneOrganizza"
-        placeholder="Scegli il fascicolo di destinazione..."
-        (archivioSelectedEvent)="archivioSelectedEvent($event.arch)">
-  </app-archivio-ricerca>
+  <div  
+    *ngIf="this.operazioneOrganizza != 'Trasforma in fascicolo' && this.operazioneOrganizza != 'Duplica'" 
+    class="organizza-target-archivio-ricerca">
+    <p-divider style="width: 70%; align-self: center;"></p-divider>
+  <p>Scegli il fascicolo di destinazione</p>
+    <app-archivio-ricerca 
+          #archivioRicerca 
+          [idAzienda]="this.archivio?.idAzienda.id" 
+          [livello]="getLivelloForAutocompliteArchivioDestinazione()"
+          [permessoMinimo]="this.permessoMinimoSuArchivioDestinazioneOrganizza"
+          [archivio]="this.archivioDestinazioneOrganizza"
+          placeholder="Cerca..."
+          (archivioSelectedEvent)="archivioSelectedEvent($event.arch)">
+    </app-archivio-ricerca>
+  </div>
   <!-- <p-autoComplete [(ngModel)]="text" placeholder="Fascicolo di desctinazione" [suggestions]="results" (completeMethod)="search($event)"></p-autoComplete> -->
   <p-button *ngIf="this.operazioneOrganizza != 'Trasforma in fascicolo'" [disabled]="!canOrganizzare()" type="button" (click)="organizza()" label="Conferma"></p-button>
 </p-dialog>
