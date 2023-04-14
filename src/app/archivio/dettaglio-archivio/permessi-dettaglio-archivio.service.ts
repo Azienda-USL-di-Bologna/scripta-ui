@@ -217,7 +217,13 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
 
       if (oggettone) {
         /* Se sto editando un permesso che già c'era semplicemente modifcando il predicato o la struttura veicolante, allora voglio spegnere il vecchio e accenderne uno nuovo */
-        const permessoPregresso = oggettone[0].categorie[0].permessi.find(p => p.id === permesso.idPermesso && (p.predicato !== predicato || p.entita_veicolante?.id_provenienza !== permesso.idProvenienzaVeicolo));
+        const permessoPregresso = oggettone[0].categorie[0].permessi.find(p => 
+          p.id === permesso.idPermesso && (
+            p.predicato !== predicato 
+            || p.entita_veicolante?.id_provenienza !== permesso.idProvenienzaVeicolo
+            || p.propaga_soggetto !== permesso.trasmetti
+            || p.propaga_oggetto !== permesso.propaga
+        ));
         if (permessoPregresso) {
           permessoPerBlackbox.managePermessoOggettone(
             soggetto,
@@ -320,7 +326,7 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
   }
 }
 
-export class PermessoTabella { 
+export class PermessoTabella {
   id: number;
   idPermesso: number;
   idProvenienzaSoggetto: number;

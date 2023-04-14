@@ -91,9 +91,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
       .subscribe((res: Archivio) => {
         setTimeout(() => {
+          this._archivio = res;
           this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
           this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
-          this._archivio = res;
           console.log("Archivio nell'archivio component: ", this._archivio);
           this.extendedArchivioService.aggiungiArchivioRecente(this._archivio.fk_idArchivioRadice.id);
           if (this.utenteUtilitiesLogin) {
