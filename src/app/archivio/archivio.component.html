@@ -127,7 +127,7 @@
         value="fascicolo" 
         [label]="this.operazioneOrganizza + ' fascicolo'" 
         [(ngModel)]="organizzaTarget" 
-        [disabled]="this.profonditaArchivio === 3 && this.operazioneOrganizza === 'Sposta'">
+        [disabled]="this.archivio.livello === 1 && this.operazioneOrganizza === 'Sposta'">
       </p-radioButton>
       <p class="organizza-target-button-descrizione">{{this.getDescrizioneAzioneTargetText('fascicolo')}}</p>
     </div>
