@@ -48,9 +48,9 @@ export class GenericCaptionTableComponent implements OnInit {
           if (utenteUtilities) {
             this.utenteUtilitiesLogin = utenteUtilities;
             this.accessibile = this.utenteUtilitiesLogin.getUtente().idPersona.accessibilita;
-            this.canUseTip = (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CA) ||
-            this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CI) ||
-            this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD));
+            this.canUseTip = /* (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CA) ||
+              this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CI) || */
+              this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD);
             const tempMap : Map<String, PermessoEntitaStoredProcedure[]> = new Map(Object.entries(this.utenteUtilitiesLogin.getUtente().permessiGediByCodiceAzienda));
             this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach(a => {
               if(tempMap.has(a.codice)) {
