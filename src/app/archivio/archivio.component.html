@@ -1,10 +1,10 @@
-<generic-caption-table *ngIf="referenceTableComponent && !archivio?.isArchivioNero"
+<generic-caption-table *ngIf="referenceTableComponent && archivio && loggeduserCanAccess"
   [configuration]="captionConfiguration" 
   [referenceTableComponent]="referenceTableComponent"
   [selectButtonsComponent]="this" 
   [functionalOperationsComponent]="this">
 </generic-caption-table>
-<p-splitter *ngIf="archivio && !archivio.isArchivioNero" styleClass="splitter-archivio" [panelSizes]="[25,75]"
+<p-splitter *ngIf="archivio && loggeduserCanAccess" styleClass="splitter-archivio" [panelSizes]="[25,75]"
   [minSizes]="[15,55]">
   <ng-template pTemplate>
     <archivio-tree [archivio]="archivio">
@@ -155,7 +155,7 @@
   <p-button *ngIf="this.operazioneOrganizza != 'Rendi fascicolo'" [disabled]="!canOrganizzare()" type="button" (click)="organizza()" label="Conferma"></p-button>
 </p-dialog>
 
-<richiesta-accesso-archivi #richiestaaccessoarchivi *ngIf="archivio?.isArchivioNero"></richiesta-accesso-archivi>
+<richiesta-accesso-archivi #richiestaaccessoarchivi *ngIf="archivio && !loggeduserCanAccess"></richiesta-accesso-archivi>
 
 <p-confirmPopup key="confirm-popup"></p-confirmPopup>
 
