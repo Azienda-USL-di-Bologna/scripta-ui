@@ -64,6 +64,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public archivioDestinazioneOrganizza: ArchivioDetailView = null;
   public profonditaArchivio: number = null;
   public permessoMinimoSuArchivioDestinazioneOrganizza: DecimalePredicato = DecimalePredicato.VICARIO;
+  public loggeduserCanAccess: boolean = false; 
 
   private ARCHIVIO_DETAIL_PROJECTION = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
 
@@ -89,11 +90,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       data.archivio.id,
       ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
       .subscribe((res: Archivio) => {
-        this.loggedUserCanVisualizeArchive = this.canVisualizeArchive(res);
-        this._archivio = res;
-        console.log("Archivio nell'archivio component: ", this._archivio);
-        this.extendedArchivioService.aggiungiArchivioRecente(this._archivio.fk_idArchivioRadice.id);
         setTimeout(() => {
+          this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
+          this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
+          this._archivio = res;
+          console.log("Archivio nell'archivio component: ", this._archivio);
+          this.extendedArchivioService.aggiungiArchivioRecente(this._archivio.fk_idArchivioRadice.id);
           if (this.utenteUtilitiesLogin) {
             this.inizializeAll();
           }
@@ -540,10 +542,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * Ritorna true se l'utente può creare il sottoarchivio e cioè se è responsabile/vicario o ha permesso di almeno modifica
    * @returns 
    */
-  public canVisualizeArchive(archivio: Archivio): boolean {
+  /* public canVisualizeArchive(archivio: Archivio): boolean {
     return archivio.permessiEspliciti?.find((p: PermessoArchivio) => 
       p.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit > DecimalePredicato.PASSAGGIO;
-  }
+  } */
 
   /**
    * Metodo chiamato quando non ho cambiato archivio, ma esso è stato modificato, 
@@ -891,7 +893,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    */
   public openArchive(archivio: ExtendedArchiviView): void {
     const arch: Archivio = archivio as any as Archivio;
-    this.navigationTabsService.addTabArchivio(archivio);
+    this.navigationTabsService.addTabArchivio(archivio, true, false, true);
     // this.archivioUtilsService.updatedArchiveSelection(arch);
     this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
   }
