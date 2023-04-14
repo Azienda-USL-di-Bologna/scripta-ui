@@ -90,13 +90,18 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       data.archivio.id,
       ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
       .subscribe((res: Archivio) => {
-        setTimeout(() => {
-          this._archivio = res;
+        this._archivio = res;
+        if (this.utenteUtilitiesLogin) {
           this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
-          this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
-          console.log("Archivio nell'archivio component: ", this._archivio);
+        }
+        console.log("Archivio nell'archivio component: ", this._archivio);
+        setTimeout(() => {
           this.extendedArchivioService.aggiungiArchivioRecente(this._archivio.fk_idArchivioRadice.id);
+
           if (this.utenteUtilitiesLogin) {
+            this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
+            this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
+            this.loggedUserIsResponsbaileOrVicario = this.hasPermessoMinimo(DecimalePredicato.VICARIO);
             this.inizializeAll();
           }
         }, 0);
@@ -151,10 +156,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       (utenteUtilities: UtenteUtilities) => {
         this.utenteUtilitiesLogin = utenteUtilities;
         if (this.archivio) {
+          this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
+          this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
+          this.loggedUserIsResponsbaileOrVicario = this.hasPermessoMinimo(DecimalePredicato.VICARIO);
           this.inizializeAll();
-          //debugger;
-          this.loggedUserIsResponsbaileOrVicario = this._archivio.attoriList.some((attore: AttoreArchivio) => attore.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id &&
-          (attore.ruolo == RuoloAttoreArchivio.RESPONSABILE || attore.ruolo == RuoloAttoreArchivio.VICARIO || attore.ruolo == RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
         }
       }
     );
