@@ -168,13 +168,13 @@
       </div>
       <div class="right-side">
         <div 
-        pTooltip="Mostra cronologia" 
-        tooltipPosition="left" 
-        (click)="loadLogs()" 
-        class="ultima-modifica"
-        style="transform: translateX(8%); cursor: pointer; font-size: small;">
-        Ultima modifica: {{removeZoneFromTime(archivio.version?.toString()) | date: 'EE d MMM y' | titlecase}}
-      </div>
+          pTooltip="Mostra cronologia" 
+          tooltipPosition="left" 
+          (click)="loadLogs()" 
+          class="ultima-modifica"
+          style="transform: translateX(8%); cursor: pointer; font-size: small;">
+          Ultima modifica: {{removeZoneFromTime(archivio.version?.toString()) | date: 'EE d MMM y' | titlecase}}
+        </div>
         <div class="numeraFasicolo">
           <!-- Bottone numera archivio -->
           <button *ngIf="archivio.stato == 'BOZZA'" 
