@@ -153,17 +153,33 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
   }
 
   /**
-   * Funzione temporanea che calcola i permessi esplciti a partire dalla blackbox.
-   * Sarà proabbilmente eliminata quando avremo il servizo asincrono apposito.
+   * Funzione che calcola i permessi esplciti a partire dalla blackbox.
+   * 
    */
-   public calcolaPermessiEspliciti(archivio: Archivio | ArchivioDetail): void {
-     this.extendedArchivioService.calcolaPermessiEspliciti(archivio.fk_idArchivioRadice.id);
-     /* if (archivio.idArchivioPadre?.id) {
-        this.extendedArchivioService.calcolaPermessiEspliciti(archivio.idArchivioPadre.id);
-     }
-     if (archivio.idArchivioRadice?.id && archivio.idArchivioRadice?.id !== archivio.idArchivioPadre?.id) {
-       this.extendedArchivioService.calcolaPermessiEspliciti(archivio.idArchivioRadice.id);
-     } */
+   public calcolaPermessiEspliciti(
+      archivio: Archivio | ArchivioDetail, 
+      calcolaPerInteraGerarchia: boolean,
+      calcolaPerAntenati: boolean): void {
+    if (calcolaPerInteraGerarchia) {
+      // Si vuole calcolare i permessi di tutti gli arhcivi che appartengono alla stessa gerarchia di questo arhicivo
+      this.extendedArchivioService.calcolaPermessiEsplicitiGerarchiaArchivio(archivio.fk_idArchivioRadice.id);
+    } else {
+      if (calcolaPerAntenati) {
+        // Si vogliono calcolare i permessi dell'archivio e nel esistano caso del padre e del nonno
+        this.extendedArchivioService.calcolaPermessiEsplicitiArchivio(archivio.id);
+        if (archivio.fk_idArchivioPadre?.id) {
+          this.extendedArchivioService.calcolaPermessiEsplicitiArchivio(archivio.fk_idArchivioPadre.id);
+        }
+        if (archivio.fk_idArchivioRadice?.id 
+            && archivio.fk_idArchivioRadice?.id !== archivio.fk_idArchivioRadice?.id
+            && archivio.fk_idArchivioRadice?.id !== archivio.id) {
+          this.extendedArchivioService.calcolaPermessiEsplicitiArchivio(archivio.fk_idArchivioRadice.id);
+        }
+      } else {
+        // Si vuole calcolare i permessi del solo arhcivio passato
+        this.extendedArchivioService.calcolaPermessiEsplicitiArchivio(archivio.id);
+      }
+    }
   }
 
   /**

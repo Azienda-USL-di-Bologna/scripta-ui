@@ -127,7 +127,7 @@
         value="fascicolo" 
         [label]="this.operazioneOrganizza + ' fascicolo'" 
         [(ngModel)]="organizzaTarget" 
-        [disabled]="this.archivio.livello === 1 && this.operazioneOrganizza === 'Sposta'">
+        [disabled]="this.archivio?.livello === 1 && this.operazioneOrganizza === 'Sposta'">
       </p-radioButton>
       <p class="organizza-target-button-descrizione">{{this.getDescrizioneAzioneTargetText('fascicolo')}}</p>
     </div>
@@ -147,7 +147,7 @@
   <div  
     *ngIf="this.operazioneOrganizza != 'Trasforma in fascicolo' && this.operazioneOrganizza != 'Duplica'" 
     class="organizza-target-archivio-ricerca">
-    <p-divider style="width: 70%; align-self: center;"></p-divider>
+    <p-divider ></p-divider>
   <p>Scegli il fascicolo di destinazione</p>
     <app-archivio-ricerca 
           #archivioRicerca 
