@@ -153,7 +153,7 @@ export class ResponsabiliComponent implements OnInit {
                   detail: "Nuovo vicario inserito con successo"
                 });
                 this.archivio.attoriList.push(attoreRes);
-                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
                 this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
               },
               error: () => {
@@ -232,7 +232,7 @@ export class ResponsabiliComponent implements OnInit {
                   summary: "Proposta responsabilità", 
                   detail: "La persona proposta come responsabile ha ricevuto una attività in scrivania"
                 });
-                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
                 this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
               }
             )
@@ -254,7 +254,7 @@ export class ResponsabiliComponent implements OnInit {
                 summary: "Aggiornamento " + attoreToOperate.ruolo.toLowerCase().replace("_"," "),
                 detail: attoreToOperate.ruolo.charAt(0) + attoreToOperate.ruolo.slice(1).toLowerCase().replace("_"," ") + " aggiornato con successo"
               });
-              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
               this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
             },
             error: () => {
@@ -288,7 +288,7 @@ export class ResponsabiliComponent implements OnInit {
                 detail: "Hai eliminato il responsabile proposto"
               });
               this.archivio.attoriList.splice(this.archivio.attoriList.findIndex((a: AttoreArchivio)=> a.id === attoreToOperate.id), 1);
-              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
               this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
               this.responsabilePropostoGiaPresente = false;
             }
@@ -304,7 +304,7 @@ export class ResponsabiliComponent implements OnInit {
                   detail:  attoreToOperate.ruolo === RuoloAttoreArchivio.VICARIO ? "Vicario eliminato con successo" : "Responsabile eliminato con successo"
                 });
                 this.archivio.attoriList.splice(this.archivio.attoriList.findIndex((a: AttoreArchivio)=> a.id === attoreToOperate.id), 1);
-                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
                 this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
               },
               error: () => {

@@ -711,7 +711,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
                 summary: "Proposta responsabilità", 
                 detail: "Hai accettato la responsabilità del fascicolo"
               });
-              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
               responsabilePropostoVecchio.ruolo = RuoloAttoreArchivio.RESPONSABILE;
               responsabilePropostoVecchio.version = (res.find(bo => (bo.entityBody as any).id === responsabilePropostoVecchio.id).entityBody as AttoreArchivio).version;
               responsabileVecchio.ruolo = RuoloAttoreArchivio.VICARIO;
@@ -773,7 +773,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
             summary: "Rifiutata responsabilità", 
             detail: "Hai rifiutato la responsabilità del fascicolo"
           });
-          this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+          this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
           
           attoreToDelete.version = (res.find(bo => (bo.entityBody as any).id === attoreToDelete.id).entityBody as AttoreArchivio).version;
           this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
