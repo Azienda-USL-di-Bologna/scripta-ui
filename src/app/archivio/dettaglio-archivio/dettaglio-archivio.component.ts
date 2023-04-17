@@ -33,6 +33,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       this.selectedTitolo = null;
     }
     this.loadConfigurations();
+    if (this.showLogs) this.loadLogs();
   }
   public panelSize:number[]=[85,15];
   public krintFilterOptions: KrintFilterOptions;
