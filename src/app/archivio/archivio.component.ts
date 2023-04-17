@@ -93,6 +93,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         this._archivio = res;
         if (this.utenteUtilitiesLogin) {
           this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
+          this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
         }
         console.log("Archivio nell'archivio component: ", this._archivio);
         setTimeout(() => {
