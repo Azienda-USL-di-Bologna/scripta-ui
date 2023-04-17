@@ -427,7 +427,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Trasforma in fascicolo"}
         }
       ],
-      disabled: this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO)
+      disabled: (this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO)||true)
     },
     // {
     //   label: "Genera",
