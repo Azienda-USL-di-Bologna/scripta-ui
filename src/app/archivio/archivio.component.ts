@@ -67,6 +67,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public loggeduserCanAccess: boolean = false; 
 
   private ARCHIVIO_DETAIL_PROJECTION = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
+  private ragazzoDelNovantaNove = false;
 
   public pageConfNoLimit: PagingConf = {
     conf: {
@@ -94,6 +95,11 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         if (this.utenteUtilitiesLogin) {
           this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
           this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
+          if (this.utenteUtilitiesLogin.getUtente()) {
+            if (this.utenteUtilitiesLogin.getUtente().utenteReale) 
+              this.ragazzoDelNovantaNove = (this.utenteUtilitiesLogin.getUtente().utenteReale.idInquadramento as unknown as String) === "99";
+            else this.ragazzoDelNovantaNove = (this.utenteUtilitiesLogin.getUtente().idInquadramento as unknown as String) === "99";
+          } 
         }
         console.log("Archivio nell'archivio component: ", this._archivio);
         setTimeout(() => {
@@ -427,7 +433,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Trasforma in fascicolo"}
         }
       ],
-      disabled: (this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO)||true)
+      disabled: (this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO) || !this.ragazzoDelNovantaNove)
     },
     // {
     //   label: "Genera",
