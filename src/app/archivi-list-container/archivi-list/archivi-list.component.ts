@@ -74,7 +74,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	];
 	public rightContentProgressSpinner: boolean = false;
 	public rowCountInProgress: boolean = false;
-  public rowCount: number;
+  	public rowCount: number;
 	public selectableColumns: ColonnaBds[] = [];
 	private mandatoryColumns: string[] = [];
 	public rowsNumber: number = 20;
@@ -114,6 +114,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public newArchivoButton: NewArchivoButton;
 	private idAziendeConGediInternautaAttivo: number[] = [];
 	private isLoggeduser99: boolean = false;
+	public messageIfNull: string = 'Non sono stati trovati fascicoli di recente utilizzo. Seleziona la voce Visibili';
 	
 	//public instanziaTabellaArchiviList = true;
 	public loggedUserCanDeleteArchivio : boolean = false; 
@@ -151,9 +152,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	ngOnInit(): void {
 		this.serviceToGetData = this.archiviListService;
 		this.cols = cols; 
-		this.archiviListMode = this.route.snapshot.queryParamMap.get('mode') as ArchiviListMode || ArchiviListMode.VISIBILI;
+		this.archiviListMode = this.route.snapshot.queryParamMap.get('mode') as ArchiviListMode || ArchiviListMode.RECENTI;
 		if (!Object.values(ArchiviListMode).includes(this.archiviListMode)) {
-			this.archiviListMode = ArchiviListMode.VISIBILI;
+			this.archiviListMode = ArchiviListMode.RECENTI;
 		}
 		//this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } });
 		const loggeduser$ = this.loginService.loggedUser$.pipe(first());
@@ -606,7 +607,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		if (this.filtriPuliti) {
 			this.filtriPuliti = false;
 			this.resetCalendarToInitialValues();
-			this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
+			this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione?.value, matchMode: "is" };
 
 			if (this.dropdownAzienda) {
 				const value = this.aziendeFiltrabili.find(a => a.value[0] === this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault.id)?.value || this.aziendeFiltrabili[0].value;
@@ -775,34 +776,35 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 * NB: In caso di lista aperta in dettaglio arhcivi il default è che non c'è filtro
 	 */
 	private resetCalendarToInitialValues() {
-		if (this.archivioPadre) {
-			this.calendarcreazione.writeValue(null);
-		} else {
-			const oggi = new Date();
-
-			switch (oggi.getMonth()) {
-				case 0:
-					// Gennaio
-					this.calendarcreazione.writeValue([
-						new Date(new Date().getFullYear() - 1, 10, 1),
-						new Date(new Date().getFullYear(), 11, 31)
-					]);
-					break;
-				case 1:
-					// Febbrario
-					this.calendarcreazione.writeValue([
-						new Date(new Date().getFullYear() - 1, 11, 1),
-						new Date(new Date().getFullYear(), 11, 31)
-					]);
-					break
-				default:
-					this.calendarcreazione.writeValue([
-						new Date(new Date().getFullYear(), 0, 1),
-						new Date(new Date().getFullYear(), 11, 31)
-					]); 
+		if (this.archiviListMode !== ArchiviListMode.RECENTI) {
+			if (this.archivioPadre) {
+				this.calendarcreazione.writeValue(null);
+			} else {		
+				const oggi = new Date();
+				switch (oggi.getMonth()) {
+					case 0:
+						// Gennaio
+						this.calendarcreazione.writeValue([
+							new Date(new Date().getFullYear() - 1, 10, 1),
+							new Date(new Date().getFullYear(), 11, 31)
+						]);
+						break;
+					case 1:
+						// Febbrario
+						this.calendarcreazione.writeValue([
+							new Date(new Date().getFullYear() - 1, 11, 1),
+							new Date(new Date().getFullYear(), 11, 31)
+						]);
+						break
+					default:
+						this.calendarcreazione.writeValue([
+							new Date(new Date().getFullYear(), 0, 1),
+							new Date(new Date().getFullYear(), 11, 31)
+						]); 
+				}
 			}
+			this.lastDataCreazioneFilterValue = this.calendarcreazione.value;
 		}
-		this.lastDataCreazioneFilterValue = this.calendarcreazione.value;
 	}
 
 
@@ -834,6 +836,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
 		switch (this.archiviListMode) {
 			case ArchiviListMode.VISIBILI:
+				this.messageIfNull = 'Non sono stati trovati fascicoli che puoi vedere.';
 				// Uso la vista che fa join con i permessi. E cerco solo archivi in cui io sono presente
 				filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
 				filterAndSort.addSort(new SortDefinition("numero", this.dataTable.sortOrder === -1 ? SORT_MODES.desc : SORT_MODES.asc));
@@ -841,15 +844,18 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
 				break;
 			case ArchiviListMode.TUTTI:
+				this.messageIfNull = 'Non sono stati trovati fascicoli che puoi vedere.';
 				filterAndSort.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
 
 				break;
 			case ArchiviListMode.PREFERITI:
+				this.messageIfNull = "Non sono stati trovati fascicoli Preferiti. Clicca l'icona del cuore in alto a destra dentro ad un fascicolo per aggiungerlo ai preferiti.";
 				filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabPreferiti"));
 				break;
 			case ArchiviListMode.FREQUENTI:
 				break;
 			case ArchiviListMode.RECENTI:
+				this.messageIfNull = 'Non sono stati trovati fascicoli di recente utilizzo. Seleziona la voce Visibili';
 				this.serviceToGetData = this.archiviRecentiService;
 				this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviorecente.customProjections.CustomArchivioRecenteWithIdArchivioDetail;
 				filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
