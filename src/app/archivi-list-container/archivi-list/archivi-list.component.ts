@@ -844,7 +844,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
 				break;
 			case ArchiviListMode.TUTTI:
-				this.messageIfNull = 'Non sono stati trovati fascicoli che puoi vedere.';
+				this.messageIfNull = 'Non sono stati trovati fascicoli.';
 				filterAndSort.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
 
 				break;
