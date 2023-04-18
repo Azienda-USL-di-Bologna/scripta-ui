@@ -836,6 +836,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			case ArchiviListMode.VISIBILI:
 				// Uso la vista che fa join con i permessi. E cerco solo archivi in cui io sono presente
 				filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+				filterAndSort.addSort(new SortDefinition("numero", this.dataTable.sortOrder === -1 ? SORT_MODES.desc : SORT_MODES.asc));
 				this.serviceToGetData = this.archivioDetailViewService;
 				this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
 				break;
