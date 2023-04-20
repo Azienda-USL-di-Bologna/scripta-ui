@@ -689,9 +689,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.loadArchiviListSubscription = null;
 		}
 
-		if(this.firstLoad && this.archiviListMode !== ArchiviListMode.RECENTI) {
-			this.resetCalendarToInitialValues();
-		}
+		//if(this.firstLoad && this.archiviListMode !== ArchiviListMode.RECENTI) {
+		//	this.resetCalendarToInitialValues();
+		//}
 
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
 

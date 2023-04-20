@@ -35,16 +35,17 @@
   }
 }
 ::ng-deep .archivi-tree  {
+
   border: none;
-  /* .p-tree-container {
+  .p-tree-container {
     .p-treenode {
       .p-treenode-content {
-        &:focus {
+         /*       &:focus {
           box-shadow: none;
-        }
+        }*/
       }
     }
-  } */
+  } 
   .nodo-bozza{
     font-style: oblique;
   }

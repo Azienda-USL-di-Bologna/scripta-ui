@@ -451,6 +451,11 @@ export class ArchivioTreeComponent implements OnInit {
     if(this.utenteUtilitiesLogin.isSD()) {
       newNode.label += " " + archivio.id.toString();
     }
+    if(children) {
+      children.sort((a, b) => {
+        return a.data?.numero - b.data?.numero
+      });
+    }
     newNode.children = children || [];
     newNode.expanded = true;
     if(archivio.stato === StatoArchivio.BOZZA) {
