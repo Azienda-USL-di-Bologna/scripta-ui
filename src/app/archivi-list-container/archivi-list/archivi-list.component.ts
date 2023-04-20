@@ -115,6 +115,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	private idAziendeConGediInternautaAttivo: number[] = [];
 	private isLoggeduser99: boolean = false;
 	public messageIfNull: string = 'Non sono stati trovati fascicoli di recente utilizzo. Seleziona la voce Visibili';
+	private firstLoad: boolean = true;
 	
 	//public instanziaTabellaArchiviList = true;
 	public loggedUserCanDeleteArchivio : boolean = false; 
@@ -687,28 +688,37 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.loadArchiviListSubscription.unsubscribe();
 			this.loadArchiviListSubscription = null;
 		}
+
+		//if(this.firstLoad && this.archiviListMode !== ArchiviListMode.RECENTI) {
+		//	this.resetCalendarToInitialValues();
+		//}
+
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
 
 		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
-		if (this.archiviListMode === ArchiviListMode.RECENTI) {
-
-			lazyFiltersAndSorts.filters.forEach((f, index) => {
-				//debugger;
-				if(f.field == "dataCreazione")
-					lazyFiltersAndSorts.filters.splice(index, 1);
-				if(f.field == "idAzienda.id")
-					lazyFiltersAndSorts.filters.splice(index, 1);
-				if(f.field == "livello")
-				lazyFiltersAndSorts.filters.splice(index, 1);
-			});
-			lazyFiltersAndSorts.filters.forEach((f, index) => {
-				if(f.field == "dataCreazione")
-					lazyFiltersAndSorts.filters.splice(index, 1);
-			});
-			
+		
+		if (this.archiviListMode === ArchiviListMode.RECENTI ) {
+			lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => !["dataCreazione", "idAzienda.id", "livello"].includes(f.field));
 			lazyFiltersAndSorts.filters.forEach(f => f.field = "idArchivio." + f.field);
-			lazyFiltersAndSorts.sorts.forEach(s => s.field = "dataRecentezza");
+			lazyFiltersAndSorts.sorts = lazyFiltersAndSorts.sorts.filter(s => s.field === "dataRecentezza");
 		}
+		if (this.archiviListMode === ArchiviListMode.TUTTI ) {
+			lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
+			lazyFiltersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
+		}
+		if (this.archiviListMode === ArchiviListMode.VISIBILI ) {
+			/* lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello"); */
+			/* if (!lazyFiltersAndSorts.filters.some(f => f.field === "tscol" )) {
+				lazyFiltersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1))
+			} */
+			/* if (this.firstLoad) {
+				this.resetCalendarToInitialValues()
+				lazyFiltersAndSorts.addFilter(new FilterDefinition("dataCreazione", FILTER_TYPES.not_string.equals, ));
+				this.firstLoad = false;
+				
+			} */
+		}
+		
 		
 		this.loadArchiviListSubscription = this.serviceToGetData.getData(
 			this.projectionToGetData,
@@ -776,35 +786,38 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 * NB: In caso di lista aperta in dettaglio arhcivi il default è che non c'è filtro
 	 */
 	private resetCalendarToInitialValues() {
-		if (this.archiviListMode !== ArchiviListMode.RECENTI) {
+		//if (this.archiviListMode !== ArchiviListMode.RECENTI) {
 			if (this.archivioPadre) {
 				this.calendarcreazione.writeValue(null);
 			} else {		
 				const oggi = new Date();
-				switch (oggi.getMonth()) {
-					case 0:
-						// Gennaio
-						this.calendarcreazione.writeValue([
-							new Date(new Date().getFullYear() - 1, 10, 1),
-							new Date(new Date().getFullYear(), 11, 31)
-						]);
-						break;
-					case 1:
-						// Febbrario
-						this.calendarcreazione.writeValue([
-							new Date(new Date().getFullYear() - 1, 11, 1),
-							new Date(new Date().getFullYear(), 11, 31)
-						]);
-						break
-					default:
-						this.calendarcreazione.writeValue([
-							new Date(new Date().getFullYear(), 0, 1),
-							new Date(new Date().getFullYear(), 11, 31)
-						]); 
+				if(this.calendarcreazione) {
+					switch (oggi.getMonth()) {
+						case 0:
+							// Gennaio
+							this.calendarcreazione.writeValue([
+								new Date(new Date().getFullYear() - 1, 10, 1),
+								new Date(new Date().getFullYear(), 11, 31)
+							]);
+							break;
+						case 1:
+							// Febbrario
+							this.calendarcreazione.writeValue([
+								new Date(new Date().getFullYear() - 1, 11, 1),
+								new Date(new Date().getFullYear(), 11, 31)
+							]);
+							break
+						default:
+							this.calendarcreazione.writeValue([
+								new Date(new Date().getFullYear(), 0, 1),
+								new Date(new Date().getFullYear(), 11, 31)
+							]); 
+					}
 				}
+				
 			}
 			this.lastDataCreazioneFilterValue = this.calendarcreazione.value;
-		}
+		//}
 	}
 
 
@@ -844,7 +857,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
 				break;
 			case ArchiviListMode.TUTTI:
-				this.messageIfNull = 'Non sono stati trovati fascicoli che puoi vedere.';
+				this.messageIfNull = 'Non sono stati trovati fascicoli.';
 				filterAndSort.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
 
 				break;
@@ -859,7 +872,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				this.serviceToGetData = this.archiviRecentiService;
 				this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviorecente.customProjections.CustomArchivioRecenteWithIdArchivioDetail;
 				filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
-				filterAndSort.addSort(new SortDefinition("dataRecentezza", "asc"))
+				filterAndSort.addSort(new SortDefinition("dataRecentezza", "desc"))
 				filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRecenti"));
 				break;
 		}

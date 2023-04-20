@@ -135,7 +135,7 @@
       <p-radioButton 
         name="organizzaTarget" 
         value="contenuto" 
-        [label]="this.operazioneOrganizza + ' solo contenuto'" 
+        [label]="this.operazioneOrganizza + (this.operazioneOrganizza == 'Duplica' ? ' con' : ' solo') + ' contenuto'" 
         [(ngModel)]="organizzaTarget">
       </p-radioButton>
       <p class="organizza-target-button-descrizione">{{this.getDescrizioneAzioneTargetText('contenuto')}}</p>
