@@ -132,7 +132,7 @@
         [disabled]="!functionalOperationsComponent.uploadDocumentButton.enable"
         mode="basic" 
         name="document[]"
-        [maxFileSize]="5000000" 
+        [maxFileSize]="500000000" 
         [customUpload]="true"
         [auto]="true"
         (uploadHandler)="functionalOperationsComponent.uploadDocument($event);fileUploaderDocumentsAuto.clear()">
