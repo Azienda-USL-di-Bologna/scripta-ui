@@ -1,0 +1,18 @@
+<p-fileUpload #fileUploaderDocumentsAuto
+  chooseLabel="Scegli" uploadLabel="Carica" cancelLabel="Svuota"
+  [multiple]="true"
+  
+  name="document[]"
+  [maxFileSize]="maxSizeUpload" 
+  [customUpload]="true"
+  (onSelect)="onSelect($event)"
+  (uploadHandler)="manageFile($event);fileUploaderDocumentsAuto.clear()">
+  
+  <ng-template pTemplate="file" let-file let-i="index">
+    <div class="p-fileupload-row">
+      <div class="p-fileupload-filename">
+        <input pInputText [(ngModel)]="nomiNuovi[i]" (input)="onRename($event, file, i)"/>
+      </div>
+    </div>
+  </ng-template>
+</p-fileUpload>

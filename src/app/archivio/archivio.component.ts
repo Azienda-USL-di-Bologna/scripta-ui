@@ -576,11 +576,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   /**
    * Funzione utile al caricamento di un document
    */
-  public uploadDocument(event: any): void {
+  public uploadDocument(event: any, nomiNuovi: string[]): void {
     const formData: FormData = new FormData();
     formData.append("idArchivio", this.archivio.id.toString());
-    event.files.forEach((file: File) => {
-      formData.append("documents", file);
+    event.files.forEach((file: File, index: number) => {
+      formData.append("documents", file, nomiNuovi[index]);
+
     });
     this.rightContentProgressSpinner = true;
     this.extendedArchivioService.uploadDocument(formData).subscribe(

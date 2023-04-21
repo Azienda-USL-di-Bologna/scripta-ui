@@ -1,4 +1,4 @@
 export interface UploadDocumentButton {
-  command: (event: any) => void;
+  command: (event: any, nomi: string[]) => void;
   enable: boolean;
 }

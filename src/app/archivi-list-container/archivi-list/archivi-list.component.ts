@@ -1045,7 +1045,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
  */
 	public myDatatableReset() {
 		this.filtriPuliti = true;
-		for (const key in this.dataTable.filters) {
+		for (const key in this.dataTable?.filters) {
 			(this.dataTable.filters as any)[key]["value"] = null;
 		}
 		this.dataTable.filteredValue = null;

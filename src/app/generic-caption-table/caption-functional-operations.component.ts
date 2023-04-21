@@ -8,4 +8,5 @@ export interface CaptionFunctionalOperationsComponent {
     newArchivoButton: NewArchivoButton;
     functionButton?: FunctionButton;
     uploadDocumentButton?: UploadDocumentButton;
+    uploadDocument?: (event: any, nomi: string[]) => {};
 }
