@@ -157,6 +157,9 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
     } */
     this.navigationTabsService.addTabToHistory(tabIndex);
     this.appService.appNameSelection(this.navigationTabsService.getTabs()[tabIndex].labelForAppName);
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 10);
   }
 
   public onCloseTab(e: any): void {

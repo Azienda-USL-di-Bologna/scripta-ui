@@ -5,12 +5,15 @@
   overflow: hidden;
   p-splitter {
     flex: 1 1 0;
-    height: calc(100% - 44.5px); // 44.5px è l'altezza della generic-caption-table
+    //height: calc(100% - 44.5px); // 44.5px è l'altezza della generic-caption-table
     .splitter-archivio {
       height: 100%;
       .p-splitter-panel {
-        overflow: hidden;
         width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
         .mini-caption-table {
           background: #f4f4f4;
           color: #333333;
