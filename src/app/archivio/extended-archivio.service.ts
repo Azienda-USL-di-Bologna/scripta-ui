@@ -67,10 +67,17 @@ export class ExtendedArchivioService extends ArchivioService {
     return this._http.post(url, formData);
   }
 
-  public calcolaPermessiEspliciti(idArchivioRadice: number) {
-    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "calcolaPermessiEspliciti";
+  public calcolaPermessiEsplicitiGerarchiaArchivio(idArchivioRadice: number) {
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "calcolaPermessiEsplicitiGerarchiaArchivio";
     const formData: FormData = new FormData();
     formData.append("idArchivioRadice", idArchivioRadice.toString());
+    this._http.post(apiUrl, formData).subscribe();
+  }
+
+  public calcolaPermessiEsplicitiArchivio(idArchivio: number) {
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "calcolaPermessiEsplicitiArchivio";
+    const formData: FormData = new FormData();
+    formData.append("idArchivio", idArchivio.toString());
     this._http.post(apiUrl, formData).subscribe();
   }
 

@@ -64,8 +64,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public archivioDestinazioneOrganizza: ArchivioDetailView = null;
   public profonditaArchivio: number = null;
   public permessoMinimoSuArchivioDestinazioneOrganizza: DecimalePredicato = DecimalePredicato.VICARIO;
+  public loggeduserCanAccess: boolean = false; 
 
   private ARCHIVIO_DETAIL_PROJECTION = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
+  private ragazzoDelNovantaNove = false;
 
   public pageConfNoLimit: PagingConf = {
     conf: {
@@ -89,12 +91,24 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       data.archivio.id,
       ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
       .subscribe((res: Archivio) => {
-        this.loggedUserCanVisualizeArchive = this.canVisualizeArchive(res);
         this._archivio = res;
+        if (this.utenteUtilitiesLogin) {
+          this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
+          this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
+          if (this.utenteUtilitiesLogin.getUtente()) {
+            if (this.utenteUtilitiesLogin.getUtente().utenteReale) 
+              this.ragazzoDelNovantaNove = (this.utenteUtilitiesLogin.getUtente().utenteReale.idInquadramento as unknown as String) === "99";
+            else this.ragazzoDelNovantaNove = (this.utenteUtilitiesLogin.getUtente().idInquadramento as unknown as String) === "99";
+          } 
+        }
         console.log("Archivio nell'archivio component: ", this._archivio);
-        this.extendedArchivioService.aggiungiArchivioRecente(this._archivio.fk_idArchivioRadice.id);
         setTimeout(() => {
+          this.extendedArchivioService.aggiungiArchivioRecente(this._archivio.fk_idArchivioRadice.id);
+
           if (this.utenteUtilitiesLogin) {
+            this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
+            this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
+            this.loggedUserIsResponsbaileOrVicario = this.hasPermessoMinimo(DecimalePredicato.VICARIO);
             this.inizializeAll();
           }
         }, 0);
@@ -149,10 +163,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       (utenteUtilities: UtenteUtilities) => {
         this.utenteUtilitiesLogin = utenteUtilities;
         if (this.archivio) {
+          this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
+          this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
+          this.loggedUserIsResponsbaileOrVicario = this.hasPermessoMinimo(DecimalePredicato.VICARIO);
           this.inizializeAll();
-          //debugger;
-          this.loggedUserIsResponsbaileOrVicario = this._archivio.attoriList.some((attore: AttoreArchivio) => attore.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id &&
-          (attore.ruolo == RuoloAttoreArchivio.RESPONSABILE || attore.ruolo == RuoloAttoreArchivio.VICARIO || attore.ruolo == RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
         }
       }
     );
@@ -414,12 +428,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Duplica"}
         },
         {  
-          label: "Rendi fascicolo",
+          label: "Trasforma in fascicolo",
           disabled: this.archivio?.livello === 1,
-          command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Rendi fascicolo"}
+          command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Trasforma in fascicolo"}
         }
       ],
-      disabled: this.isArchivioChiuso() && !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO)
+      disabled: this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO)
     },
     // {
     //   label: "Genera",
@@ -540,10 +554,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * Ritorna true se l'utente può creare il sottoarchivio e cioè se è responsabile/vicario o ha permesso di almeno modifica
    * @returns 
    */
-  public canVisualizeArchive(archivio: Archivio): boolean {
+  /* public canVisualizeArchive(archivio: Archivio): boolean {
     return archivio.permessiEspliciti?.find((p: PermessoArchivio) => 
       p.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit > DecimalePredicato.PASSAGGIO;
-  }
+  } */
 
   /**
    * Metodo chiamato quando non ho cambiato archivio, ma esso è stato modificato, 
@@ -562,11 +576,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   /**
    * Funzione utile al caricamento di un document
    */
-  public uploadDocument(event: any): void {
+  public uploadDocument(event: any, nomiNuovi: string[]): void {
     const formData: FormData = new FormData();
     formData.append("idArchivio", this.archivio.id.toString());
-    event.files.forEach((file: File) => {
-      formData.append("documents", file);
+    event.files.forEach((file: File, index: number) => {
+      formData.append("documents", file, nomiNuovi[index]);
+
     });
     this.rightContentProgressSpinner = true;
     this.extendedArchivioService.uploadDocument(formData).subscribe(
@@ -891,7 +906,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    */
   public openArchive(archivio: ExtendedArchiviView): void {
     const arch: Archivio = archivio as any as Archivio;
-    this.navigationTabsService.addTabArchivio(archivio);
+    this.navigationTabsService.addTabArchivio(archivio, true, false, true);
     // this.archivioUtilsService.updatedArchiveSelection(arch);
     this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
   }
@@ -988,7 +1003,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           this.rightContentProgressSpinner = false;
         });
         break;
-      case "Rendi fascicolo":
+      case "Trasforma in fascicolo":
         this.extendedArchivioService.rendiFascicolo(this.archivio.id)
         .subscribe({
           next: (res: any) => {
@@ -1030,7 +1045,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       case "Sposta":
         switch(target){
           case "fascicolo":
-            res = "Sposta la gerarchia e i suoi contenuti del fascicolo/subfascicolo all'interno di uno di destinazione."
+            res = "Sposta la gerarchia e i suoi contenuti del fascicolo/subfascicolo all'interno di un fascicolo di destinazione."
             break;
           case "contenuto":
             res = "Sposta solo il contenuto del fascicolo/subfascicolo all'interno di uno di destinazione."
@@ -1071,7 +1086,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * @returns true se ho inserito tutti i dati necessari altrimenti false
    */
   public canOrganizzare(): boolean{
-    if (this.archivioDestinazioneOrganizza !== null && this.organizzaTarget.length > 0 && this.operazioneOrganizza !== null && this.operazioneOrganizza !== 'Rendi fascicolo'  && this.operazioneOrganizza !== 'Duplica'){
+    if (this.archivioDestinazioneOrganizza !== null && this.organizzaTarget.length > 0 && this.operazioneOrganizza !== null && this.operazioneOrganizza !== 'Trasforma in fascicolo'  && this.operazioneOrganizza !== 'Duplica'){
       return true;
     }
     if (this.organizzaTarget.length > 0 && this.operazioneOrganizza === 'Duplica'){
@@ -1079,7 +1094,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       
       return true;
     }
-    if (this.operazioneOrganizza === 'Rendi fascicolo'){
+    if (this.operazioneOrganizza === 'Trasforma in fascicolo'){
       return true;
     }
     return false

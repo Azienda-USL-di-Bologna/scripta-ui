@@ -6,13 +6,11 @@ import { CaptionFunctionalOperationsComponent } from './caption-functional-opera
 import { CaptionConfiguration } from './caption-configuration';
 import { CaptionReferenceTableComponent } from './caption-reference-table.component';
 import { CaptionSelectButtonsComponent } from './caption-select-buttons.component';
-import { MenuItem } from 'primeng/api';
-import { Archivio, Azienda, AziendaService, PermessoEntitaStoredProcedure } from '@bds/internauta-model';
+import { Archivio, PermessoEntitaStoredProcedure } from '@bds/internauta-model';
 import { CODICI_RUOLO } from '@bds/internauta-model';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { NavigationTabsService } from '../navigation-tabs/navigation-tabs.service';
-import { TipComponent } from '@bds/common-components';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import {FileUploadComponent} from '../file-upload/file-upload.component';
 
 @Component({
   selector: 'generic-caption-table',
@@ -29,14 +27,12 @@ export class GenericCaptionTableComponent implements OnInit {
   @ViewChild("aziendaSelection", {}) public aziendaSelection: Menu;
 
   public accessibile: boolean = false;
-  public multiple: boolean = false;
-  public maxSizeUpload: Number = 50000000;
   public ref: DynamicDialogRef;
   public canUseTip: boolean = false;
   public canCreateArchivio: boolean = false;
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
-
+  public uploadDocumentDialogVisible: boolean = false;
   constructor(private loginService: JwtLoginService, public dialogService: DialogService, public navigationTabsService: NavigationTabsService,) { }
 
 
@@ -48,9 +44,9 @@ export class GenericCaptionTableComponent implements OnInit {
           if (utenteUtilities) {
             this.utenteUtilitiesLogin = utenteUtilities;
             this.accessibile = this.utenteUtilitiesLogin.getUtente().idPersona.accessibilita;
-            this.canUseTip = (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CA) ||
-            this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CI) ||
-            this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD));
+            this.canUseTip = /* (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CA) ||
+              this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.CI) || */
+              this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD);
             const tempMap : Map<String, PermessoEntitaStoredProcedure[]> = new Map(Object.entries(this.utenteUtilitiesLogin.getUtente().permessiGediByCodiceAzienda));
             this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach(a => {
               if(tempMap.has(a.codice)) {
@@ -90,6 +86,10 @@ export class GenericCaptionTableComponent implements OnInit {
     // });
     this.navigationTabsService.addTabTip();
   }
+
+  /* public showUploadDocumentDialog() {
+    this.visible = true;
+} */
 
   public isArchivioChiuso(archivio : Archivio) : boolean {
     return archivio.stato == 'PRECHIUSO' || archivio.stato == 'CHIUSO'

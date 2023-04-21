@@ -74,7 +74,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	];
 	public rightContentProgressSpinner: boolean = false;
 	public rowCountInProgress: boolean = false;
-  public rowCount: number;
+  	public rowCount: number;
 	public selectableColumns: ColonnaBds[] = [];
 	private mandatoryColumns: string[] = [];
 	public rowsNumber: number = 20;
@@ -114,6 +114,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public newArchivoButton: NewArchivoButton;
 	private idAziendeConGediInternautaAttivo: number[] = [];
 	private isLoggeduser99: boolean = false;
+	public messageIfNull: string = 'Non sono stati trovati fascicoli di recente utilizzo. Seleziona la voce Visibili';
+	private firstLoad: boolean = true;
 	
 	//public instanziaTabellaArchiviList = true;
 	public loggedUserCanDeleteArchivio : boolean = false; 
@@ -151,9 +153,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	ngOnInit(): void {
 		this.serviceToGetData = this.archiviListService;
 		this.cols = cols; 
-		this.archiviListMode = this.route.snapshot.queryParamMap.get('mode') as ArchiviListMode || ArchiviListMode.VISIBILI;
+		this.archiviListMode = this.route.snapshot.queryParamMap.get('mode') as ArchiviListMode || ArchiviListMode.RECENTI;
 		if (!Object.values(ArchiviListMode).includes(this.archiviListMode)) {
-			this.archiviListMode = ArchiviListMode.VISIBILI;
+			this.archiviListMode = ArchiviListMode.RECENTI;
 		}
 		//this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } });
 		const loggeduser$ = this.loginService.loggedUser$.pipe(first());
@@ -382,13 +384,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		this.selectButtonItems = [];
 		this.selectButtonItems.push(
 			{
-				title: "Tutti i fascicoli che posso vedere",
-				label: "Visibili",
-				// icon: "pi pi-fw pi-list", 
-				routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-				queryParams: { "mode": ArchiviListMode.VISIBILI }
-			},
-			{
 				title: "I fascicoli usati di recente",
 				label: "Recenti",
 				// icon: "pi pi-fw pi-list", 
@@ -396,6 +391,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				queryParams: { "mode": ArchiviListMode.RECENTI },
 				disabled: false
 			},
+			{
+				title: "Tutti i fascicoli che posso vedere",
+				label: "Visibili",
+				// icon: "pi pi-fw pi-list", 
+				routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+				queryParams: { "mode": ArchiviListMode.VISIBILI }
+			},
+			
 			{
 				title: "I miei fascicoli preferiti",
 				label: "Preferiti",
@@ -605,7 +608,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		if (this.filtriPuliti) {
 			this.filtriPuliti = false;
 			this.resetCalendarToInitialValues();
-			this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
+			this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione?.value, matchMode: "is" };
 
 			if (this.dropdownAzienda) {
 				const value = this.aziendeFiltrabili.find(a => a.value[0] === this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault.id)?.value || this.aziendeFiltrabili[0].value;
@@ -685,28 +688,37 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.loadArchiviListSubscription.unsubscribe();
 			this.loadArchiviListSubscription = null;
 		}
+
+		//if(this.firstLoad && this.archiviListMode !== ArchiviListMode.RECENTI) {
+		//	this.resetCalendarToInitialValues();
+		//}
+
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
 
 		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
-		if (this.archiviListMode === ArchiviListMode.RECENTI) {
-
-			lazyFiltersAndSorts.filters.forEach((f, index) => {
-				//debugger;
-				if(f.field == "dataCreazione")
-					lazyFiltersAndSorts.filters.splice(index, 1);
-				if(f.field == "idAzienda.id")
-					lazyFiltersAndSorts.filters.splice(index, 1);
-				if(f.field == "livello")
-				lazyFiltersAndSorts.filters.splice(index, 1);
-			});
-			lazyFiltersAndSorts.filters.forEach((f, index) => {
-				if(f.field == "dataCreazione")
-					lazyFiltersAndSorts.filters.splice(index, 1);
-			});
-			
+		
+		if (this.archiviListMode === ArchiviListMode.RECENTI ) {
+			lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => !["dataCreazione", "idAzienda.id", "livello"].includes(f.field));
 			lazyFiltersAndSorts.filters.forEach(f => f.field = "idArchivio." + f.field);
-			lazyFiltersAndSorts.sorts.forEach(s => s.field = "dataRecentezza");
+			lazyFiltersAndSorts.sorts = lazyFiltersAndSorts.sorts.filter(s => s.field === "dataRecentezza");
 		}
+		if (this.archiviListMode === ArchiviListMode.TUTTI ) {
+			lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
+			lazyFiltersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
+		}
+		if (this.archiviListMode === ArchiviListMode.VISIBILI ) {
+			/* lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello"); */
+			/* if (!lazyFiltersAndSorts.filters.some(f => f.field === "tscol" )) {
+				lazyFiltersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1))
+			} */
+			/* if (this.firstLoad) {
+				this.resetCalendarToInitialValues()
+				lazyFiltersAndSorts.addFilter(new FilterDefinition("dataCreazione", FILTER_TYPES.not_string.equals, ));
+				this.firstLoad = false;
+				
+			} */
+		}
+		
 		
 		this.loadArchiviListSubscription = this.serviceToGetData.getData(
 			this.projectionToGetData,
@@ -774,34 +786,38 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 * NB: In caso di lista aperta in dettaglio arhcivi il default è che non c'è filtro
 	 */
 	private resetCalendarToInitialValues() {
-		if (this.archivioPadre) {
-			this.calendarcreazione.writeValue(null);
-		} else {
-			const oggi = new Date();
-
-			switch (oggi.getMonth()) {
-				case 0:
-					// Gennaio
-					this.calendarcreazione.writeValue([
-						new Date(new Date().getFullYear() - 1, 10, 1),
-						new Date(new Date().getFullYear(), 11, 31)
-					]);
-					break;
-				case 1:
-					// Febbrario
-					this.calendarcreazione.writeValue([
-						new Date(new Date().getFullYear() - 1, 11, 1),
-						new Date(new Date().getFullYear(), 11, 31)
-					]);
-					break
-				default:
-					this.calendarcreazione.writeValue([
-						new Date(new Date().getFullYear(), 0, 1),
-						new Date(new Date().getFullYear(), 11, 31)
-					]); 
+		//if (this.archiviListMode !== ArchiviListMode.RECENTI) {
+			if (this.archivioPadre) {
+				this.calendarcreazione.writeValue(null);
+			} else {		
+				const oggi = new Date();
+				if(this.calendarcreazione) {
+					switch (oggi.getMonth()) {
+						case 0:
+							// Gennaio
+							this.calendarcreazione.writeValue([
+								new Date(new Date().getFullYear() - 1, 10, 1),
+								new Date(new Date().getFullYear(), 11, 31)
+							]);
+							break;
+						case 1:
+							// Febbrario
+							this.calendarcreazione.writeValue([
+								new Date(new Date().getFullYear() - 1, 11, 1),
+								new Date(new Date().getFullYear(), 11, 31)
+							]);
+							break
+						default:
+							this.calendarcreazione.writeValue([
+								new Date(new Date().getFullYear(), 0, 1),
+								new Date(new Date().getFullYear(), 11, 31)
+							]); 
+					}
+				}
+				
 			}
-		}
-		this.lastDataCreazioneFilterValue = this.calendarcreazione.value;
+			this.lastDataCreazioneFilterValue = this.calendarcreazione.value;
+		//}
 	}
 
 
@@ -833,25 +849,30 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
 		switch (this.archiviListMode) {
 			case ArchiviListMode.VISIBILI:
+				this.messageIfNull = 'Non sono stati trovati fascicoli che puoi vedere.';
 				// Uso la vista che fa join con i permessi. E cerco solo archivi in cui io sono presente
 				filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+				filterAndSort.addSort(new SortDefinition("numero", this.dataTable.sortOrder === -1 ? SORT_MODES.desc : SORT_MODES.asc));
 				this.serviceToGetData = this.archivioDetailViewService;
 				this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
 				break;
 			case ArchiviListMode.TUTTI:
+				this.messageIfNull = 'Non sono stati trovati fascicoli.';
 				filterAndSort.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
 
 				break;
 			case ArchiviListMode.PREFERITI:
+				this.messageIfNull = "Non sono stati trovati fascicoli Preferiti. Clicca l'icona del cuore in alto a destra dentro ad un fascicolo per aggiungerlo ai preferiti.";
 				filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabPreferiti"));
 				break;
 			case ArchiviListMode.FREQUENTI:
 				break;
 			case ArchiviListMode.RECENTI:
+				this.messageIfNull = 'Non sono stati trovati fascicoli di recente utilizzo. Seleziona la voce Visibili';
 				this.serviceToGetData = this.archiviRecentiService;
 				this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviorecente.customProjections.CustomArchivioRecenteWithIdArchivioDetail;
 				filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
-				filterAndSort.addSort(new SortDefinition("dataRecentezza", "asc"))
+				filterAndSort.addSort(new SortDefinition("dataRecentezza", "desc"))
 				filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabRecenti"));
 				break;
 		}
@@ -1024,7 +1045,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
  */
 	public myDatatableReset() {
 		this.filtriPuliti = true;
-		for (const key in this.dataTable.filters) {
+		for (const key in this.dataTable?.filters) {
 			(this.dataTable.filters as any)[key]["value"] = null;
 		}
 		this.dataTable.filteredValue = null;

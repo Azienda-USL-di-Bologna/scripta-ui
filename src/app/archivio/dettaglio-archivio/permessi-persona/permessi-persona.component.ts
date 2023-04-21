@@ -178,7 +178,26 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
             } else {
               delete this.perms[perm.idProvenienzaSoggetto];
             }
-            this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+            switch (this.livello) {
+              case 3:
+                // Ricalocolo permessi di inserto, padre e nonno
+                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, false, true);
+                break;
+              case 2:
+                if (this.archivio.numeroSottoarchivi === 0 || this.archivio.numeroSottoarchivi === null) {
+                  // Ricalocolo permessi di sottofascicolo e padre
+                  this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, false, true);
+                } else {
+                  // Ricalcolo intera gerarchia
+                  this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
+                }
+                break;
+              case 1:
+                // Ricalcolo intera gerarchia
+                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
+                break;
+            }
+            
             this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
           },
           error: () => {
