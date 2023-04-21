@@ -748,6 +748,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					Array.prototype.splice.apply(this.archivi, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(results)]);
 				}
 				this.archivi = [...this.archivi]; // trigger change detection
+				window.dispatchEvent(new Event('resize'));
 			},
 			err => {
 				this.messageService.add({

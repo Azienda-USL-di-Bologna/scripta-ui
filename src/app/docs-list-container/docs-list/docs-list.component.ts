@@ -775,6 +775,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
               this.docSelected = this.docs[index];
             }
           }
+          window.dispatchEvent(new Event('resize'));
         },
         error: (err) => {
           if(err.error.message == "Persona senza permesso su Archivio"){
