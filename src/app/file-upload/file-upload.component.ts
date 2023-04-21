@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CaptionFunctionalOperationsComponent } from '../generic-caption-table/caption-functional-operations.component';
 
 @Component({
@@ -13,6 +13,7 @@ export class FileUploadComponent implements OnInit {
   public nomiNuovi: string[] = [];
 
   @Input() functionalOperationsComponent: CaptionFunctionalOperationsComponent;
+  @Output() public uploadDocumentDialogVisible = new EventEmitter<Boolean>();
 
   constructor() { }
 
@@ -31,20 +32,11 @@ export class FileUploadComponent implements OnInit {
     });
   }
 
-  public onRename(event: any, file: File, index: Number) {
-    /* console.log(index);
-    console.log(event);
-    console.log(file); */
-    //const blob = file.slice(0, file.size, file.type); 
-    //const newFile: any = new File([blob], this.nomiNuovi[index], {type: file.type});
-    //console.log(newFile);
-    //this.uploadedFiles[index] = newFile;
-  }
-
   public manageFile(event: any) {
     console.log(event);
     this.functionalOperationsComponent.uploadDocument(event, this.nomiNuovi);
     this.nomiNuovi = [];
+    this.uploadDocumentDialogVisible.emit(false);
   }
 
 }

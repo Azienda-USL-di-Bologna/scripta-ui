@@ -11,7 +11,8 @@
   <ng-template pTemplate="file" let-file let-i="index">
     <div class="p-fileupload-row">
       <div class="p-fileupload-filename">
-        <input pInputText [(ngModel)]="nomiNuovi[i]" (input)="onRename($event, file, i)"/>
+        <input pInputText [(ngModel)]="nomiNuovi[i]"/> 
+        <div>{{file.type}}</div>
       </div>
     </div>
   </ng-template>

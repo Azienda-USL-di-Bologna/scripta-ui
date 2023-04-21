@@ -233,6 +233,6 @@
 
 <p-dialog header="Carica Allegati" [(visible)]="uploadDocumentDialogVisible" [style]="{width: '50vw'}">
   <file-upload 
-    [functionalOperationsComponent]="functionalOperationsComponent"> 
+    [functionalOperationsComponent]="functionalOperationsComponent" (uploadDocumentDialogVisible)="uploadDocumentDialogVisible=false;"> 
   </file-upload>
 </p-dialog>
