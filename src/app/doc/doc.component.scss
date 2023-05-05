@@ -61,7 +61,7 @@ main {
 }
 .accodion-box{
     padding:0.625rem;
-    
+    overflow: visible !important;
 }
 
 ::ng-deep .preview-inner {

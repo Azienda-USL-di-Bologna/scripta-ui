@@ -26,19 +26,20 @@ export class AllegatiComponent implements OnInit, OnDestroy {
   public selectedTipo: string;
   public uploadedFiles: File[] = [];
 
-  private _pregresso: boolean = true;
-  public get pregresso(): boolean {
-    return this._pregresso;
-  }
-  @Input() public set pregresso(value: boolean) {
-    this._pregresso = value;
-  }
+  public pregresso: boolean;
+  // public get pregresso(): boolean {
+  //   return this._pregresso;
+  // }
+  // @Input() public set pregresso(value: boolean) {
+  //   this._pregresso = value;
+  // }
   
 
   @ViewChild("fubauto") fileUploadInput: FileUpload;
   
   @Input() set doc(value: Doc) {
     this._doc = value;
+    this.pregresso = this._doc.pregresso;
     this.setInitialData();
   }
 
@@ -59,10 +60,10 @@ export class AllegatiComponent implements OnInit, OnDestroy {
       this.selectedAllegato = this.actualPrincipale;
     }
   }
-  
+
   /**
    * Funzione che gestisce l'upload degli allegati
-   * @param event 
+   * @param event
    */
   public onUpload(event: any): void {
     console.log("formDataformDataformData", event);
@@ -114,10 +115,10 @@ export class AllegatiComponent implements OnInit, OnDestroy {
     this.messageService.add({ severity: "info", summary: "File Uploaded", detail: "" });
   }
 
-  private buildFormData(event :any ): FormData {
+  private buildFormData(event: any ): FormData {
     this.uploadedFiles = event.files;
     const formData: FormData = new FormData();
-    formData.append("idDoc",this._doc.id.toString());
+    formData.append("idDoc", this._doc.id.toString());
     formData.append("numeroProposta", "6");
     this.uploadedFiles.forEach((file: File) => {
       formData.append("files", file);
@@ -182,9 +183,9 @@ export class AllegatiComponent implements OnInit, OnDestroy {
     this.allegatoService.deleteHttpCall(allegato.id).subscribe(
       res => {
         this.messageService.add({
-          severity:"success", 
-          summary:"Allegato", 
-          detail:"Allegato eliminato con successo"
+          severity: "success", 
+          summary: "Allegato", 
+          detail: "Allegato eliminato con successo"
         });
         // La delete può far scattare la rinumerazione degli allegati e quindi ricarico l'intera lista.
         this.loadAllegati();
@@ -269,9 +270,9 @@ export class AllegatiComponent implements OnInit, OnDestroy {
           (allegato: Allegato) => {
             this._doc.allegati[this._doc.allegati.findIndex(a => a.id === this.actualPrincipale.id)] = allegato;
             this.messageService.add({
-              severity:"success", 
-              summary:"Allegato", 
-              detail:"Allegato principale deselezionato"
+              severity: "success", 
+              summary: "Allegato", 
+              detail: "Allegato principale deselezionato"
             });
             this.actualPrincipale = null;
           }
