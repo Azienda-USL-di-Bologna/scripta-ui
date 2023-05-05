@@ -75,59 +75,61 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
           if (utenteUtilities) {
             this.utenteUtilitiesLogin = utenteUtilities;
             this.descrizioneUtenteRegistrante = utenteUtilities.getUtente().idPersona.descrizione;
+
+             /**
+             * Questa sottoscrizione serve a popolare this.doc
+             */
+            if (this.pregresso) {
+              console.log("pregressando");
+              console.log(this.detailDoc);
+              this.subscriptions.push(
+                this.loadDocument(this.detailDoc.id).subscribe((res: Doc) => {
+                  console.log("res", res);
+                  this.doc = res;
+                  console.log("doc è:", this.doc);
+                  this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
+                  this.tipoDocumento = this.doc.tipologia;
+              })
+              );
+            } else {
+              this.subscriptions.push(
+                this.route.queryParamMap.pipe(
+                  switchMap((params: ParamMap) =>
+                    this.handleCommand(params)
+                )).subscribe((res: Doc) => {
+                  this.setFreezeDocumento(false);
+                  console.log("res", res);
+                  this.doc = res;
+                  if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG).length > 0) {
+                    this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
+                  }
+                  this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
+                  this.appService.appNameSelection("PEIS - " + this.doc.idAzienda.descrizione);
+                  this.router.navigate(
+                    [],
+                    {
+                      relativeTo: this.route,
+                      queryParams: { command: "OPEN", id: this.doc.id }
+                    });
+                  },  error => {
+                  this.setFreezeDocumento(false);
+
+                  console.log("errore", error);
+
+                  this.messageService.add({
+                    severity: "error",
+                    summary: "Creazione proposta",
+                    detail: "Errore nell'avviare la proposta di protocollazione. Contattare Babelcare"
+                  });
+                })
+              );
+            }
           }
         }
       )
     );
 
-    /**
-     * Questa sottoscrizione serve a popolare this.doc
-     */
-    if (this.pregresso) {
-      console.log("pregressando");
-      console.log(this.detailDoc);
-      this.subscriptions.push(
-        this.loadDocument(this.detailDoc.id).subscribe((res: Doc) => {
-          console.log("res", res)
-          this.doc = res;
-          console.log("doc è:", this.doc);
-          this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
-          this.tipoDocumento = this.doc.tipologia;
-      })
-      )
-    } else {
-      this.subscriptions.push(
-        this.route.queryParamMap.pipe(
-          switchMap((params: ParamMap) =>
-            this.handleCommand(params)
-        )).subscribe((res: Doc) => {
-          this.setFreezeDocumento(false);
-          console.log("res", res);
-          this.doc = res;
-          if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG).length > 0) {
-            this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
-          }
-          this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
-          this.appService.appNameSelection("PEIS - " + this.doc.idAzienda.descrizione);
-          this.router.navigate(
-            [],
-            {
-              relativeTo: this.route,
-              queryParams: { command: "OPEN", id: this.doc.id }
-            });
-          },  error => {
-          this.setFreezeDocumento(false);
-
-          console.log("errore", error);
-
-          this.messageService.add({
-            severity: "error",
-            summary: "Creazione proposta",
-            detail: "Errore nell'avviare la proposta di protocollazione. Contattare Babelcare"
-          });
-        })
-      );
-    }
+   
 
 
   }
@@ -155,7 +157,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     switch (command) {
       case "NEW":
         const doc: Doc = new Doc();
-        doc.idPersonaCreazione = {id: this.utenteUtilitiesLogin.getUtente().idPersona.id} as Persona
+        doc.idPersonaCreazione = {id: this.utenteUtilitiesLogin.getUtente().idPersona.id} as Persona;
         if (params.get("idMessage") && params.get("azienda")) {
           const idMessage: string = params.get("idMessage");
           const codiceAzienda: string = params.get("azienda");
