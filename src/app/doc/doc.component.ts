@@ -72,8 +72,10 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
-          this.utenteUtilitiesLogin = utenteUtilities;
-          this.descrizioneUtenteRegistrante = utenteUtilities.getUtente().idPersona.descrizione;
+          if (utenteUtilities) {
+            this.utenteUtilitiesLogin = utenteUtilities;
+            this.descrizioneUtenteRegistrante = utenteUtilities.getUtente().idPersona.descrizione;
+          }
         }
       )
     );
