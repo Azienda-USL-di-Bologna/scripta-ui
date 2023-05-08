@@ -312,7 +312,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
       this.setFreezeDocumento(true);
       this.extendedDocService.protocollaDoc(this.doc).subscribe(res => {
         console.log("RES", res);
-        setTimeout(() => {
+       /*  setTimeout(() => { */
           this.loadDocument(this.doc.id).subscribe((res: Doc) => {
             this.setFreezeDocumento(false);
             console.log("res", res);
@@ -324,7 +324,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
               detail: "Documento protocollato con successo: numero protocollo generato " + this.numeroVisualizzazione
             });
           });
-          }, 10000);
+          /* }, 10000); */
       }, err => {
         this.setFreezeDocumento(false);
         console.log("ERRR", err);
