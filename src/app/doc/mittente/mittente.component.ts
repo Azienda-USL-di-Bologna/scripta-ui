@@ -1,6 +1,6 @@
 import {Component, Input, OnDestroy, OnInit, Output, EventEmitter, ViewChild} from "@angular/core";
 import {ExtendedMittenteService} from "./extended-mittente.service";
-import {BaseUrls, BaseUrlType, CodiceMezzo, Contatto, DettaglioContatto, DettaglioContattoService, Doc, ENTITIES_STRUCTURE, 
+import {BaseUrls, BaseUrlType, CodiceMezzo, Contatto, DettaglioContatto, DettaglioContattoService, Doc, ENTITIES_STRUCTURE,
   IndirizzoSpedizione, Mezzo, MezzoService, OrigineRelated, Persona, Related, Spedizione, TipoDettaglio, TipologiaDoc, TipoRelated} from "@bds/internauta-model";
 import {AdditionalDataDefinition, FILTER_TYPES, FilterDefinition, FiltersAndSorts, BatchOperationTypes, NextSdrEntity, BatchOperation} from "@bds/next-sdr";
 import {Subscription} from "rxjs";
@@ -8,7 +8,7 @@ import {JwtLoginService, UtenteUtilities} from "@bds/jwt-login";
 import { MessageService } from "primeng/api";
 import { enumOrigine } from "./mittente-constants";
 import { DatePipe } from "@angular/common";
-import { Table } from 'primeng/table/table';
+import { Table } from "primeng/table/table";
 
 @Component({
   selector: "mittente",
@@ -38,11 +38,11 @@ export class MittenteComponent implements OnInit, OnDestroy {
   public filteredMittente: DettaglioContatto[] = [];
   public filteredMezzo: any[] = [];
   public actualOrigine: string ;
-  
-  @Input() public pregresso: boolean = true;
+
+  public pregresso: boolean;
   @Input() public tipoDocumento: TipologiaDoc;
   @ViewChild("dt") dt?: Table;
-  
+
 
   get doc(): Doc {
     return this._doc;
@@ -50,6 +50,15 @@ export class MittenteComponent implements OnInit, OnDestroy {
 
   @Input() set doc(value: Doc) {
     this._doc = value;
+    this.pregresso = this._doc.pregresso;
+    if (!this.pregresso) {
+      this.actualMittente = this._doc.mittenti[0];
+      this.selectedMittenti = this._doc.mittenti;
+      this.indirizzo = this._doc.mittenti[0].ultimaSpedizione.indirizzo.completo;
+      this.actualMezzo = this._doc.mittenti[0].ultimaSpedizione.idMezzo;
+      this.actualOrigine = this._doc.mittenti[0].origine;
+      this.actualDataDiArrivo = new Date(this._doc.mittenti[0].ultimaSpedizione.data);
+    }
     if (this.doc.mittenti != null && this.doc.mittenti.length > 0) {
       this.mittenti = this.doc.mittenti;
     } else {
@@ -116,7 +125,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
 
   /**
    * Si occupa della ricerca del mittente
-   * @param event 
+   * @param event
    */
   searchMittente(event: any) {
     const query = event.query;
@@ -184,7 +193,7 @@ export class MittenteComponent implements OnInit, OnDestroy {
           this.actualMittente = related;
           this.selectedMittenti.push(related);
           this.actualMezzo = this.doc.mittenti[0].spedizioneList[0].idMezzo;
-          this.indirizzo=  this.doc.mittenti[0].spedizioneList[0].indirizzo.completo;
+          this.indirizzo = this.doc.mittenti[0].spedizioneList[0].indirizzo.completo;
           this.messageService.add({
             severity: "success",
             summary: "Mittente",
@@ -196,8 +205,8 @@ export class MittenteComponent implements OnInit, OnDestroy {
 
   /**
    * A partire dal dettaglio contatto mi vado a creare un oggetto related con anche la relativa spedizione.
-   * @param dettaglioContatto 
-   * @returns 
+   * @param dettaglioContatto
+   * @returns
    */
   private dettaglioContattoToRelated(dettaglioContatto: DettaglioContatto): Related {
     const mittenteRelated: Related = new Related();
@@ -298,16 +307,16 @@ export class MittenteComponent implements OnInit, OnDestroy {
           this.doc.mittenti.splice(0, 1);
         }
       )
-      this.actualMittente= null;
+      this.actualMittente = null;
       this.actualMezzo = null;
       this.indirizzo = "";
-      this.actualOrigine= null;
-      this.selectedMittenti= [];
+      this.actualOrigine = null;
+      this.selectedMittenti = [];
     }
 
   /**
    * Suggerisco all'utente il mezzo in base a cosa sta scrivendo
-   * @param event 
+   * @param event
    */
   public searchMezzo(event: any): void {
     const filteredMezzo: any[] = [];

@@ -89,7 +89,7 @@
 
     <!-- BOTTONE NUOVO ARCHIVIO [disabled] = "archivio.canCreateSottoarchivio()"-->
     <span *ngIf="configuration.newArchivio && functionalOperationsComponent.newArchivoButton && functionalOperationsComponent.newArchivoButton.enable">
-      <i *ngIf="canCreateArchivio"
+      <i
         (click)="functionalOperationsComponent.newArchivoButton.aziendeItems.length > 1 ? 
           aziendaSelection.toggle($event) : 
           functionalOperationsComponent.newArchivoButton.aziendeItems[0].command()" 
@@ -160,7 +160,7 @@
      <!-- BOTTONE TIP -->
     <span *ngIf="canUseTip">
       <i 
-        (click)="show()" 
+        (click)="showTip()" 
         class="pi pi-file-import button-icon" 
         pTooltip="TIP"
         aria-label="Tool di importazione pregressi"
@@ -226,10 +226,9 @@
           <span >{{column.header}}</span>
         </div>
       </ng-template>
-    </p-multiSelect><!-- [style]="{minWidth: '23.125rem', maxWidth: '23.125rem'}"  -->
+    </p-multiSelect>
   </div>
 </div>
-
 
 <p-dialog header="Carica Allegati" [(visible)]="uploadDocumentDialogVisible" [style]="{width: '50vw'}">
   <file-upload 

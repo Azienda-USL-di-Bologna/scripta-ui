@@ -2,7 +2,7 @@
 <div [ngClass]="{'pregresso': pregresso}">
   <p-toolbar *ngIf="!pregresso">
     <div class="classe-temporanea">
-      <button pButton type="button" label="Protocolla" icon="material-icons-outlined person_add"
+      <button  *ngIf="!numeroVisualizzazione" pButton type="button" label="Protocolla"icon="material-icons-outlined person_add"
         (click)="doButtonProtocolla()"><!-- [disabled]="doc?.dataRegistrazione || !document.oggetto" -->
       </button>
     </div>
@@ -16,6 +16,7 @@
       <span class="dati-creazione">
         <div *ngIf="!pregresso && !visualizzazioneDocumento">
           <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del {{yearOfProposta}}</span>
+          <span *ngIf="numeroVisualizzazione">Protocollo numero {{numeroVisualizzazione}} </span>
         </div>
         <span>
           Creato il giorno {{ removeZoneFromTime(doc?.dataCreazione?.toString()) | date: 'EE d MMM y, H:mm' | titlecase}}
@@ -62,11 +63,10 @@
     </div> -->
     <p-accordion class="accodion-box">
       <p-accordionTab header="Mittente" [selected]="true">
-        <mittente [doc]="doc" [tipoDocumento]="tipoDocumento" (saveMittenteEvent)="saveDoc($event,'mittenti')"
-          [pregresso]="pregresso">
+        <mittente [doc]="doc" [tipoDocumento]="tipoDocumento" (saveMittenteEvent)="saveDoc($event,'mittenti')">
         </mittente>
       </p-accordionTab>
-      <p-accordionTab *ngIf="pregresso" header="Destinatari">
+      <p-accordionTab header="Destinatari">
         <ng-template pTemplate="content">
           <destinatari [doc]="doc"> </destinatari>
         </ng-template>

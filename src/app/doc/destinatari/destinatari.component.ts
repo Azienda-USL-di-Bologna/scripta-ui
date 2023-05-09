@@ -2,7 +2,7 @@ import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Outpu
 import { BaseUrls, BaseUrlType, CategoriaContatto, Contatto, ContattoService, DettaglioContatto, Doc, ENTITIES_STRUCTURE, OrigineRelated, Persona, Related, TipoContatto, TipoRelated } from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { AdditionalDataDefinition, BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity } from "@bds/next-sdr";
-import { MessageService } from 'primeng/api';
+import { MessageService } from "primeng/api";
 import { AutoComplete } from "primeng/autocomplete";
 import { Subscription } from "rxjs";
 
@@ -22,20 +22,20 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
   private _doc: Doc;
   public selectedCompetente: Related;
   public selectedCoinvolto: Related;
-  
+
   public filteredCompetenti: DettaglioContatto[];
   public filteredCoinvolti: DettaglioContatto[];
 
-  private _pregresso: boolean = true; //TODO: ovviamente cambiare
-  public get pregresso(): boolean {
-    return this._pregresso;
-  }
-  @Input() public set pregresso(value: boolean) {
-    this._pregresso = value;
-  }
+  public pregresso: boolean;
+  // public get pregresso(): boolean {
+  //   return this._pregresso;
+  // }
+  // @Input() public set pregresso(value: boolean) {
+  //   this._pregresso = value;
+  // }
 
-  @ViewChild('autocompleteCompetenti') autocompleteCompetenti: AutoComplete;
-  @ViewChild('autocompleteCoinvolti') autocompleteCoinvolti: AutoComplete;
+  @ViewChild("autocompleteCompetenti") autocompleteCompetenti: AutoComplete;
+  @ViewChild("autocompleteCoinvolti") autocompleteCoinvolti: AutoComplete;
 
 
   get doc() {
@@ -43,6 +43,7 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   @Input() set doc(value: Doc) {
     this._doc = value;
+    this.pregresso = this._doc.pregresso;
     if (!!this.doc.competenti && this.doc.competenti.length > 0) {
       console.log("sto settando il competente")
       this.actualCompetente = this.doc.competenti[0];
@@ -78,7 +79,7 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    /* 
+    /*
       Questo codice da completare servirebbe nel caso si voglia cancellare il dato del competente quando l'utente clicca sulla x.
       Il dubbio che ho è che non vogliano la x del type="search"
       this.autocompleteCompetenti.el.nativeElement.onsearch = (event: any) => {
@@ -134,8 +135,8 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * Chiamato dal frontend per salvare il destinatario passato
-   * @param contatto 
-   * @param modalita 
+   * @param contatto
+   * @param modalita
    */
   public saveDestinatario(contatto: Contatto, modalita: string) {
     switch (modalita) {
@@ -148,11 +149,11 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
       break;
     }
   }
-  
+
   /**
    * Esegue la save sul db del related passato, nel caso del competente elimina il vecchio.
-   * @param relatedToCreate 
-   * @param modalita 
+   * @param relatedToCreate
+   * @param modalita
    */
   private insertRelated(relatedToCreate: Related, modalita: string): void {
     const batchOperations: BatchOperation[] = [];
@@ -166,7 +167,7 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
           version: this.actualCompetente.version
         } as NextSdrEntity,
       } as BatchOperation);
-    } 
+    }
     batchOperations.push({
       operation: BatchOperationTypes.INSERT,
       entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.related.path,
@@ -183,13 +184,16 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
               this.actualCompetente = related;
             break;
             case "coinvolto":
+              if (!this.doc.coinvolti) {
+                this.doc.coinvolti = [];
+              }
               this.doc.coinvolti.push(related);
               this.autocompleteCoinvolti.writeValue(null);
             break;
           }
           this.messageService.add({
-            severity:'success', 
-            summary:'Struttura destinataria', 
+            severity: "success",
+            summary: "Struttura destinataria",
             detail: `Destinatario ${modalita} inserito con successo`
           });
       })
@@ -198,9 +202,9 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * Questo metodo converte un Contatto della rubrica in un Related di scripta
-   * @param contatto 
-   * @param tipo 
-   * @returns 
+   * @param contatto
+   * @param tipo
+   * @returns
    */
   private contattoToRelated(contatto: Contatto, tipo: TipoRelated): Related {
     const destinatario: Related = new Related();
@@ -215,15 +219,15 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * Metodo chiamato dall'html per cancellare un destinatario.
-   * @param related 
+   * @param related
    */
   public onDeleteRelated(related: Related, rowIndex: number): void {
     this.destinatariService.deleteHttpCall(related.id).subscribe(
       res => {
         this.messageService.add({
-          severity:'success', 
-          summary:'Struttura destinatari', 
-          detail:'Struttura destinataria eliminata con successo'
+          severity: "success",
+          summary: "Struttura destinatari",
+          detail: "Struttura destinataria eliminata con successo"
         });
         this.doc.coinvolti.splice(rowIndex, 1);
       }
@@ -232,15 +236,15 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * Metodo chiamato dall'html per cancellare un destinatario competente.
-   * 
+   *
    */
    public onDeleteCompetente(): void{
     this.destinatariService.deleteHttpCall(this.actualCompetente.id).subscribe(
       res => {
         this.messageService.add({
-          severity:'success',
-          summary:'Competente',
-          detail:'Competente eliminato con successo'
+          severity: "success",
+          summary: "Competente",
+          detail: "Competente eliminato con successo"
         });
         this.doc.competenti.splice(0, 1)
       }
