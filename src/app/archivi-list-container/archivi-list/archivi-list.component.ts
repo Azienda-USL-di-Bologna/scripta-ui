@@ -188,6 +188,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					} else if (this.utenteUtilitiesLogin.getUtente()) {
 						this.isLoggeduser99 = (this.utenteUtilitiesLogin.getUtente().idInquadramento as unknown as String) === "99";
 					}
+					debugger;
 					const tempCanCreateArchivio: Map<String, boolean> = new Map();
 					const tempMap : Map<String, PermessoEntitaStoredProcedure[]> = new Map(Object.entries(this.utenteUtilitiesLogin.getUtente().permessiGediByCodiceAzienda));
 					this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach(a => {
@@ -214,7 +215,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					this.newArchivoButton = {
 						tooltip: "Crea nuovo fascicolo",
 						livello: 0,
-						enable: true,
+						enable: tempCanCreateArchivio.size > 0,
 						aziendeItems: this.utenteUtilitiesLogin.getUtente().aziendeAttive.map(a => {
 							return {
 								label: a.nome,
@@ -748,6 +749,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					Array.prototype.splice.apply(this.archivi, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(results)]);
 				}
 				this.archivi = [...this.archivi]; // trigger change detection
+				window.dispatchEvent(new Event('resize'));
 			},
 			err => {
 				this.messageService.add({
