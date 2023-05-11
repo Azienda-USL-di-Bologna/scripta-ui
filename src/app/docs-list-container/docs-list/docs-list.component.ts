@@ -273,6 +273,15 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         queryParams: {"mode": DocsListMode.ERRORI_VERSAMENTO}
       }); 
     }
+    if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.IP)) {
+      this.selectButtonItems.push({
+        title: "",
+        label: "Pregressi", 
+        // icon: "pi pi-fw pi-list", 
+        routerLink: ["./" + DOCS_LIST_ROUTE], 
+        queryParams: {"mode": DocsListMode.PREGRESSI}
+      }); 
+    }
   }
 
   /**
@@ -687,6 +696,12 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         break;
       case DocsListMode.ERRORI_VERSAMENTO:
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabErroriVersamento"));
+        this.initialSortField = "dataRegistrazione";
+        this.serviceForGetData = this.docDetailService;
+        this.projectionFotGetData = "CustomDocDetailForDocList";
+        break;
+      case DocsListMode.PREGRESSI:
+        filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabPregressi"));
         this.initialSortField = "dataRegistrazione";
         this.serviceForGetData = this.docDetailService;
         this.projectionFotGetData = "CustomDocDetailForDocList";
