@@ -115,7 +115,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	private idAziendeConGediInternautaAttivo: number[] = [];
 	private isLoggeduser99: boolean = false;
 	public messageIfNull: string = 'Non sono stati trovati fascicoli di recente utilizzo. Seleziona la voce Visibili';
-	private firstLoad: boolean = true;
+	private fromTabTutti: boolean = false;
 	
 	//public instanziaTabellaArchiviList = true;
 	public loggedUserCanDeleteArchivio : boolean = false; 
@@ -698,25 +698,32 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
 		
 		if (this.archiviListMode === ArchiviListMode.RECENTI ) {
+			this.fromTabTutti = false
 			lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => !["dataCreazione", "idAzienda.id", "livello"].includes(f.field));
 			lazyFiltersAndSorts.filters.forEach(f => f.field = "idArchivio." + f.field);
 			lazyFiltersAndSorts.sorts = lazyFiltersAndSorts.sorts.filter(s => s.field === "dataRecentezza");
 		}
 		if (this.archiviListMode === ArchiviListMode.TUTTI ) {
+			this.fromTabTutti = true;
 			lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
 			lazyFiltersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
 		}
 		if (this.archiviListMode === ArchiviListMode.VISIBILI ) {
-			/* lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello"); */
-			/* if (!lazyFiltersAndSorts.filters.some(f => f.field === "tscol" )) {
-				lazyFiltersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1))
-			} */
-			/* if (this.firstLoad) {
-				this.resetCalendarToInitialValues()
-				lazyFiltersAndSorts.addFilter(new FilterDefinition("dataCreazione", FILTER_TYPES.not_string.equals, ));
-				this.firstLoad = false;
-				
-			} */
+			if(this.storedLazyLoadEvent.filters?.numerazioneGerarchica.value != '' && this.fromTabTutti) { 
+				//Questo controllo serve a continuare a fare funzionare  la ricerca provenendo
+				// dal tab tutti dato che viene settato il filtro per il livello ad 1
+				this.fromTabTutti = false;
+				let text = this.storedLazyLoadEvent.filters?.numerazioneGerarchica.value
+				if (this.regexNumerazioneGerarchicaCompleta.test(text)) {
+					// La regex è una numerazione Gerarchica completa. Preparo il filtro e lo faccio partire
+					this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
+					lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
+				} else {
+					// La regex è un numerazioneGerarchica. Preparo il filtro e lo faccio partire
+					this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
+					lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
+				}
+			}
 		}
 		
 		
