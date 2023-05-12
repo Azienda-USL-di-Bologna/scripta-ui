@@ -677,7 +677,7 @@
         <div *ngSwitchCase="'dataPubblicazione'">
           {{rowData.dataPubblicazione | date:'dd/MM/yyyy'}}
         </div>
-        <div *ngSwitchCase="'oggetto'" (click)="!archivio && openDoc(rowData)" class="oggetto-content"
+        <div *ngSwitchCase="'oggetto'" (click)="!archivio && docUtilsService.openDoc(rowData,utente)" class="oggetto-content"
         [ngClass]="{'logically-deleted' : rowData.archiviation?.dataEliminazione != null}"
           [pTooltip]="rowData.oggettoVisualizzazione" tooltipPosition="top">
           <i *ngIf="rowData.visibilitaLimitata && !rowData.riservato" class="pi pi-eye"></i>

@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatiVersamento } from "@bds/internauta-model";
+import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatiVersamento, Utente } from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { buildLazyEventFiltersAndSorts } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from "@bds/next-sdr";
@@ -13,7 +13,7 @@ import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
 import { first } from 'rxjs/operators'
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
-import { Impostazioni, ImpostazioniDocList } from "../../utilities/utils";
+import { Impostazioni, ImpostazioniDocList, Utils } from "../../utilities/utils";
 import { cols, colsCSV, DocsListMode, StatiVersamentoTraduzioneVisualizzazione, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
@@ -27,6 +27,7 @@ import { DecimalePredicato } from "@bds/internauta-model";
 import { ColonnaBds, CsvExtractor } from "@bds/common-tools";
 import { NavigationTabsService } from "../../navigation-tabs/navigation-tabs.service";
 import { AppService } from "src/app/app.service";
+import { DocUtilsService } from "src/app/utilities/doc-utils.service";
 
 @Component({
   selector: "docs-list",
@@ -40,7 +41,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   private loadDocsListSubscription: Subscription;
   private loadDocsListCountSubscription: Subscription;
   private pageConf: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 0, offset: 0 } };
-  private utenteUtilitiesLogin: UtenteUtilities;
+  public utenteUtilitiesLogin: UtenteUtilities;
   private resetDocsArrayLenght: boolean = true;
   private storedLazyLoadEvent: LazyLoadEvent;
   private lastAziendaFilterValue: number[];
@@ -114,7 +115,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public hasPienaVisibilita: boolean = false;
   private _reloadDataFalg: boolean = false;
   public showAnteprima: boolean = false;
-
+  public utente: Utente;
 
   private _archivio: Archivio;
   get archivio(): Archivio { return this._archivio; }
@@ -136,7 +137,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     private messageService: MessageService,
     private docDetailService: ExtendedDocDetailService,
     private docDetailViewService: ExtendedDocDetailViewService,
-    private personaVedenteSerice: PersonaVedenteService,
+    private personaVedenteService: PersonaVedenteService,
     private personaService: PersonaService,
     private archivioDetailViewService: ArchivioDetailViewService,
     private strutturaService: StrutturaService,
@@ -147,6 +148,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     private archivioDocService: ArchivioDocService,
     private navigationTabsService: NavigationTabsService,
     private appService: AppService,
+    public docUtilsService: DocUtilsService,
   ) { }
 
   ngOnInit(): void {
@@ -160,10 +162,10 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.subscriptions.push(
       this.loginService.loggedUser$.pipe(first()).subscribe(
         (utenteUtilities: UtenteUtilities) => {
-          console.log("MIAO",utenteUtilities);
           if (utenteUtilities) {
             this.utenteUtilitiesLogin = utenteUtilities;
-            this.isSegretario = this.utenteUtilitiesLogin.getUtente().struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
+            this.utente = this.utenteUtilitiesLogin.getUtente();
+            this.isSegretario = this.utente.struttureDelSegretario && this.utenteUtilitiesLogin.getUtente().struttureDelSegretario.length > 0;
             this.calcDocListModeItem();
             this.selectedButtonItem = this.selectButtonItems.filter(element => element.queryParams.mode === this.docsListMode)[0];
             if (this.docsListMode) {
@@ -411,7 +413,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     colonneDaVisualizzare.forEach(c => {
       this._selectedColumns.push(this.cols.find(e => e.field === c));
     })
-    console.log("Colonne", this._selectedColumns);
 
     this.selectableColumns = cols.map(e => {
       if (colonneDaVisualizzare.includes(e.field)) {
@@ -441,42 +442,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     impostazioniVisualizzazioneObj["scripta.docList"].selectedColumn = this.selectedColumns.map(c => c.field);
     
     this.utenteUtilitiesLogin.setImpostazioniApplicazione(this.loginService, impostazioniVisualizzazioneObj);
-  }
-
-  /**
-   * L'utente ha cliccato per aprire un documento.
-   * Gestisco l'evento
-   * @param doc
-   */
-  public openDoc(doc: DocDetailView) {
-    if (doc.pregresso) {
-      this.openPregresso(doc as ExtendedDocDetailView);
-    } else {
-      const filtersAndSorts = new FiltersAndSorts();
-      filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
-      filtersAndSorts.addFilter(new FilterDefinition("idDocDetail.id", FILTER_TYPES.not_string.equals, doc.id));
-      this.personaVedenteSerice.getData("PersonaVedenteWithPlainFields", filtersAndSorts, null)
-        .subscribe(res => {
-          if (res && res.results) {
-            if (res.results.length > 0) {
-              const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
-                doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
-              const addRichiestaParam = true;
-              const addPassToken = true;
-              this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
-                console.log("urlAperto:", url);
-              });
-            } else {
-              this.messageService.add({
-                severity: "info",
-                summary: "Attenzione",
-                key: "docsListToast",
-                detail: `Apertura del documento non consentita`
-              });
-            }
-          }
-        });
-    }
   }
 
   /**
@@ -536,14 +501,14 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * @param event
    */
   public onLazyLoad(event: LazyLoadEvent): void {
-    console.log("event lazload", event);
+    
 
     if (event.first === 0 && event.rows === this.rowsNumber) {
       event.rows = event.rows * 2;
       this.resetDocsArrayLenght = true;
     }
 
-    console.log(`Chiedo ${this.pageConf.conf.limit} righe con offset di ${this.pageConf.conf.offset}`);
+    
     this.storedLazyLoadEvent = event;
 
     if (this.filtriPuliti) {
@@ -730,7 +695,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           this.rowCountInProgress = false;
         },
         error: (err) => {
-          console.log("Non sono riuscito a fare il count")
         }
       });
   }
@@ -762,7 +726,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       lazyFiltersAndSorts,
       this.pageConf).subscribe({
         next: (data: any) => {
-          console.log(data);
           this.totalRecords = data.page.totalElements;
           this.loading = false;
 
@@ -1412,7 +1375,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if(this.archivio)
       this.showAnteprima = true;
     if (this.showAnteprima == true) {
-      console.log("Evento eventissimo:", event);
       this.openDetailAndPreview(event.data);
     }
   }
@@ -1442,8 +1404,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           // });
         }
       )
-     
   }
+
 
 
 
@@ -1463,21 +1425,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (this.loadDocsListSubscription) {
       this.loadDocsListSubscription.unsubscribe();
     }
-  }
-
-  // public openDocPregresso(doc: ExtendedDocDetailView): void {
-  //   if (doc instanceof ExtendedDocDetailView){
-  //     console.log("ecco", doc); //TODO: rimuovere
-  //   }
-  //   this.showRightPanel.emit({
-  //     showPanel: true,
-  //     rowSelected: doc
-  //   });
-  // }
-
-  public openPregresso(doc: ExtendedDocDetailView) {
-    this.navigationTabsService.addTabDoc(doc);
-		this.appService.appNameSelection(`${doc.codiceRegistro === 'PG' ? "Protocollo generale" : doc.tipologiaVisualizzazione} pregresso ${doc.registrazioneVisualizzazione} [${doc.idAzienda.aoo}]`);
   }
 }
 

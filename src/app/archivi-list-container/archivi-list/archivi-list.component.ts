@@ -188,7 +188,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					} else if (this.utenteUtilitiesLogin.getUtente()) {
 						this.isLoggeduser99 = (this.utenteUtilitiesLogin.getUtente().idInquadramento as unknown as String) === "99";
 					}
-					debugger;
+					
 					const tempCanCreateArchivio: Map<String, boolean> = new Map();
 					const tempMap : Map<String, PermessoEntitaStoredProcedure[]> = new Map(Object.entries(this.utenteUtilitiesLogin.getUtente().permessiGediByCodiceAzienda));
 					this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach(a => {
@@ -523,7 +523,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		if (this.archiviListMode === ArchiviListMode.RECENTI) {
 
 			lazyFiltersAndSorts.filters.forEach((f, index) => {
-				//debugger;
 				if(f.field == "dataCreazione")
 					lazyFiltersAndSorts.filters.splice(index, 1);
 				if(f.field == "idAzienda.id")
@@ -1344,7 +1343,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					id: strutturaCreatore.id
 				} as Struttura;
 				idPersonaResponsabile.ruolo = RuoloAttoreArchivio.RESPONSABILE;
-				//debugger;
+				
 				//idPersonaResponsabile.idStruttura = this.utenteUtilitiesLogin.getUtente().utenteStrutturaList.find(us => us.idAfferenzaStruttura.codice === )
 				archivioBozza.attoriList.push(idPersonaResponsabile);
 			}   
