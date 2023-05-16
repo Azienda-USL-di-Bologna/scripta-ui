@@ -188,7 +188,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					} else if (this.utenteUtilitiesLogin.getUtente()) {
 						this.isLoggeduser99 = (this.utenteUtilitiesLogin.getUtente().idInquadramento as unknown as String) === "99";
 					}
-					debugger;
 					const tempCanCreateArchivio: Map<String, boolean> = new Map();
 					const tempMap : Map<String, PermessoEntitaStoredProcedure[]> = new Map(Object.entries(this.utenteUtilitiesLogin.getUtente().permessiGediByCodiceAzienda));
 					this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach(a => {

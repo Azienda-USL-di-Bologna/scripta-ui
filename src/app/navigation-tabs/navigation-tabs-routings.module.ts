@@ -1,6 +1,6 @@
 import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
-import { DOCS_LIST_ROUTE, ARCHIVI_LIST_ROUTE, ARCHIVIO_ROUTE, ARCHIVIO_DA_SCRIVANIA_ROUTE } from "src/environments/app-constants";
+import { DOCS_LIST_ROUTE, ARCHIVI_LIST_ROUTE, ARCHIVIO_ROUTE, ARCHIVIO_DA_SCRIVANIA_ROUTE, TIP_ROUTE } from "src/environments/app-constants";
 import { NavigationTabsComponent } from "./navigation-tabs.component";
 
 const routes: Routes = [
@@ -23,6 +23,10 @@ const routes: Routes = [
       {
         path: ARCHIVIO_DA_SCRIVANIA_ROUTE,
         loadChildren: () => import("../archivi-list-container/archivi-list-container.module").then(m => m.ArchiviListContainerModule)
+      },
+      {
+        path: TIP_ROUTE,
+        loadChildren: () => import("../tip-container/tip-container.module").then(m => m.TipContainerModule)
       }
     ]
   },

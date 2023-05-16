@@ -21,6 +21,7 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
   public tabItems: TabItem[] = [];
   private tabIndexToActiveAtTheBeginning = 0;
   private idArchivioAperturaDaScrivania: number;
+  private idTipSessioneImportazione: number;
   @ViewChild("tabview") private tabview: TabView;
 
   constructor(
@@ -41,6 +42,9 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
       //this.navigationTabsService.activeTabByIndex(0);
       this.tabIndexToActiveAtTheBeginning = 0;
       this.idArchivioAperturaDaScrivania = this.router.parseUrl(this.router.url).queryParams["id"];
+    } else if (this.router.routerState.snapshot.url.includes("tip")) {
+      this.tabIndexToActiveAtTheBeginning = 0;
+      this.idTipSessioneImportazione = this.router.parseUrl(this.router.url).queryParams["id"];
     } else {
       //this.navigationTabsService.activeTabByIndex(1);  
       this.tabIndexToActiveAtTheBeginning = 1;
@@ -138,6 +142,9 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
         this.archivioService.getByIdHttpCall(this.idArchivioAperturaDaScrivania, 'ArchivioWithIdAziendaAndIdMassimarioAndIdTitolo').subscribe( res => {
           this.navigationTabsService.addTabArchivio(res, true, false);
         });
+      }
+      if (this.idTipSessioneImportazione) {
+        this.navigationTabsService.addTabTip(true, this.idTipSessioneImportazione);
       }
     }, 0);
     /* for(let i=0; i < this.tabItems.length; i++) {
