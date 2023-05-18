@@ -15,9 +15,8 @@
   <p-button icon="pi pi-times" (onClick)="closePanel()"></p-button>
 </span>
 
-<p-button *ngIf = "docUtilsService.isDocApribile(doc)" 
-      label="Apri Dettaglio Documento" icon="pi pi-book" (onClick)="docUtilsService.openDoc(doc,utente)"></p-button>
-<br>
+<p-button class="margin-bot" *ngIf = "docUtilsService.isDocApribile(doc)" 
+      label="Apri documento" icon="pi pi-book" (onClick)="docUtilsService.openDoc(doc,utente)"></p-button>
 <!-- *ngIf="(!doc.visibilitaLimitata && !doc.riservato) " -->
 
 <p-accordion>
