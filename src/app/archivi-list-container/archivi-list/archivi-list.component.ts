@@ -53,6 +53,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	@ViewChild("dt") public dataTable: Table;
 	@ViewChild("columnFilterDataCreazione") public columnFilterDataCreazione: ColumnFilter;
 
+	//public sortOrder = -1;
 	public archiviListModeEnum = ArchiviListMode;
 	public archivi: ExtendedArchiviView[] = [];
 	public archiviListMode: ArchiviListMode;
@@ -172,14 +173,19 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					this.loginService.loggedUser$,
 					this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null)
 				], */
-				([[utenteUtilities, parametriAziende], usaGediInternauta]
+				([[utenteUtilities, parametriAziendeFascicoliParlanti], usaGediInternauta]
 				) => {
 					// Parte relativa al parametro aziendale
-					if (parametriAziende && parametriAziende[0]) {
-						this.fascicoliParlanti = JSON.parse(parametriAziende[0].valore || false);
-						if (this.fascicoliParlanti) {
-							this.aziendeConFascicoliParlanti = parametriAziende[0].idAziende;
+					if (parametriAziendeFascicoliParlanti && parametriAziendeFascicoliParlanti[0]) {
+						const parlanti = parametriAziendeFascicoliParlanti.find(p => JSON.parse(p.valore)); 
+						if (parlanti) {
+							this.aziendeConFascicoliParlanti = parlanti.idAziende;
+							this.fascicoliParlanti = true;
 						}
+						/* this.fascicoliParlanti = JSON.parse(parametriAziendeFascicoliParlanti[0].valore || false);
+						if (this.fascicoliParlanti) {
+							this.aziendeConFascicoliParlanti = parametriAziendeFascicoliParlanti[0].idAziende;
+						} */
 					}
 					// Parte relativa al utenteUtilities
 					this.utenteUtilitiesLogin = utenteUtilities;
@@ -417,9 +423,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			//   disabled: true
 			// },
 		);
-		if (!!!(this.fascicoliParlanti && 
+		// Il tab tutti lo deve vedere solo uno che appartiene ad alemno una azienda che non sia con fascicoliParlanti
+		/* if (!(this.fascicoliParlanti && 
 			this.utenteUtilitiesLogin.getUtente().aziendeAttive.length === 1 && 
-			this.aziendeConFascicoliParlanti.some(azienda => this.utenteUtilitiesLogin.getUtente().aziendeAttive[0].id === azienda))){
+			this.aziendeConFascicoliParlanti.some(azienda => this.utenteUtilitiesLogin.getUtente().aziendeAttive[0].id === azienda))) { */
+			if (!this.fascicoliParlanti || this.utenteUtilitiesLogin.getUtente().aziendeAttive.some(a => !this.aziendeConFascicoliParlanti.includes(a.id))) {
 				this.selectButtonItems.push(
 					{
 						title: "Tutti i fascicoli",
@@ -448,7 +456,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			altrimenti: (comportamento di default)
 				lascio creare la voce tutti con value tutte le aziende
 		*/
-		if (this.archiviListMode === this.archiviListModeEnum.TUTTI){
+		if (this.archiviListMode === this.archiviListModeEnum.TUTTI) {
 			this.aziendeFiltrabili = this.aziendeFiltrabili.filter(aziendaFiltrabile => !this.aziendeConFascicoliParlanti.includes(aziendaFiltrabile.value[0]));
 		} 
 		if (this.aziendeFiltrabili.length > 1) {
@@ -1043,7 +1051,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 */
 	public resetSort(): void {
 		this.dataTable.sortField = this.initialSortField;
-		this.dataTable.sortOrder = this.dataTable.defaultSortOrder;
+		this.dataTable.sortOrder = -1; // -1 corrisponde a desc per primeng
 		this.dataTable.sortSingle();
 	}
 

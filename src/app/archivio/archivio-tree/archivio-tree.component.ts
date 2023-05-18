@@ -5,7 +5,7 @@ import { Archivio, ArchivioDetail, ArchivioDetailViewService, ConfigurazioneServ
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
 import { AppService } from 'src/app/app.service';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from '@bds/next-sdr';
+import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES } from '@bds/next-sdr';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { ArchivioFieldUpdating, ArchivioUtilsService } from '../archivio-utils.service';
 
@@ -417,6 +417,7 @@ export class ArchivioTreeComponent implements OnInit {
 
   private buildFilterToLoadChildren(archivio: Archivio | ArchivioDetail):  FiltersAndSorts {
     const filtersAndSorts: FiltersAndSorts = new FiltersAndSorts();
+    filtersAndSorts.addSort(new SortDefinition("numero", SORT_MODES.desc));
     filtersAndSorts.addFilter(new FilterDefinition("idArchivioPadre.id", FILTER_TYPES.not_string.equals, archivio.id));
     filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals,archivio.fk_idAzienda.id));
     filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
@@ -447,19 +448,31 @@ export class ArchivioTreeComponent implements OnInit {
     newNode.data = archivio;
     newNode.collapsedIcon = "pi pi-folder";
     newNode.expandedIcon = "pi pi-folder-open";
-    newNode.label = "[" + archivio.numerazioneGerarchica + "] " + archivio.oggetto ;
-    if(this.utenteUtilitiesLogin.isSD()) {
+    newNode.label = "<b class='numerazione'>[" + archivio.numerazioneGerarchica + "]</b> " + archivio.oggetto ;
+    if (this.utenteUtilitiesLogin.isSD()) {
       newNode.label += " " + archivio.id.toString();
     }
-    if(children) {
+    /* if (children) {
       children.sort((a, b) => {
         return a.data?.numero - b.data?.numero
       });
-    }
+    } */
     newNode.children = children || [];
     newNode.expanded = true;
-    if(archivio.stato === StatoArchivio.BOZZA) {
+    newNode.styleClass = "";
+    if (archivio.stato === StatoArchivio.BOZZA) {
       newNode.styleClass = "nodo-bozza";
+    }
+    switch (archivio.livello) {
+      case 1:
+        newNode.styleClass = newNode.styleClass + " fascicolo";
+        break;
+      case 2:
+        newNode.styleClass = newNode.styleClass + " sottofascicolo";
+        break;
+      case 3:
+        newNode.styleClass = newNode.styleClass + " inserto";
+        break;
     }
     return newNode;
   }

@@ -268,7 +268,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   }
 
 
-  private loadParametroAziendaleFascicoliParlanti(){
+  private loadParametroAziendaleFascicoliParlanti() {
     this.subscriptions.push(this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null).subscribe((parametriAziende: ParametroAziende[]) => {
       //parte relativa al parametro aziendale
       if (parametriAziende && parametriAziende[0]) {

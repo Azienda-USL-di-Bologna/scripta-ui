@@ -9,12 +9,24 @@
       height: 2.563rem;
       .header-column {
         padding: 2px 0.813rem;
-        .header-box {
+        cursor: move;
+        &.numerazione-gerarchica-column .header-box {
           display: flex;
           justify-content: space-between;
           width: 100%;
         }
 
+      }
+      .sort-column:not(.sort-disable) {
+        cursor: pointer;
+        &.p-highlight {
+          background-color: #203244;
+          color: #f4f4f4;
+        }
+      }
+      .sort-disable {
+        background-color: #f4f4f4;
+        color: #000000;
       }
 
       .info-numerazione-gerarchica {
