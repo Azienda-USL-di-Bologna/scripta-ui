@@ -481,8 +481,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.rightContentProgressSpinner = true;
     this.extendedArchivioService.downloadArchivioZip(archivio).subscribe({
       next: (res) => {
-        let filename = this.getFilenameFromResponse(res, archivio);
-        this.extendedArchivioService.downloadFile(res, "application/zip", filename);
+        this.messageService.add({
+          severity: "success",
+          key: "ArchivioToast",
+          summary: "OK",
+          detail: "Il fascicolo è in preparazione. Riceverai una notifica in scrivania contenente il link per scaricarlo."
+        });
         this.rightContentProgressSpinner = false;
       },
       error: async (err) => {
