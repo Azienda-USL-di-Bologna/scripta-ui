@@ -906,9 +906,15 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    */
   public openArchive(archivio: ExtendedArchiviView): void {
     const arch: Archivio = archivio as any as Archivio;
-    this.navigationTabsService.addTabArchivio(archivio, true, false, true);
-    // this.archivioUtilsService.updatedArchiveSelection(arch);
-    this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
+    let idAziende : number[];
+    idAziende.push(archivio.idAzienda.id)
+    const usaGediInternauta$ = this.configurazioneService.getParametriAziende("usaGediInternauta", null, idAziende).pipe(first());
+    if (usaGediInternauta$ || (this.utenteUtilitiesLogin.getUtente().utenteReale.idInquadramento as unknown as String === "99")) {
+      this.navigationTabsService.addTabArchivio(archivio, true, false, true);
+      // this.archivioUtilsService.updatedArchiveSelection(arch);
+      this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
+    }
+
   }
 
   /**

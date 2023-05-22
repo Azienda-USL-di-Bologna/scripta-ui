@@ -7,6 +7,7 @@ export const DOC_ROUTE = "doc";
 export const DOCS_LIST_ROUTE = "docslist";
 export const ARCHIVIO_ROUTE = "archivio";
 export const ARCHIVI_LIST_ROUTE = "archivilist";
+export const TIP_ROUTE = "tip";
 export const ARCHIVIO_DA_SCRIVANIA_ROUTE = "apridascrivania";
 export const NAVIGATION_TABS_ROUTE = "nav";
 export const LOGGED_OUT_ROUTE = "logged-out";

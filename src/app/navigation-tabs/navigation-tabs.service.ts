@@ -196,13 +196,15 @@ export class NavigationTabsService {
     );
   }
 
-  public buildaTabTIP(): TabItem {
+  private buildaTabTIP(idTipSessioneImportazione?: number): TabItem {
     return new TabItem(
       TipComponent,
-      {},
+      {
+        idTipSessioneImportazione: idTipSessioneImportazione
+      },
       true,
       "Import Pregressi",
-      "pi pi-file-excel",
+      "pi pi-file-import",
       TabType.TIP,
       TabType.TIP, // Lo uso come id univoco di questo tab
       "Tool Importazione Pregressi"
@@ -325,9 +327,9 @@ export class NavigationTabsService {
     }
   }
 
-  public addTabTip(active: boolean = true): void {
+  public addTabTip(active: boolean = true, idTipSessioneImportazione?: number): void {
     this.addTab(
-      this.buildaTabTIP()
+      this.buildaTabTIP(idTipSessioneImportazione)
     );
     if (active) {
       this.activeLastTab();

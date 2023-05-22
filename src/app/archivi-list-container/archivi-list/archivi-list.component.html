@@ -5,7 +5,7 @@
   [columns]="selectedColumns" 
   [sortField]="initialSortField" 
   [sortOrder]="-1" 
-  [defaultSortOrder]="-1" 
+  [defaultSortOrder]="1" 
   [reorderableColumns]="true" 
   (onColReorder)="onColReorder($event)"
   [rows]="rowsNumber" 
@@ -27,14 +27,18 @@
     <tr class="header-row">
       <th *ngFor="let col of columns" 
         pReorderableColumn 
-        [ngClass]="col.headerClass"
+        [ngClass]="[archiviListMode === 'RECENTI' ? 'sort-disable' : ''].concat(col.headerClass)"
+        
         [pSortableColumn]="col.sortField"
-        [pSortableColumnDisabled]="archiviListMode === 'RECENTI' && col.field == 'dataCreazione'"
-        [ngStyle]="{'cursor': col.sortField ? null : 'move',
-         'background-color': col.field == 'dataCreazione' && archiviListMode == 'RECENTI' ? '#f4f4f4' : null,
-         'background-color': col.field == 'dataCreazione' && archiviListMode !== 'RECENTI' ? '#203244' : null,
-        'color' : col.field == 'dataCreazione' && archiviListMode == 'RECENTI' ? '#000000' : null,
-        'color' : col.field == 'dataCreazione' && archiviListMode !== 'RECENTI' ? '#f4f4f4' : null}">
+        [pSortableColumnDisabled]="archiviListMode === 'RECENTI'"
+        ><!-- [ngClass]="col.headerClass" -->
+        <!-- [ngStyle]="{
+          'cursor': col.sortField ? null : 'move',
+          'background-color': col.field == 'dataCreazione' && archiviListMode == 'RECENTI' ? '#f4f4f4' : null,
+          'background-color': col.field == 'dataCreazione' && archiviListMode !== 'RECENTI' ? '#203244' : null,
+          'color' : col.field == 'dataCreazione' && archiviListMode == 'RECENTI' ? '#000000' : null,
+          'color' : col.field == 'dataCreazione' && archiviListMode !== 'RECENTI' ? '#f4f4f4' : null
+        }" -->
         <span class="header-box" 
           [attr.aria-label]="col.label" [ngStyle]="{}">
           {{col.header}}
@@ -72,7 +76,11 @@
     <tr class="filter-row">
       <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
         <div *ngSwitchCase="'idAzienda'" #filteraziendacontainer>
-          <p-columnFilter #columnFilterAzienda [field]="col.filterField" matchMode="in" [showMenu]="false" *ngIf="archiviListMode !== 'RECENTI'">
+          <p-columnFilter #columnFilterAzienda 
+            [field]="col.filterField" 
+            matchMode="in" 
+            [showMenu]="false"
+            [ngStyle]="{'visibility': archiviListMode !== 'RECENTI' ? 'visible' : 'hidden'}"><!-- *ngIf="archiviListMode !== 'RECENTI'" -->
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-dropdown #dropdownAzienda *ngIf="isAccessibile() !== true" [options]="aziendeFiltrabili"
                 [ngModel]="value" (onChange)="filterAzienda(filter, $event.value, filteraziendacontainer)"
@@ -91,8 +99,7 @@
             type="date" 
             matchMode="is"
             [showMenu]="false"
-            [ngStyle]="{
-                        'visibility': archiviListMode !== 'RECENTI' ? 'visible' : 'hidden'}">
+            [ngStyle]="{'visibility': archiviListMode !== 'RECENTI' ? 'visible' : 'hidden'}">
             <!--            *ngIf="archiviListMode !== 'RECENTI'"-->
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-calendar #calendarcreazione 
@@ -347,12 +354,11 @@
             </span>
             <i class="pi" 
               [pTooltip]="rowData.isArchivioNero ? 'Nessun permesso sull\'archivio' : 
-              (rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO' ? 'Archivio chiuso' :
-               (rowData.tipo === 'SPECIALE' ? 'Archivio speciale' : ''))" 
-               [ngClass]="rowData.isArchivioNero ? 'pi-ban' : 
-               (rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO' ? 'pi-lock' :
+                (rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO' ? 'Archivio chiuso' :
+                (rowData.tipo === 'SPECIALE' ? 'Archivio speciale' : ''))" 
+              [ngClass]="rowData.isArchivioNero ? 'pi-ban' : 
+                (rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO' ? 'pi-lock' :
                 (rowData.tipo === 'SPECIALE' ? 'pi-star' : 'display-none'))" 
-
               tooltipPosition="top">
             </i>
           </div>

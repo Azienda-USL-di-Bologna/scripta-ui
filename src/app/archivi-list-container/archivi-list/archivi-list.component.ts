@@ -53,6 +53,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	@ViewChild("dt") public dataTable: Table;
 	@ViewChild("columnFilterDataCreazione") public columnFilterDataCreazione: ColumnFilter;
 
+	//public sortOrder = -1;
 	public archiviListModeEnum = ArchiviListMode;
 	public archivi: ExtendedArchiviView[] = [];
 	public archiviListMode: ArchiviListMode;
@@ -115,7 +116,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	private idAziendeConGediInternautaAttivo: number[] = [];
 	private isLoggeduser99: boolean = false;
 	public messageIfNull: string = 'Non sono stati trovati fascicoli di recente utilizzo. Seleziona la voce Visibili';
-	private firstLoad: boolean = true;
+	private fromTabTutti: boolean = false;
 	
 	//public instanziaTabellaArchiviList = true;
 	public loggedUserCanDeleteArchivio : boolean = false; 
@@ -172,14 +173,19 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					this.loginService.loggedUser$,
 					this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null)
 				], */
-				([[utenteUtilities, parametriAziende], usaGediInternauta]
+				([[utenteUtilities, parametriAziendeFascicoliParlanti], usaGediInternauta]
 				) => {
 					// Parte relativa al parametro aziendale
-					if (parametriAziende && parametriAziende[0]) {
-						this.fascicoliParlanti = JSON.parse(parametriAziende[0].valore || false);
-						if (this.fascicoliParlanti) {
-							this.aziendeConFascicoliParlanti = parametriAziende[0].idAziende;
+					if (parametriAziendeFascicoliParlanti && parametriAziendeFascicoliParlanti[0]) {
+						const parlanti = parametriAziendeFascicoliParlanti.find(p => JSON.parse(p.valore)); 
+						if (parlanti) {
+							this.aziendeConFascicoliParlanti = parlanti.idAziende;
+							this.fascicoliParlanti = true;
 						}
+						/* this.fascicoliParlanti = JSON.parse(parametriAziendeFascicoliParlanti[0].valore || false);
+						if (this.fascicoliParlanti) {
+							this.aziendeConFascicoliParlanti = parametriAziendeFascicoliParlanti[0].idAziende;
+						} */
 					}
 					// Parte relativa al utenteUtilities
 					this.utenteUtilitiesLogin = utenteUtilities;
@@ -188,7 +194,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					} else if (this.utenteUtilitiesLogin.getUtente()) {
 						this.isLoggeduser99 = (this.utenteUtilitiesLogin.getUtente().idInquadramento as unknown as String) === "99";
 					}
-					debugger;
+					
 					const tempCanCreateArchivio: Map<String, boolean> = new Map();
 					const tempMap : Map<String, PermessoEntitaStoredProcedure[]> = new Map(Object.entries(this.utenteUtilitiesLogin.getUtente().permessiGediByCodiceAzienda));
 					this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach(a => {
@@ -417,9 +423,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			//   disabled: true
 			// },
 		);
-		if (!!!(this.fascicoliParlanti && 
+		// Il tab tutti lo deve vedere solo uno che appartiene ad alemno una azienda che non sia con fascicoliParlanti
+		/* if (!(this.fascicoliParlanti && 
 			this.utenteUtilitiesLogin.getUtente().aziendeAttive.length === 1 && 
-			this.aziendeConFascicoliParlanti.some(azienda => this.utenteUtilitiesLogin.getUtente().aziendeAttive[0].id === azienda))){
+			this.aziendeConFascicoliParlanti.some(azienda => this.utenteUtilitiesLogin.getUtente().aziendeAttive[0].id === azienda))) { */
+			if (!this.fascicoliParlanti || this.utenteUtilitiesLogin.getUtente().aziendeAttive.some(a => !this.aziendeConFascicoliParlanti.includes(a.id))) {
 				this.selectButtonItems.push(
 					{
 						title: "Tutti i fascicoli",
@@ -448,7 +456,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			altrimenti: (comportamento di default)
 				lascio creare la voce tutti con value tutte le aziende
 		*/
-		if (this.archiviListMode === this.archiviListModeEnum.TUTTI){
+		if (this.archiviListMode === this.archiviListModeEnum.TUTTI) {
 			this.aziendeFiltrabili = this.aziendeFiltrabili.filter(aziendaFiltrabile => !this.aziendeConFascicoliParlanti.includes(aziendaFiltrabile.value[0]));
 		} 
 		if (this.aziendeFiltrabili.length > 1) {
@@ -523,7 +531,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		if (this.archiviListMode === ArchiviListMode.RECENTI) {
 
 			lazyFiltersAndSorts.filters.forEach((f, index) => {
-				//debugger;
 				if(f.field == "dataCreazione")
 					lazyFiltersAndSorts.filters.splice(index, 1);
 				if(f.field == "idAzienda.id")
@@ -699,25 +706,32 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
 		
 		if (this.archiviListMode === ArchiviListMode.RECENTI ) {
+			this.fromTabTutti = false
 			lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => !["dataCreazione", "idAzienda.id", "livello"].includes(f.field));
 			lazyFiltersAndSorts.filters.forEach(f => f.field = "idArchivio." + f.field);
 			lazyFiltersAndSorts.sorts = lazyFiltersAndSorts.sorts.filter(s => s.field === "dataRecentezza");
 		}
 		if (this.archiviListMode === ArchiviListMode.TUTTI ) {
+			this.fromTabTutti = true;
 			lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
 			lazyFiltersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
 		}
 		if (this.archiviListMode === ArchiviListMode.VISIBILI ) {
-			/* lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello"); */
-			/* if (!lazyFiltersAndSorts.filters.some(f => f.field === "tscol" )) {
-				lazyFiltersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1))
-			} */
-			/* if (this.firstLoad) {
-				this.resetCalendarToInitialValues()
-				lazyFiltersAndSorts.addFilter(new FilterDefinition("dataCreazione", FILTER_TYPES.not_string.equals, ));
-				this.firstLoad = false;
-				
-			} */
+			if(this.storedLazyLoadEvent.filters?.numerazioneGerarchica.value != '' && this.fromTabTutti) { 
+				//Questo controllo serve a continuare a fare funzionare  la ricerca provenendo
+				// dal tab tutti dato che viene settato il filtro per il livello ad 1
+				this.fromTabTutti = false;
+				let text = this.storedLazyLoadEvent.filters?.numerazioneGerarchica.value
+				if (this.regexNumerazioneGerarchicaCompleta.test(text)) {
+					// La regex è una numerazione Gerarchica completa. Preparo il filtro e lo faccio partire
+					this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
+					lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
+				} else {
+					// La regex è un numerazioneGerarchica. Preparo il filtro e lo faccio partire
+					this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
+					lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
+				}
+			}
 		}
 		
 		
@@ -1037,7 +1051,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 */
 	public resetSort(): void {
 		this.dataTable.sortField = this.initialSortField;
-		this.dataTable.sortOrder = this.dataTable.defaultSortOrder;
+		this.dataTable.sortOrder = -1; // -1 corrisponde a desc per primeng
 		this.dataTable.sortSingle();
 	}
 
@@ -1344,7 +1358,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					id: strutturaCreatore.id
 				} as Struttura;
 				idPersonaResponsabile.ruolo = RuoloAttoreArchivio.RESPONSABILE;
-				//debugger;
+				
 				//idPersonaResponsabile.idStruttura = this.utenteUtilitiesLogin.getUtente().utenteStrutturaList.find(us => us.idAfferenzaStruttura.codice === )
 				archivioBozza.attoriList.push(idPersonaResponsabile);
 			}   
