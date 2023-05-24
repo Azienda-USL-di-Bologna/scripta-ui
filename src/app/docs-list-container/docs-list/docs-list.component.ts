@@ -1,11 +1,11 @@
 import { DatePipe } from "@angular/common";
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatiVersamento, Utente } from "@bds/internauta-model";
+import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatiVersamento, Utente, StatoArchivio, ArchivioDetail, ArchivioDetailView, ConfigurazioneService } from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { buildLazyEventFiltersAndSorts } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from "@bds/next-sdr";
-import { ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
+import { ConfirmationService, LazyLoadEvent, MenuItem, MessageService } from "primeng/api";
 import { AutoComplete } from "primeng/autocomplete";
 import { Dropdown } from "primeng/dropdown";
 import { Calendar } from "primeng/calendar";
@@ -28,6 +28,8 @@ import { ColonnaBds, CsvExtractor } from "@bds/common-tools";
 import { NavigationTabsService } from "../../navigation-tabs/navigation-tabs.service";
 import { AppService } from "src/app/app.service";
 import { DocUtilsService } from "src/app/utilities/doc-utils.service";
+import { ExtendedArchivioService } from "src/app/archivio/extended-archivio.service";
+import { ExtendedArchiviView } from '../../archivi-list-container/archivi-list/extendend-archivi-view';
 
 @Component({
   selector: "docs-list",
@@ -47,6 +49,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   private lastAziendaFilterValue: number[];
   //private lastStatoFilterValue: string[];
   private lastDataCreazioneFilterValue: Date[];
+  public showOrganizzaPopUp: boolean = false;
+  public operazioneOrganizza: string = null;
+  public DecimalePredicatoVicario: DecimalePredicato = DecimalePredicato.VICARIO;
+  public funzioniItems: MenuItem[];
+  public permessoMinimoSuArchivioDestinazioneOrganizza: DecimalePredicato = DecimalePredicato.VICARIO;
+  public archivioDestinazioneOrganizza: ArchivioDetailView = null;
+  public idDocToOrganizza: number;
 
   @ViewChild("dt") public dataTable: Table;
   @ViewChild("dropdownAzienda") public dropdownAzienda: Dropdown;
@@ -149,6 +158,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     private navigationTabsService: NavigationTabsService,
     private appService: AppService,
     public docUtilsService: DocUtilsService,
+    private extendedArchivioService: ExtendedArchivioService,
+    private configurazioneService: ConfigurazioneService,
   ) { }
 
   ngOnInit(): void {
@@ -183,6 +194,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
               const bit = this.archivio.permessiEspliciti.find((permessoArchivio: PermessoArchivio) => permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit;
               this.loggedUserCanRestoreArchiviation = bit >= DecimalePredicato.VICARIO;
               this.loggedUserCanDeleteArchiviation = bit >= DecimalePredicato.ELIMINA;
+              
+              this.buildFunctionButton(this.archivio)
             }
           }
         }
@@ -1406,8 +1419,153 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       )
   }
 
+  /**
+   * Ritorna true se l'utente come permesso minimo quello passato come parametro
+   * @returns 
+   */
+  public hasPermessoMinimo(permessoMinimo: DecimalePredicato): boolean {
+    return this._archivio?.permessiEspliciti.some((permessoArchivio: PermessoArchivio) => 
+      permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id
+      &&
+      (permessoArchivio.bit >= permessoMinimo)
+    );
+  }
 
+  public isArchivioChiuso() : boolean {
+    if(this.archivio?.stato == StatoArchivio.CHIUSO || this.archivio?.stato == StatoArchivio.PRECHIUSO)
+      return true;
+    else
+      return false;
+  }
 
+  /**
+     * Creo il bottone funzioni
+     * @param archivio 
+     */
+  public buildFunctionButton(archivio: Archivio | ArchivioDetail): void {
+    const funzioniItems: MenuItem[] = [
+      {
+        label: "Organizza",
+        items: [
+          {  
+            label: "Sposta",
+            command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Sposta"}
+          },
+          {  
+            label: "Copia",
+            command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Copia"}
+          }
+        ],
+        disabled: this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO)
+      }
+  ] as MenuItem[];
+    this.funzioniItems = funzioniItems;
+  }
+
+  /**
+ * Dall'html è stato scelto un archivio su cui poi verrà archiviata la pec.
+ * @param arch 
+ */
+  public archivioSelectedEvent(arch: any) {
+    this.archivioDestinazioneOrganizza = arch as ArchivioDetailView;
+  }
+
+  public onCloseOrganizzaDialog(): void {
+    this.resetOrganizzaPopup();
+  }
+
+  /**
+ * Ripristina tutti i parametri relativi al PopUp
+ * così da inizializzarlo e non lascare dati "sporchi" alla prossima apertura
+ */
+  public resetOrganizzaPopup():void {
+    this.operazioneOrganizza = null;
+    this.archivioDestinazioneOrganizza = null;
+    this.showOrganizzaPopUp = false;
+    this.idDocToOrganizza = null;
+  }
+
+   /**
+   * In base a operazioneOrganizza lancia la chiamata al Back End passandogli tutti i parametri necessari 
+   * e mostra un toast verde con messaggio positivo o rosso con la causa dell'errore relativamente all'esito 
+   * della chiamata, in fine chiama la resetOrganizzaPopup e nasconde il PopUp
+   */
+   public organizza(): void{
+    this.rightContentProgressSpinner = true;
+    switch(this.operazioneOrganizza){
+      case "Sposta":
+        this.extendedArchivioService.spostaDoc(this.idDocToOrganizza, this.archivio.id, this.archivioDestinazioneOrganizza.id)
+        .subscribe({
+          next: (res: any) => {
+            console.log("res", res)
+            this.messageService.add({
+              severity: "success",
+              key: "ArchivioToast",
+              summary: "OK",
+              detail: "Doc spostato con successo"
+            });
+            this.openArchiveByOrganizza(res as ExtendedArchiviView);
+          },
+          error: (e: any) => {
+            this.messageService.add({
+              severity: "error",
+              key: "ArchivioToast",
+              summary: "Attenzione",
+              detail: `Error, ` + e.error.message 
+            });
+          }
+        }).add(() => {
+          //Called when operation is complete (both success and error)
+          this.resetOrganizzaPopup();
+          this.rightContentProgressSpinner = false;
+        });
+        break;
+      case "Copia":
+        this.extendedArchivioService.copiaDoc(this.idDocToOrganizza, this.archivioDestinazioneOrganizza.id)
+        .subscribe({
+          next: (res: any) => {
+            console.log("res", res)
+            this.messageService.add({
+              severity: "success",
+              key: "ArchivioToast",
+              summary: "OK",
+              detail: "Doc copiato con successo"
+            });
+            this.openArchiveByOrganizza(res as ExtendedArchiviView);
+          },
+          error: (e: any) => {
+            this.messageService.add({
+              severity: "error",
+              key: "ArchivioToast",
+              summary: "Attenzione",
+              detail: `Error, ` + e.error.message 
+            });
+          }
+        }).add(() => {
+          //Called when operation is complete (both success and error)
+          this.resetOrganizzaPopup();
+          this.rightContentProgressSpinner = false;
+        });
+        break;
+    }
+  }
+
+  /**
+   * Apre un nuovo tab o aggiorna il tab corrente con l'archivio passato come parametro in ingresso.
+   * @param archivio archivio da aprire
+   */
+  public openArchiveByOrganizza(archivio: ExtendedArchiviView): void {
+    const arch: Archivio = archivio as any as Archivio;
+    let idAziende : number[];
+    idAziende.push(archivio.idAzienda.id)
+    const usaGediInternauta$ = this.configurazioneService.getParametriAziende("usaGediInternauta", null, idAziende).pipe(first());
+    if (usaGediInternauta$ || (this.utenteUtilitiesLogin.getUtente().utenteReale.idInquadramento as unknown as String === "99")) {
+      this.navigationTabsService.addTabArchivio(archivio, true, false, true);
+      // this.archivioUtilsService.updatedArchiveSelection(arch);
+      this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
+    }
+
+  }
 
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
