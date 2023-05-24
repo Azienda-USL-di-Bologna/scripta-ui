@@ -144,4 +144,21 @@ export class ExtendedArchivioService extends ArchivioService {
     formData.append("idArchivio", idArchivio.toString());
     return this._http.post(apiUrl, formData);
   }
+
+  public spostaDoc(idDoc: number, idArchivioPartenza: number, idArchivioDestinazione: number){
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "spostaDoc";
+    const formData: FormData = new FormData();
+    formData.append("idDoc", idDoc.toString());
+    formData.append("idArchivioPartenza", idArchivioPartenza.toString());
+    formData.append("idArchivioDestinazione", idArchivioDestinazione.toString());
+    return this._http.post(apiUrl, formData);
+  }
+
+  public copiaDoc(idDoc: number, idArchivioDestinazione: number){
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "copiaDoc";
+    const formData: FormData = new FormData();
+    formData.append("idDoc", idDoc.toString());
+    formData.append("idArchivioDestinazione", idArchivioDestinazione.toString());
+    return this._http.post(apiUrl, formData);
+  }
 }

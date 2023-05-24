@@ -7,6 +7,7 @@ import { DocsListComponent } from "./docs-list.component";
 import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { DocUtilsService } from "src/app/utilities/doc-utils.service";
+import { CommonComponentsModule } from "@bds/common-components";
 
 @NgModule({
   imports: [
@@ -14,6 +15,7 @@ import { DocUtilsService } from "src/app/utilities/doc-utils.service";
     DocsListRoutingModule,
     PrimeNgModule,
     ScriptaCommonModule,
+    CommonComponentsModule
   ],
   declarations: [
     DocsListComponent
