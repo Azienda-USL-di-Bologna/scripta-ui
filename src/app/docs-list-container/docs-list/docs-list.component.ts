@@ -13,8 +13,8 @@ import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
 import { first } from 'rxjs/operators'
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
-import { Impostazioni, ImpostazioniDocList, Utils } from "../../utilities/utils";
-import { cols, colsCSV, DocsListMode, StatiVersamentoErroriPerFiltro, StatiVersamentoErroriTraduzioneVisualizzazione, StatiVersamentoParerPerFiltro, StatiVersamentoParerTraduzioneVisualizzazione, StatiVersamentoTraduzioneVisualizzazione, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
+import { Impostazioni, ImpostazioniDocList } from "../../utilities/utils";
+import { cols, colsCSV, DocsListMode, StatiVersamentoErroriPerFiltro, StatiVersamentoParerPerFiltro, StatiVersamentoTraduzioneVisualizzazione, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
@@ -1228,6 +1228,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       }
     });
   });
+  debugger
   filterCallback(array);
 }
 
