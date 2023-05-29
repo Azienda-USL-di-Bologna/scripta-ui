@@ -49,6 +49,12 @@
         [frozen]="true">
         
       </th>
+      <th *ngIf="archivio && !!!(this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicatoVicario))"
+        class="edit-archiviation-column"
+        alignFrozen="right" 
+        pFrozenColumn 
+        [frozen]="true">
+      </th>
       <th *ngIf="archivio"
         class="edit-archiviation-column"
         alignFrozen="right" 
@@ -632,6 +638,12 @@
         [frozen]="true">
         
       </th>
+      <th *ngIf="archivio && !!!(this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicatoVicario))"
+        class="edit-archiviation-column"
+        alignFrozen="right" 
+        pFrozenColumn 
+        [frozen]="true">
+      </th>
       <th  *ngIf="archivio"
         class="edit-archiviation-column"
         alignFrozen="right" 
@@ -767,6 +779,27 @@
         >
         </i>
       </td>
+      <!-- COLONNA FUNZIONI -->
+      <td *ngIf="archivio && !!!(this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicatoVicario))"
+        class="edit-archiviation-column"
+        alignFrozen="right"
+        pFrozenColumn 
+        [frozen]="true">
+        <i 
+          class="pi pi-cog funzioniGear"
+          (click)="$event.stopPropagation(); functionsSelection.toggle($event); idDocToOrganizza = rowData.id" 
+          pTooltip="Funzioni"
+          aria-label="Funzioni"
+          tooltipPosition="bottom">
+        </i>
+        <p-tieredMenu 
+          #functionsSelection 
+          appendTo="body"
+          [model]="funzioniItems"
+          [popup]="true">
+        </p-tieredMenu>
+      </td>
+      <!-- COLONNA ELIMINA -->
       <td *ngIf="archivio"
         class="edit-archiviation-column"
         alignFrozen="right"  
@@ -807,3 +840,25 @@
 <p-toast key="docsListToast"></p-toast>
 <p-confirmDialog [baseZIndex]="10000" acceptLabel="Sì"></p-confirmDialog>
 <p-confirmPopup key="confirm-popup"></p-confirmPopup>
+
+<p-dialog
+  appendTo="body"
+  header="{{this.operazioneOrganizza}}"
+  [(visible)]="this.showOrganizzaPopUp"
+  [modal]="true"
+  [responsive]="false"
+  [focusOnShow]="false"
+  (onHide)="onCloseOrganizzaDialog()"
+  contentStyleClass="organizzaPopup">
+  <p>Stai per {{operazioneOrganizza}}re il documento nel fascicolo selezionato qui sotto</p>
+  <p>Scegli il fascicolo di destinazione</p>
+    <app-archivio-ricerca 
+          #archivioRicerca 
+          [idAzienda]="this.archivio?.idAzienda.id"
+          [permessoMinimo]="this.permessoMinimoSuArchivioDestinazioneOrganizza"
+          [archivio]="this.archivioDestinazioneOrganizza"
+          placeholder="Cerca..."
+          (archivioSelectedEvent)="archivioSelectedEvent($event.arch)">
+    </app-archivio-ricerca>
+  <p-button [disabled]="archivioDestinazioneOrganizza == null" type="button" (click)="organizza()" label="Conferma"></p-button>
+</p-dialog>
