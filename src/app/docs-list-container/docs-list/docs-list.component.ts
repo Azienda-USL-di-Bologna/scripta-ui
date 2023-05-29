@@ -14,7 +14,7 @@ import { Subscription } from "rxjs";
 import { first } from 'rxjs/operators'
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
 import { Impostazioni, ImpostazioniDocList, Utils } from "../../utilities/utils";
-import { cols, colsCSV, DocsListMode, StatiVersamentoTraduzioneVisualizzazione, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
+import { cols, colsCSV, DocsListMode, StatiVersamentoErroriPerFiltro, StatiVersamentoErroriTraduzioneVisualizzazione, StatiVersamentoParerPerFiltro, StatiVersamentoParerTraduzioneVisualizzazione, StatiVersamentoTraduzioneVisualizzazione, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
@@ -77,7 +77,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public rowsNumber: number = 20;
   public tipologiaVisualizzazioneObj = TipologiaDocTraduzioneVisualizzazione;
   public statoVisualizzazioneObj = StatoDocDetailPerFiltro;
-  public statiVersamentoObj = StatiVersamentoTraduzioneVisualizzazione;
+  public statiVersamentoObj: any = null; //StatiVersamentoTraduzioneVisualizzazione;
   // public statoVisualizzazioneObj = StatoDocTraduzioneVisualizzazione;
   public statoUfficioAttiVisualizzazioneObj = StatoUfficioAttiTraduzioneVisualizzazione;
   public mieiDocumenti: boolean = true;
@@ -112,6 +112,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public loggedUserCanDeleteArchiviation: boolean = false;
   public docSelected: ExtendedDocDetailView;
   public isResponsabileVersamento: boolean = false;
+  public isResponsabileVersamentoParer: boolean = false;
   public hasPienaVisibilita: boolean = false;
   private _reloadDataFalg: boolean = false;
   public showAnteprima: boolean = false;
@@ -175,7 +176,11 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
             if (this.utenteUtilitiesLogin.isCA() === false && this.utenteUtilitiesLogin.isCI() === false) {
               this.tipologiaVisualizzazioneObj = this.tipologiaVisualizzazioneObj.filter(item => item.value !== TipologiaDoc.DOCUMENT_REGISTRO);
             }
+
             this.isResponsabileVersamento = this.utenteUtilitiesLogin.isRV();
+            this.isResponsabileVersamentoParer = true; //TODO: Qui andrà messo il valore in maniera opportuna.
+            this.setStatiVersamentoObj();
+
             if (!!!this.archivio) {
               this.loadConfigurationAndSetItUp();
             } else { 
@@ -213,6 +218,18 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       if (this.utenteUtilitiesLogin) this.calcolaAziendeFiltrabili();
       this.resetPaginationAndLoadData();
     }); */
+  }
+
+  private setStatiVersamentoObj() {
+    if (this.docsListMode === DocsListMode.ERRORI_VERSAMENTO) {
+      this.statiVersamentoObj = StatiVersamentoErroriPerFiltro;
+    } else {
+      if (this.isResponsabileVersamentoParer) {
+        this.statiVersamentoObj = StatiVersamentoParerPerFiltro;
+      } else {
+        this.statiVersamentoObj = StatiVersamentoTraduzioneVisualizzazione;
+      }
+    }
   }
 
   /**
@@ -301,6 +318,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
     }, 0); */
     if (this.utenteUtilitiesLogin) this.calcolaAziendeFiltrabili();
+    this.setStatiVersamentoObj();
     this.resetPaginationAndLoadData();
   }
 
@@ -1187,6 +1205,18 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     });
     filterCallback(array);
  }
+
+ public filterStatoUltimoVersamento(filterCallback: (value: any) => {}, value: any) {
+  let array: string[] = [];
+  value.forEach((labelStato: string) => { 
+    this.statiVersamentoObj.forEach((mappa: any) => {
+      if (mappa.nome === labelStato) {
+        array = array.concat(mappa.value);
+      }
+    });
+  });
+  filterCallback(array);
+}
 
 /**
   * Serve a calcolare se l'utente è accessibile 

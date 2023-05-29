@@ -589,7 +589,10 @@
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'statoUltimoVersamento'">
-          <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
+          <p-columnFilter 
+            [field]="col.filterField" 
+            matchMode="in" 
+            [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-multiSelect
                 *ngIf = "isAccessibile() !== true"
@@ -598,7 +601,7 @@
                 [options]="statiVersamentoObj" 
                 optionValue="value" 
                 optionLabel="nome" 
-                (onChange)="filter($event.value)" 
+                (onChange)="filterStatoUltimoVersamento($event.value)" 
                 appendTo="body"
                 >
                 <ng-template let-option pTemplate="item">

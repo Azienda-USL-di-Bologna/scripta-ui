@@ -478,6 +478,19 @@ export const StatiVersamentoTraduzioneVisualizzazione = [
   { value: StatiVersamento.ERRORE_RITENTABILE, nome: "Errore ritentabile"},
 ]
 
+export const StatiVersamentoParerPerFiltro = [
+  { value: [StatiVersamento.VERSARE, StatiVersamento.FORZARE], nome: "Da versare"},
+  { value: [StatiVersamento.VERSATO], nome: "Versato"},
+  { value: [StatiVersamento.ANNULLATO], nome: "Annullato"},
+  { value: [StatiVersamento.ERRORE, StatiVersamento.ERRORE_RITENTABILE], nome: "Errore"},
+  { value: [StatiVersamento.ERRORE, StatiVersamento.ERRORE_RITENTABILE], nome: "Errore forzabile"},
+]
+
+export const StatiVersamentoErroriPerFiltro = [
+  { value: [StatiVersamento.ERRORE, StatiVersamento.ERRORE_RITENTABILE], nome: "Errore"},
+  { value: [StatiVersamento.ERRORE, StatiVersamento.ERRORE_RITENTABILE], nome: "Errore forzabile"},
+]
+
 export enum DocsListMode {
   NUOVO = "NUOVO",
   MIEI_DOCUMENTI = "MIEI_DOCUMENTI",
