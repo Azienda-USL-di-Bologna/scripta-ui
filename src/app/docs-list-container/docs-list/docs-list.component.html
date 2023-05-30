@@ -273,17 +273,18 @@
             close
           </button>
         </div>
-        <div *ngSwitchCase="'stato'" #multiselectStati >
+        <div *ngSwitchCase="'stato'"  >
           <p-columnFilter 
             [field]="col.filterField" 
             matchMode="in" 
             [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <!-- nell'ngModel ho messo il nome perchè altrimenti non venivano settati i filtri una volta cliccati -->
-              <p-multiSelect 
+              <p-multiSelect #multiselectStati
                 *ngIf = "isAccessibile() !== true"
                 [ngModel]="nome"
                 [showHeader]="false" 
+                [dataKey]="nome"
                 [options]="statoVisualizzazioneObj" 
                 optionValue="nome"
                 optionLabel="nome" 
@@ -595,16 +596,19 @@
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'statoUltimoVersamento'">
-          <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
+          <p-columnFilter 
+            [field]="col.filterField" 
+            matchMode="in" 
+            [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-multiSelect
+              <p-multiSelect #multiselectStatoUltimoVersamento
                 *ngIf = "isAccessibile() !== true"
                 [showHeader]="false" 
-                [ngModel]="value" 
+                [ngModel]="nome" 
                 [options]="statiVersamentoObj" 
-                optionValue="value" 
+                optionValue="nome" 
                 optionLabel="nome" 
-                (onChange)="filter($event.value)" 
+                (onChange)="filterStatoUltimoVersamento(filter, $event)" 
                 appendTo="body"
                 >
                 <ng-template let-option pTemplate="item">
