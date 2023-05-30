@@ -358,6 +358,20 @@ export const cols: ColonnaBds[] = [
     useFilterMatchMode: true,
     default: false
   },
+  {
+    field: "versamentoForzabile",
+    header: "Versamento forzabile",
+    filterField: "versamentoForzabile",
+    // sortField: "sullaScrivaniaDi.descrizione",
+    style: {},
+    headerClass: ["header-column", "data-ultimo-versamento-column"],
+    filterClass: ["filter-column", "data-ultimo-versamento-column"],
+    bodyClass: ["data-ultimo-versamento-column"],
+    fieldType: "boolean",
+    filterMatchMode: FILTER_TYPES.not_string.equals,
+    useFilterMatchMode: true,
+    default: false
+  },
 
 ];
 // SPOSTATA IN PRIMENG PLUGIN
@@ -487,7 +501,7 @@ export const StatiVersamentoParerPerFiltro = [
 ]
 
 export const StatiVersamentoErroriPerFiltro = [
-  { value: [StatiVersamento.ERRORE, StatiVersamento.ERRORE_RITENTABILE], nome: "Errore"},
+  { value: [StatiVersamento.ERRORE, StatiVersamento.ERRORE_RITENTABILE], nome: "Errore non forzabile"},
   { value: [StatiVersamento.ERRORE, StatiVersamento.ERRORE_RITENTABILE], nome: "Errore forzabile"},
 ]
 

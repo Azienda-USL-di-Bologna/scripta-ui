@@ -60,6 +60,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   @ViewChild("dt") public dataTable: Table;
   @ViewChild("dropdownAzienda") public dropdownAzienda: Dropdown;
   @ViewChild("multiselectStati") public multiselectStati: MultiSelect;
+  @ViewChild("multiselectStatoUltimoVersamento") public multiselectStatoUltimoVersamento: MultiSelect;
   @ViewChild("columnFilterAzienda") public columnFilterAzienda: ColumnFilter;
   @ViewChild("autocompleteIdPersonaRedattrice") public autocompleteIdPersonaRedattrice: AutoComplete;
   @ViewChild("autocompleteidPersonaResponsabileProcedimento") public autocompleteidPersonaResponsabileProcedimento: AutoComplete;
@@ -189,6 +190,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
             }
 
             this.isResponsabileVersamento = this.utenteUtilitiesLogin.isRV();
+            
             this.isResponsabileVersamentoParer = true; //TODO: Qui andrà messo il valore in maniera opportuna.
             this.setStatiVersamentoObj();
 
@@ -233,7 +235,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     }); */
   }
 
-  private setStatiVersamentoObj() {
+  private setStatiVersamentoObj(resetFilter = false) {
     if (this.docsListMode === DocsListMode.ERRORI_VERSAMENTO) {
       this.statiVersamentoObj = StatiVersamentoErroriPerFiltro;
     } else {
@@ -243,6 +245,14 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         this.statiVersamentoObj = StatiVersamentoTraduzioneVisualizzazione;
       }
     }
+    // Tolgo il filtro
+    if (resetFilter) {
+      if (this.multiselectStatoUltimoVersamento) this.multiselectStatoUltimoVersamento.writeValue([]);
+      if (this.dataTable.filters["statoUltimoVersamento"]) (this.dataTable.filters as any)["statoUltimoVersamento"]["value"] = null;
+      if (this.dataTable.filters["versamentoForzabile"]) (this.dataTable.filters as any)["versamentoForzabile"]["value"] = null;
+    }
+    
+    
   }
 
   /**
@@ -320,6 +330,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Questa funzione gestisce il click del cambio tab
    */
   public onSelectButtonItemSelection(event: any): void {
+    const oldDocsListMode = this.docsListMode;
     this.docsListMode = event.option.queryParams.mode;
 
     // TODO: Se viene velocizzato il tab ifirmato allora si può cancellare questo if e togliere il setimeout
@@ -331,7 +342,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
     }, 0); */
     if (this.utenteUtilitiesLogin) this.calcolaAziendeFiltrabili();
-    this.setStatiVersamentoObj();
+    this.setStatiVersamentoObj(oldDocsListMode === DocsListMode.ERRORI_VERSAMENTO || this.docsListMode === DocsListMode.ERRORI_VERSAMENTO);
     this.resetPaginationAndLoadData();
   }
 
@@ -398,19 +409,24 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   private loadConfigurationAndSetItUp(): void {
     this.cols[this.cols.findIndex(c => c.field === "idArchivi")].header = "Fascicolazioni";
     this.mandatoryColumns = ["dataCreazione"];
+    const colonneDaNonVisualizzare = ["versamentoForzabile"];
     if (this.aziendeFiltrabili.length > 1) {
       this.mandatoryColumns.push("idAzienda");
     }
 
     // this.selectableColumns = cols.filter(e => !this.mandatoryColumns.includes(e.field));
-    this.selectableColumns = cols.map(e => {
-      if (this.mandatoryColumns.includes(e.field)) {
-        e.selectionDisabled = true;
-      }
-      if (!this.isResponsabileVersamento && (e.field === "dataUltimoVersamento" )) {
-        e.selectionDisabled = true;
-      }
-      return e;
+    this.selectableColumns = cols
+      .filter(
+        c => !colonneDaNonVisualizzare.includes(c.field)
+      )
+      .map(e => {
+        if (this.mandatoryColumns.includes(e.field)) {
+          e.selectionDisabled = true;
+        }
+        if (!this.isResponsabileVersamento && (e.field === "dataUltimoVersamento" )) {
+          e.selectionDisabled = true;
+        }
+        return e;
     });
     const impostazioni = this.utenteUtilitiesLogin.getImpostazioniApplicazione();
     if (impostazioni && impostazioni.impostazioniVisualizzazione && impostazioni.impostazioniVisualizzazione !== "") {
@@ -444,12 +460,16 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     colonneDaVisualizzare.forEach(c => {
       this._selectedColumns.push(this.cols.find(e => e.field === c));
     })
-
-    this.selectableColumns = cols.map(e => {
-      if (colonneDaVisualizzare.includes(e.field)) {
-        e.selectionDisabled = true;
-      }
-      return e;
+    const colonneDaNonVisualizzare = ["versamentoForzabile"];
+    this.selectableColumns = cols
+      .filter(
+        c => !colonneDaNonVisualizzare.includes(c.field)
+      )
+      .map(e => {
+        if (colonneDaVisualizzare.includes(e.field)) {
+          e.selectionDisabled = true;
+        }
+        return e;
     });
   }
 
@@ -747,7 +767,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     }
     const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
     const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
-    if(this.storedLazyLoadEvent.sortField === "dataRegistrazione"){
+    if(this.storedLazyLoadEvent.sortField === "dataRegistrazione") {
       lazyFiltersAndSorts.addSort( new SortDefinition("dataCreazione", this.storedLazyLoadEvent.sortOrder === 1 ? SORT_MODES.asc : SORT_MODES.desc))
     }
     this.loadCount(this.serviceForGetData, this.projectionFotGetData, filtersAndSorts, lazyFiltersAndSorts);
@@ -967,6 +987,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (this.autocompleteIdStrutturaRegistrazione) this.autocompleteIdStrutturaRegistrazione.writeValue(null);
     if (this.autocompleteFirmatari) this.autocompleteFirmatari.writeValue(null);
     if (this.autocompleteSullaScrivaniaDi) this.autocompleteSullaScrivaniaDi.writeValue(null); 
+    if (this.multiselectStati) this.multiselectStati.writeValue([]); 
+    if (this.multiselectStatoUltimoVersamento) this.multiselectStatoUltimoVersamento.writeValue([]); 
     this.myDatatableReset();
   }
 
@@ -1217,58 +1239,86 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       });
     });
     filterCallback(array);
- }
+  }
 
- public filterStatoUltimoVersamento(filterCallback: (value: any) => {}, value: any) {
-  let array: string[] = [];
-  value.forEach((labelStato: string) => { 
-    this.statiVersamentoObj.forEach((mappa: any) => {
-      if (mappa.nome === labelStato) {
-        array = array.concat(mappa.value);
+  /**
+   * Questa funzione gestisce in maniera custom il filtro della colonna dell'ultimo stato versamento
+   * In particolare si occupa nel caso in cui sia stato scelto "Errore forzabile" di togliere gli eventuali altri filtri sulla colonna
+   * e di aggiungere il filtro per versamentoForzabile = true.
+   * Se invece viene scelta un'altra opzione allora viene invece rimosso il corrispettivo dell'errore forzabile.
+   * @param filterCallback 
+   * @param event 
+   */
+  public filterStatoUltimoVersamento(filterCallback: (value: any) => {}, event: any) {
+    const itemValue = event.itemValue;
+    const value = event.value;
+    // Setto il filtro versamentoForzabile al suo default
+    this.dataTable.filters["versamentoForzabile"] = {
+      matchMode: "equals",
+      value: null
+    }
+    if (itemValue === "Errore forzabile" || itemValue === "Errore non forzabile") {
+      if (value.length > 0) {
+        this.multiselectStatoUltimoVersamento.writeValue([itemValue]);
+        this.dataTable.filters["versamentoForzabile"] = {
+          matchMode: "equals",
+          value: itemValue === "Errore forzabile"
+        }
+        filterCallback([StatiVersamento.ERRORE, StatiVersamento.ERRORE_RITENTABILE]);
+      } else {
+        filterCallback([]);
       }
-    });
-  });
-  debugger
-  filterCallback(array);
-}
+    } else {
+      this.multiselectStatoUltimoVersamento.writeValue(value.filter((v: string) => v !== "Errore forzabile"));
+      let array: string[] = [];
+      value.forEach((labelStato: string) => { 
+        this.statiVersamentoObj.forEach((mappa: any) => {
+          if (mappa.nome === labelStato && labelStato !== "Errore forzabile") {
+            array = array.concat(mappa.value);
+          }
+        });
+      });
+      filterCallback(array);
+    }
+  }
 
-/**
-  * Serve a calcolare se l'utente è accessibile 
-  * per capire cosa mostrargli nell'html
-  */
- public isAccessibile(): boolean {
-  return this.utenteUtilitiesLogin.getUtente().idPersona.accessibilita;
- }
+  /**
+    * Serve a calcolare se l'utente è accessibile 
+    * per capire cosa mostrargli nell'html
+    */
+  public isAccessibile(): boolean {
+    return this.utenteUtilitiesLogin.getUtente().idPersona.accessibilita;
+  }
 
  /**
   * Filtering per gli autocomplete della versione accessibile
   */
- public filterTipologia(event:any) {
-  let filtered: any[] = [];
-  let query = event.query;
-  for (let i = 0; i < this.tipologiaVisualizzazioneObj.length; i++) {
-    let tipologia = this.tipologiaVisualizzazioneObj[i];
-    if (tipologia.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
-      filtered.push(tipologia);
+  public filterTipologia(event:any) {
+    let filtered: any[] = [];
+    let query = event.query;
+    for (let i = 0; i < this.tipologiaVisualizzazioneObj.length; i++) {
+      let tipologia = this.tipologiaVisualizzazioneObj[i];
+      if (tipologia.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+        filtered.push(tipologia);
+      }
     }
+    this.filteredTipologia = filtered;
   }
-  this.filteredTipologia = filtered;
-}
 
-/**
+  /**
   * Filtering per gli autocomplete della versione accessibile
   */
- public filterStatiVersamento(event:any) {
-  let filtered: any[] = [];
-  let query = event.query;
-  for (let i = 0; i < this.statiVersamentoObj.length; i++) {
-    let statoVersamento = this.statiVersamentoObj[i];
-    if (statoVersamento.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
-      filtered.push(statoVersamento);
+  public filterStatiVersamento(event:any) {
+    let filtered: any[] = [];
+    let query = event.query;
+    for (let i = 0; i < this.statiVersamentoObj.length; i++) {
+      let statoVersamento = this.statiVersamentoObj[i];
+      if (statoVersamento.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+        filtered.push(statoVersamento);
+      }
     }
+    this.filteredStatiVersamento = filtered;
   }
-  this.filteredStatiVersamento = filtered;
-}
 
   public filterStatoAccessibile(event:any) {
     let filtered: any[] = [];
