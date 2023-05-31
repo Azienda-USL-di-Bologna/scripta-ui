@@ -141,6 +141,9 @@ $min-width-label: 9.688rem;
   height: 100%;
   transition: height 1s;
   background-color: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   &.showLogs {
     font-size: 0.938rem;
   }
@@ -160,7 +163,7 @@ $min-width-label: 9.688rem;
     }
   }
   .logger {
-    height: calc( 100% - 20px); // 20px è l'height di header-cronology
+    flex: 1 1 0;
     display: flex;
     overflow: auto;
   }
