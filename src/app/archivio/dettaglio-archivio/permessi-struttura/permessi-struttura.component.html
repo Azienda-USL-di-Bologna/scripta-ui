@@ -4,6 +4,7 @@
 	dataKey="idProvenienzaSoggetto" 
 	editMode="row"
 	[scrollable]="true"
+	[loading]="permessiDettaglioArchivioService.loading"
 	scrollHeight="flex">
 	<ng-template pTemplate="caption">
 		<div class="flex align-items-center justify-content-between">
@@ -16,7 +17,7 @@
 				(click)="inEditing = true; addPermesso()" 
 				class="mr-2" 
 				label="Aggiungi permesso"
-				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
+				[disabled]="inEditing || permessiDettaglioArchivioService.loading || !loggedUserIsResponsbaileOrVicario || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
 			</button>
 		</div>
 	</ng-template>

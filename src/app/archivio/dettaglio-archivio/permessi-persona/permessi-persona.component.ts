@@ -145,6 +145,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
    * @param index 
    */
   public onRowEditSave(perm: PermessoTabella, index: number, operation: string) {
+    this.permessiDettaglioArchivioService.loading = true;
     /* Lo faccio sempre ma in realt� serve solo per le insert. 
       Perch� dentro a this.dt.editingRowKeys la chiave di una nuova riga � "undefined" e non matcha con idProvenienzaSoggetto 
       se lo setto subito alla scelta della persona
@@ -252,7 +253,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     this.strutture = [];
     this.additionalDataComboUtenti = this.permessiDettaglioArchivioService.filtraEntitaEsistenti(this._archivio.permessi, "persone");
     const newPermessoTabella = new PermessoTabella();
-    this.perms.push(newPermessoTabella);
+    this.perms.unshift(newPermessoTabella);
     this.dt.initRowEdit(newPermessoTabella);
   }
 }

@@ -30,6 +30,7 @@ export class ResponsabiliComponent implements OnInit {
   public ruoloAttoreLoggedUser: RuoloAttoreArchivio;
   public responsabilePropostoGiaPresente: boolean = false;
   public loggedUserIsResponsabile: boolean = false;
+  
   @ViewChild("tableResponsabiliArchivi", {}) private dt: Table;
   
 
@@ -51,7 +52,7 @@ export class ResponsabiliComponent implements OnInit {
     private attoreArchivioService: AttoreArchivioService,
     private loginService: JwtLoginService,
     private messageService: MessageService,
-    private permessiDettaglioArchivioService: PermessiDettaglioArchivioService,
+    public permessiDettaglioArchivioService: PermessiDettaglioArchivioService,
     private applicazioneService: ApplicazioneService,
     private router: Router,
     private attivitaService: AttivitaService) {
@@ -101,7 +102,7 @@ export class ResponsabiliComponent implements OnInit {
     this.struttureAttoreInEditing = [];
     const newAttore = new AttoreArchivio();
     newAttore.ruolo = ruolo;
-    this.responsabiliArchivi.push(newAttore);
+    this.responsabiliArchivi.unshift(newAttore);
     this.dt.initRowEdit(newAttore);
   }
 
@@ -127,6 +128,8 @@ export class ResponsabiliComponent implements OnInit {
    * Funzione chiamata dall'html quando dopo creato/editato/cancellato un attore viene salvato
    */
   public onRowEditSave(attore: AttoreArchivio, index: number, operation: string) {
+    this.permessiDettaglioArchivioService.loading = true;
+
     const attoreToOperate = new AttoreArchivio();
     attoreToOperate.id = attore.id;
     console.log(attoreToOperate.id)
@@ -155,6 +158,7 @@ export class ResponsabiliComponent implements OnInit {
                 this.archivio.attoriList.push(attoreRes);
                 this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
                 this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+                this.permessiDettaglioArchivioService.loading = false;
               },
               error: () => {
                 this.messageService.add({
@@ -236,7 +240,6 @@ export class ResponsabiliComponent implements OnInit {
                 this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
               }
             )
-            
           )
         }
         break;

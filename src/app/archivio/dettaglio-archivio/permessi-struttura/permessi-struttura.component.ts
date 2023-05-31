@@ -92,7 +92,7 @@ export class PermessiStrutturaComponent implements OnInit {
      public addPermesso(): void {
       const newPermessoTabella = new PermessoTabella();
       this.additionalData = this.permessiDettaglioArchivioService.filtraEntitaEsistenti(this._archivio.permessi, "strutture");
-      this.perms.push(newPermessoTabella);
+      this.perms.unshift(newPermessoTabella);
       this.dt.initRowEdit(newPermessoTabella);
   }
   /**
@@ -142,6 +142,7 @@ export class PermessiStrutturaComponent implements OnInit {
    * @param index 
    */
   public onRowDelete(perm:PermessoTabella, index: number) {
+    this.permessiDettaglioArchivioService.loading = true;
     const oggettoToDelete: OggettonePermessiEntitaGenerator = this.permessiDettaglioArchivioService.buildPermessoPerBlackbox(perm,
       this._archivio.permessi,
       OggettoneOperation.REMOVE,
@@ -157,6 +158,7 @@ export class PermessiStrutturaComponent implements OnInit {
               detail: "E' stato eliminato il permesso."
             });
             this.perms.splice(index, 1);
+            this.permessiDettaglioArchivioService.loading = false;
           },
           error: () => {
             this.messageService.add({
@@ -175,6 +177,7 @@ export class PermessiStrutturaComponent implements OnInit {
    * @param index 
    */
   public onRowEditSave(perm: PermessoTabella, index: number, operation: string) {
+    this.permessiDettaglioArchivioService.loading = true;
     /* Lo faccio sempre ma in realt� serve solo per le insert. 
       Perch� dentro a this.dt.editingRowKeys la chiave di una nuova riga � "undefined" e non matcha con idProvenienzaSoggetto 
       se lo setto subito alla scelta della persona
