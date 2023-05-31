@@ -87,6 +87,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * Lo ricarico con la projection che voglio e inizializzo il componente
    */
   @Input() set data(data: any) {
+    this.rightContentProgressSpinner = true;
     this.extendedArchivioService.getByIdHttpCall(
       data.archivio.id,
       ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
@@ -111,6 +112,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
             this.loggedUserIsResponsbaileOrVicario = this.hasPermessoMinimo(DecimalePredicato.VICARIO);
             this.inizializeAll();
           }
+          this.rightContentProgressSpinner = false;
         }, 0);
       });
     this.checkPreferito(data.archivio.id);
@@ -385,7 +387,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     const aziendaItem: MenuItem = {
       label: this.archivio.idAzienda.nome,
       disabled: false,
-      command: () => this.archivilist.newArchivio(this.archivio.idAzienda.id)
+      command: () => {this.rightContentProgressSpinner = true; this.archivilist.newArchivio(this.archivio.idAzienda.id);}
     } as MenuItem;
     switch (archivio.livello) {
       case 1:

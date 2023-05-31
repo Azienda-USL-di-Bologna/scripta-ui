@@ -1285,7 +1285,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	/**
 	 * newArchivio
 	 */
-	public newArchivio(idAzienda: number): void {    
+	public newArchivio(idAzienda: number): void {
+		this.rightContentProgressSpinner = true;
 		const archivioBozza = new Archivio();
 		archivioBozza.livello = 1;
 		archivioBozza.stato = StatoArchivio.BOZZA;
@@ -1370,6 +1371,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				.subscribe((nuovoArchivioCreato: Archivio) => {      
 					this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
 					this.appService.appNameSelection(`Fascicolo ${nuovoArchivioCreato.numerazioneGerarchica} [${nuovoArchivioCreato.idAzienda.aoo}]`);
+					this.rightContentProgressSpinner = false;
 			}));
 			})
 
