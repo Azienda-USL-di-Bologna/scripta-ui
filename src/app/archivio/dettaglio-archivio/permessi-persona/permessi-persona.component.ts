@@ -72,7 +72,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
         for (const key in this.dt.editingRowKeys) {
           delete this.dt.editingRowKeys[key];
           if (key === "undefined") {
-            this.perms.pop();
+            this.perms.shift();
           }
         }
         this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
@@ -100,7 +100,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
       if (key !== perm.idProvenienzaSoggetto.toString()) {
         delete this.dt.editingRowKeys[key];
         if (key === "undefined") {
-          this.perms.pop();
+          this.perms.shift();
         }
       }
     }
@@ -224,7 +224,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
       this.perms[index] = this.permClone[perm.idProvenienzaSoggetto];
       delete this.permClone[perm.idProvenienzaSoggetto];
     } else { 
-      this.perms.pop();
+      this.perms.shift();
     }
   }
   

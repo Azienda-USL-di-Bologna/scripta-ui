@@ -118,7 +118,7 @@ export class ResponsabiliComponent implements OnInit {
       if (key !== attore.id.toString()) {
         delete this.dt.editingRowKeys[key];
         if (key === "undefined") {
-          this.responsabiliArchivi.pop();
+          this.responsabiliArchivi.shift();
         }
       }
     }
@@ -338,7 +338,7 @@ export class ResponsabiliComponent implements OnInit {
       this.responsabiliArchivi[index] = this.dictAttoriClonePerRipristino[attore.id];
       delete this.dictAttoriClonePerRipristino[attore.id];
     } else { 
-      this.responsabiliArchivi.pop();
+      this.responsabiliArchivi.shift();
     }
   }
 

@@ -73,7 +73,7 @@ export class PermessiStrutturaComponent implements OnInit {
         for (const key in this.dt.editingRowKeys) {
           delete this.dt.editingRowKeys[key];
           if (key === "undefined") {
-            this.perms.pop();
+            this.perms.shift();
           }
         }
         this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "strutture");
@@ -117,7 +117,7 @@ export class PermessiStrutturaComponent implements OnInit {
     this.perms[index] = this.permClone[perm.idProvenienzaSoggetto];
       delete this.permClone[perm.idProvenienzaSoggetto];
     } else { 
-      this.perms.pop();
+      this.perms.shift();
     }
   }
 /**
@@ -131,7 +131,7 @@ export class PermessiStrutturaComponent implements OnInit {
       if (key !== perm.idProvenienzaSoggetto.toString()) {
         delete this.dt.editingRowKeys[key];
         if (key === "undefined") {
-          this.perms.pop();
+          this.perms.shift();
         }
       }
     }
