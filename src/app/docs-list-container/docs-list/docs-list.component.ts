@@ -1,11 +1,11 @@
 import { DatePipe } from "@angular/common";
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatiVersamento, Utente } from "@bds/internauta-model";
+import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatiVersamento, Utente, StatoArchivio, ArchivioDetail, ArchivioDetailView, ConfigurazioneService } from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { buildLazyEventFiltersAndSorts } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from "@bds/next-sdr";
-import { ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
+import { ConfirmationService, LazyLoadEvent, MenuItem, MessageService } from "primeng/api";
 import { AutoComplete } from "primeng/autocomplete";
 import { Dropdown } from "primeng/dropdown";
 import { Calendar } from "primeng/calendar";
@@ -13,8 +13,8 @@ import { ColumnFilter, Table } from "primeng/table";
 import { Subscription } from "rxjs";
 import { first } from 'rxjs/operators'
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
-import { Impostazioni, ImpostazioniDocList, Utils } from "../../utilities/utils";
-import { cols, colsCSV, DocsListMode, StatiVersamentoTraduzioneVisualizzazione, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
+import { Impostazioni, ImpostazioniDocList } from "../../utilities/utils";
+import { cols, colsCSV, DocsListMode, StatiVersamentoErroriPerFiltro, StatiVersamentoParerPerFiltro, StatiVersamentoTraduzioneVisualizzazione, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
@@ -28,6 +28,8 @@ import { ColonnaBds, CsvExtractor } from "@bds/common-tools";
 import { NavigationTabsService } from "../../navigation-tabs/navigation-tabs.service";
 import { AppService } from "src/app/app.service";
 import { DocUtilsService } from "src/app/utilities/doc-utils.service";
+import { ExtendedArchivioService } from "src/app/archivio/extended-archivio.service";
+import { ExtendedArchiviView } from '../../archivi-list-container/archivi-list/extendend-archivi-view';
 
 @Component({
   selector: "docs-list",
@@ -47,10 +49,18 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   private lastAziendaFilterValue: number[];
   //private lastStatoFilterValue: string[];
   private lastDataCreazioneFilterValue: Date[];
+  public showOrganizzaPopUp: boolean = false;
+  public operazioneOrganizza: string = null;
+  public DecimalePredicatoVicario: DecimalePredicato = DecimalePredicato.VICARIO;
+  public funzioniItems: MenuItem[];
+  public permessoMinimoSuArchivioDestinazioneOrganizza: DecimalePredicato = DecimalePredicato.VICARIO;
+  public archivioDestinazioneOrganizza: ArchivioDetailView = null;
+  public idDocToOrganizza: number;
 
   @ViewChild("dt") public dataTable: Table;
   @ViewChild("dropdownAzienda") public dropdownAzienda: Dropdown;
   @ViewChild("multiselectStati") public multiselectStati: MultiSelect;
+  @ViewChild("multiselectStatoUltimoVersamento") public multiselectStatoUltimoVersamento: MultiSelect;
   @ViewChild("columnFilterAzienda") public columnFilterAzienda: ColumnFilter;
   @ViewChild("autocompleteIdPersonaRedattrice") public autocompleteIdPersonaRedattrice: AutoComplete;
   @ViewChild("autocompleteidPersonaResponsabileProcedimento") public autocompleteidPersonaResponsabileProcedimento: AutoComplete;
@@ -77,7 +87,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public rowsNumber: number = 20;
   public tipologiaVisualizzazioneObj = TipologiaDocTraduzioneVisualizzazione;
   public statoVisualizzazioneObj = StatoDocDetailPerFiltro;
-  public statiVersamentoObj = StatiVersamentoTraduzioneVisualizzazione;
+  public statiVersamentoObj: any = null; //StatiVersamentoTraduzioneVisualizzazione;
   // public statoVisualizzazioneObj = StatoDocTraduzioneVisualizzazione;
   public statoUfficioAttiVisualizzazioneObj = StatoUfficioAttiTraduzioneVisualizzazione;
   public mieiDocumenti: boolean = true;
@@ -112,6 +122,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public loggedUserCanDeleteArchiviation: boolean = false;
   public docSelected: ExtendedDocDetailView;
   public isResponsabileVersamento: boolean = false;
+  public isResponsabileVersamentoParer: boolean = false;
   public hasPienaVisibilita: boolean = false;
   private _reloadDataFalg: boolean = false;
   public showAnteprima: boolean = false;
@@ -149,6 +160,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     private navigationTabsService: NavigationTabsService,
     private appService: AppService,
     public docUtilsService: DocUtilsService,
+    private extendedArchivioService: ExtendedArchivioService,
+    private configurazioneService: ConfigurazioneService,
   ) { }
 
   ngOnInit(): void {
@@ -175,7 +188,12 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
             if (this.utenteUtilitiesLogin.isCA() === false && this.utenteUtilitiesLogin.isCI() === false) {
               this.tipologiaVisualizzazioneObj = this.tipologiaVisualizzazioneObj.filter(item => item.value !== TipologiaDoc.DOCUMENT_REGISTRO);
             }
+
             this.isResponsabileVersamento = this.utenteUtilitiesLogin.isRV();
+            
+            this.isResponsabileVersamentoParer = true; //TODO: Qui andrà messo il valore in maniera opportuna.
+            this.setStatiVersamentoObj();
+
             if (!!!this.archivio) {
               this.loadConfigurationAndSetItUp();
             } else { 
@@ -183,6 +201,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
               const bit = this.archivio.permessiEspliciti.find((permessoArchivio: PermessoArchivio) => permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id)?.bit;
               this.loggedUserCanRestoreArchiviation = bit >= DecimalePredicato.VICARIO;
               this.loggedUserCanDeleteArchiviation = bit >= DecimalePredicato.ELIMINA;
+              
+              this.buildFunctionButton(this.archivio)
             }
           }
         }
@@ -213,6 +233,26 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       if (this.utenteUtilitiesLogin) this.calcolaAziendeFiltrabili();
       this.resetPaginationAndLoadData();
     }); */
+  }
+
+  private setStatiVersamentoObj(resetFilter = false) {
+    if (this.docsListMode === DocsListMode.ERRORI_VERSAMENTO) {
+      this.statiVersamentoObj = StatiVersamentoErroriPerFiltro;
+    } else {
+      if (this.isResponsabileVersamentoParer) {
+        this.statiVersamentoObj = StatiVersamentoParerPerFiltro;
+      } else {
+        this.statiVersamentoObj = StatiVersamentoTraduzioneVisualizzazione;
+      }
+    }
+    // Tolgo il filtro
+    if (resetFilter) {
+      if (this.multiselectStatoUltimoVersamento) this.multiselectStatoUltimoVersamento.writeValue([]);
+      if (this.dataTable.filters["statoUltimoVersamento"]) (this.dataTable.filters as any)["statoUltimoVersamento"]["value"] = null;
+      if (this.dataTable.filters["versamentoForzabile"]) (this.dataTable.filters as any)["versamentoForzabile"]["value"] = null;
+    }
+    
+    
   }
 
   /**
@@ -290,6 +330,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * Questa funzione gestisce il click del cambio tab
    */
   public onSelectButtonItemSelection(event: any): void {
+    const oldDocsListMode = this.docsListMode;
     this.docsListMode = event.option.queryParams.mode;
 
     // TODO: Se viene velocizzato il tab ifirmato allora si può cancellare questo if e togliere il setimeout
@@ -301,6 +342,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
     }, 0); */
     if (this.utenteUtilitiesLogin) this.calcolaAziendeFiltrabili();
+    this.setStatiVersamentoObj(oldDocsListMode === DocsListMode.ERRORI_VERSAMENTO || this.docsListMode === DocsListMode.ERRORI_VERSAMENTO);
     this.resetPaginationAndLoadData();
   }
 
@@ -367,19 +409,24 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   private loadConfigurationAndSetItUp(): void {
     this.cols[this.cols.findIndex(c => c.field === "idArchivi")].header = "Fascicolazioni";
     this.mandatoryColumns = ["dataCreazione"];
+    const colonneDaNonVisualizzare = ["versamentoForzabile"];
     if (this.aziendeFiltrabili.length > 1) {
       this.mandatoryColumns.push("idAzienda");
     }
 
     // this.selectableColumns = cols.filter(e => !this.mandatoryColumns.includes(e.field));
-    this.selectableColumns = cols.map(e => {
-      if (this.mandatoryColumns.includes(e.field)) {
-        e.selectionDisabled = true;
-      }
-      if (!this.isResponsabileVersamento && (e.field === "dataUltimoVersamento" )) {
-        e.selectionDisabled = true;
-      }
-      return e;
+    this.selectableColumns = cols
+      .filter(
+        c => !colonneDaNonVisualizzare.includes(c.field)
+      )
+      .map(e => {
+        if (this.mandatoryColumns.includes(e.field)) {
+          e.selectionDisabled = true;
+        }
+        if (!this.isResponsabileVersamento && (e.field === "dataUltimoVersamento" )) {
+          e.selectionDisabled = true;
+        }
+        return e;
     });
     const impostazioni = this.utenteUtilitiesLogin.getImpostazioniApplicazione();
     if (impostazioni && impostazioni.impostazioniVisualizzazione && impostazioni.impostazioniVisualizzazione !== "") {
@@ -413,12 +460,16 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     colonneDaVisualizzare.forEach(c => {
       this._selectedColumns.push(this.cols.find(e => e.field === c));
     })
-
-    this.selectableColumns = cols.map(e => {
-      if (colonneDaVisualizzare.includes(e.field)) {
-        e.selectionDisabled = true;
-      }
-      return e;
+    const colonneDaNonVisualizzare = ["versamentoForzabile"];
+    this.selectableColumns = cols
+      .filter(
+        c => !colonneDaNonVisualizzare.includes(c.field)
+      )
+      .map(e => {
+        if (colonneDaVisualizzare.includes(e.field)) {
+          e.selectionDisabled = true;
+        }
+        return e;
     });
   }
 
@@ -716,7 +767,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     }
     const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
     const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
-    if(this.storedLazyLoadEvent.sortField === "dataRegistrazione"){
+    if(this.storedLazyLoadEvent.sortField === "dataRegistrazione") {
       lazyFiltersAndSorts.addSort( new SortDefinition("dataCreazione", this.storedLazyLoadEvent.sortOrder === 1 ? SORT_MODES.asc : SORT_MODES.desc))
     }
     this.loadCount(this.serviceForGetData, this.projectionFotGetData, filtersAndSorts, lazyFiltersAndSorts);
@@ -936,6 +987,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (this.autocompleteIdStrutturaRegistrazione) this.autocompleteIdStrutturaRegistrazione.writeValue(null);
     if (this.autocompleteFirmatari) this.autocompleteFirmatari.writeValue(null);
     if (this.autocompleteSullaScrivaniaDi) this.autocompleteSullaScrivaniaDi.writeValue(null); 
+    if (this.multiselectStati) this.multiselectStati.writeValue([]); 
+    if (this.multiselectStatoUltimoVersamento) this.multiselectStatoUltimoVersamento.writeValue([]); 
     this.myDatatableReset();
   }
 
@@ -1186,45 +1239,86 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       });
     });
     filterCallback(array);
- }
+  }
 
-/**
-  * Serve a calcolare se l'utente è accessibile 
-  * per capire cosa mostrargli nell'html
-  */
- public isAccessibile(): boolean {
-  return this.utenteUtilitiesLogin.getUtente().idPersona.accessibilita;
- }
+  /**
+   * Questa funzione gestisce in maniera custom il filtro della colonna dell'ultimo stato versamento
+   * In particolare si occupa nel caso in cui sia stato scelto "Errore forzabile" di togliere gli eventuali altri filtri sulla colonna
+   * e di aggiungere il filtro per versamentoForzabile = true.
+   * Se invece viene scelta un'altra opzione allora viene invece rimosso il corrispettivo dell'errore forzabile.
+   * @param filterCallback 
+   * @param event 
+   */
+  public filterStatoUltimoVersamento(filterCallback: (value: any) => {}, event: any) {
+    const itemValue = event.itemValue;
+    const value = event.value;
+    // Setto il filtro versamentoForzabile al suo default
+    this.dataTable.filters["versamentoForzabile"] = {
+      matchMode: "equals",
+      value: null
+    }
+    if (itemValue === "Errore forzabile" || itemValue === "Errore non forzabile") {
+      if (value.length > 0) {
+        this.multiselectStatoUltimoVersamento.writeValue([itemValue]);
+        this.dataTable.filters["versamentoForzabile"] = {
+          matchMode: "equals",
+          value: itemValue === "Errore forzabile"
+        }
+        filterCallback([StatiVersamento.ERRORE, StatiVersamento.ERRORE_RITENTABILE]);
+      } else {
+        filterCallback([]);
+      }
+    } else {
+      this.multiselectStatoUltimoVersamento.writeValue(value.filter((v: string) => v !== "Errore forzabile"));
+      let array: string[] = [];
+      value.forEach((labelStato: string) => { 
+        this.statiVersamentoObj.forEach((mappa: any) => {
+          if (mappa.nome === labelStato && labelStato !== "Errore forzabile") {
+            array = array.concat(mappa.value);
+          }
+        });
+      });
+      filterCallback(array);
+    }
+  }
+
+  /**
+    * Serve a calcolare se l'utente è accessibile 
+    * per capire cosa mostrargli nell'html
+    */
+  public isAccessibile(): boolean {
+    return this.utenteUtilitiesLogin.getUtente().idPersona.accessibilita;
+  }
 
  /**
   * Filtering per gli autocomplete della versione accessibile
   */
- public filterTipologia(event:any) {
-  let filtered: any[] = [];
-  let query = event.query;
-  for (let i = 0; i < this.tipologiaVisualizzazioneObj.length; i++) {
-    let tipologia = this.tipologiaVisualizzazioneObj[i];
-    if (tipologia.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
-      filtered.push(tipologia);
+  public filterTipologia(event:any) {
+    let filtered: any[] = [];
+    let query = event.query;
+    for (let i = 0; i < this.tipologiaVisualizzazioneObj.length; i++) {
+      let tipologia = this.tipologiaVisualizzazioneObj[i];
+      if (tipologia.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+        filtered.push(tipologia);
+      }
     }
+    this.filteredTipologia = filtered;
   }
-  this.filteredTipologia = filtered;
-}
 
-/**
+  /**
   * Filtering per gli autocomplete della versione accessibile
   */
- public filterStatiVersamento(event:any) {
-  let filtered: any[] = [];
-  let query = event.query;
-  for (let i = 0; i < this.statiVersamentoObj.length; i++) {
-    let statoVersamento = this.statiVersamentoObj[i];
-    if (statoVersamento.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
-      filtered.push(statoVersamento);
+  public filterStatiVersamento(event:any) {
+    let filtered: any[] = [];
+    let query = event.query;
+    for (let i = 0; i < this.statiVersamentoObj.length; i++) {
+      let statoVersamento = this.statiVersamentoObj[i];
+      if (statoVersamento.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+        filtered.push(statoVersamento);
+      }
     }
+    this.filteredStatiVersamento = filtered;
   }
-  this.filteredStatiVersamento = filtered;
-}
 
   public filterStatoAccessibile(event:any) {
     let filtered: any[] = [];
@@ -1406,8 +1500,153 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       )
   }
 
+  /**
+   * Ritorna true se l'utente come permesso minimo quello passato come parametro
+   * @returns 
+   */
+  public hasPermessoMinimo(permessoMinimo: DecimalePredicato): boolean {
+    return this._archivio?.permessiEspliciti.some((permessoArchivio: PermessoArchivio) => 
+      permessoArchivio.fk_idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id
+      &&
+      (permessoArchivio.bit >= permessoMinimo)
+    );
+  }
 
+  public isArchivioChiuso() : boolean {
+    if(this.archivio?.stato == StatoArchivio.CHIUSO || this.archivio?.stato == StatoArchivio.PRECHIUSO)
+      return true;
+    else
+      return false;
+  }
 
+  /**
+     * Creo il bottone funzioni
+     * @param archivio 
+     */
+  public buildFunctionButton(archivio: Archivio | ArchivioDetail): void {
+    const funzioniItems: MenuItem[] = [
+      {
+        label: "Organizza",
+        items: [
+          {  
+            label: "Sposta",
+            command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Sposta"}
+          },
+          {  
+            label: "Copia",
+            command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Copia"}
+          }
+        ],
+        disabled: this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO)
+      }
+  ] as MenuItem[];
+    this.funzioniItems = funzioniItems;
+  }
+
+  /**
+ * Dall'html è stato scelto un archivio su cui poi verrà archiviata la pec.
+ * @param arch 
+ */
+  public archivioSelectedEvent(arch: any) {
+    this.archivioDestinazioneOrganizza = arch as ArchivioDetailView;
+  }
+
+  public onCloseOrganizzaDialog(): void {
+    this.resetOrganizzaPopup();
+  }
+
+  /**
+ * Ripristina tutti i parametri relativi al PopUp
+ * così da inizializzarlo e non lascare dati "sporchi" alla prossima apertura
+ */
+  public resetOrganizzaPopup():void {
+    this.operazioneOrganizza = null;
+    this.archivioDestinazioneOrganizza = null;
+    this.showOrganizzaPopUp = false;
+    this.idDocToOrganizza = null;
+  }
+
+   /**
+   * In base a operazioneOrganizza lancia la chiamata al Back End passandogli tutti i parametri necessari 
+   * e mostra un toast verde con messaggio positivo o rosso con la causa dell'errore relativamente all'esito 
+   * della chiamata, in fine chiama la resetOrganizzaPopup e nasconde il PopUp
+   */
+   public organizza(): void{
+    this.rightContentProgressSpinner = true;
+    switch(this.operazioneOrganizza){
+      case "Sposta":
+        this.extendedArchivioService.spostaDoc(this.idDocToOrganizza, this.archivio.id, this.archivioDestinazioneOrganizza.id)
+        .subscribe({
+          next: (res: any) => {
+            console.log("res", res)
+            this.messageService.add({
+              severity: "success",
+              key: "ArchivioToast",
+              summary: "OK",
+              detail: "Doc spostato con successo"
+            });
+            this.openArchiveByOrganizza(res as ExtendedArchiviView);
+          },
+          error: (e: any) => {
+            this.messageService.add({
+              severity: "error",
+              key: "ArchivioToast",
+              summary: "Attenzione",
+              detail: `Error, ` + e.error.message 
+            });
+          }
+        }).add(() => {
+          //Called when operation is complete (both success and error)
+          this.resetOrganizzaPopup();
+          this.rightContentProgressSpinner = false;
+        });
+        break;
+      case "Copia":
+        this.extendedArchivioService.copiaDoc(this.idDocToOrganizza, this.archivioDestinazioneOrganizza.id)
+        .subscribe({
+          next: (res: any) => {
+            console.log("res", res)
+            this.messageService.add({
+              severity: "success",
+              key: "ArchivioToast",
+              summary: "OK",
+              detail: "Doc copiato con successo"
+            });
+            this.openArchiveByOrganizza(res as ExtendedArchiviView);
+          },
+          error: (e: any) => {
+            this.messageService.add({
+              severity: "error",
+              key: "ArchivioToast",
+              summary: "Attenzione",
+              detail: `Error, ` + e.error.message 
+            });
+          }
+        }).add(() => {
+          //Called when operation is complete (both success and error)
+          this.resetOrganizzaPopup();
+          this.rightContentProgressSpinner = false;
+        });
+        break;
+    }
+  }
+
+  /**
+   * Apre un nuovo tab o aggiorna il tab corrente con l'archivio passato come parametro in ingresso.
+   * @param archivio archivio da aprire
+   */
+  public openArchiveByOrganizza(archivio: ExtendedArchiviView): void {
+    const arch: Archivio = archivio as any as Archivio;
+    let idAziende : number[];
+    idAziende.push(archivio.idAzienda.id)
+    const usaGediInternauta$ = this.configurazioneService.getParametriAziende("usaGediInternauta", null, idAziende).pipe(first());
+    if (usaGediInternauta$ || (this.utenteUtilitiesLogin.getUtente().utenteReale.idInquadramento as unknown as String === "99")) {
+      this.navigationTabsService.addTabArchivio(archivio, true, false, true);
+      // this.archivioUtilsService.updatedArchiveSelection(arch);
+      this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
+    }
+
+  }
 
   /**
    * Oltre desottoscrivermi dalle singole sottoscrizioni, mi
