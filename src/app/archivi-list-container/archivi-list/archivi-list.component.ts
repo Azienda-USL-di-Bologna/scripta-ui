@@ -117,7 +117,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	private isLoggeduser99: boolean = false;
 	public messageIfNull: string = 'Non sono stati trovati fascicoli di recente utilizzo. Seleziona la voce Visibili';
 	private fromTabTutti: boolean = false;
-	
+	private filtriLivelloPreTabTutti: number[]; //serve a tenere traccia dei vecchio filtro sul livello passando dal tab tutti al tab dei visibili
 	//public instanziaTabellaArchiviList = true;
 	public loggedUserCanDeleteArchivio : boolean = false; 
 
@@ -717,10 +717,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			lazyFiltersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
 		}
 		if (this.archiviListMode === ArchiviListMode.VISIBILI ) {
-			if(this.storedLazyLoadEvent.filters?.numerazioneGerarchica.value != '' && this.fromTabTutti) { 
+			if((this.storedLazyLoadEvent.filters?.numerazioneGerarchica.value != '' && this.storedLazyLoadEvent.filters?.numerazioneGerarchica.value !== null)  && this.fromTabTutti) { 
 				//Questo controllo serve a continuare a fare funzionare  la ricerca provenendo
 				// dal tab tutti dato che viene settato il filtro per il livello ad 1
-				this.fromTabTutti = false;
 				let text = this.storedLazyLoadEvent.filters?.numerazioneGerarchica.value
 				if (this.regexNumerazioneGerarchicaCompleta.test(text)) {
 					// La regex è una numerazione Gerarchica completa. Preparo il filtro e lo faccio partire
@@ -732,6 +731,15 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
 				}
 			}
+			if(!this.fromTabTutti) 
+				this.filtriLivelloPreTabTutti = this.storedLazyLoadEvent.filters?.livello.value; //Salvataggio del filtro dei livelli in modo da non perderlo andando nel tab TUTTI
+			if(this.fromTabTutti && this.filtriLivelloPreTabTutti) { 
+				//Se provengo dal tab Tutti e avevo settato un filtro sul livello mentre ero nel tab Visibile reimposto il filtro 
+				lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters?.filter(f => f.field != "livello");
+				this.filtriLivelloPreTabTutti.forEach((filtro : Number) => lazyFiltersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, filtro)));
+				this.livelloValue = this.filtriLivelloPreTabTutti;
+			}
+			this.fromTabTutti = false;
 		}
 		
 		
