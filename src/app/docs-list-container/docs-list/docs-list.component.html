@@ -49,12 +49,6 @@
         [frozen]="true">
         
       </th>
-      <th *ngIf="archivio && !!!(this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicatoVicario))"
-        class="edit-archiviation-column"
-        alignFrozen="right" 
-        pFrozenColumn 
-        [frozen]="true">
-      </th>
       <th *ngIf="archivio"
         class="edit-archiviation-column"
         alignFrozen="right" 
@@ -637,13 +631,6 @@
         alignFrozen="right" 
         pFrozenColumn 
         [frozen]="true">
-        
-      </th>
-      <th *ngIf="archivio && !!!(this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicatoVicario))"
-        class="edit-archiviation-column"
-        alignFrozen="right" 
-        pFrozenColumn 
-        [frozen]="true">
       </th>
       <th  *ngIf="archivio"
         class="edit-archiviation-column"
@@ -657,6 +644,7 @@
   <!-- BODY -->
   <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex">
     <tr 
+      #riga
       class="row-height" 
       [pSelectableRow]="rowData">
       <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
@@ -786,9 +774,10 @@
         alignFrozen="right"
         pFrozenColumn 
         [frozen]="true">
-        <i 
+        <i *ngIf="!!!rowData.archiviation?.dataEliminazione"
           class="pi pi-cog funzioniGear"
-          (click)="$event.stopPropagation(); functionsSelection.toggle($event); idDocToOrganizza = rowData.id" 
+          #iconaFunzioniArchiviazione
+          (click)="onClickOnFunctionButton($event, rowData, iconaFunzioniArchiviazione)" 
           pTooltip="Funzioni"
           aria-label="Funzioni"
           tooltipPosition="bottom">
@@ -799,9 +788,15 @@
           [model]="funzioniItems"
           [popup]="true">
         </p-tieredMenu>
+        <i *ngIf="loggedUserCanRestoreArchiviation && rowData.archiviation?.dataEliminazione"
+          class="pi pi-undo" 
+          pTooltip="Ripristina fascicolazione"
+          (click)="$event.stopPropagation(); restoreArchiviation(rowData)"
+        >
+        </i>
       </td>
       <!-- COLONNA ELIMINA -->
-      <td *ngIf="archivio"
+      <!-- <td *ngIf="archivio"
         class="edit-archiviation-column"
         alignFrozen="right"  
         pFrozenColumn 
@@ -819,7 +814,7 @@
           (click)="$event.stopPropagation(); deleteArchiviation(rowData, index, iconaEliminazioneArchiviazione)"
         >
         </i>
-      </td>
+      </td> -->
     </tr>
   </ng-template>
   <ng-template pTemplate="loadingbody" let-columns="columns">

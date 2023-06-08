@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatiVersamento, Utente, StatoArchivio, ArchivioDetail, ArchivioDetailView, ConfigurazioneService } from "@bds/internauta-model";
+import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatiVersamento, Utente, StatoArchivio, ArchivioDetail, ArchivioDetailView, ConfigurazioneService, Doc } from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { buildLazyEventFiltersAndSorts } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from "@bds/next-sdr";
@@ -30,6 +30,7 @@ import { AppService } from "src/app/app.service";
 import { DocUtilsService } from "src/app/utilities/doc-utils.service";
 import { ExtendedArchivioService } from "src/app/archivio/extended-archivio.service";
 import { ExtendedArchiviView } from '../../archivi-list-container/archivi-list/extendend-archivi-view';
+import { TieredMenu } from "primeng/tieredmenu";
 
 @Component({
   selector: "docs-list",
@@ -55,7 +56,9 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public funzioniItems: MenuItem[];
   public permessoMinimoSuArchivioDestinazioneOrganizza: DecimalePredicato = DecimalePredicato.VICARIO;
   public archivioDestinazioneOrganizza: ArchivioDetailView = null;
-  public idDocToOrganizza: number;
+  public docSelezionatoToFunctions: ExtendedDocDetailView;
+  public iconaFunzioniArchiviazioneSelezionatoToFunctions: any;
+  public deleteArchiviationFlag: boolean;
 
   @ViewChild("dt") public dataTable: Table;
   @ViewChild("dropdownAzienda") public dropdownAzienda: Dropdown;
@@ -71,7 +74,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   //@ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
   @ViewChild("calendarcreazione") public calendarcreazione: Calendar;
   @ViewChild("columnFilterDataCreazione") public columnFilterDataCreazione: ColumnFilter;
-
+  @ViewChild("functionsSelection") public functionsSelection: TieredMenu;
+  @ViewChild("iconaFunzioniArchiviazione") public iconaFunzioniArchiviazione: any;
   @ViewChildren(ColumnFilter) filterColumns: QueryList<ColumnFilter>;
 
   public docsListMode: DocsListMode;
@@ -202,7 +206,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
               this.loggedUserCanRestoreArchiviation = bit >= DecimalePredicato.VICARIO;
               this.loggedUserCanDeleteArchiviation = bit >= DecimalePredicato.ELIMINA;
               
-              this.buildFunctionButton(this.archivio)
+              this.buildFunctionButton()
             }
           }
         }
@@ -1390,7 +1394,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * NB: Dentro archiviation c'è l'archivioDoc su cui sto lavorando
    * @param doc 
    */
-  public deleteArchiviation(doc: ExtendedDocDetailView, rowIndex: number, iconaEliminazioneArchiviazione: any): void {
+  public deleteArchiviation(doc: ExtendedDocDetailView, iconaFunzioniArchiviazione: any): void {
     if (["PROTOCOLLO_IN_USCITA", "PROTOCOLLO_IN_ENTRATA", "DETERMINA", "DELIBERA"].includes(doc.tipologia)
       && !doc.archiviDocList.some(archivioDoc => !archivioDoc.dataEliminazione && archivioDoc.id !== doc.archiviation.id)) {
       // Ho un PDD ma non ha altre archiviazioni non eliminate logicamente oltre quella che si sta provando a cancellare. Non posso far procedere
@@ -1404,7 +1408,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       // Procediamo con l'eliminazione logica. Prima chiediamo conferma:
       this.confirmationService.confirm({
         key: "confirm-popup",
-        target: iconaEliminazioneArchiviazione,
+        target: iconaFunzioniArchiviazione,
         message: `Stai per eliminare logicamente la fascicolazione di ${doc.registrazioneVisualizzazione ? doc.registrazioneVisualizzazione : doc.oggettoVisualizzazione}. Vuoi procedere?`,
         icon: 'pi pi-exclamation-triangle',
         accept: () => {
@@ -1523,7 +1527,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
      * Creo il bottone funzioni
      * @param archivio 
      */
-  public buildFunctionButton(archivio: Archivio | ArchivioDetail): void {
+  public buildFunctionButton(): void {
     const funzioniItems: MenuItem[] = [
       {
         label: "Organizza",
@@ -1538,9 +1542,28 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           }
         ],
         disabled: this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO)
+      },
+      {
+        label: "Elimina",
+        command: () => {this.preDeleteArchiviation();},
+        disabled: !!!this.loggedUserCanDeleteArchiviation,
+        tooltip: "Elimina fascicolazione"
       }
   ] as MenuItem[];
     this.funzioniItems = funzioniItems;
+  }
+  
+  public preDeleteArchiviation(){
+    setTimeout(() => {
+      this.deleteArchiviation(this.docSelezionatoToFunctions, this.iconaFunzioniArchiviazioneSelezionatoToFunctions)
+    }, 0);
+  }
+
+  public onClickOnFunctionButton(event: Event, rowData: ExtendedDocDetailView, iconaFunzioniArchiviazione: any){
+    event.stopPropagation();
+    this.functionsSelection.toggle(event);
+    this.docSelezionatoToFunctions = rowData;
+    this.iconaFunzioniArchiviazioneSelezionatoToFunctions = iconaFunzioniArchiviazione;
   }
 
   /**
@@ -1563,7 +1586,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.operazioneOrganizza = null;
     this.archivioDestinazioneOrganizza = null;
     this.showOrganizzaPopUp = false;
-    this.idDocToOrganizza = null;
+    this.docSelezionatoToFunctions = null;
   }
 
    /**
@@ -1575,7 +1598,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.rightContentProgressSpinner = true;
     switch(this.operazioneOrganizza){
       case "Sposta":
-        this.extendedArchivioService.spostaDoc(this.idDocToOrganizza, this.archivio.id, this.archivioDestinazioneOrganizza.id)
+        this.extendedArchivioService.spostaDoc(this.docSelezionatoToFunctions.id, this.archivio.id, this.archivioDestinazioneOrganizza.id)
         .subscribe({
           next: (res: any) => {
             console.log("res", res)
@@ -1602,7 +1625,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         });
         break;
       case "Copia":
-        this.extendedArchivioService.copiaDoc(this.idDocToOrganizza, this.archivioDestinazioneOrganizza.id)
+        this.extendedArchivioService.copiaDoc(this.docSelezionatoToFunctions.id, this.archivioDestinazioneOrganizza.id)
         .subscribe({
           next: (res: any) => {
             console.log("res", res)
