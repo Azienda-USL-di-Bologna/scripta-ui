@@ -911,12 +911,13 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * @param archivio archivio da aprire
    */
   public openArchive(archivio: ExtendedArchiviView): void {
+    debugger
     const arch: Archivio = archivio as any as Archivio;
-    let idAziende : number[];
+    let idAziende: number[] = [];
     idAziende.push(archivio.idAzienda.id)
     const usaGediInternauta$ = this.configurazioneService.getParametriAziende("usaGediInternauta", null, idAziende).pipe(first());
     if (usaGediInternauta$ || (this.utenteUtilitiesLogin.getUtente().utenteReale.idInquadramento as unknown as String === "99")) {
-      this.navigationTabsService.addTabArchivio(archivio, true, false, true);
+      this.navigationTabsService.addTabArchivio(archivio, true, false);
       // this.archivioUtilsService.updatedArchiveSelection(arch);
       this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
     }
@@ -1101,9 +1102,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     if (this.archivioDestinazioneOrganizza !== null && this.organizzaTarget.length > 0 && this.operazioneOrganizza !== null && this.operazioneOrganizza !== 'Trasforma in fascicolo'  && this.operazioneOrganizza !== 'Duplica'){
       return true;
     }
-    if (this.organizzaTarget.length > 0 && this.operazioneOrganizza === 'Duplica'){
-      console.log(this.organizzaTarget);
-      
+    if (this.organizzaTarget.length > 0 && this.operazioneOrganizza === 'Duplica'){      
       return true;
     }
     if (this.operazioneOrganizza === 'Trasforma in fascicolo'){
