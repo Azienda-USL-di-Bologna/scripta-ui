@@ -305,6 +305,9 @@
   .stato-ultimo-versamento-column {
     width: 12.5rem;
     max-width: 12.5rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
   }
   .logically-deleted {
     text-decoration: line-through;
