@@ -459,7 +459,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     },
     {
       label: this.archivio.stato === StatoArchivio.PRECHIUSO ? 'Riapri fascicolo' : 'Chiudi fascicolo',
-      disabled: ((this.archivio.stato == StatoArchivio.BOZZA || this.archivio.stato == StatoArchivio.CHIUSO) || this.archivio.livello != 1) && !this.loggedUserIsResponsbaileOrVicario,
+      disabled: this.archivio.stato === StatoArchivio.BOZZA || this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.livello !== 1 || !this.loggedUserIsResponsbaileOrVicario,
       command: () => {
         if(this.archivio.stato === StatoArchivio.PRECHIUSO)
           this.chiudiRiapriArchivio(event);
@@ -963,7 +963,11 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         });
         break;
       case "Copia":
-        this.extendedArchivioService.copiaArchivio(this.archivio.id, this.archivioDestinazioneOrganizza.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto"))
+        this.extendedArchivioService.copiaArchivio(
+          this.archivio.id, 
+          this.archivioDestinazioneOrganizza.id, 
+          this.organizzaTarget.includes("fascicolo") || this.organizzaTarget.includes("fascicoloAndContenuto"), 
+          this.organizzaTarget.includes("contenuto") || this.organizzaTarget.includes("fascicoloAndContenuto"))
         .subscribe({
           next: (res: any) => {
             console.log("res", res)
@@ -1052,7 +1056,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * @param target il target per il quale devo restituire la descrizione
    * @returns string
    */
-  public getDescrizioneAzioneTargetText(target: string): string{
+  /* public getDescrizioneAzioneTargetText(target: string): string{
     let res = "";
     switch(this.operazioneOrganizza){
       case "Sposta":
@@ -1077,7 +1081,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         break;
     }
     return res;
-  }
+  } */
 
   /**
    * Ripristina tutti i parametri relativi al PopUp
