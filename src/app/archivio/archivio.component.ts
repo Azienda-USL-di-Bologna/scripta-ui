@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, ArchivioDetailView, ArchivioDiInteresse, ArchivioDiInteresseService, DecimalePredicato, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio, ArchivioDetailViewService, ConfigurazioneService, RuoloAttoreArchivio, AttoreArchivio, ParametroAziende } from '@bds/internauta-model';
+import { Archivio, ArchivioDetail, ArchivioDetailView, ArchivioDiInteresse, ArchivioDiInteresseService, DecimalePredicato, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio, ArchivioDetailViewService, ConfigurazioneService, RuoloAttoreArchivio, AttoreArchivio, ParametroAziende, BlackboxPermessiService } from '@bds/internauta-model';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListComponent } from '../archivi-list-container/archivi-list/archivi-list.component';
 import { DocsListComponent } from '../docs-list-container/docs-list/docs-list.component';
@@ -88,13 +88,14 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    */
   @Input() set data(data: any) {
     this.rightContentProgressSpinner = true;
+
     this.extendedArchivioService.getByIdHttpCall(
       data.archivio.id,
       ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
       .subscribe((res: Archivio) => {
         this._archivio = res;
+        this.loggeduserCanAccess = !!!this._archivio.isArchivioNero;
         if (this.utenteUtilitiesLogin) {
-          this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
           this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
           if (this.utenteUtilitiesLogin.getUtente()) {
             if (this.utenteUtilitiesLogin.getUtente().utenteReale) 
@@ -107,7 +108,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           this.extendedArchivioService.aggiungiArchivioRecente(this._archivio.fk_idArchivioRadice.id);
 
           if (this.utenteUtilitiesLogin) {
-            this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
+            this.loggeduserCanAccess = !!!this._archivio.isArchivioNero;
             this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
             this.loggedUserIsResponsbaileOrVicario = this.hasPermessoMinimo(DecimalePredicato.VICARIO);
             this.inizializeAll();
@@ -159,13 +160,14 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     private appService: AppService,
 		private archivioUtilsService: ArchivioUtilsService,
     private configurazioneService: ConfigurazioneService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private blackboxPermessiService: BlackboxPermessiService
   ) {
     this.loginService.loggedUser$.pipe(first()).subscribe(
       (utenteUtilities: UtenteUtilities) => {
         this.utenteUtilitiesLogin = utenteUtilities;
         if (this.archivio) {
-          this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
+          this.loggeduserCanAccess = !!!this.archivio.isArchivioNero;
           this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
           this.loggedUserIsResponsbaileOrVicario = this.hasPermessoMinimo(DecimalePredicato.VICARIO);
           this.inizializeAll();
