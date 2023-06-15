@@ -864,13 +864,13 @@
 <p-dialog
   appendTo="body"
   header="Note versamento"
-  [(visible)]="this.showOrganizzaPopUp"
+  [(visible)]="this.showNoteVersamentoPopUp"
   [modal]="true"
-  [responsive]="false"
+  [responsive]="true"
   [focusOnShow]="false"
   contentStyleClass="organizzaPopup">
   <app-note-versamento
-    [idDoc]="rowData.id"
+    [idDoc]="this.docPerVedereLeNote"
   >
   </app-note-versamento>
 </p-dialog>
