@@ -67,8 +67,11 @@
       justify-content: flex-start;
       margin-left: 1rem;
       margin-bottom: 1rem;
-      .p-checkbox-label, .p-radiobutton-label{
-        font-size: 1.31rem;
+      label {
+        font-weight: normal;
+      }
+      .p-checkbox-label, .p-radiobutton-label {
+        font-size: 1.1rem;
         /* width: 135px; */
       }
       .organizza-target-button-descrizione {

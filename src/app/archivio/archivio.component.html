@@ -119,7 +119,7 @@
       <p-radioButton 
         name="organizzaTarget" 
         value="contenuto" 
-        label="Copia solo il contenuto" 
+        label="Copia solo i documenti contenuti" 
         [(ngModel)]="organizzaTarget">
       </p-radioButton>
       <!-- <p class="organizza-target-button-descrizione">Copia il contenuto del fascicolo/subfascicolo in uno di destinazione.</p> -->
@@ -128,7 +128,7 @@
       <p-radioButton 
         name="organizzaTarget" 
         value="fascicoloAndContenuto" 
-        label="Copia il fascicolo e il contenuto" 
+        label="Copia il fascicolo e i documenti contenuti" 
         [(ngModel)]="organizzaTarget">
       </p-radioButton>
       <!-- <p class="organizza-target-button-descrizione">Copia il contenuto del fascicolo/subfascicolo in uno di destinazione.</p> -->
@@ -143,24 +143,25 @@
       <p-radioButton 
         name="organizzaTarget" 
         value="fascicolo" 
-        label="Sposta fascicolo e contenuto" 
+        label="Sposta fascicolo e documenti contenuti" 
+        
         [(ngModel)]="organizzaTarget" 
         [disabled]="this.archivio?.livello === 1">
       </p-radioButton>
-      <span class="organizza-target-button-descrizione">
+      <!-- <span class="organizza-target-button-descrizione">pTooltip="Sposta il fascicolo e il suo contenuto."
         Sposta il fascicolo e il suo contenuto.
-      </span>
+      </span> -->
     </div>
     <div class="organizza-target-button-container">
       <p-radioButton 
         name="organizzaTarget" 
         value="contenuto" 
-        label="Sposta solo contenuto" 
+        label="Sposta solo documenti contenuti" 
         [(ngModel)]="organizzaTarget">
       </p-radioButton>
-      <span class="organizza-target-button-descrizione">
+      <!-- <span class="organizza-target-button-descrizione">
         Sposta solo il contenuto del fascicolo.
-      </span>
+      </span> -->
     </div>
   </div>
 
@@ -172,23 +173,23 @@
       <p-radioButton 
         name="organizzaTarget" 
         value="fascicolo" 
-        label="Duplica solo fascicolo" 
+        label="Duplica fascicolo senza documenti contenuti" 
         [(ngModel)]="organizzaTarget">
       </p-radioButton>
-      <span class="organizza-target-button-descrizione">
+      <!-- <span class="organizza-target-button-descrizione">
         Duplica il fascicolo senza i documenti
-      </span>
+      </span> -->
     </div>
     <div class="organizza-target-button-container">
       <p-radioButton 
         name="organizzaTarget" 
         value="contenuto" 
-        label="Duplica con contenuto" 
+        label="Duplica fascicolo con documenti contenuti" 
         [(ngModel)]="organizzaTarget">
       </p-radioButton>
-      <span class="organizza-target-button-descrizione">
+      <!-- <span class="organizza-target-button-descrizione">
         Duplica il fascicolo e anche i documenti contenuti
-      </span>
+      </span> -->
     </div>
   </div>
 
