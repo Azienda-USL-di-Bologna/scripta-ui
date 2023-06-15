@@ -751,6 +751,8 @@
             class="stato-ultimo-versamento-icon" 
             (onChange)="setVersamentoVisto($event, rowData)"
           ></p-checkbox>
+          <i class="pi pi-file-edit" pTooltip="note versamenti" (click)="openNoteVersamentoPopUp(rowData.id)">
+          </i>
         </div>
         <div *ngSwitchCase="'dataUltimoVersamento'">
           {{rowData.dataUltimoVersamento | date:'dd/MM/yyyy'}}
@@ -857,4 +859,18 @@
           (archivioSelectedEvent)="archivioSelectedEvent($event.arch)">
     </app-archivio-ricerca>
   <p-button [disabled]="archivioDestinazioneOrganizza == null" type="button" (click)="organizza()" label="Conferma"></p-button>
+</p-dialog>
+
+<p-dialog
+  appendTo="body"
+  header="Note versamento"
+  [(visible)]="this.showNoteVersamentoPopUp"
+  [modal]="true"
+  [responsive]="true"
+  [focusOnShow]="false"
+  contentStyleClass="organizzaPopup">
+  <app-note-versamento
+    [idDoc]="this.docPerVedereLeNote"
+  >
+  </app-note-versamento>
 </p-dialog>

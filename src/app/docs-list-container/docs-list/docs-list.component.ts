@@ -51,6 +51,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   //private lastStatoFilterValue: string[];
   private lastDataCreazioneFilterValue: Date[];
   public showOrganizzaPopUp: boolean = false;
+  public showNoteVersamentoPopUp: boolean = false;
   public operazioneOrganizza: string = null;
   public DecimalePredicatoVicario: DecimalePredicato = DecimalePredicato.VICARIO;
   public funzioniItems: MenuItem[];
@@ -131,6 +132,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   private _reloadDataFalg: boolean = false;
   public showAnteprima: boolean = false;
   public utente: Utente;
+  public docPerVedereLeNote: number;
 
   private _archivio: Archivio;
   get archivio(): Archivio { return this._archivio; }
@@ -1669,6 +1671,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
     }
 
+  }
+
+  public openNoteVersamentoPopUp(idDoc: number): void{
+    this.docPerVedereLeNote = idDoc;
+    console.log(this.docPerVedereLeNote);
+    this.showNoteVersamentoPopUp = true;
+    
   }
 
   /**
