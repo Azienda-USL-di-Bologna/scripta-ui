@@ -751,7 +751,9 @@
             class="stato-ultimo-versamento-icon" 
             (onChange)="setVersamentoVisto($event, rowData)"
           ></p-checkbox>
-          <i class="pi pi-file-edit" pTooltip="note versamenti" (click)="openNoteVersamentoPopUp(rowData.id)">
+          <i class="pi pi-file-edit" 
+            pTooltip="note versamenti" 
+            (click)="openNoteVersamentoPopUp(rowData.id)">
           </i>
         </div>
         <div *ngSwitchCase="'dataUltimoVersamento'">
@@ -862,6 +864,7 @@
 </p-dialog>
 
 <p-dialog
+  *ngIf="isResponsabileVersamento"
   appendTo="body"
   header="Note versamento"
   [(visible)]="this.showNoteVersamentoPopUp"
