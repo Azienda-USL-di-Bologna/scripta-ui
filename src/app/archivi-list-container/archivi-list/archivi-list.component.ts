@@ -117,7 +117,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	private isLoggeduser99: boolean = false;
 	public messageIfNull: string = 'Non sono stati trovati fascicoli di recente utilizzo. Seleziona la voce Visibili';
 	private fromTabTutti: boolean = false;
-	
+	private cacheFiltroLivelloTabVisbili: number[]; // serve a tenere traccia del vecchio filtro sul livello passando dal tab tutti al tab dei visibili
 	//public instanziaTabellaArchiviList = true;
 	public loggedUserCanDeleteArchivio : boolean = false; 
 
@@ -697,43 +697,51 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.loadArchiviListSubscription = null;
 		}
 
-		//if(this.firstLoad && this.archiviListMode !== ArchiviListMode.RECENTI) {
-		//	this.resetCalendarToInitialValues();
-		//}
-
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
-
 		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
 		
+		/**
+		 * Se sono sul tab recenti allora voglio che non vengano presi in considerazione, e quindi ignorati, i filtri su alcuni campi.
+		 * Nello specifico i campi da ingorare sono ["dataCreazione", "idAzienda.id", "livello"]
+		 * Voglio che l'odinamento sia per recentezza
+		 * Vengono poi modificati tutti i campi di filtro aggiungendo all'inizio "idArchivio." perché partiamo dalla tabella archvi_recenti
+		 */
 		if (this.archiviListMode === ArchiviListMode.RECENTI ) {
 			this.fromTabTutti = false
 			lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => !["dataCreazione", "idAzienda.id", "livello"].includes(f.field));
 			lazyFiltersAndSorts.filters.forEach(f => f.field = "idArchivio." + f.field);
 			lazyFiltersAndSorts.sorts = lazyFiltersAndSorts.sorts.filter(s => s.field === "dataRecentezza");
 		}
+
+		/**
+		 * Se sono sul tab tutti mi assicuro che il filtro sia solo sul livello 1
+		 */
 		if (this.archiviListMode === ArchiviListMode.TUTTI ) {
 			this.fromTabTutti = true;
 			lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
-			lazyFiltersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
+			filtersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
 		}
+
+
+		/**
+		 * Se sono sul tab visibili perché ci sto tornando dopo esserci già stato voglio assicurarmi che il filtro sul livello sia quello che avevo messo in precedenza
+		 * a meno che non ci sia una numerazione gerarchica diversa dal semplice numero, in quel caso voglio filtrare su tutti i livelli.
+		 */
 		if (this.archiviListMode === ArchiviListMode.VISIBILI ) {
-			if(this.storedLazyLoadEvent.filters?.numerazioneGerarchica.value != '' && this.fromTabTutti) { 
-				//Questo controllo serve a continuare a fare funzionare  la ricerca provenendo
-				// dal tab tutti dato che viene settato il filtro per il livello ad 1
-				this.fromTabTutti = false;
-				let text = this.storedLazyLoadEvent.filters?.numerazioneGerarchica.value
-				if (this.regexNumerazioneGerarchicaCompleta.test(text)) {
-					// La regex è una numerazione Gerarchica completa. Preparo il filtro e lo faccio partire
-					this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
-					lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
-				} else {
-					// La regex è un numerazioneGerarchica. Preparo il filtro e lo faccio partire
-					this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
-					lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
-				}
+			if (this.storedLazyLoadEvent.filters?.numerazioneGerarchica.value && this.storedLazyLoadEvent.filters?.numerazioneGerarchica.value.includes("-")) {
+				// Ho una numerazione gerarchica diversa da un semplice numero, quindi mi assicuro di essere sul filtro livello Tutti
+				this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
+				lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
+			} else if (this.fromTabTutti && this.cacheFiltroLivelloTabVisbili) {
+				// Se provengo dal tab Tutti e avevo settato un filtro sul livello mentre ero nel tab Visibile reimposto il filtro 
+				lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters?.filter(f => f.field != "livello");
+				this.cacheFiltroLivelloTabVisbili.forEach((filtro : Number) => lazyFiltersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, filtro)));
+				this.livelloValue = this.cacheFiltroLivelloTabVisbili;
 			}
+
+			this.cacheFiltroLivelloTabVisbili = this.storedLazyLoadEvent.filters?.livello.value; // Salvataggio del filtro dei livelli in modo da non perderlo andando nel tab TUTTI
+			this.fromTabTutti = false;
 		}
-		
 		
 		this.loadArchiviListSubscription = this.serviceToGetData.getData(
 			this.projectionToGetData,

@@ -63,15 +63,20 @@
     }
     div.organizza-target-button-container{
       display: flex; 
-      flex-direction: row; 
+      flex-direction: column; 
       justify-content: flex-start;
       margin-left: 1rem;
-      .p-checkbox-label, .p-radiobutton-label{
-        font-size: 1.31rem;
-        width: 135px;
+      margin-bottom: 1rem;
+      label {
+        font-weight: normal;
       }
-      p.organizza-target-button-descrizione{
-        padding: 1rem;
+      .p-checkbox-label, .p-radiobutton-label {
+        font-size: 1.1rem;
+        /* width: 135px; */
+      }
+      .organizza-target-button-descrizione {
+        //padding: 1rem;
+        margin-left: 1.8rem;
       }
     }
     div.organizza-confirm-button-container{

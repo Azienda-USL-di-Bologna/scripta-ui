@@ -79,6 +79,7 @@
 </p-splitter>
 <p-toast key="ArchivioToast"></p-toast>
 
+<!-- DIALOG PER IL COPIA/SPOSTA/DUPLICA/TRASFORMA IN FASICOLO -->
 <p-dialog
   appendTo="body"
   header="{{this.operazioneOrganizza}}"
@@ -88,6 +89,8 @@
   [focusOnShow]="false"
   (onHide)="onCloseOrganizzaDialog()"
   contentStyleClass="organizzaPopup">
+
+  <!-- TRASFORMA IN FASCICOLO -->
   <div class="organizza-target-container" *ngIf="this.operazioneOrganizza == 'Trasforma in fascicolo'">
     <h2 *ngIf="this.operazioneOrganizza == 'Trasforma in fascicolo'">
       Sei sicuro di voler rendere fascicolo questo {{archivio.livello === 3 ? 'inserto?' : 'sottofascicolo?'}}
@@ -97,66 +100,113 @@
       <p-button [disabled]="!canOrganizzare()" type="button" (click)="this.resetOrganizzaPopup(); this.rightContentProgressSpinner = false;" icon="pi pi-times" label="No"></p-button>
     </div>
   </div>
-  <div class="organizza-target-container" *ngIf="this.operazioneOrganizza == 'Copia'">
-    <h1 *ngIf="this.operazioneOrganizza == 'Copia'">Scegli un'operazione:</h1>
+
+  <!-- COPIA -->
+  <div *ngIf="this.operazioneOrganizza == 'Copia'"
+    class="organizza-target-container" >
+    <h3 *ngIf="this.operazioneOrganizza === 'Copia'">Scegli una operazione:</h3>
     <div class="organizza-target-button-container">
-      <p-checkbox 
+      <p-radioButton 
         name="organizzaTarget" 
         value="fascicolo" 
-        label="Copia fascicolo" 
+        label="Copia solo il fascicolo" 
         [(ngModel)]="organizzaTarget"
         [disabled]="this.profonditaArchivio === 3">
-      </p-checkbox>
-      <p class="organizza-target-button-descrizione">Copia la gerarchia del fascicolo/subfascicolo in uno di destinazione.</p>
+      </p-radioButton>
+      <!-- <p class="organizza-target-button-descrizione">Copia la gerarchia del fascicolo/subfascicolo in uno di destinazione.</p> -->
     </div>
     <div class="organizza-target-button-container">
-      <p-checkbox 
+      <p-radioButton 
         name="organizzaTarget" 
         value="contenuto" 
-        label="Copia solo contenuto" 
+        label="Copia solo i documenti contenuti" 
         [(ngModel)]="organizzaTarget">
-      </p-checkbox>
-      <p class="organizza-target-button-descrizione">Copia il contenuto del fascicolo/subfascicolo in uno di destinazione.</p>
+      </p-radioButton>
+      <!-- <p class="organizza-target-button-descrizione">Copia il contenuto del fascicolo/subfascicolo in uno di destinazione.</p> -->
+    </div>
+    <div class="organizza-target-button-container">
+      <p-radioButton 
+        name="organizzaTarget" 
+        value="fascicoloAndContenuto" 
+        label="Copia il fascicolo e i documenti contenuti" 
+        [(ngModel)]="organizzaTarget">
+      </p-radioButton>
+      <!-- <p class="organizza-target-button-descrizione">Copia il contenuto del fascicolo/subfascicolo in uno di destinazione.</p> -->
     </div>
   </div>
-  <div class="organizza-target-container" *ngIf="this.operazioneOrganizza != 'Trasforma in fascicolo' && this.operazioneOrganizza != 'Copia'">
-    <h1 *ngIf="this.operazioneOrganizza != 'Trasforma in fascicolo' && this.operazioneOrganizza != 'Copia'">Scegli un'operazione:</h1>
+
+  <!-- SPOSTA -->
+  <div *ngIf="this.operazioneOrganizza === 'Sposta'"
+    class="organizza-target-container">
+    <h3>Scegli una operazione:</h3>
     <div class="organizza-target-button-container">
       <p-radioButton 
         name="organizzaTarget" 
         value="fascicolo" 
-        [label]="this.operazioneOrganizza + ' fascicolo'" 
+        label="Sposta fascicolo e documenti contenuti" 
+        
         [(ngModel)]="organizzaTarget" 
-        [disabled]="this.archivio?.livello === 1 && this.operazioneOrganizza === 'Sposta'">
+        [disabled]="this.archivio?.livello === 1">
       </p-radioButton>
-      <p class="organizza-target-button-descrizione">{{this.getDescrizioneAzioneTargetText('fascicolo')}}</p>
+      <!-- <span class="organizza-target-button-descrizione">pTooltip="Sposta il fascicolo e il suo contenuto."
+        Sposta il fascicolo e il suo contenuto.
+      </span> -->
     </div>
     <div class="organizza-target-button-container">
       <p-radioButton 
         name="organizzaTarget" 
         value="contenuto" 
-        [label]="this.operazioneOrganizza + (this.operazioneOrganizza == 'Duplica' ? ' con' : ' solo') + ' contenuto'" 
+        label="Sposta solo documenti contenuti" 
         [(ngModel)]="organizzaTarget">
       </p-radioButton>
-      <p class="organizza-target-button-descrizione">{{this.getDescrizioneAzioneTargetText('contenuto')}}</p>
-    </div>
-    <div  *ngIf="this.operazioneOrganizza == 'Duplica'" class="organizza-target-button-container">
-      <p>* Verrà creato un duplicato del fascicolo/subfascicolo fratello a quello di partenza.</p>
+      <!-- <span class="organizza-target-button-descrizione">
+        Sposta solo il contenuto del fascicolo.
+      </span> -->
     </div>
   </div>
-  <div  
+
+  <!-- DUPLICA -->
+  <div *ngIf="this.operazioneOrganizza === 'Duplica'"
+    class="organizza-target-container" >
+    <h3>Scegli una operazione:</h3>
+    <div class="organizza-target-button-container">
+      <p-radioButton 
+        name="organizzaTarget" 
+        value="fascicolo" 
+        label="Duplica fascicolo senza documenti contenuti" 
+        [(ngModel)]="organizzaTarget">
+      </p-radioButton>
+      <!-- <span class="organizza-target-button-descrizione">
+        Duplica il fascicolo senza i documenti
+      </span> -->
+    </div>
+    <div class="organizza-target-button-container">
+      <p-radioButton 
+        name="organizzaTarget" 
+        value="contenuto" 
+        label="Duplica fascicolo con documenti contenuti" 
+        [(ngModel)]="organizzaTarget">
+      </p-radioButton>
+      <!-- <span class="organizza-target-button-descrizione">
+        Duplica il fascicolo e anche i documenti contenuti
+      </span> -->
+    </div>
+  </div>
+
+  <!-- SPOSTA/COPIA -->
+  <div
     *ngIf="this.operazioneOrganizza != 'Trasforma in fascicolo' && this.operazioneOrganizza != 'Duplica'" 
     class="organizza-target-archivio-ricerca">
-    <p-divider ></p-divider>
-  <p>Scegli il fascicolo di destinazione</p>
+    <p-divider></p-divider>
+    <p>Scegli il fascicolo di destinazione</p>
     <app-archivio-ricerca 
-          #archivioRicerca 
-          [idAzienda]="this.archivio?.idAzienda.id" 
-          [livello]="getLivelloForAutocompliteArchivioDestinazione()"
-          [permessoMinimo]="this.permessoMinimoSuArchivioDestinazioneOrganizza"
-          [archivio]="this.archivioDestinazioneOrganizza"
-          placeholder="Cerca..."
-          (archivioSelectedEvent)="archivioSelectedEvent($event.arch)">
+      #archivioRicerca 
+      [idAzienda]="this.archivio?.idAzienda.id" 
+      [livello]="getLivelloForAutocompliteArchivioDestinazione()"
+      [permessoMinimo]="this.permessoMinimoSuArchivioDestinazioneOrganizza"
+      [archivio]="this.archivioDestinazioneOrganizza"
+      placeholder="Cerca..."
+      (archivioSelectedEvent)="archivioSelectedEvent($event.arch)">
     </app-archivio-ricerca>
   </div>
   <!-- <p-autoComplete [(ngModel)]="text" placeholder="Fascicolo di desctinazione" [suggestions]="results" (completeMethod)="search($event)"></p-autoComplete> -->
