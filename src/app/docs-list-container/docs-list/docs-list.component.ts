@@ -256,6 +256,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       if (this.multiselectStatoUltimoVersamento) this.multiselectStatoUltimoVersamento.writeValue([]);
       if (this.dataTable.filters["statoUltimoVersamento"]) (this.dataTable.filters as any)["statoUltimoVersamento"]["value"] = null;
       if (this.dataTable.filters["versamentoForzabile"]) (this.dataTable.filters as any)["versamentoForzabile"]["value"] = null;
+      if (this.dataTable.filters["versamentoForzabileConcordato"]) (this.dataTable.filters as any)["versamentoForzabileConcordato"]["value"] = null;
     }
     
     
@@ -416,6 +417,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.cols[this.cols.findIndex(c => c.field === "idArchivi")].header = "Fascicolazioni";
     this.mandatoryColumns = ["dataCreazione"];
     const colonneDaNonVisualizzare = ["versamentoForzabile"];
+    colonneDaNonVisualizzare.push("versamentoForzabileConcordato");
     if (this.aziendeFiltrabili.length > 1) {
       this.mandatoryColumns.push("idAzienda");
     }
@@ -467,12 +469,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this._selectedColumns.push(this.cols.find(e => e.field === c));
     })
     const colonneDaNonVisualizzare = ["versamentoForzabile"];
+    colonneDaNonVisualizzare.push("versamentoForzabileConcordato")
     this.selectableColumns = cols
       .filter(
         c => !colonneDaNonVisualizzare.includes(c.field)
       )
       .map(e => {
-        if (colonneDaVisualizzare.includes(e.field)) {
+        if (colonneDaVisualizzare.includes(e.field)) { 
           e.selectionDisabled = true;
         }
         return e;
@@ -1263,18 +1266,35 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       matchMode: "equals",
       value: null
     }
-    if (itemValue === "Errore forzabile" || itemValue === "Errore non forzabile") {
+    this.dataTable.filters["versamentoForzabileConcordato"] = {
+      matchMode: "equals",
+      value: null
+    }
+    if (itemValue === "Errore forzabile" || itemValue === "Errore non forzabile" ) {
       if (value.length > 0) {
         this.multiselectStatoUltimoVersamento.writeValue([itemValue]);
         this.dataTable.filters["versamentoForzabile"] = {
           matchMode: "equals",
           value: itemValue === "Errore forzabile"
         }
+        
         filterCallback([StatiVersamento.ERRORE, StatiVersamento.ERRORE_RITENTABILE]);
       } else {
         filterCallback([]);
       }
-    } else {
+    } else if(itemValue === "Errore crittografico") {
+      if (value.length > 0) {
+        this.multiselectStatoUltimoVersamento.writeValue([itemValue]);
+        this.dataTable.filters["versamentoForzabileConcordato"] = {
+          matchMode: "equals",
+          value: itemValue === "Errore crittografico"
+        }
+        filterCallback([StatiVersamento.ERRORE, StatiVersamento.ERRORE_RITENTABILE]);
+      } else {
+        filterCallback([]);
+      }
+    } else
+     {
       this.multiselectStatoUltimoVersamento.writeValue(value.filter((v: string) => v !== "Errore forzabile"));
       let array: string[] = [];
       value.forEach((labelStato: string) => { 
