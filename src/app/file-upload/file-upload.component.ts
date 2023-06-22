@@ -39,4 +39,9 @@ export class FileUploadComponent implements OnInit {
     this.uploadDocumentDialogVisible.emit(false);
   }
 
+  public cleen(){
+    this.nomiNuovi = [];
+    this.uploadedFiles = [];
+  }
+
 }

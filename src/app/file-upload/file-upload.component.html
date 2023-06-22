@@ -6,6 +6,7 @@
   [maxFileSize]="maxSizeUpload" 
   [customUpload]="true"
   (onSelect)="onSelect($event)"
+  (onClear)="cleen()"
   (uploadHandler)="manageFile($event);fileUploaderDocumentsAuto.clear()">
   
   <ng-template pTemplate="file" let-file let-i="index">
