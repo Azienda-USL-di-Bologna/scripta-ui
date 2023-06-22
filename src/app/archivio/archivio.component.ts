@@ -108,7 +108,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           this.extendedArchivioService.aggiungiArchivioRecente(this._archivio.fk_idArchivioRadice.id);
 
           if (this.utenteUtilitiesLogin) {
-            this.loggeduserCanAccess = !!!this._archivio.isArchivioNero;
+            this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);//!!!this._archivio.isArchivioNero;
             this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
             this.loggedUserIsResponsbaileOrVicario = this.hasPermessoMinimo(DecimalePredicato.VICARIO);
             this.inizializeAll();
@@ -167,7 +167,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       (utenteUtilities: UtenteUtilities) => {
         this.utenteUtilitiesLogin = utenteUtilities;
         if (this.archivio) {
-          this.loggeduserCanAccess = !!!this.archivio.isArchivioNero;
+          this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);//!!!this.archivio.isArchivioNero;
           this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
           this.loggedUserIsResponsbaileOrVicario = this.hasPermessoMinimo(DecimalePredicato.VICARIO);
           this.inizializeAll();
