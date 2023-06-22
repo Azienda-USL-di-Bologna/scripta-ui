@@ -94,7 +94,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
       .subscribe((res: Archivio) => {
         this._archivio = res;
-        this.loggeduserCanAccess = !!!this._archivio.isArchivioNero;
+        this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);//!!!this._archivio.isArchivioNero;
         if (this.utenteUtilitiesLogin) {
           this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
           if (this.utenteUtilitiesLogin.getUtente()) {
