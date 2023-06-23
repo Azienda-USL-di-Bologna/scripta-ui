@@ -8,6 +8,7 @@ import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { DocUtilsService } from "src/app/utilities/doc-utils.service";
 import { CommonComponentsModule } from "@bds/common-components";
+import { DocListService } from "./docs-list.service";
 
 @NgModule({
   imports: [
@@ -24,6 +25,7 @@ import { CommonComponentsModule } from "@bds/common-components";
     ExtendedDocDetailService,
     ExtendedDocDetailViewService,
     DocUtilsService,
+    DocListService
   ],
   exports: [
     DocsListComponent
