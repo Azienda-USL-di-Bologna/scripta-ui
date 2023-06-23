@@ -49,7 +49,7 @@
         [frozen]="true">
         
       </th>
-      <th *ngIf="archivio"
+      <th *ngIf="archivio && !!!(this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicatoVicario))"
         class="edit-archiviation-column"
         alignFrozen="right" 
         pFrozenColumn 
@@ -632,7 +632,7 @@
         pFrozenColumn 
         [frozen]="true">
       </th>
-      <th  *ngIf="archivio"
+      <th  *ngIf="archivio && !!!(this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicatoVicario))"
         class="edit-archiviation-column"
         alignFrozen="right" 
         pFrozenColumn 

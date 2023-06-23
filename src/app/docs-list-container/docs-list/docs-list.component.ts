@@ -31,6 +31,7 @@ import { DocUtilsService } from "src/app/utilities/doc-utils.service";
 import { ExtendedArchivioService } from "src/app/archivio/extended-archivio.service";
 import { ExtendedArchiviView } from '../../archivi-list-container/archivi-list/extendend-archivi-view';
 import { TieredMenu } from "primeng/tieredmenu";
+import { DocListService } from "./docs-list.service";
 
 @Component({
   selector: "docs-list",
@@ -148,8 +149,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.showAnteprima = showAnteprimaInit;
   }
 
-  
-
   constructor(
     private messageService: MessageService,
     private docDetailService: ExtendedDocDetailService,
@@ -168,6 +167,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     public docUtilsService: DocUtilsService,
     private extendedArchivioService: ExtendedArchivioService,
     private configurazioneService: ConfigurazioneService,
+    private doclistService: DocListService
   ) { }
 
   ngOnInit(): void {
@@ -219,6 +219,11 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.showRightPanel.subscribe(event =>{
         this.showAnteprima = event.showPanel;
       })
+    );
+
+    // mi sottoscrivo al refreshDocs$ per fare il refresh dell'elenco docs in caso di richiesta
+    this.subscriptions.push(
+      this.doclistService.refreshDocs$.subscribe((val: boolean) => this.resetPaginationAndLoadData())
     );
    
    

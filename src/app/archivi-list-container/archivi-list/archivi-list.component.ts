@@ -100,6 +100,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public filteredStrutture: Struttura[] = [];
 	private resetArchiviArrayLenght: boolean = true;
 	public fascicoliParlanti: boolean = false;
+	public chiusuraArchivio: boolean = false;
 	public dataMinimaCreazione: Date = new Date("2000-01-01");
 	public dataMassimaCreazione: Date = new Date("2030-12-31");
 	private pageConf: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 0, offset: 0 } };
