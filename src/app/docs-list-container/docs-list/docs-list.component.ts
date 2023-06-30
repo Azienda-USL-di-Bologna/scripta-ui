@@ -584,9 +584,16 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       }
 
       if (this.dropdownAzienda) {
-        const value = this.aziendeFiltrabili.find(a => a.value[0] === this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault.id).value;
-        this.dropdownAzienda.writeValue(value);
-        this.lastAziendaFilterValue = value;
+        const aziendaFiltrabileDefault = this.aziendeFiltrabili.find(a => a.value[0] === this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault.id);
+        let aziendaValue;
+        if (aziendaFiltrabileDefault) {
+          aziendaValue = aziendaFiltrabileDefault.value;
+        } else {
+          aziendaValue = this.aziendeFiltrabili[0].value;
+        }
+        //let aziendaValue = this.aziendeFiltrabili.find(a => a.value[0] === this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault.id).value;
+        this.dropdownAzienda.writeValue(aziendaValue);
+        this.lastAziendaFilterValue = aziendaValue;
         this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
       }
       // if (this.multiselectStati) {
