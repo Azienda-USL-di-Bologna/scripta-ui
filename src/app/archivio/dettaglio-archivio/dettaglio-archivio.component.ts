@@ -673,7 +673,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     attivita.tipo = "notifica";
     attivita.oggetto = "Fascicolo: " + this.archivio.oggetto + " - " + this.archivio.numerazioneGerarchica;
     attivita.descrizione = "Accettata responsabilità";
-    attivita.urls = JSON.stringify({});
+    attivita.urls = [];
     attivita.aperta = false;
     attivita.provenienza = this.utenteUtilitiesLogin.getUtente().idPersona.descrizione;
     attivita.priorita = 3;
@@ -748,7 +748,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     attivita.tipo = "notifica";
     attivita.oggetto = "Fascicolo: " + this.archivio.oggetto + " - " + this.archivio.numerazioneGerarchica;
     attivita.descrizione = "Rifiutata responsabilità";
-    attivita.urls =JSON.stringify({});
+    attivita.urls =[];
     attivita.aperta = false;
     attivita.provenienza = this.utenteUtilitiesLogin.getUtente().idPersona.descrizione;
     attivita.priorita = 3;
