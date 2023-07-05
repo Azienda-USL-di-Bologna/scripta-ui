@@ -950,6 +950,11 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     idAziende.push(archivio.idAzienda.id)
     const usaGediInternauta$ = this.configurazioneService.getParametriAziende("usaGediInternauta", null, idAziende).pipe(first());
     if (usaGediInternauta$ || (this.utenteUtilitiesLogin.getUtente().utenteReale.idInquadramento as unknown as String === "99")) {
+      if (["Sposta", "Trasforma in fascicolo"].includes(this.operazioneOrganizza) && archivio.idArchivioRadice.id !== this.archivio.idArchivioRadice.id){
+        this.archivioUtilsService.deletedArchiveSelection(arch.id);
+      } else if (["Sposta", "Trasforma in fascicolo"].includes(this.operazioneOrganizza) && archivio.idArchivioRadice.id === this.archivio.idArchivioRadice.id){
+        this.archivioUtilsService.updatedArchiveSelection(arch);
+      }
       this.navigationTabsService.addTabArchivio(archivio, true, false);
       // this.archivioUtilsService.updatedArchiveSelection(arch);
       this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
