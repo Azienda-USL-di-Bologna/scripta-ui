@@ -200,7 +200,7 @@ export class ResponsabiliComponent implements OnInit {
             url: "/nav/apridascrivania?id=" + this.archivio.id.toString(),
             label: "Accetta/Rifiuta"
           }];
-          attivita.urls = JSON.stringify(url); //"[{\"url\" :" + "\" " + url +"\", \"label\": \"Accetta\"}]";
+          attivita.urls = url; //"[{\"url\" :" + "\" " + url +"\", \"label\": \"Accetta\"}]";
           attivita.aperta = false;
           attivita.provenienza = this.utenteUtilitiesLogin.getUtente().idPersona.descrizione;
           attivita.priorita = 3;
