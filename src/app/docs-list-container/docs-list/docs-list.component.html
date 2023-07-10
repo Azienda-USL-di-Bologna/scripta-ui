@@ -2,6 +2,12 @@
   ariaLabel="Tabella elenco documenti" 
   [value]="docs" 
   dataKey="id" 
+  [rowTrackBy]="trackByFn" 
+  [metaKeySelection]="true"
+  selectionMode="multiple" 
+  [(selection)]="docsSelected"
+  (onRowSelect)="onRowSelect($event)" 
+  (onRowUnselect)="onRowUnselect($event)"
   [columns]="selectedColumns"
   [sortField]="initialSortField"
   [sortOrder]="-1"
@@ -19,16 +25,18 @@
   (onLazyLoad)="onLazyLoad($event)" 
   [loading]="loading" 
   [totalRecords]="totalRecords"
-  selectionMode="single" 
-  [(selection)]="docSelected"
-  (onRowSelect)="onRowSelect($event)" 
-  (onRowUnselect)="onRowUnselect($event)"
   styleClass="p-table-scripta-docs-list"
   [ngClass]="{'table-zero-rows': totalRecords === 0}"
   tableStyleClass="docslist-table-body">
   <ng-template pTemplate="header" let-columns>
     <!-- HEADER & ORDINAMENTO -->
     <tr class="header-row"> 
+      <th *ngIf="docsListMode === enumDocsListMode.ERRORI_VERSAMENTO"
+        class="checkbox-column"
+        alignFrozen="left" 
+        pFrozenColumn 
+        [frozen]="true">
+      </th>
       <th *ngFor="let col of columns" pReorderableColumn
         [ngClass]="col.headerClass"
         [pSortableColumn]="col.sortField"
@@ -49,7 +57,7 @@
         [frozen]="true">
         
       </th>
-      <th *ngIf="archivio"
+      <th *ngIf="archivio && !!!(this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicatoVicario))"
         class="edit-archiviation-column"
         alignFrozen="right" 
         pFrozenColumn 
@@ -59,6 +67,12 @@
     </tr>
     <!-- FILTRI -->
     <tr class="filter-row">
+      <th *ngIf="docsListMode === enumDocsListMode.ERRORI_VERSAMENTO"
+        class="checkbox-column"
+        alignFrozen="left" 
+        pFrozenColumn 
+        [frozen]="true">
+      </th>
       <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
         <div *ngSwitchCase="'idAzienda'" #filteraziendacontainer>
           <p-columnFilter #columnFilterAzienda [field]="col.filterField"  matchMode="in" [showMenu]="false">
@@ -171,7 +185,7 @@
                 [showIcon]="false"
                 [showButtonBar]="false"
                 selectionMode="range"
-                
+                yearRange="2000:2040"
                 (onClickOutside)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'onClickOutside', $event, filter)"
                 appendTo="body"><!-- [readonlyInput]="true" -->
                 <ng-template pTemplate="footer" class="calendar-filter-footer-button">
@@ -267,17 +281,18 @@
             close
           </button>
         </div>
-        <div *ngSwitchCase="'stato'" #multiselectStati >
+        <div *ngSwitchCase="'stato'"  >
           <p-columnFilter 
             [field]="col.filterField" 
             matchMode="in" 
             [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <!-- nell'ngModel ho messo il nome perchè altrimenti non venivano settati i filtri una volta cliccati -->
-              <p-multiSelect 
+              <p-multiSelect #multiselectStati
                 *ngIf = "isAccessibile() !== true"
                 [ngModel]="nome"
                 [showHeader]="false" 
+                [dataKey]="nome"
                 [options]="statoVisualizzazioneObj" 
                 optionValue="nome"
                 optionLabel="nome" 
@@ -331,7 +346,7 @@
               <p-autoComplete
                 #autocompletearchiviDocList
                 [showEmptyMessage]="true"
-                emptyMessage="Nessun fascicolo trovato" 
+                emptyMessage="Nessun fascicolo trovato." 
                 [suggestions]="filteredArchivi"
                 (completeMethod)="filterArchivi($event)" 
                 field="descrizioneVisualizzazione"
@@ -589,16 +604,19 @@
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'statoUltimoVersamento'">
-          <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
+          <p-columnFilter 
+            [field]="col.filterField" 
+            matchMode="in" 
+            [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-multiSelect
+              <p-multiSelect #multiselectStatoUltimoVersamento
                 *ngIf = "isAccessibile() !== true"
                 [showHeader]="false" 
-                [ngModel]="value" 
+                [ngModel]="nome" 
                 [options]="statiVersamentoObj" 
-                optionValue="value" 
+                optionValue="nome" 
                 optionLabel="nome" 
-                (onChange)="filter($event.value)" 
+                (onChange)="filterStatoUltimoVersamento(filter, $event)" 
                 appendTo="body"
                 >
                 <ng-template let-option pTemplate="item">
@@ -627,9 +645,8 @@
         alignFrozen="right" 
         pFrozenColumn 
         [frozen]="true">
-        
       </th>
-      <th  *ngIf="archivio"
+      <th  *ngIf="archivio && !!!(this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicatoVicario))"
         class="edit-archiviation-column"
         alignFrozen="right" 
         pFrozenColumn 
@@ -641,8 +658,18 @@
   <!-- BODY -->
   <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex">
     <tr 
+      #riga
       class="row-height" 
-      [pSelectableRow]="rowData">
+      [pSelectableRow]="rowData"
+      [pSelectableRowIndex]="index"
+      [pSelectableRowDisabled]="false">
+      <td *ngIf="docsListMode === enumDocsListMode.ERRORI_VERSAMENTO"
+        class="checkbox-column"
+        alignFrozen="left"
+        pFrozenColumn 
+        [frozen]="true">
+        <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+      </td>
       <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
         <div *ngSwitchCase="'idAzienda'">
           {{rowData.idAzienda.nome}}
@@ -677,7 +704,7 @@
         <div *ngSwitchCase="'dataPubblicazione'">
           {{rowData.dataPubblicazione | date:'dd/MM/yyyy'}}
         </div>
-        <div *ngSwitchCase="'oggetto'" (click)="!archivio && openDoc(rowData)" class="oggetto-content"
+        <div *ngSwitchCase="'oggetto'" (click)="!archivio && docUtilsService.openDoc(rowData,utente)" class="oggetto-content"
         [ngClass]="{'logically-deleted' : rowData.archiviation?.dataEliminazione != null}"
           [pTooltip]="rowData.oggettoVisualizzazione" tooltipPosition="top">
           <i *ngIf="rowData.visibilitaLimitata && !rowData.riservato" class="pi pi-eye"></i>
@@ -747,6 +774,10 @@
             class="stato-ultimo-versamento-icon" 
             (onChange)="setVersamentoVisto($event, rowData)"
           ></p-checkbox>
+          <i class="pi pi-file-edit" 
+            pTooltip="note versamenti" 
+            (click)="openNoteVersamentoPopUp(rowData.id)">
+          </i>
         </div>
         <div *ngSwitchCase="'dataUltimoVersamento'">
           {{rowData.dataUltimoVersamento | date:'dd/MM/yyyy'}}
@@ -764,7 +795,35 @@
         >
         </i>
       </td>
-      <td *ngIf="archivio"
+      <!-- COLONNA FUNZIONI -->
+      <td *ngIf="archivio && !!!(this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicatoVicario))"
+        class="edit-archiviation-column"
+        alignFrozen="right"
+        pFrozenColumn 
+        [frozen]="true">
+        <i *ngIf="!!!rowData.archiviation?.dataEliminazione"
+          class="pi pi-cog funzioniGear"
+          #iconaFunzioniArchiviazione
+          (click)="onClickOnFunctionButton($event, rowData, iconaFunzioniArchiviazione)" 
+          pTooltip="Funzioni"
+          aria-label="Funzioni"
+          tooltipPosition="bottom">
+        </i>
+        <p-tieredMenu 
+          #functionsSelection 
+          appendTo="body"
+          [model]="funzioniItems"
+          [popup]="true">
+        </p-tieredMenu>
+        <i *ngIf="loggedUserCanRestoreArchiviation && rowData.archiviation?.dataEliminazione"
+          class="pi pi-undo" 
+          pTooltip="Ripristina fascicolazione"
+          (click)="$event.stopPropagation(); restoreArchiviation(rowData)"
+        >
+        </i>
+      </td>
+      <!-- COLONNA ELIMINA -->
+      <!-- <td *ngIf="archivio"
         class="edit-archiviation-column"
         alignFrozen="right"  
         pFrozenColumn 
@@ -782,7 +841,7 @@
           (click)="$event.stopPropagation(); deleteArchiviation(rowData, index, iconaEliminazioneArchiviazione)"
         >
         </i>
-      </td>
+      </td> -->
     </tr>
   </ng-template>
   <ng-template pTemplate="loadingbody" let-columns="columns">
@@ -804,3 +863,73 @@
 <p-toast key="docsListToast"></p-toast>
 <p-confirmDialog [baseZIndex]="10000" acceptLabel="Sì"></p-confirmDialog>
 <p-confirmPopup key="confirm-popup"></p-confirmPopup>
+
+<p-dialog
+  appendTo="body"
+  header="{{this.operazioneOrganizza}}"
+  [(visible)]="this.showOrganizzaPopUp"
+  [modal]="true"
+  [responsive]="false"
+  [focusOnShow]="false"
+  (onHide)="onCloseOrganizzaDialog()"
+  contentStyleClass="organizzaPopup">
+  <p>Stai per {{operazioneOrganizza}}re il documento nel fascicolo selezionato qui sotto</p>
+  <p>Scegli il fascicolo di destinazione</p>
+    <app-archivio-ricerca 
+          #archivioRicerca 
+          [idAzienda]="this.archivio?.idAzienda.id"
+          [permessoMinimo]="this.permessoMinimoSuArchivioDestinazioneOrganizza"
+          [archivio]="this.archivioDestinazioneOrganizza"
+          placeholder="Cerca..."
+          (archivioSelectedEvent)="archivioSelectedEvent($event.arch)">
+    </app-archivio-ricerca>
+  <p-button [disabled]="archivioDestinazioneOrganizza == null" type="button" (click)="organizza()" label="Conferma"></p-button>
+</p-dialog>
+
+<!-- NOTE VERSAMENTO -->
+<p-dialog
+  *ngIf="isResponsabileVersamento"
+  appendTo="body"
+  header="Note versamento"
+  [(visible)]="this.showNoteVersamentoPopUp"
+  [modal]="true"
+  [responsive]="true"
+  [focusOnShow]="false"
+  contentStyleClass="organizzaPopup">
+  <app-note-versamento
+    [idDoc]="this.docPerVedereLeNote"
+  >
+  </app-note-versamento>
+</p-dialog>
+
+<!-- VERSAMENTO MASSIVO -->
+<p-dialog
+  appendTo="body"
+  [header]="versamentoMassivoPopupInfo.title"
+  [(visible)]="versamentoMassivoPopupInfo.show"
+  [modal]="true"
+  [responsive]="true"
+  [focusOnShow]="false"
+  contentStyleClass="organizzaPopup">
+  <div *ngIf="versamentoMassivoPopupInfo.docCoinvolti?.length > 0">
+    <span>Il versamento coinvolgerà i seguenti documenti:</span>
+    <ul>
+      <li *ngFor="let d of versamentoMassivoPopupInfo.docCoinvolti">{{d.registrazioneVisualizzazione}}</li>
+    </ul>
+  </div>
+  <div *ngIf="versamentoMassivoPopupInfo.docImpossibilitati?.length > 0">
+    <span>I seguenti documenti non possono essere forzati:</span>
+    <ul>
+      <li *ngFor="let d of versamentoMassivoPopupInfo.docImpossibilitati">{{d.registrazioneVisualizzazione}}</li>
+    </ul>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button 
+      icon="pi pi-check" 
+      (click)="versamentoMassivoPopupInfo.show=false; 
+        versaMassivamente(versamentoMassivoPopupInfo.operazione, versamentoMassivoPopupInfo.docCoinvolti, versamentoMassivoPopupInfo.idAzienda)" 
+      label="Conferma" 
+      styleClass="p-button-text">
+    </p-button>
+  </ng-template>
+</p-dialog>

@@ -21,6 +21,7 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
   public tabItems: TabItem[] = [];
   private tabIndexToActiveAtTheBeginning = 0;
   private idArchivioAperturaDaScrivania: number;
+  private idTipSessioneImportazione: number;
   @ViewChild("tabview") private tabview: TabView;
 
   constructor(
@@ -41,6 +42,9 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
       //this.navigationTabsService.activeTabByIndex(0);
       this.tabIndexToActiveAtTheBeginning = 0;
       this.idArchivioAperturaDaScrivania = this.router.parseUrl(this.router.url).queryParams["id"];
+    } else if (this.router.routerState.snapshot.url.includes("tip")) {
+      this.tabIndexToActiveAtTheBeginning = 0;
+      this.idTipSessioneImportazione = this.router.parseUrl(this.router.url).queryParams["id"];
     } else {
       //this.navigationTabsService.activeTabByIndex(1);  
       this.tabIndexToActiveAtTheBeginning = 1;
@@ -76,15 +80,24 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
               this.utenteUtilitiesLogin = utenteUtilities;
               // Mostrare il tab fascicoli solo se è acceso il parametro in una delle aziende dell'utente
               let idAziendaArray: number[] = [];
-              this.utenteUtilitiesLogin.getUtente().aziende.forEach(elem => {
+              this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach(elem => {
                 idAziendaArray.push(elem.id);
               });
               this.subscriptions.push(
-                this.configurazioneService.getParametriAziende("tabFascicoliScriptaActive", null, idAziendaArray).subscribe(
+                this.configurazioneService.getParametriAziende("usaGediInternauta", null, idAziendaArray).subscribe(
                   (parametriAziende: ParametroAziende[]) => {
-                    console.log(parametriAziende[0].valore);
-                    const showTabFascicoli = JSON.parse(parametriAziende[0].valore || false);
-                    if (showTabFascicoli) {
+                    console.log(parametriAziende);
+                    let showTabFascicoli = false;
+                    for (const parametroAziende of parametriAziende) {
+                      showTabFascicoli = showTabFascicoli || JSON.parse(parametroAziende.valore);
+                    }
+                    let ragazzoDelNovantaNove = false;
+                    if (this.utenteUtilitiesLogin.getUtente() && this.utenteUtilitiesLogin.getUtente().utenteReale) {
+                      ragazzoDelNovantaNove = (this.utenteUtilitiesLogin.getUtente().utenteReale.idInquadramento as unknown as String) === "99";
+                    } else if (this.utenteUtilitiesLogin.getUtente()) {
+                      ragazzoDelNovantaNove = (this.utenteUtilitiesLogin.getUtente().idInquadramento as unknown as String) === "99";
+                    }
+                    if (showTabFascicoli || ragazzoDelNovantaNove) {
                       this.navigationTabsService.addTab(
                         this.navigationTabsService.buildaTabArchiviList()
                       );
@@ -130,6 +143,9 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
           this.navigationTabsService.addTabArchivio(res, true, false);
         });
       }
+      if (this.idTipSessioneImportazione) {
+        this.navigationTabsService.addTabTip(true, this.idTipSessioneImportazione);
+      }
     }, 0);
     /* for(let i=0; i < this.tabItems.length; i++) {
       if(this.tabItems[i].type === TabType.ARCHIVI_LIST && this.tabItems[i-1].type === TabType.DOCS_LIST) {
@@ -148,6 +164,9 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
     } */
     this.navigationTabsService.addTabToHistory(tabIndex);
     this.appService.appNameSelection(this.navigationTabsService.getTabs()[tabIndex].labelForAppName);
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 10);
   }
 
   public onCloseTab(e: any): void {

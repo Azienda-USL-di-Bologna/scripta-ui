@@ -67,10 +67,17 @@ export class ExtendedArchivioService extends ArchivioService {
     return this._http.post(url, formData);
   }
 
-  public calcolaPermessiEspliciti(idArchivioRadice: number) {
-    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "calcolaPermessiEspliciti";
+  public calcolaPermessiEsplicitiGerarchiaArchivio(idArchivioRadice: number) {
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "calcolaPermessiEsplicitiGerarchiaArchivio";
     const formData: FormData = new FormData();
     formData.append("idArchivioRadice", idArchivioRadice.toString());
+    this._http.post(apiUrl, formData).subscribe();
+  }
+
+  public calcolaPermessiEsplicitiArchivio(idArchivio: number) {
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "calcolaPermessiEsplicitiArchivio";
+    const formData: FormData = new FormData();
+    formData.append("idArchivio", idArchivio.toString());
     this._http.post(apiUrl, formData).subscribe();
   }
 
@@ -135,6 +142,23 @@ export class ExtendedArchivioService extends ArchivioService {
     const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "rendiFascicolo";
     const formData: FormData = new FormData();
     formData.append("idArchivio", idArchivio.toString());
+    return this._http.post(apiUrl, formData);
+  }
+
+  public spostaDoc(idDoc: number, idArchivioPartenza: number, idArchivioDestinazione: number){
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "spostaDoc";
+    const formData: FormData = new FormData();
+    formData.append("idDoc", idDoc.toString());
+    formData.append("idArchivioPartenza", idArchivioPartenza.toString());
+    formData.append("idArchivioDestinazione", idArchivioDestinazione.toString());
+    return this._http.post(apiUrl, formData);
+  }
+
+  public copiaDoc(idDoc: number, idArchivioDestinazione: number){
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "copiaDoc";
+    const formData: FormData = new FormData();
+    formData.append("idDoc", idDoc.toString());
+    formData.append("idArchivioDestinazione", idArchivioDestinazione.toString());
     return this._http.post(apiUrl, formData);
   }
 }

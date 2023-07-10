@@ -5,8 +5,9 @@
     max-width: 18.75rem;
   }
   .struttura-column {
-    min-width: 9.375rem;
-    max-width: 37.5rem;
+    // min-width: 9.375rem;
+    // max-width: 37.5rem;
+    width: 100%;
     p-celleditor {
       width: 100%;
     }
@@ -39,6 +40,7 @@
     display: flex;
     justify-content: space-around;
     flex-wrap: nowrap;
+    padding: 0 !important;
     .p-button-rounded {
       background-color: transparent !important;
       border: none !important;

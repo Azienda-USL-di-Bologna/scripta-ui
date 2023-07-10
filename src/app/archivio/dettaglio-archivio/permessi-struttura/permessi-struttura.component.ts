@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, Azienda, StatoArchivio, Struttura } from '@bds/internauta-model';
+import { Archivio, ArchivioDetail, Azienda, PermessoEntitaStoredProcedure, StatoArchivio, Struttura } from '@bds/internauta-model';
 import {Table} from 'primeng/table';
 import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
@@ -73,7 +73,7 @@ export class PermessiStrutturaComponent implements OnInit {
         for (const key in this.dt.editingRowKeys) {
           delete this.dt.editingRowKeys[key];
           if (key === "undefined") {
-            this.perms.pop();
+            this.perms.shift();
           }
         }
         this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "strutture");
@@ -92,7 +92,7 @@ export class PermessiStrutturaComponent implements OnInit {
      public addPermesso(): void {
       const newPermessoTabella = new PermessoTabella();
       this.additionalData = this.permessiDettaglioArchivioService.filtraEntitaEsistenti(this._archivio.permessi, "strutture");
-      this.perms.push(newPermessoTabella);
+      this.perms.unshift(newPermessoTabella);
       this.dt.initRowEdit(newPermessoTabella);
   }
   /**
@@ -117,7 +117,7 @@ export class PermessiStrutturaComponent implements OnInit {
     this.perms[index] = this.permClone[perm.idProvenienzaSoggetto];
       delete this.permClone[perm.idProvenienzaSoggetto];
     } else { 
-      this.perms.pop();
+      this.perms.shift();
     }
   }
 /**
@@ -131,7 +131,7 @@ export class PermessiStrutturaComponent implements OnInit {
       if (key !== perm.idProvenienzaSoggetto.toString()) {
         delete this.dt.editingRowKeys[key];
         if (key === "undefined") {
-          this.perms.pop();
+          this.perms.shift();
         }
       }
     }
@@ -142,6 +142,7 @@ export class PermessiStrutturaComponent implements OnInit {
    * @param index 
    */
   public onRowDelete(perm:PermessoTabella, index: number) {
+    this.permessiDettaglioArchivioService.loading = true;
     const oggettoToDelete: OggettonePermessiEntitaGenerator = this.permessiDettaglioArchivioService.buildPermessoPerBlackbox(perm,
       this._archivio.permessi,
       OggettoneOperation.REMOVE,
@@ -157,6 +158,7 @@ export class PermessiStrutturaComponent implements OnInit {
               detail: "E' stato eliminato il permesso."
             });
             this.perms.splice(index, 1);
+            this.permessiDettaglioArchivioService.loading = false;
           },
           error: () => {
             this.messageService.add({
@@ -175,17 +177,21 @@ export class PermessiStrutturaComponent implements OnInit {
    * @param index 
    */
   public onRowEditSave(perm: PermessoTabella, index: number, operation: string) {
+    this.permessiDettaglioArchivioService.loading = true;
     /* Lo faccio sempre ma in realt� serve solo per le insert. 
       Perch� dentro a this.dt.editingRowKeys la chiave di una nuova riga � "undefined" e non matcha con idProvenienzaSoggetto 
       se lo setto subito alla scelta della persona
     */
-      if (!!!perm.idProvenienzaSoggetto) {
-        perm.idProvenienzaSoggetto = perm.soggetto.id; 
-      }
+    if (!!!perm.idProvenienzaSoggetto) {
+      perm.idProvenienzaSoggetto = perm.soggetto.id; 
+    }
+
+    const permessiDelSoggetto = this.getPermessiFiltratiPerSoggetto(this._archivio.permessi, perm.idProvenienzaSoggetto);    
+
     const oggettoToSave: OggettonePermessiEntitaGenerator =
       this.permessiDettaglioArchivioService.buildPermessoPerBlackbox(
         perm, 
-        operation === "ADD" || operation === "BAN"? null : this._archivio.permessi,
+        operation === "ADD" || operation === "BAN" ? null : permessiDelSoggetto,
         operation === "ADD" || operation === "BAN" ? OggettoneOperation.ADD : OggettoneOperation.REMOVE,
         <AzioniPossibili>operation,
         this._archivio
@@ -204,7 +210,25 @@ export class PermessiStrutturaComponent implements OnInit {
             } else {
               delete this.perms[perm.idProvenienzaSoggetto];
             }
-            this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+            switch (this.archivio.livello) {
+              case 3:
+                // Ricalocolo permessi di inserto, padre e nonno
+                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, false, true);
+                break;
+              case 2:
+                if (this.archivio.numeroSottoarchivi === 0 || this.archivio.numeroSottoarchivi === null) {
+                  // Ricalocolo permessi di sottofascicolo e padre
+                  this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, false, true);
+                } else {
+                  // Ricalcolo intera gerarchia
+                  this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
+                }
+                break;
+              case 1:
+                // Ricalcolo intera gerarchia
+                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
+                break;
+            }
             this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
           },
           error: () => {
@@ -220,4 +244,13 @@ export class PermessiStrutturaComponent implements OnInit {
     )
   }
 
+  public getPermessiFiltratiPerSoggetto(oggettoni: PermessoEntitaStoredProcedure[], idProvenienzaSoggetto: number): PermessoEntitaStoredProcedure[] {
+    const permessiPerSoggetto: PermessoEntitaStoredProcedure[] = [];
+    oggettoni?.forEach((oggettone: PermessoEntitaStoredProcedure) => {
+      if (oggettone.soggetto.id_provenienza === idProvenienzaSoggetto) {
+        permessiPerSoggetto.push(oggettone);
+      }
+    })
+    return permessiPerSoggetto.length > 0 ? permessiPerSoggetto : null;
+  }
 }

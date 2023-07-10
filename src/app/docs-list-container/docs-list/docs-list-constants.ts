@@ -1,5 +1,5 @@
 import { ColonnaBds } from "@bds/common-tools";
-import { StatoDoc, StatoUfficioAtti, TipologiaDoc, StatiVersamento } from "@bds/internauta-model";
+import { StatoDoc, StatoUfficioAtti, TipologiaDoc, StatoVersamento } from "@bds/internauta-model";
 import { FILTER_TYPES, NextSDRDateTypes } from "@bds/next-sdr";
 import { Utils } from "src/app/utilities/utils";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
@@ -358,6 +358,34 @@ export const cols: ColonnaBds[] = [
     useFilterMatchMode: true,
     default: false
   },
+  {
+    field: "versamentoForzabile",
+    header: "Versamento forzabile",
+    filterField: "versamentoForzabile",
+    // sortField: "sullaScrivaniaDi.descrizione",
+    style: {},
+    headerClass: ["header-column", "data-ultimo-versamento-column"],
+    filterClass: ["filter-column", "data-ultimo-versamento-column"],
+    bodyClass: ["data-ultimo-versamento-column"],
+    fieldType: "boolean",
+    filterMatchMode: FILTER_TYPES.not_string.equals,
+    useFilterMatchMode: true,
+    default: false
+  },
+  {
+    field: "versamentoForzabileConcordato",
+    header: "Versamento forzabile concordato",
+    filterField: "versamentoForzabileConcordato",
+    // sortField: "sullaScrivaniaDi.descrizione",
+    style: {},
+    headerClass: ["header-column", "data-ultimo-versamento-column"],
+    filterClass: ["filter-column", "data-ultimo-versamento-column"],
+    bodyClass: ["data-ultimo-versamento-column"],
+    fieldType: "boolean",
+    filterMatchMode: FILTER_TYPES.not_string.equals,
+    useFilterMatchMode: true,
+    default: false
+  },
 
 ];
 // SPOSTATA IN PRIMENG PLUGIN
@@ -465,17 +493,32 @@ export const StatoUfficioAttiTraduzioneVisualizzazione = [
 ]
 
 export const StatiVersamentoTraduzioneVisualizzazione = [
-  { value: StatiVersamento.IN_CARICO, nome: "In carico"},
-  { value: StatiVersamento.FORZARE, nome: "Da forzare"},
-  { value: StatiVersamento.VERSARE, nome: "Da versare"},
-  { value: StatiVersamento.AGGIORNARE, nome: "Da aggiornare"},
-  { value: StatiVersamento.PARZIALE, nome: "Versato parzialmente"},
-  { value: StatiVersamento.VERSATO, nome: "Versato"},
-  { value: StatiVersamento.ANNULLATO, nome: "Annullato"},
-  { value: StatiVersamento.IN_CARICO_CON_ERRORI, nome: "In carico con errori"},
-  { value: StatiVersamento.IN_CARICO_CON_ERRORI_RITENTABILI, nome: "In carico con errori ritentabili"},
-  { value: StatiVersamento.ERRORE, nome: "Errore"},
-  { value: StatiVersamento.ERRORE_RITENTABILE, nome: "Errore ritentabile"},
+  { value: StatoVersamento.IN_CARICO, nome: "In carico"},
+  { value: StatoVersamento.FORZARE, nome: "Da forzare"},
+  { value: StatoVersamento.VERSARE, nome: "Da versare"},
+  { value: StatoVersamento.AGGIORNARE, nome: "Da aggiornare"},
+  { value: StatoVersamento.PARZIALE, nome: "Versato parzialmente"},
+  { value: StatoVersamento.VERSATO, nome: "Versato"},
+  { value: StatoVersamento.ANNULLATO, nome: "Annullato"},
+  { value: StatoVersamento.IN_CARICO_CON_ERRORI, nome: "In carico con errori"},
+  { value: StatoVersamento.IN_CARICO_CON_ERRORI_RITENTABILI, nome: "In carico con errori ritentabili"},
+  { value: StatoVersamento.ERRORE, nome: "Errore"},
+  { value: StatoVersamento.ERRORE_RITENTABILE, nome: "Errore ritentabile"},
+]
+
+export const StatiVersamentoParerPerFiltro = [
+  { value: [StatoVersamento.VERSARE, StatoVersamento.FORZARE], nome: "Da versare"},
+  { value: [StatoVersamento.VERSATO], nome: "Versato"},
+  { value: [StatoVersamento.ANNULLATO], nome: "Annullato"},
+  { value: [StatoVersamento.ERRORE, StatoVersamento.ERRORE_RITENTABILE], nome: "Errore"},
+  { value: [StatoVersamento.ERRORE, StatoVersamento.ERRORE_RITENTABILE], nome: "Errore forzabile"},
+  { value: [StatoVersamento.ERRORE, StatoVersamento.ERRORE_RITENTABILE], nome: "Errore crittografico"},
+]
+
+export const StatiVersamentoErroriPerFiltro = [
+  { value: [StatoVersamento.ERRORE, StatoVersamento.ERRORE_RITENTABILE], nome: "Errore non forzabile"},
+  { value: [StatoVersamento.ERRORE, StatoVersamento.ERRORE_RITENTABILE], nome: "Errore forzabile"},
+  { value: [StatoVersamento.ERRORE, StatoVersamento.ERRORE_RITENTABILE], nome: "Errore crittografico"},
 ]
 
 export enum DocsListMode {
@@ -485,7 +528,8 @@ export enum DocsListMode {
   IFIRMARIO = "IFIRMARIO",
   IFIRMATO = "IFIRMATO",
   REGISTRAZIONI = "REGISTRAZIONI",
-  ERRORI_VERSAMENTO = "ERRORI_VERSAMENTO"
+  ERRORI_VERSAMENTO = "ERRORI_VERSAMENTO",
+  PREGRESSI = "PREGRESSI"
 }
 
 export const colsCSV: any[] = [

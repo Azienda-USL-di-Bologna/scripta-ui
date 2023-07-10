@@ -33,7 +33,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log("setto doc a ", this.doc);
 
   }
-  
+
   public descrizioneUtenteRegistrante: string | undefined;
   public utenteUtilitiesLogin: UtenteUtilities;
   public DatiProtocolloEsterno: Number;
@@ -46,12 +46,16 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public visualizzazioneDocumento: string;
   public attachmentsBoxConfig: AttachmentsBoxConfig;
 
-  @Input() public pregresso: boolean = true;
+  public pregresso: boolean = false;
   @Input() set data(data: any) {
-    console.log("ciao", data);
-
     this.detailDoc = data.doc;
-    this.visualizzazioneDocumento = this.detailDoc.registrazioneVisualizzazione;
+    this._doc = data.doc;
+    this.doc = this._doc;
+    this.pregresso = this._doc.pregresso
+    this.visualizzazioneDocumento = this.detailDoc._registrazioneVisualizzazione;
+    console.log("visualizzazioneDocumento: ", this.visualizzazioneDocumento)
+    console.log("Doc_:", this._doc)
+    console.log("Pregresso", this.pregresso)
   }
 
   constructor(
@@ -72,67 +76,69 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
-          this.utenteUtilitiesLogin = utenteUtilities;
-          this.descrizioneUtenteRegistrante = utenteUtilities.getUtente().idPersona.descrizione;
+          if (utenteUtilities) {
+            this.utenteUtilitiesLogin = utenteUtilities;
+            this.descrizioneUtenteRegistrante = utenteUtilities.getUtente().idPersona.descrizione;
+
+             /**
+             * Questa sottoscrizione serve a popolare this.doc
+             */
+            if (this.pregresso) {
+              console.log("pregressando");
+              console.log(this.detailDoc);
+              this.subscriptions.push(
+                this.loadDocument(this.detailDoc.id).subscribe((res: Doc) => {
+                  console.log("res", res);
+                  this.doc = res;
+                  console.log("doc è:", this.doc);
+                  this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
+                  this.tipoDocumento = this.doc.tipologia;
+              })
+              );
+            } else {
+              this.subscriptions.push(
+                this.route.queryParamMap.pipe(
+                  switchMap((params: ParamMap) =>
+                    this.handleCommand(params)
+                )).subscribe((res: Doc) => {
+                  this.setFreezeDocumento(false);
+                  console.log("res", res);
+                  this.doc = res;
+                  if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG).length > 0) {
+                    console.log("RegistriDoc: ",this.doc.registroDocList)
+                    this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
+                  }
+                  this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
+                  this.appService.appNameSelection("PEIS - " + this.doc.idAzienda.descrizione);
+                  this.router.navigate(
+                    [],
+                    {
+                      relativeTo: this.route,
+                      queryParams: { command: "OPEN", id: this.doc.id }
+                    });
+                  },  error => {
+                  this.setFreezeDocumento(false);
+                  console.log("errore", error);
+                  this.messageService.add({
+                    severity: "error",
+                    summary: "Creazione proposta",
+                    detail: "Errore nell'avviare la proposta di protocollazione. Contattare Babelcare"
+                  });
+                })
+              );
+            }
+          }
         }
       )
     );
 
-    /**
-     * Questa sottoscrizione serve a popolare this.doc
-     */
-    if (this.pregresso) {
-      console.log("pregressando");
-      console.log(this.detailDoc);
-      this.subscriptions.push(
-        this.loadDocument(this.detailDoc.id).subscribe((res:Doc) => {
-          console.log("res", res)
-          this.doc = res;
-          console.log("doc è:", this.doc);
-          this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
-          this.tipoDocumento = this.doc.tipologia;
-      })
-      )
-    }
-    else {
-      this.subscriptions.push(
-        this.route.queryParamMap.pipe(
-          switchMap((params: ParamMap) =>
-            this.handleCommand(params)
-        )).subscribe((res: Doc) => {
-          this.setFreezeDocumento(false);
-          console.log("res", res);
-          this.doc = res;  
-          if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG).length > 0) {
-            this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
-          }
-          this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
-          this.appService.appNameSelection("PEIS - " + this.doc.idAzienda.descrizione);
-          this.router.navigate(
-            [], 
-            {
-              relativeTo: this.route,
-              queryParams: { command: 'OPEN', id: this.doc.id }
-            });
-          },  error => {
-          this.setFreezeDocumento(false);
-          
-          console.log("errore", error);
-  
-          this.messageService.add({
-            severity:'error', 
-            summary:'Creazione proposta', 
-            detail:'Errore nell\'avviare la proposta di protocollazione. Contattare Babelcare'
-          });
-        })
-      );
-    }
-    
-    
+   
+
+
   }
 
   ngAfterViewInit() {
-    
+
   }
 
   public removeZoneFromTime(date: string | undefined): string | null {
@@ -143,18 +149,18 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
 /**
- * Gestisce le due diverse richieste da url: 
- * 'NEW' documento (proviene dalla protocollazione da pec) ----> viene passato come parametro l'idMessage e viene usato come additionalData 
- * 'OPEN' documento ( apre un documento già esistente con l'id) 
+ * Gestisce le due diverse richieste da url:
+ * 'NEW' documento (proviene dalla protocollazione da pec) ----> viene passato come parametro l'idMessage e viene usato come additionalData
+ * 'OPEN' documento ( apre un documento già esistente con l'id)
  */
   private handleCommand(params: ParamMap): Observable<Doc> {
     const command = params.get("command");
     this.setFreezeDocumento(true);
     let res: Observable<Doc>;
-    switch(command) {
-      case "NEW": 
+    switch (command) {
+      case "NEW":
         const doc: Doc = new Doc();
-        doc.idPersonaCreazione = {id: this.utenteUtilitiesLogin.getUtente().idPersona.id} as Persona
+        doc.idPersonaCreazione = {id: this.utenteUtilitiesLogin.getUtente().idPersona.id} as Persona;
         if (params.get("idMessage") && params.get("azienda")) {
           const idMessage: string = params.get("idMessage");
           const codiceAzienda: string = params.get("azienda");
@@ -174,8 +180,8 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
 
   /**
    * Crea e torna l'observable per il caricamento del Doc tramite il suo id.
-   * @param id 
-   * @returns 
+   * @param id
+   * @returns
    */
   private loadDocument(id: number): Observable<Doc> {
     return this.extendedDocService.getByIdHttpCall(
@@ -224,11 +230,11 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
-  private hasAllegatoPrincipale(): boolean{
-    console.log("hasPrincipale",this.doc.allegati);
+  private hasAllegatoPrincipale(): boolean {
+    console.log("hasPrincipale", this.doc.allegati);
     let hasPrincipale = false;
     this.doc.allegati.forEach(allegato => {
-      if(allegato.principale)
+      if (allegato.principale)
         hasPrincipale = true;
     })
     console.log("has principale returns",  hasPrincipale);
@@ -240,48 +246,48 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.doc.mittenti && this.doc.mittenti.length > 0;
   }
 
-  private hasOggetto(): boolean{
+  private hasOggetto(): boolean {
     console.log("hasOggetto", this.doc.oggetto);
     return this.doc.oggetto && this.doc.oggetto !== "";
   }
 
-  private hasCompetente(): boolean{
+  private hasCompetente(): boolean {
     console.log("hasCompetente", this.doc.competenti);
     return this.doc.competenti && this.doc.competenti.length > 0;
   }
 
-  public possoProtocollare(): boolean{
-    if(this.hasOggetto() && this.hasMittente() && this.hasCompetente() && this.hasAllegatoPrincipale())
+  public possoProtocollare(): boolean {
+    if (this.hasOggetto() && this.hasMittente() && this.hasCompetente() && this.hasAllegatoPrincipale())
       return true;
     else
       return false;
   }
 
 
-  private addWarnMessage(messaggio: string){
+  private addWarnMessage(messaggio: string) {
     this.messageService.add({
-      severity: 'warn', 
-      summary: 'Documento', 
+      severity: "warn",
+      summary: "Documento",
       detail: messaggio
     });
   }
 
-  private manageMessageNonPossoProtocollare(){
-    if(!this.hasOggetto()){
-      this.addWarnMessage('Non puoi protocollare perché manca l\'oggetto');
+  private manageMessageNonPossoProtocollare() {
+    if (!this.hasOggetto()) {
+      this.addWarnMessage("Non puoi protocollare perché manca l'oggetto");
     }
-    if(!this.hasMittente()){
-      this.addWarnMessage('Non puoi protocollare perché manca il mittente');
+    if (!this.hasMittente()) {
+      this.addWarnMessage("Non puoi protocollare perché manca il mittente");
     }
-    if(!this.hasCompetente()){
-      this.addWarnMessage('Non puoi protocollare perché manca il destinatario competente');
+    if (!this.hasCompetente()) {
+      this.addWarnMessage("Non puoi protocollare perché manca il destinatario competente");
     }
-    if(!this.hasAllegatoPrincipale()){
-      this.addWarnMessage('Non puoi protocollare perché manca l\'allegato principale');
+    if (!this.hasAllegatoPrincipale()) {
+      this.addWarnMessage("Non puoi protocollare perché manca l'allegato principale");
     }
   }
 
-  private setFreezeDocumento(val: boolean){
+  private setFreezeDocumento(val: boolean) {
       this.inProtocollazione = val;
       this.blockedDocument = val;
   }
@@ -289,9 +295,9 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public doButtonSave(): void {
     this.appService.appNameSelection("PEIS - " + this.doc.idAzienda.descrizione);
     this.messageService.add({
-      severity:'success', 
-      summary:'Documento', 
-      detail:'Documento salvato con successo'
+      severity: "success",
+      summary: "Documento",
+      detail: "Documento salvato con successo"
     });
     console.log("nothing");
   }
@@ -309,25 +315,27 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
       this.setFreezeDocumento(true);
       this.extendedDocService.protocollaDoc(this.doc).subscribe(res => {
         console.log("RES", res);
-        this.loadDocument(this.doc.id).subscribe((res: Doc) => {
-          this.setFreezeDocumento(false);
-          console.log("res", res);
-          this.doc = res;
-          this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
-          this.messageService.add({
-            severity:'success', 
-            summary:'Documento', 
-            detail: "Documento protocollato con successo: numero protocollo generato " + this.numeroVisualizzazione
+       /*  setTimeout(() => { */
+          this.loadDocument(this.doc.id).subscribe((res: Doc) => {
+            this.setFreezeDocumento(false);
+            console.log("res", res);
+            this.doc = res;
+            this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
+            this.messageService.add({
+              severity: "success",
+              summary: "Documento",
+              detail: "Documento protocollato con successo: numero protocollo generato " + this.numeroVisualizzazione
+            });
           });
-        });
+          /* }, 10000); */
       }, err => {
         this.setFreezeDocumento(false);
         console.log("ERRR", err);
-        
+
         this.messageService.add({
-          severity:'error', 
-          summary:'Documento', 
-          detail:'Errore nel protocollare il documento'
+          severity: "error",
+          summary: "Documento",
+          detail: "Errore nel protocollare il documento"
         });
       });
     }

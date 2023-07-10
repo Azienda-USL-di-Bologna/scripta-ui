@@ -3,7 +3,7 @@
   styleClass="archivi-breadcrumb">
 </p-breadcrumb> -->
 <div class="archivi-header-div">Fascicoli in uso</div>
-<div>
+<div class="tree-container">
   <p-tree 
     [value]="archivi"
     styleClass="archivi-tree"
@@ -11,6 +11,9 @@
     [(selection)]="selectedNode" 
     (onNodeSelect)="onNodeSelect($event)"
     scrollHeight="flex">
+    <ng-template let-node pTemplate="default">
+      <div [innerHTML]="node.label"></div>
+    </ng-template>
   </p-tree>
   <div class="alert-too-much-archives" *ngIf="troppiSottoFascicoli ">
     <i class="pi pi-info-circle"></i>

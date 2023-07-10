@@ -72,7 +72,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
         for (const key in this.dt.editingRowKeys) {
           delete this.dt.editingRowKeys[key];
           if (key === "undefined") {
-            this.perms.pop();
+            this.perms.shift();
           }
         }
         this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
@@ -100,7 +100,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
       if (key !== perm.idProvenienzaSoggetto.toString()) {
         delete this.dt.editingRowKeys[key];
         if (key === "undefined") {
-          this.perms.pop();
+          this.perms.shift();
         }
       }
     }
@@ -145,6 +145,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
    * @param index 
    */
   public onRowEditSave(perm: PermessoTabella, index: number, operation: string) {
+    this.permessiDettaglioArchivioService.loading = true;
     /* Lo faccio sempre ma in realt� serve solo per le insert. 
       Perch� dentro a this.dt.editingRowKeys la chiave di una nuova riga � "undefined" e non matcha con idProvenienzaSoggetto 
       se lo setto subito alla scelta della persona
@@ -178,7 +179,26 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
             } else {
               delete this.perms[perm.idProvenienzaSoggetto];
             }
-            this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio);
+            switch (this.livello) {
+              case 3:
+                // Ricalocolo permessi di inserto, padre e nonno
+                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, false, true);
+                break;
+              case 2:
+                if (this.archivio.numeroSottoarchivi === 0 || this.archivio.numeroSottoarchivi === null) {
+                  // Ricalocolo permessi di sottofascicolo e padre
+                  this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, false, true);
+                } else {
+                  // Ricalcolo intera gerarchia
+                  this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
+                }
+                break;
+              case 1:
+                // Ricalcolo intera gerarchia
+                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
+                break;
+            }
+            
             this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
           },
           error: () => {
@@ -204,7 +224,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
       this.perms[index] = this.permClone[perm.idProvenienzaSoggetto];
       delete this.permClone[perm.idProvenienzaSoggetto];
     } else { 
-      this.perms.pop();
+      this.perms.shift();
     }
   }
   
@@ -233,7 +253,7 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     this.strutture = [];
     this.additionalDataComboUtenti = this.permessiDettaglioArchivioService.filtraEntitaEsistenti(this._archivio.permessi, "persone");
     const newPermessoTabella = new PermessoTabella();
-    this.perms.push(newPermessoTabella);
+    this.perms.unshift(newPermessoTabella);
     this.dt.initRowEdit(newPermessoTabella);
   }
 }

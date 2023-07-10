@@ -3,9 +3,11 @@ import { ExtendedDocDetailView } from '../docs-list/extended-doc-detail-view';
 import { AttachmentsBoxConfig } from '@bds/common-components';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { first, Subscription } from 'rxjs';
-import { DocDetail, Persona, Utente } from '@bds/internauta-model';
+import { DocDetail, Persona, PersonaVedenteService, TipologiaDoc, Utente } from '@bds/internauta-model';
 import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
 import { AppService } from 'src/app/app.service';
+import { MessageService } from 'primeng/api';
+import { DocUtilsService } from 'src/app/utilities/doc-utils.service';
 //import { disableDebugTools } from '@angular/platform-browser';
 
 
@@ -20,9 +22,10 @@ export class DocDetailAndPreviewComponent implements OnInit {
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
   private idPersona: Persona;
+  public utente: Utente;
   public hasPienaVisibilita: boolean = false;
 
-  
+
   @Output('closeRightPanel') closeRightPanel = new EventEmitter();
   _doc: ExtendedDocDetailView;
 
@@ -38,6 +41,9 @@ export class DocDetailAndPreviewComponent implements OnInit {
     private loginService: JwtLoginService,
     private navigationTabsService: NavigationTabsService,
     private appService: AppService,
+    private messageService: MessageService,
+    private personaVedenteService: PersonaVedenteService,
+    private docUtilsService: DocUtilsService,
   ) {
     this.attachmentsBoxConfig = new AttachmentsBoxConfig();
     this.attachmentsBoxConfig.showPreview = true;
@@ -52,28 +58,25 @@ export class DocDetailAndPreviewComponent implements OnInit {
           if (utenteUtilities) {
             this.utenteUtilitiesLogin = utenteUtilities;
             this.isResponsabileVersamento = this.utenteUtilitiesLogin.isRV();
-            this.idPersona = this.utenteUtilitiesLogin.getUtente().idPersona;
-            
+            this.utente = this.utenteUtilitiesLogin.getUtente();
+            this.idPersona = this.utente.idPersona;
+
           }
         }
       )
     );
-
-    
-    
   }
-   
+
   public closePanel() {
     this.closeRightPanel.emit({
       showPanel: false,
       rowSelected: null
-      });
-      console.log("Ma io ho l'evento")
+    });
   }
+  
 
-
-  public hasUserPienaVisibilita(doc: DocDetail):boolean {
-    if(doc.personeVedentiList.find(pv => pv.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id).pienaVisibilita){
+  public hasUserPienaVisibilita(doc: DocDetail): boolean {
+    if (doc.personeVedentiList.find(pv => pv.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id).pienaVisibilita) {
       this.hasPienaVisibilita = true;
     }
     return this.hasPienaVisibilita;

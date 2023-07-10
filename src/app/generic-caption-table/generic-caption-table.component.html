@@ -89,7 +89,7 @@
 
     <!-- BOTTONE NUOVO ARCHIVIO [disabled] = "archivio.canCreateSottoarchivio()"-->
     <span *ngIf="configuration.newArchivio && functionalOperationsComponent.newArchivoButton && functionalOperationsComponent.newArchivoButton.enable">
-      <i *ngIf="canCreateArchivio"
+      <i
         (click)="functionalOperationsComponent.newArchivoButton.aziendeItems.length > 1 ? 
           aziendaSelection.toggle($event) : 
           functionalOperationsComponent.newArchivoButton.aziendeItems[0].command()" 
@@ -124,19 +124,15 @@
     <!-- BOTTONE UPLOAD DOCUMENT -->
     <!--fileUploaderDocumentsAuto.clear() serve a svuotare il componente altrimenti si carica sempre lo stesso file--> 
     <span *ngIf="configuration.uploadDocument && functionalOperationsComponent.uploadDocumentButton" class="span-fileUpload-button">
-      <p-fileUpload #fileUploaderDocumentsAuto
-        chooseIcon="pi pi-upload"
+      
+      <i
+        (click)="uploadDocumentDialogVisible=true" 
+        class="pi pi-upload button-icon" 
         pTooltip="Carica documenti nell'archivio"
-        class="upload-document-button"
-        [multiple]="true"
-        [disabled]="!functionalOperationsComponent.uploadDocumentButton.enable"
-        mode="basic" 
-        name="document[]"
-        [maxFileSize]="5000000" 
-        [customUpload]="true"
-        [auto]="true"
-        (uploadHandler)="functionalOperationsComponent.uploadDocument($event);fileUploaderDocumentsAuto.clear()">
-      </p-fileUpload>
+        aria-label="Carica documenti nell'archivio"
+        tooltipPosition="bottom">
+      </i>      
+
     </span>
     
     <!-- BOTTONE ESPORTA -->
@@ -164,7 +160,7 @@
      <!-- BOTTONE TIP -->
     <span *ngIf="canUseTip">
       <i 
-        (click)="show()" 
+        (click)="showTip()" 
         class="pi pi-file-import button-icon" 
         pTooltip="TIP"
         aria-label="Tool di importazione pregressi"
@@ -230,6 +226,12 @@
           <span >{{column.header}}</span>
         </div>
       </ng-template>
-    </p-multiSelect><!-- [style]="{minWidth: '23.125rem', maxWidth: '23.125rem'}"  -->
+    </p-multiSelect>
   </div>
 </div>
+
+<p-dialog header="Carica Allegati" [(visible)]="uploadDocumentDialogVisible" [style]="{width: '50vw'}">
+  <file-upload 
+    [functionalOperationsComponent]="functionalOperationsComponent" (uploadDocumentDialogVisible)="uploadDocumentDialogVisible=false;"> 
+  </file-upload>
+</p-dialog>

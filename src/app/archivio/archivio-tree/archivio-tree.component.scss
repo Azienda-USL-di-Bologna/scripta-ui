@@ -1,5 +1,13 @@
 :host {
   width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.tree-container {
+  flex: 1 1 0;
+  min-height: 0;
 }
 ::ng-deep .archivi-header-div{
   display: flex;
@@ -13,7 +21,6 @@
   background-color: #f4f4f4;
   box-shadow: 2px 2px0.625rem 5px #e1e1e1;
 }
-
 ::ng-deep .archivi-breadcrumb {
   /* border: none;
   border-bottom: 1px solid #c8c8c8;
@@ -36,20 +43,58 @@
 }
 ::ng-deep .archivi-tree  {
   border: none;
-  /* .p-tree-container {
+  .p-tree-container {
     .p-treenode {
-      .p-treenode-content {
-        &:focus {
-          box-shadow: none;
+      .p-tree-toggler, .p-treenode-icon {
+        align-self: flex-start;
+        align-self: baseline;
+        align-self: self-start;
+        
+      }
+      .p-tree-toggler {
+        height: initial !important;
+        margin-top: 5px;
+      }
+      .p-treenode-icon, .p-treenode-label {
+        margin-top: 5px;
+      }
+      
+      margin-bottom: 3px;
+      &.nodo-bozza {
+        font-style: oblique;
+      }
+      &.fascicolo {
+        .numerazione {
+          background-color:#92226061;
+        }
+        .p-treenode-icon, &.fascicolo .p-highlight .p-treenode-icon {
+          color: rgba(146, 34, 96) !important;
         }
       }
+      &.sottofascicolo {
+        .numerazione {
+          background-color:#f68b208c;
+        }
+        .p-treenode-icon, &.sottofascicolo .p-highlight .p-treenode-icon {
+          color: rgb(246, 139, 32) !important;
+        }
+      }
+      &.inserto {
+        .numerazione {
+          background-color:#edc21185;
+        }
+        .p-treenode-icon, &.inserto .p-highlight .p-treenode-icon {
+          color: rgb(237, 194, 17) !important;
+        }
+      }
+      .p-treenode-content {}
     }
-  } */
-  .nodo-bozza{
-    font-style: oblique;
-  }
+    .p-treenode-selectable {
+      margin-bottom: 7px;
+    }
+  } 
+  
 }
-
 ::ng-deep .alert-too-much-archives{
   display: flex;
   align-items: baseline;

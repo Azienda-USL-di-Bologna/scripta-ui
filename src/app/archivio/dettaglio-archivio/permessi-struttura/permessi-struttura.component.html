@@ -4,6 +4,7 @@
 	dataKey="idProvenienzaSoggetto" 
 	editMode="row"
 	[scrollable]="true"
+	[loading]="permessiDettaglioArchivioService.loading"
 	scrollHeight="flex">
 	<ng-template pTemplate="caption">
 		<div class="flex align-items-center justify-content-between">
@@ -16,7 +17,7 @@
 				(click)="inEditing = true; addPermesso()" 
 				class="mr-2" 
 				label="Aggiungi permesso"
-				[disabled]="inEditing || !loggedUserIsResponsbaileOrVicario || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
+				[disabled]="inEditing || permessiDettaglioArchivioService.loading || !loggedUserIsResponsbaileOrVicario || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
 			</button>
 		</div>
 	</ng-template>
@@ -34,7 +35,7 @@
 		</tr>
 	</ng-template>
 	<ng-template pTemplate="body" let-permesso let-editing="editing" let-ri="rowIndex">
-		<tr [pEditableRow]="permesso">
+		<tr [pEditableRow]="permesso" *ngIf="permesso && permesso.predicato !== 'PASSAGGIO'">
 			<td class="struttura-column" [ngClass]="permesso.barrato ? 'barrato':'' ">
 				<!-- Non si deve poreter editare se perm['struttura'] è pieno -->
 				<p-cellEditor>
@@ -51,7 +52,7 @@
 						<div *ngIf="permesso.descrizioneSoggetto">{{permesso.descrizioneSoggetto}}</div>
 					</ng-template>
 					<ng-template pTemplate="output">
-						{{permesso.idPermesso}} ---- {{permesso.descrizioneSoggetto}}
+					 {{permesso.descrizioneSoggetto}}
 					</ng-template>
 				</p-cellEditor>
 			</td>

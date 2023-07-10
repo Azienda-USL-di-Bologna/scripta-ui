@@ -21,6 +21,8 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
   
   private _archivioReloadPermessi = new Subject<boolean>();
 
+  public loading: boolean = false;
+
   constructor(
     protected _http: HttpClient,
     protected datepipe: DatePipe,
@@ -138,9 +140,11 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
    * @param archivio 
    */
   public reloadPermessiArchivio(archivio: Archivio | ArchivioDetail) {
+    this.loading = true;
     this.blackboxPermessiService.getPermessiArchivio(archivio.id).subscribe((permessi: PermessoEntitaStoredProcedure[]) => {
       archivio.permessi = permessi;
       this.archivioReloadPermessiSelection(true);
+      this.loading = false;
     },
     err => {
       this.messageService.add({
@@ -153,17 +157,33 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
   }
 
   /**
-   * Funzione temporanea che calcola i permessi esplciti a partire dalla blackbox.
-   * Sarà proabbilmente eliminata quando avremo il servizo asincrono apposito.
+   * Funzione che calcola i permessi esplciti a partire dalla blackbox.
+   * 
    */
-   public calcolaPermessiEspliciti(archivio: Archivio | ArchivioDetail): void {
-     this.extendedArchivioService.calcolaPermessiEspliciti(archivio.fk_idArchivioRadice.id);
-     /* if (archivio.idArchivioPadre?.id) {
-        this.extendedArchivioService.calcolaPermessiEspliciti(archivio.idArchivioPadre.id);
-     }
-     if (archivio.idArchivioRadice?.id && archivio.idArchivioRadice?.id !== archivio.idArchivioPadre?.id) {
-       this.extendedArchivioService.calcolaPermessiEspliciti(archivio.idArchivioRadice.id);
-     } */
+   public calcolaPermessiEspliciti(
+      archivio: Archivio | ArchivioDetail, 
+      calcolaPerInteraGerarchia: boolean,
+      calcolaPerAntenati: boolean): void {
+    if (calcolaPerInteraGerarchia) {
+      // Si vuole calcolare i permessi di tutti gli arhcivi che appartengono alla stessa gerarchia di questo arhicivo
+      this.extendedArchivioService.calcolaPermessiEsplicitiGerarchiaArchivio(archivio.fk_idArchivioRadice.id);
+    } else {
+      if (calcolaPerAntenati) {
+        // Si vogliono calcolare i permessi dell'archivio e nel esistano caso del padre e del nonno
+        this.extendedArchivioService.calcolaPermessiEsplicitiArchivio(archivio.id);
+        if (archivio.fk_idArchivioPadre?.id) {
+          this.extendedArchivioService.calcolaPermessiEsplicitiArchivio(archivio.fk_idArchivioPadre.id);
+        }
+        if (archivio.fk_idArchivioRadice?.id 
+            && archivio.fk_idArchivioRadice?.id !== archivio.fk_idArchivioRadice?.id
+            && archivio.fk_idArchivioRadice?.id !== archivio.id) {
+          this.extendedArchivioService.calcolaPermessiEsplicitiArchivio(archivio.fk_idArchivioRadice.id);
+        }
+      } else {
+        // Si vuole calcolare i permessi del solo arhcivio passato
+        this.extendedArchivioService.calcolaPermessiEsplicitiArchivio(archivio.id);
+      }
+    }
   }
 
   /**
@@ -217,7 +237,13 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
 
       if (oggettone) {
         /* Se sto editando un permesso che già c'era semplicemente modifcando il predicato o la struttura veicolante, allora voglio spegnere il vecchio e accenderne uno nuovo */
-        const permessoPregresso = oggettone[0].categorie[0].permessi.find(p => p.id === permesso.idPermesso && (p.predicato !== predicato || p.entita_veicolante.id_provenienza !== permesso.idProvenienzaVeicolo));
+        const permessoPregresso = oggettone[0].categorie[0].permessi.find(p => 
+          p.id === permesso.idPermesso && (
+            p.predicato !== predicato 
+            || p.entita_veicolante?.id_provenienza !== permesso.idProvenienzaVeicolo
+            || p.propaga_soggetto !== permesso.trasmetti
+            || p.propaga_oggetto !== permesso.propaga
+        ));
         if (permessoPregresso) {
           permessoPerBlackbox.managePermessoOggettone(
             soggetto,
@@ -320,7 +346,7 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
   }
 }
 
-export class PermessoTabella { 
+export class PermessoTabella {
   id: number;
   idPermesso: number;
   idProvenienzaSoggetto: number;

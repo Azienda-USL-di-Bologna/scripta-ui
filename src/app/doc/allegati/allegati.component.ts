@@ -17,7 +17,7 @@ export class AllegatiComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private actualPrincipale: Allegato;
   private projectionAllegati: string = ENTITIES_STRUCTURE.scripta.allegato.standardProjections.AllegatoWithIdAllegatoPadre;
-  
+
   public _doc: Doc;
   public selectedAllegato: Allegato;
   public progress: number = 0;
@@ -26,27 +26,27 @@ export class AllegatiComponent implements OnInit, OnDestroy {
   public selectedTipo: string;
   public uploadedFiles: File[] = [];
 
-  private _pregresso: boolean = true;
-  public get pregresso(): boolean {
-    return this._pregresso;
-  }
-  @Input() public set pregresso(value: boolean) {
-    this._pregresso = value;
-  }
-  
+  public pregresso: boolean;
+  // public get pregresso(): boolean {
+  //   return this._pregresso;
+  // }
+  // @Input() public set pregresso(value: boolean) {
+  //   this._pregresso = value;
+  // }
+
 
   @ViewChild("fubauto") fileUploadInput: FileUpload;
-  
+
   @Input() set doc(value: Doc) {
     this._doc = value;
+    this.pregresso = this._doc.pregresso;
     this.setInitialData();
   }
 
   constructor(
     private messageService: MessageService,
-    private allegatoService: ExtendedAllegatoService)
-   { }
-  
+    private allegatoService: ExtendedAllegatoService) { }
+
   ngOnInit(): void {
   }
 
@@ -59,10 +59,10 @@ export class AllegatiComponent implements OnInit, OnDestroy {
       this.selectedAllegato = this.actualPrincipale;
     }
   }
-  
+
   /**
    * Funzione che gestisce l'upload degli allegati
-   * @param event 
+   * @param event
    */
   public onUpload(event: any): void {
     console.log("formDataformDataformData", event);
@@ -81,8 +81,8 @@ export class AllegatiComponent implements OnInit, OnDestroy {
             // console.log("Response header has been received!  progress is: ", this.progress);
             if (!event.ok && !(event.status === 200)) {
               this.messageService.add({
-                severity: "error", 
-                summary: `Error code ${event.status}`, 
+                severity: "error",
+                summary: `Error code ${event.status}`,
                 detail: "Backend Error, I dati passati per l'importazione sono assenti o non corretti."
               });
             }
@@ -106,18 +106,18 @@ export class AllegatiComponent implements OnInit, OnDestroy {
             setTimeout(() => {
               this.progress = 0;
               this.setProgressBarWidth(this.progress);
-              this.onCloseFileUploadDialog();          
+              this.onCloseFileUploadDialog();
               this.refreshTable = false;
             }, 0);
         }
-     }));
+      }));
     this.messageService.add({ severity: "info", summary: "File Uploaded", detail: "" });
   }
 
-  private buildFormData(event :any ): FormData {
+  private buildFormData(event: any): FormData {
     this.uploadedFiles = event.files;
     const formData: FormData = new FormData();
-    formData.append("idDoc",this._doc.id.toString());
+    formData.append("idDoc", this._doc.id.toString());
     formData.append("numeroProposta", "6");
     this.uploadedFiles.forEach((file: File) => {
       formData.append("files", file);
@@ -153,7 +153,7 @@ export class AllegatiComponent implements OnInit, OnDestroy {
    */
   public downloadAllAttachments(): void {
     this.allegatoService.downloadAllAttachments(this._doc).subscribe(
-      response => 
+      response =>
         UtilityFunctions.downLoadFile(response, "application/zip", "allegati.zip")
 
     );
@@ -182,9 +182,9 @@ export class AllegatiComponent implements OnInit, OnDestroy {
     this.allegatoService.deleteHttpCall(allegato.id).subscribe(
       res => {
         this.messageService.add({
-          severity:"success", 
-          summary:"Allegato", 
-          detail:"Allegato eliminato con successo"
+          severity: "success",
+          summary: "Allegato",
+          detail: "Allegato eliminato con successo"
         });
         // La delete può far scattare la rinumerazione degli allegati e quindi ricarico l'intera lista.
         this.loadAllegati();
@@ -225,30 +225,31 @@ export class AllegatiComponent implements OnInit, OnDestroy {
           entityBody: actualPrincipaleBody as NextSdrEntity,
           returnProjection: this.projectionAllegati
         } as BatchOperation);
-      } 
+      }
       this.subscriptions.push(
         this.allegatoService.batchHttpCall(batchOperations).subscribe(
           (res: BatchOperation[]) => {
             this.messageService.add({
-              severity: "success", 
-              summary: "Allegato", 
+              severity: "success",
+              summary: "Allegato",
               detail: "Allegato principale impostato con successo"
             });
             // Aggiorno i campi su vecchio principale
             if (this.actualPrincipale) {
-              this._doc.allegati[this._doc.allegati.findIndex(a => a.id === this.actualPrincipale.id)] = res.find(b => 
+              this._doc.allegati[this._doc.allegati.findIndex(a => a.id === this.actualPrincipale.id)] = res.find(b =>
                 (b.entityBody as Allegato).id === this.actualPrincipale.id
-                ).entityBody as Allegato;
+              ).entityBody as Allegato;
             }
             // Aggiorno i campi sul nuovo principale
             const indexNewPrincipale = this._doc.allegati.findIndex(a => a.id === this.selectedAllegato.id);
-            this._doc.allegati[indexNewPrincipale] = res.find(b => 
+            this._doc.allegati[indexNewPrincipale] = res.find(b =>
               (b.entityBody as Allegato).id === this.selectedAllegato.id
-              ).entityBody as Allegato;
+            ).entityBody as Allegato;
 
             // Setto l'actualPrincipale al nuovo principale
             this.actualPrincipale = this._doc.allegati[indexNewPrincipale];
-        })
+          }
+        )
       );
     }
   }
@@ -265,17 +266,17 @@ export class AllegatiComponent implements OnInit, OnDestroy {
 
       this.subscriptions.push(
         this.allegatoService.patchHttpCall(allegatoToSave, this.actualPrincipale.id, this.projectionAllegati, null)
-        .subscribe(
-          (allegato: Allegato) => {
-            this._doc.allegati[this._doc.allegati.findIndex(a => a.id === this.actualPrincipale.id)] = allegato;
-            this.messageService.add({
-              severity:"success", 
-              summary:"Allegato", 
-              detail:"Allegato principale deselezionato"
-            });
-            this.actualPrincipale = null;
-          }
-        )
+          .subscribe(
+            (allegato: Allegato) => {
+              this._doc.allegati[this._doc.allegati.findIndex(a => a.id === this.actualPrincipale.id)] = allegato;
+              this.messageService.add({
+                severity: "success",
+                summary: "Allegato",
+                detail: "Allegato principale deselezionato"
+              });
+              this.actualPrincipale = null;
+            }
+          )
       );
     }
   }

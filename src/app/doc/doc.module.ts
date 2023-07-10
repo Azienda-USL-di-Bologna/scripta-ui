@@ -14,6 +14,7 @@ import { ExtendedAllegatoService } from "./allegati/extended-allegato.service";
 import { AttoriComponent } from './attori/attori.component';
 import { ArchivioDocComponent } from './archivio-doc/archivio-doc.component';
 import { AttachmentsBoxModule } from "@bds/common-components";
+import { DocUtilsService } from "../utilities/doc-utils.service";
 
 
 @NgModule({
@@ -36,7 +37,8 @@ import { AttachmentsBoxModule } from "@bds/common-components";
     ExtendedDocService,
     ExtendedDestinatariService,
     ExtendedMittenteService,
-    ExtendedAllegatoService
+    ExtendedAllegatoService,
+    DocUtilsService
   ],
   exports: [
     DocComponent
