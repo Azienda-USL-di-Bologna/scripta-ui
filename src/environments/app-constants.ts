@@ -20,5 +20,6 @@ export const CUSTOM_SERVER_METHODS = {
   downloadAllAttachments: "downloadAllAttachments",
   allegato:"allegato",
   createPE: "createPE",
-  eliminaProposta: "eliminaProposta"
+  eliminaProposta: "eliminaProposta",
+  versaDocMassivo: "versaDocMassivo"
 };

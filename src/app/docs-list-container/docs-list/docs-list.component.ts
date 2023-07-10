@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatiVersamento, Utente, StatoArchivio, ArchivioDetail, ArchivioDetailView, ConfigurazioneService, Doc } from "@bds/internauta-model";
+import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatoVersamento, Utente, StatoArchivio, ArchivioDetail, ArchivioDetailView, ConfigurazioneService } from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { buildLazyEventFiltersAndSorts } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from "@bds/next-sdr";
@@ -32,6 +32,7 @@ import { ExtendedArchivioService } from "src/app/archivio/extended-archivio.serv
 import { ExtendedArchiviView } from '../../archivi-list-container/archivi-list/extendend-archivi-view';
 import { TieredMenu } from "primeng/tieredmenu";
 import { DocListService } from "./docs-list.service";
+import { FunctionButton } from "src/app/generic-caption-table/functional-buttons/functions-button";
 
 @Component({
   selector: "docs-list",
@@ -40,6 +41,7 @@ import { DocListService } from "./docs-list.service";
 })
 export class DocsListComponent implements OnInit, OnDestroy, TabComponent, CaptionReferenceTableComponent, CaptionSelectButtonsComponent {
   @Output() showRightPanel = new EventEmitter<{showPanel: boolean, rowSelected: ExtendedDocDetailView }>();
+  @Output() docListModeSelected = new EventEmitter<{ docListModeSelected: DocsListMode }>();
   @Input() data: any;
   private subscriptions: Subscription[] = [];
   private loadDocsListSubscription: Subscription;
@@ -126,7 +128,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public aziendeFiltrabiliFiltered: any[];
   public loggedUserCanRestoreArchiviation: boolean = false;
   public loggedUserCanDeleteArchiviation: boolean = false;
-  public docSelected: ExtendedDocDetailView;
+  public docsSelected: ExtendedDocDetailView[] = [];
   public isResponsabileVersamento: boolean = false;
   public isResponsabileVersamentoParer: boolean = false;
   public hasPienaVisibilita: boolean = false;
@@ -134,6 +136,15 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public showAnteprima: boolean = false;
   public utente: Utente;
   public docPerVedereLeNote: number;
+  public functionButton: FunctionButton;
+  public versamentoMassivoPopupInfo: {
+    title?: string, 
+    show?: boolean, 
+    docCoinvolti?: ExtendedDocDetailView[], 
+    docImpossibilitati?: ExtendedDocDetailView[],
+    operazione?: StatoVersamento,
+    idAzienda?: number
+  } = {};
 
   private _archivio: Archivio;
   get archivio(): Archivio { return this._archivio; }
@@ -176,6 +187,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (!Object.values(DocsListMode).includes(this.docsListMode)) {
       this.docsListMode = DocsListMode.MIEI_DOCUMENTI;
     }
+    this.docListModeSelected.emit({ docListModeSelected: this.docsListMode });
     //this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.DOCUMENTI, mode: this.docsListMode } }); 
     
     this.subscriptions.push(
@@ -196,6 +208,26 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
             }
 
             this.isResponsabileVersamento = this.utenteUtilitiesLogin.isRV();
+
+            if (this.isResponsabileVersamento) {
+              const funzioniItems: MenuItem[] = [
+              {
+                label: "Forza versamenti",
+                disabled: false,
+                command: () => this.openVersamentoMassivoPopup(StatoVersamento.FORZARE)
+              },
+              {
+                label: "Ritenta versamenti",
+                disabled: false,
+                command: () => this.openVersamentoMassivoPopup(StatoVersamento.ERRORE_RITENTABILE)
+              }] as MenuItem[];
+          
+              this.functionButton = {
+                tooltip: "Funzioni",
+                functionItems: funzioniItems,
+                enable: true,
+              };
+            }
             
             this.isResponsabileVersamentoParer = true; //TODO: Qui andrà messo il valore in maniera opportuna.
             this.setStatiVersamentoObj();
@@ -244,6 +276,93 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       if (this.utenteUtilitiesLogin) this.calcolaAziendeFiltrabili();
       this.resetPaginationAndLoadData();
     }); */
+  }
+
+  private openVersamentoMassivoPopup(operazione: StatoVersamento) {
+    if (this.docsSelected.length === 0) {
+      this.messageService.add({
+        severity: "warn",
+        key : "docsListToast",
+        summary: "Attenzione",
+        detail: `Non hai selezionato alcun documento`
+      });
+      return;
+    }
+
+    const idAzienda = this.docsSelected[0].idAzienda.id;
+    if (!this.docsSelected.every(d => d.idAzienda.id === idAzienda)) {
+      this.messageService.add({
+        severity: "warn",
+        key : "docsListToast",
+        summary: "Attenzione",
+        detail: `E' necessario selezionare documenti di una sola azienda per procedere ad una sessione di versamento`
+      });
+      return;
+    }
+
+    const docCoinvolti: ExtendedDocDetailView[] = [];
+    const docImpossibilitati: ExtendedDocDetailView[] = [];
+    if (operazione === StatoVersamento.FORZARE) {
+      docCoinvolti.push(...this.docsSelected.filter(d => {
+        return (d.statoUltimoVersamento == StatoVersamento.ERRORE) && (d.versamentoForzabile || d.versamentoForzabileConcordato)
+      }));
+      docImpossibilitati.push(...this.docsSelected.filter(d => {
+        return !((d.statoUltimoVersamento == StatoVersamento.ERRORE) && (d.versamentoForzabile || d.versamentoForzabileConcordato))
+      }));
+    } else {
+      docCoinvolti.push(...this.docsSelected.filter(d => {
+        return d.statoUltimoVersamento == StatoVersamento.ERRORE || d.statoUltimoVersamento == StatoVersamento.ERRORE_RITENTABILE
+      }));
+      docImpossibilitati.push(...this.docsSelected.filter(d => {
+        return !(d.statoUltimoVersamento == StatoVersamento.ERRORE || d.statoUltimoVersamento == StatoVersamento.ERRORE_RITENTABILE)
+      }));
+    }
+
+    if (docCoinvolti.length === 0) {
+      this.messageService.add({
+        severity: "warn",
+        key : "docsListToast",
+        summary: "Attenzione",
+        detail: `Nessuno dei documenti selezionati è ${operazione === StatoVersamento.FORZARE ? 'forzabile' : 'ritentabile'}`
+      });
+      return;
+    }
+
+    this.versamentoMassivoPopupInfo = {
+      title: operazione === StatoVersamento.FORZARE ? "Forza versamenti" : "Ritenta versamenti",
+      show: true,
+      docCoinvolti: docCoinvolti,
+      docImpossibilitati: docImpossibilitati,
+      operazione: operazione,
+      idAzienda: idAzienda
+    }
+  }
+
+  /**
+   * Chiamato dal frontend quando l'utente dopo aver selezioanto i documenti da versare clicca conferma sul popup dedicato.
+   */
+  private versaMassivamente(operazione: StatoVersamento, docs: ExtendedDocDetailView[], idAzienda: number): void {
+    this.docDetailService.versaDocMassivo(operazione, docs, idAzienda)
+      .subscribe({
+        next: (res: any) => {
+          this.messageService.add({
+            severity: "success",
+            key: "docsListToast",
+            summary: "OK",
+            detail: "Richiesta di versamento inserita con successo"
+          });
+          this.docsSelected = [];
+          this.resetPaginationAndLoadData();
+        },
+        error: (e: any) => {
+          this.messageService.add({
+            severity: "error",
+            key: "docsListToast",
+            summary: "Attenzione",
+            detail: `Errore nel completare l'operazione di versamento. Contattare babelcare`
+          });
+        }
+      });
   }
 
   private setStatiVersamentoObj(resetFilter = false) {
@@ -344,6 +463,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public onSelectButtonItemSelection(event: any): void {
     const oldDocsListMode = this.docsListMode;
     this.docsListMode = event.option.queryParams.mode;
+    this.docListModeSelected.emit({ docListModeSelected: this.docsListMode });
 
     // TODO: Se viene velocizzato il tab ifirmato allora si può cancellare questo if e togliere il setimeout
     if (this.docsListMode === DocsListMode.IFIRMATO) {
@@ -822,7 +942,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           if (idDocListToSelect && idDocListToSelect.length > 0) {
             const index = this.docs.findIndex(d => d.id === idDocListToSelect[0]);
             if (index) {
-              this.docSelected = this.docs[index];
+              this.docsSelected = [this.docs[index]];
             }
           }
           window.dispatchEvent(new Event('resize'));
@@ -1290,7 +1410,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           value: itemValue === "Errore forzabile"
         }
         
-        filterCallback([StatiVersamento.ERRORE, StatiVersamento.ERRORE_RITENTABILE]);
+        filterCallback([StatoVersamento.ERRORE, StatoVersamento.ERRORE_RITENTABILE]);
       } else {
         filterCallback([]);
       }
@@ -1301,7 +1421,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           matchMode: "equals",
           value: itemValue === "Errore crittografico"
         }
-        filterCallback([StatiVersamento.ERRORE, StatiVersamento.ERRORE_RITENTABILE]);
+        filterCallback([StatoVersamento.ERRORE, StatoVersamento.ERRORE_RITENTABILE]);
       } else {
         filterCallback([]);
       }
@@ -1504,19 +1624,30 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public onRowSelect(event: any): void {
-    if(this.archivio)
+    console.log(event);
+    console.log(this.docsSelected)
+    event.originalEvent.stopPropagation();
+    //this.docsSelected = [...this.docsSelected]
+    if (this.archivio)
       this.showAnteprima = true;
-    if (this.showAnteprima == true) {
+    if (this.showAnteprima) {
       this.openDetailAndPreview(event.data);
     }
   }
 
   public onRowUnselect(event: any): void {
+    event.originalEvent.stopPropagation();
     this.showRightPanel.emit({
       showPanel: false,
       rowSelected: null
     });
     this.showAnteprima = false;
+  }
+
+  trackByFn(index: any, item: any) {
+    if (item) {
+      return item.id;
+    }
   }
 
   public setVersamentoVisto(event: any, doc: ExtendedDocDetailView): void {

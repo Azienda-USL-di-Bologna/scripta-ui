@@ -2,6 +2,12 @@
   ariaLabel="Tabella elenco documenti" 
   [value]="docs" 
   dataKey="id" 
+  [rowTrackBy]="trackByFn" 
+  [metaKeySelection]="true"
+  selectionMode="multiple" 
+  [(selection)]="docsSelected"
+  (onRowSelect)="onRowSelect($event)" 
+  (onRowUnselect)="onRowUnselect($event)"
   [columns]="selectedColumns"
   [sortField]="initialSortField"
   [sortOrder]="-1"
@@ -19,16 +25,18 @@
   (onLazyLoad)="onLazyLoad($event)" 
   [loading]="loading" 
   [totalRecords]="totalRecords"
-  selectionMode="single" 
-  [(selection)]="docSelected"
-  (onRowSelect)="onRowSelect($event)" 
-  (onRowUnselect)="onRowUnselect($event)"
   styleClass="p-table-scripta-docs-list"
   [ngClass]="{'table-zero-rows': totalRecords === 0}"
   tableStyleClass="docslist-table-body">
   <ng-template pTemplate="header" let-columns>
     <!-- HEADER & ORDINAMENTO -->
     <tr class="header-row"> 
+      <th *ngIf="docsListMode === enumDocsListMode.ERRORI_VERSAMENTO"
+        class="checkbox-column"
+        alignFrozen="left" 
+        pFrozenColumn 
+        [frozen]="true">
+      </th>
       <th *ngFor="let col of columns" pReorderableColumn
         [ngClass]="col.headerClass"
         [pSortableColumn]="col.sortField"
@@ -59,6 +67,12 @@
     </tr>
     <!-- FILTRI -->
     <tr class="filter-row">
+      <th *ngIf="docsListMode === enumDocsListMode.ERRORI_VERSAMENTO"
+        class="checkbox-column"
+        alignFrozen="left" 
+        pFrozenColumn 
+        [frozen]="true">
+      </th>
       <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
         <div *ngSwitchCase="'idAzienda'" #filteraziendacontainer>
           <p-columnFilter #columnFilterAzienda [field]="col.filterField"  matchMode="in" [showMenu]="false">
@@ -646,7 +660,16 @@
     <tr 
       #riga
       class="row-height" 
-      [pSelectableRow]="rowData">
+      [pSelectableRow]="rowData"
+      [pSelectableRowIndex]="index"
+      [pSelectableRowDisabled]="false">
+      <td *ngIf="docsListMode === enumDocsListMode.ERRORI_VERSAMENTO"
+        class="checkbox-column"
+        alignFrozen="left"
+        pFrozenColumn 
+        [frozen]="true">
+        <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+      </td>
       <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
         <div *ngSwitchCase="'idAzienda'">
           {{rowData.idAzienda.nome}}
@@ -863,6 +886,7 @@
   <p-button [disabled]="archivioDestinazioneOrganizza == null" type="button" (click)="organizza()" label="Conferma"></p-button>
 </p-dialog>
 
+<!-- NOTE VERSAMENTO -->
 <p-dialog
   *ngIf="isResponsabileVersamento"
   appendTo="body"
@@ -876,4 +900,36 @@
     [idDoc]="this.docPerVedereLeNote"
   >
   </app-note-versamento>
+</p-dialog>
+
+<!-- VERSAMENTO MASSIVO -->
+<p-dialog
+  appendTo="body"
+  [header]="versamentoMassivoPopupInfo.title"
+  [(visible)]="versamentoMassivoPopupInfo.show"
+  [modal]="true"
+  [responsive]="true"
+  [focusOnShow]="false"
+  contentStyleClass="organizzaPopup">
+  <div *ngIf="versamentoMassivoPopupInfo.docCoinvolti?.length > 0">
+    <span>Il versamento coinvolgerà i seguenti documenti:</span>
+    <ul>
+      <li *ngFor="let d of versamentoMassivoPopupInfo.docCoinvolti">{{d.registrazioneVisualizzazione}}</li>
+    </ul>
+  </div>
+  <div *ngIf="versamentoMassivoPopupInfo.docImpossibilitati?.length > 0">
+    <span>I seguenti documenti non possono essere forzati:</span>
+    <ul>
+      <li *ngFor="let d of versamentoMassivoPopupInfo.docImpossibilitati">{{d.registrazioneVisualizzazione}}</li>
+    </ul>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button 
+      icon="pi pi-check" 
+      (click)="versamentoMassivoPopupInfo.show=false; 
+        versaMassivamente(versamentoMassivoPopupInfo.operazione, versamentoMassivoPopupInfo.docCoinvolti, versamentoMassivoPopupInfo.idAzienda)" 
+      label="Conferma" 
+      styleClass="p-button-text">
+    </p-button>
+  </ng-template>
 </p-dialog>
