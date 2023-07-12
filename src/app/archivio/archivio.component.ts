@@ -464,41 +464,18 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       disabled: this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO)
     },
     {
-      label: "Stampa", 
+      label: "Genera", 
       items: [
         {
           label: "Frontespizio", 
-          command: () => {
-            this._http.get('http://localhost:10005/internauta-api/resources/scripta/downloadFrontespizio')
-              .subscribe(
-              (res) => {
-                this.showStampaPopUp = true;
-                this.messaggioStampa = JSON.stringify(res);
-              },
-              (error) => {                              //error() callback
-                console.error('Request failed with error')
-              },
-              () => {                                   //complete() callback
-                console.error('Request completed')  
-              })
-          }
-        }
+          command: () => this.downloadFrontesprizioFascicolo(archivio as Archivio)
+        },
+        // {  
+        //    label: "Dorso",
+        //    command: () => console.log("qui dovrò generare il Dorso")
+        // }
       ]
     },
-    // {
-    //   label: "Genera",
-    //   items: [
-    //     {  
-    //       label: "Frontespizio",
-    //       command: () => console.log("qui dovrò generare il Frontespizio") 
-    //     },
-    //     {  
-    //       label: "Dorso",
-    //       command: () => console.log("qui dovrò generare il Dorso")
-    //     }
-    //   ],
-    //   disabled: false
-    // },
     {
       label: "Scarica zip",
       disabled: !this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA) ||
@@ -521,6 +498,39 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       functionItems: funzioniItems,
       enable: true,
     };
+  }
+
+  /**
+   * Effettua il download del frontespizio fascicolo.
+   * @param archivio Il fascicolo richiesto.
+   */
+  private downloadFrontesprizioFascicolo(archivio: Archivio) {
+    this.rightContentProgressSpinner = true;
+    this.extendedArchivioService.downloadFrontespizioFascicolo(archivio).subscribe({
+      next: (res) => {
+        this.rightContentProgressSpinner = false;
+        if (res && res.url)
+          window.open(res.url);
+      },
+      error: async (err) => {
+        this.rightContentProgressSpinner = false;
+        const error = JSON.parse(await err?.error?.text());
+        let severity = "error";
+        let message = "Errore durante il download. Riprovare oppure contattare BabelCare.";
+        if (error) {
+          // error code: 1.403 2.404 3.500 
+          if (["1", "2"].includes(error.code))
+            severity = "warn";
+          message = error.message;
+        } 
+        this.messageService.add({
+          severity: severity,
+          key: "ArchivioToast",
+          summary: "Attenzione",
+          detail: message
+        });
+      }
+    });
   }
 
   /**
