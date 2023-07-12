@@ -17,6 +17,16 @@ export class ExtendedArchivioService extends ArchivioService {
   }
 
   /**
+   * Scarica il pdf del frontespizio del fascicolo passato.
+   * @param archivio L'archivio.
+   * @returns Url per accedere al file pdf.
+   */
+  public downloadFrontespizioFascicolo(archivio: Archivio | ArchivioDetail): Observable<any> {
+    const url = getInternautaUrl(BaseUrlType.Scripta) + `/downloadFrontespizioFascicolo/${archivio.id}`;
+    return this._http.get(url);
+  }
+
+  /**
    * Scarica l'archivio con tutto il suo contenuto in formato zip.
    * @param archivio L'archivio da scaricare.
    * @returns Il file zip.

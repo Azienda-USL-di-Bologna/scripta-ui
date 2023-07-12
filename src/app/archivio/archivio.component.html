@@ -247,3 +247,14 @@
     ></button>
   </div>
 </p-dialog>
+
+<p-dialog 
+  appendTo="body"
+  header="Frontespizio"
+  [(visible)]="this.showStampaPopUp"
+  [modal]="true"
+  [responsive]="false"
+  [focusOnShow]="true"
+  contentStyleClass="organizzaPopup">
+  <div [innerHTML]="messaggioStampa"></div>   
+</p-dialog>
