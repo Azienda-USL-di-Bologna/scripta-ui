@@ -4,8 +4,9 @@ import { ExtendedDocDetailView } from '../docs-list-container/docs-list/extended
 import { FILTER_TYPES, FilterDefinition, FiltersAndSorts } from '@bds/next-sdr';
 import { MessageService } from 'primeng/api';
 import { NavigationTabsService } from '../navigation-tabs/navigation-tabs.service';
-import { JwtLoginService } from '@bds/jwt-login';
+import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { AppService } from '../app.service';
+import { CODICI_RUOLO } from '@bds/internauta-model';
 
 
 /**
@@ -17,13 +18,19 @@ import { AppService } from '../app.service';
 })
 export class DocUtilsService {
 
+  private utenteUtilitiesLogin: UtenteUtilities;
+
   constructor(
     private messageService: MessageService,
     private personaVedenteService: PersonaVedenteService,
     private loginService: JwtLoginService,
     private navigationTabsService: NavigationTabsService,
     private appService: AppService,
-  ) { }
+  ) { 
+    this.loginService.loggedUser$.subscribe(loggedUser => {
+      this.utenteUtilitiesLogin = loggedUser;
+    });
+  }
 
 
   public isDocApribile(doc: DocDetailView | Doc): boolean {
@@ -38,32 +45,42 @@ export class DocUtilsService {
    */
   public openDoc(doc: DocDetailView, utente: Utente) {
     if (doc.pregresso) {
-      this.openPregresso(doc as ExtendedDocDetailView);
-    } else {
-      const filtersAndSorts = new FiltersAndSorts();
-      filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, utente.idPersona.id));
-      filtersAndSorts.addFilter(new FilterDefinition("idDocDetail.id", FILTER_TYPES.not_string.equals, doc.id));
-      this.personaVedenteService.getData("PersonaVedenteWithPlainFields", filtersAndSorts, null)
-        .subscribe(res => {
-          if (res && res.results) {
-            if (res.results.length > 0) {
-              const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
-                doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
-              const addRichiestaParam = true;
-              const addPassToken = true;
-              this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true).subscribe((url: string) => {
-              });
-            } else {
-              this.messageService.add({
-                severity: "info",
-                summary: "Attenzione",
-                key: "docsListToast",
-                detail: `Apertura del documento non consentita`
-              });
-            }
-          }
-        });
+      return this.openPregresso(doc as ExtendedDocDetailView);
     }
+    if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.OS) && !doc.riservato) {
+      return this.openInterAppUrl(doc);
+    }
+    if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.MOS) && !doc.riservato && !doc.visibilitaLimitata) {
+      return this.openInterAppUrl(doc);
+    }
+    const filtersAndSorts = new FiltersAndSorts();
+    filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, utente.idPersona.id));
+    filtersAndSorts.addFilter(new FilterDefinition("idDocDetail.id", FILTER_TYPES.not_string.equals, doc.id));
+    this.personaVedenteService.getData("PersonaVedenteWithPlainFields", filtersAndSorts, null)
+      .subscribe(res => {
+        if (res && res.results) {
+          if (res.results.length > 0) {
+            this.openInterAppUrl(doc);
+          } else {
+            this.messageService.add({
+              severity: "info",
+              summary: "Attenzione",
+              key: "docsListToast",
+              detail: `Apertura del documento non consentita`
+            });
+          }
+        }
+      });
+
+  }
+
+  private openInterAppUrl(doc: DocDetailView) {
+    const encodeParams = doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITH_CONTEXT_INFORMATION ||
+      doc.idApplicazione.urlGenerationStrategy === UrlsGenerationStrategy.TRUSTED_URL_WITHOUT_CONTEXT_INFORMATION;
+    const addRichiestaParam = true;
+    const addPassToken = true;
+    this.loginService.buildInterAppUrl(doc.urlComplete, encodeParams, addRichiestaParam, addPassToken, true)
+      .subscribe((url: string) => {});
   }
 
   private openPregresso(doc: ExtendedDocDetailView) {
