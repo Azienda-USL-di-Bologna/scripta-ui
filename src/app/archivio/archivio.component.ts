@@ -944,7 +944,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * @param archivio archivio da aprire
    */
   public openArchive(archivio: ExtendedArchiviView): void {
-    debugger
     const arch: Archivio = archivio as any as Archivio;
     let idAziende: number[] = [];
     idAziende.push(archivio.idAzienda.id)

@@ -271,16 +271,16 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   private loadParametroAziendaleFascicoliParlanti() {
     this.subscriptions.push(this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null).subscribe((parametriAziende: ParametroAziende[]) => {
       //parte relativa al parametro aziendale
-      if (parametriAziende && parametriAziende[0]) {
-        this.fascicoliParlanti = JSON.parse(parametriAziende[0].valore || false);
-        if (this.fascicoliParlanti) {
-          this.aziendeConFascicoliParlanti = parametriAziende[0].idAziende;
-          if(this.aziendeConFascicoliParlanti.includes(this.archivio.idAzienda.id)) {
-            this.isParlante = true;
+      if (parametriAziende) {
+        parametriAziende.forEach(parametro => {
+          this.fascicoliParlanti = JSON.parse(parametro.valore || false);
+          if (this.fascicoliParlanti) {
+            if(this.aziendeConFascicoliParlanti.includes(this.archivio.idAzienda.id)) {
+              this.isParlante = true;
+            }
           }
-        }
-      }
-      
+        })
+      }   
     }));
   }
 
