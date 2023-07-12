@@ -898,6 +898,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    */
   private loadData(idDocListToSelect?: number[]): void { 
     this.loading = true;
+    this.docsSelected = [];
     this.pageConf.conf = {
       limit: this.storedLazyLoadEvent.rows,
       offset: this.storedLazyLoadEvent.first
