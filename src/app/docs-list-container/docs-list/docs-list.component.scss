@@ -81,7 +81,7 @@
     .p-datatable-tbody > tr > td {
       border-color:#AFC1DE;
       padding: 0;
-      div {
+      div:not(.p-checkbox-box) {
         color: #2e4a65;
         height: 3.375rem;
         padding: 9px 0.813rem;
@@ -290,7 +290,7 @@
     min-width: 14.375rem;
     max-width: 14.375rem;
   }
-  .edit-archiviation-column, .open-detail-and-preview-column {
+  .checkbox-column, .edit-archiviation-column, .open-detail-and-preview-column {
     width: 3.125rem;
     max-width: 3.125rem;
     justify-content: center;

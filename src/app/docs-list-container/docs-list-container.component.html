@@ -1,7 +1,8 @@
 <generic-caption-table *ngIf="doclistComponent"
   [configuration]="captionConfiguration"
   [referenceTableComponent]="doclistComponent"
-  [selectButtonsComponent]="doclistComponent">
+  [selectButtonsComponent]="doclistComponent"
+  [functionalOperationsComponent]="doclistComponent">
 </generic-caption-table>
 <p-splitter 
   styleClass="splitter-docs-list"
@@ -11,7 +12,8 @@
   <ng-template pTemplate>
     <docs-list #doclist
       [showAnteprimaInit]="showRightSide"
-      (showRightPanel)="manageRowSelected($event)" >
+      (showRightPanel)="manageRowSelected($event)"
+      (docListModeSelected)="manageDocListModeSelectd($event)">
     </docs-list>
   </ng-template>
   <ng-template pTemplate>
