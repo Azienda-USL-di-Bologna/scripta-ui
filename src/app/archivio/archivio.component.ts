@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Archivio, ArchivioDetail, ArchivioDetailView, ArchivioDiInteresse, ArchivioDiInteresseService, DecimalePredicato, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio, ArchivioDetailViewService, ConfigurazioneService, RuoloAttoreArchivio, AttoreArchivio, ParametroAziende, BlackboxPermessiService } from '@bds/internauta-model';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListComponent } from '../archivi-list-container/archivi-list/archivi-list.component';
@@ -50,6 +51,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   private utenteArchivioDiInteresse: ArchivioDiInteresse;
   private utenteUtilitiesLogin: UtenteUtilities;
   public messaggioChiusura: string = "ciao";
+  public messaggioStampa: string = "ciao";
   public subscriptions: Subscription[] = [];
   public loggedUserCanVisualizeArchive = false;
   public showRightSide: boolean = false;
@@ -60,6 +62,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public showChiudiPopup : boolean = false;
   public chiusuraArchivioParams : boolean = false; // è true se il chiudi deve chiudere definitivamente un archivio, è false se lo deve pre-chiudere 
   public showOrganizzaPopUp: boolean = false;
+  public showStampaPopUp: boolean = false;
   public reloadDataDocList: boolean = false;
   public loggedUserIsResponsbaileOrVicario = false;
   public operazioneOrganizza: string = null;
@@ -183,7 +186,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     private configurazioneService: ConfigurazioneService,
     private confirmationService: ConfirmationService,
     private blackboxPermessiService: BlackboxPermessiService,
-    private docListService:DocListService
+    private docListService:DocListService,
+    public _http: HttpClient
   ) {
     this.subscriptions.push(this.loginService.loggedUser$.pipe(first()).subscribe(
       (utenteUtilities: UtenteUtilities) => {
@@ -459,20 +463,19 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       ],
       disabled: this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO)
     },
-    // {
-    //   label: "Genera",
-    //   items: [
-    //     {  
-    //       label: "Frontespizio",
-    //       command: () => console.log("qui dovrò generare il Frontespizio") 
-    //     },
-    //     {  
-    //       label: "Dorso",
-    //       command: () => console.log("qui dovrò generare il Dorso")
-    //     }
-    //   ],
-    //   disabled: false
-    // },
+    {
+      label: "Genera", 
+      items: [
+        {
+          label: "Frontespizio", 
+          command: () => this.downloadFrontesprizioFascicolo(archivio as Archivio)
+        },
+        // {  
+        //    label: "Dorso",
+        //    command: () => console.log("qui dovrò generare il Dorso")
+        // }
+      ]
+    },
     {
       label: "Scarica zip",
       disabled: !this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA) ||
@@ -495,6 +498,39 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       functionItems: funzioniItems,
       enable: true,
     };
+  }
+
+  /**
+   * Effettua il download del frontespizio fascicolo.
+   * @param archivio Il fascicolo richiesto.
+   */
+  private downloadFrontesprizioFascicolo(archivio: Archivio) {
+    this.rightContentProgressSpinner = true;
+    this.extendedArchivioService.downloadFrontespizioFascicolo(archivio).subscribe({
+      next: (res) => {
+        this.rightContentProgressSpinner = false;
+        if (res && res.url)
+          window.open(res.url);
+      },
+      error: async (err) => {
+        this.rightContentProgressSpinner = false;
+        const error = JSON.parse(await err?.error?.text());
+        let severity = "error";
+        let message = "Errore durante il download. Riprovare oppure contattare BabelCare.";
+        if (error) {
+          // error code: 1.403 2.404 3.500 
+          if (["1", "2"].includes(error.code))
+            severity = "warn";
+          message = error.message;
+        } 
+        this.messageService.add({
+          severity: severity,
+          key: "ArchivioToast",
+          summary: "Attenzione",
+          detail: message
+        });
+      }
+    });
   }
 
   /**
