@@ -691,6 +691,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (event.first === 0 && event.rows === this.rowsNumber) {
       event.rows = event.rows * 2;
       this.resetDocsArrayLenght = true;
+      this.docsSelected = [];
     }
 
     
@@ -698,7 +699,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
 
     if (this.filtriPuliti) {
       this.filtriPuliti = false;
-      if(!!!this.archivio){
+      if (!!!this.archivio) {
         this.resetCalendarToInitialValues();
         this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
       }
@@ -762,7 +763,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (this.dropdownAzienda) {
       this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
     }
-
+    this.docsSelected = [];
     this.loadData(idDocListToSelect);
   }
 
@@ -898,7 +899,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    */
   private loadData(idDocListToSelect?: number[]): void { 
     this.loading = true;
-    this.docsSelected = [];
     this.pageConf.conf = {
       limit: this.storedLazyLoadEvent.rows,
       offset: this.storedLazyLoadEvent.first
