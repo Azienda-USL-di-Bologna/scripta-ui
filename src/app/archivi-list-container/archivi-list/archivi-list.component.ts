@@ -177,16 +177,15 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				([[utenteUtilities, parametriAziendeFascicoliParlanti], usaGediInternauta]
 				) => {
 					// Parte relativa al parametro aziendale
-					if (parametriAziendeFascicoliParlanti && parametriAziendeFascicoliParlanti[0]) {
-						const parlanti = parametriAziendeFascicoliParlanti.find(p => JSON.parse(p.valore)); 
+					if (parametriAziendeFascicoliParlanti ) {
+						console.log("ParametriAziendeFascicoli:", parametriAziendeFascicoliParlanti)
+						const parlanti = parametriAziendeFascicoliParlanti.find(p => { 
+							JSON.parse(p.valore);
+						}); 
 						if (parlanti) {
 							this.aziendeConFascicoliParlanti = parlanti.idAziende;
 							this.fascicoliParlanti = true;
 						}
-						/* this.fascicoliParlanti = JSON.parse(parametriAziendeFascicoliParlanti[0].valore || false);
-						if (this.fascicoliParlanti) {
-							this.aziendeConFascicoliParlanti = parametriAziendeFascicoliParlanti[0].idAziende;
-						} */
 					}
 					// Parte relativa al utenteUtilities
 					this.utenteUtilitiesLogin = utenteUtilities;
@@ -198,7 +197,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					
 					const tempCanCreateArchivio: Map<String, boolean> = new Map();
 					const tempMap : Map<String, PermessoEntitaStoredProcedure[]> = new Map(Object.entries(this.utenteUtilitiesLogin.getUtente().permessiGediByCodiceAzienda));
-					this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach(a => {
+					this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach((a: { codice: String; }) => {
 						if (tempMap.has(a.codice)) {
 							const permessi : PermessoEntitaStoredProcedure[] = tempMap.get(a.codice);
 							permessi.forEach(p => {
@@ -223,7 +222,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						tooltip: "Crea nuovo fascicolo",
 						livello: 0,
 						enable: tempCanCreateArchivio.size > 0,
-						aziendeItems: this.utenteUtilitiesLogin.getUtente().aziendeAttive.map(a => {
+						aziendeItems: this.utenteUtilitiesLogin.getUtente().aziendeAttive.map((a: { nome: any; codice: String; id: number; }) => {
 							return {
 								label: a.nome,
 								disabled: !tempCanCreateArchivio.has(a.codice) || !this.idAziendeConGediInternautaAttivo.includes(a.id),
@@ -428,7 +427,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		/* if (!(this.fascicoliParlanti && 
 			this.utenteUtilitiesLogin.getUtente().aziendeAttive.length === 1 && 
 			this.aziendeConFascicoliParlanti.some(azienda => this.utenteUtilitiesLogin.getUtente().aziendeAttive[0].id === azienda))) { */
-			if (!this.fascicoliParlanti || this.utenteUtilitiesLogin.getUtente().aziendeAttive.some(a => !this.aziendeConFascicoliParlanti.includes(a.id))) {
+			if (!this.fascicoliParlanti || this.utenteUtilitiesLogin.getUtente().aziendeAttive.some((a: { id: number; }) => !this.aziendeConFascicoliParlanti.includes(a.id))) {
 				this.selectButtonItems.push(
 					{
 						title: "Tutti i fascicoli",
@@ -955,7 +954,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		
 		filtersAndSorts.addSort(new SortDefinition("nome", SORT_MODES.asc));
 		this.personaService.getData(null, filtersAndSorts, null)
-			.subscribe(res => {
+			.subscribe((res: { results: any[]; }) => {
 				if (res && res.results) {
 					res.results.forEach((persona: any) => {
 						persona["descrizioneVisualizzazione"] = persona.descrizione + (persona.idSecondario ? " (" + persona.idSecondario + ")" : "");
@@ -988,7 +987,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, idAzienda));
 		});
 		this.strutturaService.getData("StrutturaWithIdAzienda", filtersAndSorts, null)
-			.subscribe(res => {
+			.subscribe((res: { results: any[]; }) => {
 				if (res && res.results) {
 					res.results.forEach((struttura: any) => {
 						struttura["descrizioneVisualizzazione"] =
@@ -1341,7 +1340,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "UNIFICATA"));
 		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "FUNZIONALE"));
 		filterAndSort.addFilter(new FilterDefinition("attivo", FILTER_TYPES.not_string.equals, true));
-		this.utenteStrutturaService.getData("UtenteStrutturaWithIdAfferenzaStruttura", filterAndSort, null, null).subscribe((res) => {
+		this.utenteStrutturaService.getData("UtenteStrutturaWithIdAfferenzaStruttura", filterAndSort, null, null).subscribe((res: { results: UtenteStruttura[]; }) => {
 			strutturaCreatore.id = (res.results as UtenteStruttura[]).find((a: UtenteStruttura) => a.idAfferenzaStruttura.codice === "DIRETTA")?.fk_idStruttura?.id;
 			if (!strutturaCreatore.id) {
 				strutturaCreatore.id = (res.results as UtenteStruttura[]).find((a: UtenteStruttura) => a.idAfferenzaStruttura.codice === "UNIFICATA")?.fk_idStruttura?.id;
