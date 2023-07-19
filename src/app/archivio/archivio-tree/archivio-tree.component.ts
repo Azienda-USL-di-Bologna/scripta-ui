@@ -20,7 +20,7 @@ export class ArchivioTreeComponent implements OnInit {
   public selectedNode: TreeNode = null;
   private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
   //private ARCHIVIO_DETAIL_STANDARD: string = ENTITIES_STRUCTURE.scripta.archiviodetail.standardProjections.ArchivioDetailWithPlainFields;
-  private ARCHIVIO_DETAIL_PROJECTION = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
+  private ARCHIVIO_DETAIL_PROJECTION = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewExtended;
 
   public troppiSottoFascicoli: boolean = false;
   public troppiInserti: boolean = false;

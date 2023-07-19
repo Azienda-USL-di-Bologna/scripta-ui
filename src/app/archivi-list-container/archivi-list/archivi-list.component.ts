@@ -32,6 +32,8 @@ import { ConfigurazioneService } from '@bds/internauta-model';
 import { ColonnaBds, CsvExtractor } from '@bds/common-tools';
 import { ExtendedArchivioService } from 'src/app/archivio/extended-archivio.service';
 import { ArchivioUtilsService } from 'src/app/archivio/archivio-utils.service';
+import { TitoloService } from '@bds/internauta-model';
+import { MassimarioService } from '@bds/internauta-model';
 
 @Component({
 	selector: 'archivi-list',
@@ -50,6 +52,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	@ViewChild("autocompleteIdPersonaCreazione") public autocompleteIdPersonaCreazione: AutoComplete;
 	@ViewChild("autocompleteIdStruttura") public autocompleteIdStruttura: AutoComplete;
 	@ViewChild("autocompleteVicari") public autocompleteVicari: AutoComplete;
+	@ViewChild("autocompleteTitoli") public autocompleteTitoli: AutoComplete;
+	@ViewChild("autocompleteMassimario") public autocompleteMassimario: AutoComplete;
 	@ViewChild("dt") public dataTable: Table;
 	@ViewChild("columnFilterDataCreazione") public columnFilterDataCreazione: ColumnFilter;
 
@@ -97,6 +101,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public filteredTipo: any[];
 	public filteredStati: any[];
 	public filteredPersone: Persona[] = [];
+	public filteredTitoli: Titolo[] = [];
+	public filteredMassimari: Massimario[] = [];
 	public filteredStrutture: Struttura[] = [];
 	private resetArchiviArrayLenght: boolean = true;
 	public fascicoliParlanti: boolean = false;
@@ -149,7 +155,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		private extendedArchivioService: ExtendedArchivioService,
 		private archiviRecentiService: ArchiviRecentiService,
 		private utenteStrutturaService: UtenteStrutturaService,
-		private archivioUtilsService: ArchivioUtilsService
+		private archivioUtilsService: ArchivioUtilsService,
+		private titoloService: TitoloService,
+		private massimarioService: MassimarioService
 	) { }
 
 	ngOnInit(): void {
@@ -812,6 +820,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			archivio.vicariVisualizzazione = null;
 			archivio.idPersonaResponsabileVisualizzazione = null;
 			archivio.idPersonaCreazioneVisualizzazione = null;
+			archivio.idTitoloVisualizzazione = null;
+			archivio.idMassimarioVisualizzazione = null;
 		});
 		return extendedArchiviList;
 	}
@@ -866,7 +876,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		}
 		this.initialSortField = "dataCreazione";
 		this.serviceToGetData = this.archivioDetailService;
-		this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
+		this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailExtended;
 		switch (this.archiviListMode) {
 			case ArchiviListMode.VISIBILI:
 				this.messageIfNull = 'Non sono stati trovati fascicoli che puoi vedere.';
@@ -874,7 +884,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
 				filterAndSort.addSort(new SortDefinition("numero", this.dataTable.sortOrder === -1 ? SORT_MODES.desc : SORT_MODES.asc));
 				this.serviceToGetData = this.archivioDetailViewService;
-				this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
+				this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewExtended;
 				break;
 			case ArchiviListMode.TUTTI:
 				this.messageIfNull = 'Non sono stati trovati fascicoli.';
@@ -935,15 +945,15 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	}
 
 	/**
- * Funzione chiamata tipicamente dall'autocomplete per riempire la
- * variabile di opzioni: filteredPersone con le persone che
- * corrispondono al filtro utente. Viene aggiunta la condizione che la persona
- * deve avere un utente nelle aziende visualizzabili dall'utente connesso.
- * NB: Non mi interessa che persone o i suoi utenti non siano attivi.
- * Li cerco lo stesso perché l'utente potrebbe proprio cercare la roba fatta
- * da utenti spenti.
- * @param event
- */
+	 * Funzione chiamata tipicamente dall'autocomplete per riempire la
+	 * variabile di opzioni: filteredPersone con le persone che
+	 * corrispondono al filtro utente. Viene aggiunta la condizione che la persona
+	 * deve avere un utente nelle aziende visualizzabili dall'utente connesso.
+	 * NB: Non mi interessa che persone o i suoi utenti non siano attivi.
+	 * Li cerco lo stesso perché l'utente potrebbe proprio cercare la roba fatta
+	 * da utenti spenti.
+	 * @param event
+	 */
 	public filterPersone(event: any) {
 		const filtersAndSorts = new FiltersAndSorts();
 		filtersAndSorts.addFilter(new FilterDefinition("descrizione", FILTER_TYPES.string.startsWithIgnoreCase, event.query));
@@ -1004,6 +1014,59 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			});
 	}
 
+	/**
+	 * Funzione chiamata tipicamente dall'autocomplete per riempire la
+	 * variabile di opzioni: filteredTitoli con i titoli che
+	 * corrispondono al filtro utente. Viene aggiunta la condizione che il titolo deve appartenere
+	 * alle aziende dell'utente connesso.
+	 * @param event
+	 */
+	public filterTitoli(event: any) {
+		const filtersAndSorts = new FiltersAndSorts();
+		filtersAndSorts.addFilter(new FilterDefinition("tscol", FILTER_TYPES.not_string.equals, event.query));
+    filtersAndSorts.addSort(new SortDefinition("ranking", SORT_MODES.desc));
+		this.aziendeFiltrabili.forEach(a => {
+			if ((typeof a.value) === "number")
+				filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
+		});
+		
+		this.titoloService.getData("TitoloWithIdAzienda", filtersAndSorts, null)
+			.subscribe((res: { results: any[]; }) => {
+				if (res && res.results) {
+					res.results.forEach((titolo: any) => {
+						titolo["descrizioneVisualizzazione"] = `[${titolo.classificazione}] ${titolo.nome} (${titolo.idAzienda.nome})`;
+					});
+					this.filteredTitoli = res.results;
+				} else {
+					this.filteredTitoli = [];
+				}
+		});
+	}
+
+	public filterMassimari(event: any) {
+		const filtersAndSorts = new FiltersAndSorts();
+		filtersAndSorts.addFilter(new FilterDefinition("tscol", FILTER_TYPES.not_string.equals, event.query));
+    filtersAndSorts.addSort(new SortDefinition("ranking", SORT_MODES.desc));
+		this.aziendeFiltrabili.forEach(a => {
+			if ((typeof a.value) === "number")
+				filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, a.value));
+		});
+		
+		this.massimarioService.getData("MassimarioWithIdAzienda", filtersAndSorts, null)
+			.subscribe((res: { results: any[]; }) => {
+				if (res && res.results) {
+					res.results.forEach((massimario: any) => {
+						massimario["descrizioneVisualizzazione"] = `${massimario.nome} (${massimario.idAzienda.nome})`;
+					});
+					this.filteredMassimari = res.results;
+				} else {
+					this.filteredMassimari = [];
+				}
+		});
+	}
+
+
+
 	/* 
 	 * L'utente ha cliccato su un archivio. Apriamolo
 	 */
@@ -1038,6 +1101,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		if (this.autocompleteIdPersonaCreazione) this.autocompleteIdPersonaCreazione.writeValue(null);
 		if (this.autocompleteIdStruttura) this.autocompleteIdStruttura.writeValue(null);
 		if (this.autocompleteVicari) this.autocompleteVicari.writeValue(null);
+		if (this.autocompleteTitoli) this.autocompleteTitoli.writeValue(null);
+		if (this.autocompleteMassimario) this.autocompleteMassimario.writeValue(null);
 		this.myDatatableReset();
 	}
 
