@@ -38,7 +38,6 @@ export class DocsListContainerComponent implements OnInit {
   ngOnInit(): void {}
 
   public manageRowSelected(event: {showPanel: boolean, rowSelected: ExtendedDocDetailView, sonoPersonaVedenteSuDocSelezionato: boolean}) {
-    debugger
     this.showRightSide = event.showPanel;
     this.docForDetailAndPreview = event.rowSelected;
     this.sonoPersonaVedenteSuDocSelezionato = event.sonoPersonaVedenteSuDocSelezionato;

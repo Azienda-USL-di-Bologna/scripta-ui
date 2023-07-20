@@ -1,7 +1,6 @@
 :host::ng-deep {
     height: 100%;
     display: flex;
-    flex-direction: column;
     .p-disabled, .p-component:disabled {
         opacity: 1;
     }
@@ -13,12 +12,10 @@
     justify-content: space-between;
 }
 main {
-    max-width: 62.5rem;
     width: 100%;
     margin: 0 auto;
     height: 100%;
     display: flex;
-    flex-direction: column;
 
     .info-documento {
         display: flex; 
@@ -51,7 +48,7 @@ main {
         align-self: baseline;
     }
 .protocollo-esterno-box{
-    padding: 00.625rem;
+    padding: 0.625rem;
     display: flex;
     justify-content: space-between;
     label {
@@ -59,34 +56,27 @@ main {
         padding:0.625rem;
     }
 }
-.accodion-box{
-    padding:0.625rem;
-    overflow: visible !important;
-}
-
 ::ng-deep .preview-inner {
     overflow-y: visible !important; //senza, non si vede la preview degli allegati. Esistono modi migliori?
 }
-
-.main-left {
-    float: left;
-    width: 60%;
-    margin: auto;
-}
-
-.right-attachments {
-    h2 {
-        text-align: center;
+section {
+    width: 50%;
+    margin: 0.5rem 0.5rem;
+    padding: 0.1rem 0.5rem;
+    
+    .allegati-label {
+        display: inline-block;
+        margin: 0.5rem 0;
+        font-size: 1.5rem;
     }
-    float: left;
-    width: 33%;
-    margin-left: 4%;
-
 }
 
-.pregresso {
-    width: 100%;
-    height: 100%;
-    margin-left: 2%;
-    overflow: auto;
-}
+@media screen and (max-width: 735px) {
+    main {
+        flex-direction: column;
+        overflow: auto;
+    }
+    section {
+        width: 100%;
+    }
+  }
