@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { Archivio, ArchivioDetail, ArchivioDetailView, ArchivioDiInteresse, ArchivioDiInteresseService, DecimalePredicato, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio, ArchivioDetailViewService, ConfigurazioneService, RuoloAttoreArchivio, AttoreArchivio, ParametroAziende } from '@bds/internauta-model';
+import { HttpClient } from '@angular/common/http';
+import { Archivio, ArchivioDetail, ArchivioDetailView, ArchivioDiInteresse, ArchivioDiInteresseService, DecimalePredicato, ENTITIES_STRUCTURE, PermessoArchivio, StatoArchivio, ArchivioDetailViewService, ConfigurazioneService, RuoloAttoreArchivio, AttoreArchivio, ParametroAziende, BlackboxPermessiService } from '@bds/internauta-model';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { ArchiviListComponent } from '../archivi-list-container/archivi-list/archivi-list.component';
 import { DocsListComponent } from '../docs-list-container/docs-list/docs-list.component';
@@ -15,7 +16,7 @@ import { ExtendedArchivioService } from './extended-archivio.service';
 import { Table } from 'primeng/table';
 import { AppComponent } from '../app.component';
 import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf } from '@bds/next-sdr';
-import { Subscription } from 'rxjs';
+import { Observable, Subscribable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators'
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { UploadDocumentButton } from '../generic-caption-table/functional-buttons/upload-document-button';
@@ -25,6 +26,7 @@ import { NavigationTabsService } from '../navigation-tabs/navigation-tabs.servic
 import { AppService } from '../app.service';
 import { ExtendedArchiviView } from '../archivi-list-container/archivi-list/extendend-archivi-view';
 import { ArchivioUtilsService } from './archivio-utils.service';
+import { DocListService } from '../docs-list-container/docs-list/docs-list.service';
 
 @Component({
   selector: 'app-archivio',
@@ -47,8 +49,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public archivioPreferito: boolean
   public utenteExistsInArchivioInteresse: boolean;
   private utenteArchivioDiInteresse: ArchivioDiInteresse;
-  public subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
+  public messaggioChiusura: string = "ciao";
+  public messaggioStampa: string = "ciao";
+  public subscriptions: Subscription[] = [];
   public loggedUserCanVisualizeArchive = false;
   public showRightSide: boolean = false;
   public docForDetailAndPreview: ExtendedDocDetailView;
@@ -56,7 +60,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public rowCountInProgress: boolean = false;
   public rowCount: number;
   public showChiudiPopup : boolean = false;
+  public chiusuraArchivioParams : boolean = false; // è true se il chiudi deve chiudere definitivamente un archivio, è false se lo deve pre-chiudere 
   public showOrganizzaPopUp: boolean = false;
+  public showStampaPopUp: boolean = false;
   public reloadDataDocList: boolean = false;
   public loggedUserIsResponsbaileOrVicario = false;
   public operazioneOrganizza: string = null;
@@ -87,13 +93,15 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * Lo ricarico con la projection che voglio e inizializzo il componente
    */
   @Input() set data(data: any) {
-    this.extendedArchivioService.getByIdHttpCall(
+    this.rightContentProgressSpinner = true;
+
+    this.subscriptions.push(this.extendedArchivioService.getByIdHttpCall(
       data.archivio.id,
       ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo)
       .subscribe((res: Archivio) => {
         this._archivio = res;
+        this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);//!!!this._archivio.isArchivioNero;
         if (this.utenteUtilitiesLogin) {
-          this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
           this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
           if (this.utenteUtilitiesLogin.getUtente()) {
             if (this.utenteUtilitiesLogin.getUtente().utenteReale) 
@@ -106,13 +114,32 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           this.extendedArchivioService.aggiungiArchivioRecente(this._archivio.fk_idArchivioRadice.id);
 
           if (this.utenteUtilitiesLogin) {
-            this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
+            this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);//!!!this._archivio.isArchivioNero;
             this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
             this.loggedUserIsResponsbaileOrVicario = this.hasPermessoMinimo(DecimalePredicato.VICARIO);
             this.inizializeAll();
           }
+          this.rightContentProgressSpinner = false;
         }, 0);
-      });
+
+        this.subscriptions.push(
+          this.configurazioneService.getParametriAziende("chiusuraArchivio", ["scripta"], [this.archivio.idAzienda.id]).subscribe(
+            (parametriAziende: ParametroAziende[]) => {
+              let chiusuraArchivio: boolean = false;
+              if (parametriAziende && parametriAziende[0]) {
+                chiusuraArchivio = JSON.parse(parametriAziende[0].valore)
+                this.messaggioChiusura = "<b>Attenzione!</b><br/><br/>Eventuali bozze di sottofascicoli o inserti saranno eliminate."
+                if (chiusuraArchivio) {
+                  this.chiusuraArchivioParams = true;
+                  this.messaggioChiusura += "<br/><br/>Tutti i documenti non numerati verranno numerati.";
+                }
+                this.messaggioChiusura += "<br/><br/>Si vuole procedere?"
+              }
+            })
+          );
+
+      })
+    );
     this.checkPreferito(data.archivio.id);
   }
 
@@ -157,24 +184,25 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     private appService: AppService,
 		private archivioUtilsService: ArchivioUtilsService,
     private configurazioneService: ConfigurazioneService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private blackboxPermessiService: BlackboxPermessiService,
+    private docListService:DocListService,
+    public _http: HttpClient
   ) {
-    this.loginService.loggedUser$.pipe(first()).subscribe(
+    this.subscriptions.push(this.loginService.loggedUser$.pipe(first()).subscribe(
       (utenteUtilities: UtenteUtilities) => {
         this.utenteUtilitiesLogin = utenteUtilities;
         if (this.archivio) {
-          this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);
+          this.loggeduserCanAccess = this.hasPermessoMinimo(DecimalePredicato.PASSAGGIO);//!!!this.archivio.isArchivioNero;
           this.loggedUserCanVisualizeArchive = this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA);
           this.loggedUserIsResponsbaileOrVicario = this.hasPermessoMinimo(DecimalePredicato.VICARIO);
           this.inizializeAll();
         }
       }
-    );
+    ));
   }
 
   ngOnInit(): void {
-    
-
   }
 
   ngAfterViewInit(): void {
@@ -385,7 +413,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     const aziendaItem: MenuItem = {
       label: this.archivio.idAzienda.nome,
       disabled: false,
-      command: () => this.archivilist.newArchivio(this.archivio.idAzienda.id)
+      command: () => {this.rightContentProgressSpinner = true; this.archivilist.newArchivio(this.archivio.idAzienda.id);}
     } as MenuItem;
     switch (archivio.livello) {
       case 1:
@@ -435,20 +463,19 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       ],
       disabled: this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO)
     },
-    // {
-    //   label: "Genera",
-    //   items: [
-    //     {  
-    //       label: "Frontespizio",
-    //       command: () => console.log("qui dovrò generare il Frontespizio") 
-    //     },
-    //     {  
-    //       label: "Dorso",
-    //       command: () => console.log("qui dovrò generare il Dorso")
-    //     }
-    //   ],
-    //   disabled: false
-    // },
+    {
+      label: "Genera", 
+      items: [
+        {
+          label: "Frontespizio", 
+          command: () => this.downloadFrontesprizioFascicolo(archivio as Archivio)
+        },
+        // {  
+        //    label: "Dorso",
+        //    command: () => console.log("qui dovrò generare il Dorso")
+        // }
+      ]
+    },
     {
       label: "Scarica zip",
       disabled: !this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA) ||
@@ -457,7 +484,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     },
     {
       label: this.archivio.stato === StatoArchivio.PRECHIUSO ? 'Riapri fascicolo' : 'Chiudi fascicolo',
-      disabled: ((this.archivio.stato == StatoArchivio.BOZZA || this.archivio.stato == StatoArchivio.CHIUSO) || this.archivio.livello != 1) && !this.loggedUserIsResponsbaileOrVicario,
+      disabled: this.archivio.stato === StatoArchivio.BOZZA || this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.livello !== 1 || !this.loggedUserIsResponsbaileOrVicario,
       command: () => {
         if(this.archivio.stato === StatoArchivio.PRECHIUSO)
           this.chiudiRiapriArchivio(event);
@@ -474,6 +501,39 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   /**
+   * Effettua il download del frontespizio fascicolo.
+   * @param archivio Il fascicolo richiesto.
+   */
+  private downloadFrontesprizioFascicolo(archivio: Archivio) {
+    this.rightContentProgressSpinner = true;
+    this.extendedArchivioService.downloadFrontespizioFascicolo(archivio).subscribe({
+      next: (res) => {
+        this.rightContentProgressSpinner = false;
+        if (res && res.url)
+          window.open(res.url);
+      },
+      error: async (err) => {
+        this.rightContentProgressSpinner = false;
+        const error = JSON.parse(await err?.error?.text());
+        let severity = "error";
+        let message = "Errore durante il download. Riprovare oppure contattare BabelCare.";
+        if (error) {
+          // error code: 1.403 2.404 3.500 
+          if (["1", "2"].includes(error.code))
+            severity = "warn";
+          message = error.message;
+        } 
+        this.messageService.add({
+          severity: severity,
+          key: "ArchivioToast",
+          summary: "Attenzione",
+          detail: message
+        });
+      }
+    });
+  }
+
+  /**
    * Effettua il download del fascicolo in formato zip.
    * @param archivio Il fascicolo da scaricare.
    */
@@ -481,8 +541,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.rightContentProgressSpinner = true;
     this.extendedArchivioService.downloadArchivioZip(archivio).subscribe({
       next: (res) => {
-        let filename = this.getFilenameFromResponse(res, archivio);
-        this.extendedArchivioService.downloadFile(res, "application/zip", filename);
+        this.messageService.add({
+          severity: "success",
+          key: "ArchivioToast",
+          summary: "OK",
+          detail: "Il fascicolo è in preparazione. Riceverai una notifica in scrivania contenente il link per scaricarlo."
+        });
         this.rightContentProgressSpinner = false;
       },
       error: async (err) => {
@@ -705,7 +769,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   }
 
   public chiudiRiapriArchivio(event: Event) : void {
-    console.log("evieeento", event);
     if (!this.archivio.idMassimario) {
       this.messageService.add({
         severity: "error",
@@ -723,96 +786,108 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     if (this.archivio.stato == StatoArchivio.PRECHIUSO) {
       archivioUpdate.stato = StatoArchivio.APERTO;
       this.archivio.stato = StatoArchivio.APERTO;
-      this.patchArchivio(
-        archivioUpdate,
-        additionalData,
-        "Archivio " + this.archivio.numerazioneGerarchica + " riaperto correttamente",
-        `Si è verificato un errore nella riapertura dell'archivio, contattare Babelcare`,
-        () => {this.updateArchivio.emit(this.archivio)}
+      this.subscriptions.push(this.patchArchivio(
+          archivioUpdate,
+          additionalData,
+          "Archivio " + this.archivio.numerazioneGerarchica + " riaperto correttamente",
+          `Si è verificato un errore nella riapertura dell'archivio, contattare Babelcare`
+        ).subscribe(a => {
+          this.updateArchivio.emit(this.archivio);
+          this.captionConfiguration = new CaptionConfiguration(
+            CaptionComponent.ARCHIVIO, true, true, false, false, 
+            true, true, false, false,
+            false, true);
+          this.buildNewArchivioButton(this.archivio);
+          this.buildFunctionButton(this.archivio);
+        })
       );
-      this.captionConfiguration = new CaptionConfiguration(
-        CaptionComponent.ARCHIVIO, true, true, false, false, 
-        true, true, false, false,
-        false, true);
-      this.buildNewArchivioButton(this.archivio);
-      this.buildFunctionButton(this.archivio);
+      
     } else {
-      this.subscriptions.push(
-        this.configurazioneService.getParametriAziende("chiusuraArchivio", ["scripta"], [this.archivio.idAzienda.id]).subscribe(
-          (parametriAziende: ParametroAziende[]) => {
-            let chiusuraArchivio: boolean = false;
-            if (parametriAziende && parametriAziende[0]) {
-              chiusuraArchivio = JSON.parse(parametriAziende[0].valore)
-            }
-            if (chiusuraArchivio) {
-                  // L'utente conferma di voler chiudere definitivamente il fascicolo, faccio partire la chiusura
-                  archivioUpdate.stato = StatoArchivio.CHIUSO;
-                  this.archivio.stato = StatoArchivio.CHIUSO;
-                  this.patchArchivio(
-                    archivioUpdate,
-                    additionalData,
-                    "Archivio " + this.archivio.numerazioneGerarchica + " chiuso correttamente",
-                    `Si è verificato un errore nella chiusura dell'archivio, contattare Babelcare`,
-                    () => {this.updateArchivio.emit(this.archivio)}
-                  );
-                  this.captionConfiguration = new CaptionConfiguration(
-                    CaptionComponent.ARCHIVIO, true, true, false, false, 
-                    false, true, false, false,
-                    true, true);
-                  this.buildFunctionButton(this.archivio);
-            } else {
-
-                  // L'utente conferma di voler chiudere definitivamente il fascicolo, faccio partire la chiusura
-                  archivioUpdate.stato = StatoArchivio.PRECHIUSO;
-                  this.archivio.stato = StatoArchivio.PRECHIUSO;
-                  this.patchArchivio(
-                    archivioUpdate,
-                    additionalData,
-                    "Archivio " + this.archivio.numerazioneGerarchica + " chiuso correttamente",
-                    `Si è verificato un errore nella chiusura dell'archivio, contattare Babelcare`,
-                    () => {this.updateArchivio.emit(this.archivio)}
-                    
-                  );
-                  this.captionConfiguration = new CaptionConfiguration(
-                    CaptionComponent.ARCHIVIO, true, true, false, false, 
-                    false , true, false, false,
-                    true, true);
-                  this.buildFunctionButton(this.archivio);
-            }
-          }));
-        }   
-
+      this.rightContentProgressSpinner = true;
+      if (this.chiusuraArchivioParams) {
+        // L'utente conferma di voler chiudere definitivamente il fascicolo, faccio partire la chiusura
+        archivioUpdate.stato = StatoArchivio.CHIUSO;
+        this.archivio.stato = StatoArchivio.CHIUSO;
+        this.subscriptions.push(this.patchArchivio(
+            archivioUpdate,
+            additionalData,
+            "Archivio " + this.archivio.numerazioneGerarchica + " chiuso correttamente",
+            `Si è verificato un errore nella chiusura dell'archivio, contattare Babelcare`
+          ).subscribe( a => {
+            this.updateArchivio.emit(this.archivio);
+            this.captionConfiguration = new CaptionConfiguration(
+              CaptionComponent.ARCHIVIO, true, true, false, false, 
+              false, true, false, false,
+              true, true);
+            this.buildFunctionButton(this.archivio);
+            this.docListService.refreshDocs();
+            this.rightContentProgressSpinner = false;
+          })
+        );
+      } else {
+        // L'utente conferma di voler chiudere il fascicolo, faccio partire la chiusura
+        archivioUpdate.stato = StatoArchivio.PRECHIUSO;
+        this.archivio.stato = StatoArchivio.PRECHIUSO;
+        this.subscriptions.push(this.patchArchivio(
+            archivioUpdate,
+            additionalData,
+            "Archivio " + this.archivio.numerazioneGerarchica + " chiuso correttamente",
+            `Si è verificato un errore nella chiusura dell'archivio, contattare Babelcare`
+          ).subscribe( a => {
+            this.updateArchivio.emit(this.archivio);
+            this.captionConfiguration = new CaptionConfiguration(
+              CaptionComponent.ARCHIVIO, true, true, false, false, 
+              false , true, false, false,
+              true, true);
+            this.buildFunctionButton(this.archivio);
+            this.rightContentProgressSpinner = false;
+          })
+        );
+      }
+    }
   }
 
-  public patchArchivio(archivioToUpdate: Archivio, additionalData?: AdditionalDataDefinition[], messageSuccess?: string, messageError?: string, exe?: () => void): void {
-    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id,  null/* this.ARCHIVIO_PROJECTION */, additionalData)
-      .subscribe(
-        res => {
-          console.log("Update archivio: ", res);
-          this.archivio.version = res.version;
-          if (messageSuccess) {
-            this.messageService.add({
-              severity: "success",
-              key: "dettaglioArchivioToast",
-              summary: "OK",
-              detail: messageSuccess
-            });
+  /**
+   * torna un observable, che alla sottoscrizione aggiorna l'archivio e mostra il messaggio passato in caso si successo, oppure il messaggio di errore passato in caso di errore
+   * @param archivioToUpdate 
+   * @param additionalData 
+   * @param messageSuccess 
+   * @param messageError 
+   * @returns 
+   */
+  public patchArchivio(archivioToUpdate: Archivio, additionalData?: AdditionalDataDefinition[], messageSuccess?: string, messageError?: string): Observable<any> {
+    // crea un observable al quale sottoscriversi. Alla sottoscrizione verrà prima eseguiro il codice in questa subscribe
+    const obs: Observable<any> = new Observable(
+      observer => 
+        this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id,  null/* this.ARCHIVIO_PROJECTION */, additionalData).subscribe({
+          next: (res) => {
+            console.log("Update archivio: ", res);
+            this.archivio.version = res.version;
+            if (messageSuccess) {
+              this.messageService.add({
+                severity: "success",
+                key: "dettaglioArchivioToast",
+                summary: "OK",
+                detail: messageSuccess
+              });
+            }
+            // il lancio di queste due funzioni fa si che venga eseguita prima questa subscribe e poi quella esterna al quale ci si sottoscriverà
+            observer.next(res);
+            observer.complete();
+          },
+          error: (err) => {
+            if (messageError) {
+              this.messageService.add({
+                severity: "error",
+                key: "dettaglioArchivioToast",
+                summary: "Attenzione",
+                detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`
+              });
+            }
           }
-          if (exe) {
-            exe();
-          }
-        },
-        err => {
-          if (messageError) {
-            this.messageService.add({
-              severity: "error",
-              key: "dettaglioArchivioToast",
-              summary: "Attenzione",
-              detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`
-            });
-          }
-        }
-      ));
+        })
+      );
+      return obs;
   }
 
   public addUserInArchivioDiInteresse() {
@@ -906,9 +981,20 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    */
   public openArchive(archivio: ExtendedArchiviView): void {
     const arch: Archivio = archivio as any as Archivio;
-    this.navigationTabsService.addTabArchivio(archivio, true, false, true);
-    // this.archivioUtilsService.updatedArchiveSelection(arch);
-    this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
+    let idAziende: number[] = [];
+    idAziende.push(archivio.idAzienda.id)
+    const usaGediInternauta$ = this.configurazioneService.getParametriAziende("usaGediInternauta", null, idAziende).pipe(first());
+    if (usaGediInternauta$ || (this.utenteUtilitiesLogin.getUtente().utenteReale.idInquadramento as unknown as String === "99")) {
+      if (["Sposta", "Trasforma in fascicolo"].includes(this.operazioneOrganizza) && archivio.idArchivioRadice.id !== this.archivio.idArchivioRadice.id){
+        this.archivioUtilsService.deletedArchiveSelection(arch.id);
+      } else if (["Sposta", "Trasforma in fascicolo"].includes(this.operazioneOrganizza) && archivio.idArchivioRadice.id === this.archivio.idArchivioRadice.id){
+        this.archivioUtilsService.updatedArchiveSelection(arch);
+      }
+      this.navigationTabsService.addTabArchivio(archivio, true, false);
+      // this.archivioUtilsService.updatedArchiveSelection(arch);
+      this.appService.appNameSelection("Fascicolo "+ archivio.numerazioneGerarchica + " [" + archivio.idAzienda.aoo + "]");
+    }
+
   }
 
   /**
@@ -950,7 +1036,11 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         });
         break;
       case "Copia":
-        this.extendedArchivioService.copiaArchivio(this.archivio.id, this.archivioDestinazioneOrganizza.id, this.organizzaTarget.includes("fascicolo"), this.organizzaTarget.includes("contenuto"))
+        this.extendedArchivioService.copiaArchivio(
+          this.archivio.id, 
+          this.archivioDestinazioneOrganizza.id, 
+          this.organizzaTarget.includes("fascicolo") || this.organizzaTarget.includes("fascicoloAndContenuto"), 
+          this.organizzaTarget.includes("contenuto") || this.organizzaTarget.includes("fascicoloAndContenuto"))
         .subscribe({
           next: (res: any) => {
             console.log("res", res)
@@ -1039,7 +1129,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * @param target il target per il quale devo restituire la descrizione
    * @returns string
    */
-  public getDescrizioneAzioneTargetText(target: string): string{
+  /* public getDescrizioneAzioneTargetText(target: string): string{
     let res = "";
     switch(this.operazioneOrganizza){
       case "Sposta":
@@ -1064,7 +1154,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         break;
     }
     return res;
-  }
+  } */
 
   /**
    * Ripristina tutti i parametri relativi al PopUp
@@ -1089,9 +1179,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     if (this.archivioDestinazioneOrganizza !== null && this.organizzaTarget.length > 0 && this.operazioneOrganizza !== null && this.operazioneOrganizza !== 'Trasforma in fascicolo'  && this.operazioneOrganizza !== 'Duplica'){
       return true;
     }
-    if (this.organizzaTarget.length > 0 && this.operazioneOrganizza === 'Duplica'){
-      console.log(this.organizzaTarget);
-      
+    if (this.organizzaTarget.length > 0 && this.operazioneOrganizza === 'Duplica'){      
       return true;
     }
     if (this.operazioneOrganizza === 'Trasforma in fascicolo'){

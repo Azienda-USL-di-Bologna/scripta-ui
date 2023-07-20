@@ -48,10 +48,14 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
 
   public pregresso: boolean = false;
   @Input() set data(data: any) {
-    console.log("ciao", data);
-
     this.detailDoc = data.doc;
-    this.visualizzazioneDocumento = this.detailDoc.registrazioneVisualizzazione;
+    this._doc = data.doc;
+    this.doc = this._doc;
+    this.pregresso = this._doc.pregresso
+    this.visualizzazioneDocumento = this.detailDoc._registrazioneVisualizzazione;
+    console.log("visualizzazioneDocumento: ", this.visualizzazioneDocumento)
+    console.log("Doc_:", this._doc)
+    console.log("Pregresso", this.pregresso)
   }
 
   constructor(
@@ -101,6 +105,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
                   console.log("res", res);
                   this.doc = res;
                   if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG).length > 0) {
+                    console.log("RegistriDoc: ",this.doc.registroDocList)
                     this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
                   }
                   this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
@@ -113,9 +118,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
                     });
                   },  error => {
                   this.setFreezeDocumento(false);
-
                   console.log("errore", error);
-
                   this.messageService.add({
                     severity: "error",
                     summary: "Creazione proposta",

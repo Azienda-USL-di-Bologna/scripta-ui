@@ -17,6 +17,16 @@ export class ExtendedArchivioService extends ArchivioService {
   }
 
   /**
+   * Scarica il pdf del frontespizio del fascicolo passato.
+   * @param archivio L'archivio.
+   * @returns Url per accedere al file pdf.
+   */
+  public downloadFrontespizioFascicolo(archivio: Archivio | ArchivioDetail): Observable<any> {
+    const url = getInternautaUrl(BaseUrlType.Scripta) + `/downloadFrontespizioFascicolo/${archivio.id}`;
+    return this._http.get(url);
+  }
+
+  /**
    * Scarica l'archivio con tutto il suo contenuto in formato zip.
    * @param archivio L'archivio da scaricare.
    * @returns Il file zip.
@@ -142,6 +152,23 @@ export class ExtendedArchivioService extends ArchivioService {
     const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "rendiFascicolo";
     const formData: FormData = new FormData();
     formData.append("idArchivio", idArchivio.toString());
+    return this._http.post(apiUrl, formData);
+  }
+
+  public spostaDoc(idDoc: number, idArchivioPartenza: number, idArchivioDestinazione: number){
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "spostaDoc";
+    const formData: FormData = new FormData();
+    formData.append("idDoc", idDoc.toString());
+    formData.append("idArchivioPartenza", idArchivioPartenza.toString());
+    formData.append("idArchivioDestinazione", idArchivioDestinazione.toString());
+    return this._http.post(apiUrl, formData);
+  }
+
+  public copiaDoc(idDoc: number, idArchivioDestinazione: number){
+    const apiUrl = getInternautaUrl(BaseUrlType.Scripta) + "/" + "copiaDoc";
+    const formData: FormData = new FormData();
+    formData.append("idDoc", idDoc.toString());
+    formData.append("idArchivioDestinazione", idArchivioDestinazione.toString());
     return this._http.post(apiUrl, formData);
   }
 }

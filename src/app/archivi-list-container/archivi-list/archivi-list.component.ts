@@ -53,6 +53,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	@ViewChild("dt") public dataTable: Table;
 	@ViewChild("columnFilterDataCreazione") public columnFilterDataCreazione: ColumnFilter;
 
+	//public sortOrder = -1;
 	public archiviListModeEnum = ArchiviListMode;
 	public archivi: ExtendedArchiviView[] = [];
 	public archiviListMode: ArchiviListMode;
@@ -99,6 +100,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public filteredStrutture: Struttura[] = [];
 	private resetArchiviArrayLenght: boolean = true;
 	public fascicoliParlanti: boolean = false;
+	public chiusuraArchivio: boolean = false;
 	public dataMinimaCreazione: Date = new Date("2000-01-01");
 	public dataMassimaCreazione: Date = new Date("2030-12-31");
 	private pageConf: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 0, offset: 0 } };
@@ -115,8 +117,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	private idAziendeConGediInternautaAttivo: number[] = [];
 	private isLoggeduser99: boolean = false;
 	public messageIfNull: string = 'Non sono stati trovati fascicoli di recente utilizzo. Seleziona la voce Visibili';
-	private firstLoad: boolean = true;
-	
+	private fromTabTutti: boolean = false;
+	private cacheFiltroLivelloTabVisbili: number[]; // serve a tenere traccia del vecchio filtro sul livello passando dal tab tutti al tab dei visibili
 	//public instanziaTabellaArchiviList = true;
 	public loggedUserCanDeleteArchivio : boolean = false; 
 
@@ -172,13 +174,17 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					this.loginService.loggedUser$,
 					this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null)
 				], */
-				([[utenteUtilities, parametriAziende], usaGediInternauta]
+				([[utenteUtilities, parametriAziendeFascicoliParlanti], usaGediInternauta]
 				) => {
 					// Parte relativa al parametro aziendale
-					if (parametriAziende && parametriAziende[0]) {
-						this.fascicoliParlanti = JSON.parse(parametriAziende[0].valore || false);
-						if (this.fascicoliParlanti) {
-							this.aziendeConFascicoliParlanti = parametriAziende[0].idAziende;
+					if (parametriAziendeFascicoliParlanti ) {
+						console.log("ParametriAziendeFascicoli:", parametriAziendeFascicoliParlanti)
+						const parlanti = parametriAziendeFascicoliParlanti.find(p => { 
+							JSON.parse(p.valore);
+						}); 
+						if (parlanti) {
+							this.aziendeConFascicoliParlanti = parlanti.idAziende;
+							this.fascicoliParlanti = true;
 						}
 					}
 					// Parte relativa al utenteUtilities
@@ -188,10 +194,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					} else if (this.utenteUtilitiesLogin.getUtente()) {
 						this.isLoggeduser99 = (this.utenteUtilitiesLogin.getUtente().idInquadramento as unknown as String) === "99";
 					}
-					debugger;
+					
 					const tempCanCreateArchivio: Map<String, boolean> = new Map();
 					const tempMap : Map<String, PermessoEntitaStoredProcedure[]> = new Map(Object.entries(this.utenteUtilitiesLogin.getUtente().permessiGediByCodiceAzienda));
-					this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach(a => {
+					this.utenteUtilitiesLogin.getUtente().aziendeAttive.forEach((a: { codice: String; }) => {
 						if (tempMap.has(a.codice)) {
 							const permessi : PermessoEntitaStoredProcedure[] = tempMap.get(a.codice);
 							permessi.forEach(p => {
@@ -216,7 +222,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						tooltip: "Crea nuovo fascicolo",
 						livello: 0,
 						enable: tempCanCreateArchivio.size > 0,
-						aziendeItems: this.utenteUtilitiesLogin.getUtente().aziendeAttive.map(a => {
+						aziendeItems: this.utenteUtilitiesLogin.getUtente().aziendeAttive.map((a: { nome: any; codice: String; id: number; }) => {
 							return {
 								label: a.nome,
 								disabled: !tempCanCreateArchivio.has(a.codice) || !this.idAziendeConGediInternautaAttivo.includes(a.id),
@@ -237,9 +243,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					if (!!!this.archivioPadre) {
 						this.loadConfiguration();
 					} else {
+						// Se sono un attore non semplice creatore allora posso eliminare perché sono RESP o VICARIO o RESP PROP
 						this.loggedUserCanDeleteArchivio = !!this.archivioPadre.attoriList.find(
-							e => e.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id
-							&& e.ruolo !== RuoloAttoreArchivio.CREATORE);
+							e => e.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id && e.ruolo !== RuoloAttoreArchivio.CREATORE);
 							
 						this.setColumnsPerDetailArchivio();
 						
@@ -417,9 +423,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			//   disabled: true
 			// },
 		);
-		if (!!!(this.fascicoliParlanti && 
+		// Il tab tutti lo deve vedere solo uno che appartiene ad alemno una azienda che non sia con fascicoliParlanti
+		/* if (!(this.fascicoliParlanti && 
 			this.utenteUtilitiesLogin.getUtente().aziendeAttive.length === 1 && 
-			this.aziendeConFascicoliParlanti.some(azienda => this.utenteUtilitiesLogin.getUtente().aziendeAttive[0].id === azienda))){
+			this.aziendeConFascicoliParlanti.some(azienda => this.utenteUtilitiesLogin.getUtente().aziendeAttive[0].id === azienda))) { */
+			if (!this.fascicoliParlanti || this.utenteUtilitiesLogin.getUtente().aziendeAttive.some((a: { id: number; }) => !this.aziendeConFascicoliParlanti.includes(a.id))) {
 				this.selectButtonItems.push(
 					{
 						title: "Tutti i fascicoli",
@@ -448,7 +456,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			altrimenti: (comportamento di default)
 				lascio creare la voce tutti con value tutte le aziende
 		*/
-		if (this.archiviListMode === this.archiviListModeEnum.TUTTI){
+		if (this.archiviListMode === this.archiviListModeEnum.TUTTI) {
 			this.aziendeFiltrabili = this.aziendeFiltrabili.filter(aziendaFiltrabile => !this.aziendeConFascicoliParlanti.includes(aziendaFiltrabile.value[0]));
 		} 
 		if (this.aziendeFiltrabili.length > 1) {
@@ -523,7 +531,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		if (this.archiviListMode === ArchiviListMode.RECENTI) {
 
 			lazyFiltersAndSorts.filters.forEach((f, index) => {
-				//debugger;
 				if(f.field == "dataCreazione")
 					lazyFiltersAndSorts.filters.splice(index, 1);
 				if(f.field == "idAzienda.id")
@@ -690,36 +697,63 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.loadArchiviListSubscription = null;
 		}
 
-		//if(this.firstLoad && this.archiviListMode !== ArchiviListMode.RECENTI) {
-		//	this.resetCalendarToInitialValues();
-		//}
-
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
-
 		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
 		
+		/**
+		 * Se sono sul tab recenti allora voglio che non vengano presi in considerazione, e quindi ignorati, i filtri su alcuni campi.
+		 * Nello specifico i campi da ingorare sono ["dataCreazione", "idAzienda.id", "livello"]
+		 * Voglio che l'odinamento sia per recentezza
+		 * Vengono poi modificati tutti i campi di filtro aggiungendo all'inizio "idArchivio." perché partiamo dalla tabella archvi_recenti
+		 */
 		if (this.archiviListMode === ArchiviListMode.RECENTI ) {
+			this.fromTabTutti = false
 			lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => !["dataCreazione", "idAzienda.id", "livello"].includes(f.field));
 			lazyFiltersAndSorts.filters.forEach(f => f.field = "idArchivio." + f.field);
 			lazyFiltersAndSorts.sorts = lazyFiltersAndSorts.sorts.filter(s => s.field === "dataRecentezza");
 		}
+
+		/**
+		 * Se sono sul tab tutti mi assicuro che il filtro sia solo sul livello 1
+		 */
 		if (this.archiviListMode === ArchiviListMode.TUTTI ) {
+			this.fromTabTutti = true;
 			lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
-			lazyFiltersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
+			filtersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
 		}
-		if (this.archiviListMode === ArchiviListMode.VISIBILI ) {
-			/* lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello"); */
-			/* if (!lazyFiltersAndSorts.filters.some(f => f.field === "tscol" )) {
-				lazyFiltersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1))
-			} */
-			/* if (this.firstLoad) {
-				this.resetCalendarToInitialValues()
-				lazyFiltersAndSorts.addFilter(new FilterDefinition("dataCreazione", FILTER_TYPES.not_string.equals, ));
-				this.firstLoad = false;
-				
-			} */
+
+
+		/**
+		 * Se sono sul tab visibili perché ci sto tornando dopo esserci già stato voglio assicurarmi che il filtro sul livello sia quello che avevo messo in precedenza
+		 * a meno che non ci sia una numerazione gerarchica diversa dal semplice numero, in quel caso voglio filtrare su tutti i livelli.
+		 */
+		if (this.archiviListMode === ArchiviListMode.VISIBILI) {
+			if (this.storedLazyLoadEvent.filters?.global?.value && this.regexNumerazioneGerarchica.test(this.storedLazyLoadEvent.filters.global.value)) {
+				// Nella ricerca globale si sta cercando una numerazione gerarchica, allora tolgo il filtro sul livello e sulla data
+				this.setFilterTuttiLivelli();
+				this.removeFilterFromDataCreazione();
+			} else if (this.storedLazyLoadEvent.filters?.numerazioneGerarchica?.value && this.regexNumerazioneGerarchica.test(this.storedLazyLoadEvent.filters.numerazioneGerarchica.value)) {
+				// Nella ricerca per numerazioneGerarhica si sta cercando.. allora tolgo il filtro sulla data creazione
+				this.removeFilterFromDataCreazione();
+				// In questo caso il filtro sul livello lo lascio com'è a meno che: vedi if seguente:
+				if (this.storedLazyLoadEvent.filters?.numerazioneGerarchica.value.includes("-")) {
+					// Ho una numerazione gerarchica diversa da un semplice numero, quindi mi assicuro di essere sul filtro livello Tutti
+					this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
+					lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
+				}
+			} else if (this.storedLazyLoadEvent.filters?.numero?.value) {
+				// Nella ricerca per numerazione gerarhica sto cercando un numero. Tolgo il filtro sulla data creazione
+				this.removeFilterFromDataCreazione();
+			} else if (this.fromTabTutti && this.cacheFiltroLivelloTabVisbili) {
+				// Se provengo dal tab Tutti e avevo settato un filtro sul livello mentre ero nel tab Visibile reimposto il filtro 
+				lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters?.filter(f => f.field != "livello");
+				this.cacheFiltroLivelloTabVisbili.forEach((filtro : Number) => lazyFiltersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, filtro)));
+				this.livelloValue = this.cacheFiltroLivelloTabVisbili;
+			}
+
+			this.cacheFiltroLivelloTabVisbili = this.storedLazyLoadEvent.filters?.livello.value; // Salvataggio del filtro dei livelli in modo da non perderlo andando nel tab TUTTI
+			this.fromTabTutti = false;
 		}
-		
 		
 		this.loadArchiviListSubscription = this.serviceToGetData.getData(
 			this.projectionToGetData,
@@ -793,28 +827,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				this.calendarcreazione.writeValue(null);
 			} else {		
 				const oggi = new Date();
-				if(this.calendarcreazione) {
-					switch (oggi.getMonth()) {
-						case 0:
-							// Gennaio
-							this.calendarcreazione.writeValue([
-								new Date(new Date().getFullYear() - 1, 10, 1),
-								new Date(new Date().getFullYear(), 11, 31)
-							]);
-							break;
-						case 1:
-							// Febbrario
-							this.calendarcreazione.writeValue([
-								new Date(new Date().getFullYear() - 1, 11, 1),
-								new Date(new Date().getFullYear(), 11, 31)
-							]);
-							break
-						default:
-							this.calendarcreazione.writeValue([
-								new Date(new Date().getFullYear(), 0, 1),
-								new Date(new Date().getFullYear(), 11, 31)
-							]); 
-					}
+				if (this.calendarcreazione) {
+					// Come filtro per la data vogliamo mettere quest'anno e il precedente
+					this.calendarcreazione.writeValue([
+						new Date(new Date().getFullYear() - 1, 0, 1),
+						new Date(new Date().getFullYear(), 11, 31)
+					]);
 				}
 				
 			}
@@ -936,7 +954,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		
 		filtersAndSorts.addSort(new SortDefinition("nome", SORT_MODES.asc));
 		this.personaService.getData(null, filtersAndSorts, null)
-			.subscribe(res => {
+			.subscribe((res: { results: any[]; }) => {
 				if (res && res.results) {
 					res.results.forEach((persona: any) => {
 						persona["descrizioneVisualizzazione"] = persona.descrizione + (persona.idSecondario ? " (" + persona.idSecondario + ")" : "");
@@ -969,7 +987,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			filtersAndSorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, idAzienda));
 		});
 		this.strutturaService.getData("StrutturaWithIdAzienda", filtersAndSorts, null)
-			.subscribe(res => {
+			.subscribe((res: { results: any[]; }) => {
 				if (res && res.results) {
 					res.results.forEach((struttura: any) => {
 						struttura["descrizioneVisualizzazione"] =
@@ -1037,7 +1055,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 */
 	public resetSort(): void {
 		this.dataTable.sortField = this.initialSortField;
-		this.dataTable.sortOrder = this.dataTable.defaultSortOrder;
+		this.dataTable.sortOrder = -1; // -1 corrisponde a desc per primeng
 		this.dataTable.sortSingle();
 	}
 
@@ -1067,9 +1085,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		if (!!!stringa || stringa === "") {
 			this.resetSort();
 		} else {
-			this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
-			this.dropdownLivello.writeValue(this.livelloValue);
-			this.dataTable.filters["livello"] = { value: this.dropdownLivello.value, matchMode: "in" };
+			// Setto la ricerca su tutti i livelli
+			this.setFilterTuttiLivelli();
+
+			// Setto la ricerca senza filtro sulla dataCreazione se l'input utente corrisponde ad un numero o una numerazione gerarchica
+			if (this.regexNumerazioneGerarchica.test(stringa) && this.calendarcreazione && this.archiviListMode !== ArchiviListMode.RECENTI) {
+				this.removeFilterFromDataCreazione();
+			}
+
 		}
 		this.dataTable.filterGlobal(stringa, matchMode);
 	}
@@ -1223,6 +1246,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.showToastNumerazioneNonCorretta();
 			return;
 		} 
+
 		if (this.regexNumero.test(text)) {
 			// La regex è un numero. Preparo il filtro e lo faccio partire
 			(this.dataTable.filters[this.fieldNumerazioneGerarchica] as any).value = null;
@@ -1241,13 +1265,37 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		}
 
 		if (text.includes("-") && this.livelloValue.length !== 3 && this.archiviListMode !== ArchiviListMode.TUTTI) {
-			this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
-			this.dropdownLivello.writeValue(this.livelloValue);
-			this.dataTable.filters["livello"] = { value: this.dropdownLivello.value, matchMode: "in" };
+			this.setFilterTuttiLivelli();
+		}
+
+		if (this.calendarcreazione && this.archiviListMode !== ArchiviListMode.RECENTI) {
+			this.removeFilterFromDataCreazione();
 		}
 		
 		this.dataTable.filters[this.fieldNumerazioneGerarchica] = {value: text, matchMode: this.matchModeNumerazioneGerarchica, operator: FilterOperator.AND};
 		this.dataTable._filter();
+	}
+
+
+	/**
+	 * setto a null il filtro sulla data creazione.
+	 * questo metodo è utile quando si vuole permettere all'utente di cercare in lungo e in largo tra gli archivi.
+	 */
+	private removeFilterFromDataCreazione() {
+		this.calendarcreazione.writeValue(null);
+		this.lastDataCreazioneFilterValue = null;
+		this.dataTable.filters["dataCreazione"] = { value: null, matchMode: "is" };
+	}
+
+	/**
+	 * Setto il fitlro sul livello a Tutti, cioè i livelli 1, 2 e 3.
+	 * Di fatto quindi non sto più filtrando sul livello.
+	 * questo metodo è utile quando si vuole permettere all'utente di cercare in lungo e in largo tra gli archivi.
+	 */
+	private setFilterTuttiLivelli() {
+		this.livelloValue = this.livelliFiltrabili.find(l => l.label === "Tutti").value;
+		this.dropdownLivello.writeValue(this.livelloValue);
+		this.dataTable.filters["livello"] = { value: this.dropdownLivello.value, matchMode: "in" };
 	}
 
 	/**
@@ -1271,7 +1319,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	/**
 	 * newArchivio
 	 */
-	public newArchivio(idAzienda: number): void {    
+	public newArchivio(idAzienda: number): void {
+		this.rightContentProgressSpinner = true;
 		const archivioBozza = new Archivio();
 		archivioBozza.livello = 1;
 		archivioBozza.stato = StatoArchivio.BOZZA;
@@ -1291,7 +1340,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "UNIFICATA"));
 		filterAndSort.addFilter(new FilterDefinition("idAfferenzaStuttura.codice", FILTER_TYPES.not_string.equals, "FUNZIONALE"));
 		filterAndSort.addFilter(new FilterDefinition("attivo", FILTER_TYPES.not_string.equals, true));
-		this.utenteStrutturaService.getData("UtenteStrutturaWithIdAfferenzaStruttura", filterAndSort, null, null).subscribe((res) => {
+		this.utenteStrutturaService.getData("UtenteStrutturaWithIdAfferenzaStruttura", filterAndSort, null, null).subscribe((res: { results: UtenteStruttura[]; }) => {
 			strutturaCreatore.id = (res.results as UtenteStruttura[]).find((a: UtenteStruttura) => a.idAfferenzaStruttura.codice === "DIRETTA")?.fk_idStruttura?.id;
 			if (!strutturaCreatore.id) {
 				strutturaCreatore.id = (res.results as UtenteStruttura[]).find((a: UtenteStruttura) => a.idAfferenzaStruttura.codice === "UNIFICATA")?.fk_idStruttura?.id;
@@ -1344,7 +1393,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					id: strutturaCreatore.id
 				} as Struttura;
 				idPersonaResponsabile.ruolo = RuoloAttoreArchivio.RESPONSABILE;
-				//debugger;
+				
 				//idPersonaResponsabile.idStruttura = this.utenteUtilitiesLogin.getUtente().utenteStrutturaList.find(us => us.idAfferenzaStruttura.codice === )
 				archivioBozza.attoriList.push(idPersonaResponsabile);
 			}   
@@ -1356,6 +1405,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				.subscribe((nuovoArchivioCreato: Archivio) => {      
 					this.navigationTabsService.addTabArchivio(nuovoArchivioCreato, true);
 					this.appService.appNameSelection(`Fascicolo ${nuovoArchivioCreato.numerazioneGerarchica} [${nuovoArchivioCreato.idAzienda.aoo}]`);
+					this.rightContentProgressSpinner = false;
 			}));
 			})
 
@@ -1420,6 +1470,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					
 							this.subscriptions.push(
 								this.extendedArchivioService.deleteArchivio(rowData.id).subscribe(
+								//this.extendedArchivioService.deleteHttpCall(rowData.id).subscribe(
 									res => {
 										this.messageService.add({
 											severity: "success",

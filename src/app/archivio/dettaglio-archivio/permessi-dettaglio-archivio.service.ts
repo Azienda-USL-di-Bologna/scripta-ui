@@ -21,6 +21,8 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
   
   private _archivioReloadPermessi = new Subject<boolean>();
 
+  public loading: boolean = false;
+
   constructor(
     protected _http: HttpClient,
     protected datepipe: DatePipe,
@@ -138,9 +140,11 @@ export class PermessiDettaglioArchivioService extends PermissionManagerService {
    * @param archivio 
    */
   public reloadPermessiArchivio(archivio: Archivio | ArchivioDetail) {
+    this.loading = true;
     this.blackboxPermessiService.getPermessiArchivio(archivio.id).subscribe((permessi: PermessoEntitaStoredProcedure[]) => {
       archivio.permessi = permessi;
       this.archivioReloadPermessiSelection(true);
+      this.loading = false;
     },
     err => {
       this.messageService.add({

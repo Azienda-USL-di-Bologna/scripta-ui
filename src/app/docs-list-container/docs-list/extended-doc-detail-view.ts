@@ -4,7 +4,7 @@ import { StatiVersamentoTraduzioneVisualizzazione, StatoDocTraduzioneVisualizzaz
 export class ExtendedDocDetailView extends DocDetailView {
   private _oggettoVisualizzazione: string;
   private _tipologiaVisualizzazione: string;
-  private _registrazioneVisualizzazione: string;
+  public _registrazioneVisualizzazione: string;
   private _propostaVisualizzazione: string;
   private _statoVisualizzazione: string;
   private _statoUltimoVersamentoVisualizzazione: string;

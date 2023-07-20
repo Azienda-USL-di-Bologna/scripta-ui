@@ -1,9 +1,9 @@
-import { Component, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { ActivatedRoute, Route, Router } from '@angular/router';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { AttivitaService, StatoArchivio } from '@bds/internauta-model';
-import { Applicazione, ApplicazioneService, Archivio, Attivita, AttoreArchivio, AttoreArchivioService, Azienda, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, Persona, Ruolo, RuoloAttoreArchivio, Struttura, UtenteStruttura } from '@bds/internauta-model';
+import { Applicazione, ApplicazioneService, Archivio, Attivita, AttoreArchivio, AttoreArchivioService, Azienda, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, Persona, RuoloAttoreArchivio, Struttura, UtenteStruttura } from '@bds/internauta-model';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
-import { BatchOperation, BatchOperationTypes, NextSdrEntity, PagingConf, SortDefinition, SORT_MODES } from '@bds/next-sdr';
+import { BatchOperation, BatchOperationTypes, NextSdrEntity } from '@bds/next-sdr';
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { Subscription } from 'rxjs/internal/Subscription';
@@ -30,6 +30,7 @@ export class ResponsabiliComponent implements OnInit {
   public ruoloAttoreLoggedUser: RuoloAttoreArchivio;
   public responsabilePropostoGiaPresente: boolean = false;
   public loggedUserIsResponsabile: boolean = false;
+  
   @ViewChild("tableResponsabiliArchivi", {}) private dt: Table;
   
 
@@ -51,7 +52,7 @@ export class ResponsabiliComponent implements OnInit {
     private attoreArchivioService: AttoreArchivioService,
     private loginService: JwtLoginService,
     private messageService: MessageService,
-    private permessiDettaglioArchivioService: PermessiDettaglioArchivioService,
+    public permessiDettaglioArchivioService: PermessiDettaglioArchivioService,
     private applicazioneService: ApplicazioneService,
     private router: Router,
     private attivitaService: AttivitaService) {
@@ -101,7 +102,7 @@ export class ResponsabiliComponent implements OnInit {
     this.struttureAttoreInEditing = [];
     const newAttore = new AttoreArchivio();
     newAttore.ruolo = ruolo;
-    this.responsabiliArchivi.push(newAttore);
+    this.responsabiliArchivi.unshift(newAttore);
     this.dt.initRowEdit(newAttore);
   }
 
@@ -117,7 +118,7 @@ export class ResponsabiliComponent implements OnInit {
       if (key !== attore.id.toString()) {
         delete this.dt.editingRowKeys[key];
         if (key === "undefined") {
-          this.responsabiliArchivi.pop();
+          this.responsabiliArchivi.shift();
         }
       }
     }
@@ -127,6 +128,8 @@ export class ResponsabiliComponent implements OnInit {
    * Funzione chiamata dall'html quando dopo creato/editato/cancellato un attore viene salvato
    */
   public onRowEditSave(attore: AttoreArchivio, index: number, operation: string) {
+    this.permessiDettaglioArchivioService.loading = true;
+
     const attoreToOperate = new AttoreArchivio();
     attoreToOperate.id = attore.id;
     console.log(attoreToOperate.id)
@@ -155,6 +158,7 @@ export class ResponsabiliComponent implements OnInit {
                 this.archivio.attoriList.push(attoreRes);
                 this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
                 this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
+                this.permessiDettaglioArchivioService.loading = false;
               },
               error: () => {
                 this.messageService.add({
@@ -196,7 +200,7 @@ export class ResponsabiliComponent implements OnInit {
             url: "/nav/apridascrivania?id=" + this.archivio.id.toString(),
             label: "Accetta/Rifiuta"
           }];
-          attivita.urls = JSON.stringify(url); //"[{\"url\" :" + "\" " + url +"\", \"label\": \"Accetta\"}]";
+          attivita.urls = url; //"[{\"url\" :" + "\" " + url +"\", \"label\": \"Accetta\"}]";
           attivita.aperta = false;
           attivita.provenienza = this.utenteUtilitiesLogin.getUtente().idPersona.descrizione;
           attivita.priorita = 3;
@@ -236,7 +240,6 @@ export class ResponsabiliComponent implements OnInit {
                 this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
               }
             )
-            
           )
         }
         break;
@@ -335,7 +338,7 @@ export class ResponsabiliComponent implements OnInit {
       this.responsabiliArchivi[index] = this.dictAttoriClonePerRipristino[attore.id];
       delete this.dictAttoriClonePerRipristino[attore.id];
     } else { 
-      this.responsabiliArchivi.pop();
+      this.responsabiliArchivi.shift();
     }
   }
 
