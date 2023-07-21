@@ -19,11 +19,11 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./doc-detail-and-preview.component.scss']
 })
 export class DocDetailAndPreviewComponent implements OnInit {
-  public accordionSelected: boolean[] = [true, false];
   public isResponsabileVersamento: boolean = false;
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
   private idPersona: Persona;
+  public accordionSelected: boolean[] = [true, false];
   public utente: Utente;
   public hasPienaVisibilita: boolean = false;
 
@@ -35,6 +35,9 @@ export class DocDetailAndPreviewComponent implements OnInit {
   }
   @Input() set doc(doc: ExtendedDocDetailView) {
     this._doc = doc;
+    if (this.utenteUtilitiesLogin){
+      this.accordionSelected[0] = this.accordionSelected[0] && this.canVisualizeAllegati();
+    }
   }
 
   _docListModeSelected: DocsListMode;
@@ -81,12 +84,11 @@ export class DocDetailAndPreviewComponent implements OnInit {
             this.isResponsabileVersamento = this.utenteUtilitiesLogin.isRV();
             this.utente = this.utenteUtilitiesLogin.getUtente();
             this.idPersona = this.utente.idPersona;
-
+            this.accordionSelected[0] = this.accordionSelected[0] && this.canVisualizeAllegati();
           }
         }
       )
     );
-    console.log(this.doc);
   }
 
   public closePanel() {
@@ -106,7 +108,6 @@ export class DocDetailAndPreviewComponent implements OnInit {
   }
 
   public canVisualizeAllegati(): boolean {
-    debugger
       // controllo se si tratta di un documento con visibilità normale
       if (!this.doc.visibilitaLimitata && !this.doc.riservato){
         // controllo se siamo un attore del documento
