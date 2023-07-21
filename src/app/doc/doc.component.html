@@ -1,5 +1,5 @@
 <p-toast #pageStart position="top-right" (onClose)="clearMessages()"></p-toast>
-<div [ngClass]="{'pregresso': pregresso}">
+<div>
   <p-toolbar *ngIf="!pregresso">
     <div class="classe-temporanea">
       <button  *ngIf="!numeroVisualizzazione" pButton type="button" label="Protocolla"icon="material-icons-outlined person_add"
@@ -57,6 +57,32 @@
         <input id="protocollatoda" aria-label="protocollato da" disabled="true" pInputText type="text" [disabled]="false"
           [(ngModel)]="descrizioneUtenteRegistrante">
       </div>
+      <p-accordion>
+        <p-accordionTab header="Mittente" [selected]="true">
+          <mittente [doc]="doc" [tipoDocumento]="tipoDocumento" (saveMittenteEvent)="saveDoc($event,'mittenti')">
+          </mittente>
+        </p-accordionTab>
+        <p-accordionTab header="Destinatari">
+          <ng-template pTemplate="content">
+            <destinatari [doc]="doc"> </destinatari>
+          </ng-template>
+        </p-accordionTab>
+        <p-accordionTab *ngIf="pregresso && tipoDocumento != 'PROTOCOLLO_IN_ENTRATA'" header="Attori">
+          <ng-template pTemplate="content">
+            <attori [doc]="doc"></attori>
+          </ng-template>
+        </p-accordionTab>
+        <p-accordionTab *ngIf="pregresso" header="Fascicolazioni">
+          <ng-template pTemplate="content">
+            <archivio-doc [doc]="doc"></archivio-doc>
+          </ng-template>
+        </p-accordionTab>
+        <p-accordionTab *ngIf="!pregresso" header="Allegati" class="allegati-tab">
+          <ng-template pTemplate="content">
+            <allegati [doc]="doc"></allegati>
+          </ng-template>
+        </p-accordionTab>
+      </p-accordion>
     </section>
     <!-- 
       Commento da non cancellare. Sono campi che in futuro potremmo voler utilizzare
@@ -86,39 +112,14 @@
               class="p-col">
       </p-calendar>
     </div> -->
-    <p-accordion class="accodion-box">
-      <p-accordionTab header="Mittente" [selected]="true">
-        <mittente [doc]="doc" [tipoDocumento]="tipoDocumento" (saveMittenteEvent)="saveDoc($event,'mittenti')">
-        </mittente>
-      </p-accordionTab>
-      <p-accordionTab header="Destinatari">
-        <ng-template pTemplate="content">
-          <destinatari [doc]="doc"> </destinatari>
-        </ng-template>
-      </p-accordionTab>
-      <p-accordionTab *ngIf="pregresso && tipoDocumento != 'PROTOCOLLO_IN_ENTRATA'" header="Attori">
-        <ng-template pTemplate="content">
-          <attori [doc]="doc"></attori>
-        </ng-template>
-      </p-accordionTab>
-      <p-accordionTab *ngIf="pregresso" header="Fascicolazioni">
-        <ng-template pTemplate="content">
-          <archivio-doc [doc]="doc"></archivio-doc>
-        </ng-template>
-      </p-accordionTab>
-      <p-accordionTab *ngIf="!pregresso" header="Allegati" class="allegati-tab">
-        <ng-template pTemplate="content">
-          <allegati [doc]="doc"></allegati>
-        </ng-template>
-      </p-accordionTab>
-    </p-accordion>
+    <section *ngIf="!!doc && pregresso">
+      <label class="allegati-label">Allegati</label>
+      <attachments-box
+        [idDoc]="doc.id"
+        [config]="attachmentsBoxConfig">
+      </attachments-box>
+    </section>
   </main>
   
-  <div class="right-attachments" *ngIf="!!doc && pregresso">
-    <h2>Allegati</h2>
-    <attachments-box
-      [idDoc]="doc.id"
-      [config]="attachmentsBoxConfig">
-    </attachments-box>
-  </div>
+ 
 </div>

@@ -106,7 +106,6 @@ export class DocDetailAndPreviewComponent implements OnInit {
   }
 
   public canVisualizeAllegati(): boolean {
-    debugger
       // controllo se si tratta di un documento con visibilità normale
       if (!this.doc.visibilitaLimitata && !this.doc.riservato){
         // controllo se siamo un attore del documento
