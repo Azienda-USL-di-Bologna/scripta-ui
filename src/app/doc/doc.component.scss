@@ -37,6 +37,12 @@ main {
     .label-oggetto {
         padding:0.625rem 0;
     }
+    .dati-generici {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
     .protocollato-da-box {
         display: flex;
         padding:0.625rem 0;

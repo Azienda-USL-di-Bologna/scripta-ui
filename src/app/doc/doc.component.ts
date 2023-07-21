@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
-import { Doc, ENTITIES_STRUCTURE, Persona, Allegato, CODICI_REGISTRO, TipologiaDoc } from "@bds/internauta-model";
+import { Doc, ENTITIES_STRUCTURE, Persona, Allegato, CODICI_REGISTRO, TipologiaDoc, DocDetailView } from "@bds/internauta-model";
 import { LOCAL_IT } from "@bds/common-tools";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { AdditionalDataDefinition } from "@bds/next-sdr";
@@ -11,6 +11,7 @@ import { AppService } from "../app.service";
 import { ExtendedDocService } from "./extended-doc.service";
 import { ExtendedDocDetailView } from "../docs-list-container/docs-list/extended-doc-detail-view";
 import { AttachmentsBoxConfig } from "@bds/common-components";
+import { formatDate } from '@angular/common';
 
 @Component({
   selector: "doc",
@@ -45,6 +46,11 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public tipoDocumento: TipologiaDoc;
   public visualizzazioneDocumento: string;
   public attachmentsBoxConfig: AttachmentsBoxConfig;
+  public dataRegistrazione: string;
+  public dataUltimoVersamento: string;
+  public visibilitaLimitata: boolean;
+  public riservato: boolean;
+  public annullato: boolean;
 
   public pregresso: boolean = false;
   @Input() set data(data: any) {
@@ -79,6 +85,19 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
           if (utenteUtilities) {
             this.utenteUtilitiesLogin = utenteUtilities;
             this.descrizioneUtenteRegistrante = utenteUtilities.getUtente().idPersona.descrizione;
+            if (this.detailDoc.dataUltimoVersamento != null ) {
+            this.dataUltimoVersamento = formatDate(this.detailDoc.dataUltimoVersamento, 'd MMM y', 'en_US');
+            } else {
+              this.dataUltimoVersamento = null;
+            }
+            if (this.detailDoc.dataRegistrazione != null) {
+            this.dataRegistrazione = formatDate(this.detailDoc.dataRegistrazione, 'd MMM y', 'en_US');
+            } else {
+              this.dataRegistrazione = null;
+            }
+            this.visibilitaLimitata = this.detailDoc.visibilitaLimitata;
+            this.riservato = this.detailDoc.riservato;
+            this.annullato = this.detailDoc.annullato;
 
              /**
              * Questa sottoscrizione serve a popolare this.doc
