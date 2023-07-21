@@ -131,7 +131,6 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
    */
   private setTabsAndActiveOneOfThem(): void {
     // this.tabItems = this.navigationTabsService.getTabs();
-    //debugger;
     const allTabs = this.navigationTabsService.getTabs();
     this.tabItems = [allTabs[this.tabIndexToActiveAtTheBeginning]];
     // this.tabItems.unshift(...allTabs)

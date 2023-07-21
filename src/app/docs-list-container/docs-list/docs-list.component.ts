@@ -1639,7 +1639,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
             }
           }
         }).add(() => {
-          debugger
           this.showAnteprima = true;
           this.showRightPanel.emit({
             showPanel: true,
