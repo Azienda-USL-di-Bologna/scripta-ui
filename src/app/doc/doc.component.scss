@@ -17,11 +17,11 @@ main {
     height: 100%;
     display: flex;
 
+    textarea {
+        margin-top: 0.1rem;
+    }
+
     .info-documento {
-        display: flex; 
-        flex-direction: column;
-        justify-content:space-between;
-        padding:0.625rem;
         .dati-creazione {
             display: flex;
             justify-content:space-between;
@@ -31,14 +31,11 @@ main {
         width: 100%;
         resize: none;
     }
-    .label-oggetto {
-        padding:0.625rem 0;
-    }
     .dati-generici {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        align-items: center;
+        align-items: last baseline;
     }
     .protocollato-da-box {
         display: flex;
@@ -50,9 +47,12 @@ main {
     }
 
 }
-    label {
-        align-self: baseline;
-    }
+.m-bottom-05 {
+    margin-bottom: 0.5rem;
+}
+label {
+    align-self: baseline;
+}
 .protocollo-esterno-box{
     padding: 0.625rem;
     display: flex;
@@ -67,7 +67,6 @@ main {
 }
 section {
     width: 50%;
-    margin: 0.5rem 0.5rem;
     padding: 0.1rem 0.5rem;
     
     .allegati-label {
