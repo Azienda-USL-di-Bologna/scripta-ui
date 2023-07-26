@@ -68,7 +68,7 @@
             <destinatari [doc]="doc"> </destinatari>
           </ng-template>
         </p-accordionTab>
-        <p-accordionTab *ngIf="pregresso && tipoDocumento != 'PROTOCOLLO_IN_ENTRATA'" header="Attori">
+        <p-accordionTab *ngIf="pregresso && tipoDocumento !== 'PROTOCOLLO_IN_ENTRATA'" header="Attori">
           <ng-template pTemplate="content">
             <attori [doc]="doc"></attori>
           </ng-template>
