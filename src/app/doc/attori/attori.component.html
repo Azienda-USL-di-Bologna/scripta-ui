@@ -1,14 +1,21 @@
 <div class="attori-pregressi">
+  <div>
+    <label class="p-col-2" for="responsabileProcedimento">Responsabile procedimento</label>
+    <p-listbox 
+      [options]="responsabileProcedimentoAsList" optionLabel="idPersona.descrizione" 
+      [readonly]="true" [disabled]="true">
+    </p-listbox>
+  </div>
     <div>
-        <label class="p-col-2" for="firmatari">Firmatari</label>
-        <p-listbox [options]="doc.firmatari" optionLabel="idPersona.descrizione" [readonly]="true" [disabled]="true"></p-listbox>
+      <label class="p-col-2" for="firmatari">Firmatari</label>
+      <p-listbox [options]="doc.firmatari" optionLabel="idPersona.descrizione" [readonly]="true" [disabled]="true"></p-listbox>
     </div>
     <div>
-        <label class="p-col-2" for="pareratori">Pareratori</label>
-        <p-listbox [options]="doc.pareratori" optionLabel="idPersona.descrizione" [readonly]="true" [disabled]="true"></p-listbox>
+      <label class="p-col-2" for="pareratori">Pareratori</label>
+      <p-listbox [options]="doc.pareratori" optionLabel="idPersona.descrizione" [readonly]="true" [disabled]="true"></p-listbox>
     </div>
     <div *ngIf="doc.tipologia === 'DELIBERA' || doc.tipologia === 'DETERMINA'">
-        <label class="p-col-2" for="vistatori">Vistatori</label>
-        <p-listbox [options]="doc.vistatori" optionLabel="descrizione" [readonly]="true" [disabled]="true"></p-listbox>
+      <label class="p-col-2" for="vistatori">Vistatori</label>
+      <p-listbox [options]="doc.vistatori" optionLabel="descrizione" [readonly]="true" [disabled]="true"></p-listbox>
     </div>
 </div>

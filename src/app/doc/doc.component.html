@@ -58,12 +58,11 @@
         <input id="protocollatoda" aria-label="protocollato da" disabled="true" pInputText type="text" [disabled]="false"
           [(ngModel)]="descrizioneUtenteRegistrante">
       </div>
-      <p-accordion>
-        <p-accordionTab header="Mittente" [selected]="true">
-          <mittente [doc]="doc" [tipoDocumento]="tipoDocumento" (saveMittenteEvent)="saveDoc($event,'mittenti')">
-          </mittente>
+      <p-accordion [multiple]="true">
+        <p-accordionTab *ngIf="tipoDocumento === 'PROTOCOLLO_IN_ENTRATA'" header="Mittente" [selected]="true">
+          <mittente [doc]="doc" [tipoDocumento]="tipoDocumento" (saveMittenteEvent)="saveDoc($event,'mittenti')"></mittente>
         </p-accordionTab>
-        <p-accordionTab header="Destinatari">
+        <p-accordionTab header="Destinatari" [selected]="tipoDocumento !== 'PROTOCOLLO_IN_ENTRATA'">
           <ng-template pTemplate="content">
             <destinatari [doc]="doc"> </destinatari>
           </ng-template>
