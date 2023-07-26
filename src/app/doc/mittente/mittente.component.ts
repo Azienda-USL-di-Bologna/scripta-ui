@@ -9,6 +9,7 @@ import { MessageService } from "primeng/api";
 import { enumOrigine } from "./mittente-constants";
 import { DatePipe } from "@angular/common";
 import { Table } from "primeng/table/table";
+import { LOCAL_IT } from "@bds/common-tools";
 
 @Component({
   selector: "mittente",
@@ -17,6 +18,28 @@ import { Table } from "primeng/table/table";
   providers: [ExtendedMittenteService]
 })
 export class MittenteComponent implements OnInit, OnDestroy {
+  @ViewChild("dt") dt?: Table;
+    
+  @Input() public tipoDocumento: TipologiaDoc;
+  @Input() set doc(value: Doc) {
+    this._doc = value;
+    this.pregresso = this._doc.pregresso;
+    if (!this.pregresso) {
+      this.actualMittente = this._doc.mittenti[0];
+      this.selectedMittenti = this._doc.mittenti;
+      this.indirizzo = this._doc.mittenti[0].ultimaSpedizione.indirizzo.completo;
+      this.actualMezzo = this._doc.mittenti[0].ultimaSpedizione.idMezzo;
+      this.actualOrigine = this._doc.mittenti[0].origine;
+      this.actualDataDiArrivo = new Date(this._doc.mittenti[0].ultimaSpedizione.data);
+      
+     
+    }
+    if (this.doc.mittenti != null && this.doc.mittenti.length > 0) {
+      this.mittenti = this.doc.mittenti;
+    } else {
+      this.selectedMittenti = [];
+    }
+  }
 
   private subscriptions: Subscription[] = [];
   private loggedUtenteUtilities: UtenteUtilities | undefined | null;
@@ -38,32 +61,15 @@ export class MittenteComponent implements OnInit, OnDestroy {
   public filteredMittente: DettaglioContatto[] = [];
   public filteredMezzo: any[] = [];
   public actualOrigine: string ;
-
+  public DatiProtocolloEsterno: Number;
+  public dataProtocolloEsterno: Date;
+  public localIt = LOCAL_IT;
   public pregresso: boolean;
-  @Input() public tipoDocumento: TipologiaDoc;
-  @ViewChild("dt") dt?: Table;
-
+  
+  
 
   get doc(): Doc {
     return this._doc;
-  }
-
-  @Input() set doc(value: Doc) {
-    this._doc = value;
-    this.pregresso = this._doc.pregresso;
-    if (!this.pregresso) {
-      this.actualMittente = this._doc.mittenti[0];
-      this.selectedMittenti = this._doc.mittenti;
-      this.indirizzo = this._doc.mittenti[0].ultimaSpedizione.indirizzo.completo;
-      this.actualMezzo = this._doc.mittenti[0].ultimaSpedizione.idMezzo;
-      this.actualOrigine = this._doc.mittenti[0].origine;
-      this.actualDataDiArrivo = new Date(this._doc.mittenti[0].ultimaSpedizione.data);
-    }
-    if (this.doc.mittenti != null && this.doc.mittenti.length > 0) {
-      this.mittenti = this.doc.mittenti;
-    } else {
-      this.selectedMittenti = [];
-    }
   }
 
   public saveSpedizione<K extends keyof Spedizione>(field: K, value: any) {
