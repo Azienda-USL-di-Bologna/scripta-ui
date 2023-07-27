@@ -294,13 +294,13 @@ export class NavigationTabsService {
     const tabIndex: number = this.tabs.findIndex(t => {
       return t.type === TabType.DOC && t.id === doc.id.toString();
     });
-    const labelDoc = doc.registrazioneVisualizzazione || 'PROP' +  doc.numeroProposta + '/' + doc.annoProposta;
+    const labelDoc = doc.registrazioneVisualizzazione || `PROP${doc.numeroProposta}/${doc.annoProposta}`;
     if (tabIndex !== -1) {
       this.updateTab(
         tabIndex, 
-        `${doc.registrazioneVisualizzazione}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`, 
+        `${labelDoc}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`, 
         {doc: doc},
-        `${doc.codiceRegistro === 'PG' ? "Protocollo generale" : doc.tipologiaVisualizzazione} ${pregresso ? 'pregresso ': ''}${doc.registrazioneVisualizzazione} [${doc.idAzienda.aoo}]`, 
+        `${doc.codiceRegistro === 'PG' ? "Protocollo generale" : doc.tipologiaVisualizzazione} ${pregresso ? 'pregresso ': ''}${labelDoc} [${doc.idAzienda.aoo}]`, 
       );
       if (active) {
         this.activeTabByIndex(tabIndex);
@@ -308,9 +308,9 @@ export class NavigationTabsService {
     } else if (reuseActiveTab) {
       this.updateTab(
         this.activeTabIndex, 
-        `${doc.registrazioneVisualizzazione}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`, 
+        `${labelDoc}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`, 
         {doc: doc},
-        `Protocollo generale ${pregresso ? 'pregresso ': ''}${doc.registrazioneVisualizzazione} [${doc.idAzienda.aoo}]`, 
+        `Protocollo generale ${pregresso ? 'pregresso ': ''}${labelDoc} [${doc.idAzienda.aoo}]`, 
         undefined // segnaposto per ricordare che c'è un parametro forse utile
       );
     } else {
@@ -319,7 +319,7 @@ export class NavigationTabsService {
           doc.id, 
           doc,
           `${labelDoc}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`,
-          `Protocollo generale ${pregresso ? 'pregresso ': ''}${doc.registrazioneVisualizzazione} [${doc.idAzienda.aoo}]`,
+          `Protocollo generale ${pregresso ? 'pregresso ': ''}${labelDoc} [${doc.idAzienda.aoo}]`,
         )
       );
       if (active) {
