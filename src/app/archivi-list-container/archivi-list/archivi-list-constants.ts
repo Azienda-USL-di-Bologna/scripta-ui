@@ -184,6 +184,8 @@ export const TipoArchivioTraduzioneVisualizzazione = [
   { value: TipoArchivio.PROCEDIMENTO, nome: "Procedimento" },
   { value: TipoArchivio.ATTIVITA, nome: "Attività" },
   { value: TipoArchivio.AFFARE, nome: "Affare" },
+  { value: TipoArchivio.SOGGETTO_FISICO, nome: "Soggetto fisico" },
+  { value: TipoArchivio.SOGGETTO_GIURIDICO, nome: "Soggetto giuridico" },
   { value: TipoArchivio.SPECIALE, nome: "Speciale" }
 ];
 
