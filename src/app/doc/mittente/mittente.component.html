@@ -128,8 +128,8 @@
     <ng-template let-rowdata pTemplate="body">
       <tr>
         <td> {{rowdata.descrizione}} </td>
-        <td> {{rowdata.ultimaSpedizione.indirizzo.completo}} </td>
-        <td> {{rowdata.ultimaSpedizione.idMezzo.descrizione}} </td>
+        <td> {{rowdata.ultimaSpedizione?.indirizzo?.completo}} </td>
+        <td> {{rowdata.ultimaSpedizione?.idMezzo?.descrizione}} </td>
       </tr>
     </ng-template>
   </p-table>
