@@ -294,6 +294,7 @@ export class NavigationTabsService {
     const tabIndex: number = this.tabs.findIndex(t => {
       return t.type === TabType.DOC && t.id === doc.id.toString();
     });
+    const labelDoc = doc.registrazioneVisualizzazione || 'PROP' +  doc.numeroProposta + '/' + doc.annoProposta;
     if (tabIndex !== -1) {
       this.updateTab(
         tabIndex, 
@@ -317,7 +318,7 @@ export class NavigationTabsService {
         this.buildaTabDoc(
           doc.id, 
           doc,
-          `${doc.registrazioneVisualizzazione}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`,
+          `${labelDoc}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`,
           `Protocollo generale ${pregresso ? 'pregresso ': ''}${doc.registrazioneVisualizzazione} [${doc.idAzienda.aoo}]`,
         )
       );
