@@ -14,7 +14,9 @@ export class DocsListContainerComponent implements OnInit {
   //public functionButton: FunctionButton;
   public captionConfiguration: CaptionConfiguration;
   public showRightSide: boolean = false;
+  public sonoPersonaVedenteSuDocSelezionato: boolean = false;
   public docForDetailAndPreview: ExtendedDocDetailView;
+  public docListModeSelected: DocsListMode;
   @ViewChild('doclist') doclistComponent: DocsListComponent;
 
   constructor() {
@@ -35,12 +37,14 @@ export class DocsListContainerComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  public manageRowSelected(event: {showPanel: boolean, rowSelected: ExtendedDocDetailView }) {
+  public manageRowSelected(event: {showPanel: boolean, rowSelected: ExtendedDocDetailView, sonoPersonaVedenteSuDocSelezionato: boolean}) {
     this.showRightSide = event.showPanel;
     this.docForDetailAndPreview = event.rowSelected;
+    this.sonoPersonaVedenteSuDocSelezionato = event.sonoPersonaVedenteSuDocSelezionato;
   }
 
   public manageDocListModeSelectd(event: {docListModeSelected: DocsListMode}) {
+    this.docListModeSelected = event.docListModeSelected;
     if (event.docListModeSelected === DocsListMode.ERRORI_VERSAMENTO) {
       this.captionConfiguration.functionButton = true;
     } else {

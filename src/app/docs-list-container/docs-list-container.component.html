@@ -19,7 +19,9 @@
   <ng-template pTemplate>
     <doc-detail-and-preview *ngIf="showRightSide"
       [doc]="docForDetailAndPreview" 
-      (closeRightPanel)="manageRowSelected({showPanel: false, rowSelected: null})" >
+      [sonoPersonaVedenteSuDocSelezionato]="sonoPersonaVedenteSuDocSelezionato" 
+      (closeRightPanel)="manageRowSelected({showPanel: false, rowSelected: null, sonoPersonaVedenteSuDocSelezionato: null})" 
+      [docListModeSelected]="docListModeSelected">
     </doc-detail-and-preview>
   </ng-template>
 </p-splitter>

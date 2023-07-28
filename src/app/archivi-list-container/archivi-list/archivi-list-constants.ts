@@ -152,25 +152,40 @@ export const cols: ColonnaBds[] = [
     useFilterMatchMode: true,
     default: true
   },
-  /* {
-    field: "eliminazione",
-    header: "",
-    filterField: "",
+  {
+    field: "idTitolo",
+    header: "Classificazione",
+    filterField: "idTitolo",
     style: {},
-    headerClass: ["header-column", "eliminazione-column"],
-    filterClass: ["filter-column", "eliminazione-column"],
-    bodyClass: ["scrollable-column", "eliminazione-column"],
+    headerClass: ["header-column", "classificazione-column"],
+    filterClass: ["filter-column", "classificazione-column"],
+    bodyClass: ["scrollable-column", "classificazione-column"],
     fieldType: "string",
     filterMatchMode: FILTER_TYPES.not_string.equals,
-    useFilterMatchMode: false,
+    useFilterMatchMode: true,
     default: false
-  } */
+  },
+  {
+    field: "idMassimario",
+    header: "Categoria documentale",
+    filterField: "idMassimario",
+    style: {},
+    headerClass: ["header-column", "massimario-column"],
+    filterClass: ["filter-column", "massimario-column"],
+    bodyClass: ["scrollable-column", "massimario-column"],
+    fieldType: "string",
+    filterMatchMode: FILTER_TYPES.not_string.equals,
+    useFilterMatchMode: true,
+    default: true
+  },
 ];
 
 export const TipoArchivioTraduzioneVisualizzazione = [
   { value: TipoArchivio.PROCEDIMENTO, nome: "Procedimento" },
   { value: TipoArchivio.ATTIVITA, nome: "Attività" },
   { value: TipoArchivio.AFFARE, nome: "Affare" },
+  { value: TipoArchivio.SOGGETTO_FISICO, nome: "Soggetto fisico" },
+  { value: TipoArchivio.SOGGETTO_GIURIDICO, nome: "Soggetto giuridico" },
   { value: TipoArchivio.SPECIALE, nome: "Speciale" }
 ];
 

@@ -321,6 +321,54 @@
             close
           </button>
         </div>
+        <div *ngSwitchCase="'idTitolo'" class="search-wrapper">
+          <p-columnFilter 
+            #colfiltertitoli
+            [field]="col.filterField" 
+            matchMode="" 
+            [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-autoComplete #autocompleteTitoli
+                [showEmptyMessage]="true" 
+                emptyMessage="Nessuna classificazione trovata"
+                [suggestions]="filteredTitoli" 
+                (completeMethod)="filterTitoli($event)"
+                field="descrizioneVisualizzazione" 
+                (onSelect)="filter($event?.id)" 
+                (onClear)="filter(null)"
+                appendTo="body">
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+          <button *ngIf="colfiltertitoli.hasFilter()" class="material-icons close-icon" type="reset"
+            (click)="colfiltertitoli.clearFilter(); autocompleteTitoli.writeValue(null)">
+            close
+          </button>
+        </div>
+        <div *ngSwitchCase="'idMassimario'" class="search-wrapper">
+          <p-columnFilter 
+            #colfiltermassimario
+            [field]="col.filterField" 
+            matchMode="" 
+            [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-autoComplete #autocompleteMassimario
+                [showEmptyMessage]="true" 
+                emptyMessage="Nessuna categoria documentale trovata"
+                [suggestions]="filteredMassimari" 
+                (completeMethod)="filterMassimari($event)"
+                field="descrizioneVisualizzazione" 
+                (onSelect)="filter($event?.id)" 
+                (onClear)="filter(null)"
+                appendTo="body">
+              </p-autoComplete>
+            </ng-template>
+          </p-columnFilter>
+          <button *ngIf="colfiltermassimario.hasFilter()" class="material-icons close-icon" type="reset"
+            (click)="colfiltermassimario.clearFilter(); autocompleteMassimario.writeValue(null)">
+            close
+          </button>
+        </div>
       </th>
       <th *ngIf="loggedUserCanDeleteArchivio"
         class="delete-archive-column"
@@ -421,6 +469,12 @@
           <span *ngFor="let v of rowData.descrizionePersonaVicarioList" class="vicari-item">
             {{v}} 
           </span>
+        </div>
+        <div *ngSwitchCase="'idTitolo'">
+          {{rowData.idTitoloVisualizzazione}}
+        </div>
+        <div *ngSwitchCase="'idMassimario'">
+          {{rowData.idMassimarioVisualizzazione}}
         </div>
       </td>
       <td *ngIf="loggedUserCanDeleteArchivio"

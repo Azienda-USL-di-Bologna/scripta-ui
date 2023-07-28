@@ -263,7 +263,11 @@
   .stato-column {
     min-width: 6.25rem;
     max-width: 6.25rem;
-  }  
+  }
+  .classificazione-column, .massimario-column {
+    min-width: 13rem;
+    max-width: 13rem;
+  }
 }
 
 ::ng-deep .table-zero-rows {

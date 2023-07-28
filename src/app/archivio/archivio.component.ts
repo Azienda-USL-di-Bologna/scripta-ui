@@ -72,7 +72,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public permessoMinimoSuArchivioDestinazioneOrganizza: DecimalePredicato = DecimalePredicato.VICARIO;
   public loggeduserCanAccess: boolean = false; 
 
-  private ARCHIVIO_DETAIL_PROJECTION = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewWithIdAziendaAndIdPersonaCreazioneAndIdPersonaResponsabileAndIdStrutturaAndIdVicari;
+  private ARCHIVIO_DETAIL_PROJECTION = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewExtended;
   private ragazzoDelNovantaNove = false;
 
   public pageConfNoLimit: PagingConf = {
