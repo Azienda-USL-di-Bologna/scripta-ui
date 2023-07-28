@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from "@angular/core";
-import { BaseUrls, BaseUrlType, CategoriaContatto, Contatto, ContattoService, DettaglioContatto, Doc, ENTITIES_STRUCTURE, OrigineRelated, Persona, Related, TipoContatto, TipoRelated } from "@bds/internauta-model";
+import { BaseUrls, BaseUrlType, CategoriaContatto, Contatto, ContattoService, DettaglioContatto, Doc, ENTITIES_STRUCTURE, OrigineRelated, Persona, Related, TipoContatto, TipologiaDoc, TipoRelated } from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { AdditionalDataDefinition, BatchOperation, BatchOperationTypes, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSdrEntity } from "@bds/next-sdr";
 import { MessageService } from "primeng/api";
@@ -16,17 +16,19 @@ import {ExtendedDestinatariService} from "./extended-destinatari.service";
 export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private loggedUtenteUtilities: UtenteUtilities;
-  public actualCompetente: Related;
-
-  public columnCoinvolti: any[] = [];
   private _doc: Doc;
-  public selectedCompetente: Related;
-  public selectedCoinvolto: Related;
+  
+  labelCompetenti: string;
+  labelCoinvolti: string;
+  actualCompetente: Related;
+  columnCoinvolti: any[] = [];
+  selectedCompetente: Related;
+  selectedCoinvolto: Related;
 
-  public filteredCompetenti: DettaglioContatto[];
-  public filteredCoinvolti: DettaglioContatto[];
+  filteredCompetenti: DettaglioContatto[];
+  filteredCoinvolti: DettaglioContatto[];
 
-  public pregresso: boolean;
+  pregresso: boolean;
   // public get pregresso(): boolean {
   //   return this._pregresso;
   // }
@@ -49,6 +51,8 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
       this.actualCompetente = this.doc.competenti[0];
       this.selectedCompetente = this.doc.competenti[0];
     }
+    this.setLabels(this.doc.tipologia);
+   
     // if ( value && value.competenti && value.competenti.length > 0 ) {
     //   this.selectedCompetente = value.competenti[0];
     //   this._doc = value;
@@ -88,6 +92,24 @@ export class DestinatariComponent implements OnInit, AfterViewInit, OnDestroy {
 
       }
     }; */
+  }
+  
+  setLabels(tipologia: TipologiaDoc) {
+    switch (tipologia) {
+      case TipologiaDoc.PROTOCOLLO_IN_ENTRATA:
+        this.labelCompetenti = 'Competenti';
+        this.labelCoinvolti = 'Coinvolti';
+        break;
+      case TipologiaDoc.PROTOCOLLO_IN_USCITA:
+        this.labelCompetenti = 'Principali';
+        this.labelCoinvolti = 'Altri destinatari';
+        break;
+      case TipologiaDoc.DELIBERA:
+      case TipologiaDoc.DETERMINA:
+        this.labelCompetenti = 'Destinatari Interni';
+        this.labelCoinvolti = 'Destinatari Esterni';
+        break;
+    }
   }
 
   public searchDestinatario(event: any, modalita: string) {
