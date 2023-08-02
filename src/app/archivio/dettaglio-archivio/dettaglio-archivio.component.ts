@@ -586,7 +586,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       this.confirmationService.confirm({
         key: "confirm-popup",
         target: event.target,
-        message: "Stai per numerare il fascicolo: confermi?",
+        message: "Conferma?",
         accept: () => {
           this.subscriptions.push(
             this.extendedArchivioService.numeraArchivio(
