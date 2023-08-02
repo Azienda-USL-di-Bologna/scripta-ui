@@ -121,7 +121,7 @@ export class ExtendedDocDetailView extends DocDetailView {
 
   public get tipologiaVisualizzazioneAndCodiceRegistro() {
     return new ExtendedDocDetailView();
-}
+  }
 
   public set tipologiaVisualizzazioneAndCodiceRegistro(doc: ExtendedDocDetailView) {
     switch (doc.tipologia) {
