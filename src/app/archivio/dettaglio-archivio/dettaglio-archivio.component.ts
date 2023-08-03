@@ -275,7 +275,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         parametriAziende.forEach(parametro => {
           this.fascicoliParlanti = JSON.parse(parametro.valore || false);
           if (this.fascicoliParlanti) {
-            if(this.aziendeConFascicoliParlanti.includes(this.archivio.idAzienda.id)) {
+            if (parametro.idAziende.includes(this.archivio.idAzienda.id)) {
               this.isParlante = true;
             }
           }
@@ -286,7 +286,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
 
   public changeVisibilita(): void {
-    if (this.loggedUserCanEditDetails && !this.aziendeConFascicoliParlanti?.includes(this.archivio.idAzienda.id)) {
+    if (this.loggedUserCanEditDetails /* && !this.aziendeConFascicoliParlanti?.includes(this.archivio.idAzienda.id) */) {
       this.archivio.riservato = !(this.archivio.riservato);
       const archivioToUpdate: Archivio = new Archivio();
       archivioToUpdate.riservato = this.archivio.riservato
