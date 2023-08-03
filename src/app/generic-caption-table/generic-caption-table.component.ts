@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Menu } from 'primeng/menu';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { Subscription } from 'rxjs';
@@ -24,6 +24,14 @@ export class GenericCaptionTableComponent implements OnInit {
 
   @ViewChild("aziendaSelection", {}) public aziendaSelection: Menu;
 
+  @ViewChild("inputGobalFilter") public inputGobalFilter: ElementRef;
+
+  @Input() set inputGobalFilterValue(inputGobalFilterValue: string) {
+    if (this.inputGobalFilter?.nativeElement) {
+      this.inputGobalFilter.nativeElement.value = inputGobalFilterValue;
+    }
+	}
+
   public accessibile: boolean = false;
   public ref: DynamicDialogRef;
   public canUseTip: boolean = false;
@@ -38,8 +46,6 @@ export class GenericCaptionTableComponent implements OnInit {
     public navigationTabsService: NavigationTabsService) {
 
   }
-
-
 
   ngOnInit(): void {
     this.subscriptions.push(

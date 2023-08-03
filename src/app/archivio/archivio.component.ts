@@ -71,6 +71,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public profonditaArchivio: number = null;
   public permessoMinimoSuArchivioDestinazioneOrganizza: DecimalePredicato = DecimalePredicato.VICARIO;
   public loggeduserCanAccess: boolean = false; 
+  private globalFilterForArchiviList: string = "";
+  private globalFilterForDocList: string = "";
+  private previousSelectedButtonItem: SelectButton;
+  public inputGobalFilterValue: string;
 
   private ARCHIVIO_DETAIL_PROJECTION = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewExtended;
   private ragazzoDelNovantaNove = false;
@@ -259,8 +263,6 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         this.setForContenuto();
       }
     }
-    
-
   }
 
   private setForSottoarchivi(): void {
@@ -273,6 +275,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       this.captionConfiguration.showIconArchiveClosed = true;
     } 
     this.referenceTableComponent = this.archivilist;
+    this.previousSelectedButtonItem = SelectButton.SOTTOARCHIVI;
   }
 
   public setForContenuto(): void {
@@ -284,6 +287,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       this.captionConfiguration.showIconArchiveClosed = true;
     } 
     this.referenceTableComponent = this;
+    this.previousSelectedButtonItem = SelectButton.CONTENUTO;
   }
 
   private setForDocumenti(): void {
@@ -303,6 +307,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       this.captionConfiguration.showIconArchiveClosed = true;
     } 
     this.referenceTableComponent = this.doclist;
+    this.previousSelectedButtonItem = SelectButton.DOCUMENTI;
   }
 
   private setForDettaglio(): void {
@@ -316,6 +321,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       this.captionConfiguration.showIconArchiveClosed = true;
     } 
     this.referenceTableComponent = {} as CaptionReferenceTableComponent;
+    this.previousSelectedButtonItem = SelectButton.DETTAGLIO;
   }
 
   /**
@@ -324,12 +330,27 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * @param event 
    */
   public onSelectButtonItemSelection(event: any): void {
+    switch (this.previousSelectedButtonItem) {
+      case SelectButton.SOTTOARCHIVI:
+        this.globalFilterForArchiviList = (this.referenceTableComponent.dataTable.filters?.global as any)?.value ?? "";
+        break;
+      case SelectButton.DOCUMENTI:
+        this.globalFilterForDocList = (this.referenceTableComponent.dataTable.filters?.global as any)?.value ?? "";
+        break;
+    }
+
     switch (event.option.id) {
       case SelectButton.SOTTOARCHIVI:
         this.setForSottoarchivi();
+        this.inputGobalFilterValue = this.globalFilterForArchiviList;
+        /* if (this.referenceTableComponent.dataTable.filters && this.referenceTableComponent.dataTable.filters.global) {
+        } */
         break;
       case SelectButton.DOCUMENTI:
         this.setForDocumenti();
+        this.inputGobalFilterValue = this.globalFilterForDocList;
+        /* if (this.referenceTableComponent.dataTable.filters && this.referenceTableComponent.dataTable.filters.global) {
+        } */
         break;
       case SelectButton.DETTAGLIO:
         this.setForDettaglio();
