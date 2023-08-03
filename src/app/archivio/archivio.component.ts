@@ -253,9 +253,8 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           this.selectedButtonItem = this.selectButtonItems.find(x => x.id === SelectButton.DOCUMENTI);
           this.setForDocumenti();
         } else {
-          this.selectedButtonItem = 
-          this.selectButtonItems.find(x => x.label === this.selectedButtonItem?.label && !this.selectedButtonItem?.disabled)
-          || this.selectButtonItems.find(x => x.id === SelectButton.SOTTOARCHIVI);
+          this.selectedButtonItem = this.selectButtonItems.find(x => x.label === this.selectedButtonItem?.label && !this.selectedButtonItem?.disabled)
+            || this.selectButtonItems.find(x => x.id === SelectButton.SOTTOARCHIVI);
           this.setForSottoarchivi();
         }
       } else {
@@ -276,6 +275,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     } 
     this.referenceTableComponent = this.archivilist;
     this.previousSelectedButtonItem = SelectButton.SOTTOARCHIVI;
+    setTimeout(() => {
+      this.inputGobalFilterValue = this.globalFilterForArchiviList;
+    }, 0);
   }
 
   public setForContenuto(): void {
@@ -308,6 +310,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     } 
     this.referenceTableComponent = this.doclist;
     this.previousSelectedButtonItem = SelectButton.DOCUMENTI;
+    setTimeout(() => {
+      this.inputGobalFilterValue = this.globalFilterForDocList;
+    }, 0);
   }
 
   private setForDettaglio(): void {
@@ -333,24 +338,20 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     switch (this.previousSelectedButtonItem) {
       case SelectButton.SOTTOARCHIVI:
         this.globalFilterForArchiviList = (this.referenceTableComponent.dataTable.filters?.global as any)?.value ?? "";
+        this.inputGobalFilterValue = this.globalFilterForArchiviList;
         break;
       case SelectButton.DOCUMENTI:
         this.globalFilterForDocList = (this.referenceTableComponent.dataTable.filters?.global as any)?.value ?? "";
+        this.inputGobalFilterValue = this.globalFilterForDocList;
         break;
     }
 
     switch (event.option.id) {
       case SelectButton.SOTTOARCHIVI:
         this.setForSottoarchivi();
-        this.inputGobalFilterValue = this.globalFilterForArchiviList;
-        /* if (this.referenceTableComponent.dataTable.filters && this.referenceTableComponent.dataTable.filters.global) {
-        } */
         break;
       case SelectButton.DOCUMENTI:
         this.setForDocumenti();
-        this.inputGobalFilterValue = this.globalFilterForDocList;
-        /* if (this.referenceTableComponent.dataTable.filters && this.referenceTableComponent.dataTable.filters.global) {
-        } */
         break;
       case SelectButton.DETTAGLIO:
         this.setForDettaglio();
