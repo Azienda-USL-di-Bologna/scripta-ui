@@ -75,6 +75,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   private globalFilterForDocList: string = "";
   private previousSelectedButtonItem: SelectButton;
   public inputGobalFilterValue: string;
+  public sonoPersonaVedenteSuDocSelezionato: boolean = false;
 
   private ARCHIVIO_DETAIL_PROJECTION = ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewExtended;
   private ragazzoDelNovantaNove = false;
@@ -217,9 +218,10 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
    * Metodo chiamato quando viene selezionato un documento nella docs-list
    * @param event 
    */
-  public manageRowSelected(event: {showPanel: boolean, rowSelected: ExtendedDocDetailView }) {
+  public manageRowSelected(event: {showPanel: boolean, rowSelected: ExtendedDocDetailView, sonoPersonaVedenteSuDocSelezionato: boolean}) {
     this.showRightSide = event.showPanel;
     this.docForDetailAndPreview = event.rowSelected;
+    this.sonoPersonaVedenteSuDocSelezionato = event.sonoPersonaVedenteSuDocSelezionato;
   }
 
   /**
