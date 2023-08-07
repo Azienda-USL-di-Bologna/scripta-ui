@@ -2,7 +2,8 @@
   [configuration]="captionConfiguration" 
   [referenceTableComponent]="referenceTableComponent"
   [selectButtonsComponent]="this" 
-  [functionalOperationsComponent]="this">
+  [functionalOperationsComponent]="this"
+  [inputGobalFilterValue]="inputGobalFilterValue">
 </generic-caption-table>
 <p-splitter *ngIf="archivio && loggeduserCanAccess" styleClass="splitter-archivio" [panelSizes]="[25,75]"
   [minSizes]="[15,55]">
@@ -64,7 +65,8 @@
       <ng-template pTemplate>
         <doc-detail-and-preview *ngIf="showRightSide"
           [doc]="docForDetailAndPreview" 
-          (closeRightPanel)="manageRowSelected({showPanel: false, rowSelected: null})" >
+          [sonoPersonaVedenteSuDocSelezionato]="sonoPersonaVedenteSuDocSelezionato" 
+          (closeRightPanel)="manageRowSelected({showPanel: false, rowSelected: null, sonoPersonaVedenteSuDocSelezionato: null})" >
         </doc-detail-and-preview>
       </ng-template>
     </p-splitter>

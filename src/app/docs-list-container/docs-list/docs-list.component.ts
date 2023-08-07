@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatoVersamento, Utente, StatoArchivio, ArchivioDetail, ArchivioDetailView, ConfigurazioneService } from "@bds/internauta-model";
+import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatoVersamento, Utente, StatoArchivio, ArchivioDetail, ArchivioDetailView, ConfigurazioneService, PersonaVedente } from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { buildLazyEventFiltersAndSorts } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from "@bds/next-sdr";
@@ -40,7 +40,7 @@ import { FunctionButton } from "src/app/generic-caption-table/functional-buttons
   styleUrls: ["./docs-list.component.scss"]
 })
 export class DocsListComponent implements OnInit, OnDestroy, TabComponent, CaptionReferenceTableComponent, CaptionSelectButtonsComponent {
-  @Output() showRightPanel = new EventEmitter<{showPanel: boolean, rowSelected: ExtendedDocDetailView }>();
+  @Output() showRightPanel = new EventEmitter<{showPanel: boolean, rowSelected: ExtendedDocDetailView, sonoPersonaVedenteSuDocSelezionato: boolean }>();
   @Output() docListModeSelected = new EventEmitter<{ docListModeSelected: DocsListMode }>();
   @Input() data: any;
   private subscriptions: Subscription[] = [];
@@ -135,6 +135,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   private _reloadDataFalg: boolean = false;
   public showAnteprima: boolean = false;
   public utente: Utente;
+  public sonoPersonaVedenteSuDocSelezionato: boolean = false;
   public docPerVedereLeNote: number;
   public functionButton: FunctionButton;
   public versamentoMassivoPopupInfo: {
@@ -691,6 +692,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (event.first === 0 && event.rows === this.rowsNumber) {
       event.rows = event.rows * 2;
       this.resetDocsArrayLenght = true;
+      this.docsSelected = [];
     }
 
     
@@ -698,7 +700,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
 
     if (this.filtriPuliti) {
       this.filtriPuliti = false;
-      if(!!!this.archivio){
+      if (!!!this.archivio) {
         this.resetCalendarToInitialValues();
         this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
       }
@@ -762,7 +764,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (this.dropdownAzienda) {
       this.dataTable.filters["idAzienda.id"] = { value: this.dropdownAzienda.value, matchMode: "in" };
     }
-
+    this.docsSelected = [];
     this.loadData(idDocListToSelect);
   }
 
@@ -898,7 +900,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    */
   private loadData(idDocListToSelect?: number[]): void { 
     this.loading = true;
-    this.docsSelected = [];
     this.pageConf.conf = {
       limit: this.storedLazyLoadEvent.rows,
       offset: this.storedLazyLoadEvent.first
@@ -1617,11 +1618,35 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   }
 
   public openDetailAndPreview(doc: ExtendedDocDetailView): void {
-    this.showAnteprima = true;
-    this.showRightPanel.emit({
-      showPanel: true,
-      rowSelected: doc
-    });
+    const filtersAndSorts = new FiltersAndSorts();
+      filtersAndSorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
+      filtersAndSorts.addFilter(new FilterDefinition("idDocDetail.id", FILTER_TYPES.not_string.equals, doc.id));
+      this.personaVedenteService.getData("PersonaVedenteWithPlainFields", filtersAndSorts, null)
+        .subscribe(res => {
+          if (res && res.results) {
+            if (res.results.length > 0) {
+              const pv = res.results[0] as PersonaVedente;
+              if(pv.pienaVisibilita){
+                this.sonoPersonaVedenteSuDocSelezionato = true;
+              }
+            } else {
+              this.sonoPersonaVedenteSuDocSelezionato = false;
+              // this.messageService.add({
+              //   severity: "info",
+              //   summary: "Attenzione",
+              //   key: "docsListToast",
+              //   detail: `Apertura del anteprima non consentita`
+              // });
+            }
+          }
+        }).add(() => {
+          this.showAnteprima = true;
+          this.showRightPanel.emit({
+            showPanel: true,
+            rowSelected: doc,
+            sonoPersonaVedenteSuDocSelezionato: this.sonoPersonaVedenteSuDocSelezionato,
+          });
+        });
   }
 
   public onRowSelect(event: any): void {
@@ -1640,7 +1665,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     event.originalEvent.stopPropagation();
     this.showRightPanel.emit({
       showPanel: false,
-      rowSelected: null
+      rowSelected: null,
+      sonoPersonaVedenteSuDocSelezionato: null
     });
     this.showAnteprima = false;
   }
