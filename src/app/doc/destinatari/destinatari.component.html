@@ -82,8 +82,8 @@
   <label class="p-col-2" for="coinvolti">Coinvolti</label>
   <p-listbox [options]="doc.coinvolti" optionLabel="descrizione" [disabled]="true"></p-listbox> -->
 
-  <label class="p-col-2" for="competenti">{{labelCompetenti}}</label>
-  <p-table class="destinatari-table" [value]="doc.competenti">
+  <label  *ngIf="doc.competenti" class="p-col-2" for="competenti">{{labelCompetenti}}</label>
+  <p-table *ngIf="doc.competenti" class="destinatari-table" [value]="doc.competenti">
     <ng-template pTemplate="header">
       <tr>
         <th> Descrizione </th>
@@ -100,8 +100,8 @@
     </ng-template>
   </p-table>
 
-  <label class="p-col-2" for="coinvolti">{{labelCoinvolti}}</label>
-  <p-table class="destinatari-table" [value]="doc.coinvolti">
+  <label *ngIf="doc.coinvolti" class="p-col-2" for="coinvolti">{{labelCoinvolti}}</label>
+  <p-table *ngIf="doc.coinvolti" class="destinatari-table" [value]="doc.coinvolti">
     <ng-template pTemplate="header">
       <tr>
         <th> Descrizione </th>

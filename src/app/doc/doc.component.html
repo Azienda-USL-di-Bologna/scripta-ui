@@ -22,6 +22,9 @@
           Creato il giorno {{ removeZoneFromTime(doc?.dataCreazione?.toString()) | date: 'EE d MMM y, H:mm' | titlecase}}
           da: {{doc?.idPersonaCreazione?.descrizione}}
         </span>
+        <span *ngIf="pregresso" style="font-weight: bold;">
+          Pregresso
+        </span>
       </div>
       <div class="div-oggetto m-bottom-05">
         <label for="oggetto" class="label-oggetto">Oggetto</label>
@@ -75,7 +78,7 @@
             <attori [doc]="doc"></attori>
           </ng-template>
         </p-accordionTab>
-        <p-accordionTab *ngIf="tipoDocumento !== 'PROTOCOLLO_IN_ENTRATA' && doc.additionalData['dati_pubblicazione']" header="Pubblicazioni">
+        <p-accordionTab *ngIf="tipoDocumento !== 'PROTOCOLLO_IN_ENTRATA' && doc.additionalData && doc.additionalData['dati_pubblicazione']" header="Pubblicazioni">
           <ng-template pTemplate="content">
             <dati-pubblicazione [doc]="doc"></dati-pubblicazione>
           </ng-template>

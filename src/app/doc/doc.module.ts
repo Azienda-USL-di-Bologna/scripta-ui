@@ -16,6 +16,7 @@ import { DatiPubblicazioneComponent } from './dati-pubblicazione/dati-pubblicazi
 import { ArchivioDocComponent } from './archivio-doc/archivio-doc.component';
 import { AttachmentsBoxModule } from "@bds/common-components";
 import { DocUtilsService } from "../utilities/doc-utils.service";
+import { CommonToolsModule } from "@bds/common-tools";
 
 
 @NgModule({
@@ -24,7 +25,8 @@ import { DocUtilsService } from "../utilities/doc-utils.service";
     DocRoutingModule,
     PrimeNgModule,
     ScriptaCommonModule,
-    AttachmentsBoxModule
+    AttachmentsBoxModule,
+    CommonToolsModule
   ],
   declarations: [
     DocComponent,

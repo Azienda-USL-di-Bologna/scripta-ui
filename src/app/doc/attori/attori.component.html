@@ -9,7 +9,7 @@
     <div class="firmatari-box">
       <label class="p-col-2" for="firmatari">Firmatari</label>
       <p-listbox *ngIf="doc.tipologia !== 'DELIBERA'"  [options]="doc.firmatari" optionLabel="idPersona.descrizione" [readonly]="true" [disabled]="true"></p-listbox>
-      <p-table *ngIf="doc.tipologia === 'DELIBERA'" [value]="direttoriDeli" [tableStyle]="{'min-width': '50rem'}">
+      <p-table *ngIf="doc.tipologia === 'DELIBERA'" [value]="direttoriDeli" >
         <ng-template pTemplate="header">
             <tr>
                 <th>Ruolo</th>
@@ -18,7 +18,7 @@
         </ng-template>
         <ng-template pTemplate="body" let-direttore>
             <tr>
-                <td>{{direttore.ruolo}}</td>
+                <td>{{direttore.ruolo  | beautifyEnum}}</td> 
                 <td>{{direttore.idPersona.descrizione}}</td>
             </tr>
         </ng-template>

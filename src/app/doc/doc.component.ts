@@ -97,6 +97,10 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
               this.subscriptions.push(
                 this.loadDocument(this.detailDoc.id).subscribe((res: Doc) => {
                   console.log("res", res);
+                  this.setLabelProtocollatoDa();
+
+                  this.setFreezeDocumento(false);
+
                   this.doc = res;
                   console.log("doc è:", this.doc);
                   this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
@@ -106,8 +110,9 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
                     } else {
                       this.dataUltimoVersamento = null;
                     }
-                    if (this.detailDoc.dataRegistrazione != null) {
-                    this.dataRegistrazione = formatDate(this.detailDoc.dataRegistrazione, 'dd/MM/yyyy', 'en_US');
+                    const registroDoc = this.doc.registroDocList.find(registro => registro.idRegistro.attivo === true &&  registro.idRegistro.ufficiale === true);
+                    if (registroDoc.dataRegistrazione != null) {
+                    this.dataRegistrazione = formatDate(registroDoc.dataRegistrazione, 'dd/MM/yyyy', 'en_US');
                     } else {
                       this.dataRegistrazione = null;
                     }
@@ -115,8 +120,6 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.riservato = this.detailDoc.riservato;
                     
                     this.annullato = this.detailDoc.annullato;
-                    this.setLabelProtocollatoDa();
-                  this.setFreezeDocumento(false);
 
               })
               );
@@ -212,8 +215,11 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   private setLabelProtocollatoDa() {
     if(this._doc.tipologia === TipologiaDoc.PROTOCOLLO_IN_ENTRATA || this._doc.tipologia === TipologiaDoc.PROTOCOLLO_IN_USCITA) {
       this.protocollatoDaLabel = "Protocollato Da";
-    } else if (this._doc.tipologia === TipologiaDoc.DELIBERA || this._doc.tipologia === TipologiaDoc.DETERMINA) {
+    } else if (this._doc.tipologia === TipologiaDoc.DELIBERA ) {
       this.protocollatoDaLabel = "Adottata da";
+      this.descrizioneStrutturaAdottante = this.detailDoc.idStrutturaRegistrazione.nome + " [ " + this.detailDoc.idStrutturaRegistrazione.codice + " ]";
+    } else if (this._doc.tipologia === TipologiaDoc.DETERMINA) {
+      this.protocollatoDaLabel = "Proposta da";
       this.descrizioneStrutturaAdottante = this.detailDoc.idStrutturaRegistrazione.nome + " [ " + this.detailDoc.idStrutturaRegistrazione.codice + " ]";
     }
   }
