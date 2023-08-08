@@ -1,21 +1,35 @@
 <div class="attori-pregressi">
-  <div>
-    <label class="p-col-2" for="responsabileProcedimento">Responsabile procedimento</label>
-    <p-listbox 
-      [options]="responsabileProcedimentoAsList" optionLabel="idPersona.descrizione" 
-      [readonly]="true" [disabled]="true">
-    </p-listbox>
-  </div>
-    <div>
+    <div class="responsabile-box">
+      <label class="p-col-2" for="responsabileProcedimento">Responsabile procedimento</label>
+      <p-listbox 
+        [options]="responsabileProcedimentoAsList" optionLabel="idPersona.descrizione" 
+        [readonly]="true" [disabled]="true">
+      </p-listbox>
+    </div>
+    <div class="firmatari-box">
       <label class="p-col-2" for="firmatari">Firmatari</label>
-      <p-listbox [options]="doc.firmatari" optionLabel="idPersona.descrizione" [readonly]="true" [disabled]="true"></p-listbox>
+      <p-listbox *ngIf="doc.tipologia !== 'DELIBERA'"  [options]="doc.firmatari" optionLabel="idPersona.descrizione" [readonly]="true" [disabled]="true"></p-listbox>
+      <p-table *ngIf="doc.tipologia === 'DELIBERA'" [value]="direttoriDeli" [tableStyle]="{'min-width': '50rem'}">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Ruolo</th>
+                <th>Utente</th> 
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-direttore>
+            <tr>
+                <td>{{direttore.ruolo}}</td>
+                <td>{{direttore.idPersona.descrizione}}</td>
+            </tr>
+        </ng-template>
+    </p-table>
     </div>
-    <div>
+    <div class="pareratori-box" *ngIf="doc.pareratori.length > 0">
       <label class="p-col-2" for="pareratori">Pareratori</label>
-      <p-listbox [options]="doc.pareratori" optionLabel="idPersona.descrizione" [readonly]="true" [disabled]="true"></p-listbox>
+      <p-listbox  [options]="doc.pareratori" optionLabel="idPersona.descrizione" [readonly]="true" [disabled]="true"></p-listbox>
     </div>
-    <div *ngIf="doc.tipologia === 'DELIBERA' || doc.tipologia === 'DETERMINA'">
+    <div *ngIf="(doc.tipologia === 'DELIBERA' || doc.tipologia === 'DETERMINA') && doc.vistatori.length > 0" class="vistatori-box"  >
       <label class="p-col-2" for="vistatori">Vistatori</label>
-      <p-listbox [options]="doc.vistatori" optionLabel="descrizione" [readonly]="true" [disabled]="true"></p-listbox>
+      <p-listbox  [options]="doc.vistatori" optionLabel="descrizione" [readonly]="true" [disabled]="true"></p-listbox>
     </div>
 </div>

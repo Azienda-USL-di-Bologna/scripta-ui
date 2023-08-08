@@ -30,34 +30,36 @@
         </textarea>
       </div>
       <div class="dati-generici m-bottom-5">
-        <div>
+        <div class="sotto-dati-generici">
           <label for="dataUltimoVersamento" class="label-oggetto">Data Ultimo Versamento</label>
             <input id="dataUltimoVersamento" aria-label="data" disabled="true" type="text" 
               [(ngModel)]="dataUltimoVersamento">
         </div>
-        <div>
+        <div class="sotto-dati-generici">
           <label for="dataRegistrazione">Data Registrazione</label>
           <input id="dataRegistrazione" aria-label="data" disabled="true" type="text"
             [(ngModel)]="dataRegistrazione">
         </div>
         <!-- TODO: Tutti i flag andranno disabilitati/abilitati anche in base alla registrazione del documento -->
-        <div>
+        <div class="sotto-dati-generici">
           <label for="visibilitaLimitata">Visibilita Limitata</label>
           <p-checkbox id="visibilitaLimitata" [(ngModel)]="visibilitaLimitata" [binary]="true" [readonly]="pregresso" [disabled]="pregresso"></p-checkbox>
         </div>
-        <div>
+        <div class="sotto-dati-generici">
           <label for="riservato">Riservato</label>
           <p-checkbox id="riservato" [(ngModel)]="riservato" [binary]="true" [readonly]="pregresso" [disabled]="pregresso"></p-checkbox>
         </div>
-        <div>
+        <div class="sotto-dati-generici">
           <label for="annullato">Annullato</label>
           <p-checkbox id="annullato" [(ngModel)]="annullato" [binary]="true" [readonly]="pregresso" [disabled]="pregresso"></p-checkbox>
         </div>
       </div>
       <div class="protocollato-da-box" m-bottom-5>
-        <label for="protocollatoda">Protocollato da</label>
-        <input id="protocollatoda" aria-label="protocollato da" disabled="true" pInputText type="text" [disabled]="pregresso"
+        <label for="protocollatoda">{{protocollatoDaLabel}}</label>
+        <input id="protocollatoda" *ngIf="doc.tipologia != 'DELIBERA' && doc.tipologia != 'DETERMINA'" aria-label="protocollato da" disabled="true" pInputText type="text" [disabled]="pregresso"
           [(ngModel)]="descrizioneUtenteRegistrante">
+        <input *ngIf="doc.tipologia === 'DELIBERA' || doc.tipologia === 'DETERMINA'" id="protocollatoda" aria-label="adottato da" disabled="true" pInputText type="text" [disabled]="pregresso"
+          [(ngModel)]="descrizioneStrutturaAdottante">
       </div>
       <p-accordion [multiple]="true">
         <p-accordionTab *ngIf="tipoDocumento === 'PROTOCOLLO_IN_ENTRATA'" header="Mittente" [selected]="true">
@@ -71,6 +73,11 @@
         <p-accordionTab *ngIf="tipoDocumento !== 'PROTOCOLLO_IN_ENTRATA'" header="Attori">
           <ng-template pTemplate="content">
             <attori [doc]="doc"></attori>
+          </ng-template>
+        </p-accordionTab>
+        <p-accordionTab *ngIf="tipoDocumento !== 'PROTOCOLLO_IN_ENTRATA' && doc.additionalData['dati_pubblicazione']" header="Pubblicazioni">
+          <ng-template pTemplate="content">
+            <dati-pubblicazione [doc]="doc"></dati-pubblicazione>
           </ng-template>
         </p-accordionTab>
         <p-accordionTab header="Fascicolazioni">

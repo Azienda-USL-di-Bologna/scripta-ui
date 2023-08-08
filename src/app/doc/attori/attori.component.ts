@@ -18,13 +18,31 @@ export class AttoriComponent {
   
   // Uso un array per usare la listbox ed evitare di lavorare sul css per rendere i campi uguali
   responsabileProcedimentoAsList: AttoreDoc[];  
+  direttoriDeli: AttoreDoc[];
   private _doc: Doc;
   
-  constructor() { }
+  constructor() {
+    this.setDirettoriDeli(this.doc);
+   }
 
   setResponsabileProcedimento(doc: Doc) {
     if (doc && doc.attoriList)
       this.responsabileProcedimentoAsList = doc.attoriList.filter(a => a.ruolo === RuoloAttoreDoc.RESPONSABILE_PROCEDIMENTO);
+      console.log("ci sono questi attori: " , this.responsabileProcedimentoAsList)
+
   }
+
+  setDirettoriDeli(doc: Doc) {
+    if(doc && doc.attoriList) {
+      doc.attoriList.forEach(attore => {
+        if( attore.ruolo.toString() === "DIRETTORE_AMMINISTRATIVO" || attore.ruolo.toString() ==="DIRETTORE_GENERALE" || attore.ruolo.toString() === "DIRETTORE_SANITARIO" ||
+            attore.ruolo.toString() === "DSC" || attore.ruolo.toString() === "FIRMATARIO") {
+          this.direttoriDeli.push(attore);
+          console.log("ci sono questi attori: " , attore.ruolo)
+        }
+      })
+    }
+  }
+  
 
 }
