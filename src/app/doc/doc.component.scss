@@ -22,8 +22,11 @@ main {
     }
 
     .info-documento {
+        height: 100%;
+        overflow: auto;
         .dati-creazione {
             display: flex;
+            flex-direction: column;
             justify-content:space-between;
         }
     }
@@ -33,9 +36,14 @@ main {
     }
     .dati-generici {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         justify-content: space-between;
-        align-items: last baseline;
+        // align-items: last baseline;
+        .sotto-dati-generici {
+            display: flex;
+            flex-direction: row;
+            margin-bottom: 1.5rem;
+        }
     }
     .protocollato-da-box {
         display: flex;
