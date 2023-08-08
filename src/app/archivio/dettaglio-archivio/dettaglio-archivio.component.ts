@@ -583,10 +583,16 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
    */
   public numeraFasicoloClicked(event: Event): void {
     if( this.archivio.attoriList.some(a => a.ruolo === RuoloAttoreArchivio.VICARIO)){
+      let messaggio = "";
+      if (this.labelLivelloArchivio === "Inserto") {
+        messaggio = "Stai per numerare l'" + this.labelLivelloArchivio.toLowerCase() + ": confermi?";
+      } else {
+        messaggio = "Stai per numerare il " + this.labelLivelloArchivio.toLowerCase() + ": confermi?";
+      };
       this.confirmationService.confirm({
         key: "confirm-popup",
         target: event.target,
-        message: "Conferma?",
+        message: messaggio,
         accept: () => {
           this.subscriptions.push(
             this.extendedArchivioService.numeraArchivio(
