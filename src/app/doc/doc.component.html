@@ -33,28 +33,32 @@
         </textarea>
       </div>
       <div class="dati-generici m-bottom-5">
-        <div class="sotto-dati-generici">
-          <label for="dataUltimoVersamento" class="label-oggetto">Data Ultimo Versamento</label>
+        <div class="sotto-dati-generici-date">
+          <div class="data-versamento">
+            <label for="dataUltimoVersamento" class="label-oggetto">Data Ultimo Versamento</label>
             <input id="dataUltimoVersamento" aria-label="data" disabled="true" type="text" 
               [(ngModel)]="dataUltimoVersamento">
-        </div>
-        <div class="sotto-dati-generici">
-          <label for="dataRegistrazione">Data Registrazione</label>
-          <input id="dataRegistrazione" aria-label="data" disabled="true" type="text"
+          </div>
+          <div class="data-registrazione">
+            <label for="dataRegistrazione">Data Registrazione</label>
+            <input id="dataRegistrazione" aria-label="data" disabled="true" type="text"
             [(ngModel)]="dataRegistrazione">
+          </div>
         </div>
         <!-- TODO: Tutti i flag andranno disabilitati/abilitati anche in base alla registrazione del documento -->
-        <div class="sotto-dati-generici">
-          <label for="visibilitaLimitata">Visibilita Limitata</label>
-          <p-checkbox id="visibilitaLimitata" [(ngModel)]="visibilitaLimitata" [binary]="true" [readonly]="pregresso" [disabled]="pregresso"></p-checkbox>
-        </div>
-        <div class="sotto-dati-generici">
-          <label for="riservato">Riservato</label>
-          <p-checkbox id="riservato" [(ngModel)]="riservato" [binary]="true" [readonly]="pregresso" [disabled]="pregresso"></p-checkbox>
-        </div>
-        <div class="sotto-dati-generici">
-          <label for="annullato">Annullato</label>
-          <p-checkbox id="annullato" [(ngModel)]="annullato" [binary]="true" [readonly]="pregresso" [disabled]="pregresso"></p-checkbox>
+        <div class="sotto-dati-generici-checkbox">
+          <div class="visibilita-limitata">
+            <p-checkbox id="visibilitaLimitata" [(ngModel)]="visibilitaLimitata" [binary]="true" [readonly]="pregresso" [disabled]="pregresso" class="checkbox"></p-checkbox>
+            <label for="visibilitaLimitata">Visibilita Limitata</label>
+          </div>
+          <div class="riservato">
+            <p-checkbox id="riservato" [(ngModel)]="riservato" [binary]="true" [readonly]="pregresso" [disabled]="pregresso" class="checkbox"></p-checkbox>
+            <label for="riservato">Riservato</label>
+          </div>
+          <div class="annullato">
+            <p-checkbox id="annullato" [(ngModel)]="annullato" [binary]="true" [readonly]="pregresso" [disabled]="pregresso" class="checkbox"></p-checkbox>
+            <label for="annullato">Annullato</label>
+          </div>
         </div>
       </div>
       <div class="protocollato-da-box" m-bottom-5>

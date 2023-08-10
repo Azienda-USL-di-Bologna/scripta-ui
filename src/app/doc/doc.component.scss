@@ -38,11 +38,31 @@ main {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        // align-items: last baseline;
-        .sotto-dati-generici {
+        .sotto-dati-generici-date {
             display: flex;
             flex-direction: row;
+            align-items: last baseline;
             margin-bottom: 1.5rem;
+            .data-versamento, .data-registrazione{
+                margin-right: 2rem;
+                display: flex;
+                flex-direction: row;
+            }
+        }
+        .sotto-dati-generici-checkbox {
+            display: flex;
+            flex-direction: row;
+            align-items: last baseline;
+            margin-bottom: 1.5rem;
+            .visibilita-limitata, .riservato, .annullato {
+                margin-right: 2rem;
+                align-items: center;
+                display: flex;
+                flex-direction: row;
+                .checkbox {
+                    margin-right: 1rem;
+                }
+            }
         }
     }
     .protocollato-da-box {
