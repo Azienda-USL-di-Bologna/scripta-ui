@@ -4,6 +4,20 @@
 }
 ::ng-deep .p-table-scripta-archivi-list {
   .archiviolist-table-body {
+    /* ADDITIONAL ROW, COMPARE QUANDO CI SONO RIGHE SELEZIONATE */
+    .additional-row {
+      background-color: #f4f4f4;
+      height: 2.563rem;
+      border-top: 1px solid #c8c8c8;
+      border-bottom: 1px solid #c8c8c8;
+      .selection-info {
+        align-self: center;
+        padding: 0 1rem;
+      }
+      p-button {
+        align-self: center;
+      }
+    }
     /* HEADER */
     .header-row {
       height: 2.563rem;
@@ -116,10 +130,14 @@
     /* BODY */
     .p-datatable-tbody > tr > td {
       padding: 0;
-      div {
+      div:not(.p-checkbox-box) {
+        color: #2e4a65;
         height: 3.375rem;
         padding: 9px 0.813rem;
-        width: 100%;
+        width: 100%; 
+        &:hover {
+          color: #7e7e7e !important;
+        }
       }
       &:not(.scrollable-column) {
         div {
@@ -267,6 +285,18 @@
   .classificazione-column, .massimario-column {
     min-width: 13rem;
     max-width: 13rem;
+  }
+  .checkbox-column {
+    width: 3.125rem;
+    max-width: 3.125rem;
+    justify-content: center;
+    i {
+      cursor: pointer;
+      font-size: 1.375rem;
+      &:hover {
+        color: #936;
+      }
+    }
   }
 }
 

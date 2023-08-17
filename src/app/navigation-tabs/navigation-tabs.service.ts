@@ -165,6 +165,21 @@ export class NavigationTabsService {
     );
   }
 
+  public buildaTabTIP(idTipSessioneImportazione?: number): TabItem {
+    return new TabItem(
+      TipComponent,
+      {
+        idTipSessioneImportazione: idTipSessioneImportazione
+      },
+      true,
+      "Import Pregressi",
+      "pi pi-file-import",
+      TabType.TIP,
+      TabType.TIP, // Lo uso come id univoco di questo tab
+      "Tool Importazione Pregressi"
+    );
+  }
+
   private buildaTabDoc(idDoc: number, doc:ExtendedDocDetailView, label: string, labelForAppName: string): TabItem {
     return new TabItem(
       DocComponent,
@@ -196,20 +211,7 @@ export class NavigationTabsService {
     );
   }
 
-  private buildaTabTIP(idTipSessioneImportazione?: number): TabItem {
-    return new TabItem(
-      TipComponent,
-      {
-        idTipSessioneImportazione: idTipSessioneImportazione
-      },
-      true,
-      "Import Pregressi",
-      "pi pi-file-import",
-      TabType.TIP,
-      TabType.TIP, // Lo uso come id univoco di questo tab
-      "Tool Importazione Pregressi"
-    );
-  }
+  
 
   private projectionArchivioPerSessionStorage(archivio: Archivio | ArchivioDetail | ExtendedArchiviView): Archivio {
     const a = new Archivio();
@@ -328,12 +330,12 @@ export class NavigationTabsService {
     }
   }
 
-  public addTabTip(active: boolean = true, idTipSessioneImportazione?: number): void {
+  /* public addTabTip(active: boolean = true, idTipSessioneImportazione?: number): void {
     this.addTab(
       this.buildaTabTIP(idTipSessioneImportazione)
     );
     if (active) {
       this.activeLastTab();
     }
-  }
+  } */
 }

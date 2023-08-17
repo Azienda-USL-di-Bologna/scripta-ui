@@ -79,7 +79,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	];
 	public rightContentProgressSpinner: boolean = false;
 	public rowCountInProgress: boolean = false;
-  	public rowCount: number;
+  public rowCount: number;
+	public rowCountSelected: number = 0;
 	public selectableColumns: ColonnaBds[] = [];
 	private mandatoryColumns: string[] = [];
 	public rowsNumber: number = 20;
@@ -126,7 +127,13 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	private fromTabTutti: boolean = false;
 	private cacheFiltroLivelloTabVisbili: number[]; // serve a tenere traccia del vecchio filtro sul livello passando dal tab tutti al tab dei visibili
 	//public instanziaTabellaArchiviList = true;
-	public loggedUserCanDeleteArchivio : boolean = false; 
+	public loggedUserCanDeleteArchivio : boolean = false;
+	public archivesSelected: ExtendedArchiviView[] = [];
+	public showAdditionalRow: boolean = false;
+	public allRowsAreSelected: boolean = false;
+	public allRowsWasSelected: boolean = false;
+	/* public minimumLoadedOffsetOfAllaRowsSelected: number; */
+	public maximumLoadedOffsetOfAllaRowsSelected: number = 0;
 
 	private _archivioPadre: Archivio;
 	get archivioPadre(): Archivio { return this._archivioPadre; }
@@ -388,7 +395,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		if (this.dropdownLivello) {
 			this.dataTable.filters["livello"] = {value: this.dropdownLivello.value, matchMode: "in" };
 		}
-
+		this.archivesSelected = [];
+		this.showAdditionalRow = false;
 		this.loadData();
 	}
 
@@ -616,6 +624,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public onLazyLoad(event: LazyLoadEvent): void {
 		if (event.first === 0 && event.rows === this.rowsNumber) {
 			event.rows = event.rows * 2;
+			this.archivesSelected = [];
+			this.showAdditionalRow = false;
 		}
 
 		console.log(`Chiedo ${this.pageConf.conf.limit} righe con offset di ${this.pageConf.conf.offset}`);
@@ -762,7 +772,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.cacheFiltroLivelloTabVisbili = this.storedLazyLoadEvent.filters?.livello.value; // Salvataggio del filtro dei livelli in modo da non perderlo andando nel tab TUTTI
 			this.fromTabTutti = false;
 		}
-		
+		this.loadCount(this.serviceToGetData, this.projectionToGetData, filtersAndSorts, lazyFiltersAndSorts);
 		this.loadArchiviListSubscription = this.serviceToGetData.getData(
 			this.projectionToGetData,
 			filtersAndSorts,
@@ -781,16 +791,49 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					this.resetArchiviArrayLenght = false;
 					this.dataTable.resetScrollTop();
 					this.archivi = Array.from({ length: this.totalRecords });
+					this.archivesSelected = Array.from({ length: this.totalRecords });
 				}
 
 				if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
 					/* Questo meccanismo serve per cancellare i risultati di troppo della tranche precedente.
 					Se entro qui probabilmente ho fatto una ricerca */
-					Array.prototype.splice.apply(this.archivi, [0, this.archivi.length, ...this.setCustomProperties(results)]);
+					const archiviCaricati: ExtendedArchiviView[] = this.setCustomProperties(results);
+					Array.prototype.splice.apply(this.archivi, [0, this.archivi.length, ...archiviCaricati]);
+					/* if (this.allRowsWasSelected && (this.archivesSelected.length > this.maximumLoadedOffsetOfAllaRowsSelected)) {
+						Array.prototype.splice.apply(this.archivesSelected, [0, this.archivesSelected.length, ...archiviCaricati]);
+						//this.minimumLoadedOffsetOfAllaRowsSelected = 0;
+						if (this.archivesSelected.length > this.maximumLoadedOffsetOfAllaRowsSelected)
+							this.maximumLoadedOffsetOfAllaRowsSelected = this.archivesSelected.length;
+					} */
+					console.log("STO GIRO SONO SUL PRIMO IF")
+					console.log("this.storedLazyLoadEvent.first", this.storedLazyLoadEvent.first);
+					console.log("this.storedLazyLoadEvent.rows", this.storedLazyLoadEvent.rows);
+					console.log("this.maximumLoadedOffsetOfAllaRowsSelected", this.maximumLoadedOffsetOfAllaRowsSelected)
+					console.log("this.archivesSelected.length", this.archivesSelected.length)
 				} else {
-					Array.prototype.splice.apply(this.archivi, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...this.setCustomProperties(results)]);
+					const archiviCaricati: ExtendedArchiviView[] = this.setCustomProperties(results);
+					Array.prototype.splice.apply(this.archivi, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...archiviCaricati]);
+					console.log("this.storedLazyLoadEvent.first", this.storedLazyLoadEvent.first);
+					console.log("this.storedLazyLoadEvent.rows", this.storedLazyLoadEvent.rows);
+					console.log("this.maximumLoadedOffsetOfAllaRowsSelected", this.maximumLoadedOffsetOfAllaRowsSelected)
+					console.log("this.archivesSelected.length", this.archivesSelected.length)
+					if (this.allRowsWasSelected && 
+						/*( this.storedLazyLoadEvent.first < this.minimumLoadedOffsetOfAllaRowsSelected) ||  */((this.storedLazyLoadEvent.first + this.storedLazyLoadEvent.rows) > this.maximumLoadedOffsetOfAllaRowsSelected)) {
+						Array.prototype.splice.apply(this.archivesSelected, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...archiviCaricati]);
+						console.log("entro nell'if e setto gli archives selected")
+						console.log("this.archivesSelected.length", this.archivesSelected.length)
+						/* if (this.storedLazyLoadEvent.first < this.minimumLoadedOffsetOfAllaRowsSelected)
+							this.minimumLoadedOffsetOfAllaRowsSelected = this.storedLazyLoadEvent.first; */
+							console.log("this.storedLazyLoadEvent.first + this.storedLazyLoadEvent.rows", this.storedLazyLoadEvent.first + this.storedLazyLoadEvent.rows)
+						if ((this.storedLazyLoadEvent.first + this.storedLazyLoadEvent.rows) > this.maximumLoadedOffsetOfAllaRowsSelected) {
+							console.log("setto un nuovo maximum")
+							this.maximumLoadedOffsetOfAllaRowsSelected = this.storedLazyLoadEvent.first + this.storedLazyLoadEvent.rows;
+						}
+					}
 				}
 				this.archivi = [...this.archivi]; // trigger change detection
+				this.archivesSelected = [...this.archivesSelected]; // trigger change detection
+				
 				window.dispatchEvent(new Event('resize'));
 			},
 			err => {
@@ -1578,4 +1621,52 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
       }
 	  return temp;
 	}
+
+	trackByFn(index: any, item: any) {
+    if (item) {
+      return item.id;
+    }
+  }
+	
+	public onRowSelect(event: any): void {
+    event.originalEvent.stopPropagation();
+		this.showAdditionalRow = true;
+		this.rowCountSelected++;
+  }
+
+  public onRowUnselect(event: any): void {
+		debugger
+    event.originalEvent.stopPropagation();
+		this.rowCountSelected--;
+		/* if (this.allRowsAreSelected) {
+			this.archivesSelected = [];
+			this.archivesSelected = [event.data];
+			setTimeout(() => {
+				this.archivesSelected = [...this.archivesSelected];
+			}, 0);
+		} */
+		this.allRowsAreSelected = false;
+		if (this.archivesSelected.length === 0) {
+    	this.showAdditionalRow = false;
+			this.allRowsWasSelected = false;
+		}
+  }
+	
+	public onSelectAllChange(event: any): void {
+    //event.originalEvent.stopPropagation();
+		//debugger;
+		if (event.checked) {
+			//this.minimumLoadedOffsetOfAllaRowsSelected = 0;
+			this.maximumLoadedOffsetOfAllaRowsSelected = this.archivi.length;
+			this.rowCountSelected = this.rowCount;
+    	this.showAdditionalRow = true;
+			this.allRowsAreSelected = true;
+			this.allRowsWasSelected = true;
+		} else {
+			this.showAdditionalRow = false;
+			this.allRowsAreSelected = false;
+			this.allRowsWasSelected = false;
+			this.maximumLoadedOffsetOfAllaRowsSelected = 0;
+		}
+  }
 }
