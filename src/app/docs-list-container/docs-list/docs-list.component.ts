@@ -14,7 +14,7 @@ import { Subscription } from "rxjs";
 import { first } from 'rxjs/operators'
 import { DOCS_LIST_ROUTE } from "src/environments/app-constants";
 import { Impostazioni, ImpostazioniDocList } from "../../utilities/utils";
-import { cols, colsCSV, DocsListMode, StatiVersamentoErroriPerFiltro, StatiVersamentoParerPerFiltro, StatiVersamentoTraduzioneVisualizzazione, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
+import { cols, colsCSV, DocsListMode, StatiVersamentoErroriPerFiltro, StatiVersamentoParerPerFiltro, StatiVersamentoTraduzioneVisualizzazione, StatoDocDetailPerFiltro, StatoUfficioAttiTraduzioneVisualizzazione, TipologiaDocDetailPerFiltro, TipologiaDocTraduzioneVisualizzazione } from "./docs-list-constants";
 import { ExtendedDocDetailView } from "./extended-doc-detail-view";
 import { ExtendedDocDetailService } from "./extended-doc-detail.service";
 import { ExtendedDocDetailViewService } from "./extended-doc-detail-view.service";
@@ -94,6 +94,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public _selectedColumns: ColonnaBds[] = [];
   public rowsNumber: number = 20;
   public tipologiaVisualizzazioneObj = TipologiaDocTraduzioneVisualizzazione;
+  public tipologiaVisualizzazionePerFiltro = TipologiaDocDetailPerFiltro;
   public statoVisualizzazioneObj = StatoDocDetailPerFiltro;
   public statiVersamentoObj: any = null; //StatiVersamentoTraduzioneVisualizzazione;
   // public statoVisualizzazioneObj = StatoDocTraduzioneVisualizzazione;
@@ -1453,16 +1454,31 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
  /**
   * Filtering per gli autocomplete della versione accessibile
   */
-  public filterTipologia(event:any) {
+  public filterTipologiaAccessibile(event:any) {
     let filtered: any[] = [];
     let query = event.query;
-    for (let i = 0; i < this.tipologiaVisualizzazioneObj.length; i++) {
-      let tipologia = this.tipologiaVisualizzazioneObj[i];
+    for (let i = 0; i < this.tipologiaVisualizzazionePerFiltro.length; i++) {
+      let tipologia = this.tipologiaVisualizzazionePerFiltro[i];
       if (tipologia.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
         filtered.push(tipologia);
       }
     }
     this.filteredTipologia = filtered;
+  }
+
+  /**
+  * Il filtro della tipologia è un array di array.
+  */
+  public filterTipologia(filterCallback: (value: any) => {}, value: any) {
+    let array: string[] = [];
+    value.forEach((labelTipologia: string) => { 
+      TipologiaDocDetailPerFiltro.forEach((mappa: any) => {
+        if (mappa.nome === labelTipologia) {
+          array = array.concat(mappa.value);
+        }
+      });
+    });
+    filterCallback(array);
   }
 
   /**
