@@ -84,7 +84,11 @@ export class GenericCaptionTableComponent implements OnInit {
     }
 
   public showTip() {
-    this.navigationTabsService.addTabTip();
+    //this.navigationTabsService.addTabTip();
+    this.navigationTabsService.addTab(
+      this.navigationTabsService.buildaTabTIP()
+    );
+    this.navigationTabsService.activeLastTab();
   }
 
 }
