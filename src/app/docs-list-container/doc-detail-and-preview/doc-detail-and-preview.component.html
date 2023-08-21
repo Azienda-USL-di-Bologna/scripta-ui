@@ -21,19 +21,25 @@
 
 <p-accordion>
   <p-accordionTab
-    header="Allegati" 
     [(selected)]="accordionSelected[0]"
-    [ngClass]="accordionSelected[0] ? 'tab-accordion-selected' : ''">
-    <attachments-box 
-      [idDoc]="doc.id"
-      [config]="attachmentsBoxConfig">
-    </attachments-box>
-    <h4>
-      <!-- <i *ngIf="doc.visibilitaLimitata && !doc.riservato  " class="pi pi-eye"></i>
-      <i *ngIf="!doc.visibilitaLimitata && doc.riservato " class="pi pi-eye-slash"></i> -->
-      <!-- {{!doc.visibilitaLimitata && doc.riservato && !hasUserPienaVisibilita(doc) ? "[Riservato]" : ""}} -->
-      <!-- {{doc.visibilitaLimitata && !doc.riservato  ? "Visibilita limitata" : ""}} -->
-    </h4>
+    [ngClass]="accordionSelected[0] ? 'tab-accordion-selected' : ''"
+    [disabled]="!canVisualizeAllegati()">
+    <ng-template pTemplate="header">
+      <span class="vertical-align-middle">{{ canVisualizeAllegati() ? 'Allegati' : 'Non puoi visualizzare gli allegati di questo documento' }}</span>
+    </ng-template>
+    <ng-template pTemplate="content">
+      <attachments-box 
+        *ngIf="canVisualizeAllegati()"
+        [idDoc]="doc.id"
+        [config]="attachmentsBoxConfig">
+      </attachments-box>
+      <h4>
+        <!-- <i *ngIf="doc.visibilitaLimitata && !doc.riservato  " class="pi pi-eye"></i>
+        <i *ngIf="!doc.visibilitaLimitata && doc.riservato " class="pi pi-eye-slash"></i> -->
+        <!-- {{!doc.visibilitaLimitata && doc.riservato && !hasUserPienaVisibilita(doc) ? "[Riservato]" : ""}} -->
+        <!-- {{doc.visibilitaLimitata && !doc.riservato  ? "Visibilita limitata" : ""}} -->
+      </h4>
+    </ng-template>
   </p-accordionTab>
   <p-accordionTab 
     header="Versamenti"
