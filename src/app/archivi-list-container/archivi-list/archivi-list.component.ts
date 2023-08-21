@@ -206,11 +206,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					this.utenteUtilitiesLogin = utenteUtilities;
 					this.loggedUserIsAG = this.utenteUtilitiesLogin.isAG();
 
-					/* if (this.loggedUserIsAG) {
-						debugger;
-						this.codiciAziendaLoggedUserAG = this.utenteUtilitiesLogin.getUtente
-					} */
-
 					if (this.utenteUtilitiesLogin.getUtente() && this.utenteUtilitiesLogin.getUtente().utenteReale) {
 						this.isLoggeduser99 = (this.utenteUtilitiesLogin.getUtente().utenteReale.idInquadramento as unknown as String) === "99";
 					} else if (this.utenteUtilitiesLogin.getUtente()) {
@@ -271,17 +266,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						
 					}
 
-					//this.instanziaTabellaArchiviList = true;
 					// Il primo onlazyload lo chiamo io, quando voglio io e cioè adesso. Lo faccio resettando la tabella
 					setTimeout(() => {
 						this.myDatatableReset();
-						/* this.onLazyLoad({
-							filters: {},
-							first: 0,
-							rows: 40,
-							sortField: "dataCreazione",
-							sortOrder: -1
-						}); */
 					}, 0);
 				}
 			)
@@ -400,8 +387,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		if (this.dropdownLivello) {
 			this.dataTable.filters["livello"] = {value: this.dropdownLivello.value, matchMode: "in" };
 		}
-		this.archivesSelected = [];
-		this.showAdditionalRow = false;
+		this.resetSelection();
 		this.loadData();
 	}
 
@@ -643,8 +629,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public onLazyLoad(event: LazyLoadEvent): void {
 		if (event.first === 0 && event.rows === this.rowsNumber) {
 			event.rows = event.rows * 2;
-			this.archivesSelected = [];
-			this.showAdditionalRow = false;
+			this.resetSelection();
 		}
 
 		console.log(`Chiedo ${this.pageConf.conf.limit} righe con offset di ${this.pageConf.conf.offset}`);
@@ -1169,6 +1154,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
  * Quindi il reset me lo faccio io a mano.
  */
 	public myDatatableReset() {
+		this.resetSelection();
 		this.filtriPuliti = true;
 		for (const key in this.dataTable?.filters) {
 			(this.dataTable.filters as any)[key]["value"] = null;
@@ -1606,7 +1592,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	}
 
 	/*funzioncina per fare il tooltip carino*/
-	public tooltipsVicari(vicariString : string[]):string {
+	public tooltipsVicari(vicariString : string[]): string {
 		let temp:string = ``;
       for(let i = 0; i <  vicariString.length  ; i++){
 		if(i == vicariString.length - 1){
@@ -1659,4 +1645,13 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.allRowsWasSelected = false;
 		}
   }
+
+	private resetSelection(): void {
+		this.rowCountSelected = 0;
+		this.rowsNotSelectedWhenAlmostAllRowsAreSelected = [];
+		this.allRowsAreSelected = false;
+		this.archivesSelected = [];
+		this.showAdditionalRow = false;
+		this.allRowsWasSelected = false;
+	}
 }
