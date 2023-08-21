@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import {  ArchiviRecentiService, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioRecente, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteService, UtenteStruttura, UtenteStrutturaService, PermessoEntitaStoredProcedure } from '@bds/internauta-model';
+import {  ArchiviRecentiService, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioRecente, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteStruttura, UtenteStrutturaService, PermessoEntitaStoredProcedure, CODICI_RUOLO } from '@bds/internauta-model';
 import { AppService } from '../../app.service';
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { Subscription, combineLatestWith } from 'rxjs';
@@ -132,8 +132,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public showAdditionalRow: boolean = false;
 	public allRowsAreSelected: boolean = false;
 	public allRowsWasSelected: boolean = false;
-	/* public minimumLoadedOffsetOfAllaRowsSelected: number; */
-	public maximumLoadedOffsetOfAllaRowsSelected: number = 0;
+	private rowsNotSelectedWhenAlmostAllRowsAreSelected: number[] = [];
+	public loggedUserIsAG = false;
 
 	private _archivioPadre: Archivio;
 	get archivioPadre(): Archivio { return this._archivioPadre; }
@@ -192,18 +192,25 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				([[utenteUtilities, parametriAziendeFascicoliParlanti], usaGediInternauta]
 				) => {
 					// Parte relativa al parametro aziendale
-					if (parametriAziendeFascicoliParlanti ) {
-						console.log("ParametriAziendeFascicoli:", parametriAziendeFascicoliParlanti)
-						const parlanti = parametriAziendeFascicoliParlanti.find(p => { 
-							JSON.parse(p.valore);
-						}); 
-						if (parlanti) {
-							this.aziendeConFascicoliParlanti = parlanti.idAziende;
-							this.fascicoliParlanti = true;
-						}
+					if (parametriAziendeFascicoliParlanti) {
+						// console.log("ParametriAziendeFascicoli:", parametriAziendeFascicoliParlanti)
+						parametriAziendeFascicoliParlanti.forEach(parametro => {
+							if (JSON.parse(parametro.valore || false)) {
+								this.aziendeConFascicoliParlanti = parametro.idAziende;
+								this.fascicoliParlanti = true;
+							}
+						})
 					}
+
 					// Parte relativa al utenteUtilities
 					this.utenteUtilitiesLogin = utenteUtilities;
+					this.loggedUserIsAG = this.utenteUtilitiesLogin.isAG();
+
+					/* if (this.loggedUserIsAG) {
+						debugger;
+						this.codiciAziendaLoggedUserAG = this.utenteUtilitiesLogin.getUtente
+					} */
+
 					if (this.utenteUtilitiesLogin.getUtente() && this.utenteUtilitiesLogin.getUtente().utenteReale) {
 						this.isLoggeduser99 = (this.utenteUtilitiesLogin.getUtente().utenteReale.idInquadramento as unknown as String) === "99";
 					} else if (this.utenteUtilitiesLogin.getUtente()) {
@@ -246,11 +253,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						})
 					}; 
 
-					//if (this.displayArchiviListModeItem) {
-						this.calcArchiviListModeItem();
-						this.selectedButtonItem = this.selectButtonItems[0];
-					//}
-					// this.selectedButtonItem = this.selectButtonItems.filter(element => element.queryParams.mode === this.archiviListMode)[0];
+					this.calcArchiviListModeItem();
+					this.selectedButtonItem = this.selectButtonItems[0];
+
 					if (this.archiviListMode) {
 						this.calcAziendeFiltrabili();
 					}
@@ -439,42 +444,48 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			//   disabled: true
 			// },
 		);
-		// Il tab tutti lo deve vedere solo uno che appartiene ad alemno una azienda che non sia con fascicoliParlanti
-		/* if (!(this.fascicoliParlanti && 
-			this.utenteUtilitiesLogin.getUtente().aziendeAttive.length === 1 && 
-			this.aziendeConFascicoliParlanti.some(azienda => this.utenteUtilitiesLogin.getUtente().aziendeAttive[0].id === azienda))) { */
-			if (!this.fascicoliParlanti || this.utenteUtilitiesLogin.getUtente().aziendeAttive.some((a: { id: number; }) => !this.aziendeConFascicoliParlanti.includes(a.id))) {
-				this.selectButtonItems.push(
-					{
-						title: "Tutti i fascicoli",
-						label: "Tutti",
-						// icon: "pi pi-fw pi-list", 
-						routerLink: ["./" + ARCHIVI_LIST_ROUTE],
-						queryParams: { "mode": ArchiviListMode.TUTTI }
-					}
-				);
-			}
-			
+		// Il tab tutti lo deve vedere solo uno che appartiene ad alemno una azienda che non sia con fascicoliParlanti oppure uno che è AG
+		if (
+			this.loggedUserIsAG || // Essere AG è condizione sufficiente
+			!this.fascicoliParlanti || // L'assenza di aziende con fascicoli parlanti è condizione sufficiente
+			// La presenza di una azienda senza fascicoli parlanti è condzione sufficiente
+			this.utenteUtilitiesLogin.getUtente().aziendeAttive.some((a: { id: number; }) => !this.aziendeConFascicoliParlanti.includes(a.id))
+			) {
+			this.selectButtonItems.push(
+				{
+					title: "Tutti i fascicoli",
+					label: "Tutti",
+					// icon: "pi pi-fw pi-list", 
+					routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+					queryParams: { "mode": ArchiviListMode.TUTTI }
+				}
+			);
+		}
 	}
 
+	/**
+	 * Funzione che calcolare le aziende su cui l'utente può filtrare.
+	 * Legere commenti nella fuznione per capire le regole.
+	 */
 	private calcAziendeFiltrabili() {
 		this.aziendeFiltrabili = [];
 		
 		this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive
-		.filter((azienda: Azienda) => this.idAziendeConGediInternautaAttivo.includes(azienda.id) || this.isLoggeduser99)
-		.map((azienda: Azienda) => {
-			return { value: [azienda.id], label: azienda.nome } as ValueAndLabelObj;
+			.filter((azienda: Azienda) => 
+				// Se sono un ragazzo del 99 vedo tutto
+				this.isLoggeduser99 || 
+				// Se non sono sul tab TUTTI, è sufficiente che gedi internuata sia attivo su questa azienda
+				(this.idAziendeConGediInternautaAttivo.includes(azienda.id) && this.archiviListMode !== this.archiviListModeEnum.TUTTI) || 
+				// Se sono sul tab TUTTI, gedi interuata deve essere attivo e in più deve non essere parlante o l'utente deve esserne AG
+				(
+					this.idAziendeConGediInternautaAttivo.includes(azienda.id) &&
+					(!this.aziendeConFascicoliParlanti.includes(azienda.id) || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.AG, azienda.codice))
+				)
+			)
+			.map((azienda: Azienda) => {
+				return { value: [azienda.id], label: azienda.nome } as ValueAndLabelObj;
 		});
-		/*controllo:
-				se sto preparando la richiesta per il filtro TUTTI
-			allora:
-				tolgo l'azienda o le aziende parlanti e lascio creare la voce tutti con value tutte le aziende
-			altrimenti: (comportamento di default)
-				lascio creare la voce tutti con value tutte le aziende
-		*/
-		if (this.archiviListMode === this.archiviListModeEnum.TUTTI) {
-			this.aziendeFiltrabili = this.aziendeFiltrabili.filter(aziendaFiltrabile => !this.aziendeConFascicoliParlanti.includes(aziendaFiltrabile.value[0]));
-		} 
+
 		if (this.aziendeFiltrabili.length > 1) {
 			this.aziendeFiltrabili.push({
 				value: this.aziendeFiltrabili.map(e => e.value[0]),
@@ -509,6 +520,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	*/
 	public onSelectButtonItemSelection(event: any): void {
 		this.archiviListMode = event.option.queryParams.mode;
+
+		// Quando cambio tab resetto la selezione
+		this.archivesSelected = [];
+		this.showAdditionalRow = false;
+		this.allRowsAreSelected = false;
+		this.allRowsWasSelected = false;
+		this.rowCountSelected == 0;
+		this.rowsNotSelectedWhenAlmostAllRowsAreSelected = [];
 
 		/* setTimeout(() => {
 			this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
@@ -799,36 +818,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					Se entro qui probabilmente ho fatto una ricerca */
 					const archiviCaricati: ExtendedArchiviView[] = this.setCustomProperties(results);
 					Array.prototype.splice.apply(this.archivi, [0, this.archivi.length, ...archiviCaricati]);
-					/* if (this.allRowsWasSelected && (this.archivesSelected.length > this.maximumLoadedOffsetOfAllaRowsSelected)) {
-						Array.prototype.splice.apply(this.archivesSelected, [0, this.archivesSelected.length, ...archiviCaricati]);
-						//this.minimumLoadedOffsetOfAllaRowsSelected = 0;
-						if (this.archivesSelected.length > this.maximumLoadedOffsetOfAllaRowsSelected)
-							this.maximumLoadedOffsetOfAllaRowsSelected = this.archivesSelected.length;
-					} */
-					console.log("STO GIRO SONO SUL PRIMO IF")
-					console.log("this.storedLazyLoadEvent.first", this.storedLazyLoadEvent.first);
-					console.log("this.storedLazyLoadEvent.rows", this.storedLazyLoadEvent.rows);
-					console.log("this.maximumLoadedOffsetOfAllaRowsSelected", this.maximumLoadedOffsetOfAllaRowsSelected)
-					console.log("this.archivesSelected.length", this.archivesSelected.length)
+					if (this.allRowsWasSelected) {
+						Array.prototype.splice.apply(this.archivesSelected, [0, this.archivi.length, ...archiviCaricati.filter(a => !this.rowsNotSelectedWhenAlmostAllRowsAreSelected.includes(a.id))]);
+					}
 				} else {
 					const archiviCaricati: ExtendedArchiviView[] = this.setCustomProperties(results);
 					Array.prototype.splice.apply(this.archivi, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...archiviCaricati]);
-					console.log("this.storedLazyLoadEvent.first", this.storedLazyLoadEvent.first);
-					console.log("this.storedLazyLoadEvent.rows", this.storedLazyLoadEvent.rows);
-					console.log("this.maximumLoadedOffsetOfAllaRowsSelected", this.maximumLoadedOffsetOfAllaRowsSelected)
-					console.log("this.archivesSelected.length", this.archivesSelected.length)
-					if (this.allRowsWasSelected && 
-						/*( this.storedLazyLoadEvent.first < this.minimumLoadedOffsetOfAllaRowsSelected) ||  */((this.storedLazyLoadEvent.first + this.storedLazyLoadEvent.rows) > this.maximumLoadedOffsetOfAllaRowsSelected)) {
-						Array.prototype.splice.apply(this.archivesSelected, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...archiviCaricati]);
-						console.log("entro nell'if e setto gli archives selected")
-						console.log("this.archivesSelected.length", this.archivesSelected.length)
-						/* if (this.storedLazyLoadEvent.first < this.minimumLoadedOffsetOfAllaRowsSelected)
-							this.minimumLoadedOffsetOfAllaRowsSelected = this.storedLazyLoadEvent.first; */
-							console.log("this.storedLazyLoadEvent.first + this.storedLazyLoadEvent.rows", this.storedLazyLoadEvent.first + this.storedLazyLoadEvent.rows)
-						if ((this.storedLazyLoadEvent.first + this.storedLazyLoadEvent.rows) > this.maximumLoadedOffsetOfAllaRowsSelected) {
-							console.log("setto un nuovo maximum")
-							this.maximumLoadedOffsetOfAllaRowsSelected = this.storedLazyLoadEvent.first + this.storedLazyLoadEvent.rows;
-						}
+					if (this.allRowsWasSelected) {
+						Array.prototype.splice.apply(this.archivesSelected, [this.storedLazyLoadEvent.first, this.storedLazyLoadEvent.rows, ...archiviCaricati.filter(a => !this.rowsNotSelectedWhenAlmostAllRowsAreSelected.includes(a.id))]);
 					}
 				}
 				this.archivi = [...this.archivi]; // trigger change detection
@@ -1632,19 +1629,16 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     event.originalEvent.stopPropagation();
 		this.showAdditionalRow = true;
 		this.rowCountSelected++;
+		const index = this.rowsNotSelectedWhenAlmostAllRowsAreSelected.indexOf(event.data.id, 0);
+		if (index > -1) {
+			this.rowsNotSelectedWhenAlmostAllRowsAreSelected.splice(index, 1);
+		}
   }
 
   public onRowUnselect(event: any): void {
-		debugger
     event.originalEvent.stopPropagation();
 		this.rowCountSelected--;
-		/* if (this.allRowsAreSelected) {
-			this.archivesSelected = [];
-			this.archivesSelected = [event.data];
-			setTimeout(() => {
-				this.archivesSelected = [...this.archivesSelected];
-			}, 0);
-		} */
+		this.rowsNotSelectedWhenAlmostAllRowsAreSelected.push(event.data.id);
 		this.allRowsAreSelected = false;
 		if (this.archivesSelected.length === 0) {
     	this.showAdditionalRow = false;
@@ -1653,11 +1647,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
   }
 	
 	public onSelectAllChange(event: any): void {
-    //event.originalEvent.stopPropagation();
-		//debugger;
+		this.rowsNotSelectedWhenAlmostAllRowsAreSelected = [];
 		if (event.checked) {
-			//this.minimumLoadedOffsetOfAllaRowsSelected = 0;
-			this.maximumLoadedOffsetOfAllaRowsSelected = this.archivi.length;
 			this.rowCountSelected = this.rowCount;
     	this.showAdditionalRow = true;
 			this.allRowsAreSelected = true;
@@ -1666,7 +1657,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.showAdditionalRow = false;
 			this.allRowsAreSelected = false;
 			this.allRowsWasSelected = false;
-			this.maximumLoadedOffsetOfAllaRowsSelected = 0;
 		}
   }
 }

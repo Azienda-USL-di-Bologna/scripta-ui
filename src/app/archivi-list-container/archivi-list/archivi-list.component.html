@@ -28,18 +28,16 @@
   [totalRecords]="totalRecords" 
   styleClass="p-table-scripta-archivi-list" 
   [ngClass]="{'table-zero-rows': totalRecords === 0}"
-  tableStyleClass="archiviolist-table-body"> <!-- (selectAllChange)="onSelectAllChange($event)" -->
+  tableStyleClass="archiviolist-table-body">
   <!-- HEADER & ORDINAMENTO ---->
   <ng-template pTemplate="header" let-columns>
     <tr class="header-row">
-      <!-- TODO: QUi va controllato anche che io sia AG -->
-      <!-- *ngIf="archiviListMode === 'TUTTI' && true"  -->
-      <th 
+      <th *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG"
         class="checkbox-column"
         alignFrozen="left" 
         pFrozenColumn 
         [frozen]="true">
-        <p-tableHeaderCheckbox></p-tableHeaderCheckbox><!-- (selectAllChange)="onSelectAllChange($event)" -->
+        <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
       </th>
       <th *ngFor="let col of columns" 
         pReorderableColumn 
@@ -90,8 +88,8 @@
       </th>
     </tr>
     <!-------FILTRI -->
-    <tr class="filter-row"><!-- *ngIf="archiviListMode === 'TUTTI' && true"  -->
-      <th 
+    <tr class="filter-row">
+      <th *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG"
         class="checkbox-column"
         alignFrozen="left" 
         pFrozenColumn 
@@ -399,8 +397,8 @@
         pFrozenColumn 
         [frozen]="true">
       </th>
-    </tr><!--  && archiviListMode === 'TUTTI' -->
-    <tr *ngIf="showAdditionalRow" 
+    </tr>
+    <tr *ngIf="showAdditionalRow && archiviListMode === 'TUTTI' && loggedUserIsAG"
       class="additional-row">
       <span class="selection-info">
         {{allRowsAreSelected ? 'Tutti i' + (rowCountInProgress ? ' ': ' ' + rowCountSelected + ' ') + 'fascicoli sono selezionati' : 
@@ -409,7 +407,7 @@
       <p-button 
         label="Annulla selezione"
         type="reset"
-        (click)="archivesSelected = []; showAdditionalRow = false; allRowsAreSelected = false; allRowsWasSelected = false">
+        (click)="archivesSelected = []; showAdditionalRow = false; allRowsAreSelected = false; allRowsWasSelected = false; rowsNotSelectedWhenAlmostAllRowsAreSelected = []">
       </p-button>
     </tr>
   </ng-template>
@@ -418,8 +416,8 @@
     <tr class="row-height"
       [pSelectableRow]="rowData"
       [pSelectableRowIndex]="index"
-      [pSelectableRowDisabled]="false"><!-- *ngIf="archiviListMode === 'TUTTI' && true" -->
-      <td 
+      [pSelectableRowDisabled]="false">
+      <td *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG"
         class="checkbox-column"
         alignFrozen="left"
         pFrozenColumn 
