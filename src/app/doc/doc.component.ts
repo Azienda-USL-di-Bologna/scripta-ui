@@ -12,6 +12,8 @@ import { ExtendedDocService } from "./extended-doc.service";
 import { ExtendedDocDetailView } from "../docs-list-container/docs-list/extended-doc-detail-view";
 import { AttachmentsBoxConfig } from "@bds/common-components";
 import { formatDate } from '@angular/common';
+import { DocVisualizerService } from "./doc-visualizer.service";
+import { NotaDoc, TipoNotaDoc } from "@bds/internauta-model/lib/entities/scripta/NodaDoc";
 
 @Component({
   selector: "doc",
@@ -53,17 +55,20 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public annullato: boolean;
   public protocollatoDaLabel: string;
   public descrizioneStrutturaAdottante: string;
-
+  public docVisualizer: DocVisualizerService;
   public pregresso: boolean = false;
+  public dataCreazione: string;
+  public registroLabel: string = 'Proposta numero';
+  public notaDocumentoString: string = 'Nessuna nota';
+  public notaAnnullamentoString: string = 'Nessuna nota';
+
   @Input() set data(data: any) {
     this.detailDoc = data.doc;
     this._doc = data.doc;
     this.doc = this._doc;
     this.pregresso = this._doc.pregresso
     this.visualizzazioneDocumento = this.detailDoc._registrazioneVisualizzazione;
-    console.log("visualizzazioneDocumento: ", this.visualizzazioneDocumento)
-    console.log("Doc_:", this._doc)
-    console.log("Pregresso", this.pregresso)
+    this.dataCreazione = formatDate(this.doc.dataCreazione, 'dd/MM/yyyy', 'en_US');
   }
 
   constructor(
@@ -92,17 +97,18 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
              */
              if (this.pregresso) {
               this.setFreezeDocumento(true);
-              console.log("pregressando");
-              console.log(this.detailDoc);
               this.subscriptions.push(
                 this.loadDocument(this.detailDoc.id).subscribe((res: Doc) => {
-                  console.log("res", res);
                   this.setLabelProtocollatoDa();
-
                   this.setFreezeDocumento(false);
-
                   this.doc = res;
-                  console.log("doc è:", this.doc);
+                  this.docVisualizer = new DocVisualizerService(this.doc);
+                  this.notaDocumentoString = this.doc?.notaDocumento[0]?.testo;
+                  this.notaAnnullamentoString = this.doc?.notaAnnullamento[0]?.testo;
+                  console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+                  console.log(this.docVisualizer);
+                  console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+
                   this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
                   this.tipoDocumento = this.doc.tipologia;
                   if (this.detailDoc.dataUltimoVersamento != null ) {
@@ -133,9 +139,11 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
                   this.setFreezeDocumento(false);
                   console.log("res", res); 
                   this.doc = res;
-                  if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG).length > 0) {
-                    console.log("RegistriDoc: ",this.doc.registroDocList)
-                    this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
+                  this.docVisualizer = new DocVisualizerService(this.doc);
+                  if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.ufficiale).length > 0) {
+                    console.log("RegistriDoc: ",this.doc.registroDocList);
+                    debugger;
+                    this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.ufficiale)[0].numeroVisualizzazione;
                   }
                   this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
                   this.appService.appNameSelection("PEIS - " + this.doc.idAzienda.descrizione);
@@ -157,10 +165,6 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
                 })
               );
             }
-            
-
-
-            
           }
         }
       )
@@ -214,11 +218,14 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private setLabelProtocollatoDa() {
     if(this._doc.tipologia === TipologiaDoc.PROTOCOLLO_IN_ENTRATA || this._doc.tipologia === TipologiaDoc.PROTOCOLLO_IN_USCITA) {
+      this.registroLabel = "Protocollo numero";
       this.protocollatoDaLabel = "Protocollato Da";
     } else if (this._doc.tipologia === TipologiaDoc.DELIBERA ) {
+      this.registroLabel = "Delibera numero";
       this.protocollatoDaLabel = "Adottata da";
       this.descrizioneStrutturaAdottante = this.detailDoc.idStrutturaRegistrazione.nome + " [ " + this.detailDoc.idStrutturaRegistrazione.codice + " ]";
     } else if (this._doc.tipologia === TipologiaDoc.DETERMINA) {
+      this.registroLabel = "Determina numero";
       this.protocollatoDaLabel = "Proposta da";
       this.descrizioneStrutturaAdottante = this.detailDoc.idStrutturaRegistrazione.nome + " [ " + this.detailDoc.idStrutturaRegistrazione.codice + " ]";
     }
@@ -275,6 +282,10 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     this.messageService.clear();
   }
 
+  onShow(event: Event) {
+    debugger;
+
+  }
 
   private hasAllegatoPrincipale(): boolean {
     console.log("hasPrincipale", this.doc.allegati);
@@ -366,7 +377,8 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
             this.setFreezeDocumento(false);
             console.log("res", res);
             this.doc = res;
-            this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.codice === CODICI_REGISTRO.PG)[0].numeroVisualizzazione;
+            debugger;
+            this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.ufficiale)[0].numeroVisualizzazione;
             this.messageService.add({
               severity: "success",
               summary: "Documento",
@@ -386,8 +398,6 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     }
   }
-
-
 
   public ngOnDestroy() {
     if (this.subscriptions) {

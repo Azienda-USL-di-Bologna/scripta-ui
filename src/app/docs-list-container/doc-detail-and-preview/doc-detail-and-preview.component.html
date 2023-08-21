@@ -3,7 +3,7 @@
   <h4>
     <i *ngIf="doc.visibilitaLimitata && !doc.riservato " pTooltip="Visibilità limitata" class="pi pi-eye"></i>
     <i *ngIf=" doc.riservato " pTooltip="Riservato" class="pi pi-eye-slash"></i>
-    {{doc.oggetto}}
+    {{doc.oggetto}} <div *ngIf="utenteUtilitiesLogin.hasRole('CA')"> id: {{doc.id}}</div>
   </h4>
   
 

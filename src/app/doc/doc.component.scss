@@ -11,12 +11,11 @@
     display: flex;
     justify-content: space-between;
 }
-main {
+::ng-deep .main-content {
     width: 100%;
     margin: 0 auto;
     height: 100%;
     display: flex;
-
     textarea {
         margin-top: 0.1rem;
     }
@@ -24,12 +23,38 @@ main {
     .info-documento {
         height: 100%;
         overflow: auto;
-        .dati-creazione {
-            display: flex;
-            flex-direction: column;
-            justify-content:space-between;
+        p-fieldset {
+            .p-fieldset {
+                height: auto;
+                .oggetto-and-additional-info-box{
+                    display: flex;
+                    flex-direction: row;
+                    justify-content:space-between;
+
+                    .oggetto-box {
+                        flex: 1 1 0;
+                        flex-grow: 28;
+                    }
+                    .additional-info-box {
+                        display: flex;
+                        flex-direction: column;
+                        flex-grow: 1;
+                        align-items: flex-end;
+                        .visibilita-limitata, .riservato, .annullato, .noteDoc {
+                            i {
+                                font-size: x-large;
+                            }
+                            .checkbox {
+                                margin-right: 1rem;
+                            }
+                        }
+                    }
+                }
+
+            }
         }
     }
+
     .oggetto {
         width: 100%;
         resize: none;
@@ -49,21 +74,7 @@ main {
                 flex-direction: row;
             }
         }
-        .sotto-dati-generici-checkbox {
-            display: flex;
-            flex-direction: row;
-            align-items: last baseline;
-            margin-bottom: 1.5rem;
-            .visibilita-limitata, .riservato, .annullato {
-                margin-right: 2rem;
-                align-items: center;
-                display: flex;
-                flex-direction: row;
-                .checkbox {
-                    margin-right: 1rem;
-                }
-            }
-        }
+        
     }
     .protocollato-da-box {
         display: flex;
