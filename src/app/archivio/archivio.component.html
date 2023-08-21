@@ -219,19 +219,20 @@
 
 <p-dialog 
   appendTo="body"
-  header="Chiudi fascicolo"
+  [header]="chiusuraFascicolo || chiusuraArchivioParams ? 'Chiudi fascicolo' : 'Prechiudi fascicolo'"
   [(visible)]="this.showChiudiPopup"
   [modal]="true"
   [responsive]="false"
   [focusOnShow]="false"
   contentStyleClass="chiudiPopup">
-  <div [innerHTML]="messaggioChiusura"></div>
+  <div [innerHTML]="chiusuraFascicolo && !chiusuraArchivioParams ? messaggioChiusura.slice(0, contaMessaggio) 
+  + messaggioChiusuraDefinitiva + messaggioChiusura.slice(contaMessaggio) : messaggioChiusura"></div>
   <br>
   <br>
   <div class="chiudi-fascicolo-footer">
     <button
       type="button"
-      (click)="chiudiRiapriArchivio($event); this.showChiudiPopup = false;"
+      (click)="chiusuraFascicolo ? chiusuraDefinitiva($event) : chiudiRiapriArchivio($event); this.showChiudiPopup = false;"
       pButton
       label="Conferma"
       class="mr-2 buttons"

@@ -51,16 +51,20 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   private utenteArchivioDiInteresse: ArchivioDiInteresse;
   private utenteUtilitiesLogin: UtenteUtilities;
   public messaggioChiusura: string = "ciao";
+  public messaggioChiusuraDefinitiva: string = "<br/><br/>Tutti i documenti non numerati verranno numerati.";
   public messaggioStampa: string = "ciao";
   public subscriptions: Subscription[] = [];
   public loggedUserCanVisualizeArchive = false;
   public showRightSide: boolean = false;
   public docForDetailAndPreview: ExtendedDocDetailView;
   public rightContentProgressSpinner: boolean = false;
+  public azioneInCorso: boolean = false; // è true se è in corso un'azione di chiusura, prechiusura o riapertura
   public rowCountInProgress: boolean = false;
   public rowCount: number;
   public showChiudiPopup : boolean = false;
   public chiusuraArchivioParams : boolean = false; // è true se il chiudi deve chiudere definitivamente un archivio, è false se lo deve pre-chiudere 
+  public chiusuraFascicolo: boolean = false;
+  public contaMessaggio: number = 0;
   public showOrganizzaPopUp: boolean = false;
   public showStampaPopUp: boolean = false;
   public reloadDataDocList: boolean = false;
@@ -128,10 +132,12 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
               let chiusuraArchivio: boolean = false;
               if (parametriAziende && parametriAziende[0]) {
                 chiusuraArchivio = JSON.parse(parametriAziende[0].valore)
-                this.messaggioChiusura = "<b>Attenzione!</b><br/><br/>Eventuali bozze di sottofascicoli o inserti saranno eliminate."
+                this.messaggioChiusura = "<b>Attenzione!</b><br/><br/>Eventuali bozze di sottofascicoli o inserti saranno eliminate.";
+                this.contaMessaggio = this.messaggioChiusura.length;
                 if (chiusuraArchivio) {
                   this.chiusuraArchivioParams = true;
-                  this.messaggioChiusura += "<br/><br/>Tutti i documenti non numerati verranno numerati.";
+                  this.messaggioChiusura += this.messaggioChiusuraDefinitiva;
+                  this.buildFunctionButton(this.archivio);
                 }
                 this.messaggioChiusura += "<br/><br/>Si vuole procedere?"
               }
@@ -461,7 +467,7 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
           command: () => {this.showOrganizzaPopUp = true, this.operazioneOrganizza = "Trasforma in fascicolo"}
         }
       ],
-      disabled: this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO)
+      disabled: this.isArchivioChiuso() || !!!this.hasPermessoMinimo(DecimalePredicato.VICARIO) || this.azioneInCorso
     },
     {
       label: "Genera", 
@@ -474,24 +480,47 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
         //    label: "Dorso",
         //    command: () => console.log("qui dovrò generare il Dorso")
         // }
-      ]
+      ],
+      disabled: this.azioneInCorso
     },
     {
       label: "Scarica zip",
       disabled: !this.hasPermessoMinimo(DecimalePredicato.VISUALIZZA) ||
-        archivio.stato === StatoArchivio.BOZZA,
+        archivio.stato === StatoArchivio.BOZZA || this.azioneInCorso,
       command: () => this.downloadArchivioZip(archivio as Archivio)
     },
     {
-      label: this.archivio.stato === StatoArchivio.PRECHIUSO ? 'Riapri fascicolo' : 'Chiudi fascicolo',
-      disabled: this.archivio.stato === StatoArchivio.BOZZA || this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.livello !== 1 || !this.loggedUserIsResponsbaileOrVicario,
+//      label: this.archivio.stato === StatoArchivio.PRECHIUSO ? 'Riapri fascicolo' : 'Chiudi fascicolo',
+//      disabled: this.archivio.stato === StatoArchivio.BOZZA || this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.livello !== 1 || !this.loggedUserIsResponsbaileOrVicario,
+      label: this.archivio.stato === StatoArchivio.PRECHIUSO ? 'Riapri fascicolo' : 'Prechiudi fascicolo',
+      disabled: this.archivio.stato === StatoArchivio.BOZZA 
+      || this.archivio.stato === StatoArchivio.CHIUSO 
+      || this.archivio.livello !== 1 
+      || !this.loggedUserIsResponsbaileOrVicario
+      || (archivio.stato === StatoArchivio.APERTO && this.chiusuraArchivioParams)
+      || this.azioneInCorso,
       command: () => {
         if(this.archivio.stato === StatoArchivio.PRECHIUSO)
           this.chiudiRiapriArchivio(event);
         else
           this.showChiudiPopup = true;
       }
-    }] as MenuItem[];
+    },
+    {
+      label: "Chiudi fascicolo",
+      disabled: this.archivio.stato === StatoArchivio.BOZZA
+      || this.archivio.stato === StatoArchivio.CHIUSO 
+      || this.archivio.livello !== 1 
+      || !this.loggedUserIsResponsbaileOrVicario
+      || (archivio.stato === StatoArchivio.APERTO && !this.chiusuraArchivioParams)
+      || this.azioneInCorso,
+      command: () => {
+      this.chiusuraFascicolo = true;
+      console.log("ch prima di chiudi pop: ", this.chiusuraFascicolo); 
+      this.showChiudiPopup = true;
+      }  
+    }
+  ] as MenuItem[];
 
     this.functionButton = {
       tooltip: "Funzioni",
@@ -768,8 +797,13 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
       return false;
   }
 
+  /**
+   * metodo che gestisce riapertura, chiusura e prechiusura dei fascicoli
+   * @param event 
+   * @returns 
+   */
   public chiudiRiapriArchivio(event: Event) : void {
-    if (!this.archivio.idMassimario) {
+    if (this.archivio.idMassimario === null || !this.archivio.idMassimario.id) {
       this.messageService.add({
         severity: "error",
         key: "dettaglioArchivioToast",
@@ -784,6 +818,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     const additionalData = [new AdditionalDataDefinition("OperationRequested", "CloseOrReopenArchive")];
 
     if (this.archivio.stato == StatoArchivio.PRECHIUSO) {
+      this.rightContentProgressSpinner = true;
+      this.azioneInCorso = true;
+      this.buildFunctionButton(this.archivio);
       archivioUpdate.stato = StatoArchivio.APERTO;
       this.archivio.stato = StatoArchivio.APERTO;
       this.subscriptions.push(this.patchArchivio(
@@ -797,13 +834,16 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
             CaptionComponent.ARCHIVIO, true, true, false, false, 
             true, true, false, false,
             false, true);
+          this.rightContentProgressSpinner = false;
+          this.azioneInCorso = false;
           this.buildNewArchivioButton(this.archivio);
           this.buildFunctionButton(this.archivio);
+          this.dettaglioarchivio.isArchivioChiuso = this.isArchivioChiuso();
         })
       );
-      
-    } else {
-      this.rightContentProgressSpinner = true;
+      this.chiusuraFascicolo = false;
+    } /*else {
+      //this.rightContentProgressSpinner = true;
       if (this.chiusuraArchivioParams) {
         // L'utente conferma di voler chiudere definitivamente il fascicolo, faccio partire la chiusura
         archivioUpdate.stato = StatoArchivio.CHIUSO;
@@ -824,10 +864,58 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
             this.rightContentProgressSpinner = false;
           })
         );
-      } else {
+      } */
+      else {
         // L'utente conferma di voler chiudere il fascicolo, faccio partire la chiusura
+        this.rightContentProgressSpinner = true;
+        this.azioneInCorso = true;
+        this.buildFunctionButton(this.archivio);
         archivioUpdate.stato = StatoArchivio.PRECHIUSO;
         this.archivio.stato = StatoArchivio.PRECHIUSO;
+        this.subscriptions.push(this.patchArchivio(
+            archivioUpdate,
+            additionalData,
+            "Archivio " + this.archivio.numerazioneGerarchica + " prechiuso correttamente",
+            `Si è verificato un errore nella prechiusura dell'archivio, contattare Babelcare`
+          ).subscribe( a => {
+            this.updateArchivio.emit(this.archivio);
+            this.captionConfiguration = new CaptionConfiguration(
+              CaptionComponent.ARCHIVIO, true, true, false, false, 
+              false , true, false, false,
+              true, true);
+            this.rightContentProgressSpinner = false;
+            this.azioneInCorso = false;
+            this.buildFunctionButton(this.archivio);
+            this.dettaglioarchivio.isArchivioChiuso = this.isArchivioChiuso();
+          })
+        );
+      }
+    //}
+  }
+
+  /**
+   * Metodo che imposta lo stato del fascicolo su CHIUSO
+   * @param event 
+   */
+  public chiusuraDefinitiva(event: Event): void {
+    if (this.archivio.idMassimario === null || !this.archivio.idMassimario.id) {
+      this.messageService.add({
+        severity: "error",
+        key: "dettaglioArchivioToast",
+        summary: "Attenzione",
+        detail: `Non è possibile chiudere un archivio senza aver prima assegnato una tipologia documentale`
+      });
+      return;
+    }
+    const archivioUpdate = new Archivio();
+    archivioUpdate.version = this.archivio.version;
+    const additionalData = [new AdditionalDataDefinition("OperationRequested", "CloseOrReopenArchive")];
+    this.rightContentProgressSpinner = true;
+    this.azioneInCorso = true;
+    this.buildFunctionButton(this.archivio);
+    this.azioneInCorso = true;
+    archivioUpdate.stato = StatoArchivio.CHIUSO;
+        this.archivio.stato = StatoArchivio.CHIUSO;
         this.subscriptions.push(this.patchArchivio(
             archivioUpdate,
             additionalData,
@@ -837,14 +925,15 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
             this.updateArchivio.emit(this.archivio);
             this.captionConfiguration = new CaptionConfiguration(
               CaptionComponent.ARCHIVIO, true, true, false, false, 
-              false , true, false, false,
+              false, true, false, false,
               true, true);
-            this.buildFunctionButton(this.archivio);
+            this.docListService.refreshDocs();
             this.rightContentProgressSpinner = false;
+            this.azioneInCorso = false;
+            this.buildFunctionButton(this.archivio);
+            this.dettaglioarchivio.isArchivioChiuso = this.isArchivioChiuso();
           })
-        );
-      }
-    }
+        ); 
   }
 
   /**
