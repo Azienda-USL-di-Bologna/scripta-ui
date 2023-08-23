@@ -44,7 +44,7 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
       this.idArchivioAperturaDaScrivania = this.router.parseUrl(this.router.url).queryParams["id"];
     } else if (this.router.routerState.snapshot.url.includes("tip")) {
       this.tabIndexToActiveAtTheBeginning = 0;
-      this.idTipSessioneImportazione = this.router.parseUrl(this.router.url).queryParams["id"];
+      this.idTipSessioneImportazione = this.router.parseUrl(this.router.url).queryParams["idSessione"];
     } else {
       //this.navigationTabsService.activeTabByIndex(1);
       this.tabIndexToActiveAtTheBeginning = 1;

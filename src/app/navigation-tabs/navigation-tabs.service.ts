@@ -165,11 +165,11 @@ export class NavigationTabsService {
     );
   }
 
-  public buildaTabTIP(idTipSessioneImportazione?: number): TabItem {
+  public buildaTabTIP(idSessioneImportazione?: number): TabItem {
     return new TabItem(
       TipComponent,
       {
-        idTipSessioneImportazione: idTipSessioneImportazione
+        idSessioneImportazione: idSessioneImportazione
       },
       true,
       "Import Pregressi",

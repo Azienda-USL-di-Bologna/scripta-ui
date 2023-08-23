@@ -89,6 +89,7 @@ export class GenericCaptionTableComponent implements OnInit {
       this.navigationTabsService.buildaTabTIP()
     );
     this.navigationTabsService.activeLastTab();
+
   }
 
 }
