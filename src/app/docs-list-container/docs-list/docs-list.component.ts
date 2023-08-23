@@ -860,6 +860,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         this.projectionFotGetData = "CustomDocDetailForDocList";
         break;
       case DocsListMode.PREGRESSI:
+        filterAndSort.addFilter(new FilterDefinition("pregresso", FILTER_TYPES.not_string.equals, true));
         filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabPregressi"));
         this.initialSortField = "dataRegistrazione";
         this.serviceForGetData = this.docDetailService;

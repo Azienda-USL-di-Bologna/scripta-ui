@@ -223,11 +223,11 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if (this._doc.tipologia === TipologiaDoc.DELIBERA ) {
       this.registroLabel = "Delibera numero";
       this.protocollatoDaLabel = "Adottata da";
-      this.descrizioneStrutturaAdottante = this.detailDoc.idStrutturaRegistrazione.nome + " [ " + this.detailDoc.idStrutturaRegistrazione.codice + " ]";
+      this.descrizioneStrutturaAdottante = this.detailDoc.idStrutturaRegistrazione ? this.detailDoc.idStrutturaRegistrazione.nome + " [ " + this.detailDoc.idStrutturaRegistrazione.codice + " ]" : "";
     } else if (this._doc.tipologia === TipologiaDoc.DETERMINA) {
       this.registroLabel = "Determina numero";
       this.protocollatoDaLabel = "Proposta da";
-      this.descrizioneStrutturaAdottante = this.detailDoc.idStrutturaRegistrazione.nome + " [ " + this.detailDoc.idStrutturaRegistrazione.codice + " ]";
+      this.descrizioneStrutturaAdottante = this.detailDoc.idStrutturaRegistrazione ? this.detailDoc.idStrutturaRegistrazione.nome + " [ " + this.detailDoc.idStrutturaRegistrazione.codice + " ]" : "";
     }
   }
 

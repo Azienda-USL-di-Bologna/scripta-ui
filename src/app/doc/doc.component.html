@@ -124,9 +124,17 @@
       <!-- TODO: Tutti i flag andranno disabilitati/abilitati anche in base alla registrazione del documento -->
     </div>
     
-    <div class="protocollato-da-box" m-bottom-5>
+    <div *ngIf="docVisualizer?.creatoDa && doc.idPersonaCreazione"
+      class="protocollato-da-box" 
+      m-bottom-5>
       <label>Creato da: </label>
-      <input id="creatoDa" *ngIf="docVisualizer?.creatoDa" aria-label="creato da" disabled="true" pInputText type="text" [disabled]="true"
+      <input
+        aria-label="creato da" 
+        id="creatoDa" 
+        disabled="true" 
+        pInputText 
+        type="text" 
+        [disabled]="true"
         [(ngModel)]="doc.idPersonaCreazione.descrizione">
     </div>
     <div class="protocollato-da-box" m-bottom-5>
