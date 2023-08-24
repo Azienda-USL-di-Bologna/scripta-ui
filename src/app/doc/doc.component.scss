@@ -1,126 +1,128 @@
 :host::ng-deep {
-    height: 100%;
-    display: flex;
-    .p-disabled, .p-component:disabled {
-        opacity: 1;
-    }
+  height: 100%;
+  display: flex;
+  .p-disabled, .p-component:disabled {
+    opacity: 1;
+  }
 }
 .classe-temporanea {
-    width: 62.5rem;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
+  width: 62.5rem;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
 }
+::ng-deep .nota-annullamento {
+  display: flex;
+  flex-direction: column;
+  justify-content:space-between;
+  .label-annullamento {
+    flex: 1 1 0;
+  }
+  .text-annullamento {
+    flex: 1 1 0;
+  }
+}
+
 ::ng-deep .main-content {
-    width: 100%;
-    margin: 0 auto;
+  width: 100%;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  textarea {
+    margin-top: 0.1rem;
+  }
+  .info-documento {
     height: 100%;
-    display: flex;
-    textarea {
-        margin-top: 0.1rem;
-    }
-
-    .info-documento {
-        height: 100%;
-        overflow: auto;
-        p-fieldset {
-            .p-fieldset {
-                height: auto;
-                .oggetto-and-additional-info-box{
-                    display: flex;
-                    flex-direction: row;
-                    justify-content:space-between;
-
-                    .oggetto-box {
-                        flex: 1 1 0;
-                        flex-grow: 28;
-                    }
-                    .additional-info-box {
-                        display: flex;
-                        flex-direction: column;
-                        flex-grow: 1;
-                        align-items: flex-end;
-                        .visibilita-limitata, .riservato, .annullato, .noteDoc {
-                            i {
-                                font-size: x-large;
-                            }
-                            .checkbox {
-                                margin-right: 1rem;
-                            }
-                        }
-                    }
-                }
-
-            }
+    overflow: auto;
+    p-fieldset {
+      .p-fieldset-legend{
+        font-weight: bold;
+      }
+      .p-fieldset {
+        height: auto;
+        background-color: blanchedalmond;
+        .m-bottom-05 {
+          margin-bottom: 0.5rem;
         }
-    }
-
-    .oggetto {
-        width: 100%;
-        resize: none;
-    }
-    .dati-generici {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        .sotto-dati-generici-date {
+        .dati-del-documento {
+          display: flex;
+          flex-direction: row;
+          justify-content:space-between;
+          .date-e-oggetto{
             display: flex;
-            flex-direction: row;
-            align-items: last baseline;
-            margin-bottom: 1.5rem;
-            .data-versamento, .data-registrazione{
-                margin-right: 2rem;
-                display: flex;
-                flex-direction: row;
+            flex-direction: column;
+            justify-content:space-between;
+            flex: 1 1 0;
+            flex-grow: 28;
+            .date-del-documento{
+              display: flex;
+              flex-direction: row;
+              .box-data{
+                flex: 1 1 0;
+                .label-data{
+                }
+              }
             }
+            .oggetto-box{
+              flex: 1 1 0;
+              flex-grow: 28;
+              padding-top: 1rem;
+              .oggetto {
+                width: 100%;
+                resize: none;
+              }
+            }
+          }
+          .additional-info-box{
+            flex: 1 1 0;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            align-items: flex-end;
+            .visibilita-limitata, .riservato, .annullato, .noteDoc {
+              i {
+                font-size: x-large;
+              }
+              .checkbox {
+                margin-right: 1rem;
+              }
+            }
+          }
         }
-        
-    }
-    .protocollato-da-box {
-        display: flex;
-        padding:0.625rem 0;
-        label {
+        .protocollato-da-box {
+          display: flex;
+          padding:0.625rem 0;
+          label {
             align-self: center;
             width: 8.75rem;
+          }
         }
+      } 
     }
+  }
+}
 
-}
-.m-bottom-05 {
-    margin-bottom: 0.5rem;
-}
-label {
-    align-self: baseline;
-}
-.protocollo-esterno-box{
-    padding: 0.625rem;
-    display: flex;
-    justify-content: space-between;
-    label {
-        align-self: center;
-        padding:0.625rem;
-    }
-}
 ::ng-deep .preview-inner {
-    overflow-y: visible !important; //senza, non si vede la preview degli allegati. Esistono modi migliori?
+  overflow-y: visible !important; 
+  //senza, non si vede la preview degli allegati. Esistono modi migliori?
 }
 section {
-    width: 50%;
-    padding: 0.1rem 0.5rem;
-    
-    .allegati-label {
-        display: inline-block;
-        margin: 0.5rem 0;
-        font-size: 1.5rem;
-    }
+  width: 50%;
+  padding: 0.1rem 0.5rem;
+  
+  .allegati-label {
+    display: inline-block;
+    margin: 0.5rem 0;
+    font-size: 1.5rem;
+  }
 }
 
 @media screen and (max-width: 735px) {
-    main {
-        flex-direction: column;
-        overflow: auto;
-    }
-    section {
-        width: 100%;
-    }
+  main {
+    flex-direction: column;
+    overflow: auto;
   }
+  section {
+    width: 100%;
+  }
+}

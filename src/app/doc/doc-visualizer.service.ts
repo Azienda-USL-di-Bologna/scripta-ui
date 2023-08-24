@@ -135,7 +135,8 @@ export class DocVisualizerService {
     //blocco 3 
     this.destinatari = this.doc.tipologia === TipologiaDoc.DETERMINA ||
                        this.doc.tipologia === TipologiaDoc.DELIBERA ||
-                       this.doc.tipologia === TipologiaDoc.PROTOCOLLO_IN_USCITA;
+                       this.doc.tipologia === TipologiaDoc.PROTOCOLLO_IN_USCITA ||
+                       this.doc.tipologia === TipologiaDoc.PROTOCOLLO_IN_ENTRATA;
     //blocco 4 
     this.pubblicazioni = this.doc.tipologia !== TipologiaDoc.PROTOCOLLO_IN_ENTRATA && this.doc.additionalData && this.doc.additionalData['dati_pubblicazione']
     this.datiDiArchivio = this.doc.tipologia === TipologiaDoc.DETERMINA ||
@@ -162,7 +163,8 @@ export class DocVisualizerService {
    this.normale = this.doc.visibilita === VisibilitaDoc.NORMALE;
    this.riservato = this.doc.visibilita === VisibilitaDoc.RISERVATO;
    this.visibilitaLimitata = this.doc.visibilita === VisibilitaDoc.LIMITATA;
-   this.annullato = !!this.doc.docAnnullatoList                     
+   this.annullato = this.doc.annullato;
+                       
   }
   public get editing(): boolean {
     return this._editing;

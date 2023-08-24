@@ -13,17 +13,24 @@
 
 <p-overlayPanel #opNoteAnnullamento>
   <ng-template pTemplate>
-    <textarea #notaAnnullamento
-      pInputTextarea 
-      id="notaAnnullamento" 
-      aria-label="notaAnnullamento" 
-      class="oggetto" 
-      placeholder="Inserisci la nota annullamento"
-      rows="2" cols="30"
-      [(ngModel)]="notaAnnullamentoString" 
-      disabled ="!docVisualizer?.editing">
+    <div class="nota-annullamento">
+      <div class="label-annullamento">
+        Annullato il: {{dataAnnullamento}}
+      </div>
+      <div class="text-annullamento">
+        <textarea #notaAnnullamento
+          pInputTextarea 
+          id="notaAnnullamento" 
+          aria-label="notaAnnullamento" 
+          class="oggetto" 
+          placeholder="nessuna nota"
+          rows="2" cols="30"
+          [(ngModel)]="notaAnnullamentoString" 
+          disabled ="!docVisualizer?.editing">
         <!-- (keyup)="timeOutAndSaveDoc(doc, 'oggetto')" --> 
-  </textarea>  
+        </textarea> 
+      </div>
+    </div>
   </ng-template>
 </p-overlayPanel>
 <p-overlayPanel #opNoteDocumento>
@@ -33,11 +40,10 @@
       id="notaDocumento" 
       aria-label="notaDocumento" 
       class="oggetto" 
-      placeholder="Inserisci la nota docuemnto"
+      placeholder="nessuna nota"
       rows="2" cols="30"
       [(ngModel)]="notaDocumentoString" 
       disabled ="!docVisualizer?.editing">
-        <!-- (keyup)="timeOutAndSaveDoc(doc, 'oggetto')" --> 
   </textarea>  
   </ng-template>
 </p-overlayPanel>
@@ -49,20 +55,42 @@
       <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del {{yearOfProposta}}</span>
       <span *ngIf="numeroVisualizzazione">{{registroLabel}} {{numeroVisualizzazione}} </span>
     </div>
-    <div class="oggetto-and-additional-info-box">
 
-      <div class="oggetto-box" *ngIf="docVisualizer?.oggetto">
-        <label for="oggetto" class="label-oggetto">Oggetto</label>
-        <textarea id="oggetto" *ngIf="doc" aria-label="oggetto" class="oggetto" pInputTextarea placeholder="Inserisci l'oggetto"
-          rows="2" cols="30" (keyup)="timeOutAndSaveDoc(doc, 'oggetto')" [(ngModel)]="doc.oggetto" disabled ="!docVisualizer?.editing">
-        </textarea>
+    <div class="dati-del-documento">
+      <div class="date-e-oggetto">
+        <div class="date-del-documento">
+          <div class="box-data">Creato il: {{dataCreazione}}</div>
+          <div class="box-data">Registrato il: {{dataRegistrazione}}</div>
+          <div class="box-data">Versato l'ultima volta il: {{dataUltimoVersamento}}</div>
+        </div>
+        <div class="oggetto-box" *ngIf="docVisualizer?.oggetto">
+          <label for="oggetto" class="label-oggetto">Oggetto</label>
+          <textarea id="oggetto" *ngIf="doc" 
+            aria-label="oggetto" 
+            class="oggetto" 
+            pInputTextarea 
+            placeholder="Inserisci l'oggetto"
+            rows="2" 
+            cols="30" 
+            (keyup)="timeOutAndSaveDoc(doc, 'oggetto')" 
+            [(ngModel)]="doc.oggetto" 
+            disabled ="!docVisualizer?.editing">
+          </textarea>
+        </div>
       </div>
       <div class="additional-info-box">
         <div class="visibilita-limitata">
           <i class="pi pi-eye" 
             *ngIf="docVisualizer?.visibilitaLimitata"
             pTooltip="Visibilita Limitata"></i>
-          <p-checkbox *ngIf="docVisualizer?.editing" id="visibilitaLimitata" [(ngModel)]="visibilitaLimitata" [binary]="true" [readonly]="pregresso" [disabled]="pregresso" class="checkbox"></p-checkbox>
+          <p-checkbox *ngIf="docVisualizer?.editing" 
+            id="visibilitaLimitata" 
+            [(ngModel)]="visibilitaLimitata" 
+            [binary]="true" 
+            [readonly]="pregresso" 
+            [disabled]="pregresso" 
+            class="checkbox">
+          </p-checkbox>
           <label *ngIf="docVisualizer?.editing" for="visibilitaLimitata">Visibilita Limitata</label>
         </div>
         <div class="riservato">
@@ -102,29 +130,7 @@
         </div>
       </div>
     </div> 
-
-    <div class="dati-generici m-bottom-5">
-      <div class="sotto-dati-generici-date">
-        <div class="data-versamento">
-          <label class="label-oggetto">Data Creazione</label>
-          <input id="dataCreazione" aria-label="data" disabled="true" type="text" 
-            [(ngModel)]="dataCreazione">
-        </div>
-        <div class="data-registrazione">
-          <label for="dataRegistrazione">Data Registrazione</label>
-          <input id="dataRegistrazione" aria-label="data" disabled="true" type="text"
-          [(ngModel)]="dataRegistrazione">
-        </div>
-        <div class="data-versamento">
-          <label for="dataUltimoVersamento" class="label-oggetto">Data Ultimo Versamento</label>
-          <input id="dataUltimoVersamento" aria-label="data" disabled="true" type="text" 
-            [(ngModel)]="dataUltimoVersamento">
-        </div>
-      </div>
-      <!-- TODO: Tutti i flag andranno disabilitati/abilitati anche in base alla registrazione del documento -->
-    </div>
-    
-    <div *ngIf="docVisualizer?.creatoDa && doc.idPersonaCreazione"
+    <div *ngIf="docVisualizer?.creatoDa"
       class="protocollato-da-box" 
       m-bottom-5>
       <label>Creato da: </label>
@@ -135,16 +141,29 @@
         pInputText 
         type="text" 
         [disabled]="true"
-        [(ngModel)]="doc.idPersonaCreazione.descrizione">
+        [(ngModel)]="creatoDaDescrizione">
     </div>
     <div class="protocollato-da-box" m-bottom-5>
       <label for="protocollatoda">{{protocollatoDaLabel}}</label>
-      <input id="protocollatoda" *ngIf="doc.tipologia != 'DELIBERA' && doc.tipologia != 'DETERMINA'" aria-label="protocollato da" disabled="true" pInputText type="text" [disabled]="pregresso"
+      <input *ngIf="doc.tipologia != 'DELIBERA' && doc.tipologia != 'DETERMINA'"
+        id="protocollatoda"  
+        aria-label="protocollato da"
+        disabled="true" 
+        pInputText 
+        type="text" 
+        [disabled]="pregresso"
         [(ngModel)]="descrizioneUtenteRegistrante">
-      <input *ngIf="doc.tipologia === 'DELIBERA' || doc.tipologia === 'DETERMINA'" id="protocollatoda" aria-label="adottato da" disabled="true" pInputText type="text" [disabled]="pregresso"
+      <input *ngIf="doc.tipologia === 'DELIBERA' || doc.tipologia === 'DETERMINA'" 
+        id="protocollatoda" 
+        aria-label="adottato da" 
+        disabled="true" 
+        pInputText 
+        type="text" 
+        [disabled]="pregresso"
         [(ngModel)]="descrizioneStrutturaAdottante">
     </div>
   </p-fieldset>
+
   <p-accordion [multiple]="true">
     <p-accordionTab *ngIf="tipoDocumento === 'PROTOCOLLO_IN_ENTRATA'" header="Mittente" [selected]="true">
       <mittente [doc]="doc" [tipoDocumento]="tipoDocumento" (saveMittenteEvent)="saveDoc($event,'mittenti')"></mittente>

@@ -312,7 +312,7 @@ export class NavigationTabsService {
         this.activeTabIndex, 
         `${labelDoc}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`, 
         {doc: doc},
-        `Protocollo generale ${pregresso ? 'pregresso ': ''}${labelDoc} [${doc.idAzienda.aoo}]`, 
+        `${labelDoc} [${doc.idAzienda.aoo}]`, 
         undefined // segnaposto per ricordare che c'è un parametro forse utile
       );
     } else {
@@ -321,7 +321,7 @@ export class NavigationTabsService {
           doc.id, 
           doc,
           `${labelDoc}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`,
-          `Protocollo generale ${pregresso ? 'pregresso ': ''}${labelDoc} [${doc.idAzienda.aoo}]`,
+          `${labelDoc} [${doc.idAzienda.aoo}]`,
         )
       );
       if (active) {

@@ -26,17 +26,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   private subscriptions: Subscription[] = [];
   private savingTimeout: ReturnType<typeof setTimeout> | undefined;
   public localIt = LOCAL_IT;
-  @ViewChild("pageStart") public pageStart: any;
-  private _doc: Doc;
-  public get doc(): Doc {
-    return this._doc;
-  }
-  public set doc(value: Doc) {
-    this._doc = value;
-    console.log("setto doc a ", this.doc);
-
-  }
-
+  public creatoDaDescrizone: string;
   public descrizioneUtenteRegistrante: string | undefined;
   public utenteUtilitiesLogin: UtenteUtilities;
   public DatiProtocolloEsterno: Number;
@@ -61,13 +51,22 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   public registroLabel: string = 'Proposta numero';
   public notaDocumentoString: string = 'Nessuna nota';
   public notaAnnullamentoString: string = 'Nessuna nota';
-
+  @ViewChild("pageStart") public pageStart: any;
+  private _doc: Doc;
+  public dataAnnullamento: string;
+  public get doc(): Doc {
+    return this._doc;
+  }
+  public set doc(value: Doc) {
+    this._doc = value;
+  }
   @Input() set data(data: any) {
     this.detailDoc = data.doc;
     this._doc = data.doc;
     this.doc = this._doc;
     this.pregresso = this._doc.pregresso
     this.visualizzazioneDocumento = this.detailDoc._registrazioneVisualizzazione;
+    this.creatoDaDescrizone = this._doc.idPersonaCreazione?.descrizione
     this.dataCreazione = formatDate(this.doc.dataCreazione, 'dd/MM/yyyy', 'en_US');
   }
 
@@ -105,6 +104,9 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
                   this.docVisualizer = new DocVisualizerService(this.doc);
                   this.notaDocumentoString = this.doc?.notaDocumento[0]?.testo;
                   this.notaAnnullamentoString = this.doc?.notaAnnullamento[0]?.testo;
+                  if (this.doc.annullato){
+                    this.dataAnnullamento = formatDate(this.doc?.docAnnullatoList[0]?.data, 'dd/MM/yyyy', 'en_US');
+                  }
                   console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
                   console.log(this.docVisualizer);
                   console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
