@@ -104,7 +104,7 @@
 					Inoltre non voglio poter editare un vicario mai, dato che non c'è nessun campo modificabile-->
         <button *ngIf="(!editing && (ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE || (attore.ruolo !== ruoliEnum.RESPONSABILE && attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO))) 
 							&& !(archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')
-							&& (attore.ruolo !== ruoliEnum.VICARIO && !(attore.ruolo === ruoliEnum.RESPONSABILE_PROPOSTO && struttureAttoreInEditing.length === 1))" 
+							&& (attore.ruolo !== ruoliEnum.VICARIO && !(attore.ruolo === ruoliEnum.RESPONSABILE_PROPOSTO))" 
           type="button" 
           pButton 
           pRipple
