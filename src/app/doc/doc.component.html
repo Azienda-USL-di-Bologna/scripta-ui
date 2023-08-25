@@ -11,11 +11,13 @@
   <i class="pi pi-lock" style="font-size: 3rem"></i>
 </p-blockUI>
 
+<!-- POPUP INFO ANNULLAMENTO -->
 <p-overlayPanel #opNoteAnnullamento>
   <ng-template pTemplate>
     <div class="nota-annullamento">
+      <h3>Note annullamento</h3>
       <div class="label-annullamento">
-        Annullato il: {{dataAnnullamento}}
+        Documento annullato il: {{dataAnnullamento}}
       </div>
       <div class="text-annullamento">
         <textarea #notaAnnullamento
@@ -24,7 +26,8 @@
           aria-label="notaAnnullamento" 
           class="oggetto" 
           placeholder="nessuna nota"
-          rows="2" cols="30"
+          rows="4" 
+          cols="50"
           [(ngModel)]="notaAnnullamentoString" 
           disabled ="!docVisualizer?.editing">
         <!-- (keyup)="timeOutAndSaveDoc(doc, 'oggetto')" --> 
@@ -33,56 +36,60 @@
     </div>
   </ng-template>
 </p-overlayPanel>
+
+<!-- POPUP NOTE DOCUMENTO -->
 <p-overlayPanel #opNoteDocumento>
   <ng-template pTemplate>
+    <h3>Note del documento</h3>
     <textarea #notaDocumento
       pInputTextarea 
       id="notaDocumento" 
       aria-label="notaDocumento" 
       class="oggetto" 
       placeholder="nessuna nota"
-      rows="2" cols="30"
+      rows="4" 
+      cols="50"
       [(ngModel)]="notaDocumentoString" 
       disabled ="!docVisualizer?.editing">
   </textarea>  
   </ng-template>
 </p-overlayPanel>
 
+<!-- POPUP NOTE DOCUMENTO -->
+<p-overlayPanel #opInfoVersamenti>
+  <ng-template pTemplate>
+    <h3>Info versamenti</h3>
+    <div *ngIf="dataUltimoVersamento"
+      class="box-data">
+      Versato l'ultima volta il: {{dataUltimoVersamento}}
+    </div>
+    <span *ngIf="!dataUltimoVersamento">Il documento non ha informazioni di versamento</span>
+  </ng-template>
+</p-overlayPanel>
+
 <main class="main-content" aria-level="2" *ngIf="!!doc" [ngClass]="{'main-left' : pregresso}"> <!-- -->
 <section class="info-documento">
-  <p-fieldset legend="Dati del Documento" *ngIf="docVisualizer?.datiDoc">
-    <div *ngIf="!visualizzazioneDocumento" class="m-bottom-05"> 
+  <p-fieldset *ngIf="docVisualizer?.datiDoc"
+    legend="Dati del documento" 
+    [toggleable]="true">
+    <!-- NUMERO DEL DOC -->
+    <div *ngIf="!visualizzazioneDocumento"> 
       <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del {{yearOfProposta}}</span>
       <span *ngIf="numeroVisualizzazione">{{registroLabel}} {{numeroVisualizzazione}} </span>
     </div>
-
-    <div class="dati-del-documento">
-      <div class="date-e-oggetto">
-        <div class="date-del-documento">
-          <div class="box-data">Creato il: {{dataCreazione}}</div>
-          <div class="box-data">Registrato il: {{dataRegistrazione}}</div>
-          <div class="box-data">Versato l'ultima volta il: {{dataUltimoVersamento}}</div>
-        </div>
-        <div class="oggetto-box" *ngIf="docVisualizer?.oggetto">
-          <label for="oggetto" class="label-oggetto">Oggetto</label>
-          <textarea id="oggetto" *ngIf="doc" 
-            aria-label="oggetto" 
-            class="oggetto" 
-            pInputTextarea 
-            placeholder="Inserisci l'oggetto"
-            rows="2" 
-            cols="30" 
-            (keyup)="timeOutAndSaveDoc(doc, 'oggetto')" 
-            [(ngModel)]="doc.oggetto" 
-            disabled ="!docVisualizer?.editing">
-          </textarea>
-        </div>
+    <div class="main-info">
+      <!-- DATE -->
+      <div class="date-del-documento">
+        <div class="box-data">Creato il: {{dataCreazione}}</div>
+        <div class="box-data">Registrato il: {{dataRegistrazione}}</div>
       </div>
+      <!-- ICONE INFORMATIVE -->
       <div class="additional-info-box">
-        <div class="visibilita-limitata">
-          <i class="pi pi-eye" 
-            *ngIf="docVisualizer?.visibilitaLimitata"
-            pTooltip="Visibilita Limitata"></i>
+        <div class="visibilita-limitata icon-box">
+          <i *ngIf="docVisualizer?.visibilitaLimitata"
+            class="pi pi-eye info-icon"             
+            pTooltip="Visibilita Limitata">
+          </i>
           <p-checkbox *ngIf="docVisualizer?.editing" 
             id="visibilitaLimitata" 
             [(ngModel)]="visibilitaLimitata" 
@@ -93,46 +100,71 @@
           </p-checkbox>
           <label *ngIf="docVisualizer?.editing" for="visibilitaLimitata">Visibilita Limitata</label>
         </div>
-        <div class="riservato">
+        <div class="riservato icon-box">
           <i *ngIf="docVisualizer?.riservato"
             class="pi pi-eye-slash" 
-            pTooltip="Riservato"></i>
+            pTooltip="Riservato">
+          </i>
           <p-checkbox *ngIf="docVisualizer?.editing" 
             id="riservato" 
             [(ngModel)]="riservato" 
             [binary]="true" 
             [readonly]="pregresso" 
             [disabled]="pregresso" 
-            class="checkbox"></p-checkbox>
+            class="checkbox info-icon">
+          </p-checkbox>
           <label *ngIf="docVisualizer?.editing" for="riservato">Riservato</label>
         </div>
-        <div class="annullato">
+        <div class="annullato icon-box">
           <i *ngIf="docVisualizer?.annullato"
-            pTooltip="Nota Annullamento"
-            class="pi pi-exclamation-triangle" 
+            pTooltip="Nota annullamento"
+            class="pi pi-exclamation-triangle info-icon" 
             (click)="opNoteAnnullamento.show($event)">
           </i>
-          <p-checkbox  *ngIf="docVisualizer?.editing" 
+          <p-checkbox *ngIf="docVisualizer?.editing" 
             id="annullato" 
             [(ngModel)]="annullato" 
             [binary]="true" 
             [readonly]="pregresso" 
             [disabled]="pregresso" 
-            class="checkbox"></p-checkbox>
+            class="checkbox">
+          </p-checkbox>
           <label *ngIf="docVisualizer?.editing" for="annullato">Annullato</label>
         </div>
-        <div class="noteDoc">
-          <i *ngIf="docVisualizer?.note"
-            ptooltip="Note documento"
-            class="pi pi-book" 
+        <div *ngIf="docVisualizer?.note"
+          class="note-documento icon-box">
+          <i 
+            pTooltip="Note documento"
+            class="pi pi-book info-icon" 
             (click)="opNoteDocumento.show($event)">
           </i>
         </div>
+        <div class="info-versamento icon-box">
+          <i
+            pTooltip="Info versamenti"
+            class="pi pi-box info-icon" 
+            (click)="opInfoVersamenti.show($event)">
+          </i>
+        </div>
       </div>
-    </div> 
+    </div>
+    <!-- OGGETTO -->
+    <div class="oggetto-box" *ngIf="docVisualizer?.oggetto">
+      <label for="oggetto" class="label-oggetto">Oggetto</label>
+      <textarea id="oggetto" *ngIf="doc" 
+        aria-label="oggetto" 
+        class="oggetto" 
+        pInputTextarea 
+        placeholder="Inserisci l'oggetto"
+        rows="2" 
+        cols="30" 
+        (keyup)="timeOutAndSaveDoc(doc, 'oggetto')" 
+        [(ngModel)]="doc.oggetto" 
+        disabled ="!docVisualizer?.editing">
+      </textarea>
+    </div>
     <div *ngIf="docVisualizer?.creatoDa"
-      class="protocollato-da-box" 
-      m-bottom-5>
+      class="creato-da-box">
       <label>Creato da: </label>
       <input
         aria-label="creato da" 
@@ -143,7 +175,7 @@
         [disabled]="true"
         [(ngModel)]="creatoDaDescrizione">
     </div>
-    <div class="protocollato-da-box" m-bottom-5>
+    <div class="protocollato-da-box">
       <label for="protocollatoda">{{protocollatoDaLabel}}</label>
       <input *ngIf="doc.tipologia != 'DELIBERA' && doc.tipologia != 'DETERMINA'"
         id="protocollatoda"  

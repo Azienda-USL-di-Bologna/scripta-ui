@@ -221,7 +221,7 @@ export class DocComponent implements OnInit, OnDestroy, AfterViewInit {
   private setLabelProtocollatoDa() {
     if(this._doc.tipologia === TipologiaDoc.PROTOCOLLO_IN_ENTRATA || this._doc.tipologia === TipologiaDoc.PROTOCOLLO_IN_USCITA) {
       this.registroLabel = "Protocollo numero";
-      this.protocollatoDaLabel = "Protocollato Da";
+      this.protocollatoDaLabel = "Protocollato da";
     } else if (this._doc.tipologia === TipologiaDoc.DELIBERA ) {
       this.registroLabel = "Delibera numero";
       this.protocollatoDaLabel = "Adottata da";

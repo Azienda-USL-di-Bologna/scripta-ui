@@ -41,47 +41,41 @@
       .p-fieldset {
         height: auto;
         background-color: blanchedalmond;
-        .m-bottom-05 {
-          margin-bottom: 0.5rem;
+        &.p-fieldset-toggleable .p-fieldset-legend:hover {
+          background: #ffd698;
+          border-color: #ffd698;
+          color: initial;
         }
-        .dati-del-documento {
+        &.p-fieldset-toggleable .p-fieldset-legend a {
+          color: DarkGoldenRod;
+        }
+        .main-info {
           display: flex;
+          flex-wrap: nowrap;
           flex-direction: row;
-          justify-content:space-between;
-          .date-e-oggetto{
+          justify-content: space-between;
+          .date-del-documento {
             display: flex;
-            flex-direction: column;
-            justify-content:space-between;
-            flex: 1 1 0;
-            flex-grow: 28;
-            .date-del-documento{
-              display: flex;
-              flex-direction: row;
-              .box-data{
-                flex: 1 1 0;
-                .label-data{
-                }
-              }
-            }
-            .oggetto-box{
-              flex: 1 1 0;
-              flex-grow: 28;
-              padding-top: 1rem;
-              .oggetto {
-                width: 100%;
-                resize: none;
-              }
+            flex-direction: row;
+            flex-wrap: wrap;
+            flex-grow: 10;
+            .box-data {
+              margin-right: 2rem;
             }
           }
-          .additional-info-box{
-            flex: 1 1 0;
+          .additional-info-box {
             display: flex;
-            flex-direction: column;
-            flex-grow: 1;
+            flex-grow: 2;
+            flex-direction: row;
+            justify-content: space-around;
             align-items: flex-end;
-            .visibilita-limitata, .riservato, .annullato, .noteDoc {
-              i {
+            .icon-box {
+              .info-icon {
                 font-size: x-large;
+                cursor: pointer;
+                &:hover {
+                  color: #936;
+                }
               }
               .checkbox {
                 margin-right: 1rem;
@@ -89,12 +83,19 @@
             }
           }
         }
-        .protocollato-da-box {
+        .oggetto-box {
+          padding-top: 1rem;
+          .oggetto {
+            width: 100%;
+            resize: none;
+          }
+        }
+        .creato-da-box, .protocollato-da-box {
           display: flex;
           padding:0.625rem 0;
           label {
             align-self: center;
-            width: 8.75rem;
+            width: 9.75rem;
           }
         }
       } 
