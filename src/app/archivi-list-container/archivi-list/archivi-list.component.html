@@ -400,9 +400,14 @@
     </tr>
     <tr *ngIf="showAdditionalRow && archiviListMode === 'TUTTI' && loggedUserIsAG"
       class="additional-row">
-      <span class="selection-info">
-        {{allRowsAreSelected ? 'Tutti i' + (rowCountInProgress ? ' ': ' ' + rowCountSelected + ' ') + 'fascicoli sono selezionati' : 
-          rowCountSelected === 1 ? '1 fascicolo selezionato' : rowCountSelected + ' fascicoli selezionati'}}
+      <span *ngIf="allRowsAreSelected && rowCountInProgress" class="selection-info">
+        <i class="pi pi-spin pi-spinner"></i>
+      </span>
+      <span *ngIf="allRowsAreSelected && !rowCountInProgress" class="selection-info">
+        Tutti i {{rowCountSelected}} fascicoli sono selezionati
+      </span>
+      <span *ngIf="!allRowsAreSelected" class="selection-info">
+        {{rowCountSelected === 1 ? '1 fascicolo selezionato' : rowCountSelected + ' fascicoli selezionati'}}
       </span>
       <p-button 
         label="Annulla selezione"
