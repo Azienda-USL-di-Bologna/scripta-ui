@@ -1643,6 +1643,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.showAdditionalRow = false;
 			this.allRowsAreSelected = false;
 			this.allRowsWasSelected = false;
+			this.rowCountSelected = 0;
+			this.rowsNotSelectedWhenAlmostAllRowsAreSelected = [];
+			this.archivesSelected = [];
 		}
   }
 
