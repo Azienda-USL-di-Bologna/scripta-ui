@@ -412,7 +412,13 @@
       <p-button 
         label="Annulla selezione"
         type="reset"
-        (click)="archivesSelected = []; showAdditionalRow = false; allRowsAreSelected = false; allRowsWasSelected = false; rowsNotSelectedWhenAlmostAllRowsAreSelected = []">
+        (click)="
+          rowCountSelected = 0;
+          archivesSelected = []; 
+          showAdditionalRow = false; 
+          allRowsAreSelected = false; 
+          allRowsWasSelected = false; 
+          rowsNotSelectedWhenAlmostAllRowsAreSelected = []">
       </p-button>
     </tr>
   </ng-template>
