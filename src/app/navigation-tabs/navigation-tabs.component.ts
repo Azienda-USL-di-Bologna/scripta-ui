@@ -44,9 +44,9 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
       this.idArchivioAperturaDaScrivania = this.router.parseUrl(this.router.url).queryParams["id"];
     } else if (this.router.routerState.snapshot.url.includes("tip")) {
       this.tabIndexToActiveAtTheBeginning = 0;
-      this.idTipSessioneImportazione = this.router.parseUrl(this.router.url).queryParams["id"];
+      this.idTipSessioneImportazione = this.router.parseUrl(this.router.url).queryParams["idSessione"];
     } else {
-      //this.navigationTabsService.activeTabByIndex(1);  
+      //this.navigationTabsService.activeTabByIndex(1);
       this.tabIndexToActiveAtTheBeginning = 1;
       this.appService.appNameSelection("Elenco Documenti")
     }
@@ -105,6 +105,12 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
                     this.navigationTabsService.addTab(
                       this.navigationTabsService.buildaTabDocsList()
                     );
+                    if (this.idTipSessioneImportazione) {
+                      //this.navigationTabsService.addTabTip(true, this.idTipSessioneImportazione);
+                      this.navigationTabsService.addTab(
+                        this.navigationTabsService.buildaTabTIP(this.idTipSessioneImportazione)
+                      );
+                    }
                     this.setTabsAndActiveOneOfThem();
   
                     // Tolgo subito queste due sottoscrizioni che mi disturbano quando per qualche motivo riscattano.
@@ -130,37 +136,23 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
    * E setto tutti i tab.
    */
   private setTabsAndActiveOneOfThem(): void {
-    // this.tabItems = this.navigationTabsService.getTabs();
     const allTabs = this.navigationTabsService.getTabs();
     this.tabItems = [allTabs[this.tabIndexToActiveAtTheBeginning]];
-    // this.tabItems.unshift(...allTabs)
     setTimeout(() => {
       this.tabItems = allTabs;
       this.navigationTabsService.activeTabByIndex(this.tabIndexToActiveAtTheBeginning);
       if (this.idArchivioAperturaDaScrivania) {
-        this.archivioService.getByIdHttpCall(this.idArchivioAperturaDaScrivania, 'ArchivioWithIdAziendaAndIdMassimarioAndIdTitolo').subscribe( res => {
-          this.navigationTabsService.addTabArchivio(res, true, false);
+        this.archivioService.getByIdHttpCall(this.idArchivioAperturaDaScrivania, 'ArchivioWithIdAziendaAndIdMassimarioAndIdTitolo').subscribe((archivio: Archivio) => {
+          this.navigationTabsService.addTabArchivio(archivio, true, false);
         });
       }
-      if (this.idTipSessioneImportazione) {
+      /* if (this.idTipSessioneImportazione) {
         this.navigationTabsService.addTabTip(true, this.idTipSessioneImportazione);
-      }
+      } */
     }, 0);
-    /* for(let i=0; i < this.tabItems.length; i++) {
-      if(this.tabItems[i].type === TabType.ARCHIVI_LIST && this.tabItems[i-1].type === TabType.DOCS_LIST) {
-        let tempTab = this.tabItems[i-1];
-        this.tabItems[i-1] = this.tabItems[i];
-        this.tabItems[i] = tempTab;
-      }
-    } */
   }
   
   public onChangeTab(tabIndex: number): void {
-    /* if (tabIndex == 0 || tabIndex == 1 ){
-      this.appService.appNameSelection("Elenco "+ this.navigationTabsService.getTabs()[tabIndex].label);
-    } else {
-      this.appService.appNameSelection("Fascicolo "+ this.navigationTabsService.getTabs()[tabIndex].label);
-    } */
     this.navigationTabsService.addTabToHistory(tabIndex);
     this.appService.appNameSelection(this.navigationTabsService.getTabs()[tabIndex].labelForAppName);
     setTimeout(() => {
@@ -173,11 +165,4 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
     this.appService.appNameSelection("Elenco Fascicoli");
 
   }
-
-  /* public clickOnTab(event: MouseEvent, item: TabItem) {
-    console.log(event, item);
-    if (item.closable) {
-      event.
-    }
-  } */
 }

@@ -165,6 +165,21 @@ export class NavigationTabsService {
     );
   }
 
+  public buildaTabTIP(idSessioneImportazione?: number): TabItem {
+    return new TabItem(
+      TipComponent,
+      {
+        idSessioneImportazione: idSessioneImportazione
+      },
+      true,
+      "Import Pregressi",
+      "pi pi-file-import",
+      TabType.TIP,
+      TabType.TIP, // Lo uso come id univoco di questo tab
+      "Tool Importazione Pregressi"
+    );
+  }
+
   private buildaTabDoc(idDoc: number, doc:ExtendedDocDetailView, label: string, labelForAppName: string): TabItem {
     return new TabItem(
       DocComponent,
@@ -196,20 +211,7 @@ export class NavigationTabsService {
     );
   }
 
-  private buildaTabTIP(idTipSessioneImportazione?: number): TabItem {
-    return new TabItem(
-      TipComponent,
-      {
-        idTipSessioneImportazione: idTipSessioneImportazione
-      },
-      true,
-      "Import Pregressi",
-      "pi pi-file-import",
-      TabType.TIP,
-      TabType.TIP, // Lo uso come id univoco di questo tab
-      "Tool Importazione Pregressi"
-    );
-  }
+  
 
   private projectionArchivioPerSessionStorage(archivio: Archivio | ArchivioDetail | ExtendedArchiviView): Archivio {
     const a = new Archivio();
@@ -310,7 +312,7 @@ export class NavigationTabsService {
         this.activeTabIndex, 
         `${labelDoc}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`, 
         {doc: doc},
-        `Protocollo generale ${pregresso ? 'pregresso ': ''}${labelDoc} [${doc.idAzienda.aoo}]`, 
+        `${labelDoc} [${doc.idAzienda.aoo}]`, 
         undefined // segnaposto per ricordare che c'è un parametro forse utile
       );
     } else {
@@ -319,7 +321,7 @@ export class NavigationTabsService {
           doc.id, 
           doc,
           `${labelDoc}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`,
-          `Protocollo generale ${pregresso ? 'pregresso ': ''}${labelDoc} [${doc.idAzienda.aoo}]`,
+          `${labelDoc} [${doc.idAzienda.aoo}]`,
         )
       );
       if (active) {
@@ -328,12 +330,12 @@ export class NavigationTabsService {
     }
   }
 
-  public addTabTip(active: boolean = true, idTipSessioneImportazione?: number): void {
+  /* public addTabTip(active: boolean = true, idTipSessioneImportazione?: number): void {
     this.addTab(
       this.buildaTabTIP(idTipSessioneImportazione)
     );
     if (active) {
       this.activeLastTab();
     }
-  }
+  } */
 }
