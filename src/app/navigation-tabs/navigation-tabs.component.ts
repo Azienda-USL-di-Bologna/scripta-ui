@@ -52,7 +52,7 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
 
     if (tabLoadedFromSessionStorage) {
       // Può essere che nel session storage non ci fosse il tab del tip, ma che modificando a mano l'url si voglia aprire il tip, allora aggiungo questo tab.
-      if (this.idTipSessioneImportazione && this.navigationTabsService.getTabs().findIndex(t => t.id === TabType.TIP)) {
+      if (this.idTipSessioneImportazione && this.navigationTabsService.getTabs().findIndex(t => t.id === TabType.TIP) === -1) {
         this.navigationTabsService.addTab(
           this.navigationTabsService.buildaTabTIP(this.idTipSessioneImportazione)
         );
