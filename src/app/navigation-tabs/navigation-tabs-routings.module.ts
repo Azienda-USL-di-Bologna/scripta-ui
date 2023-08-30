@@ -1,6 +1,9 @@
 import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
+import { TipComponent } from "@bds/common-components";
+import { CODICI_RUOLO } from "@bds/internauta-model";
 import { DOCS_LIST_ROUTE, ARCHIVI_LIST_ROUTE, ARCHIVIO_ROUTE, ARCHIVIO_DA_SCRIVANIA_ROUTE, TIP_ROUTE } from "src/environments/app-constants";
+import { RoleGuard } from "../guards/role-guard";
 import { NavigationTabsComponent } from "./navigation-tabs.component";
 
 const routes: Routes = [
@@ -26,7 +29,9 @@ const routes: Routes = [
       },
       {
         path: TIP_ROUTE,
-        loadChildren: () => import("../tip-container/tip-container.module").then(m => m.TipContainerModule)
+        component: TipComponent,
+        canActivate: [RoleGuard], data: {roles: [CODICI_RUOLO.IP]}
+        //loadChildren: () => import("../tip/tip.module").then(m => m.TipModule)
       }
     ]
   },

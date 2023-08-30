@@ -8,7 +8,6 @@ import { ArchivioComponent } from '../archivio/archivio.component';
 import { DocComponent } from '../doc/doc.component';
 import { DocsListContainerComponent } from '../docs-list-container/docs-list-container.component';
 import { ExtendedDocDetailView } from '../docs-list-container/docs-list/extended-doc-detail-view';
-import { TipContainerComponent } from '../tip-container/tip-container.component';
 import { TabItem, TabType } from './tab-item';
 
 @Injectable()
@@ -106,7 +105,7 @@ export class NavigationTabsService {
    * Setto il componente in base al tipo di tab
    * @returns torno false se non ho caricato nulla
    */
-  public loadTabsFromSessionStorage(): boolean {
+  public loadTabsFromSessionStorage(idSessioneImportazione: number): boolean {
     const stringTabs = sessionStorage.getItem("tabs");
     if (stringTabs) {
       const tabs = JSON.parse(stringTabs) as TabItem[];
@@ -128,7 +127,8 @@ export class NavigationTabsService {
             tab.component = ArchivioComponent;
             break;
           case TabType.TIP:
-            tab.component = TipContainerComponent;
+            tab.component = TipComponent;
+            tab.data = {idSessioneImportazione: idSessioneImportazione}
             break;
         }
         this.tabs.push(tab);
