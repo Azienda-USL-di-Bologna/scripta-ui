@@ -51,6 +51,12 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
     const tabLoadedFromSessionStorage = this.navigationTabsService.loadTabsFromSessionStorage(this.idTipSessioneImportazione);
 
     if (tabLoadedFromSessionStorage) {
+      // Può essere che nel session storage non ci fosse il tab del tip, ma che modificando a mano l'url si voglia aprire il tip, allora aggiungo questo tab.
+      if (this.idTipSessioneImportazione && this.navigationTabsService.getTabs().findIndex(t => t.id === TabType.TIP)) {
+        this.navigationTabsService.addTab(
+          this.navigationTabsService.buildaTabTIP(this.idTipSessioneImportazione)
+        );
+      }
       this.setTabsAndActiveOneOfThem(); 
     } else {
       /* Questa sottoscrizione serve a capire se l'utente appartiene ad una azienda che
