@@ -105,11 +105,11 @@
               <p-multiSelect
                 *ngIf = "isAccessibile() !== true"
                 [showHeader]="false" 
-                [ngModel]="value" 
+                [ngModel]="nome" 
                 [options]="tipologiaVisualizzazioneObj" 
-                optionValue="value" 
+                optionValue="nome" 
                 optionLabel="nome" 
-                (onChange)="filter($event.value)" 
+                (onChange)="filterTipologia(filter,$event.value)" 
                 appendTo="body"
                 >
                 <ng-template let-option pTemplate="item">
@@ -121,7 +121,7 @@
               <p-autoComplete 
                 *ngIf = "isAccessibile() == true"
                 [suggestions]="filteredTipologia" 
-                (completeMethod)="filterTipologia($event)"
+                (completeMethod)="filterTipologiaAccessibile($event)"
                 (onClear)="filter(null)"
                 field = "nome"
                 type="search"
