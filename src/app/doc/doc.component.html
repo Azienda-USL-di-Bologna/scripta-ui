@@ -1,140 +1,265 @@
 <p-toast #pageStart position="top-right" (onClose)="clearMessages()"></p-toast>
-<div>
-  <p-toolbar *ngIf="!pregresso">
-    <div class="classe-temporanea">
-      <button  *ngIf="!numeroVisualizzazione" pButton type="button" label="Protocolla"icon="material-icons-outlined person_add"
-        (click)="doButtonProtocolla()"><!-- [disabled]="doc?.dataRegistrazione || !document.oggetto" -->
-      </button>
+<p-toolbar *ngIf="docVisualizer?.numera">
+  <div class="classe-temporanea">
+    <button  *ngIf="!numeroVisualizzazione" pButton type="button" label="Protocolla"icon="material-icons-outlined person_add"
+      (click)="doButtonProtocolla()">
+    </button>
+  </div>
+</p-toolbar>
+<p-progressBar *ngIf="inProtocollazione" mode="indeterminate"></p-progressBar>
+<p-blockUI [blocked]="blockedDocument">
+  <i class="pi pi-lock" style="font-size: 3rem"></i>
+</p-blockUI>
+
+<!-- POPUP INFO ANNULLAMENTO -->
+<p-overlayPanel #opNoteAnnullamento>
+  <ng-template pTemplate>
+    <div class="nota-annullamento">
+      <h3>Note annullamento</h3>
+      <div class="label-annullamento">
+        Documento annullato il: {{dataAnnullamento}}
+      </div>
+      <div class="text-annullamento">
+        <textarea #notaAnnullamento
+          pInputTextarea 
+          id="notaAnnullamento" 
+          aria-label="notaAnnullamento" 
+          class="oggetto" 
+          placeholder="nessuna nota"
+          rows="4" 
+          cols="50"
+          [(ngModel)]="notaAnnullamentoString" 
+          disabled ="!docVisualizer?.editing">
+        <!-- (keyup)="timeOutAndSaveDoc(doc, 'oggetto')" --> 
+        </textarea> 
+      </div>
     </div>
-  </p-toolbar>
-  <p-progressBar *ngIf="inProtocollazione" mode="indeterminate"></p-progressBar>
-  <p-blockUI [blocked]="blockedDocument">
-    <i class="pi pi-lock" style="font-size: 3rem"></i>
-  </p-blockUI>
-  <main aria-level="2" *ngIf="!!doc" [ngClass]="{'main-left' : pregresso}"> <!-- -->
-    <section class="info-documento">
-      <div class="dati-creazione m-bottom-05">
-        <div *ngIf="!pregresso && !visualizzazioneDocumento"> 
-          <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del {{yearOfProposta}}</span> <!--!numeroVisualizzazione-->
-          <span *ngIf="numeroVisualizzazione">Protocollo numero {{numeroVisualizzazione}} </span>
+  </ng-template>
+</p-overlayPanel>
+
+<!-- POPUP NOTE DOCUMENTO -->
+<p-overlayPanel #opNoteDocumento>
+  <ng-template pTemplate>
+    <h3>Note del documento</h3>
+    <textarea #notaDocumento
+      pInputTextarea 
+      id="notaDocumento" 
+      aria-label="notaDocumento" 
+      class="oggetto" 
+      placeholder="nessuna nota"
+      rows="4" 
+      cols="50"
+      [(ngModel)]="notaDocumentoString" 
+      disabled ="!docVisualizer?.editing">
+  </textarea>  
+  </ng-template>
+</p-overlayPanel>
+
+<!-- POPUP NOTE DOCUMENTO -->
+<p-overlayPanel #opInfoVersamenti>
+  <ng-template pTemplate>
+    <h3>Info versamenti</h3>
+    <div *ngIf="dataUltimoVersamento"
+      class="box-data">
+      Versato l'ultima volta il: {{dataUltimoVersamento}}
+    </div>
+    <span *ngIf="!dataUltimoVersamento">Il documento non ha informazioni di versamento</span>
+  </ng-template>
+</p-overlayPanel>
+
+<main class="main-content" aria-level="2" *ngIf="!!doc" [ngClass]="{'main-left' : pregresso}"> <!-- -->
+<section class="info-documento">
+  <p-fieldset *ngIf="docVisualizer?.datiDoc"
+    legend="Dati del documento" 
+    [toggleable]="true">
+    <!-- NUMERO DEL DOC -->
+    <div *ngIf="!visualizzazioneDocumento"> 
+      <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del {{yearOfProposta}}</span>
+      <span *ngIf="numeroVisualizzazione">{{registroLabel}} {{numeroVisualizzazione}} </span>
+    </div>
+    <div class="main-info">
+      <!-- DATE -->
+      <div class="date-del-documento">
+        <div class="box-data">Creato il: {{dataCreazione}}</div>
+        <div class="box-data">Registrato il: {{dataRegistrazione}}</div>
+      </div>
+      <!-- ICONE INFORMATIVE -->
+      <div class="additional-info-box">
+        <div class="visibilita-limitata icon-box">
+          <i *ngIf="docVisualizer?.visibilitaLimitata"
+            class="pi pi-eye info-icon"             
+            pTooltip="Visibilita Limitata">
+          </i>
+          <p-checkbox *ngIf="docVisualizer?.editing" 
+            id="visibilitaLimitata" 
+            [(ngModel)]="visibilitaLimitata" 
+            [binary]="true" 
+            [readonly]="pregresso" 
+            [disabled]="pregresso" 
+            class="checkbox">
+          </p-checkbox>
+          <label *ngIf="docVisualizer?.editing" for="visibilitaLimitata">Visibilita Limitata</label>
         </div>
-        <span>
-          Creato il giorno {{ removeZoneFromTime(doc?.dataCreazione?.toString()) | date: 'EE d MMM y, H:mm' | titlecase}}
-          da: {{doc?.idPersonaCreazione?.descrizione}}
-        </span>
-        <span *ngIf="pregresso" style="font-weight: bold;">
-          Pregresso
-        </span>
-      </div>
-      <div class="div-oggetto m-bottom-05">
-        <label for="oggetto" class="label-oggetto">Oggetto</label>
-        <textarea id="oggetto" *ngIf="doc" aria-label="oggetto" class="oggetto" pInputTextarea placeholder="Inserisci l'oggetto"
-          rows="2" cols="30" (keyup)="timeOutAndSaveDoc(doc, 'oggetto')" [(ngModel)]="doc.oggetto" [disabled]="pregresso">
-        </textarea>
-      </div>
-      <div class="dati-generici m-bottom-5">
-        <div class="sotto-dati-generici-date">
-          <div class="data-versamento">
-            <label for="dataUltimoVersamento" class="label-oggetto">Data Ultimo Versamento</label>
-            <input id="dataUltimoVersamento" aria-label="data" disabled="true" type="text" 
-              [(ngModel)]="dataUltimoVersamento">
-          </div>
-          <div class="data-registrazione">
-            <label for="dataRegistrazione">Data Registrazione</label>
-            <input id="dataRegistrazione" aria-label="data" disabled="true" type="text"
-            [(ngModel)]="dataRegistrazione">
-          </div>
+        <div class="riservato icon-box">
+          <i *ngIf="docVisualizer?.riservato"
+            class="pi pi-eye-slash" 
+            pTooltip="Riservato">
+          </i>
+          <p-checkbox *ngIf="docVisualizer?.editing" 
+            id="riservato" 
+            [(ngModel)]="riservato" 
+            [binary]="true" 
+            [readonly]="pregresso" 
+            [disabled]="pregresso" 
+            class="checkbox info-icon">
+          </p-checkbox>
+          <label *ngIf="docVisualizer?.editing" for="riservato">Riservato</label>
         </div>
-        <!-- TODO: Tutti i flag andranno disabilitati/abilitati anche in base alla registrazione del documento -->
-        <div class="sotto-dati-generici-checkbox">
-          <div class="visibilita-limitata">
-            <p-checkbox id="visibilitaLimitata" [(ngModel)]="visibilitaLimitata" [binary]="true" [readonly]="pregresso" [disabled]="pregresso" class="checkbox"></p-checkbox>
-            <label for="visibilitaLimitata">Visibilita Limitata</label>
-          </div>
-          <div class="riservato">
-            <p-checkbox id="riservato" [(ngModel)]="riservato" [binary]="true" [readonly]="pregresso" [disabled]="pregresso" class="checkbox"></p-checkbox>
-            <label for="riservato">Riservato</label>
-          </div>
-          <div class="annullato">
-            <p-checkbox id="annullato" [(ngModel)]="annullato" [binary]="true" [readonly]="pregresso" [disabled]="pregresso" class="checkbox"></p-checkbox>
-            <label for="annullato">Annullato</label>
-          </div>
+        <div class="annullato icon-box">
+          <i *ngIf="docVisualizer?.annullato"
+            pTooltip="Nota annullamento"
+            class="pi pi-exclamation-triangle info-icon" 
+            (click)="opNoteAnnullamento.show($event)">
+          </i>
+          <p-checkbox *ngIf="docVisualizer?.editing" 
+            id="annullato" 
+            [(ngModel)]="annullato" 
+            [binary]="true" 
+            [readonly]="pregresso" 
+            [disabled]="pregresso" 
+            class="checkbox">
+          </p-checkbox>
+          <label *ngIf="docVisualizer?.editing" for="annullato">Annullato</label>
+        </div>
+        <div *ngIf="docVisualizer?.note"
+          class="note-documento icon-box">
+          <i 
+            pTooltip="Note documento"
+            class="pi pi-book info-icon" 
+            (click)="opNoteDocumento.show($event)">
+          </i>
+        </div>
+        <div class="info-versamento icon-box">
+          <i
+            pTooltip="Info versamenti"
+            class="pi pi-box info-icon" 
+            (click)="opInfoVersamenti.show($event)">
+          </i>
         </div>
       </div>
-      <div class="protocollato-da-box" m-bottom-5>
-        <label for="protocollatoda">{{protocollatoDaLabel}}</label>
-        <input id="protocollatoda" *ngIf="doc.tipologia != 'DELIBERA' && doc.tipologia != 'DETERMINA'" aria-label="protocollato da" disabled="true" pInputText type="text" [disabled]="pregresso"
-          [(ngModel)]="descrizioneUtenteRegistrante">
-        <input *ngIf="doc.tipologia === 'DELIBERA' || doc.tipologia === 'DETERMINA'" id="protocollatoda" aria-label="adottato da" disabled="true" pInputText type="text" [disabled]="pregresso"
-          [(ngModel)]="descrizioneStrutturaAdottante">
-      </div>
-      <p-accordion [multiple]="true">
-        <p-accordionTab *ngIf="tipoDocumento === 'PROTOCOLLO_IN_ENTRATA'" header="Mittente" [selected]="true">
-          <mittente [doc]="doc" [tipoDocumento]="tipoDocumento" (saveMittenteEvent)="saveDoc($event,'mittenti')"></mittente>
-        </p-accordionTab>
-        <p-accordionTab header="Destinatari" [selected]="tipoDocumento !== 'PROTOCOLLO_IN_ENTRATA'">
-          <ng-template pTemplate="content">
-            <destinatari [doc]="doc"> </destinatari>
-          </ng-template>
-        </p-accordionTab>
-        <p-accordionTab *ngIf="tipoDocumento !== 'PROTOCOLLO_IN_ENTRATA'" header="Attori">
-          <ng-template pTemplate="content">
-            <attori [doc]="doc"></attori>
-          </ng-template>
-        </p-accordionTab>
-        <p-accordionTab *ngIf="tipoDocumento !== 'PROTOCOLLO_IN_ENTRATA' && doc.additionalData && doc.additionalData['dati_pubblicazione']" header="Pubblicazioni">
-          <ng-template pTemplate="content">
-            <dati-pubblicazione [doc]="doc"></dati-pubblicazione>
-          </ng-template>
-        </p-accordionTab>
-        <p-accordionTab header="Fascicolazioni">
-          <ng-template pTemplate="content">
-            <archivio-doc [doc]="doc"></archivio-doc>
-          </ng-template>
-        </p-accordionTab>
-        <p-accordionTab *ngIf="!pregresso" header="Allegati" class="allegati-tab">
-          <ng-template pTemplate="content">
-            <allegati [doc]="doc"></allegati>
-          </ng-template>
-        </p-accordionTab>
-      </p-accordion>
-    </section>
-    <!-- 
-      Commento da non cancellare. Sono campi che in futuro potremmo voler utilizzare
-      <div class="protocollo-esterno-box p-grid">
-      <label class="p-col-3" id="datiProtocolloEsterno">Dati protocollo Esterno</label>
-      <p-inputNumber
-              ariaLabel="numero protocollo esterno"
-              [disabled]="false"
-              id="p-datiProtocolloEsterno"
-              inputId="datiProtocolloEsterno"
-              [(ngModel)]="DatiProtocolloEsterno"
-              class="p-col">
-      </p-inputNumber>
-      <label class="p-col-2" for="c-dataProtocollazione">del</label>
-      <span class="p-col-2" id="dataProtocollazione" style ="display:none;" >data di protocollazione esterna</span>
-      <p-calendar
-              #CdataProtocolloEsterno
-              id="c-dataProtocollazione"
-              attr.aria-labelledby="dataProtocollazione"
-              [ariaLabelledBy]="'dataProtocollazione'"
-              [(ngModel)]="dataProtocolloEsterno"
-              dateFormat="dd/mm/yy"
-              [locale]="localIt"
-              [showIcon]="true"
-              inputId="dataProtocollazione"
-              appendTo="body"
-              class="p-col">
-      </p-calendar>
-    </div> -->
-    <section *ngIf="!!doc && pregresso">
-      <label class="allegati-label">Allegati</label>
-      <attachments-box
-        [idDoc]="doc.id"
-        [config]="attachmentsBoxConfig">
-      </attachments-box>
-    </section>
-  </main>
-  
- 
-</div>
+    </div>
+    <!-- OGGETTO -->
+    <div class="oggetto-box" *ngIf="docVisualizer?.oggetto">
+      <label for="oggetto" class="label-oggetto">Oggetto</label>
+      <textarea id="oggetto" *ngIf="doc" 
+        aria-label="oggetto" 
+        class="oggetto" 
+        pInputTextarea 
+        placeholder="Inserisci l'oggetto"
+        rows="2" 
+        cols="30" 
+        (keyup)="timeOutAndSaveDoc(doc, 'oggetto')" 
+        [(ngModel)]="doc.oggetto" 
+        disabled ="!docVisualizer?.editing">
+      </textarea>
+    </div>
+    <div *ngIf="docVisualizer?.creatoDa"
+      class="creato-da-box">
+      <label>Creato da: </label>
+      <input
+        aria-label="creato da" 
+        id="creatoDa" 
+        disabled="true" 
+        pInputText 
+        type="text" 
+        [disabled]="true"
+        [(ngModel)]="creatoDaDescrizione">
+    </div>
+    <div class="protocollato-da-box">
+      <label for="protocollatoda">{{protocollatoDaLabel}}</label>
+      <input *ngIf="doc.tipologia != 'DELIBERA' && doc.tipologia != 'DETERMINA'"
+        id="protocollatoda"  
+        aria-label="protocollato da"
+        disabled="true" 
+        pInputText 
+        type="text" 
+        [disabled]="pregresso"
+        [(ngModel)]="descrizioneUtenteRegistrante">
+      <input *ngIf="doc.tipologia === 'DELIBERA' || doc.tipologia === 'DETERMINA'" 
+        id="protocollatoda" 
+        aria-label="adottato da" 
+        disabled="true" 
+        pInputText 
+        type="text" 
+        [disabled]="pregresso"
+        [(ngModel)]="descrizioneStrutturaAdottante">
+    </div>
+  </p-fieldset>
+
+  <p-accordion [multiple]="true">
+    <p-accordionTab *ngIf="tipoDocumento === 'PROTOCOLLO_IN_ENTRATA'" header="Mittente" [selected]="true">
+      <mittente [doc]="doc" [tipoDocumento]="tipoDocumento" (saveMittenteEvent)="saveDoc($event,'mittenti')"></mittente>
+    </p-accordionTab>
+    <p-accordionTab *ngIf="docVisualizer?.attori" header="Attori">
+      <ng-template pTemplate="content">
+        <attori [doc]="doc"></attori>
+      </ng-template>
+    </p-accordionTab>
+    <p-accordionTab *ngIf="docVisualizer?.destinatari" header="Destinatari" [selected]="tipoDocumento !== 'PROTOCOLLO_IN_ENTRATA'">
+      <ng-template pTemplate="content">
+        <destinatari [doc]="doc"> </destinatari>
+      </ng-template>
+    </p-accordionTab>
+    <p-accordionTab *ngIf="docVisualizer?.pubblicazioni" header="Pubblicazioni">
+      <ng-template pTemplate="content">
+        <dati-pubblicazione [doc]="doc"></dati-pubblicazione>
+      </ng-template>
+    </p-accordionTab>
+    <p-accordionTab *ngIf="docVisualizer?.fascicolo" header="Fascicolazioni">
+      <ng-template pTemplate="content">
+        <archivio-doc [doc]="doc"></archivio-doc>
+      </ng-template>
+    </p-accordionTab>
+    <p-accordionTab *ngIf="docVisualizer?.allegatiPeis" header="Allegati" class="allegati-tab">
+      <ng-template pTemplate="content">
+        <allegati [doc]="doc"></allegati>
+      </ng-template>
+    </p-accordionTab>
+  </p-accordion>
+</section>
+<!-- 
+  Commento da non cancellare. Sono campi che in futuro potremmo voler utilizzare
+  <div class="protocollo-esterno-box p-grid">
+  <label class="p-col-3" id="datiProtocolloEsterno">Dati protocollo Esterno</label>
+  <p-inputNumber
+          ariaLabel="numero protocollo esterno"
+          [disabled]="false"
+          id="p-datiProtocolloEsterno"
+          inputId="datiProtocolloEsterno"
+          [(ngModel)]="DatiProtocolloEsterno"
+          class="p-col">
+  </p-inputNumber>
+  <label class="p-col-2" for="c-dataProtocollazione">del</label>
+  <span class="p-col-2" id="dataProtocollazione" style ="display:none;" >data di protocollazione esterna</span>
+  <p-calendar
+          #CdataProtocolloEsterno
+          id="c-dataProtocollazione"
+          attr.aria-labelledby="dataProtocollazione"
+          [ariaLabelledBy]="'dataProtocollazione'"
+          [(ngModel)]="dataProtocolloEsterno"
+          dateFormat="dd/mm/yy"
+          [locale]="localIt"
+          [showIcon]="true"
+          inputId="dataProtocollazione"
+          appendTo="body"
+          class="p-col">
+  </p-calendar>
+</div> -->
+<section *ngIf="docVisualizer?.allegatiPreg">
+  <label class="allegati-label">Allegati</label>
+  <attachments-box
+    [idDoc]="doc.id"
+    [config]="attachmentsBoxConfig">
+  </attachments-box>
+</section>
+</main>

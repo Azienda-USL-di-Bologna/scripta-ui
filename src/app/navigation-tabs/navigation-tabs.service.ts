@@ -8,7 +8,6 @@ import { ArchivioComponent } from '../archivio/archivio.component';
 import { DocComponent } from '../doc/doc.component';
 import { DocsListContainerComponent } from '../docs-list-container/docs-list-container.component';
 import { ExtendedDocDetailView } from '../docs-list-container/docs-list/extended-doc-detail-view';
-import { TipContainerComponent } from '../tip-container/tip-container.component';
 import { TabItem, TabType } from './tab-item';
 
 @Injectable()
@@ -106,7 +105,7 @@ export class NavigationTabsService {
    * Setto il componente in base al tipo di tab
    * @returns torno false se non ho caricato nulla
    */
-  public loadTabsFromSessionStorage(): boolean {
+  public loadTabsFromSessionStorage(idSessioneImportazione: number): boolean {
     const stringTabs = sessionStorage.getItem("tabs");
     if (stringTabs) {
       const tabs = JSON.parse(stringTabs) as TabItem[];
@@ -128,7 +127,8 @@ export class NavigationTabsService {
             tab.component = ArchivioComponent;
             break;
           case TabType.TIP:
-            tab.component = TipContainerComponent;
+            tab.component = TipComponent;
+            tab.data = {idSessioneImportazione: idSessioneImportazione}
             break;
         }
         this.tabs.push(tab);
@@ -165,6 +165,21 @@ export class NavigationTabsService {
     );
   }
 
+  public buildaTabTIP(idSessioneImportazione?: number): TabItem {
+    return new TabItem(
+      TipComponent,
+      {
+        idSessioneImportazione: idSessioneImportazione
+      },
+      true,
+      "Import Pregressi",
+      "pi pi-file-import",
+      TabType.TIP,
+      TabType.TIP, // Lo uso come id univoco di questo tab
+      "Tool Importazione Pregressi"
+    );
+  }
+
   private buildaTabDoc(idDoc: number, doc:ExtendedDocDetailView, label: string, labelForAppName: string): TabItem {
     return new TabItem(
       DocComponent,
@@ -196,20 +211,7 @@ export class NavigationTabsService {
     );
   }
 
-  private buildaTabTIP(idTipSessioneImportazione?: number): TabItem {
-    return new TabItem(
-      TipComponent,
-      {
-        idTipSessioneImportazione: idTipSessioneImportazione
-      },
-      true,
-      "Import Pregressi",
-      "pi pi-file-import",
-      TabType.TIP,
-      TabType.TIP, // Lo uso come id univoco di questo tab
-      "Tool Importazione Pregressi"
-    );
-  }
+  
 
   private projectionArchivioPerSessionStorage(archivio: Archivio | ArchivioDetail | ExtendedArchiviView): Archivio {
     const a = new Archivio();
@@ -310,7 +312,7 @@ export class NavigationTabsService {
         this.activeTabIndex, 
         `${labelDoc}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`, 
         {doc: doc},
-        `Protocollo generale ${pregresso ? 'pregresso ': ''}${labelDoc} [${doc.idAzienda.aoo}]`, 
+        `${labelDoc} [${doc.idAzienda.aoo}]`, 
         undefined // segnaposto per ricordare che c'è un parametro forse utile
       );
     } else {
@@ -319,7 +321,7 @@ export class NavigationTabsService {
           doc.id, 
           doc,
           `${labelDoc}<span class="sottoelemento-tab">[${doc.idAzienda.aoo}]</span>`,
-          `Protocollo generale ${pregresso ? 'pregresso ': ''}${labelDoc} [${doc.idAzienda.aoo}]`,
+          `${labelDoc} [${doc.idAzienda.aoo}]`,
         )
       );
       if (active) {
@@ -328,12 +330,12 @@ export class NavigationTabsService {
     }
   }
 
-  public addTabTip(active: boolean = true, idTipSessioneImportazione?: number): void {
+  /* public addTabTip(active: boolean = true, idTipSessioneImportazione?: number): void {
     this.addTab(
       this.buildaTabTIP(idTipSessioneImportazione)
     );
     if (active) {
       this.activeLastTab();
     }
-  }
+  } */
 }
