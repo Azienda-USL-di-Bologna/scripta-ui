@@ -802,6 +802,17 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					
 				});
 			});
+
+			// if (this.archivioPadre.numeroSottoarchivi === 0){
+			// 		// siamo nella lista dei sottoarchivi e non nella ricerca globale 
+			// 	this.messageIfNull = "Non sono stati trovati fascicoli.";
+			// } 
+			// else {
+			// 	if(this.archivioPadre.numeroSottoarchivi > 0) {
+			// 		this.messageIfNull = "Non ce inserti"
+			// 	} 
+			// 	this.messageIfNull = "Non sono stati trovati fascicoli che puoi vedereeee"
+			// }
 	}
 
 
@@ -879,7 +890,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailExtended;
 		switch (this.archiviListMode) {
 			case ArchiviListMode.VISIBILI:
-				this.messageIfNull = 'Non sono stati trovati fascicoli che puoi vedere.';
+				if (this.archivioPadre.numeroSottoarchivi === 0 ) {
+					this.messageIfNull = 'Non sono stati trovati fascicoli.';
+				} else {
+					this.messageIfNull = 'Non sono stati trovati fascicoli che puoi vedere.';
+				}
 				// Uso la vista che fa join con i permessi. E cerco solo archivi in cui io sono presente
 				filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
 				filterAndSort.addSort(new SortDefinition("numero", this.dataTable.sortOrder === -1 ? SORT_MODES.desc : SORT_MODES.asc));
