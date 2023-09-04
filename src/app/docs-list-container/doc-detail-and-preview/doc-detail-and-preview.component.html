@@ -19,7 +19,7 @@
       label="Apri documento" icon="pi pi-book" (onClick)="docUtilsService.openDoc(doc,utente)"></p-button>
 <!-- *ngIf="(!doc.visibilitaLimitata && !doc.riservato) " -->
 
-<p-accordion>
+<p-accordion styleClass="doc-detail-accordion">
   <p-accordionTab
     [(selected)]="accordionSelected[0]"
     [ngClass]="accordionSelected[0] ? 'tab-accordion-selected' : ''"
