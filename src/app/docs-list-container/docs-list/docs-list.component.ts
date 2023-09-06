@@ -67,6 +67,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   @ViewChild("dt") public dataTable: Table;
   @ViewChild("dropdownAzienda") public dropdownAzienda: Dropdown;
   @ViewChild("multiselectStati") public multiselectStati: MultiSelect;
+  @ViewChild("multiselectTipologia") public multiselectTipologia: MultiSelect;
   @ViewChild("multiselectStatoUltimoVersamento") public multiselectStatoUltimoVersamento: MultiSelect;
   @ViewChild("columnFilterAzienda") public columnFilterAzienda: ColumnFilter;
   @ViewChild("autocompleteIdPersonaRedattrice") public autocompleteIdPersonaRedattrice: AutoComplete;
@@ -1133,6 +1134,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     if (this.autocompleteFirmatari) this.autocompleteFirmatari.writeValue(null);
     if (this.autocompleteSullaScrivaniaDi) this.autocompleteSullaScrivaniaDi.writeValue(null); 
     if (this.multiselectStati) this.multiselectStati.writeValue([]); 
+    if (this.multiselectTipologia) this.multiselectTipologia.writeValue([]); 
     if (this.multiselectStatoUltimoVersamento) this.multiselectStatoUltimoVersamento.writeValue([]); 
     this.myDatatableReset();
   }
