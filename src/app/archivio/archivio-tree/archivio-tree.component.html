@@ -10,6 +10,7 @@
     selectionMode="single" 
     [(selection)]="selectedNode" 
     (onNodeSelect)="onNodeSelect($event)"
+    (onNodeExpand)="onNodeExpand($event)"
     scrollHeight="flex">
     <ng-template let-node pTemplate="default">
       <div [innerHTML]="node.label"></div>
