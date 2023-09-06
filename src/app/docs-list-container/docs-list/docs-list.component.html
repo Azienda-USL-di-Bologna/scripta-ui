@@ -102,14 +102,14 @@
         <div *ngSwitchCase="'tipologia'">
           <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-multiSelect
+              <p-multiSelect #multiselectTipologia
                 *ngIf = "isAccessibile() !== true"
                 [showHeader]="false" 
                 [ngModel]="nome" 
                 [options]="tipologiaVisualizzazioneObj" 
                 optionValue="nome" 
                 optionLabel="nome" 
-                (onChange)="filterTipologia(filter,$event.value)" 
+                (onChange)="filterTipologia(filter, $event.value)"
                 appendTo="body"
                 >
                 <ng-template let-option pTemplate="item">
