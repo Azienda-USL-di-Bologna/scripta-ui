@@ -127,6 +127,7 @@ $min-width-label: 9.688rem;
   }
 }
 ::ng-deep .accodion-box-permessi {
+  overflow-y: scroll;
   flex: 1 1 0;
   .p-accordion-content {
     height: 100%;
