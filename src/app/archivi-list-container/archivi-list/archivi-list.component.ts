@@ -904,11 +904,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		this.projectionToGetData = ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections.CustomArchivioDetailExtended;
 		switch (this.archiviListMode) {
 			case ArchiviListMode.VISIBILI:
-				const tipoFascicolo = this.archivioPadre.livello === 2 ? 'inserto' : 'sottofascicolo';
-				if (this.archivioPadre.numeroSottoarchivi === 0 ) {
-					this.messageIfNull = `Nessun ${tipoFascicolo} trovato`;
-				} else {
-					this.messageIfNull = `Non è presente nessun ${tipoFascicolo} che puoi vedere`;
+				if (this.archivioPadre){
+
+					const tipoFascicolo = this.archivioPadre.livello === 2 ? 'inserto' : 'sottofascicolo';
+					if (this.archivioPadre.numeroSottoarchivi === 0 ) {
+						this.messageIfNull = `Nessun ${tipoFascicolo} trovato`;
+					} else {
+						this.messageIfNull = `Non è presente nessun ${tipoFascicolo} che puoi vedere`;
+					}
 				}
 				// Uso la vista che fa join con i permessi. E cerco solo archivi in cui io sono presente
 				filterAndSort.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, this.utenteUtilitiesLogin.getUtente().idPersona.id));
