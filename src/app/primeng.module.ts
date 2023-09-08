@@ -37,7 +37,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { ListboxModule } from 'primeng/listbox';
 import { DividerModule } from 'primeng/divider';
 import { FieldsetModule } from "primeng/fieldset";
-
+import { TagModule } from 'primeng/tag';
 @NgModule({
   declarations: [
   ],
@@ -79,7 +79,8 @@ import { FieldsetModule } from "primeng/fieldset";
     TreeSelectModule,
     TriStateCheckboxModule,
     ListboxModule,
-    DividerModule
+    DividerModule,
+    TagModule
   ],
   exports: [
     FieldsetModule,
@@ -119,7 +120,8 @@ import { FieldsetModule } from "primeng/fieldset";
     TreeSelectModule,
     TriStateCheckboxModule,
     ListboxModule,
-    DividerModule
+    DividerModule,
+    TagModule
 
   ],
   providers: [MessageService, DialogService, ConfirmationService]

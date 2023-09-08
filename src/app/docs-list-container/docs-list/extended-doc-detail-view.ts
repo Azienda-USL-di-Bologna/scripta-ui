@@ -153,6 +153,18 @@ export class ExtendedDocDetailView extends DocDetailView {
         this.tipologiaVisualizzazione = "Document";
         this.codiceRegistro = "";
         break;
+      case TipologiaDoc.RGDELI:
+        this.tipologiaVisualizzazione = "Registro giornaliero";
+        this.codiceRegistro = "RGDELI";
+        break;
+      case TipologiaDoc.RGDETE:
+        this.tipologiaVisualizzazione = "Registro giornaliero";
+        this.codiceRegistro = "RGDETE";
+        break;
+      case TipologiaDoc.RGPICO:
+        this.tipologiaVisualizzazione = "Registro giornaliero";
+        this.codiceRegistro = "RGPICO";
+        break;
       default:
         this.tipologiaVisualizzazione = "Errore";
         this.codiceRegistro = "Err";
