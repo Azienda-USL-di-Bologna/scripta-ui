@@ -48,6 +48,12 @@ export class ResponsabiliComponent implements OnInit {
   @Input() set loggedUserIsResponsbaileOrVicario(loggedUserIsResponsbaileOrVicario: Boolean) {
     this._loggedUserIsResponsbaileOrVicario = loggedUserIsResponsbaileOrVicario;
   }
+
+  public _sonoResponsabile: Boolean = false;
+  get sonoResponsabile(): Boolean { return this._sonoResponsabile;}
+  @Input() set sonoResponsabile(sonoResponsabile: Boolean) {
+    this._sonoResponsabile = sonoResponsabile;
+  }
   constructor(
     private attoreArchivioService: AttoreArchivioService,
     private loginService: JwtLoginService,

@@ -68,6 +68,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
   private attoreArchivioProjection = ENTITIES_STRUCTURE.scripta.attorearchivio.standardProjections.AttoreArchivioWithIdPersonaAndIdStruttura;
   public saving: any = {};
+  public sonoResponsabile: Boolean = false;
 
   @ViewChild("autocompleteCategoria") public autocompleteCategoria: AutoComplete;
   
@@ -639,9 +640,16 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     
   }
 
+  /**
+   * Funzione che viene chiamata quando si vuole accettare la responsabilità di un archivio
+   * 
+   * 
+   */
   public accettaResponsabilita() {
   
     const batchOperations: BatchOperation[] = [];
+
+    //aggiorno il responsabile col responsabile proposto
     const responsabilePropostoVecchio = this.archivio.attoriList.find((a: AttoreArchivio) => a.ruolo === "RESPONSABILE_PROPOSTO" );
     const attoreArchivioBody = new AttoreArchivio();
     attoreArchivioBody.id = responsabilePropostoVecchio.id;
@@ -656,13 +664,12 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       returnProjection: this.attoreArchivioProjection
     } as BatchOperation);
    
+    // aggiorno i vicari dell'archivio
     const responsabileVecchio =  this.archivio.attoriList.find((a: AttoreArchivio) => a.ruolo === "RESPONSABILE");
     const nuovoVicario =  new AttoreArchivio();
     nuovoVicario.id = responsabileVecchio.id;
     nuovoVicario.ruolo = RuoloAttoreArchivio.VICARIO;
     nuovoVicario.version = responsabileVecchio.version;
-    
-    
     batchOperations.push({
       operation: BatchOperationTypes.UPDATE,
       entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.attorearchivio.path,
@@ -671,7 +678,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       returnProjection: this.attoreArchivioProjection
     } as BatchOperation);
 
-    
+    //genero l'attivita da mettere in scrivania
     const attivita = new Attivita();
     attivita.idApplicazione = {id: "gediInt"} as Applicazione;
     attivita.idAzienda = {id: this.archivio.idAzienda.id} as Azienda;
@@ -696,44 +703,59 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       returnProjection: "AttivitaWithPlainFields"
     } as BatchOperation);
 
-
+    //cerco l'attivita che bisogna togliere dalla scrivania
     const filterAndsorts: FiltersAndSorts = new FiltersAndSorts();
       filterAndsorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, responsabilePropostoVecchio.idPersona.id));
-      filterAndsorts.addFilter(new FilterDefinition("idOggettoEsterno", FILTER_TYPES.string.containsIgnoreCase, this.archivio.id.toString()));
-
+      filterAndsorts.addFilter(new FilterDefinition("oggettoEsterno", FILTER_TYPES.string.equals, this.archivio.id));
+      filterAndsorts.addFilter(new FilterDefinition('tipoOggettoEsterno', FILTER_TYPES.string.equals, 'ArchivioInternauta'));
     this.attivitaService.getData("AttivitaWithPlainFields", filterAndsorts, null,null).subscribe(
       (res) => {
-        batchOperations.push({
-          operation: BatchOperationTypes.DELETE,
-          entityPath: BaseUrls.get(BaseUrlType.Scrivania) + "/" + ENTITIES_STRUCTURE.scrivania.attivita.path,
-          id:res.results[0].id,
-          entityBody: res.results[0] as NextSdrEntity,
-          returnProjection: "AttivitaWithPlainFields"
-        } as BatchOperation);
-        this.subscriptions.push(
-          this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
-            (res: BatchOperation[]) => {
-              this.messageService.add({
-                severity: "success", 
-                summary: "Proposta responsabilità", 
-                detail: "Hai accettato la responsabilità del fascicolo"
-              });
-              this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
-              responsabilePropostoVecchio.ruolo = RuoloAttoreArchivio.RESPONSABILE;
-              responsabilePropostoVecchio.version = (res.find(bo => (bo.entityBody as any).id === responsabilePropostoVecchio.id).entityBody as AttoreArchivio).version;
-              responsabileVecchio.ruolo = RuoloAttoreArchivio.VICARIO;
-              responsabileVecchio.version =  (res.find(bo => (bo.entityBody as any).id === responsabileVecchio.id).entityBody as AttoreArchivio).version;
-              this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
-    
-              this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[])
-                .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
-            }
+        if (res.results.length != 1) {
+          this.messageService.add({
+            severity: "error",
+            summary: "Errore nell'accettazione della responsabilità",
+            detail: "Qualcosa è andato storto, contattare babelcare"
+          });
+        } else {
+          const attivitaDaMandare = new Attivita();
+          attivitaDaMandare.id = res.results[0].id;
+          attivitaDaMandare.version = res.results[0].version;
+          batchOperations.push({
+            operation: BatchOperationTypes.DELETE,
+            entityPath: BaseUrls.get(BaseUrlType.Scrivania) + "/" + ENTITIES_STRUCTURE.scrivania.attivita.path,
+            id: attivitaDaMandare.id,
+            entityBody: attivitaDaMandare as NextSdrEntity,
+            returnProjection: "AttivitaWithPlainFields"
+          } as BatchOperation);
+          this.subscriptions.push(
+            this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
+              (res: BatchOperation[]) => {
+                this.messageService.add({
+                  severity: "success", 
+                  summary: "Proposta responsabilità", 
+                  detail: "Hai accettato la responsabilità del fascicolo"
+                });
+                this.sonoResponsabile = true;
+                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
+                responsabilePropostoVecchio.ruolo = RuoloAttoreArchivio.RESPONSABILE;
+                responsabilePropostoVecchio.version = (res.find(bo => (bo.entityBody as any).id === responsabilePropostoVecchio.id).entityBody as AttoreArchivio).version;
+                responsabileVecchio.ruolo = RuoloAttoreArchivio.VICARIO;
+                responsabileVecchio.version =  (res.find(bo => (bo.entityBody as any).id === responsabileVecchio.id).entityBody as AttoreArchivio).version;
+                this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);    
+                this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[])
+                  .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
+              }
+            )
           )
-        )
+        }
       }
     );
   }
 
+  /**
+   * Funzione che si occupa di rifiutare la responsabilita di un archivio
+   * 
+   */
   public rifiutaResponsabilita(){
     const batchOperations: BatchOperation[] = [];
     const attoreToDelete = this.archivio.attoriList.find((a:AttoreArchivio)  => a.ruolo === 'RESPONSABILE_PROPOSTO');
