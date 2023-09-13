@@ -12,9 +12,11 @@ import { ExtendedDestinatariService } from "./destinatari/extended-destinatari.s
 import { ExtendedMittenteService } from "./mittente/extended-mittente.service";
 import { ExtendedAllegatoService } from "./allegati/extended-allegato.service";
 import { AttoriComponent } from './attori/attori.component';
+import { DatiPubblicazioneComponent } from './dati-pubblicazione/dati-pubblicazione.component'
 import { ArchivioDocComponent } from './archivio-doc/archivio-doc.component';
 import { AttachmentsBoxModule } from "@bds/common-components";
 import { DocUtilsService } from "../utilities/doc-utils.service";
+import { CommonToolsModule } from "@bds/common-tools";
 
 
 @NgModule({
@@ -23,7 +25,8 @@ import { DocUtilsService } from "../utilities/doc-utils.service";
     DocRoutingModule,
     PrimeNgModule,
     ScriptaCommonModule,
-    AttachmentsBoxModule
+    AttachmentsBoxModule,
+    CommonToolsModule
   ],
   declarations: [
     DocComponent,
@@ -31,6 +34,7 @@ import { DocUtilsService } from "../utilities/doc-utils.service";
     DestinatariComponent,
     AllegatiComponent,
     AttoriComponent,
+    DatiPubblicazioneComponent,
     ArchivioDocComponent
   ],
   providers: [

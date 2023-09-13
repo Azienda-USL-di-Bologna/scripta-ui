@@ -420,6 +420,21 @@ export const TipologiaDocTraduzioneVisualizzazione = [
   { value: TipologiaDoc.DOCUMENT_UTENTE, nome: "Document" }
 ]
 
+export const TipologiaDocDetailPerFiltro = [
+  { value: [TipologiaDoc.PROTOCOLLO_IN_USCITA], nome: "Protocollo in uscita" },
+  { value: [TipologiaDoc.PROTOCOLLO_IN_ENTRATA], nome: "Protocollo in entrata" },
+  { value: [TipologiaDoc.DETERMINA], nome: "Determina" },
+  { value: [TipologiaDoc.DELIBERA], nome: "Delibera" },
+  { value: [TipologiaDoc.DOCUMENT_PEC], nome: "Pec" },
+  { 
+    value: [
+    TipologiaDoc.DOCUMENT_REGISTRO, 
+    TipologiaDoc.RGDELI, TipologiaDoc.RGDETE, 
+    TipologiaDoc.RGPICO
+   ], nome: "Registro giornaliero" },
+  { value: [TipologiaDoc.DOCUMENT_UTENTE], nome: "Document" }
+]
+
 export const StatoDocTraduzioneVisualizzazione = [
   { value: StatoDoc.CLASSIFICAZIONE, nome: "Classificazione" },
   { value: StatoDoc.DA, nome: "DA" },

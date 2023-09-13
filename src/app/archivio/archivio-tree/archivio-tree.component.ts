@@ -229,8 +229,7 @@ export class ArchivioTreeComponent implements OnInit {
                     }
                   }
                 ) 
-              }
-              else if (archivioNonno.numeroSottoarchivi <= this.numeroMaxSottoarchiviCaricabili && archivioPadre.numeroSottoarchivi > this.numeroMaxSottoarchiviCaricabili) {
+              } else if (archivioNonno.numeroSottoarchivi <= this.numeroMaxSottoarchiviCaricabili && archivioPadre.numeroSottoarchivi > this.numeroMaxSottoarchiviCaricabili) {
                 const filtersAndSorts =  this.buildFilterToLoadChildren(archivioNonno);
                 const nonnoNodo = this.buildTreeNode(archivioNonno);
                 this.archivi.push(nonnoNodo);
@@ -250,8 +249,7 @@ export class ArchivioTreeComponent implements OnInit {
                     this.troppiInserti = true;
                   }
                 )
-              }
-              else if (archivioNonno.numeroSottoarchivi > this.numeroMaxSottoarchiviCaricabili && archivioPadre.numeroSottoarchivi <= this.numeroMaxSottoarchiviCaricabili) {
+              } else if (archivioNonno.numeroSottoarchivi > this.numeroMaxSottoarchiviCaricabili && archivioPadre.numeroSottoarchivi <= this.numeroMaxSottoarchiviCaricabili) {
                 this.troppiSottoFascicoli = true;
                 const nonnoNodo = this.buildTreeNode(archivioNonno);
                 this.archivi.push(nonnoNodo);
@@ -267,8 +265,7 @@ export class ArchivioTreeComponent implements OnInit {
                     nonnoNodo.children.push(this.buildTreeNode(archivioPadre, childrenNodes))
                   }
                 )
-            }
-            else {
+            } else {
               this.archivi.push(
                   this.buildTreeNode(archivioNonno, [
                     this.buildTreeNode(archivioPadre, [
@@ -441,11 +438,16 @@ export class ArchivioTreeComponent implements OnInit {
    */
   private buildTreeNode(archivio: Archivio | ArchivioDetail, children?: TreeNode[]): TreeNode {
     const newNode: TreeNode = {};
-    if (archivio.id === this.archivio["id"]) {
+    newNode.expanded = false;
+    if (archivio.id === this.archivio.id) {
       this.selectedNode = newNode;
+      newNode.expanded = true;
+    } else if (archivio.id === this.archivio.fk_idArchivioPadre.id) {
+      newNode.expanded = true;
     }
     newNode.key = archivio.id.toString();
     newNode.data = archivio;
+    newNode.leaf = archivio.foglia as boolean;
     newNode.collapsedIcon = "pi pi-folder";
     newNode.expandedIcon = "pi pi-folder-open";
     newNode.label = "<b class='numerazione'>[" + archivio.numerazioneGerarchica + "]</b> " + archivio.oggetto ;
@@ -458,7 +460,7 @@ export class ArchivioTreeComponent implements OnInit {
       });
     } */
     newNode.children = children || [];
-    newNode.expanded = true;
+    
     newNode.styleClass = "";
     if (archivio.stato === StatoArchivio.BOZZA) {
       newNode.styleClass = "nodo-bozza";
@@ -466,6 +468,7 @@ export class ArchivioTreeComponent implements OnInit {
     switch (archivio.livello) {
       case 1:
         newNode.styleClass = newNode.styleClass + " fascicolo";
+        newNode.expanded = true;
         break;
       case 2:
         newNode.styleClass = newNode.styleClass + " sottofascicolo";
@@ -500,6 +503,13 @@ export class ArchivioTreeComponent implements OnInit {
     this.navigationTabsService.addTabArchivio(event.node.data, false);
     this.appService.appNameSelection("Fascicolo "+ event.node.data.numerazioneGerarchica  + " [" + event.node.data.idAzienda.aoo + "]");
     //this.archivioSelectedEvent.emit(event.node.data);
+  }
+
+  public onNodeExpand(event: any): void {
+    console.log(event.node)
+    if (!event.node.children || event.node.children.length === 0) {
+      this.loadChildren(event.node.data);
+    }
   }
 
   /**

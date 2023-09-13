@@ -6,6 +6,12 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  p-accordion {
+    height: 100%;
+    .doc-detail-accordion {
+      height: 100%
+    }
+  }
   .tab-accordion-selected {
     flex: 1 1 0;
     .p-toggleable-content {

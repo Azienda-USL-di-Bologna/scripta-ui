@@ -1,19 +1,13 @@
-.attori-pregressi{
+.dati-pubblicazione{
     height: 100%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    .responsabile-box{
-        margin-bottom: 1.5rem;
-    }
-    .firmatari-box {
+    .periodo-pubblicazione {
         flex: 1 1 0;
         margin-bottom: 1.5rem;
     }
-    .pareratori-box {
-        margin-bottom: 1.5rem;
-    }
-    .vistatori-box {
+    .data-esecutivita, .numero-pubblicazione, .controllo-regionale {
         margin-bottom: 1.5rem;
     }
 }

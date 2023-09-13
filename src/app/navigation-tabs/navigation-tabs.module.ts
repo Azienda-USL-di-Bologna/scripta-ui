@@ -10,8 +10,6 @@ import { TabDirective } from "./tab.directive";
 import { ArchiviListContainerModule } from "../archivi-list-container/archivi-list-container.module";
 import { DocsListContainerModule } from "../docs-list-container/docs-list-container.module";
 import { ArchivioModule } from "../archivio/archivio.module";
-import { TipContainerModule } from "../tip-container/tip-container.module";
-
 
 @NgModule({
   imports: [
@@ -21,7 +19,6 @@ import { TipContainerModule } from "../tip-container/tip-container.module";
     ScriptaCommonModule,
     ArchiviListContainerModule,
     DocsListContainerModule,
-    TipContainerModule,
     ArchivioModule
   ],
   declarations: [

@@ -2,6 +2,13 @@
   ariaLabel="Tabella elenco archivi" 
   [value]="archivi" 
   dataKey="id"
+  [rowTrackBy]="trackByFn" 
+  [metaKeySelection]="true"
+  selectionMode="multiple" 
+  [(selection)]="archivesSelected"
+  (onRowSelect)="onRowSelect($event)" 
+  (onRowUnselect)="onRowUnselect($event)"
+  (onHeaderCheckboxToggle)="onSelectAllChange($event)"
   [columns]="selectedColumns" 
   [sortField]="initialSortField" 
   [sortOrder]="-1" 
@@ -25,13 +32,21 @@
   <!-- HEADER & ORDINAMENTO ---->
   <ng-template pTemplate="header" let-columns>
     <tr class="header-row">
+      <th *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG"
+        class="checkbox-column"
+        alignFrozen="left" 
+        pFrozenColumn 
+        [frozen]="true">
+        <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+      </th>
       <th *ngFor="let col of columns" 
         pReorderableColumn 
         [ngClass]="[archiviListMode === 'RECENTI' ? 'sort-disable' : ''].concat(col.headerClass)"
         
         [pSortableColumn]="col.sortField"
         [pSortableColumnDisabled]="archiviListMode === 'RECENTI'"
-        ><!-- [ngClass]="col.headerClass" -->
+        >
+        <!-- [ngClass]="col.headerClass" -->
         <!-- [ngStyle]="{
           'cursor': col.sortField ? null : 'move',
           'background-color': col.field == 'dataCreazione' && archiviListMode == 'RECENTI' ? '#f4f4f4' : null,
@@ -74,6 +89,12 @@
     </tr>
     <!-------FILTRI -->
     <tr class="filter-row">
+      <th *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG"
+        class="checkbox-column"
+        alignFrozen="left" 
+        pFrozenColumn 
+        [frozen]="true">
+      </th>
       <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
         <div *ngSwitchCase="'idAzienda'" #filteraziendacontainer>
           <p-columnFilter #columnFilterAzienda 
@@ -377,10 +398,43 @@
         [frozen]="true">
       </th>
     </tr>
+    <tr *ngIf="showAdditionalRow && archiviListMode === 'TUTTI' && loggedUserIsAG"
+      class="additional-row">
+      <span *ngIf="allRowsAreSelected && rowCountInProgress" class="selection-info">
+        <i class="pi pi-spin pi-spinner"></i>
+      </span>
+      <span *ngIf="allRowsAreSelected && !rowCountInProgress" class="selection-info">
+        Tutti i {{rowCountSelected}} fascicoli sono selezionati
+      </span>
+      <span *ngIf="!allRowsAreSelected" class="selection-info">
+        {{rowCountSelected === 1 ? '1 fascicolo selezionato' : rowCountSelected + ' fascicoli selezionati'}}
+      </span>
+      <p-button 
+        label="Annulla selezione"
+        type="reset"
+        (click)="
+          rowCountSelected = 0;
+          archivesSelected = []; 
+          showAdditionalRow = false; 
+          allRowsAreSelected = false; 
+          allRowsWasSelected = false; 
+          rowsNotSelectedWhenAlmostAllRowsAreSelected = []">
+      </p-button>
+    </tr>
   </ng-template>
   <!-- BODY -->
-  <ng-template pTemplate="body" let-rowData let-columns="columns">
-    <tr class="row-height">
+  <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex">
+    <tr class="row-height"
+      [pSelectableRow]="rowData"
+      [pSelectableRowIndex]="index"
+      [pSelectableRowDisabled]="false">
+      <td *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG"
+        class="checkbox-column"
+        alignFrozen="left"
+        pFrozenColumn 
+        [frozen]="true">
+        <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+      </td>
       <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
         <div *ngSwitchCase="'idAzienda'">
           {{rowData.idAzienda.nome}}
@@ -493,6 +547,9 @@
   </ng-template>
   <ng-template pTemplate="loadingbody" let-columns="columns">
     <tr class="row-height">
+      <!-- <td [ngClass]="col.bodyClass" class="loading-cell">
+        <div class="loading-text"></div>
+      </td> -->
       <td *ngFor="let col of columns" [ngClass]="col.bodyClass" class="loading-cell">
         <div class="loading-text"></div>
       </td>
@@ -505,7 +562,7 @@
           <h3>{{messageIfNull}}</h3>
       </td>
   </tr>
-</ng-template>
+  </ng-template>
 </p-table>
 <p-toast key="archiviListToast"></p-toast>
 <p-confirmPopup key="confirm-popup"></p-confirmPopup>

@@ -85,6 +85,6 @@ export class DocUtilsService {
 
   private openPregresso(doc: ExtendedDocDetailView) {
     this.navigationTabsService.addTabDoc(doc);
-    this.appService.appNameSelection(`${doc.codiceRegistro === 'PG' ? "Protocollo generale" : doc.tipologiaVisualizzazione} pregresso ${doc.registrazioneVisualizzazione} [${doc.idAzienda.aoo}]`);
+    this.appService.appNameSelection(` ${doc.registrazioneVisualizzazione} [${doc.idAzienda.aoo}]`);
   }
 }

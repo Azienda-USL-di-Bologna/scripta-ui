@@ -3,7 +3,7 @@
   <h4>
     <i *ngIf="doc.visibilitaLimitata && !doc.riservato " pTooltip="Visibilità limitata" class="pi pi-eye"></i>
     <i *ngIf=" doc.riservato " pTooltip="Riservato" class="pi pi-eye-slash"></i>
-    {{doc.oggetto}}
+    {{doc.oggetto}} <div *ngIf="utenteUtilitiesLogin.hasRole('CA')"> id: {{doc.id}}</div>
   </h4>
   
 
@@ -19,7 +19,7 @@
       label="Apri documento" icon="pi pi-book" (onClick)="docUtilsService.openDoc(doc,utente)"></p-button>
 <!-- *ngIf="(!doc.visibilitaLimitata && !doc.riservato) " -->
 
-<p-accordion>
+<p-accordion styleClass="doc-detail-accordion">
   <p-accordionTab
     [(selected)]="accordionSelected[0]"
     [ngClass]="accordionSelected[0] ? 'tab-accordion-selected' : ''"

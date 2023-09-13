@@ -1,0 +1,19 @@
+<div class="dati-pubblicazione"> 
+    <div class="numero-pubblicazione">
+        <label class="p-col-2"  >Dati pubblicazione</label>
+        <input [disabled]="doc.pregresso"  Qtype="text" pInputText [(ngModel)]="numeroAnnoPubblicazione"/>
+    </div>
+    <div class="periodo-pubblicazione">
+        <label class="p-col-2"  >Periodo Pubblicazione</label>
+        <input [disabled]="doc.pregresso"  Qtype="text" pInputText [(ngModel)]="periodoPubblicazione"/>
+    </div>
+    <div class="data-esecutivita" >
+        <label class="p-col-2"  >Data Esecutività </label>
+        <input [disabled]="doc.pregresso" Qtype="text" pInputText [(ngModel)]="data_esecutivita"/>
+    </div>
+    <div class="controllo-regionale">
+        <label class="p-col-2"   >Controllo Regionale</label>
+        <p-checkbox   [(ngModel)]="controllo_regionale" [binary]="true"  [disabled]="doc.pregresso"></p-checkbox>
+    </div>
+</div>
+    

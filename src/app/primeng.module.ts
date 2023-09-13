@@ -36,11 +36,13 @@ import { TriStateCheckboxModule } from 'primeng/tristatecheckbox';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ListboxModule } from 'primeng/listbox';
 import { DividerModule } from 'primeng/divider';
-
+import { FieldsetModule } from "primeng/fieldset";
+import { TagModule } from 'primeng/tag';
 @NgModule({
   declarations: [
   ],
   imports: [
+    FieldsetModule,
     ButtonModule,
     RadioButtonModule,
     InputTextareaModule,
@@ -77,9 +79,11 @@ import { DividerModule } from 'primeng/divider';
     TreeSelectModule,
     TriStateCheckboxModule,
     ListboxModule,
-    DividerModule
+    DividerModule,
+    TagModule
   ],
   exports: [
+    FieldsetModule,
     ButtonModule,
     RadioButtonModule,
     InputTextareaModule,
@@ -116,7 +120,9 @@ import { DividerModule } from 'primeng/divider';
     TreeSelectModule,
     TriStateCheckboxModule,
     ListboxModule,
-    DividerModule
+    DividerModule,
+    TagModule
+
   ],
   providers: [MessageService, DialogService, ConfirmationService]
 })
