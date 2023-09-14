@@ -939,7 +939,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           if ( data.length == 1 ) {
             const a = JSON.parse(data[0].valore);
             console.log(a);
-            this.dataUltimoPregresso = [new  Date(1995, 2, 12), new Date(a.data)];
+            this.dataUltimoPregresso = [new  Date(1900, 2, 12), new Date(a.data)];
           } else {
             this.dataUltimoPregresso =null;
           }
