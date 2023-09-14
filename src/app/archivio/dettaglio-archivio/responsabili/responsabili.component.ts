@@ -20,6 +20,7 @@ export class ResponsabiliComponent implements OnInit {
   private _archivio: Archivio;
   private attoreArchivioProjection = ENTITIES_STRUCTURE.scripta.attorearchivio.standardProjections.AttoreArchivioWithIdPersonaAndIdStruttura;
 
+  public disableProponiResponsabile: boolean = false;
   public responsabiliArchivi: AttoreArchivio[] = [];
   public subscriptions: Subscription[] = [];
   public ruoliEnum = RuoloAttoreArchivio;
@@ -49,10 +50,12 @@ export class ResponsabiliComponent implements OnInit {
     this._loggedUserIsResponsbaileOrVicario = loggedUserIsResponsbaileOrVicario;
   }
 
-  public _sonoResponsabile: Boolean = false;
-  get sonoResponsabile(): Boolean { return this._sonoResponsabile;}
-  @Input() set sonoResponsabile(sonoResponsabile: Boolean) {
+  public _sonoResponsabile: boolean = false;
+  get sonoResponsabile(): boolean { return this._sonoResponsabile;}
+  @Input() set sonoResponsabile(sonoResponsabile: boolean) {
     this._sonoResponsabile = sonoResponsabile;
+    this.responsabilePropostoGiaPresente = false; 
+    
   }
   constructor(
     private attoreArchivioService: AttoreArchivioService,
@@ -105,6 +108,7 @@ export class ResponsabiliComponent implements OnInit {
    * Metodo chiamato dall'html per l'insertimento di un responsabile proposto o di un vicario
    */
   public addResponsabile(ruolo: RuoloAttoreArchivio): void {
+    console.log(this.loggedUserIsResponsabile || this.sonoResponsabile);
     this.struttureAttoreInEditing = [];
     const newAttore = new AttoreArchivio();
     newAttore.ruolo = ruolo;
