@@ -4,7 +4,7 @@ import { ActivatedRoute } from "@angular/router";
 import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatoVersamento, Utente, StatoArchivio, ArchivioDetail, ArchivioDetailView, ConfigurazioneService, PersonaVedente } from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { buildLazyEventFiltersAndSorts } from "@bds/primeng-plugin";
-import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from "@bds/next-sdr";
+import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES, JsonField } from "@bds/next-sdr";
 import { ConfirmationService, LazyLoadEvent, MenuItem, MessageService } from "primeng/api";
 import { AutoComplete } from "primeng/autocomplete";
 import { Dropdown } from "primeng/dropdown";
@@ -52,6 +52,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   private storedLazyLoadEvent: LazyLoadEvent;
   private lastAziendaFilterValue: number[];
   //private lastStatoFilterValue: string[];
+  private actualDataCreazioneFilterValue: Date[];
   private lastDataCreazioneFilterValue: Date[];
   public showOrganizzaPopUp: boolean = false;
   public showNoteVersamentoPopUp: boolean = false;
@@ -63,6 +64,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public docSelezionatoToFunctions: ExtendedDocDetailView;
   public iconaFunzioniArchiviazioneSelezionatoToFunctions: any;
   public deleteArchiviationFlag: boolean;
+  public needToAsk: boolean = false;
+  private dataUltimoPregresso: Date[] = [];
 
   @ViewChild("dt") public dataTable: Table;
   @ViewChild("dropdownAzienda") public dropdownAzienda: Dropdown;
@@ -260,8 +263,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.subscriptions.push(
       this.doclistService.refreshDocs$.subscribe((val: boolean) => this.resetPaginationAndLoadData())
     );
-   
-   
+    
     /* this.subscriptions.push(
       this.confirmatationService.requireConfirmation$.subscribe((confirmation: Confirmation) => {
         if (confirmation === null) {
@@ -468,11 +470,28 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     this.docsListMode = event.option.queryParams.mode;
     this.docListModeSelected.emit({ docListModeSelected: this.docsListMode });
 
-    // TODO: Se viene velocizzato il tab ifirmato allora si può cancellare questo if e togliere il setimeout
-    if (this.docsListMode === DocsListMode.IFIRMATO) {
-      this.initialSortField = "dataCreazione";
-      //this.initialSortField = "dataRegistrazione";
-    }
+    switch (this.docsListMode) {
+      case DocsListMode.DOCUMENTI_VISIBILI:
+      case DocsListMode.ERRORI_VERSAMENTO:
+      case DocsListMode.IFIRMATO:
+      case DocsListMode.MIEI_DOCUMENTI:
+      case DocsListMode.NUOVO:
+      case DocsListMode.REGISTRAZIONI: 
+      this.calendarcreazione.writeValue(this.lastDataCreazioneFilterValue);
+      this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
+        break;
+      case DocsListMode.IFIRMARIO:
+        this.calendarcreazione.writeValue(this.lastDataCreazioneFilterValue);
+        this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
+        // TODO: Se viene velocizzato il tab ifirmato allora si può cancellare questo if e togliere il setimeout
+        this.initialSortField = "dataCreazione";
+        break;
+      case DocsListMode.PREGRESSI: 
+        this.lastDataCreazioneFilterValue = this.calendarcreazione.value;
+        this.calendarcreazione.writeValue(this.dataUltimoPregresso);
+        this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
+        break;
+      } 
     /* setTimeout(() => {
       this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
     }, 0); */
@@ -798,7 +817,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
           new Date(new Date().getFullYear(), 11, 31)
         ]);
     }
-    this.lastDataCreazioneFilterValue = this.calendarcreazione.value;
+    // this.lastDataCreazioneFilterValue = this.calendarcreazione.value;
+    this.actualDataCreazioneFilterValue = this.calendarcreazione.value;
   }
 
   /**
@@ -911,6 +931,22 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.loadDocsListSubscription.unsubscribe();
       this.loadDocsListSubscription = null;
     }
+    const idAziende : number[] = [this.dropdownAzienda.value];
+    this.subscriptions.push(
+      this.configurazioneService.getParametriAziende("dataInizioPregressi", null, idAziende).subscribe(
+        (data: any) => {
+          console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+          if ( data.length == 1 ) {
+            const a = JSON.parse(data[0].valore);
+            console.log(a);
+            this.dataUltimoPregresso = [new  Date(1995, 2, 12), new Date(a.data)];
+          } else {
+            this.dataUltimoPregresso =null;
+          }
+        }
+      )
+    )
+    
     const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
     const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
     if(this.storedLazyLoadEvent.sortField === "dataRegistrazione") {
@@ -1275,7 +1311,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       calendar.onClearButtonClick(event);
     }
     if (calendar.inputId === "calendarcreazione") {
-      this.lastDataCreazioneFilterValue = calendar.value;
+      this.actualDataCreazioneFilterValue = calendar.value;
     }
     filterCallback(calendar.value);
   }
@@ -1288,7 +1324,6 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * @param command 
    * @param event 
    */
-   needToAsk = false;
    public askConfirmAndHandleCalendarCreazioneEvent(calendar: Calendar, command: string, event: Event, filterCallback: (value: Date[]) => {}) {
      //add this check becaus when we click on confirmation button it takas it as click outside
      if (this.needToAsk) {
@@ -1296,7 +1331,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
        return;
      }
      if (command === "onClickOutside") {
-       calendar.writeValue(this.lastDataCreazioneFilterValue);
+       calendar.writeValue(this.actualDataCreazioneFilterValue);
        return;
      }
      console.log(calendar);
@@ -1324,7 +1359,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
            reject: () => {
              // L'utente ha cambaito idea. Non faccio nulla
              // repopulate with old value
-             calendar.writeValue(this.lastDataCreazioneFilterValue);
+             calendar.writeValue(this.actualDataCreazioneFilterValue);
            }
          });
        }, 0);
