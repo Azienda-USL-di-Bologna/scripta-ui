@@ -166,7 +166,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		private configurazioneService: ConfigurazioneService,
 		private datepipe: DatePipe,
 		private extendedArchivioService: ExtendedArchivioService,
-		private extendedArchiviListService : ExtendedArchivioListService,
 		private archiviRecentiService: ArchiviRecentiService,
 		private utenteStrutturaService: UtenteStrutturaService,
 		private archivioUtilsService: ArchivioUtilsService,
