@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import {  ArchiviRecentiService, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioRecente, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteStruttura, UtenteStrutturaService, PermessoEntitaStoredProcedure, CODICI_RUOLO } from '@bds/internauta-model';
+import {  ArchiviRecentiService, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioRecente, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteStruttura, UtenteStrutturaService, PermessoEntitaStoredProcedure, CODICI_RUOLO, Utente } from '@bds/internauta-model';
 import { AppService } from '../../app.service';
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { Subscription, combineLatestWith } from 'rxjs';
@@ -34,6 +34,7 @@ import { ExtendedArchivioService } from 'src/app/archivio/extended-archivio.serv
 import { ArchivioUtilsService } from 'src/app/archivio/archivio-utils.service';
 import { TitoloService } from '@bds/internauta-model';
 import { MassimarioService } from '@bds/internauta-model';
+import { ExtendedArchivioListService } from './extended-archivi-list.service';
 
 @Component({
 	selector: 'archivi-list',
@@ -93,6 +94,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	private loadArchiviListCountSubscription: Subscription;
 	private serviceToGetData: NextSDREntityProvider = null;
 	private projectionToGetData: string = null;
+	private idAziendaFiltrataAG: Azienda;
 	private lastDataCreazioneFilterValue: Date[];
 	private lastAziendaFilterValue: number[];
 	public aziendeConFascicoliParlanti: number[] = [];
@@ -130,11 +132,16 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public loggedUserCanDeleteArchivio : boolean = false;
 	public archivesSelected: ExtendedArchiviView[] = [];
 	public showAdditionalRow: boolean = false;
+	public showGestioneMassiva : boolean = false;
 	public allRowsAreSelected: boolean = false;
 	public allRowsWasSelected: boolean = false;
+	private utenteSelectedGestioneMassiva : Utente;
+	private strutturaUtenteSelectedGestioneMassiva : Struttura;
+	private struttureUtenteSelectableGestioneMassiva : Struttura[] = [];
+	private isUtenteSelectedGestioneMassiva = false;
 	private rowsNotSelectedWhenAlmostAllRowsAreSelected: number[] = [];
 	public loggedUserIsAG = false;
-
+	public selectedAllAziende = false;
 	private _archivioPadre: Archivio;
 	get archivioPadre(): Archivio { return this._archivioPadre; }
 	@Input() set archivioPadre(archivioPadre: Archivio) {
@@ -160,6 +167,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		private configurazioneService: ConfigurazioneService,
 		private datepipe: DatePipe,
 		private extendedArchivioService: ExtendedArchivioService,
+		private extendedArchiviListService : ExtendedArchivioListService,
 		private archiviRecentiService: ArchiviRecentiService,
 		private utenteStrutturaService: UtenteStrutturaService,
 		private archivioUtilsService: ArchivioUtilsService,
@@ -352,6 +360,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this._selectedColumns.push(this.cols.find(e => e.field === c));
 		})
 		console.log(this._selectedColumns)
+	}
+
+	public setAziendaGestioneMassiva() : void { 
+		let archivioSelezionato = this.archivesSelected[this.archivesSelected.length - 1];
+		this.idAziendaFiltrataAG = archivioSelezionato.idAzienda;
 	}
 
 
@@ -952,6 +965,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 */
 	public filterAzienda(filterCallback: (value: number[]) => {}, value: number[], filteraziendacontainer: any) {
 		if (value.length === 1) {
+			this.selectedAllAziende = false;
 			// L'utente ha scelto un unica azienda. Faccio quindi partire il filtro.
 			this.lastAziendaFilterValue = value;
 			filterCallback(value);
@@ -966,6 +980,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					accept: () => {
 						// L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
 						this.dropdownAzienda.writeValue(value);
+						this.selectedAllAziende = true;
 						this.lastAziendaFilterValue = value;
 						filterCallback(value);
 					},
@@ -1513,6 +1528,62 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		
 	}
 
+	public loadStruttureOfUtente(utente: Utente, idAzienda: number) {
+		const initialFiltersAndSorts = new FiltersAndSorts();
+		initialFiltersAndSorts.addFilter(new FilterDefinition("idUtente.id", FILTER_TYPES.not_string.equals, utente.id));
+		initialFiltersAndSorts.addFilter(new FilterDefinition("idStruttura.idAzienda.id", FILTER_TYPES.not_string.equals, idAzienda));
+		initialFiltersAndSorts.addFilter(new FilterDefinition("idStruttura.ufficio", FILTER_TYPES.not_string.equals, false));
+		return this.utenteStrutturaService.getData(
+		  ENTITIES_STRUCTURE.baborg.utentestruttura.customProjections.UtenteStrutturaWithIdAfferenzaStrutturaCustom,
+		  initialFiltersAndSorts,
+		  null);
+	  }
+
+	public onCloseGestioneMassiva() {
+		console.log("Chiuso");
+		this.isUtenteSelectedGestioneMassiva = false;
+		this.struttureUtenteSelectableGestioneMassiva = [];
+		this.strutturaUtenteSelectedGestioneMassiva = undefined;
+		this.utenteSelectedGestioneMassiva = undefined;
+	}
+
+	public onUtenteSelectedGestioneMassiva(utenteStruttura: UtenteStruttura) {
+		this.isUtenteSelectedGestioneMassiva = true;
+		this.struttureUtenteSelectableGestioneMassiva = [];
+		this.strutturaUtenteSelectedGestioneMassiva = new Struttura();
+		this.subscriptions.push(this.loadStruttureOfUtente(utenteStruttura.idUtente, this.idAziendaFiltrataAG.id).subscribe( //Popolo la lista di struttre selezionabili
+			(data: any) => {
+				if (data && data.results) {
+					const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]> data.results;
+              		utentiStruttura
+                		.filter((us: UtenteStruttura) => us.attivo === true)
+                		.forEach((us: UtenteStruttura) => { this.struttureUtenteSelectableGestioneMassiva.push(us.idStruttura) });	
+				}
+			}
+		));
+	}
+
+	public onClickGestioneMassivaResponsabile() {
+		console.log("Struttura Selected", this.strutturaUtenteSelectedGestioneMassiva)
+		if (this.archivesSelected.length > 0) { //Se non ho selezionato tutti faccio questo
+			let stringIdsArchivi = "";
+			this.archivesSelected.forEach(archiveSelected => {
+				if(archiveSelected)
+					stringIdsArchivi = stringIdsArchivi + "ids=" + archiveSelected.id +"&"
+			})
+			this.extendedArchiviListService.gestioneMassivaResponsabile(stringIdsArchivi, this.utenteSelectedGestioneMassiva.id, this.strutturaUtenteSelectedGestioneMassiva.id, this.idAziendaFiltrataAG.id);
+			this.utenteSelectedGestioneMassiva = new Utente;
+			this.strutturaUtenteSelectedGestioneMassiva = new Struttura;
+			this.isUtenteSelectedGestioneMassiva = false;
+			this.showGestioneMassiva = false;
+		}
+		else { //Se ho selezionato tutti o deselezionato tutti entro qui
+			
+		}
+	}
+
+
+
 	public eliminaSottoarchivio(rowData: any, event: Event) : void {
 		if (rowData.numeroSottoarchivi > 0) {
 			if (rowData.livello == 2) {
@@ -1665,4 +1736,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		this.showAdditionalRow = false;
 		this.allRowsWasSelected = false;
 	}
+
+
 }

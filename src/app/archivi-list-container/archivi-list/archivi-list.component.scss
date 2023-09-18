@@ -337,6 +337,20 @@
   }
 }
 
+.funzioniGear {
+  font-size: 2rem;
+  cursor: pointer;
+  color: #2e4a65 !important; 
+  &:hover {
+    color: #936 !important;
+    background-color: transparent !important;
+    border-color: transparent !important;
+  }
+  &:target{
+    outline: none !important;
+  }
+}
+
 /*Calendar*/
 ::ng-deep .calendar-filter-footer-button-container {
   display: flex;
