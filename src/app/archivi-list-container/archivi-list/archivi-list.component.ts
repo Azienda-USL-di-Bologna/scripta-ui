@@ -34,7 +34,6 @@ import { ExtendedArchivioService } from 'src/app/archivio/extended-archivio.serv
 import { ArchivioUtilsService } from 'src/app/archivio/archivio-utils.service';
 import { TitoloService } from '@bds/internauta-model';
 import { MassimarioService } from '@bds/internauta-model';
-import { ExtendedArchivioListService } from './extended-archivi-list.service';
 
 @Component({
 	selector: 'archivi-list',
