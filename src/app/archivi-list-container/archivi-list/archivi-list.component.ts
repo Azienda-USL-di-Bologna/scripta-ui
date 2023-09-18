@@ -1572,7 +1572,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				if(archiveSelected)
 					stringIdsArchivi = stringIdsArchivi + "ids=" + archiveSelected.id +"&"
 			})
-			this.extendedArchiviListService.gestioneMassivaResponsabile(stringIdsArchivi, this.utenteSelectedGestioneMassiva.id, this.strutturaUtenteSelectedGestioneMassiva.id, this.idAziendaFiltrataAG.id);
+			this.subscriptions.push(this.archiviListService.gestioneMassivaResponsabile(
+				stringIdsArchivi,
+				this.utenteSelectedGestioneMassiva.id,
+				this.strutturaUtenteSelectedGestioneMassiva.id,
+				this.idAziendaFiltrataAG.id).subscribe((data : any) => {
+				}));
 			this.utenteSelectedGestioneMassiva = new Utente;
 			this.strutturaUtenteSelectedGestioneMassiva = new Struttura;
 			this.isUtenteSelectedGestioneMassiva = false;
