@@ -363,6 +363,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	}
 
 	public setAziendaGestioneMassiva() : void { 
+		this.utenteSelectedGestioneMassiva = undefined;
 		let archivioSelezionato = this.archivesSelected[this.archivesSelected.length - 1];
 		this.idAziendaFiltrataAG = archivioSelezionato.idAzienda;
 	}
@@ -1551,6 +1552,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		this.isUtenteSelectedGestioneMassiva = true;
 		this.struttureUtenteSelectableGestioneMassiva = [];
 		this.strutturaUtenteSelectedGestioneMassiva = new Struttura();
+		this.utenteSelectedGestioneMassiva  = utenteStruttura.idUtente;
 		this.subscriptions.push(this.loadStruttureOfUtente(utenteStruttura.idUtente, this.idAziendaFiltrataAG.id).subscribe( //Popolo la lista di struttre selezionabili
 			(data: any) => {
 				if (data && data.results) {
@@ -1564,7 +1566,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	}
 
 	public onClickGestioneMassivaResponsabile() {
-		console.log("Struttura Selected", this.strutturaUtenteSelectedGestioneMassiva)
 		if (this.archivesSelected.length > 0) { //Se non ho selezionato tutti faccio questo
 			let stringIdsArchivi = "";
 			this.archivesSelected.forEach(archiveSelected => {
