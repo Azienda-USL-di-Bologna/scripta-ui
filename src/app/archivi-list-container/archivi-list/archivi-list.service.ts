@@ -17,5 +17,5 @@ export class ArchiviListService extends ArchivioDetailService{
   public gestioneMassivaResponsabile(ids : string, idReponsabileNuovo: number, idStrutturaNuova: number, idAziendaRiferimento : number) : Observable<any> {
     const url = getInternautaUrl(BaseUrlType.Scripta) + "/" + "sostituisciResponsabileArchivioMassivo?" + ids + "idPersonaNuovoResponsabile=" + idReponsabileNuovo + "&idStrutturaNuovoResponsabile=" +idStrutturaNuova +"&idAziendaRiferimento="+idAziendaRiferimento;
     return this._http.get(url, {responseType: "blob"}); 
-}
+  }
 }

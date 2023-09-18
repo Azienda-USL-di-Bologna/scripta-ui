@@ -1572,7 +1572,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			})
 			this.subscriptions.push(this.archiviListService.gestioneMassivaResponsabile(
 				stringIdsArchivi,
-				this.utenteSelectedGestioneMassiva.id,
+				this.utenteSelectedGestioneMassiva.idPersona.id,
 				this.strutturaUtenteSelectedGestioneMassiva.id,
 				this.idAziendaFiltrataAG.id).subscribe((data : any) => {
 				}));
