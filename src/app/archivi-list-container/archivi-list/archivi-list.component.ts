@@ -34,6 +34,7 @@ import { ExtendedArchivioService } from 'src/app/archivio/extended-archivio.serv
 import { ArchivioUtilsService } from 'src/app/archivio/archivio-utils.service';
 import { TitoloService } from '@bds/internauta-model';
 import { MassimarioService } from '@bds/internauta-model';
+import { HttpParams } from '@angular/common/http';
 
 @Component({
 	selector: 'archivi-list',
@@ -1564,6 +1565,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	}
 
 	public onClickGestioneMassivaResponsabile() {
+		this.buildFilterPerGestioneMassiva();
 		if (this.archivesSelected.length > 0) { //Se non ho selezionato tutti faccio questo
 			let stringIdsArchivi = "";
 			this.archivesSelected.forEach(archiveSelected => {
@@ -1587,6 +1589,16 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	}
 
 
+	private buildFilterPerGestioneMassiva() {
+		this.loading = true; // TODO: Va nella funzione sopra
+		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
+		lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
+		filtersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
+		const parametri: HttpParams = this.serviceToGetData.buildQueryParams(null, null, filtersAndSorts, lazyFiltersAndSorts, null, null);
+		
+		console.log("parametri: ", parametri)
+	}
 
 	public eliminaSottoarchivio(rowData: any, event: Event) : void {
 		if (rowData.numeroSottoarchivi > 0) {
