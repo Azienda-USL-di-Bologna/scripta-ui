@@ -586,6 +586,7 @@
   <div class="box box-scelta-responsabile">
     <label for="ricerca-nuovo-responsabile">Scegli il responsabile dei fascicoli:</label>
     <lib-users-autocomplete id="ricerca-nuovo-responsabile"
+      *ngIf="!isReset"
       class="autocomplete-utenti" 
       [azienda]="aziendaFiltrataAG"
       [showPool]="false"
@@ -613,9 +614,16 @@
 
   <div class="box footer">
     <p-button 
+      class="bottoni-footer"
       label="Conferma" 
       (click)="onClickGestioneMassivaResponsabile()" 
       [disabled]="!isStrutturaSelectedGestioneMassiva"
-    ></p-button> 
+    ></p-button>
+    <p-button 
+    class="bottone-footer"
+    *ngIf="showSvuotaButton"
+    label="Svuota campo" 
+    (click)="svuotaCampiGestioneMassivaResponsabile()" 
+  ></p-button>   
   </div>
 </p-dialog>

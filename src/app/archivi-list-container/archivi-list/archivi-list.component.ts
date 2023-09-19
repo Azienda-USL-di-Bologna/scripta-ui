@@ -139,6 +139,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	private struttureUtenteSelectableGestioneMassiva : Struttura[] = [];
 	private isUtenteSelectedGestioneMassiva = false;
 	private isStrutturaSelectedGestioneMassiva = false;
+	private isReset = false;
+	private showSvuotaButton = false;
 	private aziendaFiltrataAG : Azienda;
 	private rowsNotSelectedWhenAlmostAllRowsAreSelected: number[] = [];
 	public loggedUserIsAG = false;
@@ -1526,10 +1528,26 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		
 	}
 
+	public svuotaCampiGestioneMassivaResponsabile() {
+        this.isReset = true;
+		this.struttureUtenteSelectableGestioneMassiva = [];
+		this.strutturaUtenteSelectedGestioneMassiva = null;
+		this.isStrutturaSelectedGestioneMassiva = false;
+		this.isUtenteSelectedGestioneMassiva = false;
+		this.utenteSelectedGestioneMassiva = null;
+        setTimeout(() => {
+            this.isReset = false; //Serve a far sparire e riapparire 
+        }, 1);
+		this.showSvuotaButton = false;
+    }
+	
+
 	public setAziendaGestioneMassiva() : void { 
 		console.log("Gestione massiva:", this.utenteSelectedGestioneMassiva)
 		/* this.isStrutturaSelectedGestioneMassiva = false;
 		this.isUtenteSelectedGestioneMassiva = false; */
+		this.isReset = false;
+		this.showSvuotaButton = false;
 		this.aziendaFiltrataAG = new Azienda();
 		this.aziendaFiltrataAG.id = this.dropdownAzienda.value[0];
 	}
@@ -1552,7 +1570,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	  }
 
 	public onCloseGestioneMassiva() {
-		console.log("Chiuso");
 		/* this.isUtenteSelectedGestioneMassiva = false;
 		this.isStrutturaSelectedGestioneMassiva = false;
 		this.struttureUtenteSelectableGestioneMassiva = [];
@@ -1586,6 +1603,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						this.strutturaUtenteSelectedGestioneMassiva = this.struttureUtenteSelectableGestioneMassiva[0];
 						this.isStrutturaSelectedGestioneMassiva = true;
 					}
+					this.showSvuotaButton = true;
 				}
 			}
 		));
