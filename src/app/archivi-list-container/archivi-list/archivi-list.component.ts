@@ -1576,16 +1576,16 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]> data.results;
 					// Riempo l'array delle strutture selezionabili per l'utente
 					utentiStruttura.forEach((us: UtenteStruttura) => {
-						if(us.idAfferenzaStruttura.id === 1) {
+						if (us.idAfferenzaStruttura.codice === "DIRETTA") {
 							this.strutturaUtenteSelectedGestioneMassiva = us.idStruttura;
 							this.isStrutturaSelectedGestioneMassiva = true;
 						}
 						this.struttureUtenteSelectableGestioneMassiva.push(us.idStruttura) 
 					});
-					if(this.strutturaUtenteSelectedGestioneMassiva === null) {
+					if (!this.strutturaUtenteSelectedGestioneMassiva) {
 						this.strutturaUtenteSelectedGestioneMassiva = this.struttureUtenteSelectableGestioneMassiva[0];
 						this.isStrutturaSelectedGestioneMassiva = true;
-					}	
+					}
 				}
 			}
 		));
