@@ -1547,7 +1547,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		/* this.isStrutturaSelectedGestioneMassiva = false;
 		this.isUtenteSelectedGestioneMassiva = false; */
 		this.isReset = false;
-		this.showSvuotaButton = false;
+		//this.showSvuotaButton = false;
 		this.aziendaFiltrataAG = new Azienda();
 		this.aziendaFiltrataAG.id = this.dropdownAzienda.value[0];
 	}
