@@ -1527,6 +1527,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	}
 
 	public setAziendaGestioneMassiva() : void { 
+		console.log("Gestione massiva:", this.utenteSelectedGestioneMassiva)
 		this.isStrutturaSelectedGestioneMassiva = false;
 		this.isUtenteSelectedGestioneMassiva = false;
 		this.aziendaFiltrataAG = new Azienda();

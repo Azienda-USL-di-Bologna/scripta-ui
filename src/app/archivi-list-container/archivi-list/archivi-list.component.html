@@ -586,7 +586,9 @@
   <br>
   <b>Scegli il responsabile dei fascicoli:</b>
   <!--Dropdown responsabile -->
+    <ng-template pTemplate="input">
         <lib-users-autocomplete
+          name="dropdown-utenti"
           class="autocomplete-utenti" 
           [(azienda)]="aziendaFiltrataAG"
           [showPool]="false"
@@ -595,6 +597,7 @@
           (utenteStrutturaSelezionatoEmit)="onUtenteSelectedGestioneMassiva($event)"
         >
         </lib-users-autocomplete>
+    </ng-template>
   <br>
   <br>
   <br>
