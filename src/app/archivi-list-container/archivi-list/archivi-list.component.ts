@@ -1617,10 +1617,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 							});
 					}
 				));
-			this.utenteSelectedGestioneMassiva = new UtenteStruttura();
-			this.strutturaUtenteSelectedGestioneMassiva = new Struttura();
-			this.isUtenteSelectedGestioneMassiva = false;
-			this.isStrutturaSelectedGestioneMassiva = false;
+			//this.utenteSelectedGestioneMassiva = new UtenteStruttura();
+			//this.strutturaUtenteSelectedGestioneMassiva = new Struttura();
+			//this.isUtenteSelectedGestioneMassiva = false;
+			//this.isStrutturaSelectedGestioneMassiva = false;
 			this.showGestioneMassiva = false;
 		}
 		else { //Se ho selezionato tutti o deselezionato tutti entro qui
