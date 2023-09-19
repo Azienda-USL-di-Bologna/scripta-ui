@@ -94,7 +94,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	private loadArchiviListCountSubscription: Subscription;
 	private serviceToGetData: NextSDREntityProvider = null;
 	private projectionToGetData: string = null;
-	private idAziendaFiltrataAG: Azienda;
 	private lastDataCreazioneFilterValue: Date[];
 	private lastAziendaFilterValue: number[];
 	public aziendeConFascicoliParlanti: number[] = [];
@@ -139,6 +138,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	private strutturaUtenteSelectedGestioneMassiva : Struttura;
 	private struttureUtenteSelectableGestioneMassiva : Struttura[] = [];
 	private isUtenteSelectedGestioneMassiva = false;
+	private aziendaFiltrataAG : Azienda;
 	private rowsNotSelectedWhenAlmostAllRowsAreSelected: number[] = [];
 	public loggedUserIsAG = false;
 	public selectedAllAziende = false;
@@ -361,11 +361,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		console.log(this._selectedColumns)
 	}
 
-	public setAziendaGestioneMassiva() : void { 
-		this.utenteSelectedGestioneMassiva = undefined;
-		let archivioSelezionato = this.archivesSelected[this.archivesSelected.length - 1];
-		this.idAziendaFiltrataAG = archivioSelezionato.idAzienda;
-	}
+	
 
 
 
@@ -968,6 +964,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.selectedAllAziende = false;
 			// L'utente ha scelto un unica azienda. Faccio quindi partire il filtro.
 			this.lastAziendaFilterValue = value;
+			console.log("Filtro: ", value)
 			filterCallback(value);
 		} else {
 			setTimeout(() => {
@@ -1528,6 +1525,13 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		
 	}
 
+	public setAziendaGestioneMassiva() : void { 
+		console.log("Azienda pre select:", this.dropdownAzienda.value[0])
+		this.aziendaFiltrataAG = new Azienda();
+		this.aziendaFiltrataAG.id = this.dropdownAzienda.value[0];
+		console.log("idAziendaFiltrata:", this.aziendaFiltrataAG)
+	}
+
 	public loadStruttureOfUtente(utente: Utente, idAzienda: number) {
 		const initialFiltersAndSorts = new FiltersAndSorts();
 		initialFiltersAndSorts.addFilter(new FilterDefinition("idUtente.id", FILTER_TYPES.not_string.equals, utente.id));
@@ -1552,7 +1556,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		this.struttureUtenteSelectableGestioneMassiva = [];
 		this.strutturaUtenteSelectedGestioneMassiva = new Struttura();
 		this.utenteSelectedGestioneMassiva  = utenteStruttura.idUtente;
-		this.subscriptions.push(this.loadStruttureOfUtente(utenteStruttura.idUtente, this.idAziendaFiltrataAG.id).subscribe( //Popolo la lista di struttre selezionabili
+		this.subscriptions.push(this.loadStruttureOfUtente(utenteStruttura.idUtente, this.aziendaFiltrataAG.id).subscribe( //Popolo la lista di struttre selezionabili 
 			(data: any) => {
 				if (data && data.results) {
 					const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]> data.results;
@@ -1576,8 +1580,24 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				stringIdsArchivi,
 				this.utenteSelectedGestioneMassiva.idPersona.id,
 				this.strutturaUtenteSelectedGestioneMassiva.id,
-				this.idAziendaFiltrataAG.id).subscribe((data : any) => {
-				}));
+				this.aziendaFiltrataAG.id).subscribe( 
+					res => {
+					this.messageService.add({
+						severity: "success",
+						key: "archiviListToast",
+						summary: "Responsabile cambiato",
+						detail: `La richiesta è stata presa in carico. Riceverai una notifica sulla scrivania non appena sarà eseguita`
+						});
+					},
+					err => {
+						this.messageService.add({
+							severity: "warn",
+							key: "archiviListToast",
+							summary: "Attenzione",
+							detail: `Qualcosa è andato storto, se il problema persiste contattare BabelCare`
+							});
+					}
+				));
 			this.utenteSelectedGestioneMassiva = new Utente;
 			this.strutturaUtenteSelectedGestioneMassiva = new Struttura;
 			this.isUtenteSelectedGestioneMassiva = false;
