@@ -932,7 +932,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			case ArchiviListMode.TUTTI:
 				this.messageIfNull = 'Non sono stati trovati fascicoli.';
 				filterAndSort.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
-
+				filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabTutti"));
 				break;
 			case ArchiviListMode.PREFERITI:
 				this.messageIfNull = "Non sono stati trovati fascicoli Preferiti. Clicca l'icona del cuore in alto a destra dentro ad un fascicolo per aggiungerlo ai preferiti.";
@@ -1564,11 +1564,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 * metodo chiamato dall'html alla selezione dell'utente responsabile
 	 * @param utenteStruttura 
 	 */
-	public onUtenteSelectedGestioneMassiva(utenteStruttura: UtenteStruttura) {
+	public onSelectedNewResponsabileGestioneMassiva(utenteStruttura: UtenteStruttura) {
 		this.isUtenteSelectedGestioneMassiva = true;
 		this.struttureUtenteSelectableGestioneMassiva = [];
 		this.strutturaUtenteSelectedGestioneMassiva = null;
 		this.utenteSelectedGestioneMassiva = utenteStruttura;
+		
 		// Popolo la lista di struttre selezionabili 
 		this.subscriptions.push(this.loadStruttureOfUtente(utenteStruttura.idUtente, this.aziendaFiltrataAG.id).subscribe( 
 			(data: any) => {
@@ -1576,16 +1577,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]> data.results;
 					// Riempo l'array delle strutture selezionabili per l'utente
 					utentiStruttura.forEach((us: UtenteStruttura) => {
-						if (us.idAfferenzaStruttura.codice === "DIRETTA") {
+						if (us.id === utenteStruttura.id) {
 							this.strutturaUtenteSelectedGestioneMassiva = us.idStruttura;
 							this.isStrutturaSelectedGestioneMassiva = true;
 						}
 						this.struttureUtenteSelectableGestioneMassiva.push(us.idStruttura) 
 					});
-					if (!this.strutturaUtenteSelectedGestioneMassiva) {
-						this.strutturaUtenteSelectedGestioneMassiva = this.struttureUtenteSelectableGestioneMassiva[0];
-						this.isStrutturaSelectedGestioneMassiva = true;
-					}
 				}
 			}
 		));
@@ -1595,7 +1592,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		this.isStrutturaSelectedGestioneMassiva = true;
 	}
 
-	public onClickGestioneMassivaResponsabile() {
+	public avviaSostituzioneResponsabileMassiva() {
 		this.rightContentProgressSpinner = true;
 
 		this.subscriptions.push(this.archiviListService.gestioneMassivaResponsabile(
