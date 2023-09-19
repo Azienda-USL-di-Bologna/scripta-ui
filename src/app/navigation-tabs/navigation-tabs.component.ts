@@ -32,7 +32,7 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
     private archivioService: ExtendedArchivioService
   ) {
     if (this.router.routerState.snapshot.url.includes("archivilist")) {
-      this.tabIdToActiveAtTheBeginning = TabType.DOCS_LIST;
+      this.tabIdToActiveAtTheBeginning = TabType.ARCHIVI_LIST;
       this.appService.appNameSelection("Elenco Fascicoli")
     } else if (this.router.routerState.snapshot.url.includes("apridascrivania")) {
       this.tabIdToActiveAtTheBeginning = TabType.DOCS_LIST;
@@ -41,7 +41,7 @@ export class NavigationTabsComponent implements OnInit, AfterViewInit {
       this.tabIdToActiveAtTheBeginning = TabType.TIP;
       this.idTipSessioneImportazione = this.router.parseUrl(this.router.url).queryParams["idSessione"];
     } else {
-      this.tabIdToActiveAtTheBeginning = TabType.ARCHIVI_LIST;
+      this.tabIdToActiveAtTheBeginning = TabType.DOCS_LIST;
       this.appService.appNameSelection("Elenco Documenti");
     }
   }
