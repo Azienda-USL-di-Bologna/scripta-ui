@@ -10,12 +10,16 @@
       height: 2.563rem;
       border-top: 1px solid #c8c8c8;
       border-bottom: 1px solid #c8c8c8;
+      align-items: center;
       .selection-info {
         align-self: center;
         padding: 0 1rem;
       }
       p-button {
         align-self: center;
+      }
+      .gestione-massiva-responsabile-button {
+        margin-left: 1rem;
       }
     }
     /* HEADER */
@@ -337,7 +341,7 @@
   }
 }
 
-.funzioniGear {
+/* .funzioni-gear {
   font-size: 2rem;
   cursor: pointer;
   color: #2e4a65 !important; 
@@ -349,7 +353,7 @@
   &:target{
     outline: none !important;
   }
-}
+} */
 
 /*Calendar*/
 ::ng-deep .calendar-filter-footer-button-container {
@@ -366,5 +370,17 @@
   .p-highlight {
     color: #ffffff;
     background: #2e4a65 !important;
+  }
+}
+
+::ng-deep .dialog-gestione-massiva-responsabile {
+  width: 50rem;
+  height: 20rem;
+  .box {
+    margin-top: 1rem;
+  }
+  .footer {
+    justify-content: center; 
+    display: flex; 
   }
 }

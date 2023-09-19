@@ -420,16 +420,13 @@
           allRowsWasSelected = false; 
           rowsNotSelectedWhenAlmostAllRowsAreSelected = []">
       </p-button>
-      <!-- BOTTONE GESTIONE MASSIVA -->
-      <span *ngIf="loggedUserIsAG && !selectedAllAziende" ><!--  e se è in tutti, click = show responsabili-->
-        <i
-          class="pi p-mr-2 pi-user-edit funzioniGear"
-          style="margin-left: 0.5rem; "
-          pTooltip="Sostituzione responsabile e struttura"
-          (click)="setAziendaGestioneMassiva(); showGestioneMassiva = true;"
-          tooltipPosition="bottom">
-        </i>
-      </span>
+      <!-- BOTTONE GESTIONE MASSIVA RESPONSABILE-->
+      <p-button 
+        class="gestione-massiva-responsabile-button"
+        icon="pi p-mr-2 pi-user-edit"
+        label="Sostituzione responsabile e struttura"
+        (click)="setAziendaGestioneMassiva(); showGestioneMassiva = true;">
+      </p-button><!-- *ngIf="archivesSelected.length > 0" -->
     </tr>
   </ng-template>
   <!-- BODY -->
@@ -576,54 +573,49 @@
 </p-table>
 <p-toast key="archiviListToast"></p-toast>
 <p-confirmPopup key="confirm-popup"></p-confirmPopup>
-<p-dialog header="Gestione massiva: Modifica responsabile/struttura" 
-  [(visible)] = "showGestioneMassiva" 
-  [style]="{width: '30vw', height: '20vw'}"
+
+<!-- DIALOG PER GESTIONE MASSIVA RESPONSAILE -->
+<p-dialog 
+  header="Gestione massiva: Modifica responsabile/struttura" 
+  [(visible)]="showGestioneMassiva" 
   (onHide)="onCloseGestioneMassiva()"
+  styleClass="dialog-gestione-massiva-responsabile"
 >
-  Stai agendo su {{rowCountSelected === 1 ? 'un fascicolo' : rowCountSelected + ' fascicoli'}}
-  <br>
-  <br>
-  <b>Scegli il responsabile dei fascicoli:</b>
-  <!--Dropdown responsabile -->
-    <ng-template pTemplate="input">
-        <lib-users-autocomplete
-          name="dropdown-utenti"
-          class="autocomplete-utenti" 
-          [(azienda)]="aziendaFiltrataAG"
-          [showPool]="false"
-          [showOnlyUser]="true"
-          [(ngModel)] = "utenteSelectedGestioneMassiva"
-          (utenteStrutturaSelezionatoEmit)="onUtenteSelectedGestioneMassiva($event)"
-        >
-        </lib-users-autocomplete>
-    </ng-template>
-  <br>
-  <br>
-  <br>
-  <b>Struttura dei fascicoli: </b> (scelta tra le strutture del responsabile)
-  <br>
-    <!-- Dropdown struttura -->
+  <span class="counter-fascicoli">Stai agendo su {{rowCountSelected === 1 ? 'un fascicolo' : rowCountSelected + ' fascicoli'}}</span>
+
+  <div class="box box-scelta-responsabile">
+    <label for="ricerca-nuovo-responsabile">Scegli il responsabile dei fascicoli:</label>
+    <lib-users-autocomplete id="ricerca-nuovo-responsabile"
+      class="autocomplete-utenti" 
+      [azienda]="aziendaFiltrataAG"
+      [showPool]="false"
+      [showOnlyUser]="false"
+      (utenteStrutturaSelezionatoEmit)="onUtenteSelectedGestioneMassiva($event)"
+    >
+    </lib-users-autocomplete>
+  </div>
+
+  <div class="box box-scelta-struttura">
+    <label>Struttura dei fascicoli: </label><span>(scelta tra le strutture del responsabile)</span>
     <p-dropdown 
-      [disabled] = "!isUtenteSelectedGestioneMassiva"
+      [disabled]="!isUtenteSelectedGestioneMassiva"
       [options]="struttureUtenteSelectableGestioneMassiva"
       [(ngModel)]="strutturaUtenteSelectedGestioneMassiva"
-      (onChange) = "onStrutturaSelectedGestioneMassiva($event)"
-     >
+      (onChange)="onStrutturaSelectedGestioneMassiva($event)">
       <ng-template let-struttura pTemplate="selectedItem">
-          <div>{{struttura.nome}}</div>
+        <div>{{struttura.nome}}</div>
       </ng-template>
       <ng-template let-struttura pTemplate="item">
-          <div>{{struttura.nome}}</div>
+        <div>{{struttura.nome}}</div>
       </ng-template>
-  </p-dropdown>
-  <br>
-  <br>
-  <div style="justify-content: center; display: flex; ">
+    </p-dropdown>
+  </div>
+
+  <div class="box footer">
     <p-button 
       label="Conferma" 
       (click)="onClickGestioneMassivaResponsabile()" 
       [disabled]="!isStrutturaSelectedGestioneMassiva"
-     ></p-button> 
+    ></p-button> 
   </div>
 </p-dialog>

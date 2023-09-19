@@ -134,7 +134,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public showGestioneMassiva : boolean = false;
 	public allRowsAreSelected: boolean = false;
 	public allRowsWasSelected: boolean = false;
-	private utenteSelectedGestioneMassiva : Utente;
+	private utenteSelectedGestioneMassiva : UtenteStruttura;
 	private strutturaUtenteSelectedGestioneMassiva : Struttura;
 	private struttureUtenteSelectableGestioneMassiva : Struttura[] = [];
 	private isUtenteSelectedGestioneMassiva = false;
@@ -178,9 +178,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	ngOnInit(): void {
 		this.serviceToGetData = this.archiviListService;
 		this.cols = cols; 
-		this.archiviListMode = this.route.snapshot.queryParamMap.get('mode') as ArchiviListMode || ArchiviListMode.RECENTI;
+		this.archiviListMode = this.route.snapshot.queryParamMap.get('mode') as ArchiviListMode || ArchiviListMode.TUTTI;
 		if (!Object.values(ArchiviListMode).includes(this.archiviListMode)) {
-			this.archiviListMode = ArchiviListMode.RECENTI;
+			this.archiviListMode = ArchiviListMode.TUTTI;
 		}
 		//this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } });
 		const loggeduser$ = this.loginService.loggedUser$.pipe(first());
@@ -805,7 +805,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					this.resetArchiviArrayLenght = false;
 					this.dataTable.resetScrollTop();
 					this.archivi = Array.from({ length: this.totalRecords });
-					this.archivesSelected = Array.from({ length: this.totalRecords });
+					//this.archivesSelected = Array.from({ length: this.totalRecords });
 				}
 
 				if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
@@ -1528,12 +1528,18 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 
 	public setAziendaGestioneMassiva() : void { 
 		console.log("Gestione massiva:", this.utenteSelectedGestioneMassiva)
-		this.isStrutturaSelectedGestioneMassiva = false;
-		this.isUtenteSelectedGestioneMassiva = false;
+		/* this.isStrutturaSelectedGestioneMassiva = false;
+		this.isUtenteSelectedGestioneMassiva = false; */
 		this.aziendaFiltrataAG = new Azienda();
 		this.aziendaFiltrataAG.id = this.dropdownAzienda.value[0];
 	}
 
+	/**
+	 * Torno un observable di utenteStruttura che carica le strutture a cui appartiene l'utente
+	 * @param utente 
+	 * @param idAzienda 
+	 * @returns 
+	 */
 	public loadStruttureOfUtente(utente: Utente, idAzienda: number) {
 		const initialFiltersAndSorts = new FiltersAndSorts();
 		initialFiltersAndSorts.addFilter(new FilterDefinition("idUtente.id", FILTER_TYPES.not_string.equals, utente.id));
@@ -1547,25 +1553,31 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 
 	public onCloseGestioneMassiva() {
 		console.log("Chiuso");
-		this.isUtenteSelectedGestioneMassiva = false;
+		/* this.isUtenteSelectedGestioneMassiva = false;
 		this.isStrutturaSelectedGestioneMassiva = false;
 		this.struttureUtenteSelectableGestioneMassiva = [];
 		this.strutturaUtenteSelectedGestioneMassiva = undefined;
-		this.utenteSelectedGestioneMassiva = undefined;
+		this.utenteSelectedGestioneMassiva = undefined; */
 	}
 
+	/**
+	 * metodo chiamato dall'html alla selezione dell'utente responsabile
+	 * @param utenteStruttura 
+	 */
 	public onUtenteSelectedGestioneMassiva(utenteStruttura: UtenteStruttura) {
 		this.isUtenteSelectedGestioneMassiva = true;
 		this.struttureUtenteSelectableGestioneMassiva = [];
-		this.strutturaUtenteSelectedGestioneMassiva = new Struttura();
-		this.utenteSelectedGestioneMassiva  = utenteStruttura.idUtente;
-		this.subscriptions.push(this.loadStruttureOfUtente(utenteStruttura.idUtente, this.aziendaFiltrataAG.id).subscribe( //Popolo la lista di struttre selezionabili 
+		this.strutturaUtenteSelectedGestioneMassiva = null;
+		this.utenteSelectedGestioneMassiva = utenteStruttura;
+		// Popolo la lista di struttre selezionabili 
+		this.subscriptions.push(this.loadStruttureOfUtente(utenteStruttura.idUtente, this.aziendaFiltrataAG.id).subscribe( 
 			(data: any) => {
 				if (data && data.results) {
 					const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]> data.results;
-              		utentiStruttura
-                		.filter((us: UtenteStruttura) => us.attivo === true)
-                		.forEach((us: UtenteStruttura) => { this.struttureUtenteSelectableGestioneMassiva.push(us.idStruttura) });	
+					// Riempo l'array delle strutture selezionabili per l'utente
+					utentiStruttura.forEach((us: UtenteStruttura) => {
+						this.struttureUtenteSelectableGestioneMassiva.push(us.idStruttura) 
+					});	
 				}
 			}
 		));
@@ -1585,7 +1597,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			})
 			this.subscriptions.push(this.archiviListService.gestioneMassivaResponsabile(
 				stringIdsArchivi,
-				this.utenteSelectedGestioneMassiva.idPersona.id,
+				this.utenteSelectedGestioneMassiva.idUtente.idPersona.id,
 				this.strutturaUtenteSelectedGestioneMassiva.id,
 				this.aziendaFiltrataAG.id).subscribe( 
 					res => {
@@ -1605,8 +1617,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 							});
 					}
 				));
-			this.utenteSelectedGestioneMassiva = new Utente;
-			this.strutturaUtenteSelectedGestioneMassiva = new Struttura;
+			this.utenteSelectedGestioneMassiva = new UtenteStruttura();
+			this.strutturaUtenteSelectedGestioneMassiva = new Struttura();
 			this.isUtenteSelectedGestioneMassiva = false;
 			this.isStrutturaSelectedGestioneMassiva = false;
 			this.showGestioneMassiva = false;
@@ -1618,7 +1630,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 
 
 	private buildFilterPerGestioneMassiva() {
-		this.loading = true; // TODO: Va nella funzione sopra
+		//this.loading = true; // TODO: Va nella funzione sopra
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
 		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
 		lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
@@ -1780,6 +1792,4 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		this.showAdditionalRow = false;
 		this.allRowsWasSelected = false;
 	}
-
-
 }
