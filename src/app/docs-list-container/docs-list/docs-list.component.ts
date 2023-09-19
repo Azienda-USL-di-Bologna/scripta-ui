@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatoVersamento, Utente, StatoArchivio, ArchivioDetail, ArchivioDetailView, ConfigurazioneService, PersonaVedente } from "@bds/internauta-model";
+import { CODICI_RUOLO, Persona, ArchivioDoc, ArchivioDocService, PersonaService, PersonaUsante, Struttura, StrutturaService, UrlsGenerationStrategy, DocDetailView, PersonaVedenteService, Archivio, PermessoArchivio, ArchivioService, ArchivioDetailViewService, DocDetail, TipologiaDoc, StatoVersamento, Utente, StatoArchivio, ArchivioDetail, ArchivioDetailView, ConfigurazioneService, PersonaVedente, ParametroAziende} from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { buildLazyEventFiltersAndSorts } from "@bds/primeng-plugin";
 import { AdditionalDataDefinition, FilterDefinition, FilterJsonDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES, JsonField } from "@bds/next-sdr";
@@ -66,6 +66,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
   public deleteArchiviationFlag: boolean;
   public needToAsk: boolean = false;
   private dataUltimoPregresso: Date[] = [];
+  // private mappaDataUltimoPregresso: {[key:number]: Date[]} = {}; 
 
   @ViewChild("dt") public dataTable: Table;
   @ViewChild("dropdownAzienda") public dropdownAzienda: Dropdown;
@@ -252,6 +253,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         }
       )
     );
+    
     
     this.subscriptions.push(
       this.showRightPanel.subscribe(event =>{
@@ -488,6 +490,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         break;
       case DocsListMode.PREGRESSI: 
         this.lastDataCreazioneFilterValue = this.calendarcreazione.value;
+        this.aziendeFiltrabiliFiltered
         this.calendarcreazione.writeValue(this.dataUltimoPregresso);
         this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
         break;
@@ -661,10 +664,12 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    */
   private calcolaAziendeFiltrabili() {
     this.aziendeFiltrabili = [];
+    let aziendeUtente: number[] =[];
     if (this.docsListMode !== DocsListMode.REGISTRAZIONI
       || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD)) {
       this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive
         .map(a => {
+          aziendeUtente.push(a.id);
           return {value: [a.id], label: a.nome} as ValueAndLabelObj;
         });
     } else if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.OS)
@@ -684,6 +689,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive
         .filter(a => codiceAziendeOSMOS.indexOf(a.codice) != -1)
         .map(a => {
+          aziendeUtente.push(a.id);
           return {value: [a.id], label: a.nome} as ValueAndLabelObj;
         });
     }
@@ -692,6 +698,25 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
         value: this.aziendeFiltrabili.map(e => e.value[0]),
         label: "Tutte"
       } as ValueAndLabelObj);
+    }
+    //aggiungo questo perche devo filtrare per la data piu grande delle mie aziende
+    if (this.aziendeFiltrabili){
+      //mi creo la mappa di tutte le date inizio di tutte le aziende
+      this.subscriptions.push(
+        this.configurazioneService.getParametriAziende("dataInizioPregressi", null, aziendeUtente).subscribe(
+          (data: ParametroAziende[]) => {
+            let dataPiuNuova: Date = new  Date(1900, 2, 12);
+            data.forEach((pa: ParametroAziende) => {
+              const dataDaValutare: Date = new Date(JSON.parse(pa.valore).data);
+              if (dataPiuNuova < dataDaValutare) {
+                dataPiuNuova = dataDaValutare;
+              }
+            })
+            this.dataUltimoPregresso = [new  Date(1900, 2, 12), dataPiuNuova];
+          }
+        )
+      )
+
     }
     // Svuoto l'eventuale filtro nel caso fosse stato usato e reimposto il default
     /* if (this.dropdownAzienda && this.columnFilterAzienda) {
@@ -932,20 +957,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.loadDocsListSubscription = null;
     }
     const idAziende : number[] = [this.dropdownAzienda.value];
-    this.subscriptions.push(
-      this.configurazioneService.getParametriAziende("dataInizioPregressi", null, idAziende).subscribe(
-        (data: any) => {
-          console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
-          if ( data.length == 1 ) {
-            const a = JSON.parse(data[0].valore);
-            console.log(a);
-            this.dataUltimoPregresso = [new  Date(1900, 2, 12), new Date(a.data)];
-          } else {
-            this.dataUltimoPregresso =null;
-          }
-        }
-      )
-    )
+    //asdasdasd vado a valorizzare la data pregresso per l'azienda voluta
+    
     
     const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
     const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
