@@ -178,9 +178,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	ngOnInit(): void {
 		this.serviceToGetData = this.archiviListService;
 		this.cols = cols; 
-		this.archiviListMode = this.route.snapshot.queryParamMap.get('mode') as ArchiviListMode || ArchiviListMode.TUTTI;
+		this.archiviListMode = this.route.snapshot.queryParamMap.get('mode') as ArchiviListMode || ArchiviListMode.RECENTI;
 		if (!Object.values(ArchiviListMode).includes(this.archiviListMode)) {
-			this.archiviListMode = ArchiviListMode.TUTTI;
+			this.archiviListMode = ArchiviListMode.RECENTI;
 		}
 		//this.router.navigate([], { relativeTo: this.route, queryParams: { view: NavViews.FASCICOLI, mode: this.archiviListMode } });
 		const loggeduser$ = this.loginService.loggedUser$.pipe(first());
@@ -1589,23 +1589,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 
 	public onClickGestioneMassivaResponsabile() {
 		this.rightContentProgressSpinner = true;
-
-		/* const ids: number[] = [];
-		const notIds: number[] = [];
-		const predicate: HttpParams = null;
-
-		// Preparo i parametri per la chiamata
-		if (!this.allRowsWasSelected) {
-			// Se non ho selezionato il flag Tutti, allora siamo nella versione in cui dobbiamo inviare un elenco di id.
-			this.archivesSelected.forEach(archiveSelected => {
-				if(archiveSelected)
-					stringIdsArchivi = stringIdsArchivi + "ids=" + archiveSelected.id +"&"
-			})
-		} else { 
-			// Se ho selezionato tutti o quasi allora devo inviare il predicato che rappresenta i vari filtri della tabella
-			predicate = this.buildFilterPerGestioneMassiva();
-			console.log("parametri: ", parametri)
-		} */
 
 		this.subscriptions.push(this.archiviListService.gestioneMassivaResponsabile(
 			this.allRowsWasSelected ? this.buildFilterPerGestioneMassiva() : null,

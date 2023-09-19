@@ -22,8 +22,6 @@ export class ArchiviListService extends ArchivioDetailService{
     idStrutturaNuovoResponsabile: number, 
     idAziendaRiferimento : number
   ) : Observable<any> {
-    /* const url = getInternautaUrl(BaseUrlType.Scripta) + "/" + "sostituisciResponsabileArchivioMassivo?" + ids + "idPersonaNuovoResponsabile=" + idReponsabileNuovo + "&idStrutturaNuovoResponsabile=" +idStrutturaNuova +"&idAziendaRiferimento="+idAziendaRiferimento;
-    return this._http.get(url);  */
     // Costruisci i parametri della richiesta HTTP
     predicate = predicate
       .set('idPersonaNuovoResponsabile', idPersonaNuovoResponsabile.toString())
