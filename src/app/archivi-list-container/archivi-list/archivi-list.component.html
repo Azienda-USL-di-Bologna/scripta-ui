@@ -590,8 +590,8 @@
       class="autocomplete-utenti" 
       [azienda]="aziendaFiltrataAG"
       [showPool]="false"
-      [showOnlyUser]="false"
-      (utenteStrutturaSelezionatoEmit)="onUtenteSelectedGestioneMassiva($event)"
+      [showOnlyUser]="true"
+      (utenteStrutturaSelezionatoEmit)="onSelectedNewResponsabileGestioneMassiva($event)"
     >
     </lib-users-autocomplete>
   </div>
@@ -616,7 +616,7 @@
     <p-button 
       class="bottoni-footer"
       label="Conferma" 
-      (click)="onClickGestioneMassivaResponsabile()" 
+      (click)="avviaSostituzioneResponsabileMassiva()" 
       [disabled]="!isStrutturaSelectedGestioneMassiva"
     ></p-button>
     <p-button 
