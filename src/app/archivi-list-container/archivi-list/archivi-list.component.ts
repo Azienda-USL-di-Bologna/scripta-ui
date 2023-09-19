@@ -138,6 +138,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	private strutturaUtenteSelectedGestioneMassiva : Struttura;
 	private struttureUtenteSelectableGestioneMassiva : Struttura[] = [];
 	private isUtenteSelectedGestioneMassiva = false;
+	private isStrutturaSelectedGestioneMassiva = false;
 	private aziendaFiltrataAG : Azienda;
 	private rowsNotSelectedWhenAlmostAllRowsAreSelected: number[] = [];
 	public loggedUserIsAG = false;
@@ -1526,10 +1527,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	}
 
 	public setAziendaGestioneMassiva() : void { 
-		console.log("Azienda pre select:", this.dropdownAzienda.value[0])
+		this.isStrutturaSelectedGestioneMassiva = false;
+		this.isUtenteSelectedGestioneMassiva = false;
 		this.aziendaFiltrataAG = new Azienda();
 		this.aziendaFiltrataAG.id = this.dropdownAzienda.value[0];
-		console.log("idAziendaFiltrata:", this.aziendaFiltrataAG)
 	}
 
 	public loadStruttureOfUtente(utente: Utente, idAzienda: number) {
@@ -1546,6 +1547,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public onCloseGestioneMassiva() {
 		console.log("Chiuso");
 		this.isUtenteSelectedGestioneMassiva = false;
+		this.isStrutturaSelectedGestioneMassiva = false;
 		this.struttureUtenteSelectableGestioneMassiva = [];
 		this.strutturaUtenteSelectedGestioneMassiva = undefined;
 		this.utenteSelectedGestioneMassiva = undefined;
@@ -1566,6 +1568,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				}
 			}
 		));
+	}
+
+	public onStrutturaSelectedGestioneMassiva(event: any) {
+		this.isStrutturaSelectedGestioneMassiva = true;
 	}
 
 	public onClickGestioneMassivaResponsabile() {
@@ -1601,6 +1607,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.utenteSelectedGestioneMassiva = new Utente;
 			this.strutturaUtenteSelectedGestioneMassiva = new Struttura;
 			this.isUtenteSelectedGestioneMassiva = false;
+			this.isStrutturaSelectedGestioneMassiva = false;
 			this.showGestioneMassiva = false;
 		}
 		else { //Se ho selezionato tutti o deselezionato tutti entro qui

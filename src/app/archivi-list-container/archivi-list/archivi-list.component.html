@@ -605,7 +605,8 @@
       [disabled] = "!isUtenteSelectedGestioneMassiva"
       [options]="struttureUtenteSelectableGestioneMassiva"
       [(ngModel)]="strutturaUtenteSelectedGestioneMassiva"
-    >
+      (onChange) = "onStrutturaSelectedGestioneMassiva($event)"
+     >
       <ng-template let-struttura pTemplate="selectedItem">
           <div>{{struttura.nome}}</div>
       </ng-template>
@@ -619,7 +620,7 @@
     <p-button 
       label="Conferma" 
       (click)="onClickGestioneMassivaResponsabile()" 
-      [disabled]="!isUtenteSelectedGestioneMassiva "
-     ></p-button> <!--&& struttureUtenteSelectableGestioneMassiva.length > 0 -->
+      [disabled]="!isStrutturaSelectedGestioneMassiva"
+     ></p-button> 
   </div>
 </p-dialog>
