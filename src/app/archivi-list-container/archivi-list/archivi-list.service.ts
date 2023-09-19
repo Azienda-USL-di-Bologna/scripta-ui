@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ArchivioDetailService, BaseUrlType, getInternautaUrl } from '@bds/internauta-model';
 import { Observable } from 'rxjs';
@@ -14,8 +14,35 @@ export class ArchiviListService extends ArchivioDetailService{
   }
 
   
-  public gestioneMassivaResponsabile(ids : string, idReponsabileNuovo: number, idStrutturaNuova: number, idAziendaRiferimento : number) : Observable<any> {
-    const url = getInternautaUrl(BaseUrlType.Scripta) + "/" + "sostituisciResponsabileArchivioMassivo?" + ids + "idPersonaNuovoResponsabile=" + idReponsabileNuovo + "&idStrutturaNuovoResponsabile=" +idStrutturaNuova +"&idAziendaRiferimento="+idAziendaRiferimento;
-    return this._http.get(url); 
+  public gestioneMassivaResponsabile(
+    predicate: HttpParams,
+    notIds: number[],
+    ids: number[], 
+    idPersonaNuovoResponsabile: number, 
+    idStrutturaNuovoResponsabile: number, 
+    idAziendaRiferimento : number
+  ) : Observable<any> {
+    /* const url = getInternautaUrl(BaseUrlType.Scripta) + "/" + "sostituisciResponsabileArchivioMassivo?" + ids + "idPersonaNuovoResponsabile=" + idReponsabileNuovo + "&idStrutturaNuovoResponsabile=" +idStrutturaNuova +"&idAziendaRiferimento="+idAziendaRiferimento;
+    return this._http.get(url);  */
+    // Costruisci i parametri della richiesta HTTP
+    predicate = predicate
+      .set('idPersonaNuovoResponsabile', idPersonaNuovoResponsabile.toString())
+      .set('idStrutturaNuovoResponsabile', idStrutturaNuovoResponsabile.toString())
+      .set('idAziendaRiferimento', idAziendaRiferimento.toString());
+
+    if (ids) {
+      ids.forEach((id) => {
+        predicate = predicate.append('ids', id.toString());
+      });
+    }
+
+    if (notIds) {
+      notIds.forEach((notId) => {
+        predicate = predicate.append('notIds', notId.toString());
+      });
+    }
+
+    // Esegui la richiesta GET con i parametri
+    return this._http.get(getInternautaUrl(BaseUrlType.Scripta) + "/" + "sostituisciResponsabileArchivioMassivo", { params: predicate });
   }
 }

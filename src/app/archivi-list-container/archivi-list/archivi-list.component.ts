@@ -1588,56 +1588,62 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	}
 
 	public onClickGestioneMassivaResponsabile() {
-		this.buildFilterPerGestioneMassiva();
-		if (this.archivesSelected.length > 0) { //Se non ho selezionato tutti faccio questo
-			let stringIdsArchivi = "";
+		this.rightContentProgressSpinner = true;
+
+		/* const ids: number[] = [];
+		const notIds: number[] = [];
+		const predicate: HttpParams = null;
+
+		// Preparo i parametri per la chiamata
+		if (!this.allRowsWasSelected) {
+			// Se non ho selezionato il flag Tutti, allora siamo nella versione in cui dobbiamo inviare un elenco di id.
 			this.archivesSelected.forEach(archiveSelected => {
 				if(archiveSelected)
 					stringIdsArchivi = stringIdsArchivi + "ids=" + archiveSelected.id +"&"
 			})
-			this.subscriptions.push(this.archiviListService.gestioneMassivaResponsabile(
-				stringIdsArchivi,
-				this.utenteSelectedGestioneMassiva.idUtente.idPersona.id,
-				this.strutturaUtenteSelectedGestioneMassiva.id,
-				this.aziendaFiltrataAG.id).subscribe( 
-					res => {
+		} else { 
+			// Se ho selezionato tutti o quasi allora devo inviare il predicato che rappresenta i vari filtri della tabella
+			predicate = this.buildFilterPerGestioneMassiva();
+			console.log("parametri: ", parametri)
+		} */
+
+		this.subscriptions.push(this.archiviListService.gestioneMassivaResponsabile(
+			this.allRowsWasSelected ? this.buildFilterPerGestioneMassiva() : null,
+			this.allRowsWasSelected ? this.rowsNotSelectedWhenAlmostAllRowsAreSelected : null,
+			this.allRowsWasSelected ? null : this.archivesSelected.map(e => e.id),
+			this.utenteSelectedGestioneMassiva.idUtente.idPersona.id,
+			this.strutturaUtenteSelectedGestioneMassiva.id,
+			this.aziendaFiltrataAG.id).subscribe(
+				res => {
 					this.messageService.add({
 						severity: "success",
 						key: "archiviListToast",
 						summary: "Responsabile cambiato",
 						detail: `La richiesta è stata presa in carico. Riceverai una notifica sulla scrivania non appena sarà eseguita`
-						});
-					},
-					err => {
-						this.messageService.add({
-							severity: "warn",
-							key: "archiviListToast",
-							summary: "Attenzione",
-							detail: `Qualcosa è andato storto, se il problema persiste contattare BabelCare`
-							});
-					}
-				));
-			//this.utenteSelectedGestioneMassiva = new UtenteStruttura();
-			//this.strutturaUtenteSelectedGestioneMassiva = new Struttura();
-			//this.isUtenteSelectedGestioneMassiva = false;
-			//this.isStrutturaSelectedGestioneMassiva = false;
-			this.showGestioneMassiva = false;
-		}
-		else { //Se ho selezionato tutti o deselezionato tutti entro qui
-			
-		}
+					});
+					this.rightContentProgressSpinner = false;
+					this.showGestioneMassiva = false;
+				},
+				err => {
+					this.messageService.add({
+						severity: "warn",
+						key: "archiviListToast",
+						summary: "Attenzione",
+						detail: `Qualcosa è andato storto, se il problema persiste contattare BabelCare`
+					});
+					this.rightContentProgressSpinner = false;
+					this.showGestioneMassiva = false;
+				}
+			));
 	}
 
 
 	private buildFilterPerGestioneMassiva() {
-		//this.loading = true; // TODO: Va nella funzione sopra
 		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
 		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
 		lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
 		filtersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
-		const parametri: HttpParams = this.serviceToGetData.buildQueryParams(null, null, filtersAndSorts, lazyFiltersAndSorts, null, null);
-		
-		console.log("parametri: ", parametri)
+		return this.serviceToGetData.buildQueryParams(null, null, filtersAndSorts, lazyFiltersAndSorts, null, null);
 	}
 
 	public eliminaSottoarchivio(rowData: any, event: Event) : void {
