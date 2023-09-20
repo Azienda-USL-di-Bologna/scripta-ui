@@ -1632,7 +1632,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						severity: "success",
 						key: "archiviListToast",
 						summary: "Cambio di responsabile massivo",
-						detail: `La richiesta è stata presa in carico e sarà svolta durante la notte; al termine dell'operazione riceverai una notifica sulla scrivania`
+						detail: `La richiesta è stata presa in carico e sarà svolta durante la notte; al termine dell'operazione riceverai una notifica sulla scrivania`,
+						life: 6000
 					});
 					this.rightContentProgressSpinner = false;
 					
