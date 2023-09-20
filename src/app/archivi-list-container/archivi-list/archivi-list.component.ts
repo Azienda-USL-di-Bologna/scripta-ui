@@ -1631,8 +1631,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					this.messageService.add({
 						severity: "success",
 						key: "archiviListToast",
-						summary: "Responsabile cambiato",
-						detail: `La richiesta è stata presa in carico. Riceverai una notifica sulla scrivania non appena sarà eseguita`
+						summary: "Cambio di responsabile massivo",
+						detail: `La richiesta è stata presa in carico e sarà svolta durante la notte; al termine dell'operazione riceverai una notifica sulla scrivania`
 					});
 					this.rightContentProgressSpinner = false;
 					
