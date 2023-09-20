@@ -32,7 +32,7 @@
   <!-- HEADER & ORDINAMENTO ---->
   <ng-template pTemplate="header" let-columns>
     <tr class="header-row">
-      <th *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG"
+      <th *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
         class="checkbox-column"
         alignFrozen="left" 
         pFrozenColumn 
@@ -89,7 +89,7 @@
     </tr>
     <!-------FILTRI -->
     <tr class="filter-row">
-      <th *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG"
+      <th *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
         class="checkbox-column"
         alignFrozen="left" 
         pFrozenColumn 
@@ -398,7 +398,7 @@
         [frozen]="true">
       </th>
     </tr>
-    <tr *ngIf="showAdditionalRow && archiviListMode === 'TUTTI' && loggedUserIsAG"
+    <tr *ngIf="showAdditionalRow && archiviListMode === 'TUTTI' && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
       class="additional-row">
       <span *ngIf="allRowsAreSelected && rowCountInProgress" class="selection-info">
         <i class="pi pi-spin pi-spinner"></i>
@@ -420,6 +420,13 @@
           allRowsWasSelected = false; 
           rowsNotSelectedWhenAlmostAllRowsAreSelected = []">
       </p-button>
+      <!-- BOTTONE GESTIONE MASSIVA RESPONSABILE-->
+      <p-button 
+        class="gestione-massiva-responsabile-button"
+        icon="pi p-mr-2 pi-user-edit"
+        label="Sostituzione responsabile e struttura"
+        (click)="setAziendaGestioneMassiva(); showGestioneMassiva = true;">
+      </p-button><!-- *ngIf="archivesSelected.length > 0" -->
     </tr>
   </ng-template>
   <!-- BODY -->
@@ -428,7 +435,7 @@
       [pSelectableRow]="rowData"
       [pSelectableRowIndex]="index"
       [pSelectableRowDisabled]="false">
-      <td *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG"
+      <td *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
         class="checkbox-column"
         alignFrozen="left"
         pFrozenColumn 
@@ -566,3 +573,57 @@
 </p-table>
 <p-toast key="archiviListToast"></p-toast>
 <p-confirmPopup key="confirm-popup"></p-confirmPopup>
+
+<!-- DIALOG PER GESTIONE MASSIVA RESPONSAILE -->
+<p-dialog 
+  header="Gestione massiva: Modifica responsabile/struttura" 
+  [(visible)]="showGestioneMassiva" 
+  (onHide)="onCloseGestioneMassiva()"
+  styleClass="dialog-gestione-massiva-responsabile"
+>
+  <span class="counter-fascicoli">Stai agendo su {{rowCountSelected === 1 ? 'un fascicolo' : rowCountSelected + ' fascicoli'}}</span>
+
+  <div class="box box-scelta-responsabile">
+    <label for="ricerca-nuovo-responsabile">Scegli il responsabile dei fascicoli:</label>
+    <lib-users-autocomplete id="ricerca-nuovo-responsabile"
+      *ngIf="!isReset && lastAziendaFilterValue"
+      class="autocomplete-utenti" 
+      [azienda]="{id: lastAziendaFilterValue[0]}"
+      [showPool]="false"
+      [showOnlyUser]="true"
+      (utenteStrutturaSelezionatoEmit)="onSelectedNewResponsabileGestioneMassiva($event)"
+    >
+    </lib-users-autocomplete>
+  </div>
+
+  <div class="box box-scelta-struttura">
+    <label>Struttura dei fascicoli: </label><span>(scelta tra le strutture del responsabile)</span>
+    <p-dropdown 
+      [disabled]="!isUtenteSelectedGestioneMassiva"
+      [options]="struttureUtenteSelectableGestioneMassiva"
+      [(ngModel)]="strutturaUtenteSelectedGestioneMassiva"
+      (onChange)="onStrutturaSelectedGestioneMassiva($event)">
+      <ng-template let-struttura pTemplate="selectedItem">
+        <div>{{struttura.nome}}</div>
+      </ng-template>
+      <ng-template let-struttura pTemplate="item">
+        <div>{{struttura.nome}}</div>
+      </ng-template>
+    </p-dropdown>
+  </div>
+
+  <div class="box footer">
+    <p-button 
+      class="bottoni-footer"
+      label="Conferma" 
+      (click)="avviaSostituzioneResponsabileMassiva()" 
+      [disabled]="!isStrutturaSelectedGestioneMassiva"
+    ></p-button>
+    <p-button 
+      class="bottone-footer"
+      *ngIf="showSvuotaButton"
+      label="Svuota campi" 
+      (click)="svuotaCampiGestioneMassivaResponsabile()" 
+  ></p-button>   
+  </div>
+</p-dialog>

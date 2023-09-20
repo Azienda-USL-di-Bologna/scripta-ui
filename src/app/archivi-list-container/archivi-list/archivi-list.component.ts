@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import {  ArchiviRecentiService, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioRecente, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteStruttura, UtenteStrutturaService, PermessoEntitaStoredProcedure, CODICI_RUOLO } from '@bds/internauta-model';
+import {  ArchiviRecentiService, Archivio, ArchivioDetailService, ArchivioDetailView, ArchivioDetailViewService, ArchivioRecente, ArchivioService, AttoreArchivio, Azienda, ENTITIES_STRUCTURE, Persona, PersonaService, RuoloAttoreArchivio, StatoArchivio, Struttura, StrutturaService, TipoArchivio, UtenteStruttura, UtenteStrutturaService, PermessoEntitaStoredProcedure, CODICI_RUOLO, Utente } from '@bds/internauta-model';
 import { AppService } from '../../app.service';
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { Subscription, combineLatestWith } from 'rxjs';
@@ -34,6 +34,7 @@ import { ExtendedArchivioService } from 'src/app/archivio/extended-archivio.serv
 import { ArchivioUtilsService } from 'src/app/archivio/archivio-utils.service';
 import { TitoloService } from '@bds/internauta-model';
 import { MassimarioService } from '@bds/internauta-model';
+import { HttpParams } from '@angular/common/http';
 
 @Component({
 	selector: 'archivi-list',
@@ -130,11 +131,21 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public loggedUserCanDeleteArchivio : boolean = false;
 	public archivesSelected: ExtendedArchiviView[] = [];
 	public showAdditionalRow: boolean = false;
+	public showGestioneMassiva : boolean = false;
 	public allRowsAreSelected: boolean = false;
 	public allRowsWasSelected: boolean = false;
+	private utenteSelectedGestioneMassiva : UtenteStruttura;
+	private strutturaUtenteSelectedGestioneMassiva : Struttura;
+	private struttureUtenteSelectableGestioneMassiva : Struttura[] = [];
+	private isUtenteSelectedGestioneMassiva = false;
+	private isStrutturaSelectedGestioneMassiva = false;
+	private isReset = false;
+	private showSvuotaButton = false;
+	//private aziendaFiltrataAG : Azienda;
 	private rowsNotSelectedWhenAlmostAllRowsAreSelected: number[] = [];
 	public loggedUserIsAG = false;
-
+	public idAziendeDoveLoggedUserIsAG: number[] = [];
+	//public selectedAllAziende = false;
 	private _archivioPadre: Archivio;
 	get archivioPadre(): Archivio { return this._archivioPadre; }
 	@Input() set archivioPadre(archivioPadre: Archivio) {
@@ -205,6 +216,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					// Parte relativa al utenteUtilities
 					this.utenteUtilitiesLogin = utenteUtilities;
 					this.loggedUserIsAG = this.utenteUtilitiesLogin.isAG();
+
+					utenteUtilities.getUtente().aziende.forEach(a => {
+						if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.IP, a.codice)) {
+							this.idAziendeDoveLoggedUserIsAG.push(a.id);
+						}
+					});
 
 					if (this.utenteUtilitiesLogin.getUtente() && this.utenteUtilitiesLogin.getUtente().utenteReale) {
 						this.isLoggeduser99 = (this.utenteUtilitiesLogin.getUtente().utenteReale.idInquadramento as unknown as String) === "99";
@@ -353,6 +370,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		})
 		console.log(this._selectedColumns)
 	}
+
+	
 
 
 
@@ -795,7 +814,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					this.resetArchiviArrayLenght = false;
 					this.dataTable.resetScrollTop();
 					this.archivi = Array.from({ length: this.totalRecords });
-					this.archivesSelected = Array.from({ length: this.totalRecords });
+					//this.archivesSelected = Array.from({ length: this.totalRecords });
 				}
 
 				if (this.pageConf.conf.offset === 0 && data.page.totalElements < this.pageConf.conf.limit) {
@@ -922,7 +941,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			case ArchiviListMode.TUTTI:
 				this.messageIfNull = 'Non sono stati trovati fascicoli.';
 				filterAndSort.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
-
+				filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabTutti"));
 				break;
 			case ArchiviListMode.PREFERITI:
 				this.messageIfNull = "Non sono stati trovati fascicoli Preferiti. Clicca l'icona del cuore in alto a destra dentro ad un fascicolo per aggiungerlo ai preferiti.";
@@ -952,8 +971,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 */
 	public filterAzienda(filterCallback: (value: number[]) => {}, value: number[], filteraziendacontainer: any) {
 		if (value.length === 1) {
+			//this.selectedAllAziende = false;
 			// L'utente ha scelto un unica azienda. Faccio quindi partire il filtro.
 			this.lastAziendaFilterValue = value;
+			console.log("Filtro: ", value)
 			filterCallback(value);
 		} else {
 			setTimeout(() => {
@@ -966,6 +987,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					accept: () => {
 						// L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
 						this.dropdownAzienda.writeValue(value);
+						//this.selectedAllAziende = true;
 						this.lastAziendaFilterValue = value;
 						filterCallback(value);
 					},
@@ -1511,6 +1533,129 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		
 
 		
+	}
+
+	public svuotaCampiGestioneMassivaResponsabile() {
+        this.isReset = true;
+		this.struttureUtenteSelectableGestioneMassiva = [];
+		this.strutturaUtenteSelectedGestioneMassiva = null;
+		this.isStrutturaSelectedGestioneMassiva = false;
+		this.isUtenteSelectedGestioneMassiva = false;
+		this.utenteSelectedGestioneMassiva = null;
+        setTimeout(() => {
+            this.isReset = false; //Serve a far sparire e riapparire 
+        }, 1);
+		this.showSvuotaButton = false;
+    }
+	
+
+	public setAziendaGestioneMassiva() : void { 
+		console.log("Gestione massiva:", this.utenteSelectedGestioneMassiva)
+		/* this.isStrutturaSelectedGestioneMassiva = false;
+		this.isUtenteSelectedGestioneMassiva = false; */
+		this.isReset = false;
+		//this.showSvuotaButton = false;
+		/* this.aziendaFiltrataAG = new Azienda();
+		this.aziendaFiltrataAG.id = this.dropdownAzienda.value[0]; */
+	}
+
+	/**
+	 * Torno un observable di utenteStruttura che carica le strutture a cui appartiene l'utente
+	 * @param utente 
+	 * @param idAzienda 
+	 * @returns 
+	 */
+	public loadStruttureOfUtente(utente: Utente, idAzienda: number) {
+		const initialFiltersAndSorts = new FiltersAndSorts();
+		initialFiltersAndSorts.addFilter(new FilterDefinition("idUtente.id", FILTER_TYPES.not_string.equals, utente.id));
+		initialFiltersAndSorts.addFilter(new FilterDefinition("idStruttura.idAzienda.id", FILTER_TYPES.not_string.equals, idAzienda));
+		initialFiltersAndSorts.addFilter(new FilterDefinition("idStruttura.ufficio", FILTER_TYPES.not_string.equals, false));
+		return this.utenteStrutturaService.getData(
+		  ENTITIES_STRUCTURE.baborg.utentestruttura.customProjections.UtenteStrutturaWithIdAfferenzaStrutturaCustom,
+		  initialFiltersAndSorts,
+		  null);
+	  }
+
+	public onCloseGestioneMassiva() {
+		/* this.isUtenteSelectedGestioneMassiva = false;
+		this.isStrutturaSelectedGestioneMassiva = false;
+		this.struttureUtenteSelectableGestioneMassiva = [];
+		this.strutturaUtenteSelectedGestioneMassiva = undefined;
+		this.utenteSelectedGestioneMassiva = undefined; */
+	}
+
+	/**
+	 * metodo chiamato dall'html alla selezione dell'utente responsabile
+	 * @param utenteStruttura 
+	 */
+	public onSelectedNewResponsabileGestioneMassiva(utenteStruttura: UtenteStruttura) {
+		this.isUtenteSelectedGestioneMassiva = true;
+		this.struttureUtenteSelectableGestioneMassiva = [];
+		this.strutturaUtenteSelectedGestioneMassiva = null;
+		this.utenteSelectedGestioneMassiva = utenteStruttura;
+		
+		// Popolo la lista di struttre selezionabili 
+		this.subscriptions.push(this.loadStruttureOfUtente(utenteStruttura.idUtente, this.lastAziendaFilterValue[0]).subscribe( 
+			(data: any) => {
+				if (data && data.results) {
+					const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]> data.results;
+					// Riempo l'array delle strutture selezionabili per l'utente
+					utentiStruttura.forEach((us: UtenteStruttura) => {
+						if (us.id === utenteStruttura.id) {
+							this.strutturaUtenteSelectedGestioneMassiva = us.idStruttura;
+							this.isStrutturaSelectedGestioneMassiva = true;
+						}
+						this.struttureUtenteSelectableGestioneMassiva.push(us.idStruttura) 
+					});
+					this.showSvuotaButton = true;
+				}
+			}
+		));
+	}
+
+	public onStrutturaSelectedGestioneMassiva(event: any) {
+		this.isStrutturaSelectedGestioneMassiva = true;
+	}
+
+	public avviaSostituzioneResponsabileMassiva() {
+		this.rightContentProgressSpinner = true;
+		this.showGestioneMassiva = false;
+		this.subscriptions.push(this.archiviListService.gestioneMassivaResponsabile(
+			this.allRowsWasSelected ? this.buildFilterPerGestioneMassiva() : new HttpParams(),
+			this.allRowsWasSelected ? this.rowsNotSelectedWhenAlmostAllRowsAreSelected : null,
+			this.allRowsWasSelected ? null : this.archivesSelected.map(e => e.id),
+			this.utenteSelectedGestioneMassiva.idUtente.idPersona.id,
+			this.strutturaUtenteSelectedGestioneMassiva.id,
+			this.lastAziendaFilterValue[0]).subscribe(
+				res => {
+					this.messageService.add({
+						severity: "success",
+						key: "archiviListToast",
+						summary: "Responsabile cambiato",
+						detail: `La richiesta è stata presa in carico. Riceverai una notifica sulla scrivania non appena sarà eseguita`
+					});
+					this.rightContentProgressSpinner = false;
+					
+				},
+				err => {
+					this.messageService.add({
+						severity: "warn",
+						key: "archiviListToast",
+						summary: "Attenzione",
+						detail: `Qualcosa è andato storto, se il problema persiste contattare BabelCare`
+					});
+					this.rightContentProgressSpinner = false;
+				}
+			));
+	}
+
+
+	private buildFilterPerGestioneMassiva() {
+		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
+		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
+		lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
+		filtersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
+		return this.serviceToGetData.buildQueryParams(null, null, filtersAndSorts, lazyFiltersAndSorts, null, null);
 	}
 
 	public eliminaSottoarchivio(rowData: any, event: Event) : void {
