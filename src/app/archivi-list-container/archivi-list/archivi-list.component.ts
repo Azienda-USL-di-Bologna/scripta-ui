@@ -141,10 +141,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	private isStrutturaSelectedGestioneMassiva = false;
 	private isReset = false;
 	private showSvuotaButton = false;
-	private aziendaFiltrataAG : Azienda;
+	//private aziendaFiltrataAG : Azienda;
 	private rowsNotSelectedWhenAlmostAllRowsAreSelected: number[] = [];
 	public loggedUserIsAG = false;
-	public selectedAllAziende = false;
+	public idAziendeDoveLoggedUserIsAG: number[] = [];
+	//public selectedAllAziende = false;
 	private _archivioPadre: Archivio;
 	get archivioPadre(): Archivio { return this._archivioPadre; }
 	@Input() set archivioPadre(archivioPadre: Archivio) {
@@ -215,6 +216,12 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					// Parte relativa al utenteUtilities
 					this.utenteUtilitiesLogin = utenteUtilities;
 					this.loggedUserIsAG = this.utenteUtilitiesLogin.isAG();
+
+					utenteUtilities.getUtente().aziende.forEach(a => {
+						if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.IP, a.codice)) {
+							this.idAziendeDoveLoggedUserIsAG.push(a.id);
+						}
+					});
 
 					if (this.utenteUtilitiesLogin.getUtente() && this.utenteUtilitiesLogin.getUtente().utenteReale) {
 						this.isLoggeduser99 = (this.utenteUtilitiesLogin.getUtente().utenteReale.idInquadramento as unknown as String) === "99";
@@ -964,7 +971,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 */
 	public filterAzienda(filterCallback: (value: number[]) => {}, value: number[], filteraziendacontainer: any) {
 		if (value.length === 1) {
-			this.selectedAllAziende = false;
+			//this.selectedAllAziende = false;
 			// L'utente ha scelto un unica azienda. Faccio quindi partire il filtro.
 			this.lastAziendaFilterValue = value;
 			console.log("Filtro: ", value)
@@ -980,7 +987,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					accept: () => {
 						// L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
 						this.dropdownAzienda.writeValue(value);
-						this.selectedAllAziende = true;
+						//this.selectedAllAziende = true;
 						this.lastAziendaFilterValue = value;
 						filterCallback(value);
 					},
@@ -1548,8 +1555,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		this.isUtenteSelectedGestioneMassiva = false; */
 		this.isReset = false;
 		//this.showSvuotaButton = false;
-		this.aziendaFiltrataAG = new Azienda();
-		this.aziendaFiltrataAG.id = this.dropdownAzienda.value[0];
+		/* this.aziendaFiltrataAG = new Azienda();
+		this.aziendaFiltrataAG.id = this.dropdownAzienda.value[0]; */
 	}
 
 	/**
@@ -1588,7 +1595,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		this.utenteSelectedGestioneMassiva = utenteStruttura;
 		
 		// Popolo la lista di struttre selezionabili 
-		this.subscriptions.push(this.loadStruttureOfUtente(utenteStruttura.idUtente, this.aziendaFiltrataAG.id).subscribe( 
+		this.subscriptions.push(this.loadStruttureOfUtente(utenteStruttura.idUtente, this.lastAziendaFilterValue[0]).subscribe( 
 			(data: any) => {
 				if (data && data.results) {
 					const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]> data.results;
@@ -1612,14 +1619,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 
 	public avviaSostituzioneResponsabileMassiva() {
 		this.rightContentProgressSpinner = true;
-
+		this.showGestioneMassiva = false;
 		this.subscriptions.push(this.archiviListService.gestioneMassivaResponsabile(
-			this.allRowsWasSelected ? this.buildFilterPerGestioneMassiva() : null,
+			this.allRowsWasSelected ? this.buildFilterPerGestioneMassiva() : new HttpParams(),
 			this.allRowsWasSelected ? this.rowsNotSelectedWhenAlmostAllRowsAreSelected : null,
 			this.allRowsWasSelected ? null : this.archivesSelected.map(e => e.id),
 			this.utenteSelectedGestioneMassiva.idUtente.idPersona.id,
 			this.strutturaUtenteSelectedGestioneMassiva.id,
-			this.aziendaFiltrataAG.id).subscribe(
+			this.lastAziendaFilterValue[0]).subscribe(
 				res => {
 					this.messageService.add({
 						severity: "success",
@@ -1628,7 +1635,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						detail: `La richiesta è stata presa in carico. Riceverai una notifica sulla scrivania non appena sarà eseguita`
 					});
 					this.rightContentProgressSpinner = false;
-					this.showGestioneMassiva = false;
+					
 				},
 				err => {
 					this.messageService.add({
@@ -1638,7 +1645,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						detail: `Qualcosa è andato storto, se il problema persiste contattare BabelCare`
 					});
 					this.rightContentProgressSpinner = false;
-					this.showGestioneMassiva = false;
 				}
 			));
 	}

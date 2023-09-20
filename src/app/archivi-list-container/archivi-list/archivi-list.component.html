@@ -32,7 +32,7 @@
   <!-- HEADER & ORDINAMENTO ---->
   <ng-template pTemplate="header" let-columns>
     <tr class="header-row">
-      <th *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG && !selectedAllAziende"
+      <th *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
         class="checkbox-column"
         alignFrozen="left" 
         pFrozenColumn 
@@ -89,7 +89,7 @@
     </tr>
     <!-------FILTRI -->
     <tr class="filter-row">
-      <th *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG && !selectedAllAziende"
+      <th *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
         class="checkbox-column"
         alignFrozen="left" 
         pFrozenColumn 
@@ -398,7 +398,7 @@
         [frozen]="true">
       </th>
     </tr>
-    <tr *ngIf="showAdditionalRow && archiviListMode === 'TUTTI' && loggedUserIsAG && !selectedAllAziende"
+    <tr *ngIf="showAdditionalRow && archiviListMode === 'TUTTI' && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
       class="additional-row">
       <span *ngIf="allRowsAreSelected && rowCountInProgress" class="selection-info">
         <i class="pi pi-spin pi-spinner"></i>
@@ -435,7 +435,7 @@
       [pSelectableRow]="rowData"
       [pSelectableRowIndex]="index"
       [pSelectableRowDisabled]="false">
-      <td *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG && !selectedAllAziende"
+      <td *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
         class="checkbox-column"
         alignFrozen="left"
         pFrozenColumn 
@@ -586,9 +586,9 @@
   <div class="box box-scelta-responsabile">
     <label for="ricerca-nuovo-responsabile">Scegli il responsabile dei fascicoli:</label>
     <lib-users-autocomplete id="ricerca-nuovo-responsabile"
-      *ngIf="!isReset"
+      *ngIf="!isReset && lastAziendaFilterValue"
       class="autocomplete-utenti" 
-      [azienda]="aziendaFiltrataAG"
+      [azienda]="{id: lastAziendaFilterValue[0]}"
       [showPool]="false"
       [showOnlyUser]="true"
       (utenteStrutturaSelezionatoEmit)="onSelectedNewResponsabileGestioneMassiva($event)"
