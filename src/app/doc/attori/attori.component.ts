@@ -40,7 +40,8 @@ export class AttoriComponent {
           attore.ruolo.toString() ==="DIRETTORE_GENERALE" ||
           attore.ruolo.toString() === "DIRETTORE_SANITARIO" ||
           attore.ruolo.toString() === "DSC" || 
-          attore.ruolo.toString() === "FIRMATARIO") {
+          attore.ruolo.toString() === "FIRMATARIO"|| 
+          attore.ruolo.toString() === "FIRMA") {
 
           this.direttoriDeli.push(attore);
         }
