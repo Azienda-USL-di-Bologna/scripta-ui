@@ -701,18 +701,17 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
     }
     //aggiungo questo perche devo filtrare per la data piu grande delle mie aziende
     if (this.aziendeFiltrabili){
-      //mi creo la mappa di tutte le date inizio di tutte le aziende
       this.subscriptions.push(
         this.configurazioneService.getParametriAziende("dataInizioPregressi", null, aziendeUtente).subscribe(
           (data: ParametroAziende[]) => {
-            let dataPiuNuova: Date = new  Date(1900, 2, 12);
+            let dataPiuNuova: Date = new  Date(1800, 2, 12);
             data.forEach((pa: ParametroAziende) => {
               const dataDaValutare: Date = new Date(JSON.parse(pa.valore).data);
               if (dataPiuNuova < dataDaValutare) {
                 dataPiuNuova = dataDaValutare;
               }
             })
-            this.dataUltimoPregresso = [new  Date(1900, 2, 12), dataPiuNuova];
+            this.dataUltimoPregresso = [new  Date(1800, 2, 12), dataPiuNuova];
           }
         )
       )
@@ -1344,6 +1343,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
        return;
      }
      if (command === "onClickOutside") {
+      if (this.docsListMode === DocsListMode.PREGRESSI){return;}
        calendar.writeValue(this.actualDataCreazioneFilterValue);
        return;
      }
