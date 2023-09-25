@@ -422,19 +422,20 @@
       </p-button>
       <!-- BOTTONE GESTIONE MASSIVA RESPONSABILE-->
       <p-button 
+        [disabled]="!autocompleteIdStruttura || !autocompleteIdStruttura.value"
         class="gestione-massiva-responsabile-button"
         icon="pi p-mr-2 pi-user-edit"
         label="Sostituzione responsabile e struttura"
-        (click)="setAziendaGestioneMassiva(); showGestioneMassiva = true;">
+        (click)="openSostituzioneResponsabileMassivoPopup()">
       </p-button><!-- *ngIf="archivesSelected.length > 0" -->
     </tr>
   </ng-template>
   <!-- BODY -->
   <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex">
-    <tr class="row-height"
-      [pSelectableRow]="rowData"
+    <tr class="row-height">
+      <!-- [pSelectableRow]="rowData"
       [pSelectableRowIndex]="index"
-      [pSelectableRowDisabled]="false">
+      [pSelectableRowDisabled]="false" -->
       <td *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
         class="checkbox-column"
         alignFrozen="left"
@@ -584,7 +585,7 @@
   <span class="counter-fascicoli">Stai agendo su {{rowCountSelected === 1 ? 'un fascicolo' : rowCountSelected + ' fascicoli'}}</span>
 
   <div class="box box-scelta-responsabile">
-    <label for="ricerca-nuovo-responsabile">Scegli il responsabile dei fascicoli:</label>
+    <label for="ricerca-nuovo-responsabile">Scegli il nuovo responsabile dei fascicoli:</label>
     <lib-users-autocomplete id="ricerca-nuovo-responsabile"
       *ngIf="!isReset && lastAziendaFilterValue"
       class="autocomplete-utenti" 
@@ -616,9 +617,10 @@
     <p-button 
       class="bottoni-footer"
       label="Conferma" 
-      (click)="avviaSostituzioneResponsabileMassiva()" 
+      (click)="confermaAvvioSostituzioneResponsabileMassiva($event)" 
       [disabled]="!isStrutturaSelectedGestioneMassiva"
     ></p-button>
+    <p-confirmPopup key="conferma-sotitutuzione-responsabile-massivo-popup"></p-confirmPopup>
     <p-button 
       class="bottone-footer"
       *ngIf="showSvuotaButton"
