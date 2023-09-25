@@ -1549,11 +1549,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
     }
 	
 
-	public setAziendaGestioneMassiva() : void { 
+	public openSostituzioneResponsabileMassivoPopup() : void { 
 		console.log("Gestione massiva:", this.utenteSelectedGestioneMassiva)
 		/* this.isStrutturaSelectedGestioneMassiva = false;
 		this.isUtenteSelectedGestioneMassiva = false; */
-		this.isReset = false;
+		if (this.autocompleteIdStruttura && this.autocompleteIdStruttura.value) {
+			this.isReset = false;
+			this.showGestioneMassiva = true;
+		}
 		//this.showSvuotaButton = false;
 		/* this.aziendaFiltrataAG = new Azienda();
 		this.aziendaFiltrataAG.id = this.dropdownAzienda.value[0]; */
@@ -1617,7 +1620,29 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		this.isStrutturaSelectedGestioneMassiva = true;
 	}
 
-	public avviaSostituzioneResponsabileMassiva() {
+	public confermaAvvioSostituzioneResponsabileMassiva(event: Event) {
+		console.log(this.autocompleteIdStruttura.value);
+		if (this.autocompleteIdStruttura.value.id !== this.strutturaUtenteSelectedGestioneMassiva.id) {
+			this.confirmationService.confirm({
+					key: "conferma-sotitutuzione-responsabile-massivo-popup",
+					target: event.target,
+					message: `I fascicoli selezionati cambieranno struttura in ${this.strutturaUtenteSelectedGestioneMassiva.nome}. Vuoi continuare?`,
+					icon: 'pi pi-exclamation-triangle',
+					accept: () => {
+							//confirm action
+							this.avviaSostituzioneResponsabileMassiva();
+					},
+					reject: () => {
+							//reject action
+							
+					}
+			});
+		} else {
+			this.avviaSostituzioneResponsabileMassiva();
+		}
+	}
+
+	private avviaSostituzioneResponsabileMassiva() {
 		this.rightContentProgressSpinner = true;
 		this.showGestioneMassiva = false;
 		this.subscriptions.push(this.archiviListService.gestioneMassivaResponsabile(
