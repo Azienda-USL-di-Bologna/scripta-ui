@@ -50,9 +50,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public utenteExistsInArchivioInteresse: boolean;
   private utenteArchivioDiInteresse: ArchivioDiInteresse;
   private utenteUtilitiesLogin: UtenteUtilities;
-  public messaggioChiusura: string = "ciao";
+  public messaggioChiusura: string = "";
   public messaggioChiusuraDefinitiva: string = "<br/><br/>Tutti i documenti non numerati verranno numerati.";
-  public messaggioStampa: string = "ciao";
+  public messaggioStampa: string = "";
   public subscriptions: Subscription[] = [];
   public loggedUserCanVisualizeArchive = false;
   public showRightSide: boolean = false;

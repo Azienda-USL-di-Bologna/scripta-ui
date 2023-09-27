@@ -39,7 +39,6 @@ export class GenericCaptionTableComponent implements OnInit {
   private subscriptions: Subscription[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
   public uploadDocumentDialogVisible: boolean = false;
-
   constructor(
     private loginService: JwtLoginService, 
     public dialogService: DialogService, 
