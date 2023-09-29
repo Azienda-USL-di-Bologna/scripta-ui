@@ -81,14 +81,15 @@
       <!-- DATE -->
       <div class="date-del-documento">
         <div class="box-data">Creato il: {{dataCreazione}}</div>
-        <div class="box-data">Registrato il: {{dataRegistrazione}}</div>
+        <div *ngIf="dataRegistrazione" class="box-data">Registrato il: {{dataRegistrazione}}</div>
       </div>
       <!-- ICONE INFORMATIVE -->
       <div class="additional-info-box">
         <div class="visibilita-limitata icon-box">
           <i *ngIf="docVisualizer?.visibilitaLimitata"
             class="pi pi-eye info-icon"             
-            pTooltip="Visibilita Limitata">
+            pTooltip="Visibilita Limitata"
+            aria-label="Visibilita limitata">
           </i>
           <p-checkbox *ngIf="docVisualizer?.editing" 
             id="visibilitaLimitata" 
@@ -103,7 +104,8 @@
         <div class="riservato icon-box">
           <i *ngIf="docVisualizer?.riservato"
             class="pi pi-eye-slash" 
-            pTooltip="Riservato">
+            pTooltip="Riservato"
+            aria-label="riservato">
           </i>
           <p-checkbox *ngIf="docVisualizer?.editing" 
             id="riservato" 
@@ -215,7 +217,7 @@
         <dati-pubblicazione [doc]="doc"></dati-pubblicazione>
       </ng-template>
     </p-accordionTab>
-    <p-accordionTab *ngIf="docVisualizer?.fascicolo" header="Fascicolazioni">
+    <p-accordionTab *ngIf="docVisualizer?.fascicolo && pregresso" header="Fascicolazioni">
       <ng-template pTemplate="content">
         <archivio-doc [doc]="doc"></archivio-doc>
       </ng-template>
