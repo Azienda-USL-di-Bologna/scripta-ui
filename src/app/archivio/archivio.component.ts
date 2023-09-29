@@ -719,9 +719,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.archivilist.removeSort();
     this.doclist.removeSort();
   }
-  public applyFilterGlobal(event: any, matchOperation: string): void {
-    this.archivilist.applyFilterGlobal(event, matchOperation);
-    this.doclist.applyFilterGlobal(event, matchOperation);
+  public applyFilterGlobal(stringa: string, matchOperation: string): void {
+    this.archivilist.applyFilterGlobal(stringa, matchOperation);
+    this.doclist.applyFilterGlobal(stringa, matchOperation);
   }
   public resetPaginationAndLoadData() {
     this.archivilist.resetPaginationAndLoadData();

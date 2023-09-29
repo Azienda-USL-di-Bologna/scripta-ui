@@ -1207,8 +1207,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * @param event
    * @param matchMode
    */
-  public applyFilterGlobal(event: Event, matchMode: string): void {
-    const stringa: string = (event.target as HTMLInputElement).value;
+  public applyFilterGlobal(stringa: string, matchMode: string): void {
+    //const stringa: string = (event.target as HTMLInputElement).value;
     if (!!!stringa || stringa === "") {
       this.resetSort();
     }

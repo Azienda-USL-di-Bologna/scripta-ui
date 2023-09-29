@@ -1201,8 +1201,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
  * @param event
  * @param matchMode
  */
-	public applyFilterGlobal(event: Event, matchMode: string) {
-		const stringa: string = (event.target as HTMLInputElement).value;
+	public applyFilterGlobal(stringa: string, matchMode: string) {
+		//const stringa: string = (event.target as HTMLInputElement).value;
 		if (!!!stringa || stringa === "") {
 			this.resetSort();
 		} else {

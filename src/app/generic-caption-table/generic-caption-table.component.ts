@@ -18,6 +18,8 @@ import { AppService } from '../app.service';
 })
 export class GenericCaptionTableComponent implements OnInit {
 
+  public tooltipGlobalFilter: string = "Premi invio per cercare";
+
   @Input() configuration: CaptionConfiguration;
   @Input() referenceTableComponent: CaptionReferenceTableComponent;
   @Input() selectButtonsComponent: CaptionSelectButtonsComponent;
@@ -84,6 +86,17 @@ export class GenericCaptionTableComponent implements OnInit {
       );
     }
 
+  public onEnterGlobalFilter(searchString: string): void {
+    console.log(searchString);
+    if (searchString && (searchString.length > 2 || /^\d+$/.test(searchString))) {
+      this.referenceTableComponent.removeSort(); 
+      this.referenceTableComponent.applyFilterGlobal(searchString, 'equals');
+      this.tooltipGlobalFilter = "Premi invio per cercare";
+    } else {
+      this.tooltipGlobalFilter = "Inserisci almeno 3 caratteri";
+    }
+  }
+
   public showTip() {
     //this.navigationTabsService.addTabTip();
     this.navigationTabsService.addTab(
@@ -91,7 +104,5 @@ export class GenericCaptionTableComponent implements OnInit {
       );
       this.appService.appNameSelection("Tool Importazione Pregressi");
     this.navigationTabsService.activeLastTab();
-
   }
-
 }
