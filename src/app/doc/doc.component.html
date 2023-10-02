@@ -74,7 +74,7 @@
     [toggleable]="true">
     <!-- NUMERO DEL DOC -->
     <div *ngIf="!visualizzazioneDocumento"> 
-      <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.id}} del {{yearOfProposta}}</span>
+      <span *ngIf="!numeroVisualizzazione">Proposta numero {{doc?.idDocDetail?.numeroProposta}} del {{yearOfProposta}}</span>
       <span *ngIf="numeroVisualizzazione">{{registroLabel}} {{numeroVisualizzazione}} </span>
     </div>
     <div class="main-info">
@@ -167,7 +167,7 @@
     </div>
     <div *ngIf="docVisualizer?.creatoDa"
       class="creato-da-box">
-      <label>Creato da: </label>
+      <label>Creato da </label>
       <input
         aria-label="creato da" 
         id="creatoDa" 
@@ -181,7 +181,6 @@
       <label for="protocollatoda">{{protocollatoDaLabel}}</label>
       <input *ngIf="doc.tipologia != 'DELIBERA' && doc.tipologia != 'DETERMINA'"
         id="protocollatoda"  
-        aria-label="protocollato da"
         disabled="true" 
         pInputText 
         type="text" 
@@ -189,7 +188,6 @@
         [(ngModel)]="descrizioneUtenteRegistrante">
       <input *ngIf="doc.tipologia === 'DELIBERA' || doc.tipologia === 'DETERMINA'" 
         id="protocollatoda" 
-        aria-label="adottato da" 
         disabled="true" 
         pInputText 
         type="text" 
