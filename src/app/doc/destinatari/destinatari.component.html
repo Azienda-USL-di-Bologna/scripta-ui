@@ -44,10 +44,11 @@
   <p-table tabindex="0"
     ariaLabel="tabella coinvolti"
     [columns]="columnCoinvolti" 
-    [value]="doc.coinvolti" 
+    [value]="doc.coinvolti"
+    *ngIf="doc.coinvolti" 
     styleClass="coinvolti-table">
-    <!-- scrollHeight="100%"
-    [scrollable]="true"   -->
+     scrollHeight="100%"
+    [scrollable]="true"  
     <ng-template pTemplate="header" let-columns>
     <tr class="row">
       <th *ngFor="let col of columns">
