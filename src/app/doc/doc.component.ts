@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
-import { Doc, ENTITIES_STRUCTURE, Persona, Allegato, CODICI_REGISTRO, TipologiaDoc, DocDetailView, RegistroDoc, VisibilitaDoc, RuoloAttoreDoc } from "@bds/internauta-model";
+import { Doc, ENTITIES_STRUCTURE, Persona, Allegato, CODICI_REGISTRO, TipologiaDoc, DocDetailView, RegistroDoc, VisibilitaDoc, RuoloAttoreDoc, AttoreDoc } from "@bds/internauta-model";
 import { LOCAL_IT } from "@bds/common-tools";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { AdditionalDataDefinition } from "@bds/next-sdr";
@@ -62,7 +62,11 @@ export class DocComponent implements OnInit, OnDestroy {
   }
   @Input() set data(data: any) {
     this.pregresso = data.doc.pregresso;
-    this.loadDocument(data.doc.id);
+    if (data.doc.id) {
+      this.loadDocument(data.doc.id);
+    }
+    
+
   }
 
   constructor(
@@ -80,6 +84,7 @@ export class DocComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     console.log("entro nell'oninit");
+
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -99,11 +104,14 @@ export class DocComponent implements OnInit, OnDestroy {
                 )).subscribe((res: Doc) => {
                   this.setFreezeDocumento(false);
                   console.log("res", res); 
+
                   this.doc = res;
+                  this.setLabelProtocollatoDa();
+                  this.loadDocument(this.doc.id);
+
                   this.docVisualizer = new DocVisualizerService(this.doc);
                   if (this.doc.registroDocList && this.doc.registroDocList.filter(rd => rd.idRegistro.ufficiale).length > 0) {
                     console.log("RegistriDoc: ",this.doc.registroDocList);
-                    debugger;
                     this.numeroVisualizzazione = this.doc.registroDocList.filter(rd => rd.idRegistro.ufficiale)[0].numeroVisualizzazione;
                   }
                   this.yearOfProposta = this.doc.dataCreazione.getFullYear().toString();
@@ -114,16 +122,16 @@ export class DocComponent implements OnInit, OnDestroy {
                       relativeTo: this.route,
                       queryParams: { command: "OPEN", id: this.doc.id }
                     });
-                  },  error => {
-                  this.setFreezeDocumento(false);
-                  console.log("errore", error);
-                  
-                  this.messageService.add({
-                    severity: "error",
-                    summary: "Creazione proposta",
-                    detail: "Errore nell'avviare la proposta di protocollazione. Contattare Babelcare"
-                  });
-                })
+                  }
+                  ,  error => {
+                  // this.setFreezeDocumento(false);
+                  // this.messageService.add({
+                  //   severity: "error",
+                  //   summary: "Creazione proposta",
+                  //   detail: "Errore nell'avviare la proposta di protocollazione. Contattare Babelcare"
+                  // });
+                }
+                )
               );
             }
           }
@@ -153,6 +161,9 @@ export class DocComponent implements OnInit, OnDestroy {
       case "NEW":
         const doc: Doc = new Doc();
         doc.idPersonaCreazione = {id: this.utenteUtilitiesLogin.getUtente().idPersona.id} as Persona;
+        doc.tipologia = TipologiaDoc.PROTOCOLLO_IN_ENTRATA;
+        // const attoreDocRedattore = { idPersona: doc.idPersonaCreazione, ruolo: RuoloAttoreDoc.REDATTORE} as AttoreDoc;
+        // doc.attoriList = [attoreDocRedattore];
         if (params.get("idMessage") && params.get("azienda")) {
           const idMessage: string = params.get("idMessage");
           const codiceAzienda: string = params.get("azienda");
@@ -163,6 +174,9 @@ export class DocComponent implements OnInit, OnDestroy {
         } else {
           res = this.extendedDocService.postHttpCall(doc, this.projection);
         }
+        // this.creatoDaDescrizione = this.doc.attoriList.filter(a => a.ruolo === RuoloAttoreDoc.REDATTORE || a.ruolo === RuoloAttoreDoc.REDAZIONE || a.ruolo === RuoloAttoreDoc.RICEZIONE)[0]?.idPersona.descrizione;
+
+        // const attoreDocRedattore = {idPersona: this.utenteUtilitiesLogin.getUtente().idPersona.id} as AttoreDoc;
       break;
       case "OPEN":
         //res = this.loadDocument(+params.get("id"));
@@ -217,13 +231,14 @@ export class DocComponent implements OnInit, OnDestroy {
    * @returns
    */
   private loadDocument(idDoc: number) {
+
       this.subscriptions.push(
         this.extendedDocService.getByIdHttpCall(idDoc,this.projection).subscribe(
           (res: Doc) => {
             this.doc = res;
-            this.setLabelProtocollatoDa();
             this.setFreezeDocumento(false);
-            
+            this.setLabelProtocollatoDa();
+
             this.docVisualizer = new DocVisualizerService(this.doc);
             this.notaDocumentoString = this.doc?.notaDocumento[0]?.testo;
             this.notaAnnullamentoString = this.doc?.notaAnnullamento[0]?.testo;
@@ -234,7 +249,7 @@ export class DocComponent implements OnInit, OnDestroy {
             this.tipoDocumento = this.doc.tipologia;
             
             this.pregresso = this.doc.pregresso;
-            this.creatoDaDescrizione = this.doc.attoriList.filter(a => a.ruolo === RuoloAttoreDoc.REDATTORE || a.ruolo === RuoloAttoreDoc.REDAZIONE)[0]?.idPersona.descrizione;
+            this.creatoDaDescrizione = this.doc.attoriList.filter(a => a.ruolo === RuoloAttoreDoc.REDATTORE || a.ruolo === RuoloAttoreDoc.REDAZIONE || a.ruolo === RuoloAttoreDoc.RICEZIONE)[0]?.idPersona.descrizione;
 
             this.dataCreazione = formatDate(this.doc.dataCreazione, 'dd/MM/yyyy', 'en_US');
             if (this.doc.dataUltimoVersamento != null ) {
@@ -387,13 +402,14 @@ export class DocComponent implements OnInit, OnDestroy {
       this.extendedDocService.protocollaDoc(this.doc).subscribe(res => {
         console.log("RES", res);
         /*  setTimeout(() => { */
-        this.loadDocument(this.doc.id);
-      
+        this.numeroVisualizzazione = res.numeroProtocollo;
         this.messageService.add({
           severity: "success",
           summary: "Documento",
-          detail: "Documento protocollato con successo: numero protocollo generato " + this.numeroVisualizzazione
+          detail: "Documento protocollato con successo: numero protocollo generato " + res.numeroProtocollo
         });
+        this.setFreezeDocumento(false);
+
           /* }, 10000); */
       }, err => {
         this.setFreezeDocumento(false);
