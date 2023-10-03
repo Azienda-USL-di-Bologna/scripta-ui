@@ -1,6 +1,6 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
-import { Doc, ENTITIES_STRUCTURE, Persona, Allegato, CODICI_REGISTRO, TipologiaDoc, DocDetailView, RegistroDoc, VisibilitaDoc, RuoloAttoreDoc, AttoreDoc } from "@bds/internauta-model";
+import { Doc, ENTITIES_STRUCTURE, Persona, TipologiaDoc, RegistroDoc, VisibilitaDoc, RuoloAttoreDoc } from "@bds/internauta-model";
 import { LOCAL_IT } from "@bds/common-tools";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { AdditionalDataDefinition } from "@bds/next-sdr";
@@ -13,8 +13,6 @@ import { ExtendedDocService } from "./extended-doc.service";
 import { AttachmentsBoxConfig } from "@bds/common-components";
 import { formatDate } from '@angular/common';
 import { DocVisualizerService } from "./doc-visualizer.service";
-import { NotaDoc, TipoNotaDoc } from "@bds/internauta-model/lib/entities/scripta/NodaDoc";
-import { ExtendedDocDetailView } from "../docs-list-container/docs-list/extended-doc-detail-view";
 
 @Component({
   selector: "doc",
