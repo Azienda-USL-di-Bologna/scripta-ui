@@ -92,6 +92,10 @@ export class GenericCaptionTableComponent implements OnInit {
       this.referenceTableComponent.removeSort(); 
       this.referenceTableComponent.applyFilterGlobal(searchString, 'equals');
       this.tooltipGlobalFilter = "Premi invio per cercare";
+    } else if (!searchString || searchString.length === 0) {
+      this.referenceTableComponent.removeSort(); 
+      this.referenceTableComponent.applyFilterGlobal(searchString, 'equals');
+      this.tooltipGlobalFilter = "Premi invio per cercare";
     } else {
       this.tooltipGlobalFilter = "Inserisci almeno 3 caratteri";
     }
