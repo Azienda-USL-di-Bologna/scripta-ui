@@ -423,6 +423,7 @@
       <!-- BOTTONE GESTIONE MASSIVA RESPONSABILE-->
       <p-button 
         [disabled]="!autocompleteIdStruttura || !autocompleteIdStruttura.value"
+        [pTooltip]="!autocompleteIdStruttura || !autocompleteIdStruttura.value ? 'Filtrare per struttura per accedere a questa funzionalità' : ''"
         class="gestione-massiva-responsabile-button"
         icon="pi p-mr-2 pi-user-edit"
         label="Sostituzione responsabile e struttura"
