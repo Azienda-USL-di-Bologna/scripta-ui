@@ -9,6 +9,7 @@ import { CaptionSelectButtonsComponent } from './caption-select-buttons.componen
 import { CODICI_RUOLO } from '@bds/internauta-model';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { NavigationTabsService } from '../navigation-tabs/navigation-tabs.service';
+import { AppService } from '../app.service';
 
 @Component({
   selector: 'generic-caption-table',
@@ -16,6 +17,8 @@ import { NavigationTabsService } from '../navigation-tabs/navigation-tabs.servic
   styleUrls: ['./generic-caption-table.component.scss']
 })
 export class GenericCaptionTableComponent implements OnInit {
+
+  public tooltipGlobalFilter: string = "Premi invio per cercare";
 
   @Input() configuration: CaptionConfiguration;
   @Input() referenceTableComponent: CaptionReferenceTableComponent;
@@ -41,7 +44,8 @@ export class GenericCaptionTableComponent implements OnInit {
   public uploadDocumentDialogVisible: boolean = false;
   constructor(
     private loginService: JwtLoginService, 
-    public dialogService: DialogService, 
+    public dialogService: DialogService,
+    private appService: AppService, 
     public navigationTabsService: NavigationTabsService) {
 
   }
@@ -82,13 +86,27 @@ export class GenericCaptionTableComponent implements OnInit {
       );
     }
 
+  public onEnterGlobalFilter(searchString: string): void {
+    console.log(searchString);
+    if (searchString && (searchString.length > 2 || /^\d+$/.test(searchString))) {
+      this.referenceTableComponent.removeSort(); 
+      this.referenceTableComponent.applyFilterGlobal(searchString, 'equals');
+      this.tooltipGlobalFilter = "Premi invio per cercare";
+    } else if (!searchString || searchString.length === 0) {
+      this.referenceTableComponent.removeSort(); 
+      this.referenceTableComponent.applyFilterGlobal(searchString, 'equals');
+      this.tooltipGlobalFilter = "Premi invio per cercare";
+    } else {
+      this.tooltipGlobalFilter = "Inserisci almeno 3 caratteri";
+    }
+  }
+
   public showTip() {
     //this.navigationTabsService.addTabTip();
     this.navigationTabsService.addTab(
       this.navigationTabsService.buildaTabTIP()
-    );
+      );
+      this.appService.appNameSelection("Tool Importazione Pregressi");
     this.navigationTabsService.activeLastTab();
-
   }
-
 }

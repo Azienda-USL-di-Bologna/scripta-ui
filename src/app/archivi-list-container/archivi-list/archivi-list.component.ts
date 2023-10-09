@@ -1201,8 +1201,8 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
  * @param event
  * @param matchMode
  */
-	public applyFilterGlobal(event: Event, matchMode: string) {
-		const stringa: string = (event.target as HTMLInputElement).value;
+	public applyFilterGlobal(stringa: string, matchMode: string) {
+		//const stringa: string = (event.target as HTMLInputElement).value;
 		if (!!!stringa || stringa === "") {
 			this.resetSort();
 		} else {
@@ -1626,7 +1626,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.confirmationService.confirm({
 					key: "conferma-sotitutuzione-responsabile-massivo-popup",
 					target: event.target,
-					message: `I fascicoli selezionati cambieranno struttura in ${this.strutturaUtenteSelectedGestioneMassiva.nome}. Vuoi continuare?`,
+					message: `I fascicoli selezionati cambieranno struttura. Vuoi continuare?`, //in ${this.strutturaUtenteSelectedGestioneMassiva.nome}
 					icon: 'pi pi-exclamation-triangle',
 					accept: () => {
 							//confirm action

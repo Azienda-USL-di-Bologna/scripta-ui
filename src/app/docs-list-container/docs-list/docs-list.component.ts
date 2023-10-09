@@ -34,6 +34,7 @@ import { TieredMenu } from "primeng/tieredmenu";
 import { DocListService } from "./docs-list.service";
 import { FunctionButton } from "src/app/generic-caption-table/functional-buttons/functions-button";
 
+
 @Component({
   selector: "docs-list",
   templateUrl: "./docs-list.component.html",
@@ -704,14 +705,14 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.subscriptions.push(
         this.configurazioneService.getParametriAziende("dataInizioPregressi", null, aziendeUtente).subscribe(
           (data: ParametroAziende[]) => {
-            let dataPiuNuova: Date = new  Date(1800, 2, 12);
+            let dataPiuNuova: Date = new Date(1980, 1, 12);
             data.forEach((pa: ParametroAziende) => {
               const dataDaValutare: Date = new Date(JSON.parse(pa.valore).data);
               if (dataPiuNuova < dataDaValutare) {
                 dataPiuNuova = dataDaValutare;
               }
             })
-            this.dataUltimoPregresso = [new  Date(1800, 2, 12), dataPiuNuova];
+            this.dataUltimoPregresso = [new Date(1980, 1, 12), dataPiuNuova];
           }
         )
       )
@@ -1207,8 +1208,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    * @param event
    * @param matchMode
    */
-  public applyFilterGlobal(event: Event, matchMode: string): void {
-    const stringa: string = (event.target as HTMLInputElement).value;
+  public applyFilterGlobal(stringa: string, matchMode: string): void {
+    //const stringa: string = (event.target as HTMLInputElement).value;
     if (!!!stringa || stringa === "") {
       this.resetSort();
     }

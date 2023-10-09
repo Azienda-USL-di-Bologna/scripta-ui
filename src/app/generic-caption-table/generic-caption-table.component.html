@@ -8,8 +8,12 @@
           <input #inputGobalFilter pInputText 
             [disabled]="!configuration.searchBox"
             type="text" 
-            (input)="referenceTableComponent.removeSort(); referenceTableComponent.applyFilterGlobal($event, 'equals')" 
-            placeholder="Ricerca.." />
+            [pTooltip]="tooltipGlobalFilter"
+            tooltipEvent="focus"
+            placeholder="Scrivi e premi invio per cercare"
+            tooltipPosition="bottom"
+            life="2000"
+            (keyup.enter)="onEnterGlobalFilter(inputGobalFilter.value)" /><!-- (input)="referenceTableComponent.removeSort(); referenceTableComponent.applyFilterGlobal($event, 'equals')"  -->
         </span>
         <!-- BOTTONE AGGIORNA RICERCA -->
         <button pButton 

@@ -423,6 +423,7 @@
       <!-- BOTTONE GESTIONE MASSIVA RESPONSABILE-->
       <p-button 
         [disabled]="!autocompleteIdStruttura || !autocompleteIdStruttura.value"
+        [pTooltip]="!autocompleteIdStruttura || !autocompleteIdStruttura.value ? 'Filtrare per struttura per accedere a questa funzionalità' : ''"
         class="gestione-massiva-responsabile-button"
         icon="pi p-mr-2 pi-user-edit"
         label="Sostituzione responsabile e struttura"
@@ -581,8 +582,10 @@
   [(visible)]="showGestioneMassiva" 
   (onHide)="onCloseGestioneMassiva()"
   styleClass="dialog-gestione-massiva-responsabile"
+  [modal]="true"
 >
   <span class="counter-fascicoli">Stai agendo su {{rowCountSelected === 1 ? 'un fascicolo' : rowCountSelected + ' fascicoli'}}</span>
+  <span class="warning-no-chiusi">Attenzione: Le modifiche non verranno applicate ad eventuali fascicoli chiusi/prechiusi.</span>
 
   <div class="box box-scelta-responsabile">
     <label for="ricerca-nuovo-responsabile">Scegli il nuovo responsabile dei fascicoli:</label>
