@@ -8,7 +8,7 @@
 	scrollHeight="flex">
   <ng-template pTemplate="caption">
 		<div class="">
-			<button *ngIf="archivio.livello === 1 && loggedUserIsResponsabile"
+			<button *ngIf="archivio.livello === 1 && (loggedUserIsResponsabile || sonoResponsabile)"
 				id="aggiungiResponsabile"
 				type="button"
 				pButton 
@@ -17,7 +17,7 @@
 				(click)="inEditing = true; addResponsabile(ruoliEnum.RESPONSABILE_PROPOSTO)" 
 				class="mr-2 bottoneVicari" 
 				label="Proponi nuovo responsabile"
-				[disabled]="inEditing || permessiDettaglioArchivioService.loading || !loggedUserIsResponsbaileOrVicario || responsabilePropostoGiaPresente || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
+				[disabled]="inEditing || !(loggedUserIsResponsabile || sonoResponsabile) || permessiDettaglioArchivioService.loading || !loggedUserIsResponsbaileOrVicario || responsabilePropostoGiaPresente || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
 			</button>
 			<button *ngIf="archivio.livello === 1"
 				id="aggiungiResponsabile"
@@ -49,7 +49,7 @@
 						<lib-users-autocomplete *ngIf="!attore.idPersona" 
 							class="autocomplete-utenti" 
 							[azienda]="archivio.idAzienda"
-              [showPool]="false"
+              				[showPool]="false"
 							[showOnlyUser]="true"
 							(utenteStrutturaSelezionatoEmit)="onUtenteStrutturaSelected($event, attore, ri)">
 						</lib-users-autocomplete><!-- [afferenzaDiretta]="true" -->

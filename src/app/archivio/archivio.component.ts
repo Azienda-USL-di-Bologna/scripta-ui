@@ -50,9 +50,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
   public utenteExistsInArchivioInteresse: boolean;
   private utenteArchivioDiInteresse: ArchivioDiInteresse;
   private utenteUtilitiesLogin: UtenteUtilities;
-  public messaggioChiusura: string = "ciao";
+  public messaggioChiusura: string = "";
   public messaggioChiusuraDefinitiva: string = "<br/><br/>Tutti i documenti non numerati verranno numerati.";
-  public messaggioStampa: string = "ciao";
+  public messaggioStampa: string = "";
   public subscriptions: Subscription[] = [];
   public loggedUserCanVisualizeArchive = false;
   public showRightSide: boolean = false;
@@ -719,9 +719,9 @@ export class ArchivioComponent implements OnInit, AfterViewInit, TabComponent, C
     this.archivilist.removeSort();
     this.doclist.removeSort();
   }
-  public applyFilterGlobal(event: any, matchOperation: string): void {
-    this.archivilist.applyFilterGlobal(event, matchOperation);
-    this.doclist.applyFilterGlobal(event, matchOperation);
+  public applyFilterGlobal(stringa: string, matchOperation: string): void {
+    this.archivilist.applyFilterGlobal(stringa, matchOperation);
+    this.doclist.applyFilterGlobal(stringa, matchOperation);
   }
   public resetPaginationAndLoadData() {
     this.archivilist.resetPaginationAndLoadData();

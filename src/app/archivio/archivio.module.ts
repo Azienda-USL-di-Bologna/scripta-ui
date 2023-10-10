@@ -30,7 +30,7 @@ import { CommonComponentsModule } from "@bds/common-components";
   declarations: [
     ArchivioComponent,
     ArchivioTreeComponent,
-    RichiestaAccessoArchiviComponent,
+    RichiestaAccessoArchiviComponent
   ],
   exports: [
   ],
