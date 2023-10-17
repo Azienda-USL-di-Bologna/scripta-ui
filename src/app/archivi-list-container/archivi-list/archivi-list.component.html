@@ -430,8 +430,6 @@
         (click)="openSostituzioneResponsabileMassivoPopup()">
       </p-button><!-- *ngIf="archivesSelected.length > 0" -->
       <p-button 
-       
-        [pTooltip]="!autocompleteIdStruttura || !autocompleteIdStruttura.value ? 'Filtrare per struttura per accedere a questa funzionalità' : ''"
         class="gestione-massiva-responsabile-button"
         icon="pi p-mr-2 pi-user-edit"
         label="Sostituzione permessi/vicari"
@@ -672,10 +670,12 @@
           label="Aggiungi vicario">
         </button> 
       <p-table #tableAggiuntaVicari
+        class="tabella-permessi-persona"
         [scrollable]="true"
         dataKey="id"
         editMode="row" 
         [value]="vicariDaAggiungere"
+        styleClass="tabella-permessi-persona"
       >
         <ng-template pTemplate="header">
           <tr>
@@ -706,17 +706,12 @@
             <td class="struttura-column">
               <p-cellEditor>
                 <ng-template pTemplate="input">
-                  <p-dropdown 
-                    appendTo="body"
-                    [(ngModel)]="vicario.idStruttura"  
-                    >
                     <ng-template let-struttura pTemplate="selectedItem">
                       <div>{{struttura.nome}}</div>
                     </ng-template>
                     <ng-template let-struttura pTemplate="item">
                       <div>{{struttura.nome}}</div>
                     </ng-template>
-                  </p-dropdown>
                 </ng-template>
                 <ng-template pTemplate="output">
                   {{vicario.idStruttura?.nome}}
@@ -751,10 +746,12 @@
           label="Aggiungi vicario da cancellare">
         </button> 
       <p-table #tableRimozioneVicari
+        class="tabella-permessi-persona"
         [scrollable]="true"
         dataKey="id"
         editMode="row" 
         [value]="vicariDaRimuovere"
+        styleClass="tabella-permessi-persona"
       >
         <ng-template pTemplate="header">
           <tr>
@@ -785,17 +782,12 @@
             <td class="struttura-column">
               <p-cellEditor>
                 <ng-template pTemplate="input">
-                  <p-dropdown 
-                    appendTo="body"
-                    [(ngModel)]="vicario.idStruttura"  
-                    >
                     <ng-template let-struttura pTemplate="selectedItem">
                       <div>{{struttura.nome}}</div>
                     </ng-template>
                     <ng-template let-struttura pTemplate="item">
                       <div>{{struttura.nome}}</div>
                     </ng-template>
-                  </p-dropdown>
                 </ng-template>
                 <ng-template pTemplate="output">
                   {{vicario.idStruttura?.nome}}
@@ -829,9 +821,9 @@
           (click)="addUtenteGestioneMassiva('DELETEPERMESSI')" 
           label="Aggiungi permesso utente da cancellare">
         </button> 
-        <div class="tabella-permessi-persona"> 
-          <p-table #tableRimozionePermessi
+        <p-table #tableRimozionePermessi
         [scrollable]="true"
+        class="tabella-permessi-persona"
         dataKey="id"
         editMode="row" 
         styleClass="tabella-permessi-persona"
@@ -865,17 +857,12 @@
             <td class="struttura-column">
               <p-cellEditor>
                 <ng-template pTemplate="input">
-                  <p-dropdown 
-                    appendTo="body"
-                    [(ngModel)]="utente.idStruttura"  
-                    >
                     <ng-template let-struttura pTemplate="selectedItem">
                       <div>{{struttura.nome}}</div>
                     </ng-template>
                     <ng-template let-struttura pTemplate="item">
                       <div>{{struttura.nome}}</div>
                     </ng-template>
-                  </p-dropdown>
                 </ng-template>
                 <ng-template pTemplate="output">
                   {{utente.idStruttura?.nome}}
@@ -895,9 +882,7 @@
             </td>
           </tr>
         </ng-template>
-      </p-table>
-        </div>
-      
+      </p-table>      
     </mat-tab>
     <mat-tab label="Aggiunta permessi" [disabled]="inEditing"> <!--TAB AGGIUNTA PERMESSI-->
       <button
@@ -911,27 +896,9 @@
           (click)="addUtenteGestioneMassiva('ADDPERMESSI')" 
           label="Aggiungi permesso utente">
         </button> 
-        <button *ngIf="inEditing && permessiDaAggiungere.length > 0 && permessiDaAggiungere[0].persona"
-        pButton 
-        pRipple
-        label="Salva modifiche"
-        pTooltip="Conferma"
-        class="bottone-header p-button-text adding-button" 
-        type="button" 
-        icon="pi pi-check" 
-        (click)="inEditing=false; confirmPermessi()">
-      </button>
-      <button *ngIf="!inEditing && permessiDaAggiungere.length > 0"
-        pButton 
-        pRipple
-        label="Modifica tipi di permesso"
-        pTooltip="Conferma"
-        class="bottone-header p-button-text adding-button"
-        type="button" 
-        icon="pi pi-pencil" 
-        (click)="inEditing=true;">
-      </button>
       <p-table #tableAggiuntaPermessi
+        class="tabella-permessi-persona"
+        styleClass="tabella-permessi-persona"
         [scrollable]="true"
         dataKey="id"
         editMode="row" 
@@ -943,7 +910,7 @@
             <th class="struttura-column">Struttura</th>
             <th class="permesso-column">Tipo di permesso</th>
             <th class="propaga-column">Propaga a sottolivelli</th>
-            <th class="azione-comun">Azioni</th>
+            <th class="azione-column">Azioni</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-ri="rowIndex" let-permesso let-editing="inEditing">
@@ -978,7 +945,6 @@
                   <ng-template pTemplate="input" >
                     <p-dropdown 
                       appendTo="body"
-                      [disabled]="!inEditing"
                       [(ngModel)]="permesso.predicato"
                       [options]="predicatiPermessiGestioneMassiva">
                     </p-dropdown>

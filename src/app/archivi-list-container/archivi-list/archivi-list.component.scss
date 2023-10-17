@@ -402,9 +402,6 @@
 ::ng-deep .dialog-gestione-massiva-vicari-permessi {
   width: 60rem;
   height: 40rem;
-  &.tabella-permessi-persona {
-    height: 20rem !important;
-  }
   .counter-fascicoli {
     display: block;
   }
@@ -441,3 +438,27 @@
     margin-right: 5rem;
   }
 }
+::ng-deep .tabella-permessi-persona {
+  .propaga-column  {
+      min-width: 19% !important;
+      width: 19% !important;
+      max-width: 19% !important;
+      display: flex;
+      justify-content: left;
+      //flex-wrap: nowrap;
+      padding: 0 !important;
+    }
+    .azione-column {
+        min-width: 10% !important;
+        width: 10% !important;
+        max-width: 10% !important;
+        display: flex;
+        justify-content: center;
+        flex-wrap: nowrap;
+        padding: 0 !important;
+    }
+  }
+
+
+
+  

@@ -1687,15 +1687,15 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					}
 				}
 			));
-			this.inEditing= false;
+			this.inEditing = false;
 		}
 		else {
-			//this.inEditing = false;
 			const permessoPersonaTemp: PermessoPersona = new PermessoPersona();
 			permessoPersonaTemp.persona = utenteStruttura.idUtente.idPersona;
 			permessoPersonaTemp.struttura = utenteStruttura.idStruttura;
 			permessoPersonaTemp.predicato = EnumPredicatoPermessoPersona.VISUALIZZA;
 			this.permessiDaAggiungere[index] = permessoPersonaTemp;
+			this.inEditing = false;
 			
 		}
 
@@ -1822,7 +1822,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			));
 	}
 
-	avviaGestioneMassivaPermessiVicari() {
+	/**
+	 * 
+	 */
+	public avviaGestioneMassivaPermessiVicari(): void {
 		this.rightContentProgressSpinner = true;
 		this.showGestioneMassivaPermessi = false;
 		const idsPersonaVicariAdd: number[] = [];
