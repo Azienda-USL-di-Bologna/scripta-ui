@@ -6,7 +6,7 @@ templateUrl: "./box-participanti-aggiudicatari.component.html",
 styleUrls: ["./box-participanti-aggiudicatari.component.scss"]
 })
 
-export class BoxParticipantiAggiudicatari implements OnInit {
+export class BoxParticipantiAggiudicatariComponent implements OnInit {
     
     public raggruppamenti: any[] = [
         {name:'Nome1', tipologia:'tipologia1'},
