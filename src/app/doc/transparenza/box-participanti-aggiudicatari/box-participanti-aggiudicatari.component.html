@@ -1,0 +1,321 @@
+    <p-accordion>
+        <p-accordionTab header="Partecipanti in Raggruppamento">
+        <p-table #dt
+        [value]="raggruppamenti"
+        dataKey="idRaggruppamento" 
+        editMode="row"
+        styleClass="tabella"
+        [scrollable]="true"
+        scrollHeight="flex">
+        <ng-template pTemplate="caption">
+        <div>
+          <button 
+          id="nuovoRaggruppamento"
+          type="button"
+          pButton 
+          pRipple 
+          icon="pi pi-plus" 
+          (click)="nuovoRaggruppamento()"
+          class="btn-partecipanti" 
+          label="Nuovo Raggruppamento">
+      </button>
+        </div>
+      </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th class="partecipante-column">Partecipante</th>
+                <th class="tipologia-column">Tipologia</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowData let-editing="editing" let-ri="rowIndex">
+            <tr [pEditableRow]="rowData">
+              <td class="partecipante-column" pEditableColumn>
+                <p-cellEditor>
+                  <ng-template pTemplate="input">
+                    <input [(ngModel)]="rowData.name" type="text" pInputText>
+                  </ng-template>
+                  <ng-template pTemplate="output">
+                    {{ rowData.name }}
+                  </ng-template>
+                </p-cellEditor>
+              </td>
+              <td class="tipologia-column" pEditableColumn>
+                <p-cellEditor>
+                  <ng-template pTemplate="input">
+                    <input [(ngModel)]="rowData.email" type="text" pInputText>
+                  </ng-template>
+                  <ng-template pTemplate="output">
+                    {{ rowData.tipologia }}
+                  </ng-template>
+                </p-cellEditor>
+              </td>
+              <td style="text-align:center">
+                <!-- aggiunto un'icona per attivare la modifica -->
+                <button 
+                *ngIf="!editing"
+                pButton 
+					      pRipple 
+					      pInitEditableRow 
+					      pTooltip="Modifica Raggruppamento"
+					      class="p-button-rounded p-button-text"
+					      type="button"  
+					      icon="pi pi-pencil" 
+                (click)="modificaPartecipante(rowData)">
+                </button>
+
+                <!-- aggiunto un'icona per eliminare una riga -->
+                <button *ngIf="!editing" 
+					      pButton 
+					      pRipple 
+					      pTooltip="Elimina Partecipante"
+					      class="p-button-rounded p-button-text"
+				 	      type="button"  
+					      icon="pi pi-trash" 
+				 	      (click)="eliminaRiga(raggruppamenti, rowData)">
+				        </button>
+             
+                <!-- aggiunto un'icona per salvare la modifica -->
+                <button 
+                *ngIf="editing"
+                pButton
+                pRipple
+                pSaveEditableRow 
+                pTooltip="Salva Raggruppamento"
+                class = "p-button-rounded p-button-text p-button-success p-mr-2"
+                type="button"
+                icon="pi pi-check"
+                (click)="savePartecipante(rowData)">
+                </button>
+
+                <!-- aggiunto un'icona per cancellare la modifica -->
+                <button 
+                *ngIf="editing" 
+                pButton 
+                pRipple 
+                type="button" 
+                pCancelEditableRow 
+                icon="pi pi-times" 
+                (click)="onRowEditCancel()"
+                class="p-button-rounded p-button-text p-button-danger">
+              </button>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+        </p-accordionTab>
+    </p-accordion>
+    <p-accordion>
+      <p-accordionTab header="Partecipanti Singoli">
+        <p-table #dt
+        [value]="singoli"
+        dataKey="idSibgoli" 
+        editMode="row"
+        styleClass="tabella"
+        [scrollable]="true"
+        scrollHeight="flex">
+        <ng-template pTemplate="caption">
+        <div>
+          <button 
+          id="nuovoSingolo"
+          type="button"
+          pButton 
+          pRipple 
+          icon="pi pi-plus" 
+          (click)="nuovoSingolo()"
+          class="btn-partecipanti" 
+          label="Nuovo Singolo">
+      </button>
+        </div>
+      </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th class="partecipante-column">Partecipante</th>
+                <th class="tipologia-column"></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowData let-editing="editing" let-ri="rowIndex">
+            <tr [pEditableRow]="rowData">
+              <td class="partecipante-column" pEditableColumn>
+                <p-cellEditor>
+                  <ng-template pTemplate="input">
+                    <input [(ngModel)]="rowData.name" type="text" pInputText>
+                  </ng-template>
+                  <ng-template pTemplate="output">
+                    {{ rowData.name }}
+                  </ng-template>
+                </p-cellEditor>
+              </td>
+              <td class="tipologia-column" pEditableColumn>
+                <p-cellEditor>
+                  <ng-template pTemplate="input">
+                    <input [(ngModel)]="rowData.email" type="text" pInputText>
+                  </ng-template>
+                  <ng-template pTemplate="output">
+                    {{ rowData.email }}
+                  </ng-template>
+                </p-cellEditor>
+              </td>
+             
+              <td style="text-align:center">
+                <!-- aggiunto un'icona per attivare la modifica -->
+                <button 
+                *ngIf="!editing"
+                pButton 
+					      pRipple 
+					      pInitEditableRow 
+					      pTooltip="Modifica Raggruppamento"
+					      class="p-button-rounded p-button-text"
+					      type="button"  
+					      icon="pi pi-pencil" 
+                (click)="modificaPartecipante(rowData)">
+                </button>
+
+                <!-- aggiunto un'icona per eliminare una riga -->
+                <button *ngIf="!editing" 
+					      pButton 
+					      pRipple 
+					      pTooltip="Elimina Partecipante"
+					      class="p-button-rounded p-button-text"
+				 	      type="button"  
+					      icon="pi pi-trash" 
+				 	      (click)="eliminaRiga(singoli, rowData)">
+				        </button>
+             
+                <!-- aggiunto un'icona per salvare la modifica -->
+                <button 
+                *ngIf="editing"
+                pButton
+                pRipple
+                pSaveEditableRow 
+                pTooltip="Salva Raggruppamento"
+                class = "p-button-rounded p-button-text p-button-success p-mr-2"
+                type="button"
+                icon="pi pi-check"
+                (click)="savePartecipante(rowData)">
+                </button>
+
+                <!-- aggiunto un'icona per cancellare la modifica -->
+                <button 
+                *ngIf="editing" 
+                pButton 
+                pRipple 
+                type="button" 
+                pCancelEditableRow 
+                icon="pi pi-times" 
+                (click)="onRowEditCancel()"
+                class="p-button-rounded p-button-text p-button-danger">
+              </button>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+    </p-accordionTab>
+    </p-accordion>
+    <p-accordion>
+        <p-accordionTab  header="Aggiudicatari">
+          <p-table #dt
+          [value]="aggiudicatari"
+          dataKey="idAggiudicatari" 
+          editMode="row"
+          styleClass="tabella"
+          [scrollable]="true"
+          scrollHeight="flex">
+          <ng-template pTemplate="caption">
+          <div>
+            <button 
+            id="nuovoAggiudicatario"
+            type="button"
+            pButton 
+            pRipple 
+            icon="pi pi-plus" 
+            (click)="nuovoAggiudicatario()"
+            class="btn-partecipanti" 
+            label="Nuovo Aggiudicatario">
+        </button>
+          </div>
+        </ng-template>
+          <ng-template pTemplate="header">
+              <tr>
+                  <th class="partecipante-column">Aggiudicatario</th>
+                  <th class="tipologia-column">Ruolo</th>
+              </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-rowData let-editing="editing" let-ri="rowIndex">
+              <tr [pEditableRow]="rowData">
+                <td class="partecipante-column" pEditableColumn>
+                  <p-cellEditor>
+                    <ng-template pTemplate="input">
+                      <input [(ngModel)]="rowData.name" type="text" pInputText>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                      {{ rowData.name }}
+                    </ng-template>
+                  </p-cellEditor>
+                </td>
+                <td class="tipologia-column" pEditableColumn>
+                  <p-cellEditor>
+                    <ng-template pTemplate="input">
+                      <input [(ngModel)]="rowData.ruolo" type="text" pInputText>
+                    </ng-template>
+                    <ng-template pTemplate="output">
+                      {{ rowData.ruolo }}
+                    </ng-template>
+                  </p-cellEditor>
+                </td>
+                <td style="text-align:center">
+                  <!-- aggiunto un'icona per attivare la modifica -->
+                  <button 
+                  *ngIf="!editing"
+                  pButton 
+                  pRipple 
+                  pInitEditableRow 
+                  pTooltip="Modifica Raggruppamento"
+                  class="p-button-rounded p-button-text"
+                  type="button"  
+                  icon="pi pi-pencil" 
+                  (click)="modificaPartecipante(rowData)">
+                  </button>
+  
+                  <!-- aggiunto un'icona per eliminare una riga -->
+                  <button *ngIf="!editing" 
+                  pButton 
+                  pRipple 
+                  pTooltip="Elimina Partecipante"
+                  class="p-button-rounded p-button-text"
+                   type="button"  
+                  icon="pi pi-trash" 
+                   (click)="eliminaRiga(aggiudicatari, rowData)">
+                  </button>
+               
+                  <!-- aggiunto un'icona per salvare la modifica -->
+                  <button 
+                  *ngIf="editing"
+                  pButton
+                  pRipple
+                  pSaveEditableRow 
+                  pTooltip="Salva Raggruppamento"
+                  class = "p-button-rounded p-button-text p-button-success p-mr-2"
+                  type="button"
+                  icon="pi pi-check"
+                  (click)="saveAggiudicatario()">
+                  </button>
+  
+                  <!-- aggiunto un'icona per cancellare la modifica -->
+                  <button 
+                  *ngIf="editing" 
+                  pButton 
+                  pRipple 
+                  type="button" 
+                  pCancelEditableRow 
+                  icon="pi pi-times" 
+                  (click)="onRowEditCancel()"
+                  class="p-button-rounded p-button-text p-button-danger">
+                </button>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-accordionTab>
+    </p-accordion>
+
+    
