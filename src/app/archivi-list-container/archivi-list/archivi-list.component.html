@@ -432,7 +432,7 @@
       <p-button 
         class="gestione-massiva-responsabile-button"
         icon="pi p-mr-2 pi-user-edit"
-        label="Sostituzione permessi/vicari"
+        label="Modifica permessi/vicari"
         (click)="openGestioneMassivaPermessiPopup()">
       </p-button><!-- *ngIf="archivesSelected.length > 0"  [disabled]="!autocompleteIdStruttura || !autocompleteIdStruttura.value"-->
     </tr>
@@ -669,6 +669,16 @@
           (click)="addUtenteGestioneMassiva('ADDVICARI')" 
           label="Aggiungi vicario">
         </button> 
+        <button
+        class="adding-button"
+        *ngIf="inEditing"
+        type="button"
+        pButton 
+        pRipple 
+        icon="pi pi-times" 
+        (click)="cancelGestioneMassiva('ADDVICARI')" 
+        label="Annulla">
+      </button> 
       <p-table #tableAggiuntaVicari
         class="tabella-permessi-persona"
         [scrollable]="true"
@@ -745,6 +755,16 @@
           (click)="addUtenteGestioneMassiva('DELETEVICARI')" 
           label="Aggiungi vicario da cancellare">
         </button> 
+        <button
+        class="adding-button"
+        id="annulla"
+        type="button"
+        pButton 
+        pRipple 
+        *ngIf="inEditing"
+        icon="pi pi-times" 
+        (click)="cancelGestioneMassiva('DELETEVICARI')" 
+        label="Annulla"></button>
       <p-table #tableRimozioneVicari
         class="tabella-permessi-persona"
         [scrollable]="true"
@@ -820,7 +840,17 @@
           icon="pi pi-plus" 
           (click)="addUtenteGestioneMassiva('DELETEPERMESSI')" 
           label="Aggiungi permesso utente da cancellare">
-        </button> 
+        </button>
+        <button
+        class="adding-button"
+        id="annulla"
+        type="button"
+        pButton 
+        pRipple 
+        *ngIf="inEditing"
+        icon="pi pi-times" 
+        (click)="cancelGestioneMassiva('DELETEPERMESSI')" 
+        label="Annulla"></button>
         <p-table #tableRimozionePermessi
         [scrollable]="true"
         class="tabella-permessi-persona"
@@ -894,7 +924,17 @@
           [disabled]="inEditing"
           icon="pi pi-plus" 
           (click)="addUtenteGestioneMassiva('ADDPERMESSI')" 
-          label="Aggiungi permesso utente">
+          label="Aggiungi permesso utente"></button>
+          <button
+          class="adding-button"
+          id="annulla"
+          type="button"
+          pButton 
+          pRipple 
+          *ngIf="inEditing"
+          icon="pi pi-times" 
+          (click)="cancelGestioneMassiva('ADDPERMESSI')" 
+          label="Annulla"> 
         </button> 
       <p-table #tableAggiuntaPermessi
         class="tabella-permessi-persona"

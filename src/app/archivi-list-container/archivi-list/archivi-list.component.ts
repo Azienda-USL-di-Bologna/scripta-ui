@@ -1581,6 +1581,28 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.isReset = false;
 			this.showGestioneMassivaPermessi = true;
 	}
+	public cancelGestioneMassiva(tabName: string) : void {
+		switch (tabName) {
+			case "ADDVICARI":
+				this.vicariDaAggiungere.shift();
+				this.inEditing = false;
+				break;
+			case "DELETEVICARI":
+				this.vicariDaRimuovere.shift();
+				this.inEditing = false;
+				break;
+			case "DELETEPERMESSI":
+				this.permessiDaRimuovere.shift();
+				this.inEditing = false;
+				break;
+			case "ADDPERMESSI":
+				this.permessiDaAggiungere.shift();
+				this.inEditing = false;
+				break;
+			default:
+				break;
+		}
+	}
 
 	public addUtenteGestioneMassiva(currentTab: string) : void {
 		let newUtente = new UtenteStruttura;

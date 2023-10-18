@@ -431,12 +431,20 @@
   }
   .adding-button {
     margin-bottom: 1.5rem;
+    margin-left: 1rem;
   }
   .no-scroll-tab {
     width: 100%;
     margin-left: 5rem;
     margin-right: 5rem;
   }
+}
+::ng-deep.mat-tab-label.mat-tab-label-active:not(.mat-tab-disabled),
+::ng-deep.mat-tab-label.mat-tab-label-active.cdk-keyboard-focused:not(.mat-tab-disabled) {
+  //background-color: #dcd5a4;
+  font-weight: 700;
+  color: black;
+  opacity: 1;
 }
 ::ng-deep .tabella-permessi-persona {
   .propaga-column  {
