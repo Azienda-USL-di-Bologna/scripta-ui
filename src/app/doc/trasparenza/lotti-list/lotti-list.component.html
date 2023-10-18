@@ -1,0 +1,71 @@
+<div class="first-div">
+<p>Trasparenza - Legge 190</p>
+<div class="elenco-lotti">
+  <p>Elenco Lotti</p>
+</div>
+  <div class="box-ricerca">
+    <span class="p-input-icon-left">
+      <i class="pi pi-search"></i>
+      <input #inputGobalFilter pInputText 
+        type="text"  
+        placeholder="Cerca per CIG"
+        tooltipPosition="bottom"
+        (input)="myTable.filterGlobal($any($event.target).value, 'contains')">
+    </span>
+  </div>
+  <p-table
+    #myTable
+    [value]="listaLotti"
+    responsiveLayout="scroll"
+    styleClass="p-datatable-sm"
+    [rowHover]="true"
+    [rows]="10"
+    [globalFilterFields]="['cig']">
+    <ng-template pTemplate="header">
+        <tr>
+          <th width=15%>CIG</th>
+          <th width=25%>Oggetto</th>
+          <th width=25%>CF STRUTTURA PROPONENTE</th>
+          <th width=25%>DENOMINAZIONE STRUTTURA</th>
+          <th width=10%></th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-rowdata let-ri="rowIndex">
+        <tr>
+          <td>
+            {{rowdata.cig}}
+          </td>
+          <td>
+            {{rowdata.oggetto}}
+          </td>
+          <td>
+            {{rowdata.cf_struttura_proponente}}
+          </td>
+          <td>
+            {{rowdata.denominazione_struttura}}
+          </td>
+            <td style="text-align:center">
+              <button pButton pRipple type="button" icon="pi pi-pencil" (click)="onRowEditInit()" class="p-button-rounded"></button>
+              <button pButton pRipple type="button" pCancelRow icon="pi pi-trash" (click)="deleteRow(rowdata)" class="p-button-rounded"></button>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
+  <div class="top-footer-buttons">
+    <div>
+      <button pButton pRipple type="button" label="Aggiungi Lotto" (click)="aggiungiLotto()" class="p-button-text"></button>
+      <button pButton pRipple type="button" label="Importa Ordini in Ecconomia" class="p-button-text"></button>
+    </div>
+    <button pButton pRipple type="button" label="Chiudi" class="p-button-text"></button>
+  </div>
+</div>
+<p-dialog [(visible)]="dialogDisplay" [modal]="true">
+  <p-header style="position: center;">
+      Detagglio Lotto
+  </p-header>
+  <textarea rows="10" cols="50" pInputTextarea></textarea>
+  <p-footer>
+      <button pButton pRipple type="button" title="Salva" label="Salva"></button>
+      <button pButton pRipple type="button" title="Annulla" label="Annulla" (click)="cancelDialog()"></button>
+  </p-footer>
+</p-dialog>

@@ -1,0 +1,38 @@
+.first-div{
+  margin: 0.7rem;
+}
+.elenco-lotti {
+  p{
+  display: flex;
+  margin-left:  40rem;
+  margin-top: 0.5rem;
+  font-size: large;
+  }
+}
+.box-ricerca {
+  width: 15rem;
+  padding-bottom: 0.5rem;
+}
+
+button {
+  margin-right: 10px;
+  display: inline-flex;
+  cursor: pointer;
+  user-select: none;
+  align-items: center;
+  vertical-align: bottom;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+  &:hover {
+    color: #333333;
+    background-color: #993366 !important;
+    border-color: #993366 !important;
+  }
+}
+.top-footer-buttons {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 5px;
+  bottom:0.5px;
+}
