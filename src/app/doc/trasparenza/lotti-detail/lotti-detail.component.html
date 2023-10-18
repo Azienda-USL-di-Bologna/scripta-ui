@@ -1,0 +1,159 @@
+<div class="form-lotti-detail">
+  <div class="input-lotto-CIG">
+    <div class="p-grid">
+      <div class="p-col-12 p-md-3">
+        <label>CIG</label>
+        <input 
+          class="input-CIG"
+          type="text" 
+          pInputText 
+          name="add CIG" 
+          placeholder="CIG" 
+          required
+        >
+      </div>
+
+      <div class="p-col-12 p-md-3">
+        <label>Lotto</label>
+        <input 
+          class="input-lotto"
+          type="text" 
+          pInputText 
+          name="add lotto" 
+          placeholder="Lotto" 
+          required
+        >
+      </div>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="dropdown-container">
+      <div class="dropdown-tipologia">
+        <label>Tipologia</label>
+        <p-dropdown 
+          [options]="tipologia" 
+          [(ngModel)]="selectTipologia" 
+          placeholder="Scelta tipologia" 
+          optionLabel="name"
+          [showClear]="false"
+        ></p-dropdown>
+      </div>
+    
+      <div class="dropdown-scelta-contraente">
+        <label>Scelta Contraente</label>
+        <p-dropdown 
+          [options]="contraente" 
+          [(ngModel)]="selectContraente" 
+          placeholder="Scelta contraente" 
+          optionLabel="name"
+          [showClear]="false"
+        ></p-dropdown>
+      </div>
+    </div>
+    
+    <div class="input-oggetto">
+      <label>Oggetto</label>
+      <input 
+        class="input-lotto"
+        type="text" 
+        pInputText 
+        [(ngModel)]="oggetto"
+      >
+    </div>
+
+    <div class="card">
+      <p-divider align="left" type="dashed">
+        <b>Partecipanti</b>
+      </p-divider>
+    
+     <box-participanti-aggiudicatari></box-participanti-aggiudicatari>
+    </div>
+
+    <div class="card">
+      <p-divider align="left" type="dashed">
+        <b>Aggiudicatori</b>
+      </p-divider>
+    
+      <p>
+        Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
+        doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore
+        veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim
+        ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia
+        consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.
+        Consectetur, adipisci velit, sed quia non numquam eius modi.
+      </p>
+    </div>
+
+    <!-- <div class="input-importTotale-importLiquidato">
+      <div class="input-importTotale">
+        <label>Import Totale</label>
+        <p-inputNumber 
+          type="number" 
+          name="add Import Totale"
+          mode="decimal"
+          placeholder="Import Totale" 
+        ></p-inputNumber>
+      </div>
+
+      <div class="input-importLiquidato">
+        <label>Import Liquidato</label>
+        <p-inputNumber
+          type="number" 
+          name="add Import Liquidato"
+          mode="decimal"
+          placeholder="Import Liquidato"
+        ></p-inputNumber>
+      </div>
+    </div> -->
+    <div class="p-grid p-fluid">
+      <div class="p-field p-col-12 p-md-3">
+        <label>Importo Totale</label>
+        <p-inputNumber 
+          mode="decimal" 
+          [showButtons]="true" 
+          inputId="minmax-buttons" 
+          [min]="0"
+          placeholder="Importo Totale" 
+          >
+        </p-inputNumber>
+      </div>
+
+      <div class="p-field p-col-12 p-md-3">
+        <label>Importo Liquidato</label>
+        <p-inputNumber 
+          mode="decimal" 
+          [showButtons]="true" 
+          inputId="minmax-buttons" 
+          [min]="0"
+          placeholder="Importo Liquidato"
+        >
+        </p-inputNumber>
+      </div>
+    </div>
+
+    <div class="p-fluid p-grid p-formgrid">
+      <div class="p-field p-col-12 p-md-3">
+        <label for="icon">Data Inizio</label>
+        <p-calendar 
+          [(ngModel)]="dataIniziale"
+          [maxDate]="dataCompletamento"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          inputId="icon"
+          ></p-calendar>
+      </div>
+
+      <div class="p-field p-col-12 p-md-3">
+        <label for="icon">Data Completamento</label>
+        <p-calendar 
+          [(ngModel)]="dataCompletamento"
+          [minDate]="dataIniziale"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          inputId="icon"
+        ></p-calendar>
+      </div>
+    </div>
+  </div>
+</div>
