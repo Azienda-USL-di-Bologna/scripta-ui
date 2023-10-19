@@ -59,7 +59,12 @@
     <button pButton pRipple type="button" label="Chiudi" class="p-button-text"></button>
   </div>
 </div>
-<p-dialog [(visible)]="dialogDisplay" [modal]="true">
+<p-dialog 
+  header="Dettaglio Lotto" 
+  [(visible)]="dialogDisplay" 
+  [style]="{width: '70vw', height: '70vh'}" 
+  appendTo="body" 
+  [modal]="true">
   <p-header style="position: center;">
       Detagglio Lotto
   </p-header>

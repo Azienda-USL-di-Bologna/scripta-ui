@@ -1,4 +1,4 @@
-    <p-accordion>
+    <p-accordion  *ngIf="modalita !== 'aggiudicatari'">
         <p-accordionTab header="Partecipanti in Raggruppamento">
         <p-table #dt
         [value]="raggruppamenti"
@@ -40,14 +40,16 @@
                 </p-cellEditor>
               </td>
               <td class="tipologia-column" pEditableColumn>
-                <p-cellEditor>
-                  <ng-template pTemplate="input">
-                    <input [(ngModel)]="rowData.email" type="text" pInputText>
-                  </ng-template>
-                  <ng-template pTemplate="output">
-                    {{ rowData.tipologia }}
-                  </ng-template>
-                </p-cellEditor>
+                <div class="dropdown-tipologia">
+                  <p-dropdown 
+                    [options]="tipologie" 
+                    [(ngModel)]="selectTipologia" 
+                    placeholder="Scelta tipologia" 
+                    optionLabel="name"
+                    [showClear]="false"
+                    appendTo="body"
+                  ></p-dropdown>
+                </div>
               </td>
               <td style="text-align:center">
                 <!-- aggiunto un'icona per attivare la modifica -->
@@ -104,7 +106,7 @@
         </p-table>
         </p-accordionTab>
     </p-accordion>
-    <p-accordion>
+    <p-accordion  *ngIf="modalita !== 'aggiudicatari'">
       <p-accordionTab header="Partecipanti Singoli">
         <p-table #dt
         [value]="singoli"
@@ -211,7 +213,7 @@
         </p-table>
     </p-accordionTab>
     </p-accordion>
-    <p-accordion>
+    <p-accordion *ngIf="modalita === 'aggiudicatari'">
         <p-accordionTab  header="Aggiudicatari">
           <p-table #dt
           [value]="aggiudicatari"
