@@ -1,0 +1,70 @@
+.form-lotti-detail {
+  .input-lotto-CIG {
+    margin: 1rem;
+    display: flex;
+    // flex-direction: row;
+    // flex-wrap: nowrap;
+    // justify-content: flex-end;
+    // align-items: center;
+    .p-grid {
+      display: flex;
+      // justify-content: flex-end;
+      .p-col-12 p-md-3 {
+        justify-content: space-between;
+        margin-right: 1rem;
+      }
+    }
+  }
+  .main-container {
+    margin: 1rem;
+    .dropdown-container {
+      display: flex; 
+      justify-content: space-between; 
+      margin-bottom: 1rem;
+      .dropdown-tipologia {
+        margin-right: 1rem;
+        flex: 1;
+      }
+      .dropdown-scelta-contraente {
+        flex: 1; 
+      }
+    }
+    .input-oggetto {
+      margin-bottom: 1rem;
+    }
+
+    // .input-importTotale-importLiquidato {
+    //   display: flex; 
+    //   justify-content: space-between; 
+    //   margin-bottom: 1rem;
+    //   .input-importTotale {
+    //     margin-right: 1rem;
+    //     flex: 1;
+    //     //   display: flex;
+    //     // justify-content: space-between;
+    //   }
+    //   .input-importLiquidato {
+    //     flex: 1;
+    //   }
+    // }
+
+    // .p-fluid p-grid p-formgrid {
+    //   display: flex; 
+    //   margin-bottom: 1rem;
+    //   justify-content: space-between;
+    // }
+    // .calendar-dataIniziale {
+    //   // flex: 1; 
+    //   margin-right: 1rem;
+    //   // display: flex;
+    //   // justify-content: space-between;
+    //   flex: 1;
+    //   .calendar-dataIniziale-input {
+    //     width: 150px;
+    //   }
+    // }
+    // .calendar-dataCompletamento {
+    //   flex: 1;
+    // }
+  }
+}

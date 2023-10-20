@@ -1,0 +1,37 @@
+::ng-deep .tabella{
+  .partecipante-column{
+    min-width: 18.75rem;
+    width: 18.75rem;
+    max-width: 18.75rem;
+  }
+  .tipologia-column{
+    width: 100%;
+    p-celleditor {
+      width: 100%;
+    }
+  }
+    .p-button-rounded {
+        background-color: transparent !important;
+        border: none !important;
+        color: #203244 !important;
+        &:hover {
+          border-color: #2e4a65 !important;
+          background-color: #406284 !important;
+          color: #ffffff !important;
+          font-weight: normal !important;
+        }
+        &.p-button-danger {
+          color: #e91224 !important;
+        }
+        &.p-button-success {
+          color: #34A835 !important;
+        }
+        &.p-button-danger:hover, &.p-button-success:hover {
+          border:1px solid #2e4a65 !important;
+          background-color:transparent !important;
+        }
+        .p-button-icon {
+          font-size: 1.2rem;
+        } 
+      }
+}
