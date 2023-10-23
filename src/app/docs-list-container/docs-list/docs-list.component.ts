@@ -480,11 +480,11 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       case DocsListMode.MIEI_DOCUMENTI:
       case DocsListMode.NUOVO:
       case DocsListMode.REGISTRAZIONI: 
-      this.calendarcreazione.writeValue(this.lastDataCreazioneFilterValue);
+      this.calendarcreazione.writeValue(this.lastDataCreazioneFilterValue || this.actualDataCreazioneFilterValue);
       this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
         break;
       case DocsListMode.IFIRMARIO:
-        this.calendarcreazione.writeValue(this.lastDataCreazioneFilterValue);
+        this.calendarcreazione.writeValue(this.lastDataCreazioneFilterValue || this.actualDataCreazioneFilterValue);
         this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
         // TODO: Se viene velocizzato il tab ifirmato allora si può cancellare questo if e togliere il setimeout
         this.initialSortField = "dataCreazione";
