@@ -1,4 +1,7 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { BaseUrlType, CUSTOM_SERVER_METHODS, getInternautaUrl } from '@bds/internauta-model';
 
 @Component({
   selector: 'app-lotti-list',
@@ -6,6 +9,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./lotti-list.component.scss']
 })
 export class LottiListComponent implements OnInit {
+
+  public idEsterno: string = "";
   
   public dialogDisplay: boolean = false;
   listaLotti: LottiList[] = [{cig: "first", oggetto: "Oggetto", cf_struttura_proponente: 1, denominazione_struttura: "demo"}];
@@ -18,9 +23,15 @@ export class LottiListComponent implements OnInit {
     ];
 
 
-  constructor() { }
+  constructor(
+    protected _http: HttpClient,
+    private route: ActivatedRoute
+  ) { }
 
   ngOnInit(): void {
+    const queryParams = this.route.snapshot.queryParamMap;
+    this.idEsterno = queryParams.get('guid');
+
   }
 
   onRowEditInit() {
@@ -41,6 +52,15 @@ export class LottiListComponent implements OnInit {
 
   public cancelDialog() {
     this.dialogDisplay = false;
+  }
+
+  public chiudiLottoList(): void {
+    const apiUrl = getInternautaUrl(BaseUrlType.Lotti) + "/refreshLotti" + "?guid=" + this.idEsterno ;
+    this._http.get(apiUrl).subscribe(
+      res => {
+        window.close();
+      }
+    );
   }
 }
 
