@@ -221,11 +221,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
               const funzioniItems: MenuItem[] = [
               {
                 label: "Forza versamenti",
+                icon: "pi pi-bolt",
                 disabled: false,
                 command: () => this.openVersamentoMassivoPopup(StatoVersamento.FORZARE)
               },
               {
                 label: "Ritenta versamenti",
+                icon: "pi pi-reply",
                 disabled: false,
                 command: () => this.openVersamentoMassivoPopup(StatoVersamento.ERRORE_RITENTABILE)
               }] as MenuItem[];
@@ -445,7 +447,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       }); 
     }
 
-    if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.RV)) {
+    if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.RV)
+        || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD)) {
       this.selectButtonItems.push({
         title: "",
         label: "Errori Versamento", 

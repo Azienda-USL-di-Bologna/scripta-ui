@@ -46,6 +46,24 @@
     [(selected)]="accordionSelected[1]"
     *ngIf = "isResponsabileVersamento === true"
     [ngClass]="accordionSelected[1] ? 'tab-accordion-selected' : ''">
+    <i class="pi pi-info-circle info-versamenti" 
+      (click)="op.toggle($event)"
+      pTooltip="Scopri alcune caratteristiche degli errori versamento">
+    </i>
+    <p-overlayPanel #op 
+      appendTo="body"
+      styleClass="overlaypanel-info-versamenti"
+      [showCloseIcon]="true">
+      <ng-template pTemplate>
+        <p>Questo filtro può essere usato per cercare un fascicolo per numero oppure per numerazione gerarchica. Di seguito alcuni esempi</p>
+        <ul>
+          <li>Seleziona il livello Sottofascicolo e scrivi nella ricerca il numero del sottofascicolo desiderato</li>
+          <li>Seleziona il livello Tutti e scrivi una numerazione gerarchica completa (es 23-1/2018) per trovare immediatamente il fascicolo desiderato</li>
+          <li>Non ti ricordi l'esatta numerazione? Inserisci quello che ti ricordi a partire dal livello più importante, ad es. con 23- troverari tutti i sottofascioli/inserti figli del fascicolo 23</li>
+        </ul>
+        Ricorda: Non cercare qui immettendo solo l'anno, usa il filtro sull'anno di creazione o altri ancora per trovare più facilmente ciò che desideri.
+      </ng-template>
+    </p-overlayPanel>
     <versamenti [idDoc]="doc.id"></versamenti>
   </p-accordionTab>
 </p-accordion>
