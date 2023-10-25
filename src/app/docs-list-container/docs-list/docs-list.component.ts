@@ -956,7 +956,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.loadDocsListSubscription.unsubscribe();
       this.loadDocsListSubscription = null;
     }
-    const idAziende : number[] = [this.dropdownAzienda.value];
+    //const idAziende : number[] = [this.dropdownAzienda.value];
     //asdasdasd vado a valorizzare la data pregresso per l'azienda voluta
     
     
