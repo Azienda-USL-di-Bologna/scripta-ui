@@ -55,13 +55,13 @@
       styleClass="overlaypanel-info-versamenti"
       [showCloseIcon]="true">
       <ng-template pTemplate>
-        <p>Questo filtro può essere usato per cercare un fascicolo per numero oppure per numerazione gerarchica. Di seguito alcuni esempi</p>
+        <p>Gli errori di versamento possono essere di tre tipi</p>
         <ul>
-          <li>Seleziona il livello Sottofascicolo e scrivi nella ricerca il numero del sottofascicolo desiderato</li>
-          <li>Seleziona il livello Tutti e scrivi una numerazione gerarchica completa (es 23-1/2018) per trovare immediatamente il fascicolo desiderato</li>
-          <li>Non ti ricordi l'esatta numerazione? Inserisci quello che ti ricordi a partire dal livello più importante, ad es. con 23- troverari tutti i sottofascioli/inserti figli del fascicolo 23</li>
+          <li>Errori forzabili: sono documenti che presentano dei problemi nella verifica della validità della firma di un allegato o più. Il responsabile di versamento li può forzare in autonomia.</li>
+          <li>Errori crittografici: sono documenti che presentano dei problemi strutturali nella firma di un allegato o più. Il responsabile di versamento li può forzare, ma in sessioni concordate con il polo archivistico</li>
+          <li>Errori non forzabili: sono documenti che presentano errori nella composizione del documento inviato al polo archivistico, errori nel processo di invio, etc.. Il responsabile di versamento può solo ritentare il versamento. </li>
         </ul>
-        Ricorda: Non cercare qui immettendo solo l'anno, usa il filtro sull'anno di creazione o altri ancora per trovare più facilmente ciò che desideri.
+        Ricorda: La differenza tra ritentare e forzare un versamento è che il "ritenta versamento" riverserà lo stesso xml, mentre il "forza versamento" abiliterà il parametro chiamato "forza accettazione" nell'xml che permette di mandare in conservazione i documenti nonostante gli errori forzabili
       </ng-template>
     </p-overlayPanel>
     <versamenti [idDoc]="doc.id"></versamenti>
