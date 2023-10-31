@@ -23,10 +23,10 @@ export class ModificaVicariPermessiComponent {
   @Input() serviceToGetData: NextSDREntityProvider;
   @Input() idAzienda: number;
 
-  //@Output() rightContentProgressSpinner = new EventEmitter<Boolean>();
+  @Output() hideMe = new EventEmitter<Boolean>();
 
-	checked = true;
-  public inEditing: boolean = false;
+	public checked = true;
+	public utenteCercato: UtenteStruttura;
   public vicariDaAggiungere: UtenteStruttura[] = [];
   public vicariDaRimuovere: UtenteStruttura[] = [];
 	public permessiDaRimuovere: UtenteStruttura[] = [];
@@ -35,7 +35,9 @@ export class ModificaVicariPermessiComponent {
 
   private subscriptions: Subscription[] = [];
 	private predicatiPermessiGestioneMassiva: EnumPredicatoPermessoPersona[] = [
-    EnumPredicatoPermessoPersona.VISUALIZZA, EnumPredicatoPermessoPersona.MODIFICA, EnumPredicatoPermessoPersona.ELIMINA
+    EnumPredicatoPermessoPersona.VISUALIZZA, 
+		EnumPredicatoPermessoPersona.MODIFICA, 
+		EnumPredicatoPermessoPersona.ELIMINA
   ];
 
   @ViewChild("tableAggiuntaVicari", {}) private dtAddVicari: Table;
@@ -51,55 +53,28 @@ export class ModificaVicariPermessiComponent {
 	) { }
 
 
-  public addUtenteGestioneMassiva(currentTab: string) : void {
+  /* public addUtenteGestioneMassiva(currentTab: string) : void {
 		let newUtente = new UtenteStruttura;
 		switch (currentTab) {
 			case "ADDVICARI":
 				this.vicariDaAggiungere.unshift(newUtente);
 				this.dtAddVicari.initRowEdit(newUtente);
-				this.inEditing = true;
 				break;
 			case "DELETEVICARI":
 				this.vicariDaRimuovere.unshift(newUtente);
 				this.dtRemoveVicari.initRowEdit(newUtente);
-				this.inEditing = true;
 				break;
 			case "DELETEPERMESSI":
 				this.permessiDaRimuovere.unshift(newUtente);
 				this.dtRemovePermessi.initRowEdit(newUtente);
-				this.inEditing = true;
 				break;
 			case "ADDPERMESSI":
-				this.inEditing = true;
 				const newPermessoPersona = new PermessoPersona();
 				this.permessiDaAggiungere.unshift(newPermessoPersona);
 				this.dtAddPermessi.initRowEdit(newPermessoPersona);
 				break;
 		}
-	}
-
-  public cancelGestioneMassiva(tabName: string) : void {
-		switch (tabName) {
-			case "ADDVICARI":
-				this.vicariDaAggiungere.shift();
-				this.inEditing = false;
-				break;
-			case "DELETEVICARI":
-				this.vicariDaRimuovere.shift();
-				this.inEditing = false;
-				break;
-			case "DELETEPERMESSI":
-				this.permessiDaRimuovere.shift();
-				this.inEditing = false;
-				break;
-			case "ADDPERMESSI":
-				this.permessiDaAggiungere.shift();
-				this.inEditing = false;
-				break;
-			default:
-				break;
-		}
-	}
+	} */
 
   /**
 	 * Torno un observable di utenteStruttura che carica le strutture a cui appartiene l'utente
@@ -118,44 +93,32 @@ export class ModificaVicariPermessiComponent {
 		  null);
   }
   
-  public onSelectedNewUtenteGestioneMassiva(utenteStruttura: UtenteStruttura, index: number, currentTab: string) {
-		if(currentTab != "ADDPERMESSI") {
-			this.subscriptions.push(this.loadStruttureOfUtente(utenteStruttura.idUtente, this.idAzienda).subscribe( 
-				(data: any) => {
-					if (data && data.results) {
-						const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]> data.results;
-						let utenteTemp = utentiStruttura.find((us: UtenteStruttura) => 
-							us.idAfferenzaStruttura.codice == "DIRETTA");
-						if(!utenteTemp) {
-							utenteTemp = utentiStruttura.find((us: UtenteStruttura) =>
-								us.idAfferenzaStruttura.codice == "UNIFICATA");
-						}
-						switch (currentTab) {
-							case "ADDVICARI":
-								this.vicariDaAggiungere[index] = utenteTemp;
-								break;
-							case "DELETEVICARI":
-								this.vicariDaRimuovere[index] = utenteTemp;
-								break;
-							case "DELETEPERMESSI":
-								this.permessiDaRimuovere[index] = utenteTemp;
-								break;
-							default:
-								break;
-						}
-						
-					}
+  public onSelectedNewUtenteGestioneMassiva(utenteStruttura: UtenteStruttura, index: number, currentTab: string): void {
+		if (utenteStruttura) {
+			if (currentTab !== "ADDPERMESSI") {
+				switch (currentTab) {
+					case "ADDVICARI":
+						this.vicariDaAggiungere.push(utenteStruttura);
+						break;
+					case "DELETEVICARI":
+						this.vicariDaRimuovere.push(utenteStruttura);
+						break;
+					case "DELETEPERMESSI":
+						this.permessiDaRimuovere.push(utenteStruttura);
+						break;
 				}
-			));
-			this.inEditing = false;
-		} else {
-			const permessoPersonaTemp: PermessoPersona = new PermessoPersona();
-			permessoPersonaTemp.persona = utenteStruttura.idUtente.idPersona;
-			permessoPersonaTemp.struttura = utenteStruttura.idStruttura;
-			permessoPersonaTemp.predicato = EnumPredicatoPermessoPersona.VISUALIZZA;
-			this.permessiDaAggiungere[index] = permessoPersonaTemp;
-			this.inEditing = false;
+			} else {
+				const permessoPersonaTemp: PermessoPersona = new PermessoPersona();
+				permessoPersonaTemp.persona = utenteStruttura.idUtente.idPersona;
+				permessoPersonaTemp.struttura = utenteStruttura.idStruttura;
+				permessoPersonaTemp.predicato = EnumPredicatoPermessoPersona.VISUALIZZA;
+				this.permessiDaAggiungere.push(permessoPersonaTemp);
+			}
 		}
+		this.utenteCercato = new UtenteStruttura();
+		setTimeout(() => {
+			this.utenteCercato = null;
+		}, 0);
 	}
 
   public deleteRowUtenteGestioneMassiva(index: number, currentTab: string) {
@@ -172,26 +135,24 @@ export class ModificaVicariPermessiComponent {
 			case "ADDPERMESSI":
 				this.permessiDaAggiungere.splice(index, 1);
 				break;
-			default:
-				break;
 		}
 	}
 
-  public confermaAvvioGestioneMassivaPermessiVicari(event: Event) {
+  public confermaAvvioGestioneMassivaPermessiVicari(event: Event): void {
 		if (this.permessiDaAggiungere.length > 0 || this.permessiDaRimuovere.length > 0 || this.vicariDaAggiungere.length > 0 || this.vicariDaRimuovere.length > 0) {
-			this.avviaGestioneMassivaPermessiVicari();
+			//this.avviaGestioneMassivaPermessiVicari();
 			this.confirmationService.confirm({
 					key: "conferma-gestione-massiva-vicari-permessi-popup",
-					target: event.target,
-					message: `I fascicoli selezionati subiranno le modifiche apportate. Vuoi continuare?`,
+					//target: event.target,
+					message: `I fascicoli selezionati subiranno le modifiche richieste. Vuoi continuare?`,
 					icon: 'pi pi-exclamation-triangle',
 					accept: () => {
 							//confirm action
 							this.avviaGestioneMassivaPermessiVicari();
+							this.hideMe.emit(true);
 					},
 					reject: () => {
 							//reject action
-							
 					}
 			});
 		} else {
@@ -207,18 +168,18 @@ export class ModificaVicariPermessiComponent {
 
   
 
-  public confirmPermessi() {
+  /* public confirmPermessi() {
 		console.log("Permessi aggiungere:", this.permessiDaAggiungere);
 		console.log("Predicati possibili:", this.predicatiPermessiGestioneMassiva);
-	}
+	} */
 
-  public onCloseGestioneMassiva() : void {
+  /* public onCloseGestioneMassiva() : void {
 		this.permessiDaAggiungere = [];
 		this.permessiDaRimuovere = [];
 		this.vicariDaAggiungere = []
 		this.vicariDaRimuovere = [];
-		this.inEditing = false;
-	}
+		//this.inEditing = false;
+	} */
 
   /**
 	 * 
@@ -278,7 +239,6 @@ export class ModificaVicariPermessiComponent {
 	}
 
   private buildFilterPerGestioneMassiva() {
-		
 		return this.serviceToGetData.buildQueryParams(null, null, this.filtersAndSorts, this.lazyFiltersAndSorts, null, null);
 	}
 }
@@ -299,4 +259,4 @@ export enum EnumPredicatoPermessoPersona {
 	VISUALIZZA = "VISUALIZZA",
 	MODIFICA = "MODIFICA",
 	ELIMINA = "ELIMINA"
-  }
+}

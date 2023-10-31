@@ -590,11 +590,22 @@
 <p-dialog 
   header="Gestione massiva: Modifica responsabile/struttura" 
   [(visible)]="showGestioneMassivaResponsabile" 
-  (onHide)="onCloseGestioneMassiva()"
+  
   styleClass="dialog-gestione-massiva-responsabile"
   [modal]="true"
->
-  <sostituzione-responsabile></sostituzione-responsabile>
+><!-- (onHide)="onCloseGestioneMassiva()" -->
+  <sostituzione-responsabile
+    [rowCountSelected]="rowCountSelected"
+    [allRowsWasSelected]="allRowsWasSelected"
+    [filtersAndSorts]="filtersAndSortsForGestioneMassiva"
+    [lazyFiltersAndSorts]="lazyFiltersAndSortsForGestioneMassiva"
+    [rowsNotSelectedWhenAlmostAllRowsAreSelected]="rowsNotSelectedWhenAlmostAllRowsAreSelected"
+    [archivesSelected]="archivesSelected"
+    [serviceToGetData]="serviceToGetData"
+    [idAzienda]="idAziendaFilter"
+    [idStrutturaFiltro]="idStrutturaFilter"
+    (hideMe)="showGestioneMassivaResponsabile = false"
+  ></sostituzione-responsabile>
 </p-dialog>
 
 <!-- DIALOG GESTIONE MASSIVA VICARI E PERMESSI -->
@@ -603,8 +614,7 @@
   [(visible)]="showGestioneMassivaPermessi" 
   styleClass="dialog-gestione-massiva-vicari-permessi"
   [modal]="true"
-  (onHide)="onCloseGestioneMassiva()"
->
+><!-- (onHide)="onCloseGestioneMassiva()" -->
   <modifica-vicari-permessi
     [rowCountSelected]="rowCountSelected"
     [allRowsWasSelected]="allRowsWasSelected"
@@ -614,5 +624,6 @@
     [archivesSelected]="archivesSelected"
     [serviceToGetData]="serviceToGetData"
     [idAzienda]="idAziendaFilter"
+    (hideMe)="showGestioneMassivaPermessi = false"
   ></modifica-vicari-permessi>
 </p-dialog>

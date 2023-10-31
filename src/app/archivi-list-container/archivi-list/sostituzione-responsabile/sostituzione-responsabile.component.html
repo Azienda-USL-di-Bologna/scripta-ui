@@ -4,7 +4,7 @@
 <div class="box box-scelta-responsabile">
   <label for="ricerca-nuovo-responsabile">Scegli il nuovo responsabile dei fascicoli:</label>
   <lib-users-autocomplete id="ricerca-nuovo-responsabile"
-    *ngIf="!isReset && lastAziendaFilterValue"
+    *ngIf="!isReset && idAzienda"
     class="autocomplete-utenti" 
     [azienda]="{id: idAzienda}"
     [showPool]="false"

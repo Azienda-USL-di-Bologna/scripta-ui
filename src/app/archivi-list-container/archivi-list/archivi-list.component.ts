@@ -132,8 +132,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public loggedUserCanDeleteArchivio : boolean = false;
 	public archivesSelected: ExtendedArchiviView[] = [];
 	public showAdditionalRow: boolean = false;
-	public showGestioneMassivaResponsabile : boolean = false;
-	public showGestioneMassivaPermessi: boolean = false;
+	
 	public allRowsAreSelected: boolean = false;
 	public allRowsWasSelected: boolean = false;
 	
@@ -150,6 +149,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.resetPaginationAndLoadData();
 		}
 	}
+
+	// Proprietà utili alla gestione massiva
+	public showGestioneMassivaResponsabile : boolean = false;
+	public showGestioneMassivaPermessi: boolean = false;
+	public filtersAndSortsForGestioneMassiva: FiltersAndSorts;
+	public lazyFiltersAndSortsForGestioneMassiva: FiltersAndSorts;
+	public idAziendaFilter: number;
+	public idStrutturaFilter: number;
 
 	constructor(
 		private loginService: JwtLoginService,
@@ -1528,28 +1535,29 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			})
 	}
 
-
-	public openSostituzioneResponsabileMassivoPopup() : void { 
+	public openSostituzioneResponsabileMassivoPopup(): void { 
 		if (this.autocompleteIdStruttura && this.autocompleteIdStruttura.value) {
-			// this.isReset = false;
-			this.showGestioneMassivaResponsabile = true;
-		}
-	}
-
-	filtersAndSortsForGestioneMassiva: FiltersAndSorts;
-	lazyFiltersAndSortsForGestioneMassiva: FiltersAndSorts;
-	idAziendaFilter: number;
-	public openGestioneMassivaPermessiPopup() : void {
-			//this.isReset = false;
+			console.log("this.autocompleteIdStruttura.value", this.autocompleteIdStruttura.value)
 			this.filtersAndSortsForGestioneMassiva = this.buildCustomFilterAndSort();
 			this.lazyFiltersAndSortsForGestioneMassiva = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
 			this.lazyFiltersAndSortsForGestioneMassiva.filters = this.lazyFiltersAndSortsForGestioneMassiva.filters.filter(f => f.field != "livello");
 			this.filtersAndSortsForGestioneMassiva.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
-			this.idAziendaFilter = this.lastAziendaFilterValue[0]; // TODO: questa cosa non mi convince
-			this.showGestioneMassivaPermessi = true;
+			this.idAziendaFilter = this.lastAziendaFilterValue[0];
+			this.idStrutturaFilter = this.autocompleteIdStruttura.value.id;
+			this.showGestioneMassivaResponsabile = true;
+		}
+	}
+
+	public openGestioneMassivaPermessiPopup(): void {
+		this.filtersAndSortsForGestioneMassiva = this.buildCustomFilterAndSort();
+		this.lazyFiltersAndSortsForGestioneMassiva = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
+		this.lazyFiltersAndSortsForGestioneMassiva.filters = this.lazyFiltersAndSortsForGestioneMassiva.filters.filter(f => f.field != "livello");
+		this.filtersAndSortsForGestioneMassiva.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
+		this.idAziendaFilter = this.lastAziendaFilterValue[0]; // TODO: questa cosa non mi convince
+		this.showGestioneMassivaPermessi = true;
 	}
 	
-	public eliminaSottoarchivio(rowData: any, event: Event) : void {
+	public eliminaSottoarchivio(rowData: any, event: Event): void {
 		if (rowData.numeroSottoarchivi > 0) {
 			if (rowData.livello == 2) {
 				this.messageService.add({
@@ -1561,7 +1569,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					return;
 			}
 		}
-
 		this.extendedArchivioService.archivioHasDoc(rowData.id).subscribe((
 			res: boolean) => {
 				if (res == true) {
@@ -1631,11 +1638,13 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						reject: () => {	}
 					});
 				}
-			}	
+			}
 		)
 	}
 
-	/*funzioncina per fare il tooltip carino*/
+	/**
+	 * funzioncina per fare il tooltip carino
+	 * */
 	public tooltipsVicari(vicariString : string[]): string {
 		let temp: string = ``;
 		for (let i = 0; i < vicariString.length; i++) {

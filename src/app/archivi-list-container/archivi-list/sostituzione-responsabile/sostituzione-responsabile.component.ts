@@ -1,5 +1,5 @@
 import { HttpParams } from '@angular/common/http';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ENTITIES_STRUCTURE, Struttura, Utente, UtenteStruttura, UtenteStrutturaService } from '@bds/internauta-model';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider } from '@bds/next-sdr';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -13,6 +13,17 @@ import { ExtendedArchiviView } from '../extendend-archivi-view';
 	styleUrls: ['./sostituzione-responsabile.component.scss']
 })
 export class SostituzioneResponsabileComponent {
+	@Input() rowCountSelected: number;
+  @Input() allRowsWasSelected: boolean;
+  @Input() filtersAndSorts: FiltersAndSorts;
+  @Input() lazyFiltersAndSorts: FiltersAndSorts;
+  @Input() rowsNotSelectedWhenAlmostAllRowsAreSelected: number[];
+  @Input() archivesSelected: ExtendedArchiviView[];
+  @Input() serviceToGetData: NextSDREntityProvider;
+  @Input() idAzienda: number;
+  @Input() idStrutturaFiltro: number;
+
+	@Output() hideMe = new EventEmitter<Boolean>();
 
   private utenteSelectedGestioneMassiva : UtenteStruttura;
 	private strutturaUtenteSelectedGestioneMassiva : Struttura;
@@ -23,16 +34,6 @@ export class SostituzioneResponsabileComponent {
 	private isReset = false;
 	private showSvuotaButton = false;
   private subscriptions: Subscription[] = [];
-
-  @Input() rowCountSelected: number;
-  @Input() allRowsWasSelected: boolean;
-  @Input() filtersAndSorts: FiltersAndSorts;
-  @Input() lazyFiltersAndSorts: FiltersAndSorts;
-  @Input() rowsNotSelectedWhenAlmostAllRowsAreSelected: number[];
-  @Input() archivesSelected: ExtendedArchiviView[];
-  @Input() serviceToGetData: NextSDREntityProvider;
-  @Input() lastAziendaFilterValue: number[];
-  @Input() idStrutturaFiltro: number;
 
   constructor(
 		private messageService: MessageService,
@@ -52,7 +53,7 @@ export class SostituzioneResponsabileComponent {
 		this.utenteSelectedGestioneMassiva = utenteStruttura;
 		
 		// Popolo la lista di struttre selezionabili 
-		this.subscriptions.push(this.loadStruttureOfUtente(utenteStruttura.idUtente, this.lastAziendaFilterValue[0]).subscribe( 
+		this.subscriptions.push(this.loadStruttureOfUtente(utenteStruttura.idUtente, this.idAzienda).subscribe( 
 			(data: any) => {
 				if (data && data.results) {
 					const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]> data.results;
@@ -96,7 +97,7 @@ export class SostituzioneResponsabileComponent {
 			this.allRowsWasSelected ? null : this.archivesSelected.map(e => e.id),
 			this.utenteSelectedGestioneMassiva.idUtente.idPersona.id,
 			this.strutturaUtenteSelectedGestioneMassiva.id,
-			this.lastAziendaFilterValue[0]).subscribe(
+			this.idAzienda).subscribe(
 				res => {
 					this.messageService.add({
 						severity: "success",
@@ -121,8 +122,8 @@ export class SostituzioneResponsabileComponent {
 	}
 
   private buildFilterPerGestioneMassiva() {
-		this.lazyFiltersAndSorts.filters = this.lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
-		this.filtersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
+		/* this.lazyFiltersAndSorts.filters = this.lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
+		this.filtersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1)); */
 		return this.serviceToGetData.buildQueryParams(null, null, this.filtersAndSorts, this.lazyFiltersAndSorts, null, null);
 	}
 
@@ -136,14 +137,15 @@ export class SostituzioneResponsabileComponent {
 					accept: () => {
 							//confirm action
 							this.avviaSostituzioneResponsabileMassiva();
+							this.hideMe.emit(true);
 					},
 					reject: () => {
 							//reject action
-							
 					}
 			});
 		} else {
 			this.avviaSostituzioneResponsabileMassiva();
+			this.hideMe.emit(true);
 		}
 	}
 
