@@ -7,10 +7,14 @@ import {MatTabsModule} from '@angular/material/tabs';
 import { ArchiviListComponent } from './archivi-list.component';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonComponentsModule, UsersAutocompleteComponent } from '@bds/common-components';
+import { ModificaVicariPermessiComponent } from './modifica-vicari-permessi/modifica-vicari-permessi.component';
+import { SostituzioneResponsabileComponent } from './sostituzione-responsabile/sostituzione-responsabile.component';
 
 @NgModule({
   declarations: [
-    ArchiviListComponent
+    ArchiviListComponent,
+    ModificaVicariPermessiComponent,
+    SostituzioneResponsabileComponent
   ],
   imports: [
     FormsModule,

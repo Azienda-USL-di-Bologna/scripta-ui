@@ -1,0 +1,47 @@
+<span class="counter-fascicoli">Stai agendo su {{rowCountSelected === 1 ? 'un fascicolo' : rowCountSelected + ' fascicoli'}}</span>
+<span class="warning-no-chiusi">Attenzione: Le modifiche non verranno applicate ad eventuali fascicoli chiusi/prechiusi.</span>
+
+<div class="box box-scelta-responsabile">
+  <label for="ricerca-nuovo-responsabile">Scegli il nuovo responsabile dei fascicoli:</label>
+  <lib-users-autocomplete id="ricerca-nuovo-responsabile"
+    *ngIf="!isReset && lastAziendaFilterValue"
+    class="autocomplete-utenti" 
+    [azienda]="{id: idAzienda}"
+    [showPool]="false"
+    [showOnlyUser]="true"
+    (utenteStrutturaSelezionatoEmit)="onSelectedNewResponsabileGestioneMassiva($event)"
+  >
+  </lib-users-autocomplete>
+</div>
+
+<div class="box box-scelta-struttura">
+  <label>Struttura dei fascicoli: </label><span>(scelta tra le strutture del responsabile)</span>
+  <p-dropdown 
+    [disabled]="!isUtenteSelectedGestioneMassiva"
+    [options]="struttureUtenteSelectableGestioneMassiva"
+    [(ngModel)]="strutturaUtenteSelectedGestioneMassiva"
+    (onChange)="onStrutturaSelectedGestioneMassiva($event)">
+    <ng-template let-struttura pTemplate="selectedItem">
+      <div>{{struttura.nome}}</div>
+    </ng-template>
+    <ng-template let-struttura pTemplate="item">
+      <div>{{struttura.nome}}</div>
+    </ng-template>
+  </p-dropdown>
+</div>
+
+<div class="box footer">
+  <p-button 
+    class="bottoni-footer"
+    label="Conferma" 
+    (click)="confermaAvvioSostituzioneResponsabileMassiva($event)" 
+    [disabled]="!isStrutturaSelectedGestioneMassiva"
+  ></p-button>
+  <p-confirmPopup key="conferma-sotitutuzione-responsabile-massivo-popup"></p-confirmPopup>
+  <p-button 
+    class="bottone-footer"
+    *ngIf="showSvuotaButton"
+    label="Svuota campi" 
+    (click)="svuotaCampiGestioneMassivaResponsabile()" 
+  ></p-button>   
+</div>
