@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Lotto, LottoService, getInternautaUrl, BaseUrlType, ENTITIES_STRUCTURE, DocDetailService } from '@bds/internauta-model';
+import { Lotto, LottoService, getInternautaUrl, BaseUrlType, ENTITIES_STRUCTURE, DocDetailService, CUSTOM_SERVER_METHODS } from '@bds/internauta-model';
 import { FILTER_TYPES, FilterDefinition, FiltersAndSorts, PagingConf } from '@bds/next-sdr';
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
+// import { LottiDetailComponent } from '../lotti-detail/lotti-detail.component';
 
 @Component({
   selector: 'app-lotti-list',
@@ -22,6 +23,11 @@ export class LottiListComponent implements OnInit {
   @ViewChild("dt") dt: Table;
   public LOADED_ROWS = 30;
   public totalRecords: number;
+  public editLottoRow: Lotto = null;
+  // listaLotti: LottiList[] = [
+  //   {cig: "first", oggetto: "Oggetto", cf_struttura_proponente: 1, denominazione_struttura: "demo"}
+  //   // {id: 1, cig: "first", oggetto: "Oggetto", denominazione_struttura: "demo", importoTotale: 100.01}
+  // ];
 
   public cols: any[] = [
     { field: "cig", header: "CIG", tooltip: "" },
@@ -64,9 +70,9 @@ export class LottiListComponent implements OnInit {
     );
   }
 
-  onRowEditInit(rowdata: any): void {
-    this.selectedRow = {...rowdata};
+  onRowEditInit(lotto: Lotto) {
     this.dialogDisplay = true;
+    this.editLottoRow = lotto;
   }
 
   deleteRow(rowData: any): void {
@@ -87,11 +93,20 @@ export class LottiListComponent implements OnInit {
   
   aggiungiLotto(): void {
     this.dialogDisplay = true;
-    //this.listaLotti.push({cig: "second", oggetto: "Oggetto", cf_struttura_proponente: 1, denominazione_struttura: "demo"});
+    this.editLottoRow = null;
   }
 
   public cancelDialog() {
     this.dialogDisplay = false;
+  }
+
+  public saveDialog() {
+    this.dialogDisplay = false;
+    this.lottoService.postHttpCall(new Lotto())
+      .subscribe(result => {
+        this.listaLotti.push(result);
+      }
+    );
   }
 
   public chiudiLottoList(): void {
@@ -109,4 +124,4 @@ export class LottiList {
   public oggetto: string;
   public cf_struttura_proponente: number;
   public denominazione_struttura: string;
-  }
+}
