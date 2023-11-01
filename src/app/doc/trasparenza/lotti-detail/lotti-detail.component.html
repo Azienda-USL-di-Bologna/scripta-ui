@@ -2,26 +2,28 @@
   <div class="input-lotto-CIG">
     <div class="p-grid">
       <div class="p-col-12 p-md-3">
-        <label>CIG</label>
+        <label>CIG*</label>
         <input 
           class="input-CIG"
           type="text" 
           pInputText 
           name="add CIG" 
-          placeholder="CIG" 
-          required
+          placeholder="CIG"
+          [(ngModel)]="lotto.cig"
+          ariaRequired="true"
         >
       </div>
 
       <div class="p-col-12 p-md-3">
-        <label>Lotto</label>
+        <label>Lotto*</label>
         <input 
           class="input-lotto"
           type="text" 
           pInputText 
           name="add lotto" 
           placeholder="Lotto" 
-          required
+          [(ngModel)]="lotto.lotto"
+          ariaRequired="true"
         >
       </div>
     </div>
@@ -30,35 +32,37 @@
   <div class="main-container">
     <div class="dropdown-container">
       <div class="dropdown-tipologia">
-        <label>Tipologia</label>
+        <label>Tipologia*</label>
         <p-dropdown 
           [options]="tipologia" 
-          [(ngModel)]="selectTipologia" 
+          [(ngModel)]="lotto.idTipologia"
           placeholder="Scelta tipologia" 
-          optionLabel="name"
+          optionLabel="nome"
           [showClear]="false"
+          ariaRequired="true"
         ></p-dropdown>
       </div>
     
       <div class="dropdown-scelta-contraente">
-        <label>Scelta Contraente</label>
+        <label>Scelta Contraente*</label>
         <p-dropdown 
           [options]="contraente" 
-          [(ngModel)]="selectContraente" 
+          [(ngModel)]="lotto.idContraente"
           placeholder="Scelta contraente" 
-          optionLabel="name"
+          optionLabel="nome"
           [showClear]="false"
+          ariaRequired="true"
         ></p-dropdown>
       </div>
     </div>
     
     <div class="input-oggetto">
-      <label>Oggetto</label>
+      <label>Oggetto*</label>
       <input 
         class="input-lotto"
+        [(ngModel)]="lotto.oggetto"
         type="text" 
         pInputText 
-        [(ngModel)]="oggetto"
       >
     </div>
 
@@ -77,48 +81,31 @@
       <box-participanti-aggiudicatari [modalita]="'aggiudicatari'"></box-participanti-aggiudicatari>
     </div>
 
-    <!-- <div class="input-importTotale-importLiquidato">
-      <div class="input-importTotale">
-        <label>Import Totale</label>
-        <p-inputNumber 
-          type="number" 
-          name="add Import Totale"
-          mode="decimal"
-          placeholder="Import Totale" 
-        ></p-inputNumber>
-      </div>
-
-      <div class="input-importLiquidato">
-        <label>Import Liquidato</label>
-        <p-inputNumber
-          type="number" 
-          name="add Import Liquidato"
-          mode="decimal"
-          placeholder="Import Liquidato"
-        ></p-inputNumber>
-      </div>
-    </div> -->
     <div class="p-grid p-fluid">
       <div class="p-field p-col-12 p-md-3">
-        <label>Importo Totale</label>
+        <label>Importo Totale*</label>
         <p-inputNumber 
-          mode="decimal" 
-          [showButtons]="true" 
-          inputId="minmax-buttons" 
+          mode="decimal"
+          [(ngModel)]="lotto.importoTotale"
+          inputId="importoTotale" 
           [min]="0"
           placeholder="Importo Totale" 
+          aria-required="true"
+          [minFractionDigits] = 2
           >
         </p-inputNumber>
       </div>
-
+      
       <div class="p-field p-col-12 p-md-3">
-        <label>Importo Liquidato</label>
+        <label>Importo Liquidato*</label>
         <p-inputNumber 
           mode="decimal" 
-          [showButtons]="true" 
-          inputId="minmax-buttons" 
+          [(ngModel)]="lotto.importLiquidato"
+          inputId="importLiquidato" 
           [min]="0"
           placeholder="Importo Liquidato"
+          aria-required="true"
+          [minFractionDigits] = 2
         >
         </p-inputNumber>
       </div>
@@ -126,24 +113,26 @@
 
     <div class="p-fluid p-grid p-formgrid">
       <div class="p-field p-col-12 p-md-3">
-        <label for="icon">Data Inizio</label>
+        <label for="icon">Data Inizio*</label>
         <p-calendar 
-          [(ngModel)]="dataIniziale"
-          [maxDate]="dataCompletamento"
+          [maxDate]="lotto.dataCompletamento"
+          [(ngModel)]="lotto.dataInizio"
           [showIcon]="true"
           dateFormat="dd/mm/yy"
           inputId="icon"
-          ></p-calendar>
+          aria-required="true"
+        ></p-calendar>
       </div>
 
       <div class="p-field p-col-12 p-md-3">
-        <label for="icon">Data Completamento</label>
+        <label for="icon">Data Completamento*</label>
         <p-calendar 
-          [(ngModel)]="dataCompletamento"
-          [minDate]="dataIniziale"
+          [minDate]="lotto.dataInizio"
+          [(ngModel)]="lotto.dataCompletamento"
           [showIcon]="true"
           dateFormat="dd/mm/yy"
           inputId="icon"
+          aria-required="true"
         ></p-calendar>
       </div>
     </div>

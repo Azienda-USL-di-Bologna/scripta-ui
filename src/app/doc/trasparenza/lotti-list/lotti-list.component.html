@@ -76,18 +76,20 @@
     <button pButton pRipple type="button" label="Chiudi" (click)="chiudiLottoList()" class="p-button-text"></button>
   </div>
 </div>
-<p-dialog 
+<p-dialog
+  *ngIf="dialogDisplay"
   header="Dettaglio Lotto" 
   [(visible)]="dialogDisplay" 
   [style]="{width: '70vw', height: '70vh'}" 
   appendTo="body" 
   [modal]="true">
   <p-header style="position: center;">
-      Detagglio Lotto
+      Detaglio Lotto
   </p-header>
-  <app-lotti-detail></app-lotti-detail>
+  <app-lotti-detail 
+    [lotto]="editLottoRow"></app-lotti-detail>
   <p-footer>
-      <button pButton pRipple type="button" title="Salva" label="Salva"></button>
+      <button pButton pRipple type="button" title="Salva" label="Salva" (click)="saveDialog()"></button>
       <button pButton pRipple type="button" title="Annulla" label="Annulla" (click)="cancelDialog()"></button>
   </p-footer>
 </p-dialog>
