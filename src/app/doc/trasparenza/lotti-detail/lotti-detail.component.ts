@@ -1,11 +1,6 @@
-import { Component, OnInit, Output } from '@angular/core';
-
-interface Tipologia {
-  name: string
-}
-interface Contraente {
-  name: string
-}
+import { Component, Input, OnInit } from '@angular/core';
+import { Contraente, Lotto, Tipologia } from '@bds/internauta-model';
+import { LottiDetailService } from './lotti-detail.service';
 
 @Component({
   selector: 'app-lotti-detail',
@@ -16,33 +11,32 @@ interface Contraente {
 export class LottiDetailComponent implements OnInit {
   public display: boolean;
   public tipologia: Tipologia[];
-  public selectTipologia: Tipologia;
   public contraente: Contraente[];
-  public selectContraente: Contraente;
-  public oggetto: string;
-  public dataIniziale: Date;
-  public dataCompletamento: Date;
 
-  constructor() { 
-    this.tipologia = [
-      {name: "Aggiudicata"},
-      {name: "In corso"},
-      {name: "Annullata"},
-      {name: "Sospesa"},
-      {name: "Deserta"}
-    ];
-
-    this.contraente = [
-      {name: "test"},
-      {name: "test"},
-      {name: "test"},
-      {name: "test"},
-      {name: "test"}
-    ];
+  private _lotto: Lotto;
+  get lotto(): Lotto {
+    return this._lotto;
+  }
+  @Input() set lotto(value: Lotto) {
+    this._lotto = value;
   }
 
+  constructor( private lottiDetailService: LottiDetailService) { }
+ 
   ngOnInit(): void {
-    this.oggetto = 'Oggetto compilata dal loggetto della deti e deli';
+    if (!this._lotto){
+      this._lotto = new Lotto();
+    } 
+    this.lottiDetailService.getTipologie().subscribe(res => {
+      if (res) {
+        this.tipologia = res._embedded.tipologia;
+      }
+    });
+
+    this.lottiDetailService.getContraente().subscribe(res => {
+      if (res) {
+        this.contraente = res._embedded.contraente;
+      }
+    });
   }
 }
-

@@ -1,3 +1,4 @@
+<p-toast></p-toast>
 <div class="first-div">
 <p>Trasparenza - Legge 190</p>
 <div class="elenco-lotti">
@@ -10,23 +11,33 @@
         type="text"  
         placeholder="Cerca per CIG"
         tooltipPosition="bottom"
-        (input)="myTable.filterGlobal($any($event.target).value, 'contains')">
+        (input)="dt.filterGlobal($any($event.target).value, 'contains')">
     </span>
   </div>
   <p-table
-    #myTable
+    #dt
     [value]="listaLotti"
     responsiveLayout="scroll"
     styleClass="p-datatable-sm"
     [rowHover]="true"
-    [rows]="10"
+    [paginator]="true"
+    [totalRecords]="totalRecords"
+    [rows]="20"
+    currentPageReportTemplate="Visualizzati da {first} a {last} di {totalRecords} lotti"
+    [showCurrentPageReport]="true"
+    [columns]="cols"
+    [loading]="loading"
+    [scrollable]="true"
+    scrollHeight="340px"  
     [globalFilterFields]="['cig']">
     <ng-template pTemplate="header">
         <tr>
-          <th width=15%>CIG</th>
+          <th width=10%>CIG</th>
+          <th width=10%>Lotto</th>
           <th width=25%>Oggetto</th>
-          <th width=25%>CF STRUTTURA PROPONENTE</th>
-          <th width=25%>DENOMINAZIONE STRUTTURA</th>
+          <th width=15%>Tipologia</th>
+          <th width=10%>Importo Totale</th>
+          <th width=10%>Importo Liquidato</th>
           <th width=10%></th>
         </tr>
     </ng-template>
@@ -36,16 +47,22 @@
             {{rowdata.cig}}
           </td>
           <td>
+            {{rowdata.lotto}}
+          </td>
+          <td>
             {{rowdata.oggetto}}
           </td>
           <td>
-            {{rowdata.cf_struttura_proponente}}
+            {{rowdata.idTipologia.nome}}
           </td>
           <td>
-            {{rowdata.denominazione_struttura}}
+            {{rowdata.importoTotale}}
+          </td>
+          <td>
+            {{rowdata.importoLiquidato}}
           </td>
             <td style="text-align:center">
-              <button pButton pRipple type="button" icon="pi pi-pencil" (click)="onRowEditInit()" class="p-button-rounded"></button>
+              <button pButton pRipple type="button" icon="pi pi-pencil" (click)="onRowEditInit(rowdata)" class="p-button-rounded"></button>
               <button pButton pRipple type="button" pCancelRow icon="pi pi-trash" (click)="deleteRow(rowdata)" class="p-button-rounded"></button>
             </td>
         </tr>
@@ -54,23 +71,25 @@
   <div class="top-footer-buttons">
     <div>
       <button pButton pRipple type="button" label="Aggiungi Lotto" (click)="aggiungiLotto()" class="p-button-text"></button>
-      <button pButton pRipple type="button" label="Importa Ordini in Ecconomia" class="p-button-text"></button>
+      <button pButton pRipple type="button" label="Importa Ordini in Ecconomia" (click)="chiudiLottoList()" class="p-button-text"></button>
     </div>
-    <button pButton pRipple type="button" label="Chiudi" class="p-button-text"></button>
+    <button pButton pRipple type="button" label="Chiudi" (click)="chiudiLottoList()" class="p-button-text"></button>
   </div>
 </div>
-<p-dialog 
+<p-dialog
+  *ngIf="dialogDisplay"
   header="Dettaglio Lotto" 
   [(visible)]="dialogDisplay" 
   [style]="{width: '70vw', height: '70vh'}" 
   appendTo="body" 
   [modal]="true">
   <p-header style="position: center;">
-      Detagglio Lotto
+      Detaglio Lotto
   </p-header>
-  <app-lotti-detail></app-lotti-detail>
+  <app-lotti-detail 
+    [lotto]="editLottoRow"></app-lotti-detail>
   <p-footer>
-      <button pButton pRipple type="button" title="Salva" label="Salva"></button>
+      <button pButton pRipple type="button" title="Salva" label="Salva" (click)="saveDialog()"></button>
       <button pButton pRipple type="button" title="Annulla" label="Annulla" (click)="cancelDialog()"></button>
   </p-footer>
 </p-dialog>
