@@ -439,14 +439,14 @@
     margin-right: 5rem;
   }
 }
-::ng-deep.mat-tab-label.mat-tab-label-active:not(.mat-tab-disabled),
+/* ::ng-deep.mat-tab-label.mat-tab-label-active:not(.mat-tab-disabled),
 ::ng-deep.mat-tab-label.mat-tab-label-active.cdk-keyboard-focused:not(.mat-tab-disabled) {
   //background-color: #2e4a65;
   font-weight: 700;
   color: black;
   opacity: 1;
-}
-::ng-deep .tabella-permessi-persona {
+} */
+/* ::ng-deep .tabella-permessi-persona {
   .propaga-column  {
       min-width: 19% !important;
       width: 19% !important;
@@ -465,7 +465,7 @@
         flex-wrap: nowrap;
         padding: 0 !important;
     }
-  }
+  } */
 
 
 

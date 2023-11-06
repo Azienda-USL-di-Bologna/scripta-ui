@@ -8,7 +8,7 @@
 	scrollHeight="flex">
   <ng-template pTemplate="caption">
 		<div class="">
-			<button *ngIf="archivio.livello === 1 && (loggedUserIsResponsabile || sonoResponsabile)"
+			<button *ngIf="archivio.livello === 1 && loggedUserIsResponsbaileOrVicario"
 				id="aggiungiResponsabile"
 				type="button"
 				pButton 

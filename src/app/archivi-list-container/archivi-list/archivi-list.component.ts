@@ -57,10 +57,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	@ViewChild("autocompleteMassimario") public autocompleteMassimario: AutoComplete;
 	@ViewChild("dt") public dataTable: Table;
 	@ViewChild("columnFilterDataCreazione") public columnFilterDataCreazione: ColumnFilter;
-	@ViewChild("tableAggiuntaVicari", {}) private dtAddVicari: Table;
-	@ViewChild("tableRimozioneVicari", {}) private dtRemoveVicari: Table;
-	@ViewChild("tableRimozionePermessi", {}) private dtRemovePermessi: Table;
-	@ViewChild("tableAggiuntaPermessi", {}) private dtAddPermessi: Table;
+	
 
 	//public sortOrder = -1;
 	public archiviListModeEnum = ArchiviListMode;
@@ -112,12 +109,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public filteredStrutture: Struttura[] = [];
 	private resetArchiviArrayLenght: boolean = true;
 	public fascicoliParlanti: boolean = false;
-	public vicariDaAggiungere: UtenteStruttura[] = [];
-	public vicariDaRimuovere: UtenteStruttura[] = [];
-	public permessiDaRimuovere: UtenteStruttura[] = [];
-	public permessiDaAggiungere: PermessoPersona[] = [];
-	public permessiDaAggiungereIds: PermessoPersonaOnlyId[] = [];
-	private predicatiPermessiGestioneMassiva: EnumPredicatoPermessoPersona[] = [];
 	public chiusuraArchivio: boolean = false;
 	public dataMinimaCreazione: Date = new Date("2000-01-01");
 	public dataMassimaCreazione: Date = new Date("2030-12-31");
@@ -141,25 +132,16 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public loggedUserCanDeleteArchivio : boolean = false;
 	public archivesSelected: ExtendedArchiviView[] = [];
 	public showAdditionalRow: boolean = false;
-	public showGestioneMassivaResponsabile : boolean = false;
+	
 	public allRowsAreSelected: boolean = false;
 	public allRowsWasSelected: boolean = false;
-	public showGestioneMassivaPermessi: boolean = false;
-	private utenteSelectedGestioneMassiva : UtenteStruttura;
-	private strutturaUtenteSelectedGestioneMassiva : Struttura;
-	private struttureUtenteSelectableGestioneMassiva : Struttura[] = [];
-	private checked = true;
-	private isUtenteSelectedGestioneMassiva = false;
-	private isStrutturaSelectedGestioneMassiva = false;
-	private isReset = false;
-	private showSvuotaButton = false;
+	
 	//private aziendaFiltrataAG : Azienda;
 	private rowsNotSelectedWhenAlmostAllRowsAreSelected: number[] = [];
 	public loggedUserIsAG = false;
 	public idAziendeDoveLoggedUserIsAG: number[] = [];
 	//public selectedAllAziende = false;
 	private _archivioPadre: Archivio;
-	public inEditing: boolean = false;
 	get archivioPadre(): Archivio { return this._archivioPadre; }
 	@Input() set archivioPadre(archivioPadre: Archivio) {
 		this._archivioPadre = archivioPadre;
@@ -167,6 +149,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.resetPaginationAndLoadData();
 		}
 	}
+
+	// Proprietà utili alla gestione massiva
+	public showGestioneMassivaResponsabile : boolean = false;
+	public showGestioneMassivaPermessi: boolean = false;
+	public filtersAndSortsForGestioneMassiva: FiltersAndSorts;
+	public lazyFiltersAndSortsForGestioneMassiva: FiltersAndSorts;
+	public idAziendaFilter: number;
+	public idStrutturaFilter: number;
 
 	constructor(
 		private loginService: JwtLoginService,
@@ -192,9 +182,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	) { }
 
 	ngOnInit(): void {
-		this.predicatiPermessiGestioneMassiva.push(EnumPredicatoPermessoPersona.VISUALIZZA,
-			EnumPredicatoPermessoPersona.MODIFICA,
-			EnumPredicatoPermessoPersona.ELIMINA);
 		this.serviceToGetData = this.archiviListService;
 		this.cols = cols; 
 		this.archiviListMode = this.route.snapshot.queryParamMap.get('mode') as ArchiviListMode || ArchiviListMode.RECENTI;
@@ -1546,372 +1533,31 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					this.rightContentProgressSpinner = false;
 			}));
 			})
-
-		
-
-		
 	}
 
-	public svuotaCampiGestioneMassivaResponsabile() {
-        this.isReset = true;
-		this.struttureUtenteSelectableGestioneMassiva = [];
-		this.strutturaUtenteSelectedGestioneMassiva = null;
-		this.isStrutturaSelectedGestioneMassiva = false;
-		this.isUtenteSelectedGestioneMassiva = false;
-		this.utenteSelectedGestioneMassiva = null;
-        setTimeout(() => {
-            this.isReset = false; //Serve a far sparire e riapparire 
-        }, 1);
-		this.showSvuotaButton = false;
-    }
-	
-
-	public openSostituzioneResponsabileMassivoPopup() : void { 
-		console.log("Gestione massiva:", this.utenteSelectedGestioneMassiva)
+	public openSostituzioneResponsabileMassivoPopup(): void { 
 		if (this.autocompleteIdStruttura && this.autocompleteIdStruttura.value) {
-			this.isReset = false;
+			console.log("this.autocompleteIdStruttura.value", this.autocompleteIdStruttura.value)
+			this.filtersAndSortsForGestioneMassiva = this.buildCustomFilterAndSort();
+			this.lazyFiltersAndSortsForGestioneMassiva = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
+			this.lazyFiltersAndSortsForGestioneMassiva.filters = this.lazyFiltersAndSortsForGestioneMassiva.filters.filter(f => f.field != "livello");
+			this.filtersAndSortsForGestioneMassiva.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
+			this.idAziendaFilter = this.lastAziendaFilterValue[0];
+			this.idStrutturaFilter = this.autocompleteIdStruttura.value.id;
 			this.showGestioneMassivaResponsabile = true;
 		}
-		//this.showSvuotaButton = false;
-		/* this.aziendaFiltrataAG = new Azienda();
-		this.aziendaFiltrataAG.id = this.dropdownAzienda.value[0]; */
 	}
 
-	public openGestioneMassivaPermessiPopup() : void {
-			this.isReset = false;
-			this.showGestioneMassivaPermessi = true;
+	public openGestioneMassivaPermessiPopup(): void {
+		this.filtersAndSortsForGestioneMassiva = this.buildCustomFilterAndSort();
+		this.lazyFiltersAndSortsForGestioneMassiva = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe);
+		this.lazyFiltersAndSortsForGestioneMassiva.filters = this.lazyFiltersAndSortsForGestioneMassiva.filters.filter(f => f.field != "livello");
+		this.filtersAndSortsForGestioneMassiva.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
+		this.idAziendaFilter = this.lastAziendaFilterValue[0]; // TODO: questa cosa non mi convince
+		this.showGestioneMassivaPermessi = true;
 	}
-	public cancelGestioneMassiva(tabName: string) : void {
-		switch (tabName) {
-			case "ADDVICARI":
-				this.vicariDaAggiungere.shift();
-				this.inEditing = false;
-				break;
-			case "DELETEVICARI":
-				this.vicariDaRimuovere.shift();
-				this.inEditing = false;
-				break;
-			case "DELETEPERMESSI":
-				this.permessiDaRimuovere.shift();
-				this.inEditing = false;
-				break;
-			case "ADDPERMESSI":
-				this.permessiDaAggiungere.shift();
-				this.inEditing = false;
-				break;
-			default:
-				break;
-		}
-	}
-
-	public addUtenteGestioneMassiva(currentTab: string) : void {
-		let newUtente = new UtenteStruttura;
-		switch (currentTab) {
-			case "ADDVICARI":
-				this.vicariDaAggiungere.unshift(newUtente);
-				this.dtAddVicari.initRowEdit(newUtente);
-				this.inEditing = true;
-				break;
-			case "DELETEVICARI":
-				this.vicariDaRimuovere.unshift(newUtente);
-				this.dtRemoveVicari.initRowEdit(newUtente);
-				this.inEditing = true;
-				break;
-			case "DELETEPERMESSI":
-				this.permessiDaRimuovere.unshift(newUtente);
-				this.dtRemovePermessi.initRowEdit(newUtente);
-				this.inEditing = true;
-				break;
-			case "ADDPERMESSI":
-				this.inEditing = true;
-				const newPermessoPersona = new PermessoPersona();
-				this.permessiDaAggiungere.unshift(newPermessoPersona);
-				this.dtAddPermessi.initRowEdit(newPermessoPersona);
-				break;
-			default:
-				break;
-		}
-
-	}
-
-	/**
-	 * Torno un observable di utenteStruttura che carica le strutture a cui appartiene l'utente
-	 * @param utente 
-	 * @param idAzienda 
-	 * @returns 
-	 */
-	public loadStruttureOfUtente(utente: Utente, idAzienda: number) {
-		const initialFiltersAndSorts = new FiltersAndSorts();
-		initialFiltersAndSorts.addFilter(new FilterDefinition("idUtente.id", FILTER_TYPES.not_string.equals, utente.id));
-		initialFiltersAndSorts.addFilter(new FilterDefinition("idStruttura.idAzienda.id", FILTER_TYPES.not_string.equals, idAzienda));
-		initialFiltersAndSorts.addFilter(new FilterDefinition("idStruttura.ufficio", FILTER_TYPES.not_string.equals, false));
-		return this.utenteStrutturaService.getData(
-		  ENTITIES_STRUCTURE.baborg.utentestruttura.customProjections.UtenteStrutturaWithIdAfferenzaStrutturaCustom,
-		  initialFiltersAndSorts,
-		  null);
-	  }
-	  
-	/**
-	 * metodo chiamato dall'html alla selezione dell'utente responsabile
-	 * @param utenteStruttura 
-	 */
-	public onSelectedNewResponsabileGestioneMassiva(utenteStruttura: UtenteStruttura) {
-		this.isUtenteSelectedGestioneMassiva = true;
-		this.struttureUtenteSelectableGestioneMassiva = [];
-		this.strutturaUtenteSelectedGestioneMassiva = null;
-		this.utenteSelectedGestioneMassiva = utenteStruttura;
-		
-		// Popolo la lista di struttre selezionabili 
-		this.subscriptions.push(this.loadStruttureOfUtente(utenteStruttura.idUtente, this.lastAziendaFilterValue[0]).subscribe( 
-			(data: any) => {
-				if (data && data.results) {
-					const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]> data.results;
-					// Riempo l'array delle strutture selezionabili per l'utente
-					utentiStruttura.forEach((us: UtenteStruttura) => {
-						if (us.id === utenteStruttura.id) {
-							this.strutturaUtenteSelectedGestioneMassiva = us.idStruttura;
-							this.isStrutturaSelectedGestioneMassiva = true;
-						}
-						this.struttureUtenteSelectableGestioneMassiva.push(us.idStruttura) 
-					});
-					this.showSvuotaButton = true;
-				}
-			}
-		));
-	}
-
-	public onSelectedNewUtenteGestioneMassiva(utenteStruttura: UtenteStruttura, index: number, currentTab: string) {
-		if(currentTab != "ADDPERMESSI") {
-			this.subscriptions.push(this.loadStruttureOfUtente(utenteStruttura.idUtente, this.lastAziendaFilterValue[0]).subscribe( 
-				(data: any) => {
-					if (data && data.results) {
-						const utentiStruttura: UtenteStruttura[] = <UtenteStruttura[]> data.results;
-						let utenteTemp = utentiStruttura.find((us: UtenteStruttura) => 
-							us.idAfferenzaStruttura.codice == "DIRETTA");
-						if(!utenteTemp) {
-							utenteTemp = utentiStruttura.find((us: UtenteStruttura) =>
-								us.idAfferenzaStruttura.codice == "UNIFICATA");
-						}
-						switch (currentTab) {
-							case "ADDVICARI":
-								this.vicariDaAggiungere[index] = utenteTemp;
-								break;
-							case "DELETEVICARI":
-								this.vicariDaRimuovere[index] = utenteTemp;
-								break;
-							case "DELETEPERMESSI":
-								this.permessiDaRimuovere[index] = utenteTemp;
-								break;
-							default:
-								break;
-						}
-						
-					}
-				}
-			));
-			this.inEditing = false;
-		}
-		else {
-			const permessoPersonaTemp: PermessoPersona = new PermessoPersona();
-			permessoPersonaTemp.persona = utenteStruttura.idUtente.idPersona;
-			permessoPersonaTemp.struttura = utenteStruttura.idStruttura;
-			permessoPersonaTemp.predicato = EnumPredicatoPermessoPersona.VISUALIZZA;
-			this.permessiDaAggiungere[index] = permessoPersonaTemp;
-			this.inEditing = false;
-			
-		}
-
-	}
-
-	public deleteRowUtenteGestioneMassiva(index: number, currentTab: string) {
-		switch (currentTab) {
-			case "ADDVICARI":
-				this.vicariDaAggiungere.splice(index, 1);
-				break;
-			case "DELETEVICARI":
-				this.vicariDaRimuovere.splice(index, 1);
-				break;
-			case "DELETEPERMESSI":
-				this.permessiDaRimuovere.splice(index, 1);
-				break;
-			case "ADDPERMESSI":
-				this.permessiDaAggiungere.splice(index, 1);
-				break;
-			default:
-				break;
-		}
-	}
-
-	public confirmPermessi() {
-		console.log("Permessi aggiungere:", this.permessiDaAggiungere);
-		console.log("Predicati possibili:", this.predicatiPermessiGestioneMassiva);
-	}
-
-	public onStrutturaSelectedGestioneMassiva(event: any) {
-		this.isStrutturaSelectedGestioneMassiva = true;
-	}
-
-	public onCloseGestioneMassiva() : void {
-		this.permessiDaAggiungere = [];
-		this.permessiDaRimuovere = [];
-		this.vicariDaAggiungere = []
-		this.vicariDaRimuovere = [];
-		this.inEditing = false;
-	}
-
-
-	public confermaAvvioSostituzioneResponsabileMassiva(event: Event) {
-		console.log(this.autocompleteIdStruttura.value);
-		if (this.autocompleteIdStruttura.value.id !== this.strutturaUtenteSelectedGestioneMassiva.id) {
-			this.confirmationService.confirm({
-					key: "conferma-sotitutuzione-responsabile-massivo-popup",
-					target: event.target,
-					message: `I fascicoli selezionati cambieranno struttura. Vuoi continuare?`, //in ${this.strutturaUtenteSelectedGestioneMassiva.nome}
-					icon: 'pi pi-exclamation-triangle',
-					accept: () => {
-							//confirm action
-							this.avviaSostituzioneResponsabileMassiva();
-					},
-					reject: () => {
-							//reject action
-							
-					}
-			});
-		} else {
-			this.avviaSostituzioneResponsabileMassiva();
-		}
-	}
-
-	public confermaAvvioGestioneMassivaPermessiVicari(event: Event) { 
-		if (this.permessiDaAggiungere.length > 0 || this.permessiDaRimuovere.length > 0 || this.vicariDaAggiungere.length > 0 || this.vicariDaRimuovere.length > 0) {
-			this.avviaGestioneMassivaPermessiVicari();
-			this.confirmationService.confirm({
-					key: "conferma-gestione-massiva-vicari-permessi-popup",
-					target: event.target,
-					message: `I fascicoli selezionati subiranno le modifiche apportate. Vuoi continuare?`,
-					icon: 'pi pi-exclamation-triangle',
-					accept: () => {
-							//confirm action
-							this.avviaGestioneMassivaPermessiVicari();
-					},
-					reject: () => {
-							//reject action
-							
-					}
-			});
-		} else {
-			this.messageService.add({
-				severity: "warn",
-				key: "archiviListToast",
-				summary: "Attenzione!",
-				detail: `Si prega di compilare almeno un campo`,
-				life: 6000
-			});
-		}
-	}
-
-
-	private avviaSostituzioneResponsabileMassiva() {
-		this.rightContentProgressSpinner = true;
-		this.showGestioneMassivaResponsabile = false;
-		this.subscriptions.push(this.archiviListService.gestioneMassivaResponsabile(
-			this.allRowsWasSelected ? this.buildFilterPerGestioneMassiva() : new HttpParams(),
-			this.allRowsWasSelected ? this.rowsNotSelectedWhenAlmostAllRowsAreSelected : null,
-			this.allRowsWasSelected ? null : this.archivesSelected.map(e => e.id),
-			this.utenteSelectedGestioneMassiva.idUtente.idPersona.id,
-			this.strutturaUtenteSelectedGestioneMassiva.id,
-			this.lastAziendaFilterValue[0]).subscribe(
-				res => {
-					this.messageService.add({
-						severity: "success",
-						key: "archiviListToast",
-						summary: "Cambio di responsabile massivo",
-						detail: `La richiesta è stata presa in carico e sarà svolta durante la notte; al termine dell'operazione riceverai una notifica sulla scrivania`,
-						life: 6000
-					});
-					this.rightContentProgressSpinner = false;
-					
-				},
-				err => {
-					this.messageService.add({
-						severity: "warn",
-						key: "archiviListToast",
-						summary: "Attenzione",
-						detail: `Qualcosa è andato storto, se il problema persiste contattare BabelCare`
-					});
-					this.rightContentProgressSpinner = false;
-				}
-			));
-	}
-
-	/**
-	 * 
-	 */
-	public avviaGestioneMassivaPermessiVicari(): void {
-		this.rightContentProgressSpinner = true;
-		this.showGestioneMassivaPermessi = false;
-		const idsPersonaVicariAdd: number[] = [];
-		const idsPersonaVicariDelete: number[] = [];
-		const idsPersonaPermessiDelete: number[] = [];
-		const idsPermessiAdd: PermessoPersonaOnlyId[] = [];
-		this.vicariDaAggiungere.forEach(us => {
-			idsPersonaVicariAdd.push(us.idUtente.idPersona.id)
-		});
-		this.vicariDaRimuovere.forEach(us => {
-			idsPersonaVicariDelete.push(us.idUtente.idPersona.id)
-		});
-		this.permessiDaRimuovere.forEach(us => {
-			idsPersonaPermessiDelete.push(us.idUtente.idPersona.id)
-		});
-		this.permessiDaAggiungere.forEach(permesso => { 
-			const permessoPersonaTemp: PermessoPersonaOnlyId = new PermessoPersonaOnlyId;
-			permessoPersonaTemp.idPersona = permesso.persona.id;
-			permessoPersonaTemp.predicato = permesso.predicato;
-			permessoPersonaTemp.idStruttura = permesso.struttura.id
-			idsPermessiAdd.push(permessoPersonaTemp);
-		 });
-		this.subscriptions.push(this.archiviListService.gestioneMassivaPermessiVicari(
-			this.allRowsWasSelected ? this.buildFilterPerGestioneMassiva() : new HttpParams(),
-			this.allRowsWasSelected ? this.rowsNotSelectedWhenAlmostAllRowsAreSelected : null,
-			this.allRowsWasSelected ? null : this.archivesSelected.map(e => e.id),
-			idsPersonaVicariAdd,
-			idsPersonaVicariDelete,
-			idsPersonaPermessiDelete,
-			idsPermessiAdd,
-			this.lastAziendaFilterValue[0]).subscribe(
-				res => {
-					this.messageService.add({
-						severity: "success",
-						key: "archiviListToast",
-						summary: "Cambio di permessi massivo",
-						detail: `La richiesta è stata presa in carico e sarà svolta durante la notte; al termine dell'operazione riceverai una notifica sulla scrivania`,
-						life: 6000
-					});
-					this.rightContentProgressSpinner = false;
-					
-				},
-				err => {
-					this.messageService.add({
-						severity: "warn",
-						key: "archiviListToast",
-						summary: "Attenzione",
-						detail: `Qualcosa è andato storto, se il problema persiste contattare BabelCare`
-					});
-					this.rightContentProgressSpinner = false;
-				}
-			));
-	}
-
-
-	private buildFilterPerGestioneMassiva() {
-		const filtersAndSorts: FiltersAndSorts = this.buildCustomFilterAndSort();
-		const lazyFiltersAndSorts: FiltersAndSorts = buildLazyEventFiltersAndSorts(this.storedLazyLoadEvent, this.cols, this.datepipe) ; 
-		lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
-		filtersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
-		return this.serviceToGetData.buildQueryParams(null, null, filtersAndSorts, lazyFiltersAndSorts, null, null);
-	}
-
-	public eliminaSottoarchivio(rowData: any, event: Event) : void {
+	
+	public eliminaSottoarchivio(rowData: any, event: Event): void {
 		if (rowData.numeroSottoarchivi > 0) {
 			if (rowData.livello == 2) {
 				this.messageService.add({
@@ -1923,7 +1569,6 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					return;
 			}
 		}
-
 		this.extendedArchivioService.archivioHasDoc(rowData.id).subscribe((
 			res: boolean) => {
 				if (res == true) {
@@ -1993,21 +1638,22 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 						reject: () => {	}
 					});
 				}
-			}	
+			}
 		)
 	}
 
-	/*funzioncina per fare il tooltip carino*/
+	/**
+	 * funzioncina per fare il tooltip carino
+	 * */
 	public tooltipsVicari(vicariString : string[]): string {
-		let temp:string = ``;
-      for(let i = 0; i <  vicariString.length  ; i++){
-		if(i == vicariString.length - 1){
-			temp+=`<span>${vicariString[i]}</span><br>`;
+		let temp: string = ``;
+		for (let i = 0; i < vicariString.length; i++) {
+			if (i === vicariString.length - 1) {
+				temp += `<span>${vicariString[i]}</span><br>`;
+			} else {
+				temp += `<span>${vicariString[i]},</span><br>`;
+			}
 		}
-		else{
-			temp+=`<span>${vicariString[i]},</span><br>`;
-		}
-      }
 	  return temp;
 	}
 
@@ -2065,20 +1711,3 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	}
 }
 
-export class PermessoPersona {
-	persona: Persona;
-	struttura: Struttura;
-	predicato: EnumPredicatoPermessoPersona;
-}
-
-export class PermessoPersonaOnlyId {
-	idPersona: number;
-	idStruttura: number;
-	predicato: EnumPredicatoPermessoPersona
-}
-
-export enum EnumPredicatoPermessoPersona {
-	VISUALIZZA = "VISUALIZZA",
-	MODIFICA = "MODIFICA",
-	ELIMINA = "ELIMINA"
-  }

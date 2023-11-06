@@ -3,7 +3,8 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ArchivioDetailService, BaseUrlType, getInternautaUrl } from '@bds/internauta-model';
 import { Observable } from 'rxjs';
-import { PermessoPersona, PermessoPersonaOnlyId } from './archivi-list.component';
+import { PermessoPersonaOnlyId } from './modifica-vicari-permessi/modifica-vicari-permessi.component';
+//import { PermessoPersona, PermessoPersonaOnlyId } from './archivi-list.component';
 
 @Injectable({
   providedIn: 'root'
