@@ -1319,6 +1319,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    */
   public handleCalendarButtonEvent(calendar: Calendar, command: string, event: Event, filterCallback: (value: Date[]) => {}) {
     if (command === "doFilter" || command === "onClickOutside") { // pulsante OK
+
       calendar.hideOverlay();
     } else if (command === "setToday") { // pulsante OGGI
       calendar.writeValue([new Date(), null]);
@@ -1327,6 +1328,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       calendar.onClearButtonClick(event);
     }
     if (calendar.inputId === "calendarcreazione") {
+      this.lastDataCreazioneFilterValue = calendar.value;
       this.actualDataCreazioneFilterValue = calendar.value;
     }
     filterCallback(calendar.value);
