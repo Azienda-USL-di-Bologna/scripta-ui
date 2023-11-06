@@ -140,12 +140,14 @@ export class ModificaVicariPermessiComponent {
 
   public confermaAvvioGestioneMassivaPermessiVicari(event: Event): void {
 		if (this.permessiDaAggiungere.length > 0 || this.permessiDaRimuovere.length > 0 || this.vicariDaAggiungere.length > 0 || this.vicariDaRimuovere.length > 0) {
+			
+
 			//this.avviaGestioneMassivaPermessiVicari();
 			this.confirmationService.confirm({
 					key: "conferma-gestione-massiva-vicari-permessi-popup",
 					//target: event.target,
-					message: `I fascicoli selezionati subiranno le modifiche richieste. Vuoi continuare?`,
-					icon: 'pi pi-exclamation-triangle',
+					message: this.buildConfirmMessage(),
+					//icon: 'pi pi-exclamation-triangle',
 					accept: () => {
 							//confirm action
 							this.avviaGestioneMassivaPermessiVicari();
@@ -166,7 +168,27 @@ export class ModificaVicariPermessiComponent {
 		}
 	}
 
-  
+  private buildConfirmMessage(): string {
+		let confirmMessage = "Le seguenti modifiche saranno effettuate sui fascicoli selezionati:<br>";
+		if (this.vicariDaAggiungere && this.vicariDaAggiungere.length > 0) {
+			confirmMessage += "<br><b>Vicari da aggiungere:</b><br>"
+			this.vicariDaAggiungere.forEach(v => confirmMessage += v.idUtente.idPersona.descrizione + "<br>");
+		}
+		if (this.vicariDaRimuovere && this.vicariDaRimuovere.length > 0) {
+			confirmMessage += "<br><b>Vicari da eliminare:</b><br>"
+			this.vicariDaRimuovere.forEach(v => confirmMessage += v.idUtente.idPersona.descrizione + "<br>");
+		}
+		if (this.permessiDaAggiungere && this.permessiDaAggiungere.length > 0) {
+			confirmMessage += "<br><b>Permessi da aggiungere:</b><br>"
+			this.permessiDaAggiungere.forEach(v => confirmMessage += v.persona.descrizione + ` (${v.predicato.toString()})<br>`);
+		}
+		if (this.permessiDaRimuovere && this.permessiDaRimuovere.length > 0) {
+			confirmMessage += "<br><b>Permessi da eliminare:</b><br>"
+			this.permessiDaRimuovere.forEach(v => confirmMessage += v.idUtente.idPersona.descrizione + "<br>");
+		}
+		confirmMessage += "<br>Vuoi continuare?"
+		return confirmMessage;
+	}
 
   /* public confirmPermessi() {
 		console.log("Permessi aggiungere:", this.permessiDaAggiungere);

@@ -1,29 +1,32 @@
 <span class="counter-fascicoli">Stai agendo su {{rowCountSelected === 1 ? 'un fascicolo' : rowCountSelected + ' fascicoli'}}</span>
 <span class="warning-no-chiusi">Attenzione: Le modifiche non verranno applicate ad eventuali fascicoli chiusi/prechiusi.</span>
-<p-tabView>
+<p-tabView styleClass="tabview-modifica-vicari-permessi">
   <!-- TAB AGGIUNTA VICARI -->
   <p-tabPanel header="Vicari da aggiungere">
-    <div class="searching-box">
-      <label for="ricerca-nuovo-vicario">Scegli vicario da aggiungere:</label>
-      <lib-users-autocomplete 
-        id="ricerca-nuovo-vicario"
-        [utenteIniziale]="utenteCercato"
-        [afferenzaDiretta]="true"
-        class="autocomplete-utenti" 
-        [azienda]="{id: idAzienda}"
-        [showPool]="false"
-        [showOnlyUser]="false"
-        (utenteStrutturaSelezionatoEmit)="onSelectedNewUtenteGestioneMassiva($event, ri, 'ADDVICARI')"
-      ></lib-users-autocomplete>
-    </div>
     <p-table #tableAggiuntaVicari
       class="tabella-permessi-persona"
       [scrollable]="true"
+      scrollHeight="flex"
       dataKey="id"
       editMode="row" 
       [value]="vicariDaAggiungere"
       styleClass="tabella-permessi-persona"
     >
+      <ng-template pTemplate="caption">
+        <div class="searching-box">
+          <label for="ricerca-nuovo-vicario">Scegli vicario da aggiungere:</label>
+          <lib-users-autocomplete 
+            id="ricerca-nuovo-vicario"
+            [utenteIniziale]="utenteCercato"
+            [afferenzaDiretta]="true"
+            class="autocomplete-utenti" 
+            [azienda]="{id: idAzienda}"
+            [showPool]="false"
+            [showOnlyUser]="false"
+            (utenteStrutturaSelezionatoEmit)="onSelectedNewUtenteGestioneMassiva($event, ri, 'ADDVICARI')"
+          ></lib-users-autocomplete>
+        </div>
+      </ng-template>
       <ng-template pTemplate="header">
         <tr>
           <th class="nome-column">Nome</th>
@@ -56,27 +59,30 @@
   </p-tabPanel>
   <!-- TAB RIMOZIONE VICARI -->
   <p-tabPanel header="Vicari da eliminare"> 
-    <div class="searching-box">
-      <label for="ricerca-rimozione-vicario">Scegli vicario da eliminare:</label>
-      <lib-users-autocomplete 
-        id="ricerca-rimozione-vicario"
-        [utenteIniziale]="utenteCercato"
-        [afferenzaDiretta]="true"
-        class="autocomplete-utenti" 
-        [azienda]="{id: idAzienda}"
-        [showPool]="false"
-        [showOnlyUser]="false"
-        (utenteStrutturaSelezionatoEmit)="onSelectedNewUtenteGestioneMassiva($event, ri, 'DELETEVICARI')"
-      ></lib-users-autocomplete>
-    </div>
     <p-table #tableRimozioneVicari
       class="tabella-permessi-persona"
       [scrollable]="true"
+      scrollHeight="flex"
       dataKey="id"
       editMode="row" 
       [value]="vicariDaRimuovere"
       styleClass="tabella-permessi-persona"
     >
+      <ng-template pTemplate="caption">
+        <div class="searching-box">
+          <label for="ricerca-rimozione-vicario">Scegli vicario da eliminare:</label>
+          <lib-users-autocomplete 
+            id="ricerca-rimozione-vicario"
+            [utenteIniziale]="utenteCercato"
+            [afferenzaDiretta]="true"
+            class="autocomplete-utenti" 
+            [azienda]="{id: idAzienda}"
+            [showPool]="false"
+            [showOnlyUser]="false"
+            (utenteStrutturaSelezionatoEmit)="onSelectedNewUtenteGestioneMassiva($event, ri, 'DELETEVICARI')"
+          ></lib-users-autocomplete>
+        </div>
+      </ng-template>
       <ng-template pTemplate="header">
         <tr>
           <th class="nome-column">Nome</th>
@@ -109,27 +115,29 @@
   </p-tabPanel>
   <!-- TAB AGGIUNTA PERMESSI -->
   <p-tabPanel header="Permessi da aggiungere"> 
-    <div class="searching-box">
-      <label for="ricerca-aggiunta-permesso">Scegli utente a cui dare un permesso:</label>
-      <lib-users-autocomplete 
-        id="ricerca-aggiunta-permesso"
-        [utenteIniziale]="utenteCercato"
-        [afferenzaDiretta]="true"
-        class="autocomplete-utenti" 
-        [azienda]="{id: idAzienda}"
-        [showPool]="false"
-        [showOnlyUser]="false"
-        (utenteStrutturaSelezionatoEmit)="onSelectedNewUtenteGestioneMassiva($event, ri, 'ADDPERMESSI')"
-      ></lib-users-autocomplete>
-    </div>
     <p-table #tableAggiuntaPermessi
       class="tabella-permessi-persona"
       styleClass="tabella-permessi-persona"
       [scrollable]="true"
+      scrollHeight="flex"
       dataKey="id"
-      
       [value]="permessiDaAggiungere"
     ><!-- editMode="row"  -->
+      <ng-template pTemplate="caption">
+        <div class="searching-box">
+          <label for="ricerca-aggiunta-permesso">Scegli utente a cui dare un permesso:</label>
+          <lib-users-autocomplete 
+            id="ricerca-aggiunta-permesso"
+            [utenteIniziale]="utenteCercato"
+            [afferenzaDiretta]="true"
+            class="autocomplete-utenti" 
+            [azienda]="{id: idAzienda}"
+            [showPool]="false"
+            [showOnlyUser]="false"
+            (utenteStrutturaSelezionatoEmit)="onSelectedNewUtenteGestioneMassiva($event, ri, 'ADDPERMESSI')"
+          ></lib-users-autocomplete>
+        </div>
+      </ng-template>
       <ng-template pTemplate="header">
         <tr>
           <th class="nome-column">Nome</th>
@@ -148,7 +156,12 @@
             {{permesso.struttura.nome}}
           </td>
           <td class="permesso-column" pEditableColumn>
-            <p-cellEditor>
+            <p-dropdown 
+              appendTo="body"
+              [(ngModel)]="permesso.predicato"
+              [options]="predicatiPermessiGestioneMassiva">
+            </p-dropdown>
+            <!-- <p-cellEditor>
               <ng-template pTemplate="input">
                 <p-dropdown 
                   appendTo="body"
@@ -159,7 +172,7 @@
               <ng-template pTemplate="output">
                 {{permesso?.predicato.toString()}}
               </ng-template>
-            </p-cellEditor>
+            </p-cellEditor> -->
           </td>
           <!-- <td class="propaga-column">
             <p-checkbox
@@ -185,26 +198,29 @@
   </p-tabPanel>
   <!-- TAB RIMOZIONE PERMESSI -->
   <p-tabPanel header="Permessi da eliminare">
-    <div class="searching-box">
-      <label for="ricerca-rimozione-permessi">Scegli utente a cui rimuovere i permessi:</label>
-      <lib-users-autocomplete 
-        id="ricerca-rimozione-permessi"
-        [utenteIniziale]="utenteCercato"
-        [afferenzaDiretta]="true"
-        class="autocomplete-utenti" 
-        [azienda]="{id: idAzienda}"
-        [showPool]="false"
-        [showOnlyUser]="false"
-        (utenteStrutturaSelezionatoEmit)="onSelectedNewUtenteGestioneMassiva($event, ri, 'DELETEPERMESSI')"
-      ></lib-users-autocomplete>
-    </div>
     <p-table #tableRimozionePermessi
       [scrollable]="true"
+      scrollHeight="flex"
       class="tabella-permessi-persona"
       dataKey="id"
       editMode="row" 
       styleClass="tabella-permessi-persona"
       [value]="permessiDaRimuovere">
+      <ng-template pTemplate="caption">
+        <div class="searching-box">
+          <label for="ricerca-rimozione-permessi">Scegli utente a cui rimuovere i permessi:</label>
+          <lib-users-autocomplete 
+            id="ricerca-rimozione-permessi"
+            [utenteIniziale]="utenteCercato"
+            [afferenzaDiretta]="true"
+            class="autocomplete-utenti" 
+            [azienda]="{id: idAzienda}"
+            [showPool]="false"
+            [showOnlyUser]="false"
+            (utenteStrutturaSelezionatoEmit)="onSelectedNewUtenteGestioneMassiva($event, ri, 'DELETEPERMESSI')"
+          ></lib-users-autocomplete>
+        </div>
+      </ng-template>
       <ng-template pTemplate="header">
         <tr>
           <th class="nome-column">Nome</th>
@@ -246,7 +262,6 @@
 
 <p-confirmDialog 
   header="Conferma modifica" 
-  icon="pi pi-exclamation-triangle"
   key="conferma-gestione-massiva-vicari-permessi-popup">
  <!--  <ng-template pTemplate="message">
     <h3>Header Content</h3>
