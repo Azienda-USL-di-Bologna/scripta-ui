@@ -255,12 +255,12 @@
 <div class="box footer">
   <p-button 
     class="bottoni-footer"
-    label="Conferma" 
+    label="Conferma modifiche a vicari e permessi" 
     (click)="confermaAvvioGestioneMassivaPermessiVicari($event)"
   ></p-button>
   <p-button *ngIf="vicariDaAggiungere.length > 0 || vicariDaRimuovere.length > 0 || permessiDaAggiungere.length > 0 || permessiDaRimuovere.length > 0"
     class="bottone-footer"
-    label="Svuota campi" 
+    label="Svuota lista" 
     (click)="svuotaCampi()" 
   ></p-button>   
 </div>
