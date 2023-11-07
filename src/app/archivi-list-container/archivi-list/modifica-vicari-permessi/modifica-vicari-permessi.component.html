@@ -258,6 +258,11 @@
     label="Conferma" 
     (click)="confermaAvvioGestioneMassivaPermessiVicari($event)"
   ></p-button>
+  <p-button *ngIf="vicariDaAggiungere.length > 0 || vicariDaRimuovere.length > 0 || permessiDaAggiungere.length > 0 || permessiDaRimuovere.length > 0"
+    class="bottone-footer"
+    label="Svuota campi" 
+    (click)="svuotaCampi()" 
+  ></p-button>   
 </div>
 
 <p-confirmDialog 

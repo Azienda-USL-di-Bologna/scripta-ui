@@ -3,4 +3,26 @@
   flex-direction: column;
   overflow: hidden;
   height: 100%;
+  .counter-fascicoli {
+    display: block;
+  }
+  .warning-no-chiusi {
+    display: block;
+    font-size: 0.9rem;
+  }
+  .box {
+    margin-top: 1rem;
+    &.box-scelta-responsabile {
+      lib-users-autocomplete {
+        padding: 0 !important;
+      }
+    }
+  }
+  .footer {
+    justify-content: center; 
+    display: flex; 
+  }
+  .bottone-footer {
+    margin-left: 1.5rem;
+  }
 }

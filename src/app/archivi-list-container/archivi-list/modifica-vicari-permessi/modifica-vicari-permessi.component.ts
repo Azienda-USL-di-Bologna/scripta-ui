@@ -203,6 +203,13 @@ export class ModificaVicariPermessiComponent {
 		//this.inEditing = false;
 	} */
 
+	public svuotaCampi(): void {
+		this.vicariDaAggiungere = [];
+		this.vicariDaRimuovere = [];
+		this.permessiDaAggiungere = [];
+		this.permessiDaRimuovere = [];
+	}
+
   /**
 	 * 
 	 */
