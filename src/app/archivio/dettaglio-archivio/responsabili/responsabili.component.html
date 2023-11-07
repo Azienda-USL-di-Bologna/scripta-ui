@@ -100,11 +100,11 @@
       <td *ngIf="archivio.livello === 1 && loggedUserIsResponsbaileOrVicario"
         class="azione-column">
         <!-- Bottone di editing.
-          Se la riga riguarda il resp o il proposto allora devo essere RESPONSABILE 
+          Se la riga riguarda il resp o il proposto allora devo essere RESPONSABILE, per il resp prop va bene anche il vicario.
 					Inoltre non voglio poter editare un vicario mai, dato che non c'è nessun campo modificabile-->
-        <button *ngIf="(!editing && (ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE || (attore.ruolo !== ruoliEnum.RESPONSABILE && attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO))) 
+        <button *ngIf="!editing && (ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE || (attore.ruolo !== ruoliEnum.RESPONSABILE)) 
 							&& !(archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')
-							&& (attore.ruolo !== ruoliEnum.VICARIO && !(attore.ruolo === ruoliEnum.RESPONSABILE_PROPOSTO))" 
+							&& (attore.ruolo !== ruoliEnum.VICARIO)" 
           type="button" 
           pButton 
           pRipple
@@ -115,9 +115,8 @@
           (click)="inEditing = true; onRowEditInit(attore)">
         </button>
         <!-- Bottone di cancellazione. 
-          Non si può cancellare il responsabile. E per cancellare un proposto devo essere RESPONSABILE -->
-        <button *ngIf="(!editing && attore.ruolo !== ruoliEnum.RESPONSABILE && 
-              (attore.ruolo !== ruoliEnum.RESPONSABILE_PROPOSTO || ruoloAttoreLoggedUser === ruoliEnum.RESPONSABILE)) && !(archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')"
+          Non si può cancellare il responsabile. E per cancellare un proposto devo essere RESPONSABILE o VICARIO -->
+        <button *ngIf="(!editing && attore.ruolo !== ruoliEnum.RESPONSABILE) && !(archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')"
 					pButton 
 					pRipple
 					pTooltip="Elimina"
@@ -127,7 +126,7 @@
           (click)="onRowEditSave(attore, ri, 'DELETE')">
         </button>
         <!-- Bottone di salvataggio dell'editing. -->
-        <button *ngIf="editing && (attore.ruolo !== ruoliEnum.VICARIO && !(attore.ruolo === ruoliEnum.RESPONSABILE_PROPOSTO && struttureAttoreInEditing.length === 1))"
+        <button *ngIf="editing && attore.ruolo !== ruoliEnum.VICARIO && !(attore.ruolo === ruoliEnum.RESPONSABILE_PROPOSTO && struttureAttoreInEditing.length === 1)"
 					pButton 
 					pRipple 
 					pSaveEditableRow 
