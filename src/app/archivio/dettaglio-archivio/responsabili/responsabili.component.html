@@ -17,7 +17,7 @@
 				(click)="inEditing = true; addResponsabile(ruoliEnum.RESPONSABILE_PROPOSTO)" 
 				class="mr-2 bottoneVicari" 
 				label="Proponi nuovo responsabile"
-				[disabled]="inEditing || !(loggedUserIsResponsabile || sonoResponsabile) || permessiDettaglioArchivioService.loading || !loggedUserIsResponsbaileOrVicario || responsabilePropostoGiaPresente || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
+				[disabled]="inEditing || permessiDettaglioArchivioService.loading || !loggedUserIsResponsbaileOrVicario || responsabilePropostoGiaPresente || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
 			</button>
 			<button *ngIf="archivio.livello === 1"
 				id="aggiungiResponsabile"
