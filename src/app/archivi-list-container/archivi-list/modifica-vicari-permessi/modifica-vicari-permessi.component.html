@@ -2,7 +2,7 @@
 <span class="warning-no-chiusi">Attenzione: Le modifiche non verranno applicate ad eventuali fascicoli chiusi/prechiusi.</span>
 <p-tabView styleClass="tabview-modifica-vicari-permessi">
   <!-- TAB AGGIUNTA VICARI -->
-  <p-tabPanel header="Vicari da aggiungere">
+  <p-tabPanel header="Aggiungi vicari">
     <p-table #tableAggiuntaVicari
       class="tabella-permessi-persona"
       [scrollable]="true"
@@ -58,7 +58,7 @@
     </p-table>
   </p-tabPanel>
   <!-- TAB RIMOZIONE VICARI -->
-  <p-tabPanel header="Vicari da eliminare"> 
+  <p-tabPanel header="Elimina vicari"> 
     <p-table #tableRimozioneVicari
       class="tabella-permessi-persona"
       [scrollable]="true"
@@ -114,7 +114,7 @@
     </p-table>
   </p-tabPanel>
   <!-- TAB AGGIUNTA PERMESSI -->
-  <p-tabPanel header="Permessi da aggiungere"> 
+  <p-tabPanel header="Aggiungi permessi"> 
     <p-table #tableAggiuntaPermessi
       class="tabella-permessi-persona"
       styleClass="tabella-permessi-persona"
@@ -197,7 +197,7 @@
       </p-table>
   </p-tabPanel>
   <!-- TAB RIMOZIONE PERMESSI -->
-  <p-tabPanel header="Permessi da eliminare">
+  <p-tabPanel header="Elimina permessi">
     <p-table #tableRimozionePermessi
       [scrollable]="true"
       scrollHeight="flex"
