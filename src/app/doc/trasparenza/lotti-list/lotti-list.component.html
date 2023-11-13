@@ -1,9 +1,6 @@
 <p-toast></p-toast>
+<p-confirmDialog icon="pi pi-exclamation-triangle"></p-confirmDialog>
 <div class="first-div">
-<p>Trasparenza - Legge 190</p>
-<div class="elenco-lotti">
-  <p>Elenco Lotti</p>
-</div>
   <div class="box-ricerca">
     <span class="p-input-icon-left">
       <i class="pi pi-search"></i>
@@ -18,50 +15,49 @@
     #dt
     [value]="listaLotti"
     responsiveLayout="scroll"
-    styleClass="p-datatable-sm"
     [rowHover]="true"
     [paginator]="true"
     [totalRecords]="totalRecords"
-    [rows]="20"
+    [rows]="15"
     currentPageReportTemplate="Visualizzati da {first} a {last} di {totalRecords} lotti"
     [showCurrentPageReport]="true"
     [columns]="cols"
     [loading]="loading"
     [scrollable]="true"
-    scrollHeight="340px"  
+    scrollHeight="75vh"  
     [globalFilterFields]="['cig']">
     <ng-template pTemplate="header">
         <tr>
-          <th width=10%>CIG</th>
-          <th width=10%>Lotto</th>
-          <th width=25%>Oggetto</th>
-          <th width=15%>Tipologia</th>
-          <th width=10%>Importo Totale</th>
-          <th width=10%>Importo Liquidato</th>
-          <th width=10%></th>
+          <th style="min-width:10%">CIG</th>
+          <th style="min-width:10%">Lotto</th>
+          <th style="min-width:40%">Oggetto</th>
+          <th style="min-width:12%">Tipologia</th>
+          <th style="min-width:10%">Importo Totale</th>
+          <th style="min-width:11%">Importo Liquidato</th>
+          <th style="min-width:7%"></th>
         </tr>
     </ng-template>
     <ng-template pTemplate="body" let-rowdata let-ri="rowIndex">
         <tr>
-          <td>
+          <td style="min-width:10%">
             {{rowdata.cig}}
           </td>
-          <td>
+          <td style="min-width:10%">
             {{rowdata.lotto}}
           </td>
-          <td>
+          <td style="min-width:40%">
             {{rowdata.oggetto}}
           </td>
-          <td>
+          <td style="min-width:12%">
             {{rowdata.idTipologia.nome}}
           </td>
-          <td>
+          <td style="min-width:10%">
             {{rowdata.importoTotale}}
           </td>
-          <td>
+          <td style="min-width:11%">
             {{rowdata.importoLiquidato}}
           </td>
-            <td style="text-align:center">
+            <td style="text-align:center; min-width:7%">
               <button pButton pRipple type="button" icon="pi pi-pencil" (click)="onRowEditInit(rowdata)" class="p-button-rounded"></button>
               <button pButton pRipple type="button" pCancelRow icon="pi pi-trash" (click)="deleteRow(rowdata)" class="p-button-rounded"></button>
             </td>
@@ -71,7 +67,7 @@
   <div class="top-footer-buttons">
     <div>
       <button pButton pRipple type="button" label="Aggiungi Lotto" (click)="aggiungiLotto()" class="p-button-text"></button>
-      <button pButton pRipple type="button" label="Importa Ordini in Ecconomia" (click)="chiudiLottoList()" class="p-button-text"></button>
+      <button pButton pRipple type="button" label="Importa Ordini in Economia" (click)="chiudiLottoList()" class="p-button-text"></button>
     </div>
     <button pButton pRipple type="button" label="Chiudi" (click)="chiudiLottoList()" class="p-button-text"></button>
   </div>

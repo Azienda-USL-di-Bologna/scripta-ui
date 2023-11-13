@@ -1,11 +1,11 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Lotto, LottoService, getInternautaUrl, BaseUrlType, ENTITIES_STRUCTURE, DocDetailService, CUSTOM_SERVER_METHODS } from '@bds/internauta-model';
+import { Lotto, LottoService, getInternautaUrl, BaseUrlType, ENTITIES_STRUCTURE } from '@bds/internauta-model';
 import { FILTER_TYPES, FilterDefinition, FiltersAndSorts, PagingConf } from '@bds/next-sdr';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
-// import { LottiDetailComponent } from '../lotti-detail/lotti-detail.component';
+import { AppService } from 'src/app/app.service';
 
 @Component({
   selector: 'app-lotti-list',
@@ -21,13 +21,9 @@ export class LottiListComponent implements OnInit {
   public selectedRow: any;
   public loading: boolean = true;
   @ViewChild("dt") dt: Table;
-  public LOADED_ROWS = 30;
   public totalRecords: number;
   public editLottoRow: Lotto = null;
-  // listaLotti: LottiList[] = [
-  //   {cig: "first", oggetto: "Oggetto", cf_struttura_proponente: 1, denominazione_struttura: "demo"}
-  //   // {id: 1, cig: "first", oggetto: "Oggetto", denominazione_struttura: "demo", importoTotale: 100.01}
-  // ];
+  public appName: string = "Trasparenza  - Legge 190 - Elenco Lotti";
 
   public cols: any[] = [
     { field: "cig", header: "CIG", tooltip: "" },
@@ -43,10 +39,12 @@ export class LottiListComponent implements OnInit {
     protected _http: HttpClient, 
     private route: ActivatedRoute,
     private lottoService: LottoService,
-    private docDetailService: DocDetailService,
-    private messageService: MessageService ) { }
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService,
+    private appService: AppService ) { }
 
   ngOnInit(): void {
+    this.appService.appNameSelection(this.appName);
     this.loading = true;
     this.idEsterno = this.route.snapshot.queryParamMap.get('guid');
     const apiUrl = getInternautaUrl(BaseUrlType.Lotti)
@@ -77,18 +75,32 @@ export class LottiListComponent implements OnInit {
 
   deleteRow(rowData: any): void {
     const index = this.listaLotti.indexOf(rowData);
-    if (index !== -1) {
-      this.listaLotti.splice(index, 1);
-    }
-    this.lottoService.deleteHttpCall(rowData.id).subscribe(
-      res => {
-        this.messageService.add({
-          severity: "success",
-          summary: "Lotto",
-          detail: "Lotto eliminato con successo"
-        });
-      }
-    );
+    this.confirmationService.confirm({
+      message: 'Sei sicuro di voler eliminare il lotto?',
+        header: 'Conferma',
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => { 
+          this.loading = true;    
+          if (index !== -1) {
+            this.listaLotti.splice(index, 1);
+          }
+          this.lottoService.deleteHttpCall(rowData.id).subscribe(
+            res => {
+              this.messageService.add({
+                severity: "success",
+                summary: "Successo",
+                detail: "Lotto eliminato con successo"
+              });
+              this.totalRecords = this.totalRecords - 1;
+              this.loading = false;
+            }
+          );
+        },
+        reject: () => {
+          /* L'utente ha cambaito idea. Non faccio nulla */ 
+        }
+    });
+    
   }
   
   aggiungiLotto(): void {
@@ -109,13 +121,22 @@ export class LottiListComponent implements OnInit {
     );
   }
 
-  public chiudiLottoList(): void {
+  public refreshLotti() {
     const apiUrl = getInternautaUrl(BaseUrlType.Lotti) + "/refreshLotti" + "?guid=" + this.idEsterno ;
     this._http.get(apiUrl).subscribe(
       res => {
         window.close();
       }
     );
+  }
+    
+  @HostListener('window:beforeunload', ['$event'])
+  public onWindowClose(event: BeforeUnloadEvent): void {
+    this.refreshLotti();
+  }
+  
+  public chiudiLottoList(): void {
+    this.refreshLotti();
   }
 }
 
