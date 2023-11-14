@@ -1,4 +1,5 @@
 <div class="form-lotti-detail">
+  <form [formGroup]="lottoForm">
   <div class="input-lotto-CIG">
     <div class="p-grid">
       <div class="p-col-12 p-md-3">
@@ -9,7 +10,7 @@
           pInputText 
           name="add CIG" 
           placeholder="CIG"
-          [(ngModel)]="lotto.cig"
+          formControlName="cig"
           ariaRequired="true"
         >
       </div>
@@ -22,7 +23,7 @@
           pInputText 
           name="add lotto" 
           placeholder="Lotto" 
-          [(ngModel)]="lotto.lotto"
+          formControlName="lotto"
           ariaRequired="true"
         >
       </div>
@@ -35,7 +36,7 @@
         <label>Tipologia*</label>
         <p-dropdown 
           [options]="tipologia" 
-          [(ngModel)]="lotto.idTipologia"
+          formControlName="idTipologia"
           placeholder="Scelta tipologia" 
           optionLabel="nome"
           [showClear]="false"
@@ -47,7 +48,7 @@
         <label>Scelta Contraente*</label>
         <p-dropdown 
           [options]="contraente" 
-          [(ngModel)]="lotto.idContraente"
+          formControlName="idContraente"
           placeholder="Scelta contraente" 
           optionLabel="nome"
           [showClear]="false"
@@ -60,7 +61,7 @@
       <label>Oggetto*</label>
       <input 
         class="input-lotto"
-        [(ngModel)]="lotto.oggetto"
+        formControlName="oggetto"
         type="text" 
         pInputText 
       >
@@ -86,7 +87,7 @@
         <label>Importo Totale*</label>
         <p-inputNumber 
           mode="decimal"
-          [(ngModel)]="lotto.importoTotale"
+          formControlName="importoTotale"
           inputId="importoTotale" 
           [min]="0"
           placeholder="Importo Totale" 
@@ -100,8 +101,8 @@
         <label>Importo Liquidato*</label>
         <p-inputNumber 
           mode="decimal" 
-          [(ngModel)]="lotto.importLiquidato"
-          inputId="importLiquidato" 
+          formControlName="importoLiquidato"
+          inputId="importoLiquidato" 
           [min]="0"
           placeholder="Importo Liquidato"
           aria-required="true"
@@ -115,8 +116,8 @@
       <div class="p-field p-col-12 p-md-3">
         <label for="icon">Data Inizio*</label>
         <p-calendar 
-          [maxDate]="lotto.dataCompletamento"
-          [(ngModel)]="lotto.dataInizio"
+          [maxDate]="lottoForm.value['dataCompletamento']"
+          formControlName="dataInizio"
           [showIcon]="true"
           dateFormat="dd/mm/yy"
           inputId="icon"
@@ -127,8 +128,8 @@
       <div class="p-field p-col-12 p-md-3">
         <label for="icon">Data Completamento*</label>
         <p-calendar 
-          [minDate]="lotto.dataInizio"
-          [(ngModel)]="lotto.dataCompletamento"
+          [minDate]="lottoForm.value['dataInizio']"
+          formControlName="dataCompletamento"
           [showIcon]="true"
           dateFormat="dd/mm/yy"
           inputId="icon"
@@ -137,4 +138,5 @@
       </div>
     </div>
   </div>
+  </form>
 </div>
