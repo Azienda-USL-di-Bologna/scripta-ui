@@ -80,38 +80,14 @@
   appendTo="body" 
   [modal]="true">
   <p-header style="position: center;">
-      Detaglio Lotto
+      Dettaglio Lotto
   </p-header>
-  <app-lotti-detail 
-    [lotto]="editLottoRow"></app-lotti-detail>
+  <app-lotti-detail
+    [lottoForm]="lottoForm"></app-lotti-detail>
   <p-footer>
-      <button pButton pRipple type="button" title="Salva" label="Salva" (click)="saveDialog()"></button>
-      <button pButton pRipple type="button" title="Annulla" label="Annulla" (click)="cancelDialog()"></button>
+    <div class="button-container-dialog">
+      <button [style]="{width: '6rem', height: '2rem', margin: '0 1.5rem 0 0'}" pButton pRipple type="button" title="Salva" label="Salva" (click)="saveDialog()" [disabled]="lottoForm.invalid || lottoForm.pristine || !isRealyChangedAnything()"></button>
+      <button [style]="{width: '6rem', height: '2rem'}" pButton pRipple type="button" title="Annulla" label="Annulla" (click)="cancelDialog()"></button>
+    </div>
   </p-footer>
 </p-dialog>
-<!-- 
-<p-dialog 
-  header="Dettaglio Lotto" 
-  [(visible)]="display" 
-  [style]="{width: '70vw', height: '70vh'}" 
-  [baseZIndex]="10000"
-  [modal]="true">
-
-  
-
-  <ng-template pTemplate="footer">
-    <div class="salvaBtn-chiudiBtn">
-      <p-button 
-        icon="pi pi-check" 
-        label="Salva" 
-        styleClass="p-button-text"
-        (onClick)="saveDialog()"
-        ></p-button>
-        <p-button 
-        icon="pi pi-times" 
-        label="Chiudi"
-        (onClick)="closeDialog()"
-        ></p-button>
-      </div>
-    </ng-template>
-  </p-dialog> -->
