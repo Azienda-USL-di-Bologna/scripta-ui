@@ -33,7 +33,7 @@ import { AppService } from 'src/app/app.service';
 export class LottiListComponent implements OnInit {
   public dialogDisplay: boolean = false;
   public idEsterno: string = "";
-  listaLotti: Lotto[];
+  listaLotti: Lotto[] = [];
   public data: any[] = [];
   public selectedRow: any;
   public loading: boolean = true;
