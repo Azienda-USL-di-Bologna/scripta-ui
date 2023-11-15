@@ -100,13 +100,14 @@ export class LottiListComponent implements OnInit {
     this.dialogDisplay = false;
   }
 
-  public saveDialog() {
+  public saveDialog(lotto: Lotto) {
+    console.log(lotto);
     this.dialogDisplay = false;
-    this.lottoService.postHttpCall(new Lotto())
-      .subscribe(result => {
-        this.listaLotti.push(result);
-      }
-    );
+    // this.lottoService.postHttpCall(new Lotto())
+    //   .subscribe(result => {
+    //     this.listaLotti.push(result);
+    //   }
+    // );
   }
 
   public chiudiLottoList(): void {

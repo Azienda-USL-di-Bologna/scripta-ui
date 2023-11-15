@@ -89,7 +89,7 @@
   <app-lotti-detail 
     [lotto]="editLottoRow"></app-lotti-detail>
   <p-footer>
-      <button pButton pRipple type="button" title="Salva" label="Salva" (click)="saveDialog()"></button>
+      <button pButton pRipple type="button" title="Salva" label="Salva" (click)="saveDialog(editLottoRow)"></button>
       <button pButton pRipple type="button" title="Annulla" label="Annulla" (click)="cancelDialog()"></button>
   </p-footer>
 </p-dialog>
