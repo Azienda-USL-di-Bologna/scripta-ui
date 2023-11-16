@@ -72,14 +72,14 @@
         <!-- <b>Partecipanti</b> -->
       </p-divider>
     
-     <box-participanti-aggiudicatari  [modalita]="'partecipanti'" [gruppoList]="lotto.gruppiPartecipanti"></box-participanti-aggiudicatari>
+     <box-participanti-aggiudicatari  [modalita]="'partecipanti'" [gruppoList]="lottoForm.get('gruppiPartecipanti').value"></box-participanti-aggiudicatari>
     </div>
 
     <div class="card">
       <p-divider align="left" type="dashed">
         <!-- <b>Aggiudicatari</b> -->
       </p-divider>
-      <box-participanti-aggiudicatari [modalita]="'aggiudicatari'" [gruppoList]="lotto.gruppiAggiudicatari"></box-participanti-aggiudicatari>
+      <box-participanti-aggiudicatari [modalita]="'aggiudicatari'" [gruppoList]="lottoForm.get('gruppiAggiudicatari').value"></box-participanti-aggiudicatari>
     </div>
 
     <div class="p-grid p-fluid">
