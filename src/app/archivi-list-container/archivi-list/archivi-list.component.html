@@ -627,3 +627,15 @@
     (hideMe)="showGestioneMassivaPermessi = false"
   ></modifica-vicari-permessi>
 </p-dialog>
+
+<!-- DIALOG COPIA/TRASFERISCI ABILITAZIONI -->
+<p-dialog 
+  header="Gestione massiva: Copia/Trasferisci abilitazioni" 
+  [(visible)]="showCopiaTrasferisciAbilitazioni" 
+  styleClass="dialog-copia-trasferisci-abilitazioni"
+  [modal]="true"
+>
+  <copia-trasferisci-abilitazioni
+    (hideMe)="showCopiaTrasferisciAbilitazioni = false"
+  ></copia-trasferisci-abilitazioni>
+</p-dialog>

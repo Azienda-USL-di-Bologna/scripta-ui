@@ -35,6 +35,7 @@ import { ArchivioUtilsService } from 'src/app/archivio/archivio-utils.service';
 import { TitoloService } from '@bds/internauta-model';
 import { MassimarioService } from '@bds/internauta-model';
 import { HttpParams } from '@angular/common/http';
+import { FunctionButton } from 'src/app/generic-caption-table/functional-buttons/functions-button';
 
 @Component({
 	selector: 'archivi-list',
@@ -140,6 +141,9 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	private rowsNotSelectedWhenAlmostAllRowsAreSelected: number[] = [];
 	public loggedUserIsAG = false;
 	public idAziendeDoveLoggedUserIsAG: number[] = [];
+
+	public functionButton: FunctionButton;
+
 	//public selectedAllAziende = false;
 	private _archivioPadre: Archivio;
 	get archivioPadre(): Archivio { return this._archivioPadre; }
@@ -153,6 +157,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	// Proprietà utili alla gestione massiva
 	public showGestioneMassivaResponsabile : boolean = false;
 	public showGestioneMassivaPermessi: boolean = false;
+	public showCopiaTrasferisciAbilitazioni: boolean = false;
 	public filtersAndSortsForGestioneMassiva: FiltersAndSorts;
 	public lazyFiltersAndSortsForGestioneMassiva: FiltersAndSorts;
 	public idAziendaFilter: number;
@@ -219,9 +224,24 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 					// Parte relativa al utenteUtilities
 					this.utenteUtilitiesLogin = utenteUtilities;
 					this.loggedUserIsAG = this.utenteUtilitiesLogin.isAG();
+					if (this.loggedUserIsAG) {
+						const funzioniItems: MenuItem[] = [
+              {
+                label: "Copia/Trasferisci abilitazioni",
+                icon: "pi pi-clone",
+                disabled: false,
+                command: () => this.showCopiaTrasferisciAbilitazioni = true
+              }] as MenuItem[];
+          
+              this.functionButton = {
+                tooltip: "Funzioni",
+                functionItems: funzioniItems,
+                enable: true,
+              };
+					}
 
 					utenteUtilities.getUtente().aziende.forEach(a => {
-						if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.IP, a.codice)) {
+						if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.AG, a.codice)) {
 							this.idAziendeDoveLoggedUserIsAG.push(a.id);
 						}
 					});

@@ -9,12 +9,14 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonComponentsModule, UsersAutocompleteComponent } from '@bds/common-components';
 import { ModificaVicariPermessiComponent } from './modifica-vicari-permessi/modifica-vicari-permessi.component';
 import { SostituzioneResponsabileComponent } from './sostituzione-responsabile/sostituzione-responsabile.component';
+import { CopiaTrasferisciAbilitazioniComponent } from './copia-trasferisci-abilitazioni/copia-trasferisci-abilitazioni.component';
 
 @NgModule({
   declarations: [
     ArchiviListComponent,
     ModificaVicariPermessiComponent,
-    SostituzioneResponsabileComponent
+    SostituzioneResponsabileComponent,
+    CopiaTrasferisciAbilitazioniComponent
   ],
   imports: [
     FormsModule,
