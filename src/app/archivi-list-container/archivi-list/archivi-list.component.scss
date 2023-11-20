@@ -376,77 +376,19 @@
 ::ng-deep .dialog-gestione-massiva-responsabile {
   width: 50rem;
   height: 20rem;
-  .counter-fascicoli {
-    display: block;
-  }
-  .warning-no-chiusi {
-    display: block;
-    font-size: 0.9rem;
-  }
-  .box {
-    margin-top: 1rem;
-    &.box-scelta-responsabile {
-      lib-users-autocomplete {
-        padding: 0 !important;
-      }
-    }
-  }
-  .footer {
-    justify-content: center; 
-    display: flex; 
-  }
-  .bottone-footer {
-    margin-left: 1.5rem;
-  }
 }
 ::ng-deep .dialog-gestione-massiva-vicari-permessi {
   width: 60rem;
   height: 40rem;
-  .counter-fascicoli {
-    display: block;
-  }
-  .warning-no-chiusi {
-    display: block;
-    font-size: 0.9rem;
-  }
-  .box {
-    margin-top: 5rem;
-    &.box-scelta-responsabile {
-      lib-users-autocomplete {
-        padding: 0 !important;
-      }
-    }
-  }
-  .footer {
-    margin-bottom: 1.5rem;
-    justify-content: center; 
-    display: flex; 
-  }
-  .bottone-header {
-    margin-left: 1.5rem;
-  }
-  .bottone-footer {
-    margin-bottom: 5rem;
-    margin-left: 1.5rem;
-  }
-  .adding-button {
-    margin-bottom: 1.5rem;
-    margin-left: 1rem;
-  }
-  .no-scroll-tab {
-    width: 100%;
-    margin-left: 5rem;
-    margin-right: 5rem;
-  }
 }
-::ng-deep.mat-tab-label.mat-tab-label-active:not(.mat-tab-disabled),
+/* ::ng-deep.mat-tab-label.mat-tab-label-active:not(.mat-tab-disabled),
 ::ng-deep.mat-tab-label.mat-tab-label-active.cdk-keyboard-focused:not(.mat-tab-disabled) {
   //background-color: #2e4a65;
   font-weight: 700;
   color: black;
   opacity: 1;
-}
-::ng-deep .tabella-permessi-persona {
+} */
+/* ::ng-deep .tabella-permessi-persona {
   .propaga-column  {
       min-width: 19% !important;
       width: 19% !important;
@@ -465,7 +407,7 @@
         flex-wrap: nowrap;
         padding: 0 !important;
     }
-  }
+  } */
 
 
 

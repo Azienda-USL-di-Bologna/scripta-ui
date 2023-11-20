@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Contraente, Lotto, Tipologia } from '@bds/internauta-model';
+import { Contraente, Tipologia } from '@bds/internauta-model';
 import { LottiDetailService } from './lotti-detail.service';
+import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-lotti-detail',
@@ -13,20 +14,22 @@ export class LottiDetailComponent implements OnInit {
   public tipologia: Tipologia[];
   public contraente: Contraente[];
 
-  private _lotto: Lotto;
-  get lotto(): Lotto {
-    return this._lotto;
+  private _lottoForm: FormGroup;
+  get lottoForm(): FormGroup {
+    return this._lottoForm;
   }
-  @Input() set lotto(value: Lotto) {
-    this._lotto = value;
+  @Input() set lottoForm(value: FormGroup) {
+    this._lottoForm = value;
   }
 
-  constructor( private lottiDetailService: LottiDetailService) { }
+  constructor(
+    private lottiDetailService: LottiDetailService,
+    ) { }
  
   ngOnInit(): void {
-    if (!this._lotto){
-      this._lotto = new Lotto();
-    } 
+    // if (!this._lottoForm){
+    //   this._lottoForm = new FormGroup();
+    // } 
     this.lottiDetailService.getTipologie().subscribe(res => {
       if (res) {
         this.tipologia = res._embedded.tipologia;

@@ -4,21 +4,13 @@
 p-table {
   height: 100%;
 }
-.elenco-lotti {
-  p{
-  display: flex;
-  margin-left:  40rem;
-  margin-top: 0.5rem;
-  font-size: large;
-  }
-}
 .box-ricerca {
-  width: 15rem;
+  width: 10rem;
   padding-bottom: 0.5rem;
 }
 
 button {
-  margin-right: 10px;
+  margin-right: 5px;
   display: inline-flex;
   cursor: pointer;
   user-select: none;

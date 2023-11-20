@@ -5,12 +5,14 @@ import { LottiListComponent } from './lotti-list.component';
 import { LottiDetailComponent } from '../lotti-detail/lotti-detail.component';
 import { BoxParticipantiAggiudicatariComponent } from '../box-participanti-aggiudicatari/box-participanti-aggiudicatari.component';
 import { ScriptaCommonModule } from 'src/app/scripta-common.module';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   imports: [
     CommonModule,
     PrimeNgModule,
-    ScriptaCommonModule
+    ScriptaCommonModule,
+    ReactiveFormsModule
   ],
   declarations: [
     LottiListComponent,
