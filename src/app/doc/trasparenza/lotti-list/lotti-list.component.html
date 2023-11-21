@@ -11,65 +11,67 @@
         (input)="dt.filterGlobal($any($event.target).value, 'contains')">
     </span>
   </div>
-  <p-table
-    #dt
-    [value]="listaLotti"
-    responsiveLayout="scroll"
-    [rowHover]="true"
-    [paginator]="true"
-    [totalRecords]="totalRecords"
-    [rows]="15"
-    currentPageReportTemplate="Visualizzati da {first} a {last} di {totalRecords} lotti"
-    [showCurrentPageReport]="true"
-    [columns]="cols"
-    [loading]="loading"
-    [scrollable]="true"
-    scrollHeight="75vh"  
-    [globalFilterFields]="['cig']">
-    <ng-template pTemplate="header">
-        <tr>
-          <th style="min-width:10%">CIG</th>
-          <th style="min-width:10%">Lotto</th>
-          <th style="min-width:40%">Oggetto</th>
-          <th style="min-width:12%">Tipologia</th>
-          <th style="min-width:10%">Importo Totale</th>
-          <th style="min-width:11%">Importo Liquidato</th>
-          <th style="min-width:7%"></th>
-        </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-rowdata let-ri="rowIndex">
-        <tr>
-          <td style="min-width:10%">
-            {{rowdata.cig}}
-          </td>
-          <td style="min-width:10%">
-            {{rowdata.lotto}}
-          </td>
-          <td style="min-width:40%">
-            {{rowdata.oggetto}}
-          </td>
-          <td style="min-width:12%">
-            {{rowdata.idTipologia.nome}}
-          </td>
-          <td style="min-width:10%">
-            {{rowdata.importoTotale}}
-          </td>
-          <td style="min-width:11%">
-            {{rowdata.importoLiquidato}}
-          </td>
-            <td style="text-align:center; min-width:7%">
-              <button pButton pRipple type="button" icon="pi pi-pencil" (click)="onRowEditInit(rowdata)" class="p-button-rounded"></button>
-              <button pButton pRipple type="button" pCancelRow icon="pi pi-trash" (click)="deleteRow(rowdata)" class="p-button-rounded"></button>
+  <div style="height: calc(100vh - 105px);">
+    <p-table
+      #dt
+      [value]="listaLotti"
+      responsiveLayout="scroll"
+      [rowHover]="true"
+      [paginator]="true"
+      [totalRecords]="totalRecords"
+      [rows]="15"
+      currentPageReportTemplate="Visualizzati da {first} a {last} di {totalRecords} lotti"
+      [showCurrentPageReport]="true"
+      [columns]="cols"
+      [loading]="loading"
+      scrollHeight="flex"  
+      [scrollable]="true"
+      [globalFilterFields]="['cig']">
+      <ng-template pTemplate="header">
+          <tr>
+            <th style="min-width:10%">CIG</th>
+            <th style="min-width:10%">Lotto</th>
+            <th style="min-width:40%">Oggetto</th>
+            <th style="min-width:12%">Tipologia</th>
+            <th style="min-width:10%">Importo Totale</th>
+            <th style="min-width:10%">Importo Liquidato</th>
+            <th style="min-width:7%"></th>
+          </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowdata let-ri="rowIndex">
+          <tr>
+            <td style="min-width:10%; overflow-wrap:anywhere;">
+              {{rowdata.cig}}
             </td>
-        </tr>
-    </ng-template>
-</p-table>
-  <div class="top-footer-buttons">
-    <div>
-      <button pButton pRipple type="button" label="Aggiungi Lotto" (click)="aggiungiLotto()" class="p-button-text"></button>
-      <button pButton pRipple type="button" label="Importa Ordini in Economia" (click)="chiudiLottoList()" class="p-button-text"></button>
+            <td style="min-width:10%; overflow-wrap:anywhere; ">
+              {{rowdata.lotto}}
+            </td>
+            <td style="min-width:40%; overflow-wrap:anywhere;">
+              {{rowdata.oggetto}}
+            </td>
+            <td style="min-width:12%; overflow-wrap:anywhere;">
+              {{rowdata.idTipologia.nome}}
+            </td>
+            <td style="min-width:10%; overflow-wrap:anywhere;">
+              {{rowdata.importoTotale | number:'1.2': 'it-IT'}}
+            </td>
+            <td style="min-width:10%; overflow-wrap:anywhere;">
+              {{rowdata.importoLiquidato | number:'1.2': 'it-IT'}}
+            </td>
+              <td style="text-align:center; min-width:7%">
+                <button pButton pRipple type="button" icon="pi pi-pencil" (click)="onRowEditInit(rowdata)" class="p-button-rounded"></button>
+                <button pButton pRipple type="button" pCancelRow icon="pi pi-trash" (click)="deleteRow(rowdata)" class="p-button-rounded"></button>
+              </td>
+          </tr>
+      </ng-template>
+    </p-table>
+    <div class="top-footer-buttons">
+      <div>
+        <button pButton pRipple type="button" label="Aggiungi Lotto" (click)="aggiungiLotto()" class="p-button-text"></button>
+        <button pButton pRipple type="button" label="Importa Ordini in Economia" (click)="chiudiLottoList()" class="p-button-text"></button>
+      </div>
+      <button pButton pRipple type="button" label="Chiudi" (click)="chiudiLottoList()" class="p-button-text"></button>
     </div>
-    <button pButton pRipple type="button" label="Chiudi" (click)="chiudiLottoList()" class="p-button-text"></button>
   </div>
 </div>
 <p-dialog
