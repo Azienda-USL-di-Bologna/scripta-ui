@@ -17,6 +17,7 @@ import { ArchivioDocComponent } from './archivio-doc/archivio-doc.component';
 import { AttachmentsBoxModule } from "@bds/common-components";
 import { DocUtilsService } from "../utilities/doc-utils.service";
 import { CommonToolsModule } from "@bds/common-tools";
+import { DocsDocsComponent } from './docs-docs/docs-docs.component';
 
 
 @NgModule({
@@ -26,7 +27,7 @@ import { CommonToolsModule } from "@bds/common-tools";
     PrimeNgModule,
     ScriptaCommonModule,
     AttachmentsBoxModule,
-    CommonToolsModule
+    CommonToolsModule,
   ],
   declarations: [
     DocComponent,
@@ -35,14 +36,16 @@ import { CommonToolsModule } from "@bds/common-tools";
     AllegatiComponent,
     AttoriComponent,
     DatiPubblicazioneComponent,
-    ArchivioDocComponent
+    ArchivioDocComponent,
+    DocsDocsComponent
   ],
   providers: [
     ExtendedDocService,
     ExtendedDestinatariService,
     ExtendedMittenteService,
     ExtendedAllegatoService,
-    DocUtilsService
+    DocUtilsService,
+    
   ],
   exports: [
     DocComponent
