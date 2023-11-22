@@ -1,9 +1,10 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { RefreshLoggedUserGuard, LoginGuard, NoLoginGuard, JwtLoginComponent, LoggedOutPageComponent } from "@bds/jwt-login";
-import { LOGIN_ROUTE, LOGGED_OUT_ROUTE, DOC_ROUTE, HOME_ROUTE, NAVIGATION_TABS_ROUTE } from "src/environments/app-constants";
+import { LOGIN_ROUTE, LOGGED_OUT_ROUTE, DOC_ROUTE, HOME_ROUTE, NAVIGATION_TABS_ROUTE, DOC_DOC_ROUTE } from "src/environments/app-constants";
 import { PageNotFoundComponent } from "@bds/common-components";
 import { LottiListComponent } from './doc/trasparenza/lotti-list/lotti-list.component';
+import { DocsDocsComponent } from "./doc/docs-docs/docs-docs.component";
 
 const routes: Routes = [
   { path: "", redirectTo: NAVIGATION_TABS_ROUTE, pathMatch: "full" },
@@ -16,6 +17,7 @@ const routes: Routes = [
     canActivate: [RefreshLoggedUserGuard, LoginGuard]
   },
   { path: DOC_ROUTE, loadChildren: () => import("./doc/doc.module").then(m => m.DocModule), canActivate: [RefreshLoggedUserGuard, LoginGuard] },
+  { path: DOC_DOC_ROUTE, loadChildren: () => import("./doc/doc.module").then(m => m.DocModule),component: DocsDocsComponent,  canActivate: [RefreshLoggedUserGuard, LoginGuard] },
   { path: NAVIGATION_TABS_ROUTE, loadChildren: () => import("./navigation-tabs/navigation-tabs.module").then(m => m.NavigationTabsModule), canActivate: [RefreshLoggedUserGuard, LoginGuard] },
   { path: "**", component: PageNotFoundComponent }
 ];

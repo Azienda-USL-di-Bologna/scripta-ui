@@ -1,0 +1,71 @@
+<div class="big-container">
+    <div class="selection-container" *ngIf="!solaLettura">
+        <span class="selection-text">
+            Seleziona un documento da collegare: 
+        </span>
+        <div class="autocomplete-container">
+            <p-autoComplete
+            class="autocomplete"
+            appendTo="body"
+            [suggestions]="filteredDocumenti"
+            [(ngModel)]="docDaCollegare"
+            (completeMethod)="filterDocumento($event.query)"
+            [dropdown]="true"
+            [autoZIndex]="true"
+            [placeholder]="placeholder"
+            (onSelect)="selectDocumentToAdd()"
+            emptyMessage="Nessuno documento trovato"
+            field="label"
+            
+            >
+            <ng-template let-documenti pTemplate="item">
+                <div class="p-d-flex p-ai-center">
+                    {{documenti.label}}
+                </div>
+            </ng-template>
+            </p-autoComplete>
+            <p-checkbox
+                class="check-box"
+                label="Cerca anche tra i documenti pregressi"
+                binary="true"
+                [(ngModel)]="cercaAncheTraPregressi"
+            >
+            </p-checkbox>
+        </div>
+        
+    </div>
+    <span class="text-documenti-collegati">Documenti Collegati  </span>
+    <div class="tree-preview-container">
+        <div class="tree">
+            <p-tree 
+                [value]="documentiNodi"
+                styleClass="doc-tree"
+                selectionMode="single" 
+                [(selection)]="selectedNode" 
+                (onNodeSelect)="onNodeSelect($event)"
+                (onNodeExpand)="onNodeExpand($event)"
+                scrollHeight="flex">
+                <ng-template let-node pTemplate="default">
+                    <div class="label-nodi">
+                        <div [innerHTML]="node.label"></div>
+                        <i *ngIf="node.key !== idDocSorgente.toString() && !solaLettura" 
+                        class="pi pi-trash icona-cancella" 
+                        (click)="deleteCollegamento(node.data, docDocCollegati)" 
+                        pTooltip="elimina collegamento"></i>
+                    </div>
+                </ng-template>
+            </p-tree>
+        </div>
+        <div class="allegati-container">
+            <p class="text-allegati">Allegati</p>
+            <attachments-box
+            [idDoc]="selectedDocId"
+            [config]="attachmentsBoxConfig">
+            </attachments-box>
+        </div>
+        
+    </div>
+</div>
+<p-confirmDialog key="confirm-dialog" [baseZIndex]="10000" acceptLabel="Sì"></p-confirmDialog>
+
+
