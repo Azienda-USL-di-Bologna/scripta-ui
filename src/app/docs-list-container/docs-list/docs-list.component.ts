@@ -221,11 +221,13 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
               const funzioniItems: MenuItem[] = [
               {
                 label: "Forza versamenti",
+                icon: "pi pi-bolt",
                 disabled: false,
                 command: () => this.openVersamentoMassivoPopup(StatoVersamento.FORZARE)
               },
               {
                 label: "Ritenta versamenti",
+                icon: "pi pi-reply",
                 disabled: false,
                 command: () => this.openVersamentoMassivoPopup(StatoVersamento.ERRORE_RITENTABILE)
               }] as MenuItem[];
@@ -445,7 +447,8 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       }); 
     }
 
-    if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.RV)) {
+    if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.RV)
+        || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD)) {
       this.selectButtonItems.push({
         title: "",
         label: "Errori Versamento", 
@@ -480,11 +483,11 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       case DocsListMode.MIEI_DOCUMENTI:
       case DocsListMode.NUOVO:
       case DocsListMode.REGISTRAZIONI: 
-      this.calendarcreazione.writeValue(this.lastDataCreazioneFilterValue);
+      this.calendarcreazione.writeValue(this.lastDataCreazioneFilterValue || this.actualDataCreazioneFilterValue);
       this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
         break;
       case DocsListMode.IFIRMARIO:
-        this.calendarcreazione.writeValue(this.lastDataCreazioneFilterValue);
+        this.calendarcreazione.writeValue(this.lastDataCreazioneFilterValue || this.actualDataCreazioneFilterValue);
         this.dataTable.filters["dataCreazione"] = { value: this.calendarcreazione.value, matchMode: "is" };
         // TODO: Se viene velocizzato il tab ifirmato allora si può cancellare questo if e togliere il setimeout
         this.initialSortField = "dataCreazione";
@@ -956,7 +959,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       this.loadDocsListSubscription.unsubscribe();
       this.loadDocsListSubscription = null;
     }
-    const idAziende : number[] = [this.dropdownAzienda.value];
+    //const idAziende : number[] = [this.dropdownAzienda.value];
     //asdasdasd vado a valorizzare la data pregresso per l'azienda voluta
     
     
@@ -1316,6 +1319,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
    */
   public handleCalendarButtonEvent(calendar: Calendar, command: string, event: Event, filterCallback: (value: Date[]) => {}) {
     if (command === "doFilter" || command === "onClickOutside") { // pulsante OK
+
       calendar.hideOverlay();
     } else if (command === "setToday") { // pulsante OGGI
       calendar.writeValue([new Date(), null]);
@@ -1324,6 +1328,7 @@ export class DocsListComponent implements OnInit, OnDestroy, TabComponent, Capti
       calendar.onClearButtonClick(event);
     }
     if (calendar.inputId === "calendarcreazione") {
+      this.lastDataCreazioneFilterValue = calendar.value;
       this.actualDataCreazioneFilterValue = calendar.value;
     }
     filterCallback(calendar.value);

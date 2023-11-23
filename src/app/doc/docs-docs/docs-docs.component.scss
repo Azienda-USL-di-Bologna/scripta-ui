@@ -1,0 +1,74 @@
+.big-container{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    .selection-container{
+        padding-bottom: 3rem;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+        justify-content: space-between;
+        .selection-text{
+            padding-left: 3rem;
+            font-size: medium;
+            font-weight: bold;
+        }
+        .autocomplete-container{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin-inline: 2rem;
+            .autocomplete{
+                flex: 1 1 0;
+            }
+            .check-box{
+                margin-inline: 2rem;
+            }
+        }
+    }
+    .text-documenti-collegati{
+        padding-left: 3rem;
+        
+        /* margin-left: 3rem; */
+        font-size: medium;
+        /* margin-top: 3rem; */
+        border-style: double;
+        border-color: lightgray;
+        // font-weight: bold;
+        color: darkgray;
+    }
+    .tree-preview-container{
+        flex: 1 1 0;
+        height: 100%;
+        display: flex;
+        flex-direction: row;
+        overflow: hidden;
+        background-color: lightgray;
+        justify-content: space-between;
+        
+        
+        
+        
+        
+        .allegati-container {
+            .text-allegati{
+                font-weight: bold;
+                margin-left: 3rem;
+            }
+            width: 50rem;
+            flex: 1 1 0;
+        }
+    }
+}
+.label-nodi{
+    display: flex;
+    align-items: center;
+    .icona-cancella{
+        padding-left: 0.6rem;
+    }
+}
+.nodo-pregresso {
+    color: red;
+}
+::ng-deep .doc-tree{
+    width: 35rem !important;
+}

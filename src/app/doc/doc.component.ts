@@ -190,7 +190,7 @@ export class DocComponent implements OnInit, OnDestroy {
       if (registriUfficiali && registriUfficiali.length > 0) {
         this.descrizioneStrutturaAdottante = registriUfficiali[0].idStrutturaRegistrante.nome;
         if (registriUfficiali[0].idStrutturaRegistrante.codice !== null){
-          this.descrizioneStrutturaAdottante = + " [ " + registriUfficiali[0].idStrutturaRegistrante.codice + " ]";
+          this.descrizioneStrutturaAdottante = this.descrizioneStrutturaAdottante + " [ " + registriUfficiali[0].idStrutturaRegistrante.codice + " ]";
         }
         this.descrizioneUtenteRegistrante = this.descrizioneStrutturaAdottante;
         if (registriUfficiali[0].idPersonaRegistrante !== undefined && registriUfficiali[0].idPersonaRegistrante !== null){

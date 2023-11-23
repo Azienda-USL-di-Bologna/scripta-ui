@@ -1,0 +1,276 @@
+<span class="counter-fascicoli">Stai agendo su {{rowCountSelected === 1 ? 'un fascicolo' : rowCountSelected + ' fascicoli'}}</span>
+<span class="warning-no-chiusi">Attenzione: Le modifiche non verranno applicate ad eventuali fascicoli chiusi/prechiusi.</span>
+<p-tabView styleClass="tabview-modifica-vicari-permessi">
+  <!-- TAB AGGIUNTA VICARI -->
+  <p-tabPanel header="Aggiungi vicari">
+    <p-table #tableAggiuntaVicari
+      class="tabella-permessi-persona"
+      [scrollable]="true"
+      scrollHeight="flex"
+      dataKey="id"
+      editMode="row" 
+      [value]="vicariDaAggiungere"
+      styleClass="tabella-permessi-persona"
+    >
+      <ng-template pTemplate="caption">
+        <div class="searching-box">
+          <label for="ricerca-nuovo-vicario">Scegli vicario da aggiungere:</label>
+          <lib-users-autocomplete 
+            id="ricerca-nuovo-vicario"
+            [utenteIniziale]="utenteCercato"
+            [afferenzaDiretta]="true"
+            class="autocomplete-utenti" 
+            [azienda]="{id: idAzienda}"
+            [showPool]="false"
+            [showOnlyUser]="false"
+            (utenteStrutturaSelezionatoEmit)="onSelectedNewUtenteGestioneMassiva($event, ri, 'ADDVICARI')"
+          ></lib-users-autocomplete>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="nome-column">Nome</th>
+          <th class="struttura-column">Struttura</th>
+          <th class="azione-column"></th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-ri="rowIndex" let-vicario>
+        <tr>
+          <td class="nome-column">
+            {{vicario.idUtente.idPersona.descrizione}}
+          </td>
+          <td class="struttura-column">
+            {{vicario.idStruttura?.nome}}
+          </td>
+          <td class="azione-column">
+            <button
+              pButton 
+              pRipple
+              pTooltip="Elimina"
+              class="p-button-rounded p-button-text"
+              type="button" 
+              icon="pi pi-trash" 
+              (click)="deleteRowUtenteGestioneMassiva(ri, 'ADDVICARI')">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-tabPanel>
+  <!-- TAB RIMOZIONE VICARI -->
+  <p-tabPanel header="Elimina vicari"> 
+    <p-table #tableRimozioneVicari
+      class="tabella-permessi-persona"
+      [scrollable]="true"
+      scrollHeight="flex"
+      dataKey="id"
+      editMode="row" 
+      [value]="vicariDaRimuovere"
+      styleClass="tabella-permessi-persona"
+    >
+      <ng-template pTemplate="caption">
+        <div class="searching-box">
+          <label for="ricerca-rimozione-vicario">Scegli vicario da eliminare:</label>
+          <lib-users-autocomplete 
+            id="ricerca-rimozione-vicario"
+            [utenteIniziale]="utenteCercato"
+            [afferenzaDiretta]="true"
+            class="autocomplete-utenti" 
+            [azienda]="{id: idAzienda}"
+            [showPool]="false"
+            [showOnlyUser]="false"
+            (utenteStrutturaSelezionatoEmit)="onSelectedNewUtenteGestioneMassiva($event, ri, 'DELETEVICARI')"
+          ></lib-users-autocomplete>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="nome-column">Nome</th>
+          <th class="struttura-column">Struttura</th>
+          <th class="azione-column"></th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-ri="rowIndex" let-vicario>
+        <tr [pEditableRow]="vicario">
+          <td class="nome-column">
+            {{vicario.idUtente.idPersona.descrizione}}
+          </td>
+          <td class="struttura-column">
+            {{vicario.idStruttura?.nome}}
+          </td>
+          <td class="azione-column">
+            <button 
+              pButton 
+              pRipple
+              pTooltip="Elimina"
+              class="p-button-rounded p-button-text"
+              type="button" 
+              icon="pi pi-trash" 
+              (click)="deleteRowUtenteGestioneMassiva(ri, 'DELETEVICARI')">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-tabPanel>
+  <!-- TAB AGGIUNTA PERMESSI -->
+  <p-tabPanel header="Aggiungi permessi"> 
+    <p-table #tableAggiuntaPermessi
+      class="tabella-permessi-persona"
+      styleClass="tabella-permessi-persona"
+      [scrollable]="true"
+      scrollHeight="flex"
+      dataKey="id"
+      [value]="permessiDaAggiungere"
+    ><!-- editMode="row"  -->
+      <ng-template pTemplate="caption">
+        <div class="searching-box">
+          <label for="ricerca-aggiunta-permesso">Scegli utente a cui dare un permesso:</label>
+          <lib-users-autocomplete 
+            id="ricerca-aggiunta-permesso"
+            [utenteIniziale]="utenteCercato"
+            [afferenzaDiretta]="true"
+            class="autocomplete-utenti" 
+            [azienda]="{id: idAzienda}"
+            [showPool]="false"
+            [showOnlyUser]="false"
+            (utenteStrutturaSelezionatoEmit)="onSelectedNewUtenteGestioneMassiva($event, ri, 'ADDPERMESSI')"
+          ></lib-users-autocomplete>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="nome-column">Nome</th>
+          <th class="struttura-column">Struttura</th>
+          <th class="permesso-column">Permesso</th>
+          <!-- <th class="propaga-column">Propaga a sottolivelli</th> -->
+          <th class="azione-column"></th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-ri="rowIndex" let-permesso>
+        <tr [pEditableRow]="permesso">
+          <td class="nome-column">
+            {{permesso.persona?.descrizione}}
+          </td>
+          <td class="struttura-column">
+            {{permesso.struttura.nome}}
+          </td>
+          <td class="permesso-column" pEditableColumn>
+            <p-dropdown 
+              appendTo="body"
+              [(ngModel)]="permesso.predicato"
+              [options]="predicatiPermessiGestioneMassiva">
+            </p-dropdown>
+            <!-- <p-cellEditor>
+              <ng-template pTemplate="input">
+                <p-dropdown 
+                  appendTo="body"
+                  [(ngModel)]="permesso.predicato"
+                  [options]="predicatiPermessiGestioneMassiva">
+                </p-dropdown>
+              </ng-template>
+              <ng-template pTemplate="output">
+                {{permesso?.predicato.toString()}}
+              </ng-template>
+            </p-cellEditor> -->
+          </td>
+          <!-- <td class="propaga-column">
+            <p-checkbox
+              [disabled]="true"
+              [binary]="true"
+              [(ngModel)]="checked">
+            </p-checkbox>
+          </td> -->
+          <td class="azione-column">
+            <button
+              pButton 
+              pRipple
+              pTooltip="Elimina"
+              class="p-button-rounded p-button-text"
+              type="button" 
+              icon="pi pi-trash" 
+              (click)="deleteRowUtenteGestioneMassiva(ri, 'ADDPERMESSI')">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+      </p-table>
+  </p-tabPanel>
+  <!-- TAB RIMOZIONE PERMESSI -->
+  <p-tabPanel header="Elimina permessi">
+    <p-table #tableRimozionePermessi
+      [scrollable]="true"
+      scrollHeight="flex"
+      class="tabella-permessi-persona"
+      dataKey="id"
+      editMode="row" 
+      styleClass="tabella-permessi-persona"
+      [value]="permessiDaRimuovere">
+      <ng-template pTemplate="caption">
+        <div class="searching-box">
+          <label for="ricerca-rimozione-permessi">Scegli utente a cui rimuovere i permessi:</label>
+          <lib-users-autocomplete 
+            id="ricerca-rimozione-permessi"
+            [utenteIniziale]="utenteCercato"
+            [afferenzaDiretta]="true"
+            class="autocomplete-utenti" 
+            [azienda]="{id: idAzienda}"
+            [showPool]="false"
+            [showOnlyUser]="false"
+            (utenteStrutturaSelezionatoEmit)="onSelectedNewUtenteGestioneMassiva($event, ri, 'DELETEPERMESSI')"
+          ></lib-users-autocomplete>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="nome-column">Nome</th>
+          <th class="struttura-column">Struttura</th>
+          <th class="azione-column"></th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-ri="rowIndex" let-utente>
+        <tr [pEditableRow]="utente">
+          <td class="nome-column">
+            {{utente.idUtente.idPersona.descrizione}}
+          </td>
+          <td class="struttura-column">
+            {{utente.idStruttura?.nome}}
+          </td>
+          <td class="azione-column">
+            <button
+              pButton 
+              pRipple
+              pTooltip="Elimina"
+              class="p-button-rounded p-button-text"
+              type="button" 
+              icon="pi pi-trash" 
+              (click)="deleteRowUtenteGestioneMassiva(ri, 'DELETEPERMESSI')">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-tabPanel>
+</p-tabView>
+<div class="box footer">
+  <p-button
+    class="bottoni-footer"
+    label="Conferma modifiche a vicari e permessi" 
+    (click)="confermaAvvioGestioneMassivaPermessiVicari($event)"
+  ></p-button>
+  <p-button *ngIf="vicariDaAggiungere.length > 0 || vicariDaRimuovere.length > 0 || permessiDaAggiungere.length > 0 || permessiDaRimuovere.length > 0"
+    class="bottone-footer"
+    label="Svuota lista" 
+    (click)="svuotaCampi()" 
+  ></p-button>
+</div>
+
+<p-confirmDialog 
+  header="Conferma modifica" 
+  key="conferma-gestione-massiva-vicari-permessi-popup">
+ <!--  <ng-template pTemplate="message">
+    <h3>Header Content</h3>
+    dsdsds
+  </ng-template> -->
+</p-confirmDialog>
+ 
