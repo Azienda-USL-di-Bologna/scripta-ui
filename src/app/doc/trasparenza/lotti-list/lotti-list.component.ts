@@ -13,6 +13,8 @@ import {
   Doc,
   Contraente,
   DocService,
+  GruppoLotto,
+  TipoGruppo,
 } from "@bds/internauta-model";
 import {
   FILTER_TYPES,
@@ -52,6 +54,8 @@ export class LottiListComponent implements OnInit {
     importoLiquidato: ["", [Validators.required]],
     dataInizio: ["", [Validators.required]],
     dataCompletamento: ["", [Validators.required]],
+    gruppiPartecipanti: [[]],
+    gruppiAggiudicatari: [[]]
   });
   public appName: string = "Trasparenza  - Legge 190 - Elenco Lotti";
 
@@ -79,6 +83,10 @@ export class LottiListComponent implements OnInit {
     this.appService.appNameSelection(this.appName);
     this.loading = true;
     this.idEsterno = this.route.snapshot.queryParamMap.get("guid");
+    this.getLottiData();
+  }
+
+  getLottiData() {
     const filterAndSortDoc = new FiltersAndSorts();
     filterAndSortDoc.addFilter(
       new FilterDefinition(
@@ -130,7 +138,7 @@ export class LottiListComponent implements OnInit {
     this.dialogDisplay = true;
     this.editLottoRow = lotto;
     const lottoToEdit = {
-      cig:lotto.cig,
+      cig: lotto.cig,
       lotto: lotto.lotto,
       idTipologia: lotto.idTipologia,
       idContraente: lotto.idContraente,
@@ -139,6 +147,8 @@ export class LottiListComponent implements OnInit {
       importoLiquidato: lotto.importoLiquidato,
       dataInizio: lotto.dataInizio,
       dataCompletamento: lotto.dataCompletamento,
+      gruppiPartecipanti: lotto.gruppiPartecipanti,
+      gruppiAggiudicatari: lotto.gruppiAggiudicatari
     }
     this.lottoForm.reset(lottoToEdit);
   }
@@ -186,6 +196,7 @@ export class LottiListComponent implements OnInit {
       importoLiquidato: "",
       dataInizio: "",
       dataCompletamento: "",
+      gruppiList: [new GruppoLotto()],
     }
     this.lottoForm.reset(newLotto);
   }
@@ -194,7 +205,7 @@ export class LottiListComponent implements OnInit {
     this.dialogDisplay = false;
   }
 
-  public isRealyChangedAnything() {
+  public isReallyChangedAnything() {
     return this.lottoForm.controls.lotto.value !== this.editLottoRow.lotto ||
            this.lottoForm.controls.cig.value !== this.editLottoRow.cig ||
            this.lottoForm.controls.oggetto.value !== this.editLottoRow.oggetto ||
@@ -208,6 +219,7 @@ export class LottiListComponent implements OnInit {
 
   public saveDialog() {
     this.dialogDisplay = false;
+    const projection = "LottoWithAll";
     if (this.editLottoRow.id && this.editLottoRow.id > 0) {
       const campiModificatiDelLotto: Lotto = new Lotto();
       if (this.lottoForm.controls.lotto.dirty && this.lottoForm.controls.lotto.value !== this.editLottoRow.lotto){
@@ -237,12 +249,14 @@ export class LottiListComponent implements OnInit {
       if (this.lottoForm.controls.dataCompletamento.dirty && this.lottoForm.controls.dataCompletamento.value !== this.editLottoRow.dataCompletamento){
         campiModificatiDelLotto.dataCompletamento = this.dataPipe.transform(this.lottoForm.controls.dataCompletamento.value, 'yyyy-MM-dd') as any;        
       } 
+      campiModificatiDelLotto.gruppiList = this.lottoForm.controls.gruppiPartecipanti.value.concat(this.lottoForm.controls.gruppiAggiudicatari.value);
+
       campiModificatiDelLotto.version = this.editLottoRow.version;
       delete campiModificatiDelLotto.nextSdrDateInformation;
       console.log(campiModificatiDelLotto);
       this.loading = true;
-      this.lottoService.patchHttpCall(campiModificatiDelLotto, this.editLottoRow.id).subscribe(
-        (res) => {
+      this.lottoService.patchHttpCall(campiModificatiDelLotto, this.editLottoRow.id, projection).subscribe(
+        (res: Lotto ) => {
           const index = this.listaLotti.findIndex((x) => x.id == this.editLottoRow.id);
           this.listaLotti[index] = res;
           this.messageService.add({
@@ -274,10 +288,11 @@ export class LottiListComponent implements OnInit {
       newLotto.importoTotale = this.lottoForm.value['importoTotale'];
       newLotto.dataCompletamento = this.dataPipe.transform(this.lottoForm.value['dataCompletamento'], 'yyyy-MM-dd') as any;
       newLotto.dataInizio = this.dataPipe.transform(this.lottoForm.value['dataInizio'], 'yyyy-MM-dd') as any;
+      newLotto.gruppiList = this.lottoForm.value['gruppiPartecipanti'].concat(this.lottoForm.value['gruppiAggiudicatari']);
       delete newLotto.nextSdrDateInformation;
       console.log(newLotto);
       this.loading = true;
-      this.lottoService.postHttpCall(newLotto).subscribe(
+      this.lottoService.postHttpCall(newLotto, projection).subscribe(
         (result) => {
           this.messageService.add({
             severity: "success",
