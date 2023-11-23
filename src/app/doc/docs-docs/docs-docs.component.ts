@@ -102,9 +102,10 @@ export class DocsDocsComponent implements OnInit {
                       }
                     )
                   });
-                  this.documentiNodi.push(this.buildTreeNode(this.docSorgente, this.childrenNodes));
                 }
               )
+              this.documentiNodi.push(this.buildTreeNode(this.docSorgente, this.childrenNodes));
+
           })
         }  
       )
