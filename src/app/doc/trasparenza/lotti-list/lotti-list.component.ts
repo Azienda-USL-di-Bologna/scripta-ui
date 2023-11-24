@@ -249,7 +249,7 @@ export class LottiListComponent implements OnInit {
       if (this.lottoForm.controls.dataCompletamento.dirty && this.lottoForm.controls.dataCompletamento.value !== this.editLottoRow.dataCompletamento){
         campiModificatiDelLotto.dataCompletamento = this.dataPipe.transform(this.lottoForm.controls.dataCompletamento.value, 'yyyy-MM-dd') as any;        
       } 
-      campiModificatiDelLotto.gruppiList = this.lottoForm.controls.gruppiPartecipanti.value.concat(this.lottoForm.controls.gruppiAggiudicatari.value);
+      campiModificatiDelLotto.fk_gruppiList = this.lottoForm.controls.gruppiPartecipanti.value.concat(this.lottoForm.controls.gruppiAggiudicatari.value);
 
       campiModificatiDelLotto.version = this.editLottoRow.version;
       delete campiModificatiDelLotto.nextSdrDateInformation;
@@ -288,7 +288,7 @@ export class LottiListComponent implements OnInit {
       newLotto.importoTotale = this.lottoForm.value['importoTotale'];
       newLotto.dataCompletamento = this.dataPipe.transform(this.lottoForm.value['dataCompletamento'], 'yyyy-MM-dd') as any;
       newLotto.dataInizio = this.dataPipe.transform(this.lottoForm.value['dataInizio'], 'yyyy-MM-dd') as any;
-      newLotto.gruppiList = this.lottoForm.value['gruppiPartecipanti'].concat(this.lottoForm.value['gruppiAggiudicatari']);
+      newLotto.fk_gruppiList = this.lottoForm.value['gruppiPartecipanti'].concat(this.lottoForm.value['gruppiAggiudicatari']);
       delete newLotto.nextSdrDateInformation;
       console.log(newLotto);
       this.loading = true;

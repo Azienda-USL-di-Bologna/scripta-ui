@@ -1,9 +1,19 @@
 import { HttpClient } from "@angular/common/http";
-import { Component, Input, OnDestroy, OnInit } from "@angular/core";
-import { Componente, GruppoLotto, RuoloComponente, TipoGruppo, Tipologia } from "@bds/internauta-model";
+import {
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+} from "@angular/core";
+import {
+  Componente,
+  GruppoLotto,
+  RuoloComponente,
+  TipoGruppo,
+  Tipologia,
+} from "@bds/internauta-model";
 import { BoxParticipantiAggiudicatariService } from "./box-participanti-aggiudicatari.service";
 import { Table } from "primeng/table";
-
 
 @Component({
   selector: "box-participanti-aggiudicatari",
@@ -36,7 +46,7 @@ export class BoxParticipantiAggiudicatariComponent
           (g) => !this.partecipantiSingoli.includes(g)
         );
       } else if (this.gruppoList.length === 0) {
-        this._gruppoList = [new GruppoLotto()]; 
+        this._gruppoList = [new GruppoLotto()];
         this._gruppoList[0].componentiList = [];
         this._gruppoList[0].tipo = TipoGruppo.AGGIUDICATARIO;
       }
@@ -78,6 +88,7 @@ export class BoxParticipantiAggiudicatariComponent
           this.ruolocomponente = res._embedded.ruolocomponente;
           this._gruppoList.forEach((g) =>
             g.componentiList.map((c) => {
+              c.combinedKey = c.id + c.codiceFiscale;
               if (!c.idRuolo) {
                 c.idRuolo = this.ruolocomponente.find(
                   (r) => r.id === c.fk_idRuolo.id
@@ -134,7 +145,8 @@ export class BoxParticipantiAggiudicatariComponent
   public onRowEditCancel(
     componentiList: Componente[],
     rowData: Componente,
-    rowIndex: number
+    rowIndex: number,
+    isComponenteSingolo = false
   ) {
     const isObjEmpty = (obj: any) =>
       obj === null || Object.keys(obj).length === 0;
@@ -147,8 +159,13 @@ export class BoxParticipantiAggiudicatariComponent
     const isEmpty = Object.values(rowData).every(isItemEmpty);
 
     if (isEmpty) {
-      componentiList.splice(rowIndex, 1);
+      if (isComponenteSingolo) {
+        this.partecipantiSingoli.splice(rowIndex, 1);
+      } else {
+        componentiList.splice(rowIndex, 1);
+      }
     }
+
     this.concatListePartecipanti();
   }
 
@@ -201,6 +218,12 @@ export class BoxParticipantiAggiudicatariComponent
   }
 
   private concatListePartecipanti() {
-    this._gruppoList = this.partecipantiGruppi.concat(this.partecipantiSingoli);
+    if (this._modalita === "partecipanti") {
+      this._gruppoList = this.partecipantiGruppi.concat(
+        this.partecipantiSingoli
+      );
+    } else {
+      this._gruppoList = this.gruppoList;
+    }
   }
 }

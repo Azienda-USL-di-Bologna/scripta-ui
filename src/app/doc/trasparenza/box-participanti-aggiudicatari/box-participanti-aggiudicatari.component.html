@@ -1,400 +1,499 @@
-    <p-accordion  *ngIf="modalita === 'partecipanti'">
-        <p-accordionTab header="Partecipanti in Raggruppamento">
-          <div>
-            <button 
-            id="nuovoRaggruppamento"
-            type="button"
-            pButton 
-            pRipple 
-            icon="pi pi-plus" 
-            (click)="nuovoRaggruppamento()"
-            class="btn-partecipanti" 
-            label="Aggiungi Raggruppamento"
-            style="margin-bottom: 15px;">
-        </button>
+<p-accordion *ngIf="modalita === 'partecipanti'">
+  <p-accordionTab header="Partecipanti in Raggruppamento">
+    <div>
+      <button
+        id="nuovoRaggruppamento"
+        type="button"
+        pButton
+        pRipple
+        icon="pi pi-plus"
+        (click)="nuovoRaggruppamento()"
+        class="btn-partecipanti"
+        label="Aggiungi Raggruppamento"
+        style="margin-bottom: 15px"
+      ></button>
+    </div>
+    <div
+      *ngFor="let gruppo of partecipantiGruppi; let i = index"
+      style="margin-bottom: 35px"
+    >
+      <p-table
+        #dt
+        [value]="gruppo.componentiList"
+        dataKey="combinedKey"
+        editMode="row"
+        responsiveLayout="scroll"
+        styleClass="tabella"
+        [rows]="3"
+        [loading]="loading"
+        [scrollable]="true"
+        scrollHeight="200px"
+      >
+        <ng-template pTemplate="caption">
+          <div class="gruppo-partBtn">
+            <span>Gruppo {{ partecipantiGruppi.length - i }}</span>
+            <button
+              id="nuovoPartecipante"
+              type="button"
+              pButton
+              pRipple
+              icon="pi pi-plus"
+              (click)="nuovoPartecipante(dt, gruppo.componentiList)"
+              class="btn-partecipante"
+              label="Partecipante"
+              style="margin-left: 15px; height: 2rem"
+            ></button>
           </div>
-          <div  *ngFor="let gruppo of partecipantiGruppi ;let i = index" style="margin-bottom: 35px;" >
-          <p-table #dt 
-          [value]="gruppo.componentiList"
-          dataKey="id"
-          editMode="row"
-          responsiveLayout="scroll"
-          styleClass="tabella"
-          [rows]="3"
-          [loading]="loading"
-          [scrollable]="true"
-          scrollHeight="200px">
-          <ng-template pTemplate="caption">
-            <div class="gruppo-partBtn" >
-              <span>Gruppo {{partecipantiGruppi.length - i}}</span>
-            <button 
-                  id="nuovoPartecipante"
-                  type="button"
-                  pButton 
-                  pRipple 
-                  icon="pi pi-plus"
-                  (click)="nuovoPartecipante(dt, gruppo.componentiList)"
-                  class="btn-partecipante" 
-                  label="Partecipante"
-                  style="margin-left: 15px;height: 2rem;"
-                  >
-              </button>
-            </div>
-          </ng-template>
-          <ng-template pTemplate="header">
-              <tr >
-                <th class="cf-column"> Codice Fiscale </th>
-                <th class="rs-column"> Ragione Sociale </th>
-                <th class="r-column"> Ruolo </th>
-                <th class="action-column"></th>
-              </tr>
-          </ng-template>
-          <ng-template pTemplate="body" let-rowData let-editing="editing" let-ri="rowIndex">
-              <tr [pEditableRow]="rowData">
-                <td class="cf-column" pEditableColumn>
-                  <p-cellEditor 
-                  style="overflow: hidden; text-overflow: ellipsis;white-space: nowrap;">
-                    <ng-template pTemplate="input">
-                      <input [(ngModel)]="rowData.codiceFiscale" type="text" pInputText>
-                    </ng-template>
-                    <ng-template pTemplate="output">
-                      {{ rowData.codiceFiscale }}
-                    </ng-template>
-                  </p-cellEditor>
-                </td>
-                <td class="rs-column" pEditableColumn>
-                  <p-cellEditor style="width:100%; overflow: hidden; text-overflow: ellipsis;white-space: nowrap;">
-                    <ng-template pTemplate="input" >
-                      <div class="part-singolo-input">
-                      <input [(ngModel)]="rowData.ragioneSociale" type="text" pInputText >
-                    </div>
-                    </ng-template>
-                    <ng-template pTemplate="output">
-                      {{ rowData.ragioneSociale }}
-                    </ng-template>
-                  </p-cellEditor>
-                </td>
-                <td class="r-column" pEditableColumn>
-                    <div class="dropdown-ruolo" >
-                      <p-dropdown 
-                        dataKey="nome"
-                        [options]="ruolocomponente" 
-                        [(ngModel)]="rowData.idRuolo"
-                        placeholder="Scelta ruolo" 
-                        optionLabel="nome"
-                        [showClear]="true"
-                        appendTo="body"
-                      ></p-dropdown>
-                    </div>
-                </td>
-               
-                <td 
-                class="action-column"
-                style="text-align:center">
-                  <!-- aggiunto un'icona per attivare la modifica -->
-                  <button 
-                  *ngIf="!editing"
-                  pButton 
-                  pRipple 
-                  pInitEditableRow 
-                  pTooltip="Modifica Raggruppamento"
-                  class="p-button-rounded p-button-text"
-                  type="button"  
-                  icon="pi pi-pencil" 
-                  (click)="modificaPartecipante(rowData)">
-                  </button>
-  
-                  <!-- aggiunto un'icona per eliminare una riga -->
-                  <button *ngIf="!editing" 
-                  pButton 
-                  pRipple 
-                  pTooltip="Elimina Partecipante"
-                  class="p-button-rounded p-button-text"
-                  style="margin-left: -1rem;"
-                  type="button"  
-                  icon="pi pi-trash" 
-                   (click)="eliminaPartecipante(gruppo,gruppo.componentiList,rowData)">
-                  </button>
-               
-                  <!-- aggiunto un'icona per salvare la modifica -->
-                  <button *ngIf="editing"
-                  pButton
-                  pRipple
-                  pSaveEditableRow 
-                  pTooltip="Conferma Raggruppamento"
-                  class = "p-button-rounded p-button-text p-button-success p-mr-2"
-                  style="margin-left: 0.2rem;"
-                  type="button"
-                  icon="pi pi-check"
-                  (click)="salvaPartecipante()">
-                  </button>
+        </ng-template>
+        <ng-template pTemplate="header">
+          <tr>
+            <th class="cf-column">Codice Fiscale</th>
+            <th class="rs-column">Ragione Sociale</th>
+            <th class="r-column">Ruolo</th>
+            <th class="action-column"></th>
+          </tr>
+        </ng-template>
+        <ng-template
+          pTemplate="body"
+          let-rowData
+          let-editing="editing"
+          let-ri="rowIndex"
+        >
+          <tr [pEditableRow]="rowData">
+            <td class="cf-column">
+              <p-cellEditor
+                style="
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                "
+              >
+                <ng-template pTemplate="input">
+                  <input
+                    [(ngModel)]="rowData.codiceFiscale"
+                    type="text"
+                    pInputText
+                  />
+                </ng-template>
+                <ng-template pTemplate="output">
+                  {{ rowData.codiceFiscale }}
+                </ng-template>
+              </p-cellEditor>
+            </td>
+            <td class="rs-column">
+              <p-cellEditor
+                style="
+                  width: 100%;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                "
+              >
+                <ng-template pTemplate="input">
+                  <div class="part-singolo-input">
+                    <input
+                      [(ngModel)]="rowData.ragioneSociale"
+                      type="text"
+                      pInputText
+                    />
+                  </div>
+                </ng-template>
+                <ng-template pTemplate="output">
+                  {{ rowData.ragioneSociale }}
+                </ng-template>
+              </p-cellEditor>
+            </td>
+            <td class="r-column">
+              <div class="dropdown-ruolo">
+                <p-dropdown
+                  dataKey="nome"
+                  [options]="ruolocomponente"
+                  [(ngModel)]="rowData.idRuolo"
+                  placeholder="Scelta ruolo"
+                  optionLabel="nome"
+                  [showClear]="true"
+                  appendTo="body"
+                  [disabled]="!editing"
+                ></p-dropdown>
+              </div>
+            </td>
 
-                  <!-- aggiunto un'icona per cancellare la modifica -->
-                  <button *ngIf="editing" 
-					        pButton 
-				          pRipple 
-					        pCancelEditableRow 
-					        icon="pi pi-times" 
-					        pTooltip="Annulla modifiche"
-					        class="p-button-rounded p-button-text p-button-danger"
-                  style="margin-left: -1rem;"
-					        type="button" 
-					        (click)="onRowEditCancel(gruppo.componentiList,rowData,ri)">
-				          </button>
-                </td>
-              </tr>
-          </ng-template>
+            <td class="action-column" style="text-align: center">
+              <!-- aggiunto un'icona per attivare la modifica -->
+              <button
+                *ngIf="!editing"
+                pButton
+                pRipple
+                pInitEditableRow
+                pTooltip="Modifica Raggruppamento"
+                class="p-button-rounded p-button-text"
+                type="button"
+                icon="pi pi-pencil"
+                (click)="modificaPartecipante(rowData)"
+              ></button>
+
+              <!-- aggiunto un'icona per eliminare una riga -->
+              <button
+                *ngIf="!editing"
+                pButton
+                pRipple
+                pTooltip="Elimina Partecipante"
+                class="p-button-rounded p-button-text"
+                style="margin-left: -1rem"
+                type="button"
+                icon="pi pi-trash"
+                (click)="
+                  eliminaPartecipante(gruppo, gruppo.componentiList, rowData)
+                "
+              ></button>
+
+              <!-- aggiunto un'icona per salvare la modifica -->
+              <button
+                *ngIf="editing"
+                pButton
+                pRipple
+                pSaveEditableRow
+                pTooltip="Conferma Raggruppamento"
+                class="p-button-rounded p-button-text p-button-success p-mr-2"
+                style="margin-left: 0.2rem"
+                type="button"
+                icon="pi pi-check"
+                (click)="salvaPartecipante()"
+              ></button>
+
+              <!-- aggiunto un'icona per cancellare la modifica -->
+              <button
+                *ngIf="editing"
+                pButton
+                pRipple
+                pCancelEditableRow
+                icon="pi pi-times"
+                pTooltip="Annulla modifiche"
+                class="p-button-rounded p-button-text p-button-danger"
+                style="margin-left: -1rem"
+                type="button"
+                (click)="onRowEditCancel(gruppo.componentiList, rowData, ri)"
+              ></button>
+            </td>
+          </tr>
+        </ng-template>
       </p-table>
-      </div>
-        </p-accordionTab>
-    </p-accordion>
-    <p-accordion  *ngIf="modalita !== 'aggiudicatari'">
-      <p-accordionTab header="Partecipanti Singoli">
-        <div  style="margin-bottom: 35px;">
-        <p-table #dt 
+    </div>
+  </p-accordionTab>
+</p-accordion>
+<p-accordion *ngIf="modalita !== 'aggiudicatari'">
+  <p-accordionTab header="Partecipanti Singoli">
+    <div style="margin-bottom: 35px">
+      <p-table
+        #dt
         [value]="partecipantiSingoli"
-        dataKey="id"
+        dataKey="combinedKey"
         responsiveLayout="scroll"
         editMode="row"
         styleClass="tabella-singolo"
         [rows]="3"
         [loading]="loading"
         [scrollable]="true"
-        scrollHeight="200px">
+        scrollHeight="200px"
+      >
         <ng-template pTemplate="caption">
-        <div class="singolo-part">
-          <button 
-          id="nuovoSingolo"
-          type="button"
-          pButton 
-          pRipple 
-          icon="pi pi-plus" 
-          (click)="nuovoSingolo(dt, partecipantiSingoli)"
-          class="btn-partecipanti" 
-          label="Partecipante">
-      </button>
-        </div>
-      </ng-template>
-        <ng-template pTemplate="header">
-            <tr >
-              <th class="cf-column">Codice Fiscale</th>
-              <th class="rs-column">Ragione Sociale</th>
-              <th class="action-column"></th>
-            </tr>
+          <div class="singolo-part">
+            <button
+              id="nuovoSingolo"
+              type="button"
+              pButton
+              pRipple
+              icon="pi pi-plus"
+              (click)="nuovoSingolo(dt, partecipantiSingoli)"
+              class="btn-partecipanti"
+              label="Partecipante"
+            ></button>
+          </div>
         </ng-template>
-        <ng-template pTemplate="body" let-rowData let-editing="editing" let-ri="rowIndex">
-            <tr [pEditableRow]="rowData" *ngIf="!rowData.idRuolo" style="height: 58.65px;">
-              <td class="cf-column" pEditableColumn>
-                <p-cellEditor style="overflow: hidden; text-overflow: ellipsis;white-space: nowrap;">
-                  <ng-template pTemplate="input">
-                    <input [(ngModel)]="rowData.componentiList[0].codiceFiscale" type="text" pInputText>
-                  </ng-template>
-                  <ng-template pTemplate="output">
-                    {{ rowData.componentiList[0].codiceFiscale }}
-                  </ng-template>
-                </p-cellEditor>
-              </td>
-              <td class="rs-column" pEditableColumn>
-                <p-cellEditor style="width:100%; overflow: hidden; text-overflow: ellipsis;white-space: nowrap;">
-                  <ng-template pTemplate="input">
-                    <input [(ngModel)]="rowData.componentiList[0].ragioneSociale" type="text" pInputText>
-                  </ng-template>
-                  <ng-template pTemplate="output">
-                    {{ rowData.componentiList[0].ragioneSociale }}
-                  </ng-template>
-                </p-cellEditor>
-              </td>
-              <td 
-              class="action-column" 
-              style="text-align:center">
-                <!-- aggiunto un'icona per attivare la modifica -->
-                <button 
+        <ng-template pTemplate="header">
+          <tr>
+            <th class="cf-column">Codice Fiscale</th>
+            <th class="rs-column">Ragione Sociale</th>
+            <th class="action-column"></th>
+          </tr>
+        </ng-template>
+        <ng-template
+          pTemplate="body"
+          let-rowData
+          let-editing="editing"
+          let-ri="rowIndex"
+        >
+          <tr
+            [pEditableRow]="rowData"
+            *ngIf="!rowData.idRuolo"
+            style="height: 58.65px"
+          >
+            <td class="cf-column">
+              <p-cellEditor
+                style="
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                "
+              >
+                <ng-template pTemplate="input">
+                  <input
+                    [(ngModel)]="rowData.componentiList[0].codiceFiscale"
+                    type="text"
+                    pInputText
+                  />
+                </ng-template>
+                <ng-template pTemplate="output">
+                  {{ rowData.componentiList[0].codiceFiscale }}
+                </ng-template>
+              </p-cellEditor>
+            </td>
+            <td class="rs-column">
+              <p-cellEditor
+                style="
+                  width: 100%;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                "
+              >
+                <ng-template pTemplate="input">
+                  <input
+                    [(ngModel)]="rowData.componentiList[0].ragioneSociale"
+                    type="text"
+                    pInputText
+                  />
+                </ng-template>
+                <ng-template pTemplate="output">
+                  {{ rowData.componentiList[0].ragioneSociale }}
+                </ng-template>
+              </p-cellEditor>
+            </td>
+            <td class="action-column" style="text-align: center">
+              <!-- aggiunto un'icona per attivare la modifica -->
+              <button
                 *ngIf="!editing"
-                pButton 
-					      pRipple 
-					      pInitEditableRow 
-					      pTooltip="Modifica Singolo"
-					      class="p-button-rounded p-button-text"
-					      type="button"  
-					      icon="pi pi-pencil" 
-                (click)="modificaSingolo(rowData)">
-                </button>
+                pButton
+                pRipple
+                pInitEditableRow
+                pTooltip="Modifica Singolo"
+                class="p-button-rounded p-button-text"
+                type="button"
+                icon="pi pi-pencil"
+                (click)="modificaSingolo(rowData)"
+              ></button>
 
-                <!-- aggiunto un'icona per eliminare una riga -->
-                <button *ngIf="!editing" 
-					      pButton 
-					      pRipple 
-					      pTooltip="Elimina Partecipante"
-					      class="p-button-rounded p-button-text"
-                style="margin-left: -1rem;"
-				 	      type="button"  
-					      icon="pi pi-trash" 
-				 	      (click)="eliminaSingolo(partecipantiSingoli, rowData)">
-				        </button>
-             
-                <!-- aggiunto un'icona per salvare la modifica -->
-                <button 
+              <!-- aggiunto un'icona per eliminare una riga -->
+              <button
+                *ngIf="!editing"
+                pButton
+                pRipple
+                pTooltip="Elimina Partecipante"
+                class="p-button-rounded p-button-text"
+                style="margin-left: -1rem"
+                type="button"
+                icon="pi pi-trash"
+                (click)="eliminaSingolo(partecipantiSingoli, rowData)"
+              ></button>
+
+              <!-- aggiunto un'icona per salvare la modifica -->
+              <button
                 *ngIf="editing"
                 pButton
                 pRipple
-                pSaveEditableRow 
+                pSaveEditableRow
                 pTooltip="Salva Raggruppamento"
-                class = "p-button-rounded p-button-text p-button-success p-mr-2"
-                style="margin-left: 0.2rem;"
+                class="p-button-rounded p-button-text p-button-success p-mr-2"
+                style="margin-left: 0.2rem"
                 type="button"
                 icon="pi pi-check"
-                (click)="salvaSingolo()">
-                </button>
+                (click)="salvaSingolo()"
+              ></button>
 
-                <!-- aggiunto un'icona per cancellare la modifica -->
-                <button *ngIf="editing" 
-					        pButton 
-				          pRipple 
-					        pCancelEditableRow 
-					        icon="pi pi-times" 
-					        pTooltip="Annulla modifiche"
-					        class="p-button-rounded p-button-text p-button-danger"
-                  style="margin-left: -1rem;"
-					        type="button" 
-					        (click)="onRowEditCancel(rowData.componentiList,rowData,ri)">
-				          </button>
-              </td>
-            </tr>
-          </ng-template>
-        </p-table>
-        </div>
-    </p-accordionTab>
-    </p-accordion>
-    <p-accordion *ngIf="modalita === 'aggiudicatari'">
-        <p-accordionTab  header="Aggiudicatari">
-          <p-table #dt *ngFor="let gruppo of gruppoList"
-          [value]="gruppo.componentiList"
-          dataKey="id"
-          editMode="row"
-          responsiveLayout="scroll"
-          styleClass="tabella"
-          [rows]="3"
-          [loading]="loading"
-          [scrollable]="true"
-          scrollHeight="200px">
-          <ng-template pTemplate="caption">
-          <div class="gruppo-aggdBtn">
-          <button 
+              <!-- aggiunto un'icona per cancellare la modifica -->
+              <button
+                *ngIf="editing"
+                pButton
+                pRipple
+                pCancelEditableRow
+                icon="pi pi-times"
+                pTooltip="Annulla modifiche"
+                class="p-button-rounded p-button-text p-button-danger"
+                style="margin-left: -1rem"
+                type="button"
+                (click)="
+                  onRowEditCancel(
+                    rowData.componentiList,
+                    rowData.componentiList[0],
+                    ri,
+                    true
+                  )
+                "
+              ></button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </p-accordionTab>
+</p-accordion>
+<p-accordion *ngIf="modalita === 'aggiudicatari'">
+  <p-accordionTab header="Aggiudicatari">
+    <p-table
+      #dt
+      *ngFor="let gruppo of gruppoList"
+      [value]="gruppo.componentiList"
+      dataKey="combinedKey"
+      editMode="row"
+      responsiveLayout="scroll"
+      styleClass="tabella"
+      [rows]="3"
+      [loading]="loading"
+      [scrollable]="true"
+      scrollHeight="200px"
+    >
+      <ng-template pTemplate="caption">
+        <div class="gruppo-aggdBtn">
+          <button
             id="nuovoAggiudicatario"
             type="button"
-            pButton 
-            pRipple 
-            icon="pi pi-plus" 
+            pButton
+            pRipple
+            icon="pi pi-plus"
             (click)="nuovoAggiudicatario(dt, gruppo.componentiList)"
-            class="mr-2" 
+            class="mr-2"
             label="Aggiudicatario"
-            
+          ></button>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="cf-column">Codice Fiscale</th>
+          <th class="rs-column">Ragione Sociale</th>
+          <th class="r-column">Ruolo</th>
+          <th class="action-column"></th>
+        </tr>
+      </ng-template>
+      <ng-template
+        pTemplate="body"
+        let-rowData
+        let-editing="editing"
+        let-ri="rowIndex"
+      >
+        <tr [pEditableRow]="rowData">
+          <td class="cf-column">
+            <p-cellEditor
+              style="
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              "
             >
-        </button>
-          </div>
-        </ng-template>
-          <ng-template pTemplate="header">
-              <tr>
-                <th class="cf-column">Codice Fiscale</th>
-                <th class="rs-column">Ragione Sociale</th>
-                <th class="r-column">Ruolo</th>
-                <th class="action-column"></th>
-              </tr>
-          </ng-template>
-          <ng-template pTemplate="body" let-rowData let-editing="editing" let-ri="rowIndex">
-              <tr [pEditableRow]="rowData">
-                <td class="cf-column" pEditableColumn>
-                  <p-cellEditor style="overflow: hidden; text-overflow: ellipsis;white-space: nowrap;">
-                    <ng-template pTemplate="input">
-                      <input [(ngModel)]="rowData.codiceFiscale" type="text" pInputText>
-                    </ng-template>
-                    <ng-template pTemplate="output">
-                      {{ rowData.codiceFiscale }}
-                    </ng-template>
-                  </p-cellEditor>
-                </td>
-                <td class="rs-column" pEditableColumn>
-                  <p-cellEditor style="width:100%; overflow: hidden; text-overflow: ellipsis;white-space: nowrap;">
-                    <ng-template pTemplate="input">
-                      <input [(ngModel)]="rowData.ragioneSociale" type="text" pInputText>
-                    </ng-template>
-                    <ng-template pTemplate="output">
-                      {{ rowData.ragioneSociale }}
-                    </ng-template>
-                  </p-cellEditor>
-                </td>
-                <td class="r-column" pEditableColumn>
-                  <div class="dropdown-ruolo">
-                    <p-dropdown 
-                        [options]="ruolocomponente" 
-                        [(ngModel)]="rowData.idRuolo"
-                        placeholder="Scelta ruolo" 
-                        optionLabel="nome"
-                        [showClear]="true"
-                        appendTo="body"
-                        [disabled]="gruppo.componentiList.length === 1"
-                      ></p-dropdown>
-                  </div>
-                </td>
+              <ng-template pTemplate="input">
+                <input
+                  [(ngModel)]="rowData.codiceFiscale"
+                  type="text"
+                  pInputText
+                />
+              </ng-template>
+              <ng-template pTemplate="output">
+                {{ rowData.codiceFiscale }}
+              </ng-template>
+            </p-cellEditor>
+          </td>
+          <td class="rs-column">
+            <p-cellEditor
+              style="
+                width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              "
+            >
+              <ng-template pTemplate="input">
+                <input
+                  [(ngModel)]="rowData.ragioneSociale"
+                  type="text"
+                  pInputText
+                />
+              </ng-template>
+              <ng-template pTemplate="output">
+                {{ rowData.ragioneSociale }}
+              </ng-template>
+            </p-cellEditor>
+          </td>
+          <td class="r-column">
+            <div class="dropdown-ruolo">
+              <p-dropdown
+                dataKey="nome"
+                [options]="ruolocomponente"
+                [(ngModel)]="rowData.idRuolo"
+                placeholder="Scelta ruolo"
+                optionLabel="nome"
+                [showClear]="true"
+                appendTo="body"
+                [disabled]="gruppo.componentiList.length === 1"
+              ></p-dropdown>
+            </div>
+          </td>
 
-                <td 
-                class="action-column"
-                style="text-align:center">
-                  <!-- aggiunto un'icona per attivare la modifica -->
-                  <button 
-                  *ngIf="!editing"
-                  pButton 
-                  pRipple 
-                  pInitEditableRow 
-                  pTooltip="Modifica Aggiudicatario"
-                  class="p-button-rounded p-button-text"
-                  type="button"  
-                  icon="pi pi-pencil" 
-                  (click)="modificaAggiudicatario(rowData)">
-                  </button>
-  
-                  <!-- aggiunto un'icona per eliminare una riga -->
-                  <button *ngIf="!editing" 
-                  pButton 
-                  pRipple 
-                  pTooltip="Elimina Aggiudicatario"
-                  class="p-button-rounded p-button-text"
-                  style="margin-left: -1rem;"
-                  type="button"  
-                  icon="pi pi-trash" 
-                   (click)="eliminaAggiudicatario( gruppo.componentiList,rowData)">
-                  </button>
-               
-                  <!-- aggiunto un'icona per salvare la modifica -->
-                  <button *ngIf="editing"
-                  pButton
-                  pRipple
-                  pSaveEditableRow 
-                  pTooltip="Salva Aggiudicatario"
-                  class = "p-button-rounded p-button-text p-button-success"
-                  style="margin-left: 0.2rem;"
-                  type="button"
-                  icon="pi pi-check"
-                  (click)="salvaAggiudicatario()">
-                  </button>
+          <td class="action-column" style="text-align: center">
+            <!-- aggiunto un'icona per attivare la modifica -->
+            <button
+              *ngIf="!editing"
+              pButton
+              pRipple
+              pInitEditableRow
+              pTooltip="Modifica Aggiudicatario"
+              class="p-button-rounded p-button-text"
+              type="button"
+              icon="pi pi-pencil"
+              (click)="modificaAggiudicatario(rowData)"
+            ></button>
 
-                  <!-- aggiunto un'icona per cancellare la modifica -->
-                  <button *ngIf="editing" 
-					        pButton 
-				          pRipple 
-					        pCancelEditableRow 
-					        icon="pi pi-times" 
-					        pTooltip="Annulla modifiche"
-					        class="p-button-rounded p-button-text p-button-danger"
-                  style="margin-left: -1rem;"
-					        type="button" 
-					        (click)=" onRowEditCancel(gruppo.componentiList,rowData,ri)">
-				          </button>
-                </td>
-              </tr>
-            </ng-template>
-          </p-table>
-        </p-accordionTab>
-    </p-accordion>
+            <!-- aggiunto un'icona per eliminare una riga -->
+            <button
+              *ngIf="!editing"
+              pButton
+              pRipple
+              pTooltip="Elimina Aggiudicatario"
+              class="p-button-rounded p-button-text"
+              style="margin-left: -1rem"
+              type="button"
+              icon="pi pi-trash"
+              (click)="eliminaAggiudicatario(gruppo.componentiList, rowData)"
+            ></button>
 
-    
+            <!-- aggiunto un'icona per salvare la modifica -->
+            <button
+              *ngIf="editing"
+              pButton
+              pRipple
+              pSaveEditableRow
+              pTooltip="Salva Aggiudicatario"
+              class="p-button-rounded p-button-text p-button-success"
+              style="margin-left: 0.2rem"
+              type="button"
+              icon="pi pi-check"
+              (click)="salvaAggiudicatario()"
+            ></button>
+
+            <!-- aggiunto un'icona per cancellare la modifica -->
+            <button
+              *ngIf="editing"
+              pButton
+              pRipple
+              pCancelEditableRow
+              icon="pi pi-times"
+              pTooltip="Annulla modifiche"
+              class="p-button-rounded p-button-text p-button-danger"
+              style="margin-left: -1rem"
+              type="button"
+              (click)="onRowEditCancel(gruppo.componentiList, rowData, ri)"
+            ></button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-accordionTab>
+</p-accordion>
