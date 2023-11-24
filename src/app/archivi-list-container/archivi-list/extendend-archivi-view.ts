@@ -1,3 +1,4 @@
+import { DecimaleAnomaliaArchivioDetail } from "@bds/internauta-model";
 import { ArchivioDetailView, Persona, TipoArchivio } from "@bds/internauta-model";
 import { StatoArchivioTraduzioneVisualizzazione, TipoArchivioTraduzioneVisualizzazione } from "./archivi-list-constants";
 
@@ -10,6 +11,7 @@ export class ExtendedArchiviView extends ArchivioDetailView {
   // private riservato: boolean;
   private _idTitoloVisualizzazione: string;
   private _idMassimarioVisualizzazione: string;
+  private _anomalieVisualizzazione: string;
 
   constructor() { super(); }
 
@@ -95,6 +97,28 @@ export class ExtendedArchiviView extends ArchivioDetailView {
     this._idMassimarioVisualizzazione = "";
     if (this.idMassimario) {
       this._idMassimarioVisualizzazione = `${this.idMassimario.nome}`;
+    }
+  }
+
+  public get anomalieVisualizzazione(): string {
+    return this._anomalieVisualizzazione;
+  }
+
+  public set anomalieVisualizzazione(anomalieVisualizzazione: string) {
+    this._anomalieVisualizzazione = "";
+    if (this.bitAnomalie) {
+      if (this.bitAnomalie & DecimaleAnomaliaArchivioDetail.RESPONSABILE_DISATTIVO) {
+        this._anomalieVisualizzazione += "Responsabile disattivo. ";
+      }
+      if (this.bitAnomalie & DecimaleAnomaliaArchivioDetail.VICARI_ATTIVI_NON_PRESENTI) {
+        this._anomalieVisualizzazione += "Senza vicari attivi. ";
+      }
+      if (this.bitAnomalie & DecimaleAnomaliaArchivioDetail.INCOERENZA_STRUTTURA) {
+        this._anomalieVisualizzazione += "Incoerenza struttura. ";
+      }
+      if (this.bitAnomalie & DecimaleAnomaliaArchivioDetail.CHIUSI_INVISIBILI) {
+        this._anomalieVisualizzazione += "Nessun utente vi ha accesso. ";
+      }
     }
   }
 }

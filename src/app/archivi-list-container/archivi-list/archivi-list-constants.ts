@@ -1,4 +1,5 @@
 import { ColonnaBds } from "@bds/common-tools";
+import { DecimaleAnomaliaArchivioDetail } from "@bds/internauta-model";
 import { StatoArchivio, TipoArchivio } from "@bds/internauta-model";
 import { FILTER_TYPES, NextSDRDateTypes } from "@bds/next-sdr";
 import { Utils } from "../../utilities/utils";
@@ -10,10 +11,29 @@ export enum ArchiviListMode {
   VISIBILI = "VISIBILI",
   FREQUENTI = "FREQUENTI",
   PREFERITI = "PREFERITI",
-  TUTTI = "TUTTI"
+  TUTTI = "TUTTI",
+  ANOMALI = "ANOMALI"
 }
 
 export const cols: ColonnaBds[] = [
+  {
+    field: "bitAnomalie",
+    header: "Anomalie",
+    filterField: "bitAnomalie",
+    // sortField: "idAzienda.nome",
+    style: {},
+    headerClass: ["header-column", "bit-anomalie-column"],
+    filterClass: ["filter-column", "bit-anomalie-column"],
+    bodyClass: ["scrollable-column","bit-anomalie-column"],
+    fieldType: "number",
+    filterMatchMode: FILTER_TYPES.not_string.equals,
+    useFilterMatchMode: true,
+    default: false,
+    additionalData: {
+      frozen: true,
+      alignFrozen: "left"
+    }
+  },
   {
     field: "idAzienda",
     header: "Ente",
@@ -195,6 +215,13 @@ export const StatoArchivioTraduzioneVisualizzazione = [
   { value: StatoArchivio.APERTO, nome: "Aperto" },
   { value: StatoArchivio.CHIUSO, nome: "Chiuso" },
   { value: StatoArchivio.BOZZA, nome: "Bozza" },
+];
+
+export const DecimaleAnomaliaArchivioDetailTraduzioneVisualizzazione = [
+  { value: DecimaleAnomaliaArchivioDetail.RESPONSABILE_DISATTIVO, nome: "Responsabile disattivo" },
+  { value: DecimaleAnomaliaArchivioDetail.VICARI_ATTIVI_NON_PRESENTI, nome: "Vicari attivi non presenti" },
+  { value: DecimaleAnomaliaArchivioDetail.INCOERENZA_STRUTTURA, nome: "Incoerenza struttura" },
+  { value: DecimaleAnomaliaArchivioDetail.CHIUSI_INVISIBILI, nome: "Chiusi senza accesso" },
 ];
 
 export const colsCSV: any[] = [
