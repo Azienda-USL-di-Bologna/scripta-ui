@@ -158,7 +158,7 @@
                 style="margin-left: 0.2rem"
                 type="button"
                 icon="pi pi-check"
-                (click)="salvaPartecipante()"
+                (click)="salvaPartecipante(rowData)"
               ></button>
 
               <!-- aggiunto un'icona per cancellare la modifica -->
@@ -307,7 +307,7 @@
                 style="margin-left: 0.2rem"
                 type="button"
                 icon="pi pi-check"
-                (click)="salvaSingolo()"
+                (click)="salvaSingolo(rowData)"
               ></button>
 
               <!-- aggiunto un'icona per cancellare la modifica -->
@@ -432,7 +432,7 @@
                 optionLabel="nome"
                 [showClear]="true"
                 appendTo="body"
-                [disabled]="gruppo.componentiList.length === 1"
+                [disabled]="!editing || gruppo.componentiList.length === 1"
               ></p-dropdown>
             </div>
           </td>
@@ -475,7 +475,7 @@
               style="margin-left: 0.2rem"
               type="button"
               icon="pi pi-check"
-              (click)="salvaAggiudicatario()"
+              (click)="salvaAggiudicatario(rowData)"
             ></button>
 
             <!-- aggiunto un'icona per cancellare la modifica -->

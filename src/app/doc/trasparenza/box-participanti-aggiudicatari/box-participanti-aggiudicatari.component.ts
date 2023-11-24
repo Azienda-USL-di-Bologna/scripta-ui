@@ -21,7 +21,7 @@ import { Table } from "primeng/table";
   styleUrls: ["./box-participanti-aggiudicatari.component.scss"],
 })
 export class BoxParticipantiAggiudicatariComponent
-  implements OnInit, OnDestroy
+  implements OnInit
 {
   private _modalita: any = null;
 
@@ -46,9 +46,10 @@ export class BoxParticipantiAggiudicatariComponent
           (g) => !this.partecipantiSingoli.includes(g)
         );
       } else if (this.gruppoList.length === 0) {
-        this._gruppoList = [new GruppoLotto()];
-        this._gruppoList[0].componentiList = [];
-        this._gruppoList[0].tipo = TipoGruppo.AGGIUDICATARIO;
+        const gruppoLotto = new GruppoLotto();
+        gruppoLotto.tipo = TipoGruppo.AGGIUDICATARIO;
+        gruppoLotto.componentiList = [];
+        this._gruppoList.unshift(gruppoLotto);
       }
     }
   }
@@ -71,14 +72,6 @@ export class BoxParticipantiAggiudicatariComponent
     protected _http: HttpClient,
     private boxParticipantiAggiudicatariService: BoxParticipantiAggiudicatariService
   ) {}
-
-  ngOnDestroy() {
-    if (this._modalita !== "aggiudicatari") {
-      this._gruppoList = this.partecipantiSingoli.concat(
-        this.partecipantiGruppi
-      );
-    }
-  }
 
   ngOnInit(): void {
     this.boxParticipantiAggiudicatariService
@@ -140,7 +133,9 @@ export class BoxParticipantiAggiudicatariComponent
     this.concatListePartecipanti();
   }
 
-  public salvaPartecipante() {}
+  public salvaPartecipante(rowData: Componente) {
+    rowData.combinedKey = rowData.id + rowData.codiceFiscale;
+  }
 
   public onRowEditCancel(
     componentiList: Componente[],
@@ -185,15 +180,18 @@ export class BoxParticipantiAggiudicatariComponent
     this.editingRow = { ...rowData };
   }
 
-  public eliminaSingolo(gruppoList: GruppoLotto[], rowData: any) {
+  public eliminaSingolo(gruppoList: GruppoLotto[], rowData: GruppoLotto) {
+    rowData.componentiList = [];
     const index = gruppoList.indexOf(rowData);
     if (index !== -1) {
-      gruppoList.splice(index, 1);
+      this.partecipantiSingoli.splice(index, 1);
     }
     this.concatListePartecipanti();
   }
 
-  public salvaSingolo() {}
+  public salvaSingolo(rowData: Componente) {
+    rowData.combinedKey = rowData.id + rowData.codiceFiscale;
+  }
 
   //Aggiudicatario
 
@@ -207,7 +205,9 @@ export class BoxParticipantiAggiudicatariComponent
     this.editingRow = { ...rowData };
   }
 
-  public salvaAggiudicatario() {}
+  public salvaAggiudicatario(rowData: Componente) {
+    rowData.combinedKey = rowData.id + rowData.codiceFiscale;
+  }
 
   public eliminaAggiudicatario(componentiList: Componente[], rowData: any) {
     const index = componentiList.indexOf(rowData);
