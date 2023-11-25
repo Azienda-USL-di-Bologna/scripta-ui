@@ -102,11 +102,15 @@
   }
 }
 
-.gruppo-partBtn{
+.gruppo-part-btn{
   display: flex;
-  flex-direction: row;
+  justify-content: space-between;
+  // max-width: 20rem;
+}
+
+.part-label-btn {
+  display: flex;
   align-items: center;
-  max-width: 20rem;
 }
 
 .gruppo-aggdBtn{

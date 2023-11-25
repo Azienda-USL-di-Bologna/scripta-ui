@@ -1,3 +1,4 @@
+<p-confirmPopup key="eliminaGruppo"></p-confirmPopup>
 <p-accordion *ngIf="modalita === 'partecipanti'">
   <p-accordionTab header="Partecipanti in Raggruppamento">
     <div>
@@ -9,12 +10,13 @@
         icon="pi pi-plus"
         (click)="nuovoRaggruppamento()"
         class="btn-partecipanti"
-        label="Aggiungi Raggruppamento"
+        label="Gruppo"
+        pTooltip="Aggiungi gruppo"
         style="margin-bottom: 15px"
       ></button>
     </div>
     <div
-      *ngFor="let gruppo of partecipantiGruppi; let i = index"
+      *ngFor="let gruppo of gruppoList; let i = index"
       style="margin-bottom: 35px"
     >
       <p-table
@@ -30,19 +32,36 @@
         scrollHeight="200px"
       >
         <ng-template pTemplate="caption">
-          <div class="gruppo-partBtn">
-            <span>Gruppo {{ partecipantiGruppi.length - i }}</span>
-            <button
-              id="nuovoPartecipante"
-              type="button"
-              pButton
-              pRipple
-              icon="pi pi-plus"
-              (click)="nuovoPartecipante(dt, gruppo.componentiList)"
-              class="btn-partecipante"
-              label="Partecipante"
-              style="margin-left: 15px; height: 2rem"
-            ></button>
+          <div class="gruppo-part-btn">
+            <div class="part-label-btn">
+              <span>Gruppo {{ gruppoList.length - i }}</span>
+              <button
+                id="nuovoPartecipante"
+                type="button"
+                pButton
+                pRipple
+                icon="pi pi-plus"
+                (click)="nuovoPartecipante(dt, gruppo.componentiList)"
+                class="btn-partecipante"
+                label="Partecipante"
+                pTooltip="Aggiungi partecipante"
+                style="margin-left: 15px; height: 2rem"
+              ></button>
+            </div>
+            <div>
+              <button
+                id="eliminaGruppo"
+                type="button"
+                pButton
+                pRipple
+                icon="pi pi-trash"
+                (click)="eliminaGruppo($event, i)"
+                class="btn-partecipante"
+                label="Gruppo"
+                pTooltip="Elimina gruppo"
+                style="margin-left: 15px; height: 2rem"
+              ></button>
+            </div>
           </div>
         </ng-template>
         <ng-template pTemplate="header">
@@ -142,9 +161,7 @@
                 style="margin-left: -1rem"
                 type="button"
                 icon="pi pi-trash"
-                (click)="
-                  eliminaPartecipante(gruppo, gruppo.componentiList, rowData)
-                "
+                (click)="eliminaPartecipante(gruppo.componentiList, ri)"
               ></button>
 
               <!-- aggiunto un'icona per salvare la modifica -->
@@ -186,7 +203,7 @@
     <div style="margin-bottom: 35px">
       <p-table
         #dt
-        [value]="partecipantiSingoli"
+        [value]="singoliList"
         dataKey="combinedKey"
         responsiveLayout="scroll"
         editMode="row"
@@ -204,8 +221,9 @@
               pButton
               pRipple
               icon="pi pi-plus"
-              (click)="nuovoSingolo(dt, partecipantiSingoli)"
+              (click)="nuovoSingolo(dt, singoliList)"
               class="btn-partecipanti"
+              pTooltip="Aggiunti partecipante"
               label="Partecipante"
             ></button>
           </div>
@@ -293,7 +311,7 @@
                 style="margin-left: -1rem"
                 type="button"
                 icon="pi pi-trash"
-                (click)="eliminaSingolo(partecipantiSingoli, rowData)"
+                (click)="eliminaSingolo(singoliList, rowData)"
               ></button>
 
               <!-- aggiunto un'icona per salvare la modifica -->
@@ -461,7 +479,7 @@
               style="margin-left: -1rem"
               type="button"
               icon="pi pi-trash"
-              (click)="eliminaAggiudicatario(gruppo.componentiList, rowData)"
+              (click)="eliminaAggiudicatario(gruppo.componentiList, ri)"
             ></button>
 
             <!-- aggiunto un'icona per salvare la modifica -->
