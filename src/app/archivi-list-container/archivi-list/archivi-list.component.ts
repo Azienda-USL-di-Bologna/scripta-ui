@@ -1071,13 +1071,15 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 * @param filterPersone 
 	 */
 	public filterAnomalie(filterCallback: (value: number[]) => {}, value: number[], filteraziendacontainer: any) {
-		if (value) {
+		if (value && value.length > 0) {
 			let filtro = 0;
 			value.forEach(bitAnomalia => {
 				filtro = filtro | bitAnomalia;
 			});
 			filterCallback([filtro]);
 			this.multiselectBitAnomalie.overlayVisible = false;
+		} else {
+			filterCallback(null);
 		}
 		setTimeout(() => {
 			this.multiselectBitAnomalie.value = value;

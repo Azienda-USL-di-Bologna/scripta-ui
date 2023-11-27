@@ -111,13 +111,13 @@ export class ExtendedArchiviView extends ArchivioDetailView {
         this._anomalieVisualizzazione += "Responsabile disattivo. ";
       }
       if (this.bitAnomalie & DecimaleAnomaliaArchivioDetail.VICARI_ATTIVI_NON_PRESENTI) {
-        this._anomalieVisualizzazione += "Senza vicari attivi. ";
+        this._anomalieVisualizzazione += "Vicari attivi non presenti. ";
       }
       if (this.bitAnomalie & DecimaleAnomaliaArchivioDetail.INCOERENZA_STRUTTURA) {
         this._anomalieVisualizzazione += "Incoerenza struttura. ";
       }
       if (this.bitAnomalie & DecimaleAnomaliaArchivioDetail.CHIUSI_INVISIBILI) {
-        this._anomalieVisualizzazione += "Nessun utente vi ha accesso. ";
+        this._anomalieVisualizzazione += "Chiuso senza accesso. ";
       }
     }
   }
