@@ -86,9 +86,15 @@ export class DocsDocsComponent implements OnInit {
           this.docDetailViewService.getByIdHttpCall(this.idDocSorgente,"CustomDocDetailViewForDocList").subscribe(
             (docSorgente: DocDetailView) => {
               this.docSorgente = this.setCustomProperties(docSorgente);
-              this.appService.appNameSelection(`${this.docSorgente.codiceRegistro} ${this.docSorgente.numeroRegistrazione}/${this.docSorgente.annoRegistrazione} [${this.docSorgente.idAzienda.descrizione}] - Documenti Collegati`);
+              let numeroDocumento: string;
+              if(!this.docSorgente.numeroRegistrazione) {
+                numeroDocumento = "x";
+              } else {
+                numeroDocumento =this.docSorgente.numeroRegistrazione.toString();
+              }
+              this.appService.appNameSelection(`${this.docSorgente.codiceRegistro} ${numeroDocumento}/${this.docSorgente.annoRegistrazione} [${this.docSorgente.idAzienda.descrizione}] - Documenti Collegati`);
               this.idAzienda = this.docSorgente.idAzienda;
-              this.buildTreeNode(this.docSorgente);
+              // this.buildTreeNode(this.docSorgente);
               this.isSolaLettura();
               this.docDocService.getDocsDocsByIdDocSorgente(this.idDocSorgente).subscribe(
                 (res: DocDoc[]) => {
@@ -241,7 +247,21 @@ export class DocsDocsComponent implements OnInit {
     
     newNode.collapsedIcon = "pi pi-file";
     newNode.expandedIcon = "pi pi-file";
-    newNode.label = documento.codiceRegistro + " " + documento.numeroRegistrazione + "/" + documento.annoRegistrazione + " " + documento.oggetto ;
+
+    // let numeroDocumento: string;
+    // if(!documento.numeroRegistrazione) {
+    //   numeroDocumento = "x";
+    // } else {
+    //   numeroDocumento = documento.numeroRegistrazione.toString();
+    // }
+    // let oggetto: string;
+    // if(!oggetto) {
+    //   oggetto = '[]'
+    // } else {
+    //   oggetto = documento.oggetto;
+    // }
+
+    newNode.label = documento.codiceRegistro + " " + (documento.numeroRegistrazione ? documento.numeroRegistrazione.toString() : "x" ) + "/" + documento.annoRegistrazione + " " +( documento.oggetto ? documento.oggetto : "[Oggetto non presente]") ;
     
     newNode.children = children || [];
     
@@ -307,6 +327,7 @@ export class DocsDocsComponent implements OnInit {
    * @param docDocAttuali 
    */
   public deleteCollegamento(nodoDaEliminare: ExtendedDocDetailView, docDocAttuali: DocDoc[]) {
+   
     this.confirmationService.confirm({
       key: "confirm-dialog",
       message: "Stai eliminando l'associazione col documento " + nodoDaEliminare.codiceRegistro + " " + nodoDaEliminare.numeroRegistrazione + "/" + nodoDaEliminare.annoRegistrazione  + "[" + nodoDaEliminare.oggetto + "] "+ ", vuoi proseguire?",
