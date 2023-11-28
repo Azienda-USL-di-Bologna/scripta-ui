@@ -1,14 +1,24 @@
-::ng-deep.tabella{
+::ng-deep.tabella {
   width: 100%;
   .p-datatable-header {
-
-    .gruppo-partBtn {
-      .autocomplete-contatto{
-        height: 2rem;
-        margin-bottom: 1rem;
+    width: 100%;
+  }
+  
+  .gruppo-agg-btn,
+  .gruppo-part-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    div:first-child {
+      display: flex;
+      width: 40rem;
+      label {
+        width: 13rem;
       }
     }
-    width: 100%;
+    .btn-partecipanti {
+      width: 10rem;
+    }
   }
 
   .p-datatable-thead{
@@ -70,6 +80,23 @@
 }
 
 ::ng-deep.tabella-singolo{
+
+  .gruppo-part-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    div:first-child {
+      display: flex;
+      width: 40rem;
+      label {
+        width: 13rem;
+      }
+    }
+    .btn-partecipanti {
+      width: 10rem;
+    }
+  }
+
   .p-datatable-header {
     width: 100%;
   }
@@ -123,23 +150,12 @@
   }
 }
 
-.gruppo-part-btn{
-  display: flex;
-  justify-content: space-between;
-  // max-width: 20rem;
-}
-
-.part-label-btn {
-  display: flex;
-  align-items: center;
-}
-
-.gruppo-aggdBtn{
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  max-width: 20rem;
-}
+// .gruppo-aggdBtn{
+//   display: flex;
+//   flex-direction: row;
+//   align-items: center;
+//   max-width: 20rem;
+// }
 
 .dropdown-ruolo{
   width: 100%;

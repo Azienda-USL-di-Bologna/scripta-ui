@@ -11,6 +11,7 @@ import {
   ENTITIES_STRUCTURE,
   GruppoLotto,
   RuoloComponente,
+  TipoContatto,
   TipoGruppo,
   Tipologia,
 } from "@bds/internauta-model";
@@ -63,8 +64,6 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
 
   public componenti: Componente[] = [];
   public tipologia: Tipologia[];
-  public partecipantiSingoli: GruppoLotto[] = [];
-  public partecipantiGruppi: GruppoLotto[] = [];
   public aggiudicatari: Componente[] = [];
   public ruolocomponente: RuoloComponente[] = [];
   public loading: boolean = false;
@@ -72,10 +71,10 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
   public editingRow: any;
   public rowData: any;
 
-  public contattoSelezionato: Contatto[];
+  public contattoSingoloSelezionato: Contatto;
+  public contattoSelezionato: { [key: number]: Contatto } = {} ;
   public filteredContatto: Contatto[];
   public contatti: Contatto[];
-  public contattoCercato: Contatto;
 
   constructor(
     private contattoService: ContattoService,
@@ -106,39 +105,43 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
   }
 
   public filterContatto(event: any) {
-    //const projection = ENTITIES_STRUCTURE.rubrica.contatti.standardProjections.ContattoWithIdContatto;
-    let filtered: any[] = [];
     let query = event.query;
     this.loadContatto(query);
-    // for ( let i = 0; i < this.contatti?.length; i++) {
-    //   let contatto = this.contatti[i];
-    //   if (contatto.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
-    //     filtered.push(contatto);
-    //   }
-    // }
-  
   }
   
   public loadContatto(query: string) {
     const projection = ENTITIES_STRUCTURE.rubrica.contatto.standardProjections.ContattoWithIdContatto;
     const filtersAndSorts: FiltersAndSorts = new FiltersAndSorts();
-    // filtersAndSorts.addFilter(new FilterDefinition("codiceFiscale", FILTER_TYPES.string.contains, query));
     filtersAndSorts.addFilter(new FilterDefinition("ragioneSociale", FILTER_TYPES.string.contains, query));
+    filtersAndSorts.addFilter(new FilterDefinition("tipo", FILTER_TYPES.not_string.equals, TipoContatto.AZIENDA));
+    filtersAndSorts.addFilter(new FilterDefinition("tipo", FILTER_TYPES.not_string.equals, TipoContatto.FORNITORE));
     filtersAndSorts.addFilter(new FilterDefinition("contatto.eliminato", FILTER_TYPES.not_string.equals, false));
     filtersAndSorts.addFilter(new FilterDefinition("contatto.tscol", FILTER_TYPES.not_string.equals, query));
     this.subscriptions.push(
       this.contattoService.getData(projection, filtersAndSorts).subscribe(res => {
-        console.log(res);
-        // this.filteredContatto = res.results;
-        // res.results.forEach(contatto => {
-        //   const contattoDaRubrica = new Contatto();
-        //   contattoDaRubrica.id = contatto.id;
-        //   contattoDaRubrica.ragioneSociale = contatto.ragioneSociale;
-        //   contattoDaRubrica.codiceFiscale = contatto.codiceFiscale;
-        //   this.filteredContatto.unshift(contattoDaRubrica);
-        // })
+        this.filteredContatto = res.results;
       })
     )
+  }
+
+  onContattoSelect(contattoSelezionato: Contatto, dt: Table, componentiList: Componente[], index: number) {
+    const componente = this.initComponente(contattoSelezionato);
+    this.nuovoPartecipante(dt, componentiList, componente);
+    delete this.contattoSelezionato[index];
+  }
+
+  onContattoSingoloSelect(contattoSelezionato: Contatto, dt: Table) {
+    const componente = this.initComponente(contattoSelezionato);
+    this.nuovoSingolo(dt, componente);
+    this.contattoSingoloSelezionato = null;
+  }
+
+  initComponente(contatto: Contatto): Componente {
+    const componente = new Componente();
+    componente.codiceFiscale = contatto.codiceFiscale;
+    componente.ragioneSociale = contatto.ragioneSociale;
+    componente.combinedKey = componente.codiceFiscale + componente.ragioneSociale;
+    return componente;
   }
 
   //Partecipante in Raggruppamento
@@ -165,8 +168,8 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
   });
   }
 
-  public nuovoPartecipante(dt: Table, componentiList: Componente[]): void {
-    componentiList.unshift(new Componente());
+  public nuovoPartecipante(dt: Table, componentiList: Componente[], componente = new Componente()): void {
+    componentiList.unshift(componente);
     const newRow = dt.value[0];
     dt.initRowEdit(newRow);
   }
@@ -213,15 +216,13 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
 
   //Partecipante Singolo
 
-  public nuovoSingolo(dt: Table, gruppoList: GruppoLotto[]): void {
+  public nuovoSingolo(dt: Table, componente = new Componente()): void {
     const gruppoLotto = new GruppoLotto();
     gruppoLotto.tipo = TipoGruppo.PARTECIPANTE;
-    gruppoLotto.componentiList = [new Componente()];
+    gruppoLotto.componentiList = [componente];
     this._singoliList.unshift(gruppoLotto);
     const newRow = dt.value[0];
     dt.initRowEdit(newRow);
-
-    
   }
 
   public modificaSingolo(rowData: any) {
