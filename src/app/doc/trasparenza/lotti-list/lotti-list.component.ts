@@ -229,6 +229,7 @@ export class LottiListComponent implements OnInit {
 
   aggiungiLotto(): void {
     this.dialogDisplay = true;
+    this.editLottoRow = new Lotto();
     const newLotto = new Lotto();
     newLotto.idTipologia = new Tipologia();
     newLotto.idContraente = new Contraente();

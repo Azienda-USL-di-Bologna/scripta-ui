@@ -8,9 +8,9 @@
     width: 100%;
   }
 
-  .p-datatable-thead
-  .cf-column {
-    // max-width: 11.75rem;
+  .p-datatable-thead .cf-column,
+  .p-datatable-tbody .cf-column {
+    max-width: 210px;
     p-celleditor{
       width: 100%;
     }
@@ -22,7 +22,7 @@
     }
   }
   .r-column{
-    // max-width: 15rem;
+    max-width: 250px;
     p-celleditor{
       width: 100%;
     }
@@ -70,7 +70,7 @@
     width: 100%;
   }
   .cf-column {
-    // max-width: 11.75rem;
+    max-width: 210px;
     p-celleditor{
       width: 100%;
     }
