@@ -172,6 +172,8 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
     this._singoliList.unshift(gruppoLotto);
     const newRow = dt.value[0];
     dt.initRowEdit(newRow);
+
+    
   }
 
   public modificaSingolo(rowData: any) {

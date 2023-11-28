@@ -82,6 +82,7 @@
             <td class="cf-column">
               <p-cellEditor
                 style="
+                  width: 100%;
                   overflow: hidden;
                   text-overflow: ellipsis;
                   white-space: nowrap;
@@ -249,6 +250,7 @@
             <td class="cf-column">
               <p-cellEditor
                 style="
+                  width: 100%;
                   overflow: hidden;
                   text-overflow: ellipsis;
                   white-space: nowrap;
@@ -316,7 +318,7 @@
 
               <!-- aggiunto un'icona per salvare la modifica -->
               <button
-                *ngIf="editing"
+                *ngIf="editing && !rowData.isNewRow"
                 pButton
                 pRipple
                 pSaveEditableRow
@@ -402,6 +404,7 @@
           <td class="cf-column">
             <p-cellEditor
               style="
+                width: 100%;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;

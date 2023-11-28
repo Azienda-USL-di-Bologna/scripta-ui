@@ -1,28 +1,36 @@
 ::ng-deep.tabella{
   width: 100%;
   .p-datatable-header {
-    max-width: 87.4rem;
-}
+    width: 100%;
+  }
 
-.p-datatable-thead{
-  max-width: 87.5rem;
-}
+  .p-datatable-thead{
+    width: 100%;
+  }
+
+  .p-datatable-thead
   .cf-column {
-    max-width: 11.75rem;
+    // max-width: 11.75rem;
+    p-celleditor{
+      width: 100%;
+    }
   } 
   .rs-column{
-    max-width: 52.6rem;
+    // max-width: 52.6rem;
+    p-celleditor{
+      width: 100%;
+    }
   }
   .r-column{
-    max-width: 15rem;
+    // max-width: 15rem;
     p-celleditor{
       width: 100%;
     }
   }
   .action-column{
-    min-width: 7rem;
-    width: 7rem;
-    max-width: 7.1rem;
+    // min-width: 7rem;
+    // width: 7rem;
+    max-width: 8.1rem;
     display: flex;
     justify-content: space-around;
     flex-wrap: nowrap;
@@ -56,16 +64,22 @@
 
 ::ng-deep.tabella-singolo{
   .p-datatable-header {
-    max-width: 87.4rem;
-}
-.p-datatable-thead{
-  max-width: 87.5rem;
-}
+    width: 100%;
+  }
+  .p-datatable-thead{
+    width: 100%;
+  }
   .cf-column {
-    max-width: 11.75rem;
+    // max-width: 11.75rem;
+    p-celleditor{
+      width: 100%;
+    }
   } 
   .rs-column{
-    max-width: 67.4rem;
+    // max-width: 67.4rem;
+    p-celleditor{
+      width: 100%;
+    }
   }
   
   .action-column{
