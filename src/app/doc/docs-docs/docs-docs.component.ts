@@ -78,43 +78,51 @@ export class DocsDocsComponent implements OnInit {
     this.idDocSorgente = Number(this.route.snapshot.queryParamMap.get('idDoc')) as number;
     this.openedFrom = this.route.snapshot.queryParamMap.get('from');
     this.subscriptions.push(
-      this.loginService.loggedUser$.pipe(first()).subscribe(
+      this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
           if (utenteUtilities) {
             this.utenteUtilitiesLogin = utenteUtilities;
-          }
-          this.docDetailViewService.getByIdHttpCall(this.idDocSorgente,"CustomDocDetailViewForDocList").pipe(first()).subscribe(
-            (docSorgente: DocDetailView) => {
-              this.docSorgente = this.setCustomProperties(docSorgente);
-              let numeroDocumento: string;
-              if(!this.docSorgente.numeroRegistrazione) {
-                numeroDocumento = "x";
-              } else {
-                numeroDocumento =this.docSorgente.numeroRegistrazione.toString();
-              }
-              this.appService.appNameSelection(`${this.docSorgente.codiceRegistro} ${numeroDocumento}/${this.docSorgente.annoRegistrazione} [${this.docSorgente.idAzienda.descrizione}] - Documenti Collegati`);
-              this.idAzienda = this.docSorgente.idAzienda;
-              // this.buildTreeNode(this.docSorgente);
+            if(this.docSorgente) {
               this.isSolaLettura();
-              this.docDocService.getDocsDocsByIdDocSorgente(this.idDocSorgente).pipe(first()).subscribe(
-                (res: DocDoc[]) => {
-                  res.forEach(r => this.docDocCollegati.push(r));
-                  this.docDocCollegati.forEach(docDoc => {
-                    this.docDetailViewService.getByIdHttpCall(docDoc.fk_idDocDestinazione.id,"CustomDocDetailViewForDocList").pipe(first()).subscribe(
-                      (res: DocDetailView) => {
-                        const docNuovo: ExtendedDocDetailView = this.setCustomProperties(res);
-                        this.documentiCollegatiList.push(docNuovo);
-                        this.childrenNodes.push(this.buildTreeNode(docNuovo))
-                      }
-                    )
-                  });
-                }
-              )
-              this.documentiNodi.push(this.buildTreeNode(this.docSorgente, this.childrenNodes));
-
-          })
+            }
+          }
+          
         }  
       )
+    )
+    this.subscriptions.push(
+      this.docDetailViewService.getByIdHttpCall(this.idDocSorgente,"CustomDocDetailViewForDocList").pipe(first()).subscribe(
+        (docSorgente: DocDetailView) => {
+          this.docSorgente = this.setCustomProperties(docSorgente);
+          let numeroDocumento: string;
+          if(!this.docSorgente.numeroRegistrazione) {
+            numeroDocumento = "x";
+          } else {
+            numeroDocumento =this.docSorgente.numeroRegistrazione.toString();
+          }
+          this.appService.appNameSelection(`${this.docSorgente.codiceRegistro} ${numeroDocumento}/${this.docSorgente.annoRegistrazione} [${this.docSorgente.idAzienda.descrizione}] - Documenti Collegati`);
+          this.idAzienda = this.docSorgente.idAzienda;
+          // this.buildTreeNode(this.docSorgente);
+          if(this.utenteUtilitiesLogin) {
+            this.isSolaLettura();
+          }
+          this.docDocService.getDocsDocsByIdDocSorgente(this.idDocSorgente).pipe(first()).subscribe(
+            (res: DocDoc[]) => {
+              res.forEach(r => this.docDocCollegati.push(r));
+              this.docDocCollegati.forEach(docDoc => {
+                this.docDetailViewService.getByIdHttpCall(docDoc.fk_idDocDestinazione.id,"CustomDocDetailViewForDocList").pipe(first()).subscribe(
+                  (res: DocDetailView) => {
+                    const docNuovo: ExtendedDocDetailView = this.setCustomProperties(res);
+                    this.documentiCollegatiList.push(docNuovo);
+                    this.childrenNodes.push(this.buildTreeNode(docNuovo))
+                  }
+                )
+              });
+            }
+          )
+          this.documentiNodi.push(this.buildTreeNode(this.docSorgente, this.childrenNodes));
+
+      })
     )
   }
 
