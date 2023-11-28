@@ -14,7 +14,7 @@ import { DocDoc } from '@bds/internauta-model';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, SortDefinition, SORT_MODES } from '@bds/next-sdr';
 import { ConfirmationService, MessageService, TreeNode } from 'primeng/api';
-import { Subscription } from 'rxjs';
+import { Subscription, first } from 'rxjs';
 import { AppService } from 'src/app/app.service';
 import { ExtendedDocDetailView } from 'src/app/docs-list-container/docs-list/extended-doc-detail-view';
 import { ExtendedDocDetailService } from 'src/app/docs-list-container/docs-list/extended-doc-detail.service';
@@ -78,12 +78,12 @@ export class DocsDocsComponent implements OnInit {
     this.idDocSorgente = Number(this.route.snapshot.queryParamMap.get('idDoc')) as number;
     this.openedFrom = this.route.snapshot.queryParamMap.get('from');
     this.subscriptions.push(
-      this.loginService.loggedUser$.subscribe(
+      this.loginService.loggedUser$.pipe(first()).subscribe(
         (utenteUtilities: UtenteUtilities) => {
           if (utenteUtilities) {
             this.utenteUtilitiesLogin = utenteUtilities;
           }
-          this.docDetailViewService.getByIdHttpCall(this.idDocSorgente,"CustomDocDetailViewForDocList").subscribe(
+          this.docDetailViewService.getByIdHttpCall(this.idDocSorgente,"CustomDocDetailViewForDocList").pipe(first()).subscribe(
             (docSorgente: DocDetailView) => {
               this.docSorgente = this.setCustomProperties(docSorgente);
               let numeroDocumento: string;
@@ -96,11 +96,11 @@ export class DocsDocsComponent implements OnInit {
               this.idAzienda = this.docSorgente.idAzienda;
               // this.buildTreeNode(this.docSorgente);
               this.isSolaLettura();
-              this.docDocService.getDocsDocsByIdDocSorgente(this.idDocSorgente).subscribe(
+              this.docDocService.getDocsDocsByIdDocSorgente(this.idDocSorgente).pipe(first()).subscribe(
                 (res: DocDoc[]) => {
                   res.forEach(r => this.docDocCollegati.push(r));
                   this.docDocCollegati.forEach(docDoc => {
-                    this.docDetailViewService.getByIdHttpCall(docDoc.fk_idDocDestinazione.id,"CustomDocDetailViewForDocList").subscribe(
+                    this.docDetailViewService.getByIdHttpCall(docDoc.fk_idDocDestinazione.id,"CustomDocDetailViewForDocList").pipe(first()).subscribe(
                       (res: DocDetailView) => {
                         const docNuovo: ExtendedDocDetailView = this.setCustomProperties(res);
                         this.documentiCollegatiList.push(docNuovo);
