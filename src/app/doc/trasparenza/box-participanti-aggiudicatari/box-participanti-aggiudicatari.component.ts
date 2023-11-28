@@ -1,8 +1,10 @@
 import { HttpClient } from "@angular/common/http";
 import { Component, Input, OnDestroy, OnInit } from "@angular/core";
-import { Componente, GruppoLotto, RuoloComponente, TipoGruppo, Tipologia } from "@bds/internauta-model";
+import { Componente, Contatto, ContattoService, ENTITIES_STRUCTURE, GruppoLotto, RuoloComponente, TipoGruppo, Tipologia } from "@bds/internauta-model";
 import { BoxParticipantiAggiudicatariService } from "./box-participanti-aggiudicatari.service";
 import { Table } from "primeng/table";
+import { AdditionalDataDefinition, FILTER_TYPES, FilterDefinition, FiltersAndSorts } from '@bds/next-sdr';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -14,6 +16,7 @@ export class BoxParticipantiAggiudicatariComponent
   implements OnInit, OnDestroy
 {
   private _modalita: any = null;
+  private subscriptions: Subscription[] = [];
 
   @Input() set modalita(mode: any) {
     if (mode) this._modalita = mode;
@@ -57,7 +60,13 @@ export class BoxParticipantiAggiudicatariComponent
   public editingRow: any;
   public rowData: any;
 
+  public contattoSelezionato: Contatto[];
+  public filteredContatto: Contatto[];
+  public contatti: Contatto[];
+  public contattoCercato: Contatto;
+
   constructor(
+    private contattoService: ContattoService,
     protected _http: HttpClient,
     private boxParticipantiAggiudicatariService: BoxParticipantiAggiudicatariService
   ) {}
@@ -87,6 +96,42 @@ export class BoxParticipantiAggiudicatariComponent
           );
         }
       });
+  }
+
+  public filterContatto(event: any) {
+    //const projection = ENTITIES_STRUCTURE.rubrica.contatti.standardProjections.ContattoWithIdContatto;
+    let filtered: any[] = [];
+    let query = event.query;
+    this.loadContatto(query);
+    // for ( let i = 0; i < this.contatti?.length; i++) {
+    //   let contatto = this.contatti[i];
+    //   if (contatto.nome.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+    //     filtered.push(contatto);
+    //   }
+    // }
+  
+  }
+  
+  public loadContatto(query: string) {
+    const projection = ENTITIES_STRUCTURE.rubrica.contatto.standardProjections.ContattoWithIdContatto;
+    const filtersAndSorts: FiltersAndSorts = new FiltersAndSorts();
+    // filtersAndSorts.addFilter(new FilterDefinition("codiceFiscale", FILTER_TYPES.string.contains, query));
+    filtersAndSorts.addFilter(new FilterDefinition("ragioneSociale", FILTER_TYPES.string.contains, query));
+    filtersAndSorts.addFilter(new FilterDefinition("contatto.eliminato", FILTER_TYPES.not_string.equals, false));
+    filtersAndSorts.addFilter(new FilterDefinition("contatto.tscol", FILTER_TYPES.not_string.equals, query));
+    this.subscriptions.push(
+      this.contattoService.getData(projection, filtersAndSorts).subscribe(res => {
+        console.log(res);
+        // this.filteredContatto = res.results;
+        // res.results.forEach(contatto => {
+        //   const contattoDaRubrica = new Contatto();
+        //   contattoDaRubrica.id = contatto.id;
+        //   contattoDaRubrica.ragioneSociale = contatto.ragioneSociale;
+        //   contattoDaRubrica.codiceFiscale = contatto.codiceFiscale;
+        //   this.filteredContatto.unshift(contattoDaRubrica);
+        // })
+      })
+    )
   }
 
   //Partecipante in Raggruppamento
