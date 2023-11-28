@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { HttpClient } from "@angular/common/http";
 import { Component, HostListener, OnInit, ViewChild } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from "@angular/router";
 import {
   Lotto,
@@ -13,6 +13,8 @@ import {
   Doc,
   Contraente,
   DocService,
+  GruppoLotto,
+  Componente,
 } from "@bds/internauta-model";
 import {
   FILTER_TYPES,
@@ -42,17 +44,7 @@ export class LottiListComponent implements OnInit {
   public editLottoRow: Lotto = null;
   public doc: Doc = null;
 
-  public lottoForm: FormGroup = this.formBuilder.group({
-    cig: ["", [Validators.required]],
-    lotto: ["", [Validators.required]],
-    idTipologia: [new Tipologia(), [Validators.required]],
-    idContraente: [new Contraente(), [Validators.required]],
-    oggetto: ["", [Validators.required]],
-    importoTotale: ["", [Validators.required]],
-    importoLiquidato: ["", [Validators.required]],
-    dataInizio: ["", [Validators.required]],
-    dataCompletamento: ["", [Validators.required]],
-  });
+  public lottoForm: FormGroup;
   public appName: string = "Trasparenza  - Legge 190 - Elenco Lotti";
 
   public cols: any[] = [
@@ -79,6 +71,66 @@ export class LottiListComponent implements OnInit {
     this.appService.appNameSelection(this.appName);
     this.loading = true;
     this.idEsterno = this.route.snapshot.queryParamMap.get("guid");
+    this.getLottiData();
+  }
+
+  createLottoFormGroup(lotto: Lotto) {
+    const partecipantiSingoli = lotto.gruppiPartecipanti.filter(
+      (g) =>
+        g.componentiList.length === 1 &&
+        g.componentiList[0].fk_idRuolo?.id === null
+    );
+    const partecipantiGruppi = lotto.gruppiPartecipanti.filter(
+      (g) => !partecipantiSingoli.includes(g)
+    );
+    return this.formBuilder.group({
+      id: [{value: lotto.id, disabled: true}],
+      cig: [lotto.cig, [Validators.required]],
+      lotto: [lotto.lotto, [Validators.required]],
+      idTipologia: [lotto.idTipologia, [Validators.required]],
+      idContraente: [lotto.idContraente, [Validators.required]],
+      oggetto: [lotto.oggetto, [Validators.required]],
+      importoTotale: [lotto.importoTotale, [Validators.required]],
+      importoLiquidato: [lotto.importoLiquidato, [Validators.required]],
+      dataInizio: [lotto.dataInizio, [Validators.required]],
+      dataCompletamento: [lotto.dataCompletamento, [Validators.required]],
+      partecipantiGruppi: this.formBuilder.array(this.loadGruppiLottiArrays(partecipantiGruppi)),
+      partecipantiSingoli: this.formBuilder.array(this.loadGruppiLottiArrays(partecipantiSingoli)),
+      gruppiAggiudicatari: this.formBuilder.array(this.loadGruppiLottiArrays(lotto.gruppiAggiudicatari)),
+      version: [lotto.version]
+    });
+  }
+
+  loadGruppiLottiArrays(gruppiLotto: GruppoLotto[]) {
+    const gruppiFormArray = gruppiLotto.map(g => this.createGruppiLottoFormGroup(g));
+    return gruppiFormArray;
+  }
+
+  createGruppiLottoFormGroup(gruppo: GruppoLotto) {
+    return this.formBuilder.group({
+      id: [gruppo.id],
+      tipo: [gruppo.tipo],
+      componentiList: this.formBuilder.array(this.loadComponentiArrays(gruppo.componentiList)),
+      version: gruppo.version,
+    });
+  }
+  loadComponentiArrays(componenti: Componente[]) {
+    const componentiFormGroupArray = componenti.map(c => this.createComponentiFormGroup(c));
+    return componentiFormGroupArray;
+  }
+
+  createComponentiFormGroup(componente: Componente) {
+    return this.formBuilder.group({
+      id: [componente.id],
+      codiceFiscale: [componente.codiceFiscale],
+      ragioneSociale: [componente.ragioneSociale],
+      idRuolo: [componente.idRuolo],
+      fk_idRuolo: [componente.fk_idRuolo],
+      version: [componente.version]
+    });
+  }
+
+  getLottiData() {
     const filterAndSortDoc = new FiltersAndSorts();
     filterAndSortDoc.addFilter(
       new FilterDefinition(
@@ -130,7 +182,7 @@ export class LottiListComponent implements OnInit {
     this.dialogDisplay = true;
     this.editLottoRow = lotto;
     const lottoToEdit = {
-      cig:lotto.cig,
+      cig: lotto.cig,
       lotto: lotto.lotto,
       idTipologia: lotto.idTipologia,
       idContraente: lotto.idContraente,
@@ -139,8 +191,10 @@ export class LottiListComponent implements OnInit {
       importoLiquidato: lotto.importoLiquidato,
       dataInizio: lotto.dataInizio,
       dataCompletamento: lotto.dataCompletamento,
-    }
-    this.lottoForm.reset(lottoToEdit);
+      gruppiPartecipanti: lotto.gruppiPartecipanti,
+      gruppiAggiudicatari: lotto.gruppiAggiudicatari
+    } as Lotto;
+    this.lottoForm = this.createLottoFormGroup(lottoToEdit);
   }
 
   deleteRow(rowData: any): void {
@@ -176,25 +230,23 @@ export class LottiListComponent implements OnInit {
   aggiungiLotto(): void {
     this.dialogDisplay = true;
     this.editLottoRow = new Lotto();
-    const newLotto = {
-      cig: "",
-      lotto: "",
-      idTipologia: new Tipologia(),
-      idContraente:  new Contraente(),
-      oggetto: "",
-      importoTotale: "",
-      importoLiquidato: "",
-      dataInizio: "",
-      dataCompletamento: "",
-    }
-    this.lottoForm.reset(newLotto);
+    const newLotto = new Lotto();
+    newLotto.idTipologia = new Tipologia();
+    newLotto.idContraente = new Contraente();
+    newLotto.gruppiPartecipanti = [];
+    newLotto.gruppiAggiudicatari = [];
+    this.lottoForm = this.createLottoFormGroup(newLotto);
   }
 
   public cancelDialog() {
     this.dialogDisplay = false;
   }
 
-  public isRealyChangedAnything() {
+  public isReallyChangedAnything(): boolean {
+    const gruppiPartecipanti = [
+      ...this.partecipantiGruppi.value,
+      ...this.partecipantiSingoli.value];
+
     return this.lottoForm.controls.lotto.value !== this.editLottoRow.lotto ||
            this.lottoForm.controls.cig.value !== this.editLottoRow.cig ||
            this.lottoForm.controls.oggetto.value !== this.editLottoRow.oggetto ||
@@ -203,11 +255,23 @@ export class LottiListComponent implements OnInit {
            this.lottoForm.controls.importoLiquidato.value !== this.editLottoRow.importoLiquidato ||
            this.lottoForm.controls.importoTotale.value !== this.editLottoRow.importoTotale || 
            this.lottoForm.controls.dataInizio.value !== this.editLottoRow.dataInizio || 
-           this.lottoForm.controls.dataCompletamento.value !== this.editLottoRow.dataCompletamento
+           this.lottoForm.controls.dataCompletamento.value !== this.editLottoRow.dataCompletamento ||
+           this.confrontaArray(gruppiPartecipanti, this.editLottoRow.gruppiPartecipanti) ||
+           this.confrontaArray(this.gruppiAggiudicatari.value, this.editLottoRow.gruppiAggiudicatari)
   }
 
+  get partecipantiGruppi() {
+    return <FormArray>this.lottoForm.get('partecipantiGruppi');
+  }
+  get partecipantiSingoli() {
+    return <FormArray>this.lottoForm.get('partecipantiSingoli');
+  }
+  get gruppiAggiudicatari() {
+    return <FormArray>this.lottoForm.get('gruppiAggiudicatari');
+  }
   public saveDialog() {
     this.dialogDisplay = false;
+    const projection = "LottoWithAll";
     if (this.editLottoRow.id && this.editLottoRow.id > 0) {
       const campiModificatiDelLotto: Lotto = new Lotto();
       if (this.lottoForm.controls.lotto.dirty && this.lottoForm.controls.lotto.value !== this.editLottoRow.lotto){
@@ -237,12 +301,17 @@ export class LottiListComponent implements OnInit {
       if (this.lottoForm.controls.dataCompletamento.dirty && this.lottoForm.controls.dataCompletamento.value !== this.editLottoRow.dataCompletamento){
         campiModificatiDelLotto.dataCompletamento = this.dataPipe.transform(this.lottoForm.controls.dataCompletamento.value, 'yyyy-MM-dd') as any;        
       } 
+      campiModificatiDelLotto.gruppiList = [
+        ...this.lottoForm.controls.partecipantiGruppi.value,
+        ...this.lottoForm.controls.partecipantiSingoli.value,
+        ...this.lottoForm.controls.gruppiAggiudicatari.value
+      ]
       campiModificatiDelLotto.version = this.editLottoRow.version;
       delete campiModificatiDelLotto.nextSdrDateInformation;
       console.log(campiModificatiDelLotto);
       this.loading = true;
-      this.lottoService.patchHttpCall(campiModificatiDelLotto, this.editLottoRow.id).subscribe(
-        (res) => {
+      this.lottoService.patchHttpCall(campiModificatiDelLotto, this.editLottoRow.id, projection).subscribe(
+        (res: Lotto ) => {
           const index = this.listaLotti.findIndex((x) => x.id == this.editLottoRow.id);
           this.listaLotti[index] = res;
           this.messageService.add({
@@ -274,10 +343,15 @@ export class LottiListComponent implements OnInit {
       newLotto.importoTotale = this.lottoForm.value['importoTotale'];
       newLotto.dataCompletamento = this.dataPipe.transform(this.lottoForm.value['dataCompletamento'], 'yyyy-MM-dd') as any;
       newLotto.dataInizio = this.dataPipe.transform(this.lottoForm.value['dataInizio'], 'yyyy-MM-dd') as any;
+      newLotto.gruppiList = [
+        ...this.lottoForm.controls.partecipantiGruppi.value,
+        ...this.lottoForm.controls.partecipantiSingoli.value,
+        ...this.lottoForm.controls.gruppiAggiudicatari.value
+      ];
       delete newLotto.nextSdrDateInformation;
       console.log(newLotto);
       this.loading = true;
-      this.lottoService.postHttpCall(newLotto).subscribe(
+      this.lottoService.postHttpCall(newLotto, projection).subscribe(
         (result) => {
           this.messageService.add({
             severity: "success",
@@ -315,6 +389,18 @@ export class LottiListComponent implements OnInit {
   
   public chiudiLottoList(): void {
     this.refreshLotti();
+  }
+
+  public confrontaArray(array1: GruppoLotto[], array2: GruppoLotto[]): boolean {
+    if (array1.length !== array2.length) {
+      return true;
+    }
+    for (let i = 0; i < array1.length; i++) {
+      if (array1[i].componentiList.length !== array2[i].componentiList.length) {
+        return true;
+      }
+    }
+    return false; // Nessuna differenza trovata
   }
 }
 
