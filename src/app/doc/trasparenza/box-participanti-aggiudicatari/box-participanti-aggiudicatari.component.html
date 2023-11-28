@@ -1,3 +1,4 @@
+<p-confirmPopup key="eliminaGruppo"></p-confirmPopup>
 <p-accordion *ngIf="modalita === 'partecipanti'">
   <p-accordionTab header="Partecipanti in Raggruppamento">
     <div>
@@ -9,19 +10,19 @@
         icon="pi pi-plus"
         (click)="nuovoRaggruppamento()"
         class="btn-partecipanti"
-        label="Aggiungi Raggruppamento"
+        label="Gruppo"
+        pTooltip="Aggiungi gruppo"
         style="margin-bottom: 15px"
       ></button>
     </div>
     <div
-      *ngFor="let gruppo of partecipantiGruppi; let i = index"
+      *ngFor="let gruppo of gruppoList; let i = index"
       style="margin-bottom: 35px"
     >
-    <p-fieldset legend="Gruppo {{ partecipantiGruppi.length - i }}" [toggleable]="true">
       <p-table
         #dt
         [value]="gruppo.componentiList"
-        dataKey="id"
+        dataKey="combinedKey"
         editMode="row"
         responsiveLayout="scroll"
         styleClass="tabella"
@@ -59,6 +60,20 @@
               class="btn-partecipante"
               style="margin-left: 15px; height: 2rem"
             ></button>
+            <!-- <div> -->
+              <button
+                id="eliminaGruppo"
+                type="button"
+                pButton
+                pRipple
+                icon="pi pi-trash"
+                (click)="eliminaGruppo($event, i)"
+                class="btn-partecipante"
+                label="Gruppo"
+                pTooltip="Elimina gruppo"
+                style="margin-left: 15px; height: 2rem"
+              ></button>
+            <!-- </div> -->
           </div>
         </ng-template>
         <ng-template pTemplate="header">
@@ -73,11 +88,13 @@
           pTemplate="body"
           let-rowData
           let-editing="editing"
-          let-ri="rowIndex">
+          let-ri="rowIndex"
+        >
           <tr [pEditableRow]="rowData">
-            <td class="cf-column" pEditableColumn>
+            <td class="cf-column">
               <p-cellEditor
                 style="
+                  width: 100%;
                   overflow: hidden;
                   text-overflow: ellipsis;
                   white-space: nowrap;
@@ -95,7 +112,7 @@
                 </ng-template>
               </p-cellEditor>
             </td>
-            <td class="rs-column" pEditableColumn>
+            <td class="rs-column">
               <p-cellEditor
                 style="
                   width: 100%;
@@ -118,7 +135,7 @@
                 </ng-template>
               </p-cellEditor>
             </td>
-            <td class="r-column" pEditableColumn>
+            <td class="r-column">
               <div class="dropdown-ruolo">
                 <p-dropdown
                   dataKey="nome"
@@ -128,6 +145,7 @@
                   optionLabel="nome"
                   [showClear]="true"
                   appendTo="body"
+                  [disabled]="!editing"
                 ></p-dropdown>
               </div>
             </td>
@@ -156,9 +174,7 @@
                 style="margin-left: -1rem"
                 type="button"
                 icon="pi pi-trash"
-                (click)="
-                  eliminaPartecipante(gruppo, gruppo.componentiList, rowData)
-                "
+                (click)="eliminaPartecipante(gruppo.componentiList, ri)"
               ></button>
 
               <!-- aggiunto un'icona per salvare la modifica -->
@@ -172,7 +188,7 @@
                 style="margin-left: 0.2rem"
                 type="button"
                 icon="pi pi-check"
-                (click)="salvaPartecipante()"
+                (click)="salvaPartecipante(rowData)"
               ></button>
 
               <!-- aggiunto un'icona per cancellare la modifica -->
@@ -192,7 +208,6 @@
           </tr>
         </ng-template>
       </p-table>
-    </p-fieldset>
     </div>
   </p-accordionTab>
 </p-accordion>
@@ -201,8 +216,8 @@
     <div style="margin-bottom: 35px">
       <p-table
         #dt
-        [value]="partecipantiSingoli"
-        dataKey="id"
+        [value]="singoliList"
+        dataKey="combinedKey"
         responsiveLayout="scroll"
         editMode="row"
         styleClass="tabella-singolo"
@@ -219,8 +234,9 @@
               pButton
               pRipple
               icon="pi pi-plus"
-              (click)="nuovoSingolo(dt, partecipantiSingoli)"
+              (click)="nuovoSingolo(dt, singoliList)"
               class="btn-partecipanti"
+              pTooltip="Aggiunti partecipante"
               label="Partecipante"
             ></button>
           </div>
@@ -243,9 +259,10 @@
             *ngIf="!rowData.idRuolo"
             style="height: 58.65px"
           >
-            <td class="cf-column" pEditableColumn>
+            <td class="cf-column">
               <p-cellEditor
                 style="
+                  width: 100%;
                   overflow: hidden;
                   text-overflow: ellipsis;
                   white-space: nowrap;
@@ -263,7 +280,7 @@
                 </ng-template>
               </p-cellEditor>
             </td>
-            <td class="rs-column" pEditableColumn>
+            <td class="rs-column">
               <p-cellEditor
                 style="
                   width: 100%;
@@ -308,12 +325,12 @@
                 style="margin-left: -1rem"
                 type="button"
                 icon="pi pi-trash"
-                (click)="eliminaSingolo(partecipantiSingoli, rowData)"
+                (click)="eliminaSingolo(singoliList, rowData)"
               ></button>
 
               <!-- aggiunto un'icona per salvare la modifica -->
               <button
-                *ngIf="editing"
+                *ngIf="editing && !rowData.isNewRow"
                 pButton
                 pRipple
                 pSaveEditableRow
@@ -322,7 +339,7 @@
                 style="margin-left: 0.2rem"
                 type="button"
                 icon="pi pi-check"
-                (click)="salvaSingolo()"
+                (click)="salvaSingolo(rowData)"
               ></button>
 
               <!-- aggiunto un'icona per cancellare la modifica -->
@@ -336,7 +353,14 @@
                 class="p-button-rounded p-button-text p-button-danger"
                 style="margin-left: -1rem"
                 type="button"
-                (click)="onRowEditCancel(rowData.componentiList, rowData, ri)"
+                (click)="
+                  onRowEditCancel(
+                    rowData.componentiList,
+                    rowData.componentiList[0],
+                    ri,
+                    true
+                  )
+                "
               ></button>
             </td>
           </tr>
@@ -351,7 +375,7 @@
       #dt
       *ngFor="let gruppo of gruppoList"
       [value]="gruppo.componentiList"
-      dataKey="id"
+      dataKey="combinedKey"
       editMode="row"
       responsiveLayout="scroll"
       styleClass="tabella"
@@ -389,9 +413,10 @@
         let-ri="rowIndex"
       >
         <tr [pEditableRow]="rowData">
-          <td class="cf-column" pEditableColumn>
+          <td class="cf-column">
             <p-cellEditor
               style="
+                width: 100%;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
@@ -409,7 +434,7 @@
               </ng-template>
             </p-cellEditor>
           </td>
-          <td class="rs-column" pEditableColumn>
+          <td class="rs-column">
             <p-cellEditor
               style="
                 width: 100%;
@@ -430,16 +455,17 @@
               </ng-template>
             </p-cellEditor>
           </td>
-          <td class="r-column" pEditableColumn>
+          <td class="r-column">
             <div class="dropdown-ruolo">
               <p-dropdown
+                dataKey="nome"
                 [options]="ruolocomponente"
                 [(ngModel)]="rowData.idRuolo"
                 placeholder="Scelta ruolo"
                 optionLabel="nome"
                 [showClear]="true"
                 appendTo="body"
-                [disabled]="gruppo.componentiList.length === 1"
+                [disabled]="!editing || gruppo.componentiList.length === 1"
               ></p-dropdown>
             </div>
           </td>
@@ -468,7 +494,7 @@
               style="margin-left: -1rem"
               type="button"
               icon="pi pi-trash"
-              (click)="eliminaAggiudicatario(gruppo.componentiList, rowData)"
+              (click)="eliminaAggiudicatario(gruppo.componentiList, ri)"
             ></button>
 
             <!-- aggiunto un'icona per salvare la modifica -->
@@ -482,7 +508,7 @@
               style="margin-left: 0.2rem"
               type="button"
               icon="pi pi-check"
-              (click)="salvaAggiudicatario()"
+              (click)="salvaAggiudicatario(rowData)"
             ></button>
 
             <!-- aggiunto un'icona per cancellare la modifica -->

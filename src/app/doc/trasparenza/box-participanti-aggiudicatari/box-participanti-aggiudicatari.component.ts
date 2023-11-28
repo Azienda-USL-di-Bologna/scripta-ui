@@ -1,20 +1,31 @@
 import { HttpClient } from "@angular/common/http";
-import { Component, Input, OnDestroy, OnInit } from "@angular/core";
-import { Componente, Contatto, ContattoService, ENTITIES_STRUCTURE, GruppoLotto, RuoloComponente, TipoGruppo, Tipologia } from "@bds/internauta-model";
+import {
+  Component,
+  Input,
+  OnInit,
+} from "@angular/core";
+import {
+  Componente,
+  Contatto,
+  ContattoService,
+  ENTITIES_STRUCTURE,
+  GruppoLotto,
+  RuoloComponente,
+  TipoGruppo,
+  Tipologia,
+} from "@bds/internauta-model";
 import { BoxParticipantiAggiudicatariService } from "./box-participanti-aggiudicatari.service";
 import { Table } from "primeng/table";
-import { AdditionalDataDefinition, FILTER_TYPES, FilterDefinition, FiltersAndSorts } from '@bds/next-sdr';
+import { ConfirmationService } from 'primeng/api';
 import { Subscription } from 'rxjs';
-
+import { FILTER_TYPES, FilterDefinition, FiltersAndSorts } from '@bds/next-sdr';
 
 @Component({
   selector: "box-participanti-aggiudicatari",
   templateUrl: "./box-participanti-aggiudicatari.component.html",
   styleUrls: ["./box-participanti-aggiudicatari.component.scss"],
 })
-export class BoxParticipantiAggiudicatariComponent
-  implements OnInit, OnDestroy
-{
+export class BoxParticipantiAggiudicatariComponent implements OnInit {
   private _modalita: any = null;
   private subscriptions: Subscription[] = [];
 
@@ -25,23 +36,24 @@ export class BoxParticipantiAggiudicatariComponent
     return this._modalita;
   }
 
+  private _singoliList: GruppoLotto[] = null;
+  @Input() set singoliList(values: GruppoLotto[]) {
+    if (values) 
+      this._singoliList = values;
+  }
+  public get singoliList(): GruppoLotto[] {
+    return this._singoliList;
+  }
+
   private _gruppoList: GruppoLotto[] = null;
   @Input() set gruppoList(values: GruppoLotto[]) {
     if (values) {
       this._gruppoList = values;
-      if (this._modalita === "partecipanti") {
-        this.partecipantiSingoli = this._gruppoList.filter(
-          (g) =>
-            g.componentiList.length === 1 &&
-            g.componentiList[0].fk_idRuolo?.id === null
-        );
-        this.partecipantiGruppi = this._gruppoList.filter(
-          (g) => !this.partecipantiSingoli.includes(g)
-        );
-      } else if (this.gruppoList.length === 0) {
-        this._gruppoList = [new GruppoLotto()]; 
-        this._gruppoList[0].componentiList = [];
-        this._gruppoList[0].tipo = TipoGruppo.AGGIUDICATARIO;
+      if (this._modalita === 'aggiudicatari' && this.gruppoList.length === 0) {
+        const gruppoLotto = new GruppoLotto();
+        gruppoLotto.tipo = TipoGruppo.AGGIUDICATARIO;
+        gruppoLotto.componentiList = [];
+        this._gruppoList.unshift(gruppoLotto);
       }
     }
   }
@@ -68,16 +80,9 @@ export class BoxParticipantiAggiudicatariComponent
   constructor(
     private contattoService: ContattoService,
     protected _http: HttpClient,
+    private confirmationService: ConfirmationService,
     private boxParticipantiAggiudicatariService: BoxParticipantiAggiudicatariService
   ) {}
-
-  ngOnDestroy() {
-    if (this._modalita !== "aggiudicatari") {
-      this._gruppoList = this.partecipantiSingoli.concat(
-        this.partecipantiGruppi
-      );
-    }
-  }
 
   ngOnInit(): void {
     this.boxParticipantiAggiudicatariService
@@ -85,15 +90,17 @@ export class BoxParticipantiAggiudicatariComponent
       .subscribe((res) => {
         if (res) {
           this.ruolocomponente = res._embedded.ruolocomponente;
-          this._gruppoList.forEach((g) =>
+          this._gruppoList.forEach((g) => {
+            g.componentiList = g.componentiList.filter(c => c !== null); // La form lo inizializza a null...
             g.componentiList.map((c) => {
-              if (!c.idRuolo) {
+              c.combinedKey = c.id + c.codiceFiscale;
+              if (c.fk_idRuolo && c.fk_idRuolo.id && !c.idRuolo) {
                 c.idRuolo = this.ruolocomponente.find(
                   (r) => r.id === c.fk_idRuolo.id
                 );
               }
             })
-          );
+          });
         }
       });
   }
@@ -139,17 +146,29 @@ export class BoxParticipantiAggiudicatariComponent
   public nuovoRaggruppamento() {
     const gruppoLotto = new GruppoLotto();
     gruppoLotto.tipo = TipoGruppo.PARTECIPANTE;
-    gruppoLotto.componentiList = [new Componente()];
-    this.partecipantiGruppi.unshift(gruppoLotto);
+    gruppoLotto.componentiList = [];
     this._gruppoList.unshift(gruppoLotto);
-    this.concatListePartecipanti();
+  }
+
+  eliminaGruppo(event: Event, groupIndex: number) {
+    this.confirmationService.confirm({
+      target: event.target,
+      message: 'Sei sicuro di voler eliminare il gruppo?',
+      icon: 'pi pi-exclamation-triangle',
+      key: 'eliminaGruppo',
+      accept: () => {
+        this._gruppoList.splice(groupIndex, 1);
+      },
+      reject: () => {
+          //reject action
+      }
+  });
   }
 
   public nuovoPartecipante(dt: Table, componentiList: Componente[]): void {
     componentiList.unshift(new Componente());
     const newRow = dt.value[0];
     dt.initRowEdit(newRow);
-    this.concatListePartecipanti();
   }
 
   public modificaPartecipante(rowData: any) {
@@ -157,29 +176,21 @@ export class BoxParticipantiAggiudicatariComponent
   }
 
   public eliminaPartecipante(
-    gruppo: GruppoLotto,
     componentiList: Componente[],
-    rowData: any
+    rowIndex: number
   ) {
-    const index = componentiList.indexOf(rowData);
-    if (index !== -1) {
-      componentiList.splice(index, 1);
-      if (gruppo.componentiList.length === 0) {
-        const gruppoIndex = this.partecipantiGruppi.indexOf(gruppo);
-        if (gruppoIndex !== -1) {
-          this.partecipantiGruppi.splice(gruppoIndex, 1);
-        }
-      }
-    }
-    this.concatListePartecipanti();
+    componentiList.splice(rowIndex, 1);
   }
 
-  public salvaPartecipante() {}
+  public salvaPartecipante(rowData: Componente) {
+    rowData.combinedKey = rowData.id + rowData.codiceFiscale;
+  }
 
   public onRowEditCancel(
     componentiList: Componente[],
     rowData: Componente,
-    rowIndex: number
+    rowIndex: number,
+    isComponenteSingolo = false
   ) {
     const isObjEmpty = (obj: any) =>
       obj === null || Object.keys(obj).length === 0;
@@ -192,36 +203,42 @@ export class BoxParticipantiAggiudicatariComponent
     const isEmpty = Object.values(rowData).every(isItemEmpty);
 
     if (isEmpty) {
-      componentiList.splice(rowIndex, 1);
+      if (isComponenteSingolo) {
+        this._singoliList.splice(rowIndex, 1);
+      } else {
+        componentiList.splice(rowIndex, 1);
+      }
     }
-    this.concatListePartecipanti();
   }
 
   //Partecipante Singolo
 
   public nuovoSingolo(dt: Table, gruppoList: GruppoLotto[]): void {
-    gruppoList.unshift(new GruppoLotto());
-    gruppoList[0].tipo = TipoGruppo.PARTECIPANTE;
-    gruppoList[0].componentiList = [new Componente()];
-    this._gruppoList.unshift(gruppoList[0]);
+    const gruppoLotto = new GruppoLotto();
+    gruppoLotto.tipo = TipoGruppo.PARTECIPANTE;
+    gruppoLotto.componentiList = [new Componente()];
+    this._singoliList.unshift(gruppoLotto);
     const newRow = dt.value[0];
     dt.initRowEdit(newRow);
-    this.concatListePartecipanti();
+
+    
   }
 
   public modificaSingolo(rowData: any) {
     this.editingRow = { ...rowData };
   }
 
-  public eliminaSingolo(gruppoList: GruppoLotto[], rowData: any) {
+  public eliminaSingolo(gruppoList: GruppoLotto[], rowData: GruppoLotto) {
+    rowData.componentiList = [];
     const index = gruppoList.indexOf(rowData);
     if (index !== -1) {
-      gruppoList.splice(index, 1);
+      this._singoliList.splice(index, 1);
     }
-    this.concatListePartecipanti();
   }
 
-  public salvaSingolo() {}
+  public salvaSingolo(rowData: any) {
+    rowData.combinedKey = rowData.componentiList[0].id + rowData.componentiList[0].codiceFiscale;
+  }
 
   //Aggiudicatario
 
@@ -235,17 +252,12 @@ export class BoxParticipantiAggiudicatariComponent
     this.editingRow = { ...rowData };
   }
 
-  public salvaAggiudicatario() {}
-
-  public eliminaAggiudicatario(componentiList: Componente[], rowData: any) {
-    const index = componentiList.indexOf(rowData);
-    if (index !== -1) {
-      componentiList.splice(index, 1);
-    }
-    if (componentiList.length === 1) delete componentiList[0].idRuolo;
+  public salvaAggiudicatario(rowData: Componente) {
+    rowData.combinedKey = rowData.id + rowData.codiceFiscale;
   }
 
-  private concatListePartecipanti() {
-    this._gruppoList = this.partecipantiGruppi.concat(this.partecipantiSingoli);
+  public eliminaAggiudicatario(componentiList: Componente[], rowIndex: number) {
+    componentiList.splice(rowIndex, 1);
+    if (componentiList.length === 1) delete componentiList[0].idRuolo;
   }
 }
