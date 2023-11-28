@@ -6,14 +6,20 @@ import {
 } from "@angular/core";
 import {
   Componente,
+  Contatto,
+  ContattoService,
+  ENTITIES_STRUCTURE,
   GruppoLotto,
   RuoloComponente,
+  TipoContatto,
   TipoGruppo,
   Tipologia,
 } from "@bds/internauta-model";
 import { BoxParticipantiAggiudicatariService } from "./box-participanti-aggiudicatari.service";
 import { Table } from "primeng/table";
 import { ConfirmationService } from 'primeng/api';
+import { Subscription } from 'rxjs';
+import { FILTER_TYPES, FilterDefinition, FiltersAndSorts } from '@bds/next-sdr';
 
 @Component({
   selector: "box-participanti-aggiudicatari",
@@ -22,6 +28,7 @@ import { ConfirmationService } from 'primeng/api';
 })
 export class BoxParticipantiAggiudicatariComponent implements OnInit {
   private _modalita: any = null;
+  private subscriptions: Subscription[] = [];
 
   @Input() set modalita(mode: any) {
     if (mode) this._modalita = mode;
@@ -57,8 +64,6 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
 
   public componenti: Componente[] = [];
   public tipologia: Tipologia[];
-  public partecipantiSingoli: GruppoLotto[] = [];
-  public partecipantiGruppi: GruppoLotto[] = [];
   public aggiudicatari: Componente[] = [];
   public ruolocomponente: RuoloComponente[] = [];
   public loading: boolean = false;
@@ -66,7 +71,13 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
   public editingRow: any;
   public rowData: any;
 
+  public contattoSingoloSelezionato: Contatto;
+  public contattoSelezionato: { [key: number]: Contatto } = {} ;
+  public filteredContatto: Contatto[];
+  public contatti: Contatto[];
+
   constructor(
+    private contattoService: ContattoService,
     protected _http: HttpClient,
     private confirmationService: ConfirmationService,
     private boxParticipantiAggiudicatariService: BoxParticipantiAggiudicatariService
@@ -93,6 +104,46 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
       });
   }
 
+  public filterContatto(event: any) {
+    let query = event.query;
+    this.loadContatto(query);
+  }
+  
+  public loadContatto(query: string) {
+    const projection = ENTITIES_STRUCTURE.rubrica.contatto.standardProjections.ContattoWithIdContatto;
+    const filtersAndSorts: FiltersAndSorts = new FiltersAndSorts();
+    filtersAndSorts.addFilter(new FilterDefinition("ragioneSociale", FILTER_TYPES.string.contains, query));
+    filtersAndSorts.addFilter(new FilterDefinition("tipo", FILTER_TYPES.not_string.equals, TipoContatto.AZIENDA));
+    filtersAndSorts.addFilter(new FilterDefinition("tipo", FILTER_TYPES.not_string.equals, TipoContatto.FORNITORE));
+    filtersAndSorts.addFilter(new FilterDefinition("contatto.eliminato", FILTER_TYPES.not_string.equals, false));
+    filtersAndSorts.addFilter(new FilterDefinition("contatto.tscol", FILTER_TYPES.not_string.equals, query));
+    this.subscriptions.push(
+      this.contattoService.getData(projection, filtersAndSorts).subscribe(res => {
+        this.filteredContatto = res.results;
+      })
+    )
+  }
+
+  onContattoSelect(contattoSelezionato: Contatto, dt: Table, componentiList: Componente[], index: number) {
+    const componente = this.initComponente(contattoSelezionato);
+    this.nuovoPartecipante(dt, componentiList, componente);
+    delete this.contattoSelezionato[index];
+  }
+
+  onContattoSingoloSelect(contattoSelezionato: Contatto, dt: Table) {
+    const componente = this.initComponente(contattoSelezionato);
+    this.nuovoSingolo(dt, componente);
+    this.contattoSingoloSelezionato = null;
+  }
+
+  initComponente(contatto: Contatto): Componente {
+    const componente = new Componente();
+    componente.codiceFiscale = contatto.codiceFiscale;
+    componente.ragioneSociale = contatto.ragioneSociale;
+    componente.combinedKey = componente.codiceFiscale + componente.ragioneSociale;
+    return componente;
+  }
+
   //Partecipante in Raggruppamento
 
   public nuovoRaggruppamento() {
@@ -117,8 +168,8 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
   });
   }
 
-  public nuovoPartecipante(dt: Table, componentiList: Componente[]): void {
-    componentiList.unshift(new Componente());
+  public nuovoPartecipante(dt: Table, componentiList: Componente[], componente = new Componente()): void {
+    componentiList.unshift(componente);
     const newRow = dt.value[0];
     dt.initRowEdit(newRow);
   }
@@ -165,15 +216,13 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
 
   //Partecipante Singolo
 
-  public nuovoSingolo(dt: Table, gruppoList: GruppoLotto[]): void {
+  public nuovoSingolo(dt: Table, componente = new Componente()): void {
     const gruppoLotto = new GruppoLotto();
     gruppoLotto.tipo = TipoGruppo.PARTECIPANTE;
-    gruppoLotto.componentiList = [new Componente()];
+    gruppoLotto.componentiList = [componente];
     this._singoliList.unshift(gruppoLotto);
     const newRow = dt.value[0];
     dt.initRowEdit(newRow);
-
-    
   }
 
   public modificaSingolo(rowData: any) {

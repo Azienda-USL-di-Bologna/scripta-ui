@@ -12,6 +12,7 @@
         class="btn-partecipanti"
         label="Gruppo"
         pTooltip="Aggiungi gruppo"
+        tooltipPosition="top"
         style="margin-bottom: 15px"
       ></button>
     </div>
@@ -19,6 +20,7 @@
       *ngFor="let gruppo of gruppoList; let i = index"
       style="margin-bottom: 35px"
     >
+    <p-fieldset legend="Gruppo {{ gruppoList.length - i }}" [toggleable]="true">
       <p-table
         #dt
         [value]="gruppo.componentiList"
@@ -29,38 +31,58 @@
         [rows]="3"
         [loading]="loading"
         [scrollable]="true"
-        scrollHeight="200px"
-      >
+        scrollHeight="200px">
         <ng-template pTemplate="caption">
           <div class="gruppo-part-btn">
-            <div class="part-label-btn">
-              <span>Gruppo {{ gruppoList.length - i }}</span>
+            <div>
+              <label for="ricerca-contatto">Cerca in rubrica:</label>
+              <p-autoComplete 
+                #autoComplete
+                id="ricerca-contatto"
+                styleClass="autocomplete-contatto"
+                placeholder="Cerca per ragione sociale.."
+                [dropdown]="true"
+                [(ngModel)]="contattoSelezionato[i]"
+                [suggestions]="filteredContatto"
+                (completeMethod)="filterContatto($event)"
+                (onSelect)="onContattoSelect($event, dt, gruppo.componentiList, i)"
+              >
+                <ng-template let-contatto pTemplate="item">
+                  <div class="contatto-item">
+                    <div>{{ contatto.ragioneSociale }}</div>
+                  </div>
+                </ng-template>
+              </p-autoComplete>
+            </div>
+            <div>
               <button
                 id="nuovoPartecipante"
                 type="button"
                 pButton
                 pRipple
                 icon="pi pi-plus"
-                (click)="nuovoPartecipante(dt, gruppo.componentiList)"
-                class="btn-partecipante"
                 label="Partecipante"
                 pTooltip="Aggiungi partecipante"
-                style="margin-left: 15px; height: 2rem"
+                tooltipPosition="top"
+                class="btn-partecipanti"
+                style="margin-left: 15px;"
+                (click)="nuovoPartecipante(dt, gruppo.componentiList)"
               ></button>
-            </div>
-            <div>
-              <button
-                id="eliminaGruppo"
-                type="button"
-                pButton
-                pRipple
-                icon="pi pi-trash"
-                (click)="eliminaGruppo($event, i)"
-                class="btn-partecipante"
-                label="Gruppo"
-                pTooltip="Elimina gruppo"
-                style="margin-left: 15px; height: 2rem"
-              ></button>
+              <!-- <div> -->
+                <button
+                  id="eliminaGruppo"
+                  type="button"
+                  pButton
+                  pRipple
+                  icon="pi pi-trash"
+                  label="Gruppo"
+                  pTooltip="Elimina gruppo"
+                  tooltipPosition="top"
+                  class="btn-partecipanti"
+                  style="margin-left: 15px;"
+                  (click)="eliminaGruppo($event, i)"
+                ></button>
+              <!-- </div> -->
             </div>
           </div>
         </ng-template>
@@ -146,6 +168,7 @@
                 pRipple
                 pInitEditableRow
                 pTooltip="Modifica Raggruppamento"
+                tooltipPosition="top"
                 class="p-button-rounded p-button-text"
                 type="button"
                 icon="pi pi-pencil"
@@ -158,6 +181,7 @@
                 pButton
                 pRipple
                 pTooltip="Elimina Partecipante"
+                tooltipPosition="top"
                 class="p-button-rounded p-button-text"
                 style="margin-left: -1rem"
                 type="button"
@@ -172,6 +196,7 @@
                 pRipple
                 pSaveEditableRow
                 pTooltip="Conferma Raggruppamento"
+                tooltipPosition="top"
                 class="p-button-rounded p-button-text p-button-success p-mr-2"
                 style="margin-left: 0.2rem"
                 type="button"
@@ -187,6 +212,7 @@
                 pCancelEditableRow
                 icon="pi pi-times"
                 pTooltip="Annulla modifiche"
+                tooltipPosition="top"
                 class="p-button-rounded p-button-text p-button-danger"
                 style="margin-left: -1rem"
                 type="button"
@@ -196,6 +222,7 @@
           </tr>
         </ng-template>
       </p-table>
+    </p-fieldset>
     </div>
   </p-accordionTab>
 </p-accordion>
@@ -215,18 +242,41 @@
         scrollHeight="200px"
       >
         <ng-template pTemplate="caption">
-          <div class="singolo-part">
-            <button
-              id="nuovoSingolo"
-              type="button"
-              pButton
-              pRipple
-              icon="pi pi-plus"
-              (click)="nuovoSingolo(dt, singoliList)"
-              class="btn-partecipanti"
-              pTooltip="Aggiunti partecipante"
-              label="Partecipante"
-            ></button>
+          <div class="gruppo-part-btn">
+            <div>
+              <label for="ricerca-contatto">Cerca in rubrica:</label>
+              <p-autoComplete 
+                #autoComplete
+                id="ricerca-contatto"
+                styleClass="autocomplete-contatto"
+                placeholder="Digita una ragione sociale..."
+                [dropdown]="true"
+                [(ngModel)]="contattoSingoloSelezionato"
+                [suggestions]="filteredContatto"
+                (completeMethod)="filterContatto($event)"
+                (onSelect)="onContattoSingoloSelect($event, dt)"
+              >
+                <ng-template let-contatto pTemplate="item">
+                  <div class="contatto-item">
+                    <div>{{ contatto.ragioneSociale }}</div>
+                  </div>
+                </ng-template>
+              </p-autoComplete>
+            </div>
+            <div>
+              <button
+                id="nuovoSingolo"
+                type="button"
+                pButton
+                pRipple
+                icon="pi pi-plus"
+                (click)="nuovoSingolo(dt)"
+                class="btn-partecipanti"
+                pTooltip="Aggiungi partecipante"
+                tooltipPosition="top"
+                label="Partecipante"
+              ></button>
+            </div>
           </div>
         </ng-template>
         <ng-template pTemplate="header">
@@ -297,6 +347,7 @@
                 pRipple
                 pInitEditableRow
                 pTooltip="Modifica Singolo"
+                tooltipPosition="top"
                 class="p-button-rounded p-button-text"
                 type="button"
                 icon="pi pi-pencil"
@@ -309,6 +360,7 @@
                 pButton
                 pRipple
                 pTooltip="Elimina Partecipante"
+                tooltipPosition="top"
                 class="p-button-rounded p-button-text"
                 style="margin-left: -1rem"
                 type="button"
@@ -323,6 +375,7 @@
                 pRipple
                 pSaveEditableRow
                 pTooltip="Salva Raggruppamento"
+                tooltipPosition="top"
                 class="p-button-rounded p-button-text p-button-success p-mr-2"
                 style="margin-left: 0.2rem"
                 type="button"
@@ -338,6 +391,7 @@
                 pCancelEditableRow
                 icon="pi pi-times"
                 pTooltip="Annulla modifiche"
+                tooltipPosition="top"
                 class="p-button-rounded p-button-text p-button-danger"
                 style="margin-left: -1rem"
                 type="button"
@@ -361,7 +415,7 @@
   <p-accordionTab header="Aggiudicatari">
     <p-table
       #dt
-      *ngFor="let gruppo of gruppoList"
+      *ngFor="let gruppo of gruppoList; let i = index"
       [value]="gruppo.componentiList"
       dataKey="combinedKey"
       editMode="row"
@@ -373,17 +427,41 @@
       scrollHeight="200px"
     >
       <ng-template pTemplate="caption">
-        <div class="gruppo-aggdBtn">
-          <button
-            id="nuovoAggiudicatario"
-            type="button"
-            pButton
-            pRipple
-            icon="pi pi-plus"
-            (click)="nuovoAggiudicatario(dt, gruppo.componentiList)"
-            class="mr-2"
-            label="Aggiudicatario"
-          ></button>
+        <div class="gruppo-agg-btn">
+          <div>
+            <label for="ricerca-contatto">Cerca in rubrica:</label>
+            <p-autoComplete 
+              #autoComplete
+              id="ricerca-contatto"
+              styleClass="autocomplete-contatto"
+              placeholder="Cerca per ragione sociale..."
+              [dropdown]="true"
+              [(ngModel)]="contattoSelezionato[i]"
+              [suggestions]="filteredContatto"
+              (completeMethod)="filterContatto($event)"
+              (onSelect)="onContattoSelect($event, dt, gruppo.componentiList, i)"
+            >
+              <ng-template let-contatto pTemplate="item">
+                <div class="contatto-item">
+                  <div>{{ contatto.ragioneSociale [contatto.codiceFiscale] }}</div>
+                </div>
+              </ng-template>
+            </p-autoComplete>
+          </div>
+          <div>
+            <button
+              id="nuovoAggiudicatario"
+              type="button"
+              pButton
+              pRipple
+              icon="pi pi-plus"
+              pTooltip="Aggiunti aggiudicatario"
+              tooltipPosition="top"
+              class="mr-2 btn-partecipanti"
+              label="Aggiudicatario"
+              (click)="nuovoAggiudicatario(dt, gruppo.componentiList)"
+            ></button>
+          </div>
         </div>
       </ng-template>
       <ng-template pTemplate="header">
@@ -466,6 +544,7 @@
               pRipple
               pInitEditableRow
               pTooltip="Modifica Aggiudicatario"
+              tooltipPosition="top"
               class="p-button-rounded p-button-text"
               type="button"
               icon="pi pi-pencil"
@@ -478,6 +557,7 @@
               pButton
               pRipple
               pTooltip="Elimina Aggiudicatario"
+              tooltipPosition="top"
               class="p-button-rounded p-button-text"
               style="margin-left: -1rem"
               type="button"
@@ -492,6 +572,7 @@
               pRipple
               pSaveEditableRow
               pTooltip="Salva Aggiudicatario"
+              tooltipPosition="top"
               class="p-button-rounded p-button-text p-button-success"
               style="margin-left: 0.2rem"
               type="button"
@@ -507,6 +588,7 @@
               pCancelEditableRow
               icon="pi pi-times"
               pTooltip="Annulla modifiche"
+              tooltipPosition="top"
               class="p-button-rounded p-button-text p-button-danger"
               style="margin-left: -1rem"
               type="button"
