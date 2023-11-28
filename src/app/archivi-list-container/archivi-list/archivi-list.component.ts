@@ -483,7 +483,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			.filter((azienda: Azienda) => 
 				// Se sono un ragazzo del 99 vedo anche le aziende spente, però tengo cmq in considerazione i fascicoli parlanti
 				// Se non sono sul tab TUTTI, è sufficiente che gedi internuata sia attivo su questa azienda
-				((this.isLoggeduser99 || this.idAziendeConGediInternautaAttivo.includes(azienda.id)) && this.archiviListMode !== this.archiviListModeEnum.TUTTI && this.archiviListMode !== this.archiviListModeEnum.ANOMALI) || 
+				((this.isLoggeduser99 || this.idAziendeConGediInternautaAttivo.includes(azienda.id)) && this.archiviListMode !== this.archiviListModeEnum.TUTTI) || 
 				// Se sono sul tab TUTTI, gedi interuata deve essere attivo e in più deve non essere parlante o l'utente deve esserne AG
 				(
 					(this.isLoggeduser99 || this.idAziendeConGediInternautaAttivo.includes(azienda.id)) &&
