@@ -12,12 +12,17 @@
     div:first-child {
       display: flex;
       width: 35rem;
+
+      @media only screen and (max-width: 1340px) {
+        width: 30rem;
+      }
+
       label {
         width: 13rem;
       }
     }
     .btn-partecipanti {
-      width: 10rem;
+      width: 9rem;
     }
   }
 
