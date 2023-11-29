@@ -23,7 +23,7 @@
           pTooltip="Applica i filtri. Aggiorna"
           aria-label="Applica i filtri"
           tooltipPosition="bottom"
-          (click)="referenceTableComponent.resetPaginationAndLoadData()">
+          (click)="onEnterGlobalFilter(inputGobalFilter.value); referenceTableComponent.resetPaginationAndLoadData()">
         </button>
         <!-- BOTTONE RESETTA RICERCA -->
         <button pButton 

@@ -14,7 +14,7 @@ import { DocDoc } from '@bds/internauta-model';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, SortDefinition, SORT_MODES } from '@bds/next-sdr';
 import { ConfirmationService, MessageService, TreeNode } from 'primeng/api';
-import { Subscription } from 'rxjs';
+import { Subscription, first } from 'rxjs';
 import { AppService } from 'src/app/app.service';
 import { ExtendedDocDetailView } from 'src/app/docs-list-container/docs-list/extended-doc-detail-view';
 import { ExtendedDocDetailService } from 'src/app/docs-list-container/docs-list/extended-doc-detail.service';
@@ -82,32 +82,47 @@ export class DocsDocsComponent implements OnInit {
         (utenteUtilities: UtenteUtilities) => {
           if (utenteUtilities) {
             this.utenteUtilitiesLogin = utenteUtilities;
-          }
-          this.docDetailViewService.getByIdHttpCall(this.idDocSorgente,"CustomDocDetailViewForDocList").subscribe(
-            (docSorgente: DocDetailView) => {
-              this.docSorgente = this.setCustomProperties(docSorgente);
-              this.appService.appNameSelection(`${this.docSorgente.codiceRegistro} ${this.docSorgente.numeroRegistrazione}/${this.docSorgente.annoRegistrazione} [${this.docSorgente.idAzienda.descrizione}] - Documenti Collegati`);
-              this.idAzienda = this.docSorgente.idAzienda;
-              this.buildTreeNode(this.docSorgente);
+            if(this.docSorgente) {
               this.isSolaLettura();
-              this.docDocService.getDocsDocsByIdDocSorgente(this.idDocSorgente).subscribe(
-                (res: DocDoc[]) => {
-                  res.forEach(r => this.docDocCollegati.push(r));
-                  this.docDocCollegati.forEach(docDoc => {
-                    this.docDetailViewService.getByIdHttpCall(docDoc.fk_idDocDestinazione.id,"CustomDocDetailViewForDocList").subscribe(
-                      (res: DocDetailView) => {
-                        const docNuovo: ExtendedDocDetailView = this.setCustomProperties(res);
-                        this.documentiCollegatiList.push(docNuovo);
-                        this.childrenNodes.push(this.buildTreeNode(docNuovo))
-                      }
-                    )
-                  });
-                  this.documentiNodi.push(this.buildTreeNode(this.docSorgente, this.childrenNodes));
-                }
-              )
-          })
+            }
+          }
+          
         }  
       )
+    )
+    this.subscriptions.push(
+      this.docDetailViewService.getByIdHttpCall(this.idDocSorgente,"CustomDocDetailViewForDocList").pipe(first()).subscribe(
+        (docSorgente: DocDetailView) => {
+          this.docSorgente = this.setCustomProperties(docSorgente);
+          let numeroDocumento: string;
+          if(!this.docSorgente.numeroRegistrazione) {
+            numeroDocumento = "x";
+          } else {
+            numeroDocumento =this.docSorgente.numeroRegistrazione.toString();
+          }
+          this.appService.appNameSelection(`${this.docSorgente.codiceRegistro} ${numeroDocumento}/${this.docSorgente.annoRegistrazione} [${this.docSorgente.idAzienda.descrizione}] - Documenti Collegati`);
+          this.idAzienda = this.docSorgente.idAzienda;
+          // this.buildTreeNode(this.docSorgente);
+          if(this.utenteUtilitiesLogin) {
+            this.isSolaLettura();
+          }
+          this.docDocService.getDocsDocsByIdDocSorgente(this.idDocSorgente).pipe(first()).subscribe(
+            (res: DocDoc[]) => {
+              res.forEach(r => this.docDocCollegati.push(r));
+              this.docDocCollegati.forEach(docDoc => {
+                this.docDetailViewService.getByIdHttpCall(docDoc.fk_idDocDestinazione.id,"CustomDocDetailViewForDocList").pipe(first()).subscribe(
+                  (res: DocDetailView) => {
+                    const docNuovo: ExtendedDocDetailView = this.setCustomProperties(res);
+                    this.documentiCollegatiList.push(docNuovo);
+                    this.childrenNodes.push(this.buildTreeNode(docNuovo))
+                  }
+                )
+              });
+            }
+          )
+          this.documentiNodi.push(this.buildTreeNode(this.docSorgente, this.childrenNodes));
+
+      })
     )
   }
 
@@ -240,7 +255,21 @@ export class DocsDocsComponent implements OnInit {
     
     newNode.collapsedIcon = "pi pi-file";
     newNode.expandedIcon = "pi pi-file";
-    newNode.label = documento.codiceRegistro + " " + documento.numeroRegistrazione + "/" + documento.annoRegistrazione + " " + documento.oggetto ;
+
+    // let numeroDocumento: string;
+    // if(!documento.numeroRegistrazione) {
+    //   numeroDocumento = "x";
+    // } else {
+    //   numeroDocumento = documento.numeroRegistrazione.toString();
+    // }
+    // let oggetto: string;
+    // if(!oggetto) {
+    //   oggetto = '[]'
+    // } else {
+    //   oggetto = documento.oggetto;
+    // }
+
+    newNode.label = documento.codiceRegistro + " " + (documento.numeroRegistrazione ? documento.numeroRegistrazione.toString() : "x" ) + "/" + documento.annoRegistrazione + " " +( documento.oggetto ? documento.oggetto : "[Oggetto non presente]") ;
     
     newNode.children = children || [];
     
@@ -306,6 +335,7 @@ export class DocsDocsComponent implements OnInit {
    * @param docDocAttuali 
    */
   public deleteCollegamento(nodoDaEliminare: ExtendedDocDetailView, docDocAttuali: DocDoc[]) {
+   
     this.confirmationService.confirm({
       key: "confirm-dialog",
       message: "Stai eliminando l'associazione col documento " + nodoDaEliminare.codiceRegistro + " " + nodoDaEliminare.numeroRegistrazione + "/" + nodoDaEliminare.annoRegistrazione  + "[" + nodoDaEliminare.oggetto + "] "+ ", vuoi proseguire?",

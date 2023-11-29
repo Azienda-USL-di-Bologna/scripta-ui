@@ -5,7 +5,7 @@ import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { Subscription, combineLatestWith } from 'rxjs';
 import { first } from 'rxjs/operators'
 import { ARCHIVI_LIST_ROUTE } from 'src/environments/app-constants';
-import { ArchiviListMode, cols, colsCSV, TipoArchivioTraduzioneVisualizzazione, StatoArchivioTraduzioneVisualizzazione } from './archivi-list-constants';
+import { ArchiviListMode, cols, colsCSV, TipoArchivioTraduzioneVisualizzazione, StatoArchivioTraduzioneVisualizzazione, DecimaleAnomaliaArchivioDetailTraduzioneVisualizzazione } from './archivi-list-constants';
 import { ActivatedRoute } from '@angular/router';
 import { ValueAndLabelObj } from '../../docs-list-container/docs-list/docs-list.component';
 import { AdditionalDataDefinition, FilterDefinition, FiltersAndSorts, FILTER_TYPES, NextSDREntityProvider, PagingConf, SortDefinition, SORT_MODES } from '@bds/next-sdr';
@@ -34,8 +34,8 @@ import { ExtendedArchivioService } from 'src/app/archivio/extended-archivio.serv
 import { ArchivioUtilsService } from 'src/app/archivio/archivio-utils.service';
 import { TitoloService } from '@bds/internauta-model';
 import { MassimarioService } from '@bds/internauta-model';
-import { HttpParams } from '@angular/common/http';
 import { FunctionButton } from 'src/app/generic-caption-table/functional-buttons/functions-button';
+import { MultiSelect } from 'primeng/multiselect';
 
 @Component({
 	selector: 'archivi-list',
@@ -58,7 +58,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	@ViewChild("autocompleteMassimario") public autocompleteMassimario: AutoComplete;
 	@ViewChild("dt") public dataTable: Table;
 	@ViewChild("columnFilterDataCreazione") public columnFilterDataCreazione: ColumnFilter;
-	
+	@ViewChild("multiselectBitAnomalie") public multiselectBitAnomalie: MultiSelect;
 
 	//public sortOrder = -1;
 	public archiviListModeEnum = ArchiviListMode;
@@ -101,6 +101,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	public aziendeConFascicoliParlanti: number[] = [];
 	public tipoVisualizzazioneObj = TipoArchivioTraduzioneVisualizzazione;
 	public statoVisualizzazioneObj = StatoArchivioTraduzioneVisualizzazione;
+	public anomaliaArchivioDetailObj = DecimaleAnomaliaArchivioDetailTraduzioneVisualizzazione;
 	public aziendeFiltrabiliFiltered: any[];
 	public filteredTipo: any[];
 	public filteredStati: any[];
@@ -345,9 +346,15 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 	 * Sulla base di questo vengono poi settate le colonne visualizzate
 	 */
 	private loadConfiguration(): void {
+		const unavailableColumns: string[] = [];
 		this.mandatoryColumns = ["dataCreazione"];
 		if (this.aziendeFiltrabili.length > 1) {
 			this.mandatoryColumns.push("idAzienda");
+		}
+		if (this.loggedUserIsAG && this.archiviListMode === this.archiviListModeEnum.ANOMALI) {
+			this.mandatoryColumns.push("bitAnomalie");
+		} else {
+			unavailableColumns.push("bitAnomalie");
 		}
 		
 		this.selectableColumns = cols.map(e => {
@@ -367,7 +374,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				// Aggiungo le colonne obbligatorie nel caso mancassero
 				this.mandatoryColumns.forEach(mc => {
 					if (!this._selectedColumns.some(sc => sc.field === mc)) {
-						this._selectedColumns.push(this.cols.find(c => c.field === mc));
+						this._selectedColumns.unshift(this.cols.find(c => c.field === mc));
 					}
 				});
 			}
@@ -376,8 +383,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 		if (!this._selectedColumns || this._selectedColumns.length === 0) {
 			this._selectedColumns = this.cols.filter(c => c.default);
 		}
-		
-		
+		// Ci sono delle colonne che non voglio visualizzare e la voglio escludere anche dalle selezionabili
+		if (unavailableColumns.length > 0) {
+			this._selectedColumns = this._selectedColumns.filter(c => !unavailableColumns.includes(c.field));
+			this.selectableColumns = this.selectableColumns.filter(c => !unavailableColumns.includes(c.field));
+		}
 	}
 
 	/**
@@ -490,24 +500,35 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				}
 			);
 		}
+
+		if (this.loggedUserIsAG) {
+			this.selectButtonItems.push(
+				{
+					title: "Fascicoli che presentano delle anomalie",
+					label: "Anomalie",
+					// icon: "pi pi-fw pi-list", 
+					routerLink: ["./" + ARCHIVI_LIST_ROUTE],
+					queryParams: { "mode": ArchiviListMode.ANOMALI }
+				}
+			);
+		}
 	}
 
 	/**
 	 * Funzione che calcolare le aziende su cui l'utente può filtrare.
 	 * Legere commenti nella fuznione per capire le regole.
 	 */
-	private calcAziendeFiltrabili() {
+	 private calcAziendeFiltrabili() {
 		this.aziendeFiltrabili = [];
 		
 		this.aziendeFiltrabili = this.utenteUtilitiesLogin.getUtente().aziendeAttive
 			.filter((azienda: Azienda) => 
-				// Se sono un ragazzo del 99 vedo tutto
-				this.isLoggeduser99 || 
+				// Se sono un ragazzo del 99 vedo anche le aziende spente, però tengo cmq in considerazione i fascicoli parlanti
 				// Se non sono sul tab TUTTI, è sufficiente che gedi internuata sia attivo su questa azienda
-				(this.idAziendeConGediInternautaAttivo.includes(azienda.id) && this.archiviListMode !== this.archiviListModeEnum.TUTTI) || 
+				((this.isLoggeduser99 || this.idAziendeConGediInternautaAttivo.includes(azienda.id)) && this.archiviListMode !== this.archiviListModeEnum.TUTTI && this.archiviListMode !== this.archiviListModeEnum.ANOMALI) || 
 				// Se sono sul tab TUTTI, gedi interuata deve essere attivo e in più deve non essere parlante o l'utente deve esserne AG
 				(
-					this.idAziendeConGediInternautaAttivo.includes(azienda.id) &&
+					(this.isLoggeduser99 || this.idAziendeConGediInternautaAttivo.includes(azienda.id)) &&
 					(!this.aziendeConFascicoliParlanti.includes(azienda.id) || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.AG, azienda.codice))
 				)
 			)
@@ -562,12 +583,19 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.router.navigate([], { relativeTo: this.route, queryParams: event.option.queryParams });
 		}, 0); */
 		if (this.utenteUtilitiesLogin) this.calcAziendeFiltrabili();
-		if (this.archiviListMode === ArchiviListMode.TUTTI) {
-			// In TUTTI, devo obbligatoriamnte vedere solo il livello 1.
+		if (this.archiviListMode === ArchiviListMode.TUTTI || this.archiviListMode === ArchiviListMode.ANOMALI) {
+			// In TUTTI e ANOMALI, devo obbligatoriamnte vedere solo il livello 1.
 			this.livelloValue = [1];
 			if (this.dropdownLivello) {
 				this.dropdownLivello.writeValue(this.livelloValue);
 			}
+		}
+
+		this._selectedColumns = this._selectedColumns.filter(c => c.field !== "bitAnomalie");
+		this.selectableColumns = this.selectableColumns.filter(c => c.field !== "bitAnomalie");
+		if (this.archiviListMode === ArchiviListMode.ANOMALI) {
+			this._selectedColumns.unshift(this.cols.find(e => e.field === "bitAnomalie"));
+			this.selectableColumns.unshift(this.cols.find(e => e.field === "bitAnomalie"));
 		}
 
 		this.resetPaginationAndLoadData();
@@ -778,10 +806,14 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			lazyFiltersAndSorts.sorts = lazyFiltersAndSorts.sorts.filter(s => s.field === "dataRecentezza");
 		}
 
+		if (this.archiviListMode === ArchiviListMode.ANOMALI) {
+			lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field !== "dataCreazione");
+		}
+
 		/**
-		 * Se sono sul tab tutti mi assicuro che il filtro sia solo sul livello 1
+		 * Se sono sul tab TUTTI e ANOMALI mi assicuro che il filtro sia solo sul livello 1
 		 */
-		if (this.archiviListMode === ArchiviListMode.TUTTI ) {
+		if (this.archiviListMode === ArchiviListMode.TUTTI || this.archiviListMode === ArchiviListMode.ANOMALI) {
 			this.fromTabTutti = true;
 			lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(f => f.field != "livello");
 			filtersAndSorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
@@ -890,6 +922,7 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			archivio.idPersonaCreazioneVisualizzazione = null;
 			archivio.idTitoloVisualizzazione = null;
 			archivio.idMassimarioVisualizzazione = null;
+			archivio.anomalieVisualizzazione = null;
 		});
 		return extendedArchiviList;
 	}
@@ -967,6 +1000,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				filterAndSort.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
 				filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabTutti"));
 				break;
+			case ArchiviListMode.ANOMALI:
+				this.messageIfNull = 'Non sono stati trovati fascicoli che presentano anomalie.';
+				filterAndSort.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
+				filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabAnomalie"));
+				break;
 			case ArchiviListMode.PREFERITI:
 				this.messageIfNull = "Non sono stati trovati fascicoli Preferiti. Clicca l'icona del cuore in alto a destra dentro ad un fascicolo per aggiungerlo ai preferiti.";
 				filterAndSort.addAdditionalData(new AdditionalDataDefinition("OperationRequested", "VisualizzaTabPreferiti"));
@@ -1021,6 +1059,30 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 				});
 			}, 0);
 		}
+	}
+
+	/**
+	 * 
+	 * @param filterCallback 
+	 * @param value 
+	 * @param filteraziendacontainer 
+	 * @param param3 
+	 * @param filterPersone 
+	 */
+	public filterAnomalie(filterCallback: (value: number[]) => {}, value: number[], filteraziendacontainer: any) {
+		if (value && value.length > 0) {
+			let filtro = 0;
+			value.forEach(bitAnomalia => {
+				filtro = filtro | bitAnomalia;
+			});
+			filterCallback([filtro]);
+			this.multiselectBitAnomalie.overlayVisible = false;
+		} else {
+			filterCallback(null);
+		}
+		setTimeout(() => {
+			this.multiselectBitAnomalie.value = value;
+		}, 0);
 	}
 
 	/**
@@ -1234,7 +1296,10 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.setFilterTuttiLivelli();
 
 			// Setto la ricerca senza filtro sulla dataCreazione se l'input utente corrisponde ad un numero o una numerazione gerarchica
-			if (this.regexNumerazioneGerarchica.test(stringa) && this.calendarcreazione && this.archiviListMode !== ArchiviListMode.RECENTI) {
+			if (this.regexNumerazioneGerarchica.test(stringa) 
+				&& this.calendarcreazione 
+				&& this.archiviListMode !== ArchiviListMode.RECENTI 
+				&& this.archiviListMode !== ArchiviListMode.ANOMALI) {
 				this.removeFilterFromDataCreazione();
 			}
 
@@ -1409,11 +1474,11 @@ export class ArchiviListComponent implements OnInit, TabComponent, OnDestroy, Ca
 			this.matchModeNumerazioneGerarchica = FILTER_TYPES.string.startsWith;
 		}
 
-		if (text.includes("-") && this.livelloValue.length !== 3 && this.archiviListMode !== ArchiviListMode.TUTTI) {
+		if (text.includes("-") && this.livelloValue.length !== 3 && this.archiviListMode !== ArchiviListMode.TUTTI && this.archiviListMode !== ArchiviListMode.ANOMALI) {
 			this.setFilterTuttiLivelli();
 		}
 
-		if (this.calendarcreazione && this.archiviListMode !== ArchiviListMode.RECENTI) {
+		if (this.calendarcreazione && this.archiviListMode !== ArchiviListMode.RECENTI && this.archiviListMode !== ArchiviListMode.ANOMALI) {
 			this.removeFilterFromDataCreazione();
 		}
 		

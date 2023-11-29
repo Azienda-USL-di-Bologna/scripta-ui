@@ -43,13 +43,14 @@
                 placeholder="Cerca per ragione sociale.."
                 [dropdown]="true"
                 [(ngModel)]="contattoSelezionato[i]"
+                field="contattoSelezionato[i].ragioneSociale"
                 [suggestions]="filteredContatto"
                 (completeMethod)="filterContatto($event)"
                 (onSelect)="onContattoSelect($event, dt, gruppo.componentiList, i)"
               >
                 <ng-template let-contatto pTemplate="item">
                   <div class="contatto-item">
-                    <div>{{ contatto.ragioneSociale }}</div>
+                    <div>{{ contatto.ragioneSociale + ' (' + contatto.codiceFiscale + ')'}}</div>
                   </div>
                 </ng-template>
               </p-autoComplete>
@@ -252,13 +253,14 @@
                 placeholder="Digita una ragione sociale..."
                 [dropdown]="true"
                 [(ngModel)]="contattoSingoloSelezionato"
+                field="contattoSingoloSelezionato.ragioneSociale"
                 [suggestions]="filteredContatto"
                 (completeMethod)="filterContatto($event)"
                 (onSelect)="onContattoSingoloSelect($event, dt)"
               >
                 <ng-template let-contatto pTemplate="item">
                   <div class="contatto-item">
-                    <div>{{ contatto.ragioneSociale }}</div>
+                    <div>{{ contatto.ragioneSociale + ' (' + contatto.codiceFiscale + ')'}}</div>
                   </div>
                 </ng-template>
               </p-autoComplete>
@@ -437,13 +439,14 @@
               placeholder="Cerca per ragione sociale..."
               [dropdown]="true"
               [(ngModel)]="contattoSelezionato[i]"
+              field="contattoSelezionato[i].ragioneSociale"
               [suggestions]="filteredContatto"
               (completeMethod)="filterContatto($event)"
               (onSelect)="onContattoSelect($event, dt, gruppo.componentiList, i)"
             >
               <ng-template let-contatto pTemplate="item">
                 <div class="contatto-item">
-                  <div>{{ contatto.ragioneSociale [contatto.codiceFiscale] }}</div>
+                  <div>{{ contatto.ragioneSociale + ' (' + contatto.codiceFiscale + ')'}}</div>
                 </div>
               </ng-template>
             </p-autoComplete>
@@ -458,6 +461,7 @@
               pTooltip="Aggiunti aggiudicatario"
               tooltipPosition="top"
               class="mr-2 btn-partecipanti"
+              style="width: 10rem;"
               label="Aggiudicatario"
               (click)="nuovoAggiudicatario(dt, gruppo.componentiList)"
             ></button>

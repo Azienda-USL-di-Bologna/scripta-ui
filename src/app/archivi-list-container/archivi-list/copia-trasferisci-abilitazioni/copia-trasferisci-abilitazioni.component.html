@@ -4,7 +4,7 @@
   <label>Azienda:</label>
   <lib-aziende-autocomplete 
     [(azienda)]="aziendaDiRiferimento" 
-    (onChange)="onChangeAzienda($event)" 
+    (aziendaChange)="onChangeAzienda($event)" 
     [idAziendeSceglibili]="idAziendeDoveLoggedUserIsAG">
   </lib-aziende-autocomplete>
 </div>
@@ -65,7 +65,8 @@
     [disabled]="!personaDestinazione"
     [options]="struttureSelezionabili"
     [(ngModel)]="strutturaDestinazione"
-    (onChange)="onChangeStruttura($event)">
+    (onChange)="onChangeStruttura($event.value)"
+    appendTo="body">
     <ng-template let-struttura pTemplate="selectedItem">
       <div>{{struttura.nome}}</div>
     </ng-template>

@@ -32,7 +32,7 @@
   <!-- HEADER & ORDINAMENTO ---->
   <ng-template pTemplate="header" let-columns>
     <tr class="header-row">
-      <th *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
+      <th *ngIf="(archiviListMode === 'TUTTI' || archiviListMode === 'ANOMALI') && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
         class="checkbox-column"
         alignFrozen="left" 
         pFrozenColumn 
@@ -45,6 +45,10 @@
         
         [pSortableColumn]="col.sortField"
         [pSortableColumnDisabled]="archiviListMode === 'RECENTI'"
+
+        [attr.pFrozenColumn]="col.additionalData?.frozen"
+        [attr.alignFrozen]="col.additionalData?.alignFrozen" 
+        [attr.frozen]="col.additionalData?.frozen"
         >
         <!-- [ngClass]="col.headerClass" -->
         <!-- [ngStyle]="{
@@ -59,12 +63,13 @@
           {{col.header}}
           <p-sortIcon *ngIf="col.sortField && archiviListMode !== 'RECENTI'" [field]="col.sortField" ></p-sortIcon>
 
+          <!-- TIP NUMERAZIONE GERARCHICA -->
           <i *ngIf="col.field === 'numerazioneGerarchica'" 
             class="pi pi-info-circle info-numerazione-gerarchica" 
-            (click)="op.toggle($event)"
+            (click)="opnumerazioneGerarchica.toggle($event)"
             pTooltip="Scopri come usare al meglio la ricerca per numerazione">
           </i>
-          <p-overlayPanel #op 
+          <p-overlayPanel #opnumerazioneGerarchica 
             appendTo="body"
             styleClass="overlaypanel-info-numerazione"
             [showCloseIcon]="true">
@@ -78,6 +83,27 @@
               Ricorda: Non cercare qui immettendo solo l'anno, usa il filtro sull'anno di creazione o altri ancora per trovare più facilmente ciò che desideri.
             </ng-template>
           </p-overlayPanel>
+
+          <!-- TIP ANOMALIE -->
+          <i *ngIf="col.field === 'bitAnomalie'" 
+            class="pi pi-info-circle info-numerazione-gerarchica" 
+            (click)="opbitAnomalie.toggle($event)"
+            pTooltip="Scopri come usare al meglio la ricerca per numerazione">
+          </i>
+          <p-overlayPanel #opbitAnomalie
+            appendTo="body"
+            styleClass="overlaypanel-info-numerazione"
+            [showCloseIcon]="true">
+            <ng-template pTemplate>
+              <p>Le possibili anomalie sono:</p>
+              <ul>
+                <li><b>Responsabile disattivo</b>: I fascicoli con questa anomalia sono di fatto sprovvisti di responsabile in quanto l'utente responsabile non è più un utente attivo.</li>
+                <li><b>Vicari attivi non presenti</b>: I fascicoli con questa anomalia non hanno vicari oppure se hanno dei vicari questi non sono più attivi. Di norma, ogni fascicolo dovrebbe avere almeno un vicario attivo.</li>
+                <li><b>Incoerenza struttura</b>: I fascicoli con questa anomalia hanno il vicario attivo, ma questo è inserito con una struttura alla quale il responsabile non appartiene.</li>
+                <li><b>Chiusi senza accesso</b>: I fascicoli con questa anomalia sono chiusi o prechiusi e nessun utente attivo vi ha accesso, né come responsabile/vicario né con un permesso.</li>
+              </ul>
+            </ng-template>
+          </p-overlayPanel>
         </span>
       </th>
       <th *ngIf="loggedUserCanDeleteArchivio"
@@ -89,13 +115,38 @@
     </tr>
     <!-------FILTRI -->
     <tr class="filter-row">
-      <th *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
+      <th *ngIf="(archiviListMode === 'TUTTI' || archiviListMode === 'ANOMALI') && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
         class="checkbox-column"
         alignFrozen="left" 
         pFrozenColumn 
         [frozen]="true">
       </th>
-      <th *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.filterClass">
+      <th *ngFor="let col of columns" 
+        [ngSwitch]="col.field" 
+        [ngClass]="col.filterClass"
+        [attr.alignFrozen]="col.additionalData?.alignFrozen" 
+        [attr.pFrozenColumn]="col.additionalData?.frozen"
+        [attr.frozen]="col.additionalData?.frozen">
+        <div *ngSwitchCase="'bitAnomalie'">
+          <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-multiSelect #multiselectBitAnomalie
+                [showHeader]="false" 
+                [ngModel]="value"
+                [options]="anomaliaArchivioDetailObj" 
+                optionValue="value" 
+                optionLabel="nome"
+                (onChange)="filterAnomalie(filter, $event.value)" 
+                appendTo="body">
+                <ng-template let-option pTemplate="item">
+                  <div class="p-multiselect-representative-option">
+                    <span class="p-ml-1">{{option.nome}}</span>
+                  </div>
+                </ng-template>
+              </p-multiSelect>
+            </ng-template>
+          </p-columnFilter>
+        </div>
         <div *ngSwitchCase="'idAzienda'" #filteraziendacontainer>
           <p-columnFilter #columnFilterAzienda 
             [field]="col.filterField" 
@@ -103,9 +154,15 @@
             [showMenu]="false"
             [ngStyle]="{'visibility': archiviListMode !== 'RECENTI' ? 'visible' : 'hidden'}"><!-- *ngIf="archiviListMode !== 'RECENTI'" -->
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-dropdown #dropdownAzienda *ngIf="isAccessibile() !== true" [options]="aziendeFiltrabili"
-                [ngModel]="value" (onChange)="filterAzienda(filter, $event.value, filteraziendacontainer)"
-                optionValue="value" optionLabel="label" appendTo="body" [disabled]="archiviListMode == 'RECENTI'">
+              <p-dropdown *ngIf="isAccessibile() !== true"
+                #dropdownAzienda  
+                [options]="aziendeFiltrabili"
+                [ngModel]="value"
+                (onChange)="filterAzienda(filter, $event.value, filteraziendacontainer)"
+                optionValue="value" 
+                optionLabel="label" 
+                appendTo="body" 
+                [disabled]="archiviListMode == 'RECENTI'">
               </p-dropdown>
               <p-autoComplete *ngIf="isAccessibile() == true" [suggestions]="aziendeFiltrabiliFiltered"
                 (completeMethod)="filterAziendaAccessibile($event)" (onClear)="filter(null)" field="label" type="search"
@@ -120,7 +177,7 @@
             type="date" 
             matchMode="is"
             [showMenu]="false"
-            [ngStyle]="{'visibility': archiviListMode !== 'RECENTI' ? 'visible' : 'hidden'}">
+            [ngStyle]="{'visibility': archiviListMode !== 'RECENTI' && archiviListMode !== 'ANOMALI' ? 'visible' : 'hidden'}">
             <!--            *ngIf="archiviListMode !== 'RECENTI'"-->
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-calendar #calendarcreazione 
@@ -137,7 +194,7 @@
                 [readonlyInput]="true"                          
                 (onClickOutside)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'onClickOutside', $event, filter)"
                 appendTo="body"
-                [disabled]="archiviListMode == 'RECENTI'">
+                [disabled]="archiviListMode === 'RECENTI' || archiviListMode === 'ANOMALI'">
                 <ng-template pTemplate="footer" class="calendar-filter-footer-button">
                   <div class="calendar-filter-footer-button-container">
                     <p-button label="Conferma" (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'doFilter', $event, filter)"></p-button>
@@ -251,7 +308,7 @@
         </div>
         <div *ngSwitchCase="'numerazioneGerarchica'" class="search-wrapper">
           <span class="search-wrapper"
-            [pTooltip]="archiviListMode === archiviListModeEnum.TUTTI || archivioPadre ? 'La selezione è disabilitata' : 'Seleziona livello'" 
+            [pTooltip]="archiviListMode === archiviListModeEnum.TUTTI || archiviListMode === archiviListModeEnum.ANOMALI || archivioPadre ? 'La selezione è disabilitata' : 'Seleziona livello'" 
             tooltipPosition="top"
             >
             <p-columnFilter #columnFilterLivello 
@@ -265,7 +322,7 @@
                   [options]="livelliFiltrabili"
                   [(ngModel)]="livelloValue"
                   (onChange)="filter($event.value)"
-                  [disabled]="(archiviListMode === archiviListModeEnum.TUTTI || archiviListMode === archiviListModeEnum.RECENTI || !!archivioPadre)"
+                  [disabled]="(archiviListMode === archiviListModeEnum.TUTTI || archiviListMode === archiviListModeEnum.ANOMALI || archiviListMode === archiviListModeEnum.RECENTI || !!archivioPadre)"
                   optionValue="value" 
                   optionLabel="label" 
                   panelStyleClass="dropdown-panel-livello"
@@ -398,7 +455,7 @@
         [frozen]="true">
       </th>
     </tr>
-    <tr *ngIf="showAdditionalRow && archiviListMode === 'TUTTI' && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
+    <tr *ngIf="showAdditionalRow && (archiviListMode === 'TUTTI' || archiviListMode === 'ANOMALI') && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
       class="additional-row">
       <span *ngIf="allRowsAreSelected && rowCountInProgress" class="selection-info">
         <i class="pi pi-spin pi-spinner"></i>
@@ -445,7 +502,7 @@
       <!-- [pSelectableRow]="rowData"
       [pSelectableRowIndex]="index"
       [pSelectableRowDisabled]="false" -->
-      <td *ngIf="archiviListMode === 'TUTTI' && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
+      <td *ngIf="(archiviListMode === 'TUTTI' || archiviListMode === 'ANOMALI') && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
         class="checkbox-column"
         alignFrozen="left"
         pFrozenColumn 
@@ -453,6 +510,9 @@
         <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
       </td>
       <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
+        <div *ngSwitchCase="'bitAnomalie'">
+          {{rowData.anomalieVisualizzazione}}
+        </div>
         <div *ngSwitchCase="'idAzienda'">
           {{rowData.idAzienda.nome}}
         </div>

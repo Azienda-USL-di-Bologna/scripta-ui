@@ -188,6 +188,10 @@
     height: 3.313rem;
     max-height: 3.313rem;
   }
+  .bit-anomalie-column {
+    min-width: 12rem;
+    max-width: 12rem;
+  }
   .data-creazione-column {
     min-width: 12.063rem;
     max-width: 12.063rem;
@@ -383,7 +387,7 @@
 }
 ::ng-deep .dialog-copia-trasferisci-abilitazioni {
   width: 40rem;
-  height: 37rem;
+  height: 38rem;
 }
 /* ::ng-deep.mat-tab-label.mat-tab-label-active:not(.mat-tab-disabled),
 ::ng-deep.mat-tab-label.mat-tab-label-active.cdk-keyboard-focused:not(.mat-tab-disabled) {
