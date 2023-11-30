@@ -37,12 +37,12 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
     return this._modalita;
   }
 
-  private _singoliList: GruppoLotto[] = null;
-  @Input() set singoliList(values: GruppoLotto[]) {
+  private _singoliList: any[] = null;
+  @Input() set singoliList(values: any[]) {
     if (values) 
       this._singoliList = values;
   }
-  public get singoliList(): GruppoLotto[] {
+  public get singoliList(): any[] {
     return this._singoliList;
   }
 
@@ -92,7 +92,7 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
           this._gruppoList.forEach((g) => {
             g.componentiList = g.componentiList.filter(c => c !== null); // La form lo inizializza a null...
             g.componentiList.map((c) => {
-              c.combinedKey = c.id + c.codiceFiscale;
+              c.combinedKey = c.codiceFiscale + c.ragioneSociale;
               if (c.fk_idRuolo && c.fk_idRuolo.id && !c.idRuolo) {
                 c.idRuolo = this.ruolocomponente.find(
                   (r) => r.id === c.fk_idRuolo.id
@@ -100,6 +100,13 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
               }
             })
           });
+          if (this._singoliList && this._singoliList.length) 
+            this._singoliList.forEach((g) => {
+              g.componentiList = g.componentiList.filter((c:any) => c !== null); // La form lo inizializza a null...
+              g.componentiList.map((c: any) => {
+                g.combinedKey = c.codiceFiscale + c.ragioneSociale;
+              })
+            });
         }
       });
   }
@@ -186,7 +193,7 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
   }
 
   public salvaPartecipante(rowData: Componente) {
-    rowData.combinedKey = rowData.id + rowData.codiceFiscale;
+    rowData.combinedKey = rowData.codiceFiscale + rowData.ragioneSociale;
   }
 
   public onRowEditCancel(
@@ -238,7 +245,7 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
   }
 
   public salvaSingolo(rowData: any) {
-    rowData.combinedKey = rowData.componentiList[0].id + rowData.componentiList[0].codiceFiscale;
+    rowData.combinedKey = rowData.componentiList[0].codiceFiscale + rowData.componentiList[0].ragioneSociale;
   }
 
   //Aggiudicatario
@@ -254,7 +261,7 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
   }
 
   public salvaAggiudicatario(rowData: Componente) {
-    rowData.combinedKey = rowData.id + rowData.codiceFiscale;
+    rowData.combinedKey = rowData.codiceFiscale + rowData.ragioneSociale;
   }
 
   public eliminaAggiudicatario(componentiList: Componente[], rowIndex: number) {

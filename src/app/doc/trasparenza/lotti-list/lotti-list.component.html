@@ -96,7 +96,7 @@
         title="Salva" 
         label="Salva" 
         (click)="saveDialog()" 
-        [disabled]="lottoForm.invalid || lottoForm.pristine || !isReallyChangedAnything()">
+        [disabled]="lottoForm.invalid">
       </button>
       <button [style]="{width: '6rem', height: '2rem'}" pButton pRipple type="button" title="Annulla" label="Annulla" (click)="cancelDialog()"></button>
     </div>
