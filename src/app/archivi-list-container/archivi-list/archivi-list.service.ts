@@ -23,7 +23,7 @@ export class ArchiviListService extends ArchivioDetailService{
     idPersonaNuovoResponsabile: number, 
     idStrutturaNuovoResponsabile: number, 
     idAziendaRiferimento : number
-  ) : Observable<any> {
+  ): Observable<any> {
     // Costruisci i parametri della richiesta HTTP
     predicate = predicate
       .set('idPersonaNuovoResponsabile', idPersonaNuovoResponsabile.toString())
@@ -55,7 +55,7 @@ export class ArchiviListService extends ArchivioDetailService{
     idsPersonaPermessiDelete: number[],
     permessiPersonaAdd: PermessoPersonaOnlyId[],
     idAziendaRiferimento: number
-  ) : Observable<any> {
+  ): Observable<any> {
     predicate = predicate
       .set('idAziendaRiferimento', idAziendaRiferimento.toString());
     if (ids) {
@@ -80,5 +80,28 @@ export class ArchiviListService extends ArchivioDetailService{
     });
     const url = getInternautaUrl(BaseUrlType.Scripta) + "/modificaVicariAndPermessiArchivioMassivo?" + predicate.toString();
     return this._http.post(url, stringBody, {headers: headers})
+  }
+
+  /**
+   * 
+   * @returns 
+   */
+  public copiaTrasferimentoAbilitazioni(
+    operationType: string,
+    idAziendaRiferimento: number,
+    idPersonaSorgente: number,
+    idPersonaDestinazione: number,
+    idStrutturaDestinazione: number
+  ): Observable<any> {
+    // Costruisci i parametri della richiesta HTTP
+    const predicate = new HttpParams()
+      .set('operationType', operationType)
+      .set('idAziendaRiferimento', idAziendaRiferimento.toString())
+      .set('idPersonaSorgente', idPersonaSorgente.toString())
+      .set('idPersonaDestinazione', idPersonaDestinazione.toString())
+      .set('idStrutturaDestinazione', idStrutturaDestinazione.toString());
+
+    // Esegui la richiesta GET con i parametri
+    return this._http.get(getInternautaUrl(BaseUrlType.Scripta) + "/" + "copiaTrasferisciAbilitazioniArchiviMassivo", { params: predicate });
   }
 }

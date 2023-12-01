@@ -19,6 +19,7 @@ import localeIt from "@angular/common/locales/it";
 import localeItExtra from "@angular/common/locales/extra/it";
 import { PrimeNgModule } from "./primeng.module";
 import { ScriptaCommonModule } from "./scripta-common.module";
+import { AttachmentsBoxModule } from "@bds/common-components";
 
 registerLocaleData(localeIt, "it-IT", localeItExtra);
 
@@ -38,7 +39,8 @@ registerLocaleData(localeIt, "it-IT", localeItExtra);
         CommonComponentsModule,
         HeaderModule,
         HeaderFeaturesModule,
-        CommonToolsModule
+        CommonToolsModule,
+        AttachmentsBoxModule
     ],
     providers: [
         DatePipe,

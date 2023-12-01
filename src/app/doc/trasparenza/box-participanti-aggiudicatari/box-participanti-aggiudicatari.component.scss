@@ -1,37 +1,170 @@
-::ng-deep .tabella{
-  .partecipante-column{
-    min-width: 18.75rem;
-    width: 18.75rem;
-    max-width: 18.75rem;
-  }
-  .tipologia-column{
+::ng-deep.tabella {
+  width: 100%;
+  .p-datatable-header {
     width: 100%;
-    p-celleditor {
+  }
+  
+  .gruppo-agg-btn,
+  .gruppo-part-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    div:first-child {
+      display: flex;
+      width: 35rem;
+
+      @media only screen and (max-width: 1340px) {
+        width: 30rem;
+      }
+
+      label {
+        width: 13rem;
+      }
+    }
+    .btn-partecipanti {
+      width: 9rem;
+    }
+  }
+
+  .p-datatable-thead{
+    width: 100%;
+  }
+
+  .p-datatable-thead .cf-column,
+  .p-datatable-tbody .cf-column {
+    max-width: 210px;
+    p-celleditor{
+      width: 100%;
+    }
+  } 
+  .rs-column{
+    // max-width: 52.6rem;
+    p-celleditor{
       width: 100%;
     }
   }
+  .r-column{
+    max-width: 250px;
+    p-celleditor{
+      width: 100%;
+    }
+  }
+  .action-column{
+    // min-width: 7rem;
+    // width: 7rem;
+    max-width: 8.1rem;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: nowrap;
+    padding: 0 !important;
     .p-button-rounded {
-        background-color: transparent !important;
-        border: none !important;
-        color: #203244 !important;
-        &:hover {
-          border-color: #2e4a65 !important;
-          background-color: #406284 !important;
-          color: #ffffff !important;
-          font-weight: normal !important;
-        }
-        &.p-button-danger {
-          color: #e91224 !important;
-        }
-        &.p-button-success {
-          color: #34A835 !important;
-        }
-        &.p-button-danger:hover, &.p-button-success:hover {
-          border:1px solid #2e4a65 !important;
-          background-color:transparent !important;
-        }
-        .p-button-icon {
-          font-size: 1.2rem;
-        } 
+      // background-color: transparent !important;
+      border: none !important;
+      color: #ffffff !important;
+      &:hover {
+        border-color: #993366 !important;
+        background-color: #993366 !important;
+        color: #ffffff !important;
+        font-weight: normal !important;
       }
+      &.p-button-danger {
+        color: #ffffff !important;
+      }
+      &.p-button-success {
+        color: #ffffff !important;
+      }
+      &.p-button-danger:hover, &.p-button-success:hover {
+        border:1px solid #993366 !important;
+        background-color:#993366 !important;
+      }
+      .p-button-icon {
+        font-size: 1rem;
+      } 
+    }
+  }
 }
+
+::ng-deep.tabella-singolo{
+
+  .gruppo-part-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    div:first-child {
+      display: flex;
+      width: 35rem;
+      label {
+        width: 13rem;
+      }
+    }
+    .btn-partecipanti {
+      width: 10rem;
+    }
+  }
+
+  .p-datatable-header {
+    width: 100%;
+  }
+  .p-datatable-thead{
+    width: 100%;
+  }
+  .cf-column {
+    max-width: 210px;
+    p-celleditor{
+      width: 100%;
+    }
+  } 
+  .rs-column{
+    // max-width: 67.4rem;
+    p-celleditor{
+      width: 100%;
+    }
+  }
+  
+  .action-column{
+    min-width: 7rem;
+    width: 7rem;
+    max-width: 7.3rem;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: nowrap;
+    padding: 0 !important;
+    .p-button-rounded {
+      border: none !important;
+      color: #ffffff !important;
+      &:hover {
+        border-color: #993366 !important;
+        background-color: #993366 !important;
+        color: #ffffff !important;
+        font-weight: normal !important;
+      }
+      &.p-button-danger {
+        color: #ffffff !important;
+      }
+      &.p-button-success {
+        color: #ffffff !important;
+      }
+      &.p-button-danger:hover, &.p-button-success:hover {
+        border:1px solid #993366 !important;
+        background-color:#993366 !important;
+      }
+      .p-button-icon {
+        font-size: 1rem;
+      } 
+    }
+  }
+}
+
+// .gruppo-aggdBtn{
+//   display: flex;
+//   flex-direction: row;
+//   align-items: center;
+//   max-width: 20rem;
+// }
+
+.dropdown-ruolo{
+  width: 100%;
+}
+
+
+
