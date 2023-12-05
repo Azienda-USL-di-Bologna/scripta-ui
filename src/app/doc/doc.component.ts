@@ -1,6 +1,6 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
-import { Doc, ENTITIES_STRUCTURE, Persona, TipologiaDoc, RegistroDoc, VisibilitaDoc, RuoloAttoreDoc } from "@bds/internauta-model";
+import { Doc, ENTITIES_STRUCTURE, Persona, TipologiaDoc, RegistroDoc, VisibilitaDoc, RuoloAttoreDoc, DocDoc } from "@bds/internauta-model";
 import { LOCAL_IT } from "@bds/common-tools";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import { AdditionalDataDefinition } from "@bds/next-sdr";
@@ -13,6 +13,8 @@ import { ExtendedDocService } from "./extended-doc.service";
 import { AttachmentsBoxConfig } from "@bds/common-components";
 import { formatDate } from '@angular/common';
 import { DocVisualizerService } from "./doc-visualizer.service";
+import { NavigationTabsService } from '../navigation-tabs/navigation-tabs.service';
+import { DOC_DOC_ROUTE } from "src/environments/app-constants";
 
 @Component({
   selector: "doc",
@@ -49,6 +51,8 @@ export class DocComponent implements OnInit, OnDestroy {
   public registroLabel: string = 'Proposta numero';
   public notaDocumentoString: string = 'Nessuna nota';
   public notaAnnullamentoString: string = 'Nessuna nota';
+  private windowDocumentiCollegati: Window | null = null;
+  public docsCollegati: DocDoc[];
   @ViewChild("pageStart") public pageStart: any;
   private _doc: Doc;
   public dataAnnullamento: string;
@@ -73,6 +77,7 @@ export class DocComponent implements OnInit, OnDestroy {
     private loginService: JwtLoginService,
     private messageService: MessageService,
     private route: ActivatedRoute,
+    public navigationTabsService: NavigationTabsService,
     private appService: AppService) {
       this.attachmentsBoxConfig = new AttachmentsBoxConfig();
       this.attachmentsBoxConfig.showPreview = true;
@@ -82,7 +87,6 @@ export class DocComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     console.log("entro nell'oninit");
-
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -135,7 +139,7 @@ export class DocComponent implements OnInit, OnDestroy {
           }
         }
       )
-    );
+    );  
   }
 
 
@@ -234,6 +238,7 @@ export class DocComponent implements OnInit, OnDestroy {
         this.extendedDocService.getByIdHttpCall(idDoc,this.projection).subscribe(
           (res: Doc) => {
             this.doc = res;
+            console.log("res: ", res)
             this.setFreezeDocumento(false);
             this.setLabelProtocollatoDa();
 
@@ -264,9 +269,10 @@ export class DocComponent implements OnInit, OnDestroy {
             this.visibilitaLimitata = this.doc.visibilita === VisibilitaDoc.LIMITATA;
             this.riservato = this.doc.visibilita === VisibilitaDoc.RISERVATO;
             this.annullato = this.doc.annullato;
-            
+            this.docsCollegati = this.doc.docsCollegati;  
         })
       );
+
   }
 
   /**
@@ -419,6 +425,17 @@ export class DocComponent implements OnInit, OnDestroy {
           detail: "Errore nel protocollare il documento"
         });
       });
+    }
+  }
+
+  public showDocumentiCollegati() {
+    const idDoc = this.doc.id;
+    const from = 'scripta';
+    const url = `${DOC_DOC_ROUTE}?idDoc=${idDoc}&from=${from}`;
+    if (this.windowDocumentiCollegati && !this.windowDocumentiCollegati.closed) {
+      this.windowDocumentiCollegati.focus();
+    } else {
+      this.windowDocumentiCollegati = window.open(url, '_blank', 'popup=true');
     }
   }
 
