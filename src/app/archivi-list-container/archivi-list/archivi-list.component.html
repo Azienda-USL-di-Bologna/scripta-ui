@@ -1,55 +1,66 @@
-<p-table #dt 
-  ariaLabel="Tabella elenco archivi" 
-  [value]="archivi" 
+<p-table
+  #dt
+  ariaLabel="Tabella elenco archivi"
+  [value]="archivi"
   dataKey="id"
-  [rowTrackBy]="trackByFn" 
+  [rowTrackBy]="trackByFn"
   [metaKeySelection]="true"
-  selectionMode="multiple" 
+  selectionMode="multiple"
   [(selection)]="archivesSelected"
-  (onRowSelect)="onRowSelect($event)" 
+  (onRowSelect)="onRowSelect($event)"
   (onRowUnselect)="onRowUnselect($event)"
   (onHeaderCheckboxToggle)="onSelectAllChange($event)"
-  [columns]="selectedColumns" 
-  [sortField]="initialSortField" 
-  [sortOrder]="-1" 
-  [defaultSortOrder]="1" 
-  [reorderableColumns]="true" 
+  [columns]="selectedColumns"
+  [sortField]="initialSortField"
+  [sortOrder]="-1"
+  [defaultSortOrder]="1"
+  [reorderableColumns]="true"
   (onColReorder)="onColReorder($event)"
-  [rows]="rowsNumber" 
+  [rows]="rowsNumber"
   scrollHeight="flex"
-  [scrollable]="true" 
-  [virtualScroll]="true" 
-  [virtualScrollDelay]="150" 
+  [scrollable]="true"
+  [virtualScroll]="true"
+  [virtualScrollDelay]="150"
   [virtualRowHeight]="54"
-  [lazy]="true" 
-  [lazyLoadOnInit]="false" 
-  (onLazyLoad)="onLazyLoad($event)" 
+  [lazy]="true"
+  [lazyLoadOnInit]="false"
+  (onLazyLoad)="onLazyLoad($event)"
   [loading]="loading"
-  [totalRecords]="totalRecords" 
-  styleClass="p-table-scripta-archivi-list" 
-  [ngClass]="{'table-zero-rows': totalRecords === 0}"
+  [totalRecords]="totalRecords"
+  styleClass="p-table-scripta-archivi-list"
+  [ngClass]="{ 'table-zero-rows': totalRecords === 0 }"
   tableStyleClass="archiviolist-table-body">
   <!-- HEADER & ORDINAMENTO ---->
-  <ng-template pTemplate="header" let-columns>
+  <ng-template
+    pTemplate="header"
+    let-columns>
     <tr class="header-row">
-      <th *ngIf="(archiviListMode === 'TUTTI' || archiviListMode === 'ANOMALI') && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
+      <th
+        *ngIf="
+          (archiviListMode === 'TUTTI' || archiviListMode === 'ANOMALI') &&
+          loggedUserIsAG &&
+          lastAziendaFilterValue.length === 1 &&
+          idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])
+        "
         class="checkbox-column"
-        alignFrozen="left" 
-        pFrozenColumn 
+        alignFrozen="left"
+        pFrozenColumn
         [frozen]="true">
         <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
       </th>
-      <th *ngFor="let col of columns" 
-        pReorderableColumn 
-        [ngClass]="[archiviListMode === 'RECENTI' ? 'sort-disable' : ''].concat(col.headerClass)"
-        
+      <th
+        *ngFor="let col of columns"
+        pReorderableColumn
+        [ngClass]="
+          [archiviListMode === 'RECENTI' ? 'sort-disable' : ''].concat(
+            col.headerClass
+          )
+        "
         [pSortableColumn]="col.sortField"
         [pSortableColumnDisabled]="archiviListMode === 'RECENTI'"
-
         [attr.pFrozenColumn]="col.additionalData?.frozen"
-        [attr.alignFrozen]="col.additionalData?.alignFrozen" 
-        [attr.frozen]="col.additionalData?.frozen"
-        >
+        [attr.alignFrozen]="col.additionalData?.alignFrozen"
+        [attr.frozen]="col.additionalData?.frozen">
         <!-- [ngClass]="col.headerClass" -->
         <!-- [ngStyle]="{
           'cursor': col.sortField ? null : 'move',
@@ -58,151 +69,267 @@
           'color' : col.field == 'dataCreazione' && archiviListMode == 'RECENTI' ? '#000000' : null,
           'color' : col.field == 'dataCreazione' && archiviListMode !== 'RECENTI' ? '#f4f4f4' : null
         }" -->
-        <span class="header-box" 
-          [attr.aria-label]="col.label" [ngStyle]="{}">
-          {{col.header}}
-          <p-sortIcon *ngIf="col.sortField && archiviListMode !== 'RECENTI'" [field]="col.sortField" ></p-sortIcon>
+        <span
+          class="header-box"
+          [attr.aria-label]="col.label"
+          [ngStyle]="{}">
+          {{ col.header }}
+          <p-sortIcon
+            *ngIf="col.sortField && archiviListMode !== 'RECENTI'"
+            [field]="col.sortField"></p-sortIcon>
 
           <!-- TIP NUMERAZIONE GERARCHICA -->
-          <i *ngIf="col.field === 'numerazioneGerarchica'" 
-            class="pi pi-info-circle info-numerazione-gerarchica" 
+          <i
+            *ngIf="col.field === 'numerazioneGerarchica'"
+            class="pi pi-info-circle info-numerazione-gerarchica"
             (click)="opnumerazioneGerarchica.toggle($event)"
             pTooltip="Scopri come usare al meglio la ricerca per numerazione">
           </i>
-          <p-overlayPanel #opnumerazioneGerarchica 
+          <p-overlayPanel
+            #opnumerazioneGerarchica
             appendTo="body"
             styleClass="overlaypanel-info-numerazione"
             [showCloseIcon]="true">
             <ng-template pTemplate>
-              <p>Questo filtro può essere usato per cercare un fascicolo per numero oppure per numerazione gerarchica. Di seguito alcuni esempi</p>
+              <p>
+                Questo filtro può essere usato per cercare un fascicolo per
+                numero oppure per numerazione gerarchica. Di seguito alcuni
+                esempi
+              </p>
               <ul>
-                <li>Seleziona il livello Sottofascicolo e scrivi nella ricerca il numero del sottofascicolo desiderato</li>
-                <li>Seleziona il livello Tutti e scrivi una numerazione gerarchica completa (es 23-1/2018) per trovare immediatamente il fascicolo desiderato</li>
-                <li>Non ti ricordi l'esatta numerazione? Inserisci quello che ti ricordi a partire dal livello più importante, ad es. con 23- troverari tutti i sottofascioli/inserti figli del fascicolo 23</li>
+                <li>
+                  Seleziona il livello Sottofascicolo e scrivi nella ricerca il
+                  numero del sottofascicolo desiderato
+                </li>
+                <li>
+                  Seleziona il livello Tutti e scrivi una numerazione gerarchica
+                  completa (es 23-1/2018) per trovare immediatamente il
+                  fascicolo desiderato
+                </li>
+                <li>
+                  Non ti ricordi l'esatta numerazione? Inserisci quello che ti
+                  ricordi a partire dal livello più importante, ad es. con 23-
+                  troverari tutti i sottofascioli/inserti figli del fascicolo 23
+                </li>
               </ul>
-              Ricorda: Non cercare qui immettendo solo l'anno, usa il filtro sull'anno di creazione o altri ancora per trovare più facilmente ciò che desideri.
+              Ricorda: Non cercare qui immettendo solo l'anno, usa il filtro
+              sull'anno di creazione o altri ancora per trovare più facilmente
+              ciò che desideri.
             </ng-template>
           </p-overlayPanel>
 
           <!-- TIP ANOMALIE -->
-          <i *ngIf="col.field === 'bitAnomalie'" 
-            class="pi pi-info-circle info-numerazione-gerarchica" 
+          <i
+            *ngIf="col.field === 'bitAnomalie'"
+            class="pi pi-info-circle info-numerazione-gerarchica"
             (click)="opbitAnomalie.toggle($event)"
             pTooltip="Scopri come usare al meglio la ricerca per numerazione">
           </i>
-          <p-overlayPanel #opbitAnomalie
+          <p-overlayPanel
+            #opbitAnomalie
             appendTo="body"
             styleClass="overlaypanel-info-numerazione"
             [showCloseIcon]="true">
             <ng-template pTemplate>
               <p>Le possibili anomalie sono:</p>
               <ul>
-                <li><b>Responsabile disattivo</b>: I fascicoli con questa anomalia sono di fatto sprovvisti di responsabile in quanto l'utente responsabile non è più un utente attivo.</li>
-                <li><b>Vicari attivi non presenti</b>: I fascicoli con questa anomalia non hanno vicari oppure se hanno dei vicari questi non sono più attivi. Di norma, ogni fascicolo dovrebbe avere almeno un vicario attivo.</li>
-                <li><b>Incoerenza struttura</b>: I fascicoli con questa anomalia hanno il vicario attivo, ma questo è inserito con una struttura alla quale il responsabile non appartiene.</li>
-                <li><b>Chiusi senza accesso</b>: I fascicoli con questa anomalia sono chiusi o prechiusi e nessun utente attivo vi ha accesso, né come responsabile/vicario né con un permesso.</li>
+                <li>
+                  <b>Responsabile disattivo</b>: I fascicoli con questa anomalia
+                  sono di fatto sprovvisti di responsabile in quanto l'utente
+                  responsabile non è più un utente attivo.
+                </li>
+                <li>
+                  <b>Vicari attivi non presenti</b>: I fascicoli con questa
+                  anomalia non hanno vicari oppure se hanno dei vicari questi
+                  non sono più attivi. Di norma, ogni fascicolo dovrebbe avere
+                  almeno un vicario attivo.
+                </li>
+                <li>
+                  <b>Incoerenza struttura</b>: I fascicoli con questa anomalia
+                  hanno il vicario attivo, ma questo è inserito con una
+                  struttura alla quale il responsabile non appartiene.
+                </li>
+                <li>
+                  <b>Chiusi senza accesso</b>: I fascicoli con questa anomalia
+                  sono chiusi o prechiusi e nessun utente attivo vi ha accesso,
+                  né come responsabile/vicario né con un permesso.
+                </li>
               </ul>
             </ng-template>
           </p-overlayPanel>
         </span>
       </th>
-      <th *ngIf="loggedUserCanDeleteArchivio"
+      <th
+        *ngIf="loggedUserCanDeleteArchivio"
         class="delete-archive-column"
-        alignFrozen="right" 
-        pFrozenColumn 
-        [frozen]="true">
-      </th>
+        alignFrozen="right"
+        pFrozenColumn
+        [frozen]="true"></th>
     </tr>
     <!-------FILTRI -->
     <tr class="filter-row">
-      <th *ngIf="(archiviListMode === 'TUTTI' || archiviListMode === 'ANOMALI') && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
+      <th
+        *ngIf="
+          (archiviListMode === 'TUTTI' || archiviListMode === 'ANOMALI') &&
+          loggedUserIsAG &&
+          lastAziendaFilterValue.length === 1 &&
+          idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])
+        "
         class="checkbox-column"
-        alignFrozen="left" 
-        pFrozenColumn 
-        [frozen]="true">
-      </th>
-      <th *ngFor="let col of columns" 
-        [ngSwitch]="col.field" 
+        alignFrozen="left"
+        pFrozenColumn
+        [frozen]="true"></th>
+      <th
+        *ngFor="let col of columns"
+        [ngSwitch]="col.field"
         [ngClass]="col.filterClass"
-        [attr.alignFrozen]="col.additionalData?.alignFrozen" 
+        [attr.alignFrozen]="col.additionalData?.alignFrozen"
         [attr.pFrozenColumn]="col.additionalData?.frozen"
         [attr.frozen]="col.additionalData?.frozen">
         <div *ngSwitchCase="'bitAnomalie'">
-          <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
-            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-multiSelect #multiselectBitAnomalie
-                [showHeader]="false" 
+          <p-columnFilter
+            [field]="col.filterField"
+            matchMode="in"
+            [showMenu]="false">
+            <ng-template
+              pTemplate="filter"
+              let-value
+              let-filter="filterCallback">
+              <p-multiSelect
+                #multiselectBitAnomalie
+                [showHeader]="false"
                 [ngModel]="value"
-                [options]="anomaliaArchivioDetailObj" 
-                optionValue="value" 
+                [options]="anomaliaArchivioDetailObj"
+                optionValue="value"
                 optionLabel="nome"
-                (onChange)="filterAnomalie(filter, $event.value)" 
+                (onChange)="filterAnomalie(filter, $event.value)"
                 appendTo="body">
-                <ng-template let-option pTemplate="item">
+                <ng-template
+                  let-option
+                  pTemplate="item">
                   <div class="p-multiselect-representative-option">
-                    <span class="p-ml-1">{{option.nome}}</span>
+                    <span class="p-ml-1">{{ option.nome }}</span>
                   </div>
                 </ng-template>
               </p-multiSelect>
             </ng-template>
           </p-columnFilter>
         </div>
-        <div *ngSwitchCase="'idAzienda'" #filteraziendacontainer>
-          <p-columnFilter #columnFilterAzienda 
-            [field]="col.filterField" 
-            matchMode="in" 
+        <div
+          *ngSwitchCase="'idAzienda'"
+          #filteraziendacontainer>
+          <p-columnFilter
+            #columnFilterAzienda
+            [field]="col.filterField"
+            matchMode="in"
             [showMenu]="false"
-            [ngStyle]="{'visibility': archiviListMode !== 'RECENTI' ? 'visible' : 'hidden'}"><!-- *ngIf="archiviListMode !== 'RECENTI'" -->
-            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-dropdown *ngIf="isAccessibile() !== true"
-                #dropdownAzienda  
+            [ngStyle]="{
+              visibility: archiviListMode !== 'RECENTI' ? 'visible' : 'hidden'
+            }"
+            ><!-- *ngIf="archiviListMode !== 'RECENTI'" -->
+            <ng-template
+              pTemplate="filter"
+              let-value
+              let-filter="filterCallback">
+              <p-dropdown
+                *ngIf="isAccessibile() !== true"
+                #dropdownAzienda
                 [options]="aziendeFiltrabili"
                 [ngModel]="value"
-                (onChange)="filterAzienda(filter, $event.value, filteraziendacontainer)"
-                optionValue="value" 
-                optionLabel="label" 
-                appendTo="body" 
+                (onChange)="
+                  filterAzienda(filter, $event.value, filteraziendacontainer)
+                "
+                optionValue="value"
+                optionLabel="label"
+                appendTo="body"
                 [disabled]="archiviListMode == 'RECENTI'">
               </p-dropdown>
-              <p-autoComplete *ngIf="isAccessibile() == true" [suggestions]="aziendeFiltrabiliFiltered"
-                (completeMethod)="filterAziendaAccessibile($event)" (onClear)="filter(null)" field="label" type="search"
-                appendTo="body" (onSelect)="filterAzienda(filter, $event.value, filteraziendacontainer)">
+              <p-autoComplete
+                *ngIf="isAccessibile() == true"
+                [suggestions]="aziendeFiltrabiliFiltered"
+                (completeMethod)="filterAziendaAccessibile($event)"
+                (onClear)="filter(null)"
+                field="label"
+                type="search"
+                appendTo="body"
+                (onSelect)="
+                  filterAzienda(filter, $event.value, filteraziendacontainer)
+                ">
               </p-autoComplete>
             </ng-template>
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'dataCreazione'">
-          <p-columnFilter #columnFilterDataCreazione
-            [field]="col.filterField" 
-            type="date" 
+          <p-columnFilter
+            #columnFilterDataCreazione
+            [field]="col.filterField"
+            type="date"
             matchMode="is"
             [showMenu]="false"
-            [ngStyle]="{'visibility': archiviListMode !== 'RECENTI' && archiviListMode !== 'ANOMALI' ? 'visible' : 'hidden'}">
+            [ngStyle]="{
+              visibility:
+                archiviListMode !== 'RECENTI' && archiviListMode !== 'ANOMALI'
+                  ? 'visible'
+                  : 'hidden'
+            }">
             <!--            *ngIf="archiviListMode !== 'RECENTI'"-->
-            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-calendar #calendarcreazione 
+            <ng-template
+              pTemplate="filter"
+              let-value
+              let-filter="filterCallback">
+              <p-calendar
+                #calendarcreazione
                 inputId="calendarcreazione"
-                [ngModel]="value"  
+                [ngModel]="value"
                 [minDate]="dataMinimaCreazione"
                 [maxDate]="dataMassimaCreazione"
-                dataType="date" 
-                dateFormat="yy" 
+                dataType="date"
+                dateFormat="yy"
                 [showIcon]="false"
-                [showButtonBar]="false" 
-                selectionMode="range" 
-                view="year"   
-                [readonlyInput]="true"                          
-                (onClickOutside)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'onClickOutside', $event, filter)"
+                [showButtonBar]="false"
+                selectionMode="range"
+                view="year"
+                [readonlyInput]="true"
+                (onClickOutside)="
+                  askConfirmAndHandleCalendarCreazioneEvent(
+                    calendarcreazione,
+                    'onClickOutside',
+                    $event,
+                    filter
+                  )
+                "
                 appendTo="body"
-                [disabled]="archiviListMode === 'RECENTI' || archiviListMode === 'ANOMALI'">
-                <ng-template pTemplate="footer" class="calendar-filter-footer-button">
+                [disabled]="
+                  archiviListMode === 'RECENTI' || archiviListMode === 'ANOMALI'
+                ">
+                <ng-template
+                  pTemplate="footer"
+                  class="calendar-filter-footer-button">
                   <div class="calendar-filter-footer-button-container">
-                    <p-button label="Conferma" (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'doFilter', $event, filter)"></p-button>
+                    <p-button
+                      label="Conferma"
+                      (click)="
+                        askConfirmAndHandleCalendarCreazioneEvent(
+                          calendarcreazione,
+                          'doFilter',
+                          $event,
+                          filter
+                        )
+                      "></p-button>
                     <!-- <p-button
                       (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'setToday', $event, filter)">
                       Oggi
                     </p-button> -->
-                    <p-button label="Svuota" (click)="askConfirmAndHandleCalendarCreazioneEvent(calendarcreazione, 'clear', $event, filter)"></p-button>
+                    <p-button
+                      label="Svuota"
+                      (click)="
+                        askConfirmAndHandleCalendarCreazioneEvent(
+                          calendarcreazione,
+                          'clear',
+                          $event,
+                          filter
+                        )
+                      "></p-button>
                   </div>
                 </ng-template>
               </p-calendar>
@@ -210,334 +337,604 @@
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'tipo'">
-          <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
-            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-multiSelect *ngIf="isAccessibile() !== true" [showHeader]="false" [ngModel]="value"
-                [options]="tipoVisualizzazioneObj" optionValue="value" optionLabel="nome"
-                (onChange)="filter($event.value)" appendTo="body">
-                <ng-template let-option pTemplate="item">
+          <p-columnFilter
+            [field]="col.filterField"
+            matchMode="in"
+            [showMenu]="false">
+            <ng-template
+              pTemplate="filter"
+              let-value
+              let-filter="filterCallback">
+              <p-multiSelect
+                *ngIf="isAccessibile() !== true"
+                [showHeader]="false"
+                [ngModel]="value"
+                [options]="tipoVisualizzazioneObj"
+                optionValue="value"
+                optionLabel="nome"
+                (onChange)="filter($event.value)"
+                appendTo="body">
+                <ng-template
+                  let-option
+                  pTemplate="item">
                   <div class="p-multiselect-representative-option">
-                    <span class="p-ml-1">{{option.nome}}</span>
+                    <span class="p-ml-1">{{ option.nome }}</span>
                   </div>
                 </ng-template>
               </p-multiSelect>
-              <p-autoComplete *ngIf="isAccessibile() == true" [suggestions]="filteredTipo"
-                (completeMethod)="filterTipo($event)" (onClear)="filter(null)" field="nome" type="search"
-                appendTo="body" (onSelect)="filter($event.value)">
+              <p-autoComplete
+                *ngIf="isAccessibile() == true"
+                [suggestions]="filteredTipo"
+                (completeMethod)="filterTipo($event)"
+                (onClear)="filter(null)"
+                field="nome"
+                type="search"
+                appendTo="body"
+                (onSelect)="filter($event.value)">
               </p-autoComplete>
             </ng-template>
           </p-columnFilter>
         </div>
         <div *ngSwitchCase="'stato'">
-          <p-columnFilter [field]="col.filterField" matchMode="in" [showMenu]="false">
-            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-multiSelect *ngIf="isAccessibile() !== true" [ngModel]="value" [showHeader]="false"
-                [options]="statoVisualizzazioneObj" optionValue="value" optionLabel="nome"
-                (onChange)="filter($event.value)" appendTo="body">
-                <ng-template let-option pTemplate="item">
+          <p-columnFilter
+            [field]="col.filterField"
+            matchMode="in"
+            [showMenu]="false">
+            <ng-template
+              pTemplate="filter"
+              let-value
+              let-filter="filterCallback">
+              <p-multiSelect
+                *ngIf="isAccessibile() !== true"
+                [ngModel]="value"
+                [showHeader]="false"
+                [options]="statoVisualizzazioneObj"
+                optionValue="value"
+                optionLabel="nome"
+                (onChange)="filter($event.value)"
+                appendTo="body">
+                <ng-template
+                  let-option
+                  pTemplate="item">
                   <div class="p-multiselect-representative-option">
-                    <span class="p-ml-1">{{option.nome}}</span>
+                    <span class="p-ml-1">{{ option.nome }}</span>
                   </div>
                 </ng-template>
               </p-multiSelect>
-              <p-autoComplete *ngIf="isAccessibile() == true" [suggestions]="filteredStati"
-                (completeMethod)="filterStatoAccessibile($event)" (onClear)="filter(null)" field="nome" type="search"
-                appendTo="body" (onSelect)="filter($event.value)">
+              <p-autoComplete
+                *ngIf="isAccessibile() == true"
+                [suggestions]="filteredStati"
+                (completeMethod)="filterStatoAccessibile($event)"
+                (onClear)="filter(null)"
+                field="nome"
+                type="search"
+                appendTo="body"
+                (onSelect)="filter($event.value)">
               </p-autoComplete>
             </ng-template>
           </p-columnFilter>
         </div>
-        <div *ngSwitchCase="'oggetto'" class="search-wrapper">
-          <p-columnFilter #colfilteroggetto type="text" [field]="col.filterField" [matchMode]="col.filterMatchMode"
+        <div
+          *ngSwitchCase="'oggetto'"
+          class="search-wrapper">
+          <p-columnFilter
+            #colfilteroggetto
+            type="text"
+            [field]="col.filterField"
+            [matchMode]="col.filterMatchMode"
             [showMenu]="false">
-            <ng-template pTemplate="filter" let-value let-filterMethod="filterCallback">
-              <input #inputOggetto type="text" pInputText [value]="value"
-                (keydown.enter)="removeSort(); filterMethod(inputOggetto.value)">
+            <ng-template
+              pTemplate="filter"
+              let-value
+              let-filterMethod="filterCallback">
+              <input
+                #inputOggetto
+                type="text"
+                pInputText
+                [value]="value"
+                (keydown.enter)="
+                  removeSort(); filterMethod(inputOggetto.value)
+                " />
             </ng-template>
           </p-columnFilter>
-          <button *ngIf="colfilteroggetto.hasFilter()" class="material-icons close-icon" type="reset"
+          <button
+            *ngIf="colfilteroggetto.hasFilter()"
+            class="material-icons close-icon"
+            type="reset"
             (click)="colfilteroggetto.clearFilter(); resetSort()">
             close
           </button>
         </div>
-        <div *ngSwitchCase="'idPersonaResponsabile'" class="search-wrapper">
-          <p-columnFilter #colfilteridPersonaResponsabile [field]="col.filterField" matchMode="equals"
+        <div
+          *ngSwitchCase="'idPersonaResponsabile'"
+          class="search-wrapper">
+          <p-columnFilter
+            #colfilteridPersonaResponsabile
+            [field]="col.filterField"
+            matchMode="equals"
             [showMenu]="false">
-            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-autoComplete #autocompleteIdPersonaResponsabile [showEmptyMessage]="true"
-                emptyMessage="Nessun utente trovato" [suggestions]="filteredPersone"
-                (completeMethod)="filterPersone($event)" field="descrizioneVisualizzazione"
-                (onSelect)="filter($event?.id)" (onClear)="filter(null)" type="search" appendTo="body">
+            <ng-template
+              pTemplate="filter"
+              let-value
+              let-filter="filterCallback">
+              <p-autoComplete
+                #autocompleteIdPersonaResponsabile
+                [showEmptyMessage]="true"
+                emptyMessage="Nessun utente trovato"
+                [suggestions]="filteredPersone"
+                (completeMethod)="filterPersone($event)"
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter($event?.id)"
+                (onClear)="filter(null)"
+                type="search"
+                appendTo="body">
               </p-autoComplete>
             </ng-template>
           </p-columnFilter>
-          <button *ngIf="colfilteridPersonaResponsabile.hasFilter()" class="material-icons close-icon" type="reset"
-            (click)="colfilteridPersonaResponsabile.clearFilter(); autocompleteIdPersonaResponsabile.writeValue(null)">
+          <button
+            *ngIf="colfilteridPersonaResponsabile.hasFilter()"
+            class="material-icons close-icon"
+            type="reset"
+            (click)="
+              colfilteridPersonaResponsabile.clearFilter();
+              autocompleteIdPersonaResponsabile.writeValue(null)
+            ">
             close
           </button>
         </div>
-        <div *ngSwitchCase="'idPersonaCreazione'" class="search-wrapper">
-          <p-columnFilter #colfilteridPersonaCreazione [field]="col.filterField" matchMode="equals" [showMenu]="false">
-            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-autoComplete #autocompleteIdPersonaCreazione [showEmptyMessage]="true"
-                emptyMessage="Nessun utente trovato" [suggestions]="filteredPersone"
-                (completeMethod)="filterPersone($event)" field="descrizioneVisualizzazione"
-                (onSelect)="filter($event?.id)" (onClear)="filter(null)" type="search" appendTo="body">
+        <div
+          *ngSwitchCase="'idPersonaCreazione'"
+          class="search-wrapper">
+          <p-columnFilter
+            #colfilteridPersonaCreazione
+            [field]="col.filterField"
+            matchMode="equals"
+            [showMenu]="false">
+            <ng-template
+              pTemplate="filter"
+              let-value
+              let-filter="filterCallback">
+              <p-autoComplete
+                #autocompleteIdPersonaCreazione
+                [showEmptyMessage]="true"
+                emptyMessage="Nessun utente trovato"
+                [suggestions]="filteredPersone"
+                (completeMethod)="filterPersone($event)"
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter($event?.id)"
+                (onClear)="filter(null)"
+                type="search"
+                appendTo="body">
               </p-autoComplete>
             </ng-template>
           </p-columnFilter>
-          <button *ngIf="colfilteridPersonaCreazione.hasFilter()" class="material-icons close-icon" type="reset"
-            (click)="colfilteridPersonaCreazione.clearFilter(); autocompleteIdPersonaCreazione.writeValue(null)">
+          <button
+            *ngIf="colfilteridPersonaCreazione.hasFilter()"
+            class="material-icons close-icon"
+            type="reset"
+            (click)="
+              colfilteridPersonaCreazione.clearFilter();
+              autocompleteIdPersonaCreazione.writeValue(null)
+            ">
             close
           </button>
         </div>
-        <div *ngSwitchCase="'idStruttura'" class="search-wrapper">
-          <p-columnFilter #colfilteridStruttura [field]="col.filterField" matchMode="equals" [showMenu]="false">
-            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-autoComplete #autocompleteIdStruttura [showEmptyMessage]="true"
-                emptyMessage="Nessuna struttura trovata" [suggestions]="filteredStrutture"
-                (completeMethod)="filterStrutture($event)" field="descrizioneVisualizzazione"
-                (onSelect)="filter($event?.id)" (onClear)="filter(null)" appendTo="body">
+        <div
+          *ngSwitchCase="'idStruttura'"
+          class="search-wrapper">
+          <p-columnFilter
+            #colfilteridStruttura
+            [field]="col.filterField"
+            matchMode="equals"
+            [showMenu]="false">
+            <ng-template
+              pTemplate="filter"
+              let-value
+              let-filter="filterCallback">
+              <p-autoComplete
+                #autocompleteIdStruttura
+                [showEmptyMessage]="true"
+                emptyMessage="Nessuna struttura trovata"
+                [suggestions]="filteredStrutture"
+                (completeMethod)="filterStrutture($event)"
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter($event?.id)"
+                (onClear)="filter(null)"
+                appendTo="body">
               </p-autoComplete>
             </ng-template>
           </p-columnFilter>
-          <button *ngIf="colfilteridStruttura.hasFilter()" class="material-icons close-icon" type="reset"
-            (click)="colfilteridStruttura.clearFilter(); autocompleteIdStruttura.writeValue(null)">
+          <button
+            *ngIf="colfilteridStruttura.hasFilter()"
+            class="material-icons close-icon"
+            type="reset"
+            (click)="
+              colfilteridStruttura.clearFilter();
+              autocompleteIdStruttura.writeValue(null)
+            ">
             close
           </button>
         </div>
-        <div *ngSwitchCase="'numerazioneGerarchica'" class="search-wrapper">
-          <span class="search-wrapper"
-            [pTooltip]="archiviListMode === archiviListModeEnum.TUTTI || archiviListMode === archiviListModeEnum.ANOMALI || archivioPadre ? 'La selezione è disabilitata' : 'Seleziona livello'" 
-            tooltipPosition="top"
-            >
-            <p-columnFilter #columnFilterLivello 
-              field="livello" 
-              matchMode="in" 
+        <div
+          *ngSwitchCase="'numerazioneGerarchica'"
+          class="search-wrapper">
+          <span
+            class="search-wrapper"
+            [pTooltip]="
+              archiviListMode === archiviListModeEnum.TUTTI ||
+              archiviListMode === archiviListModeEnum.ANOMALI ||
+              archivioPadre
+                ? 'La selezione è disabilitata'
+                : 'Seleziona livello'
+            "
+            tooltipPosition="top">
+            <p-columnFilter
+              #columnFilterLivello
+              field="livello"
+              matchMode="in"
               class="column-filter-livello"
               [showMenu]="false">
-              <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-                <p-dropdown #dropdownLivello 
-                  
+              <ng-template
+                pTemplate="filter"
+                let-value
+                let-filter="filterCallback">
+                <p-dropdown
+                  #dropdownLivello
                   [options]="livelliFiltrabili"
                   [(ngModel)]="livelloValue"
                   (onChange)="filter($event.value)"
-                  [disabled]="(archiviListMode === archiviListModeEnum.TUTTI || archiviListMode === archiviListModeEnum.ANOMALI || archiviListMode === archiviListModeEnum.RECENTI || !!archivioPadre)"
-                  optionValue="value" 
-                  optionLabel="label" 
+                  [disabled]="
+                    archiviListMode === archiviListModeEnum.TUTTI ||
+                    archiviListMode === archiviListModeEnum.ANOMALI ||
+                    archiviListMode === archiviListModeEnum.RECENTI ||
+                    !!archivioPadre
+                  "
+                  optionValue="value"
+                  optionLabel="label"
                   panelStyleClass="dropdown-panel-livello"
                   appendTo="body">
                   <ng-template pTemplate="selectedItem">
-                    <span class="material-icons folder_outline-icon"
+                    <span
+                      class="material-icons folder_outline-icon"
                       [ngStyle]="{
-                        'color': livelloValue.length > 1 ? 'white' : 
-                          (livelloValue[0] === 1 ? '#92225f' : 
-                            (livelloValue[0] === 2 ? '#f68b20' : '#edc211'))}">
+                        color:
+                          livelloValue.length > 1
+                            ? 'white'
+                            : livelloValue[0] === 1
+                            ? '#92225f'
+                            : livelloValue[0] === 2
+                            ? '#f68b20'
+                            : '#edc211'
+                      }">
                       folder
                     </span>
                   </ng-template>
-                  <ng-template let-livello pTemplate="item">
-                    <span class="material-icons folder_outline-icon"
+                  <ng-template
+                    let-livello
+                    pTemplate="item">
+                    <span
+                      class="material-icons folder_outline-icon"
                       [ngStyle]="{
-                        'color': livello.value.length > 1 ? 'white' : 
-                          (livello.value[0] === 1 ? '#92225f' : 
-                            (livello.value[0] === 2 ? '#f68b20' : '#edc211'))}"
-                      pTooltip="Fascicolo" 
+                        color:
+                          livello.value.length > 1
+                            ? 'white'
+                            : livello.value[0] === 1
+                            ? '#92225f'
+                            : livello.value[0] === 2
+                            ? '#f68b20'
+                            : '#edc211'
+                      }"
+                      pTooltip="Fascicolo"
                       tooltipPosition="top">
                       folder
                     </span>
-                    {{livello.label}}
+                    {{ livello.label }}
                   </ng-template>
                 </p-dropdown>
               </ng-template>
             </p-columnFilter>
           </span>
-          <div class="search-wrapper box-filtro-numerazione" >
+          <div class="search-wrapper box-filtro-numerazione">
             <!--NB: La columnfilter qui è fittizia, in realtà il filtro è assolutamente custom e gestito dal ts -->
-            <p-columnFilter #colfilterNumerazioneGerarchica 
-              [field]="fieldNumerazioneGerarchica" 
+            <p-columnFilter
+              #colfilterNumerazioneGerarchica
+              [field]="fieldNumerazioneGerarchica"
               [matchMode]="matchModeNumerazioneGerarchica"
-              [showMenu]="false" 
+              [showMenu]="false"
               [useGrouping]="false">
-              <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-                <input #inputnumerazionegerarchica
-                  [ngStyle]="{'background-color': !regexNumerazioneGerarchica.test(inputnumerazionegerarchica?.value) ? '#FFCDD2' : ''}"
-                  pInputText 
+              <ng-template
+                pTemplate="filter"
+                let-value
+                let-filter="filterCallback">
+                <input
+                  #inputnumerazionegerarchica
+                  [ngStyle]="{
+                    'background-color': !regexNumerazioneGerarchica.test(
+                      inputnumerazionegerarchica?.value
+                    )
+                      ? '#FFCDD2'
+                      : ''
+                  }"
+                  pInputText
                   [ngModel]="value"
-                  type="text" 
+                  type="text"
                   placeholder="x-x-x/aaaa"
-                  (keydown.enter)="onEnterNumerazioneGerarchica(inputnumerazionegerarchica?.value)" />
+                  (keydown.enter)="
+                    onEnterNumerazioneGerarchica(
+                      inputnumerazionegerarchica?.value
+                    )
+                  " />
               </ng-template>
             </p-columnFilter>
-            <button *ngIf="colfilterNumerazioneGerarchica.hasFilter()" class="material-icons close-icon" type="reset"
+            <button
+              *ngIf="colfilterNumerazioneGerarchica.hasFilter()"
+              class="material-icons close-icon"
+              type="reset"
               (click)="colfilterNumerazioneGerarchica.clearFilter()">
               close
             </button>
           </div>
         </div>
-        <div *ngSwitchCase="'idVicari'" class="search-wrapper">
-          <p-columnFilter 
-            #colfiltervicari 
-            [field]="col.filterField" 
-            matchMode="" 
+        <div
+          *ngSwitchCase="'idVicari'"
+          class="search-wrapper">
+          <p-columnFilter
+            #colfiltervicari
+            [field]="col.filterField"
+            matchMode=""
             [showMenu]="false">
-            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-autoComplete #autocompleteVicari 
-                [showEmptyMessage]="true" 
+            <ng-template
+              pTemplate="filter"
+              let-value
+              let-filter="filterCallback">
+              <p-autoComplete
+                #autocompleteVicari
+                [showEmptyMessage]="true"
                 emptyMessage="Nessun utente trovato"
-                [suggestions]="filteredPersone" 
+                [suggestions]="filteredPersone"
                 (completeMethod)="filterPersone($event)"
-                field="descrizioneVisualizzazione" 
-                (onSelect)="filter($event?.id)" 
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter($event?.id)"
                 (onClear)="filter(null)"
                 appendTo="body">
               </p-autoComplete>
             </ng-template>
           </p-columnFilter>
-          <button *ngIf="colfiltervicari.hasFilter()" class="material-icons close-icon" type="reset"
-            (click)="colfiltervicari.clearFilter(); autocompleteVicari.writeValue(null)">
+          <button
+            *ngIf="colfiltervicari.hasFilter()"
+            class="material-icons close-icon"
+            type="reset"
+            (click)="
+              colfiltervicari.clearFilter(); autocompleteVicari.writeValue(null)
+            ">
             close
           </button>
         </div>
-        <div *ngSwitchCase="'idTitolo'" class="search-wrapper">
-          <p-columnFilter 
+        <div
+          *ngSwitchCase="'idTitolo'"
+          class="search-wrapper">
+          <p-columnFilter
             #colfiltertitoli
-            [field]="col.filterField" 
-            matchMode="" 
+            [field]="col.filterField"
+            matchMode=""
             [showMenu]="false">
-            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-autoComplete #autocompleteTitoli
-                [showEmptyMessage]="true" 
+            <ng-template
+              pTemplate="filter"
+              let-value
+              let-filter="filterCallback">
+              <p-autoComplete
+                #autocompleteTitoli
+                [showEmptyMessage]="true"
                 emptyMessage="Nessuna classificazione trovata"
-                [suggestions]="filteredTitoli" 
+                [suggestions]="filteredTitoli"
                 (completeMethod)="filterTitoli($event)"
-                field="descrizioneVisualizzazione" 
-                (onSelect)="filter($event?.id)" 
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter($event?.id)"
                 (onClear)="filter(null)"
                 appendTo="body">
               </p-autoComplete>
             </ng-template>
           </p-columnFilter>
-          <button *ngIf="colfiltertitoli.hasFilter()" class="material-icons close-icon" type="reset"
-            (click)="colfiltertitoli.clearFilter(); autocompleteTitoli.writeValue(null)">
+          <button
+            *ngIf="colfiltertitoli.hasFilter()"
+            class="material-icons close-icon"
+            type="reset"
+            (click)="
+              colfiltertitoli.clearFilter(); autocompleteTitoli.writeValue(null)
+            ">
             close
           </button>
         </div>
-        <div *ngSwitchCase="'idMassimario'" class="search-wrapper">
-          <p-columnFilter 
+        <div
+          *ngSwitchCase="'idMassimario'"
+          class="search-wrapper">
+          <p-columnFilter
             #colfiltermassimario
-            [field]="col.filterField" 
-            matchMode="" 
+            [field]="col.filterField"
+            matchMode=""
             [showMenu]="false">
-            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-              <p-autoComplete #autocompleteMassimario
-                [showEmptyMessage]="true" 
+            <ng-template
+              pTemplate="filter"
+              let-value
+              let-filter="filterCallback">
+              <p-autoComplete
+                #autocompleteMassimario
+                [showEmptyMessage]="true"
                 emptyMessage="Nessuna categoria documentale trovata"
-                [suggestions]="filteredMassimari" 
+                [suggestions]="filteredMassimari"
                 (completeMethod)="filterMassimari($event)"
-                field="descrizioneVisualizzazione" 
-                (onSelect)="filter($event?.id)" 
+                field="descrizioneVisualizzazione"
+                (onSelect)="filter($event?.id)"
                 (onClear)="filter(null)"
                 appendTo="body">
               </p-autoComplete>
             </ng-template>
           </p-columnFilter>
-          <button *ngIf="colfiltermassimario.hasFilter()" class="material-icons close-icon" type="reset"
-            (click)="colfiltermassimario.clearFilter(); autocompleteMassimario.writeValue(null)">
+          <button
+            *ngIf="colfiltermassimario.hasFilter()"
+            class="material-icons close-icon"
+            type="reset"
+            (click)="
+              colfiltermassimario.clearFilter();
+              autocompleteMassimario.writeValue(null)
+            ">
             close
           </button>
         </div>
       </th>
-      <th *ngIf="loggedUserCanDeleteArchivio"
+      <th
+        *ngIf="loggedUserCanDeleteArchivio"
         class="delete-archive-column"
-        alignFrozen="right" 
-        pFrozenColumn 
-        [frozen]="true">
-      </th>
+        alignFrozen="right"
+        pFrozenColumn
+        [frozen]="true"></th>
     </tr>
-    <tr *ngIf="showAdditionalRow && (archiviListMode === 'TUTTI' || archiviListMode === 'ANOMALI') && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
+    <tr
+      *ngIf="
+        showAdditionalRow &&
+        (archiviListMode === 'TUTTI' || archiviListMode === 'ANOMALI') &&
+        loggedUserIsAG &&
+        lastAziendaFilterValue.length === 1 &&
+        idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])
+      "
       class="additional-row">
-      <span *ngIf="allRowsAreSelected && rowCountInProgress" class="selection-info">
+      <span
+        *ngIf="allRowsAreSelected && rowCountInProgress"
+        class="selection-info">
         <i class="pi pi-spin pi-spinner"></i>
       </span>
-      <span *ngIf="allRowsAreSelected && !rowCountInProgress" class="selection-info">
-        Tutti i {{rowCountSelected}} fascicoli sono selezionati
+      <span
+        *ngIf="allRowsAreSelected && !rowCountInProgress"
+        class="selection-info">
+        Tutti i {{ rowCountSelected }} fascicoli sono selezionati
       </span>
-      <span *ngIf="!allRowsAreSelected" class="selection-info">
-        {{rowCountSelected === 1 ? '1 fascicolo selezionato' : rowCountSelected + ' fascicoli selezionati'}}
+      <span
+        *ngIf="!allRowsAreSelected"
+        class="selection-info">
+        {{
+          rowCountSelected === 1
+            ? "1 fascicolo selezionato"
+            : rowCountSelected + " fascicoli selezionati"
+        }}
       </span>
-      <p-button 
+      <p-button
         label="Annulla selezione"
         type="reset"
         (click)="
           rowCountSelected = 0;
-          archivesSelected = []; 
-          showAdditionalRow = false; 
-          allRowsAreSelected = false; 
-          allRowsWasSelected = false; 
-          rowsNotSelectedWhenAlmostAllRowsAreSelected = []">
+          archivesSelected = [];
+          showAdditionalRow = false;
+          allRowsAreSelected = false;
+          allRowsWasSelected = false;
+          rowsNotSelectedWhenAlmostAllRowsAreSelected = []
+        ">
       </p-button>
       <!-- BOTTONE GESTIONE MASSIVA RESPONSABILE-->
-      <p-button 
+      <p-button
         *ngIf="archivesSelected.length > 0"
         [disabled]="!autocompleteIdStruttura || !autocompleteIdStruttura.value"
-        [pTooltip]="!autocompleteIdStruttura || !autocompleteIdStruttura.value ? 'Filtrare per struttura per accedere a questa funzionalità' : ''"
+        [pTooltip]="
+          !autocompleteIdStruttura || !autocompleteIdStruttura.value
+            ? 'Filtrare per struttura per accedere a questa funzionalità'
+            : ''
+        "
         class="gestione-massiva-responsabile-button"
         icon="pi p-mr-2 pi-user-edit"
         label="Sostituzione responsabile e struttura"
         (click)="openSostituzioneResponsabileMassivoPopup()">
-      </p-button><!-- *ngIf="archivesSelected.length > 0" -->
-      <p-button 
+      </p-button
+      ><!-- *ngIf="archivesSelected.length > 0" -->
+      <p-button
         *ngIf="archivesSelected.length > 0"
         class="gestione-massiva-responsabile-button"
         icon="pi p-mr-2 pi-user-edit"
         label="Modifica permessi/vicari"
         (click)="openGestioneMassivaPermessiPopup()">
-      </p-button><!-- *ngIf="archivesSelected.length > 0"  [disabled]="!autocompleteIdStruttura || !autocompleteIdStruttura.value"-->
+      </p-button
+      ><!-- *ngIf="archivesSelected.length > 0"  [disabled]="!autocompleteIdStruttura || !autocompleteIdStruttura.value"-->
     </tr>
   </ng-template>
   <!-- BODY -->
-  <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex">
+  <ng-template
+    pTemplate="body"
+    let-rowData
+    let-columns="columns"
+    let-index="rowIndex">
     <tr class="row-height">
       <!-- [pSelectableRow]="rowData"
       [pSelectableRowIndex]="index"
       [pSelectableRowDisabled]="false" -->
-      <td *ngIf="(archiviListMode === 'TUTTI' || archiviListMode === 'ANOMALI') && loggedUserIsAG && lastAziendaFilterValue.length === 1 && idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])"
+      <td
+        *ngIf="
+          (archiviListMode === 'TUTTI' || archiviListMode === 'ANOMALI') &&
+          loggedUserIsAG &&
+          lastAziendaFilterValue.length === 1 &&
+          idAziendeDoveLoggedUserIsAG.includes(lastAziendaFilterValue[0])
+        "
         class="checkbox-column"
         alignFrozen="left"
-        pFrozenColumn 
+        pFrozenColumn
         [frozen]="true">
         <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
       </td>
-      <td *ngFor="let col of columns" [ngSwitch]="col.field" [ngClass]="col.bodyClass">
+      <td
+        *ngFor="let col of columns"
+        [ngSwitch]="col.field"
+        [ngClass]="col.bodyClass">
         <div *ngSwitchCase="'bitAnomalie'">
-          {{rowData.anomalieVisualizzazione}}
+          {{ rowData.anomalieVisualizzazione }}
         </div>
         <div *ngSwitchCase="'idAzienda'">
-          {{rowData.idAzienda.nome}}
+          {{ rowData.idAzienda.nome }}
         </div>
         <div *ngSwitchCase="'tipo'">
-          {{rowData.tipoVisualizzazione}}
+          {{ rowData.tipoVisualizzazione }}
         </div>
-        <div *ngSwitchCase="'numerazioneGerarchica'" class="numerazione-box"
+        <div
+          *ngSwitchCase="'numerazioneGerarchica'"
+          class="numerazione-box"
           (click)="openArchive(rowData)">
           <div class="left-side">
-            <span [ngStyle]="{
-              'color': rowData.livello === 1 ? '#92225f' : 
-                (rowData.livello === 2 ? '#f68b20' : '#edc211')}" 
-              class="material-icons folder_outline-icon-fasc" 
-              [pTooltip]="rowData.livello === 1 ? 'Fascicolo' : 
-              (rowData.livello === 2 ? 'Sottofascicolo' : 'Inserto')" 
+            <span
+              [ngStyle]="{
+                color:
+                  rowData.livello === 1
+                    ? '#92225f'
+                    : rowData.livello === 2
+                    ? '#f68b20'
+                    : '#edc211'
+              }"
+              class="material-icons folder_outline-icon-fasc"
+              [pTooltip]="
+                rowData.livello === 1
+                  ? 'Fascicolo'
+                  : rowData.livello === 2
+                  ? 'Sottofascicolo'
+                  : 'Inserto'
+              "
               tooltipPosition="top">
-                folder
+              folder
             </span>
-            <i class="pi" 
-              [pTooltip]="rowData.isArchivioNero ? 'Nessun permesso sull\'archivio' : 
-                (rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO' ? 'Archivio chiuso' :
-                (rowData.tipo === 'SPECIALE' ? 'Archivio speciale' : ''))" 
-              [ngClass]="rowData.isArchivioNero ? 'pi-ban' : 
-                (rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO' ? 'pi-lock' :
-                (rowData.tipo === 'SPECIALE' ? 'pi-star' : 'display-none'))" 
+            <i
+              class="pi"
+              [pTooltip]="
+                rowData.isArchivioNero
+                  ? 'Nessun permesso sull\'archivio'
+                  : rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO'
+                  ? 'Archivio chiuso'
+                  : rowData.tipo === 'SPECIALE'
+                  ? 'Archivio speciale'
+                  : ''
+              "
+              [ngClass]="
+                rowData.isArchivioNero
+                  ? 'pi-ban'
+                  : rowData.stato === 'CHIUSO' || rowData.stato === 'PRECHIUSO'
+                  ? 'pi-lock'
+                  : rowData.tipo === 'SPECIALE'
+                  ? 'pi-star'
+                  : 'display-none'
+              "
               tooltipPosition="top">
             </i>
           </div>
@@ -571,74 +968,105 @@
             </span>
           </div> -->
           <div class="box-numerazione">
-            {{rowData.numerazioneGerarchica}}
-          </div> 
+            {{ rowData.numerazioneGerarchica }}
+          </div>
         </div>
         <div *ngSwitchCase="'dataCreazione'">
-          {{rowData.dataCreazione | date:'dd/MM/yyyy'}}
+          {{ rowData.dataCreazione | date : "dd/MM/yyyy" }}
         </div>
-        <div *ngSwitchCase="'oggetto'" class="oggetto-content" [pTooltip]="rowData.oggetto" tooltipPosition="top"
+        <div
+          *ngSwitchCase="'oggetto'"
+          class="oggetto-content"
+          [pTooltip]="rowData.oggetto"
+          tooltipPosition="top"
           (click)="openArchive(rowData)">
-          {{rowData.oggetto && rowData.oggetto !== "" ? rowData.oggetto : "[nome non assegnato]"}}
+          {{
+            rowData.oggetto && rowData.oggetto !== ""
+              ? rowData.oggetto
+              : "[nome non assegnato]"
+          }}
         </div>
         <div *ngSwitchCase="'stato'">
-          {{rowData.statoVisualizzazione}}
+          {{ rowData.statoVisualizzazione }}
         </div>
         <div *ngSwitchCase="'idPersonaResponsabile'">
-          {{rowData.idPersonaResponsabileVisualizzazione}}
+          {{ rowData.idPersonaResponsabileVisualizzazione }}
         </div>
         <div *ngSwitchCase="'idPersonaCreazione'">
-          {{rowData.idPersonaCreazioneVisualizzazione}}
+          {{ rowData.idPersonaCreazioneVisualizzazione }}
         </div>
-        <div *ngSwitchCase="'idStruttura'" [pTooltip]="rowData.idStruttura?.nome" tooltipPosition="top">
-          {{rowData.idStruttura?.nome}}
-        </div>
-        <div *ngSwitchCase="'idVicari'"
-          [pTooltip]="rowData.descrizionePersonaVicarioList != '' ? tooltipsVicari(rowData.descrizionePersonaVicarioList) : 'Nessun vicario selezionato'"
-          [escape] = "false"
+        <div
+          *ngSwitchCase="'idStruttura'"
+          [pTooltip]="rowData.idStruttura?.nome"
           tooltipPosition="top">
-          <span *ngFor="let v of rowData.descrizionePersonaVicarioList" class="vicari-item">
-            {{v}} 
+          {{ rowData.idStruttura?.nome }}
+        </div>
+        <div
+          *ngSwitchCase="'idVicari'"
+          [pTooltip]="
+            rowData.descrizionePersonaVicarioList != ''
+              ? tooltipsVicari(rowData.descrizionePersonaVicarioList)
+              : 'Nessun vicario selezionato'
+          "
+          [escape]="false"
+          tooltipPosition="top">
+          <span
+            *ngFor="let v of rowData.descrizionePersonaVicarioList"
+            class="vicari-item">
+            {{ v }}
           </span>
         </div>
         <div *ngSwitchCase="'idTitolo'">
-          {{rowData.idTitoloVisualizzazione}}
+          {{ rowData.idTitoloVisualizzazione }}
         </div>
         <div *ngSwitchCase="'idMassimario'">
-          {{rowData.idMassimarioVisualizzazione}}
+          {{ rowData.idMassimarioVisualizzazione }}
         </div>
       </td>
-      <td *ngIf="loggedUserCanDeleteArchivio"
+      <td
+        *ngIf="loggedUserCanDeleteArchivio"
         class="delete-archive-column"
-        alignFrozen="right"  
-        pFrozenColumn 
+        alignFrozen="right"
+        pFrozenColumn
         [frozen]="true">
         <i
-          class="pi pi-times" 
-          [pTooltip]="rowData.livello == 2 ? 'Elimina sottofascicolo' : 'Elimina inserto'"
-          (click)="$event.stopPropagation(); eliminaSottoarchivio(rowData, $event)"
-        >
+          class="pi pi-times"
+          [pTooltip]="
+            rowData.livello == 2 ? 'Elimina sottofascicolo' : 'Elimina inserto'
+          "
+          (click)="
+            $event.stopPropagation(); eliminaSottoarchivio(rowData, $event)
+          ">
         </i>
       </td>
     </tr>
   </ng-template>
-  <ng-template pTemplate="loadingbody" let-columns="columns">
+  <ng-template
+    pTemplate="loadingbody"
+    let-columns="columns">
     <tr class="row-height">
       <!-- <td [ngClass]="col.bodyClass" class="loading-cell">
         <div class="loading-text"></div>
       </td> -->
-      <td *ngFor="let col of columns" [ngClass]="col.bodyClass" class="loading-cell">
+      <td
+        *ngFor="let col of columns"
+        [ngClass]="col.bodyClass"
+        class="loading-cell">
         <div class="loading-text"></div>
       </td>
     </tr>
   </ng-template>
   <!-- No Records-->
-  <ng-template pTemplate="emptymessage" let-columns>
+  <ng-template
+    pTemplate="emptymessage"
+    let-columns>
     <tr>
-      <td [attr.colspan]="columns.length" class="emptyMessage" >
-          <h3>{{messageIfNull}}</h3>
+      <td
+        [attr.colspan]="columns.length"
+        class="emptyMessage">
+        <h3>{{ messageIfNull }}</h3>
       </td>
-  </tr>
+    </tr>
   </ng-template>
 </p-table>
 
@@ -647,55 +1075,62 @@
 <p-confirmPopup key="confirm-popup"></p-confirmPopup>
 
 <!-- DIALOG PER GESTIONE MASSIVA RESPONSAILE -->
-<p-dialog 
-  header="Gestione massiva: Modifica responsabile/struttura" 
-  [(visible)]="showGestioneMassivaResponsabile" 
-  
+<p-dialog
+  header="Gestione massiva: Modifica responsabile/struttura"
+  [(visible)]="showGestioneMassivaResponsabile"
   styleClass="dialog-gestione-massiva-responsabile"
   [modal]="true"
-><!-- (onHide)="onCloseGestioneMassiva()" -->
+  ><!-- (onHide)="onCloseGestioneMassiva()" -->
   <sostituzione-responsabile
     [rowCountSelected]="rowCountSelected"
     [allRowsWasSelected]="allRowsWasSelected"
     [filtersAndSorts]="filtersAndSortsForGestioneMassiva"
     [lazyFiltersAndSorts]="lazyFiltersAndSortsForGestioneMassiva"
-    [rowsNotSelectedWhenAlmostAllRowsAreSelected]="rowsNotSelectedWhenAlmostAllRowsAreSelected"
+    [rowsNotSelectedWhenAlmostAllRowsAreSelected]="
+      rowsNotSelectedWhenAlmostAllRowsAreSelected
+    "
     [archivesSelected]="archivesSelected"
     [serviceToGetData]="serviceToGetData"
     [idAzienda]="idAziendaFilter"
     [idStrutturaFiltro]="idStrutturaFilter"
     (hideMe)="showGestioneMassivaResponsabile = false"
-  ></sostituzione-responsabile>
+    [escludiArchiviChiusiFromAbilitazioniMassive]="
+      escludiArchiviChiusiFromAbilitazioniMassive
+    "></sostituzione-responsabile>
 </p-dialog>
 
 <!-- DIALOG GESTIONE MASSIVA VICARI E PERMESSI -->
-<p-dialog 
-  header="Gestione massiva: Modifica vicari/permessi" 
-  [(visible)]="showGestioneMassivaPermessi" 
+<p-dialog
+  header="Gestione massiva: Modifica vicari/permessi"
+  [(visible)]="showGestioneMassivaPermessi"
   styleClass="dialog-gestione-massiva-vicari-permessi"
   [modal]="true"
-><!-- (onHide)="onCloseGestioneMassiva()" -->
+  ><!-- (onHide)="onCloseGestioneMassiva()" -->
   <modifica-vicari-permessi
     [rowCountSelected]="rowCountSelected"
     [allRowsWasSelected]="allRowsWasSelected"
     [filtersAndSorts]="filtersAndSortsForGestioneMassiva"
     [lazyFiltersAndSorts]="lazyFiltersAndSortsForGestioneMassiva"
-    [rowsNotSelectedWhenAlmostAllRowsAreSelected]="rowsNotSelectedWhenAlmostAllRowsAreSelected"
+    [rowsNotSelectedWhenAlmostAllRowsAreSelected]="
+      rowsNotSelectedWhenAlmostAllRowsAreSelected
+    "
     [archivesSelected]="archivesSelected"
     [serviceToGetData]="serviceToGetData"
     [idAzienda]="idAziendaFilter"
     (hideMe)="showGestioneMassivaPermessi = false"
-  ></modifica-vicari-permessi>
+    [escludiArchiviChiusiFromAbilitazioniMassive]="
+      escludiArchiviChiusiFromAbilitazioniMassive
+    "></modifica-vicari-permessi>
 </p-dialog>
 
 <!-- DIALOG COPIA/TRASFERISCI ABILITAZIONI -->
-<p-dialog 
-  header="Gestione massiva: Copia/Trasferisci abilitazioni" 
-  [(visible)]="showCopiaTrasferisciAbilitazioni" 
+<p-dialog
+  header="Gestione massiva: Copia/Trasferisci abilitazioni"
+  [(visible)]="showCopiaTrasferisciAbilitazioni"
   styleClass="dialog-copia-trasferisci-abilitazioni"
-  [modal]="true"
->
+  [modal]="true">
   <copia-trasferisci-abilitazioni
-    (hideMe)="showCopiaTrasferisciAbilitazioni = false"
-  ></copia-trasferisci-abilitazioni>
+    (hideMe)="
+      showCopiaTrasferisciAbilitazioni = false
+    "></copia-trasferisci-abilitazioni>
 </p-dialog>
