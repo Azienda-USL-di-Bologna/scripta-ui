@@ -269,7 +269,7 @@ export class DocComponent implements OnInit, OnDestroy {
             this.visibilitaLimitata = this.doc.visibilita === VisibilitaDoc.LIMITATA;
             this.riservato = this.doc.visibilita === VisibilitaDoc.RISERVATO;
             this.annullato = this.doc.annullato;
-            this.docsCollegati = this.doc.docsCollegati;  
+            this.docsCollegati = this.doc.docsCollegati; 
         })
       );
 

@@ -133,7 +133,7 @@
           </p-checkbox>
           <label *ngIf="docVisualizer?.editing" for="annullato">Annullato</label>
         </div>
-        <div class="info-versamento icon-box" *ngIf="docsCollegati.length > 0">
+        <div *ngIf="docVisualizer?.docsCollegati"class="info-versamento icon-box">
           <i
             pTooltip="Documenti collegati"
             class="pi pi-clone info-icon" 
