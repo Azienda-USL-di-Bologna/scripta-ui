@@ -329,7 +329,7 @@ export class LottiListComponent implements OnInit {
       ]
       campiModificatiDelLotto.version = this.editLottoRow.version;
       delete campiModificatiDelLotto.nextSdrDateInformation;
-      console.log(campiModificatiDelLotto);
+      // console.log(campiModificatiDelLotto);
       this.dialogDisplay = false;
       this.loading = true;
       this.lottoService.patchHttpCall(campiModificatiDelLotto, this.editLottoRow.id, projection).subscribe(
@@ -371,7 +371,8 @@ export class LottiListComponent implements OnInit {
         ...this.lottoForm.controls.gruppiAggiudicatari.value
       ];
       delete newLotto.nextSdrDateInformation;
-      console.log(newLotto);
+      // console.log(newLotto);
+      this.dialogDisplay = false;
       this.loading = true;
       this.lottoService.postHttpCall(newLotto, projection).subscribe(
         (result) => {
