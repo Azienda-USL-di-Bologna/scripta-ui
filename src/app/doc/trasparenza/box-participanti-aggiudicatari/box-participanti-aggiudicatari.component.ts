@@ -65,7 +65,7 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
   public componenti: Componente[] = [];
   public tipologia: Tipologia[];
   public aggiudicatari: Componente[] = [];
-  public ruolocomponente: RuoloComponente[] = [];
+  public ruolocomponente: any[] = [];
   public loading: boolean = false;
   public newRow: boolean = false;
   public editingRow: any;
@@ -109,6 +109,27 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
             });
         }
       });
+  }
+
+  onShow(componentiList: Componente[]) {
+    const capogruppo = componentiList.find((c) => 
+    c.idRuolo && c.idRuolo.nome.toUpperCase() === "CAPOGRUPPO"
+    );
+    const mandante = componentiList.find((c) => 
+      c.idRuolo && c.idRuolo.nome.toUpperCase() === "MANDANTE"
+    );
+    this.ruolocomponente.map((r: any) =>{
+      if (r.nome.toUpperCase() === "MANDANTE") {
+          r.inactive = !!mandante;
+      }
+    });
+    this.ruolocomponente.map((r: any) =>{
+      if (r.nome.toUpperCase() === "CAPOGRUPPO") {
+          r.inactive = !!capogruppo;
+      }
+    });
+    console.log("onShow:" + mandante?.idRuolo?.nome);
+    console.log("onShow:" + capogruppo?.idRuolo?.nome);
   }
 
   public filterContatto(event: any) {

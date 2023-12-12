@@ -155,8 +155,10 @@
                   placeholder="Scelta ruolo"
                   optionLabel="nome"
                   [showClear]="true"
+                  (onShow)="onShow(gruppo.componentiList)"
                   appendTo="body"
                   [disabled]="!editing"
+                  optionDisabled="inactive"
                 ></p-dropdown>
               </div>
             </td>
@@ -536,6 +538,8 @@
                 [showClear]="true"
                 appendTo="body"
                 [disabled]="!editing || gruppo.componentiList.length === 1"
+                (onShow)="onShow(gruppo.componentiList)"
+                optionDisabled="inactive"
               ></p-dropdown>
             </div>
           </td>
