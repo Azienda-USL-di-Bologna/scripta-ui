@@ -1,9 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import {
-  Component,
-  Input,
-  OnInit,
-} from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 import {
   Componente,
   Contatto,
@@ -17,9 +13,9 @@ import {
 } from "@bds/internauta-model";
 import { BoxParticipantiAggiudicatariService } from "./box-participanti-aggiudicatari.service";
 import { Table } from "primeng/table";
-import { ConfirmationService } from 'primeng/api';
-import { Subscription } from 'rxjs';
-import { FILTER_TYPES, FilterDefinition, FiltersAndSorts } from '@bds/next-sdr';
+import { ConfirmationService } from "primeng/api";
+import { Subscription } from "rxjs";
+import { FILTER_TYPES, FilterDefinition, FiltersAndSorts } from "@bds/next-sdr";
 
 @Component({
   selector: "box-participanti-aggiudicatari",
@@ -39,8 +35,7 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
 
   private _singoliList: any[] = null;
   @Input() set singoliList(values: any[]) {
-    if (values) 
-      this._singoliList = values;
+    if (values) this._singoliList = values;
   }
   public get singoliList(): any[] {
     return this._singoliList;
@@ -50,7 +45,7 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
   @Input() set gruppoList(values: GruppoLotto[]) {
     if (values) {
       this._gruppoList = values;
-      if (this._modalita === 'aggiudicatari' && this.gruppoList.length === 0) {
+      if (this._modalita === "aggiudicatari" && this.gruppoList.length === 0) {
         const gruppoLotto = new GruppoLotto();
         gruppoLotto.tipo = TipoGruppo.AGGIUDICATARIO;
         gruppoLotto.componentiList = [];
@@ -72,7 +67,7 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
   public rowData: any;
 
   public contattoSingoloSelezionato: Contatto;
-  public contattoSelezionato: { [key: number]: Contatto } = {} ;
+  public contattoSelezionato: { [key: number]: Contatto } = {};
   public filteredContatto: Contatto[];
   public contatti: Contatto[];
 
@@ -90,7 +85,7 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
         if (res) {
           this.ruolocomponente = res._embedded.ruolocomponente;
           this._gruppoList.forEach((g) => {
-            g.componentiList = g.componentiList.filter(c => c !== null); // La form lo inizializza a null...
+            g.componentiList = g.componentiList.filter((c) => c !== null); // La form lo inizializza a null...
             g.componentiList.map((c) => {
               c.combinedKey = c.codiceFiscale + c.ragioneSociale;
               if (c.fk_idRuolo && c.fk_idRuolo.id && !c.idRuolo) {
@@ -98,14 +93,16 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
                   (r) => r.id === c.fk_idRuolo.id
                 );
               }
-            })
+            });
           });
-          if (this._singoliList && this._singoliList.length) 
+          if (this._singoliList && this._singoliList.length)
             this._singoliList.forEach((g) => {
-              g.componentiList = g.componentiList.filter((c:any) => c !== null); // La form lo inizializza a null...
+              g.componentiList = g.componentiList.filter(
+                (c: any) => c !== null
+              ); // La form lo inizializza a null...
               g.componentiList.map((c: any) => {
                 g.combinedKey = c.codiceFiscale + c.ragioneSociale;
-              })
+              });
             });
         }
       });
@@ -115,23 +112,62 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
     let query = event.query;
     this.loadContatto(query);
   }
-  
+
   public loadContatto(query: string) {
-    const projection = ENTITIES_STRUCTURE.rubrica.contatto.standardProjections.ContattoWithIdContatto;
+    const projection =
+      ENTITIES_STRUCTURE.rubrica.contatto.standardProjections
+        .ContattoWithIdContatto;
     const filtersAndSorts: FiltersAndSorts = new FiltersAndSorts();
-    filtersAndSorts.addFilter(new FilterDefinition("ragioneSociale", FILTER_TYPES.string.contains, query));
-    filtersAndSorts.addFilter(new FilterDefinition("tipo", FILTER_TYPES.not_string.equals, TipoContatto.AZIENDA));
-    filtersAndSorts.addFilter(new FilterDefinition("tipo", FILTER_TYPES.not_string.equals, TipoContatto.FORNITORE));
-    filtersAndSorts.addFilter(new FilterDefinition("contatto.eliminato", FILTER_TYPES.not_string.equals, false));
-    filtersAndSorts.addFilter(new FilterDefinition("contatto.tscol", FILTER_TYPES.not_string.equals, query));
+    filtersAndSorts.addFilter(
+      new FilterDefinition(
+        "ragioneSociale",
+        FILTER_TYPES.string.contains,
+        query
+      )
+    );
+    filtersAndSorts.addFilter(
+      new FilterDefinition(
+        "tipo",
+        FILTER_TYPES.not_string.equals,
+        TipoContatto.AZIENDA
+      )
+    );
+    filtersAndSorts.addFilter(
+      new FilterDefinition(
+        "tipo",
+        FILTER_TYPES.not_string.equals,
+        TipoContatto.FORNITORE
+      )
+    );
+    filtersAndSorts.addFilter(
+      new FilterDefinition(
+        "contatto.eliminato",
+        FILTER_TYPES.not_string.equals,
+        false
+      )
+    );
+    filtersAndSorts.addFilter(
+      new FilterDefinition(
+        "contatto.tscol",
+        FILTER_TYPES.not_string.equals,
+        query
+      )
+    );
     this.subscriptions.push(
-      this.contattoService.getData(projection, filtersAndSorts).subscribe(res => {
-        this.filteredContatto = res.results;
-      })
-    )
+      this.contattoService
+        .getData(projection, filtersAndSorts)
+        .subscribe((res) => {
+          this.filteredContatto = res.results;
+        })
+    );
   }
 
-  onContattoSelect(contattoSelezionato: Contatto, dt: Table, componentiList: Componente[], index: number) {
+  onContattoSelect(
+    contattoSelezionato: Contatto,
+    dt: Table,
+    componentiList: Componente[],
+    index: number
+  ) {
     const componente = this.initComponente(contattoSelezionato);
     this.nuovoPartecipante(dt, componentiList, componente);
     delete this.contattoSelezionato[index];
@@ -147,7 +183,8 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
     const componente = new Componente();
     componente.codiceFiscale = contatto.codiceFiscale;
     componente.ragioneSociale = contatto.ragioneSociale;
-    componente.combinedKey = componente.codiceFiscale + componente.ragioneSociale;
+    componente.combinedKey =
+      componente.codiceFiscale + componente.ragioneSociale;
     return componente;
   }
 
@@ -163,19 +200,23 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
   eliminaGruppo(event: Event, groupIndex: number) {
     this.confirmationService.confirm({
       target: event.target,
-      message: 'Sei sicuro di voler eliminare il gruppo?',
-      icon: 'pi pi-exclamation-triangle',
-      key: 'eliminaGruppo',
+      message: "Sei sicuro di voler eliminare il gruppo?",
+      icon: "pi pi-exclamation-triangle",
+      key: "eliminaGruppo",
       accept: () => {
         this._gruppoList.splice(groupIndex, 1);
       },
       reject: () => {
-          //reject action
-      }
-  });
+        //reject action
+      },
+    });
   }
 
-  public nuovoPartecipante(dt: Table, componentiList: Componente[], componente = new Componente()): void {
+  public nuovoPartecipante(
+    dt: Table,
+    componentiList: Componente[],
+    componente = new Componente()
+  ): void {
     componentiList.unshift(componente);
     const newRow = dt.value[0];
     dt.initRowEdit(newRow);
@@ -185,10 +226,7 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
     this.editingRow = { ...rowData };
   }
 
-  public eliminaPartecipante(
-    componentiList: Componente[],
-    rowIndex: number
-  ) {
+  public eliminaPartecipante(componentiList: Componente[], rowIndex: number) {
     componentiList.splice(rowIndex, 1);
   }
 
@@ -245,7 +283,9 @@ export class BoxParticipantiAggiudicatariComponent implements OnInit {
   }
 
   public salvaSingolo(rowData: any) {
-    rowData.combinedKey = rowData.componentiList[0].codiceFiscale + rowData.componentiList[0].ragioneSociale;
+    rowData.combinedKey =
+      rowData.componentiList[0].codiceFiscale +
+      rowData.componentiList[0].ragioneSociale;
   }
 
   //Aggiudicatario
