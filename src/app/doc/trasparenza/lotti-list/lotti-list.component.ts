@@ -360,6 +360,7 @@ export class LottiListComponent implements OnInit {
           });
           this.loading = false;
           this.listaLotti.unshift(result);
+          this.totalRecords = this.listaLotti.length;
         },
         (error) => {
           this.messageService.add({
