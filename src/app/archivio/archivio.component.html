@@ -1,49 +1,73 @@
-<generic-caption-table *ngIf="referenceTableComponent && archivio && loggeduserCanAccess"
-  [configuration]="captionConfiguration" 
+<generic-caption-table
+  *ngIf="referenceTableComponent && archivio && loggeduserCanAccess"
+  [configuration]="captionConfiguration"
   [referenceTableComponent]="referenceTableComponent"
-  [selectButtonsComponent]="this" 
+  [selectButtonsComponent]="this"
   [functionalOperationsComponent]="this"
   [inputGobalFilterValue]="inputGobalFilterValue">
 </generic-caption-table>
-<p-splitter *ngIf="archivio && loggeduserCanAccess" styleClass="splitter-archivio" [panelSizes]="[25,75]"
-  [minSizes]="[15,55]">
+<p-splitter
+  *ngIf="archivio && loggeduserCanAccess"
+  styleClass="splitter-archivio"
+  [panelSizes]="[25, 75]"
+  [minSizes]="[15, 55]">
   <ng-template pTemplate>
-    <archivio-tree [archivio]="archivio">
-    </archivio-tree>
+    <archivio-tree [archivio]="archivio"> </archivio-tree>
   </ng-template>
   <ng-template pTemplate>
     <!-- Contenuto (lista archivi + lista documenti)-->
-    <p-splitter *ngIf="!contenutoDiviso" layout="vertical" [gutterSize]="6" [ngClass]="{
-        'hide': selectedButtonItem && selectedButtonItem.id !== 'CONTENUTO', 
-        'hide-sottoarchivi': archivio.livello === 3 
+    <p-splitter
+      *ngIf="!contenutoDiviso"
+      layout="vertical"
+      [gutterSize]="6"
+      [ngClass]="{
+        hide: selectedButtonItem && selectedButtonItem.id !== 'CONTENUTO',
+        'hide-sottoarchivi': archivio.livello === 3
       }">
       <ng-template pTemplate>
         <!-- Lista sottoarchivi -->
-        <div style="width: 100%;">
+        <div style="width: 100%">
           <!--  *ngIf="archivio.livello !== 3" -->
-          <h4 class="mini-caption-table">{{archivio.livello === 1 ? 'Sottofascicoli' : 'Inserti'}} contenuti</h4>
+          <h4 class="mini-caption-table">
+            {{ archivio.livello === 1 ? "Sottofascicoli" : "Inserti" }}
+            contenuti
+          </h4>
           <!-- La condizione dell'ngIf potrebbe sembrare superflua ma è invece necessaria per far si che la ptable mostri il contenuto
           altrimenti quello che fa è caricare le righe ma non mostrarle -->
-          <archivi-list #archivilist
-            *ngIf="archivio.livello !== 3 && selectedButtonItem && selectedButtonItem.id === 'CONTENUTO'"
+          <archivi-list
+            #archivilist
+            *ngIf="
+              archivio.livello !== 3 &&
+              selectedButtonItem &&
+              selectedButtonItem.id === 'CONTENUTO'
+            "
             [archivioPadre]="archivio">
           </archivi-list>
         </div>
       </ng-template>
       <ng-template pTemplate>
         <!-- Lista documenti contenuti -->
-        <div style="width: 100%;">
-          <h4 class="mini-caption-table caption-lista-docs">Documenti contenuti</h4>
-          <docs-list #doclist [archivio]="archivio" [reloadData]="this.reloadDataDocList">
+        <div style="width: 100%">
+          <h4 class="mini-caption-table caption-lista-docs">
+            Documenti contenuti
+          </h4>
+          <docs-list
+            #doclist
+            [archivio]="archivio"
+            [reloadData]="this.reloadDataDocList">
           </docs-list>
         </div>
       </ng-template>
     </p-splitter>
 
     <!-- Lista sottoarchivi -->
-    <archivi-list #archivilist *ngIf="contenutoDiviso" 
+    <archivi-list
+      #archivilist
+      *ngIf="contenutoDiviso"
       [archivioPadre]="archivio"
-      [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'SOTTOARCHIVI'}">
+      [ngClass]="{
+        hide: selectedButtonItem && selectedButtonItem.id !== 'SOTTOARCHIVI'
+      }">
     </archivi-list>
 
     <!-- Lista documenti contenuti -->
@@ -51,30 +75,47 @@
       [archivio]="archivio"
       [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'DOCUMENTI'}">
     </docs-list> -->
-    <p-splitter *ngIf="contenutoDiviso && loggedUserCanVisualizeArchive" 
+    <p-splitter
+      *ngIf="contenutoDiviso && loggedUserCanVisualizeArchive"
       styleClass="splitter-docs-list"
-      [panelSizes]="[50,50]"
-      [minSizes]="[30,30]"
-      [ngClass]="{ 'hiderightside': !showRightSide, 'hide': selectedButtonItem && selectedButtonItem.id !== 'DOCUMENTI' }">
+      [panelSizes]="[50, 50]"
+      [minSizes]="[30, 30]"
+      [ngClass]="{
+        hiderightside: !showRightSide,
+        hide: selectedButtonItem && selectedButtonItem.id !== 'DOCUMENTI'
+      }">
       <ng-template pTemplate>
-        <docs-list #doclist
+        <docs-list
+          #doclist
           [archivio]="archivio"
-          (showRightPanel)="manageRowSelected($event)" >
+          (showRightPanel)="manageRowSelected($event)">
         </docs-list>
       </ng-template>
       <ng-template pTemplate>
-        <doc-detail-and-preview *ngIf="showRightSide"
-          [doc]="docForDetailAndPreview" 
-          [sonoPersonaVedenteSuDocSelezionato]="sonoPersonaVedenteSuDocSelezionato" 
-          (closeRightPanel)="manageRowSelected({showPanel: false, rowSelected: null, sonoPersonaVedenteSuDocSelezionato: null})" >
+        <doc-detail-and-preview
+          *ngIf="showRightSide"
+          [doc]="docForDetailAndPreview"
+          [sonoPersonaVedenteSuDocSelezionato]="
+            sonoPersonaVedenteSuDocSelezionato
+          "
+          (closeRightPanel)="
+            manageRowSelected({
+              showPanel: false,
+              rowSelected: null,
+              sonoPersonaVedenteSuDocSelezionato: null
+            })
+          ">
         </doc-detail-and-preview>
       </ng-template>
     </p-splitter>
 
     <!-- Dati dell'archivio -->
-    <dettaglio-archivio #dettaglioarchivio 
+    <dettaglio-archivio
+      #dettaglioarchivio
       [archivio]="archivio"
-      [ngClass]="{'hide': selectedButtonItem && selectedButtonItem.id !== 'DETTAGLIO'}"
+      [ngClass]="{
+        hide: selectedButtonItem && selectedButtonItem.id !== 'DETTAGLIO'
+      }"
       (updateArchivio)="onUpdateArchivio($event)">
     </dettaglio-archivio>
   </ng-template>
@@ -84,53 +125,68 @@
 <!-- DIALOG PER IL COPIA/SPOSTA/DUPLICA/TRASFORMA IN FASICOLO -->
 <p-dialog
   appendTo="body"
-  header="{{this.operazioneOrganizza}}"
+  header="{{ this.operazioneOrganizza }}"
   [(visible)]="this.showOrganizzaPopUp"
   [modal]="true"
   [responsive]="false"
   [focusOnShow]="false"
   (onHide)="onCloseOrganizzaDialog()"
   contentStyleClass="organizzaPopup">
-
   <!-- TRASFORMA IN FASCICOLO -->
-  <div class="organizza-target-container" *ngIf="this.operazioneOrganizza == 'Trasforma in fascicolo'">
+  <div
+    class="organizza-target-container"
+    *ngIf="this.operazioneOrganizza == 'Trasforma in fascicolo'">
     <h2 *ngIf="this.operazioneOrganizza == 'Trasforma in fascicolo'">
-      Sei sicuro di voler rendere fascicolo questo {{archivio.livello === 3 ? 'inserto?' : 'sottofascicolo?'}}
+      Sei sicuro di voler rendere fascicolo questo
+      {{ archivio.livello === 3 ? "inserto?" : "sottofascicolo?" }}
     </h2>
     <div class="organizza-confirm-button-container">
-      <p-button [disabled]="!canOrganizzare()" type="button" (click)="this.organizza()" icon="pi pi-check" label="Si"></p-button>
-      <p-button [disabled]="!canOrganizzare()" type="button" (click)="this.resetOrganizzaPopup(); this.rightContentProgressSpinner = false;" icon="pi pi-times" label="No"></p-button>
+      <p-button
+        [disabled]="!canOrganizzare()"
+        type="button"
+        (click)="this.organizza()"
+        icon="pi pi-check"
+        label="Si"></p-button>
+      <p-button
+        [disabled]="!canOrganizzare()"
+        type="button"
+        (click)="
+          this.resetOrganizzaPopup(); this.rightContentProgressSpinner = false
+        "
+        icon="pi pi-times"
+        label="No"></p-button>
     </div>
   </div>
 
   <!-- COPIA -->
-  <div *ngIf="this.operazioneOrganizza == 'Copia'"
-    class="organizza-target-container" >
+  <div
+    *ngIf="this.operazioneOrganizza == 'Copia'"
+    class="organizza-target-container">
     <h3 *ngIf="this.operazioneOrganizza === 'Copia'">Scegli una operazione:</h3>
     <div class="organizza-target-button-container">
-      <p-radioButton 
-        name="organizzaTarget" 
-        value="fascicolo" 
-        label="Copia solo il fascicolo" 
+      <p-radioButton
+        name="organizzaTarget"
+        value="fascicolo"
+        label="Copia solo il fascicolo"
         [(ngModel)]="organizzaTarget"
         [disabled]="this.profonditaArchivio === 3">
       </p-radioButton>
       <!-- <p class="organizza-target-button-descrizione">Copia la gerarchia del fascicolo/subfascicolo in uno di destinazione.</p> -->
     </div>
     <div class="organizza-target-button-container">
-      <p-radioButton 
-        name="organizzaTarget" 
-        value="contenuto" 
-        label="Copia solo i documenti contenuti" 
+      <p-radioButton
+        name="organizzaTarget"
+        value="contenuto"
+        label="Copia solo i documenti contenuti"
         [(ngModel)]="organizzaTarget">
       </p-radioButton>
       <!-- <p class="organizza-target-button-descrizione">Copia il contenuto del fascicolo/subfascicolo in uno di destinazione.</p> -->
     </div>
     <div class="organizza-target-button-container">
-      <p-radioButton 
-        name="organizzaTarget" 
-        value="fascicoloAndContenuto" 
-        label="Copia il fascicolo e i documenti contenuti" 
+      <p-radioButton
+        name="organizzaTarget"
+        value="fascicoloAndContenuto"
+        label="Copia il fascicolo e i documenti contenuti"
         [(ngModel)]="organizzaTarget">
       </p-radioButton>
       <!-- <p class="organizza-target-button-descrizione">Copia il contenuto del fascicolo/subfascicolo in uno di destinazione.</p> -->
@@ -138,16 +194,16 @@
   </div>
 
   <!-- SPOSTA -->
-  <div *ngIf="this.operazioneOrganizza === 'Sposta'"
+  <div
+    *ngIf="this.operazioneOrganizza === 'Sposta'"
     class="organizza-target-container">
     <h3>Scegli una operazione:</h3>
     <div class="organizza-target-button-container">
-      <p-radioButton 
-        name="organizzaTarget" 
-        value="fascicolo" 
-        label="Sposta fascicolo e documenti contenuti" 
-        
-        [(ngModel)]="organizzaTarget" 
+      <p-radioButton
+        name="organizzaTarget"
+        value="fascicolo"
+        label="Sposta fascicolo e documenti contenuti"
+        [(ngModel)]="organizzaTarget"
         [disabled]="this.archivio?.livello === 1">
       </p-radioButton>
       <!-- <span class="organizza-target-button-descrizione">pTooltip="Sposta il fascicolo e il suo contenuto."
@@ -155,10 +211,10 @@
       </span> -->
     </div>
     <div class="organizza-target-button-container">
-      <p-radioButton 
-        name="organizzaTarget" 
-        value="contenuto" 
-        label="Sposta solo documenti contenuti" 
+      <p-radioButton
+        name="organizzaTarget"
+        value="contenuto"
+        label="Sposta solo documenti contenuti"
         [(ngModel)]="organizzaTarget">
       </p-radioButton>
       <!-- <span class="organizza-target-button-descrizione">
@@ -168,14 +224,15 @@
   </div>
 
   <!-- DUPLICA -->
-  <div *ngIf="this.operazioneOrganizza === 'Duplica'"
-    class="organizza-target-container" >
+  <div
+    *ngIf="this.operazioneOrganizza === 'Duplica'"
+    class="organizza-target-container">
     <h3>Scegli una operazione:</h3>
     <div class="organizza-target-button-container">
-      <p-radioButton 
-        name="organizzaTarget" 
-        value="fascicolo" 
-        label="Duplica fascicolo senza documenti contenuti" 
+      <p-radioButton
+        name="organizzaTarget"
+        value="fascicolo"
+        label="Duplica fascicolo senza documenti contenuti"
         [(ngModel)]="organizzaTarget">
       </p-radioButton>
       <!-- <span class="organizza-target-button-descrizione">
@@ -183,10 +240,10 @@
       </span> -->
     </div>
     <div class="organizza-target-button-container">
-      <p-radioButton 
-        name="organizzaTarget" 
-        value="contenuto" 
-        label="Duplica fascicolo con documenti contenuti" 
+      <p-radioButton
+        name="organizzaTarget"
+        value="contenuto"
+        label="Duplica fascicolo con documenti contenuti"
         [(ngModel)]="organizzaTarget">
       </p-radioButton>
       <!-- <span class="organizza-target-button-descrizione">
@@ -197,61 +254,84 @@
 
   <!-- SPOSTA/COPIA -->
   <div
-    *ngIf="this.operazioneOrganizza != 'Trasforma in fascicolo' && this.operazioneOrganizza != 'Duplica'" 
+    *ngIf="
+      operazioneOrganizza != 'Trasforma in fascicolo' &&
+      operazioneOrganizza != 'Duplica'
+    "
     class="organizza-target-archivio-ricerca">
     <p-divider></p-divider>
     <p>Scegli il fascicolo di destinazione</p>
-    <app-archivio-ricerca 
-      #archivioRicerca 
-      [idAzienda]="this.archivio?.idAzienda.id" 
+    <app-archivio-ricerca
+      #archivioRicerca
+      [idAzienda]="archivio?.idAzienda.id"
       [livello]="getLivelloForAutocompliteArchivioDestinazione()"
-      [permessoMinimo]="this.permessoMinimoSuArchivioDestinazioneOrganizza"
-      [archivio]="this.archivioDestinazioneOrganizza"
+      [permessoMinimo]="permessoMinimoSuArchivioDestinazioneOrganizza"
+      [archivio]="archivioDestinazioneOrganizza"
       placeholder="Cerca..."
       (archivioSelectedEvent)="archivioSelectedEvent($event.arch)">
     </app-archivio-ricerca>
   </div>
   <!-- <p-autoComplete [(ngModel)]="text" placeholder="Fascicolo di desctinazione" [suggestions]="results" (completeMethod)="search($event)"></p-autoComplete> -->
-  <p-button *ngIf="this.operazioneOrganizza != 'Trasforma in fascicolo'" [disabled]="!canOrganizzare()" type="button" (click)="organizza()" label="Conferma"></p-button>
+  <p-button
+    *ngIf="operazioneOrganizza != 'Trasforma in fascicolo'"
+    [disabled]="!canOrganizzare()"
+    type="button"
+    (click)="organizza()"
+    label="Conferma"></p-button>
 </p-dialog>
 
-<richiesta-accesso-archivi #richiestaaccessoarchivi *ngIf="archivio && !loggeduserCanAccess"></richiesta-accesso-archivi>
+<richiesta-accesso-archivi
+  #richiestaaccessoarchivi
+  *ngIf="archivio && !loggeduserCanAccess"></richiesta-accesso-archivi>
 
 <p-confirmPopup key="confirm-popup"></p-confirmPopup>
 
-<p-dialog 
+<p-dialog
   appendTo="body"
-  [header]="chiusuraFascicolo || chiusuraArchivioParams ? 'Chiudi fascicolo' : 'Prechiudi fascicolo'"
+  [header]="
+    chiusuraFascicolo || chiusuraArchivioParams
+      ? 'Chiudi fascicolo'
+      : 'Prechiudi fascicolo'
+  "
   [(visible)]="this.showChiudiPopup"
   [modal]="true"
   [responsive]="false"
   [focusOnShow]="false"
   contentStyleClass="chiudiPopup">
-  <div [innerHTML]="chiusuraFascicolo && !chiusuraArchivioParams ? messaggioChiusura.slice(0, contaMessaggio) 
-  + messaggioChiusuraDefinitiva + messaggioChiusura.slice(contaMessaggio) : messaggioChiusura"></div>
-  <br>
-  <br>
+  <div
+    [innerHTML]="
+      chiusuraFascicolo && !chiusuraArchivioParams
+        ? messaggioChiusura.slice(0, contaMessaggio) +
+          messaggioChiusuraDefinitiva +
+          messaggioChiusura.slice(contaMessaggio)
+        : messaggioChiusura
+    "></div>
+  <br />
+  <br />
   <div class="chiudi-fascicolo-footer">
     <button
       type="button"
-      (click)="chiusuraFascicolo ? chiusuraDefinitiva($event) : chiudiRiapriArchivio($event); this.showChiudiPopup = false;"
+      (click)="
+        chiusuraFascicolo
+          ? chiusuraDefinitiva($event)
+          : chiudiRiapriArchivio($event);
+        this.showChiudiPopup = false
+      "
       pButton
       label="Conferma"
       class="mr-2 buttons"
-      icon="pi pi-check"
-    ></button>
+      icon="pi pi-check"></button>
     <button
       type="button"
-      (click)="this.showChiudiPopup = false;"
+      (click)="this.showChiudiPopup = false"
       pButton
       label="Annulla"
       icon="pi pi-times"
-      class="mr-2 buttons"
-    ></button>
+      class="mr-2 buttons"></button>
   </div>
 </p-dialog>
 
-<p-dialog 
+<p-dialog
   appendTo="body"
   header="Frontespizio"
   [(visible)]="this.showStampaPopUp"
@@ -259,5 +339,5 @@
   [responsive]="false"
   [focusOnShow]="true"
   contentStyleClass="organizzaPopup">
-  <div [innerHTML]="messaggioStampa"></div>   
+  <div [innerHTML]="messaggioStampa"></div>
 </p-dialog>
