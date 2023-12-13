@@ -20,56 +20,71 @@
       *ngFor="let gruppo of gruppoList; let i = index"
       style="margin-bottom: 35px"
     >
-    <p-fieldset legend="Gruppo {{ gruppoList.length - i }}" [toggleable]="true">
-      <p-table
-        #dt
-        [value]="gruppo.componentiList"
-        dataKey="combinedKey"
-        editMode="row"
-        responsiveLayout="scroll"
-        styleClass="tabella"
-        [rows]="3"
-        [loading]="loading"
-        [scrollable]="true"
-        scrollHeight="200px">
-        <ng-template pTemplate="caption">
-          <div class="gruppo-part-btn">
-            <div>
-              <label for="ricerca-contatto">Cerca in rubrica:</label>
-              <p-autoComplete 
-                #autoComplete
-                id="ricerca-contatto"
-                styleClass="autocomplete-contatto"
-                placeholder="Cerca per ragione sociale.."
-                [dropdown]="true"
-                [(ngModel)]="contattoSelezionato[i]"
-                field="contattoSelezionato[i].ragioneSociale"
-                [suggestions]="filteredContatto"
-                (completeMethod)="filterContatto($event)"
-                (onSelect)="onContattoSelect($event, dt, gruppo.componentiList, i)"
-              >
-                <ng-template let-contatto pTemplate="item">
-                  <div class="contatto-item">
-                    <div>{{ contatto.ragioneSociale + ' (' + contatto.codiceFiscale + ')'}}</div>
-                  </div>
-                </ng-template>
-              </p-autoComplete>
-            </div>
-            <div>
-              <button
-                id="nuovoPartecipante"
-                type="button"
-                pButton
-                pRipple
-                icon="pi pi-plus"
-                label="Partecipante"
-                pTooltip="Aggiungi partecipante"
-                tooltipPosition="top"
-                class="btn-partecipanti"
-                style="margin-left: 15px;"
-                (click)="nuovoPartecipante(dt, gruppo.componentiList)"
-              ></button>
-              <!-- <div> -->
+      <p-fieldset
+        legend="Gruppo {{ gruppoList.length - i }}"
+        [toggleable]="true"
+      >
+        <p-table
+          #dt
+          [value]="gruppo.componentiList"
+          dataKey="combinedKey"
+          editMode="row"
+          responsiveLayout="scroll"
+          styleClass="tabella"
+          [rows]="3"
+          [loading]="loading"
+          [scrollable]="true"
+          scrollHeight="200px"
+        >
+          <ng-template pTemplate="caption">
+            <div class="gruppo-part-btn">
+              <div>
+                <label for="ricerca-contatto">Cerca in rubrica:</label>
+                <p-autoComplete
+                  #autoComplete
+                  id="ricerca-contatto"
+                  styleClass="autocomplete-contatto"
+                  placeholder="Cerca per ragione sociale.."
+                  [dropdown]="true"
+                  [(ngModel)]="contattoSelezionato[i]"
+                  field="contattoSelezionato[i].ragioneSociale"
+                  [suggestions]="filteredContatto"
+                  (completeMethod)="filterContatto($event)"
+                  (onSelect)="
+                    onContattoSelect($event, dt, gruppo.componentiList, i)
+                  "
+                >
+                  <ng-template let-contatto pTemplate="output">
+                    <div class="contatto-item">
+                      <div>
+                        {{
+                          contatto.ragioneSociale +
+                            " (" +
+                            (contatto.partitaIva ||
+                              contatto.codiceFiscale ||
+                              "piva/cf mancante") +
+                            ")"
+                        }}
+                      </div>
+                    </div>
+                  </ng-template>
+                </p-autoComplete>
+              </div>
+              <div>
+                <button
+                  id="nuovoPartecipante"
+                  type="button"
+                  pButton
+                  pRipple
+                  icon="pi pi-plus"
+                  label="Partecipante"
+                  pTooltip="Aggiungi partecipante"
+                  tooltipPosition="top"
+                  class="btn-partecipanti"
+                  style="margin-left: 15px"
+                  (click)="nuovoPartecipante(dt, gruppo.componentiList)"
+                ></button>
+                <!-- <div> -->
                 <button
                   id="eliminaGruppo"
                   type="button"
@@ -80,150 +95,159 @@
                   pTooltip="Elimina gruppo"
                   tooltipPosition="top"
                   class="btn-partecipanti"
-                  style="margin-left: 15px;"
+                  style="margin-left: 15px"
                   (click)="eliminaGruppo($event, i)"
                 ></button>
-              <!-- </div> -->
+                <!-- </div> -->
+              </div>
             </div>
-          </div>
-        </ng-template>
-        <ng-template pTemplate="header">
-          <tr>
-            <th class="cf-column">Codice Fiscale</th>
-            <th class="rs-column">Ragione Sociale</th>
-            <th class="r-column">Ruolo</th>
-            <th class="action-column"></th>
-          </tr>
-        </ng-template>
-        <ng-template
-          pTemplate="body"
-          let-rowData
-          let-editing="editing"
-          let-ri="rowIndex"
-        >
-          <tr [pEditableRow]="rowData">
-            <td class="cf-column">
-              <p-cellEditor
-                style="
-                  width: 100%;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  white-space: nowrap;
-                "
-              >
-                <ng-template pTemplate="input">
-                  <input
-                    [(ngModel)]="rowData.codiceFiscale"
-                    type="text"
-                    pInputText
-                  />
-                </ng-template>
-                <ng-template pTemplate="output">
-                  {{ rowData.codiceFiscale }}
-                </ng-template>
-              </p-cellEditor>
-            </td>
-            <td class="rs-column">
-              <p-cellEditor
-                style="
-                  width: 100%;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  white-space: nowrap;
-                "
-              >
-                <ng-template pTemplate="input">
-                  <div class="part-singolo-input">
+          </ng-template>
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="cf-column">P.IVA / Codice Fiscale</th>
+              <th class="rs-column">Ragione Sociale</th>
+              <th class="r-column">Ruolo</th>
+              <th class="action-column"></th>
+            </tr>
+          </ng-template>
+          <ng-template
+            pTemplate="body"
+            let-rowData
+            let-editing="editing"
+            let-ri="rowIndex"
+          >
+            <tr [pEditableRow]="rowData">
+              <td class="cf-column">
+                <p-cellEditor
+                  style="
+                    width: 100%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                  "
+                >
+                  <ng-template pTemplate="input">
                     <input
-                      [(ngModel)]="rowData.ragioneSociale"
+                      [(ngModel)]="rowData.codiceFiscale"
                       type="text"
                       pInputText
+                      required
                     />
-                  </div>
-                </ng-template>
-                <ng-template pTemplate="output">
-                  {{ rowData.ragioneSociale }}
-                </ng-template>
-              </p-cellEditor>
-            </td>
-            <td class="r-column">
-              <div class="dropdown-ruolo">
-                <p-dropdown
-                  dataKey="nome"
-                  [options]="ruolocomponente"
-                  [(ngModel)]="rowData.idRuolo"
-                  placeholder="Scelta ruolo"
-                  optionLabel="nome"
-                  [showClear]="true"
-                  appendTo="body"
-                  [disabled]="!editing"
-                ></p-dropdown>
-              </div>
-            </td>
+                  </ng-template>
+                  <ng-template pTemplate="output">
+                    {{ rowData.codiceFiscale }}
+                  </ng-template>
+                </p-cellEditor>
+              </td>
+              <td class="rs-column">
+                <p-cellEditor
+                  style="
+                    width: 100%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                  "
+                >
+                  <ng-template pTemplate="input">
+                    <div class="part-singolo-input">
+                      <input
+                        [(ngModel)]="rowData.ragioneSociale"
+                        type="text"
+                        pInputText
+                        required
+                      />
+                    </div>
+                  </ng-template>
+                  <ng-template pTemplate="output">
+                    {{ rowData.ragioneSociale }}
+                  </ng-template>
+                </p-cellEditor>
+              </td>
+              <td class="r-column">
+                <div class="dropdown-ruolo">
+                  <p-dropdown
+                    dataKey="nome"
+                    [options]="ruolocomponente"
+                    [(ngModel)]="rowData.idRuolo"
+                    placeholder="Scelta ruolo"
+                    optionLabel="nome"
+                    [showClear]="true"
+                    appendTo="body"
+                    [disabled]="!editing"
+                    (onShow)="onShow(gruppo.componentiList)"
+                    [required]="true"
+                  ></p-dropdown>
+                </div>
+              </td>
 
-            <td class="action-column" style="text-align: center">
-              <!-- aggiunto un'icona per attivare la modifica -->
-              <button
-                *ngIf="!editing"
-                pButton
-                pRipple
-                pInitEditableRow
-                pTooltip="Modifica Raggruppamento"
-                tooltipPosition="top"
-                class="p-button-rounded p-button-text"
-                type="button"
-                icon="pi pi-pencil"
-                (click)="modificaPartecipante(rowData)"
-              ></button>
+              <td class="action-column" style="text-align: center">
+                <!-- aggiunto un'icona per attivare la modifica -->
+                <button
+                  *ngIf="!editing"
+                  pButton
+                  pRipple
+                  pInitEditableRow
+                  pTooltip="Modifica Raggruppamento"
+                  tooltipPosition="top"
+                  class="p-button-rounded p-button-text"
+                  type="button"
+                  icon="pi pi-pencil"
+                  (click)="modificaPartecipante(rowData)"
+                ></button>
 
-              <!-- aggiunto un'icona per eliminare una riga -->
-              <button
-                *ngIf="!editing"
-                pButton
-                pRipple
-                pTooltip="Elimina Partecipante"
-                tooltipPosition="top"
-                class="p-button-rounded p-button-text"
-                style="margin-left: -1rem"
-                type="button"
-                icon="pi pi-trash"
-                (click)="eliminaPartecipante(gruppo.componentiList, ri)"
-              ></button>
+                <!-- aggiunto un'icona per eliminare una riga -->
+                <button
+                  *ngIf="!editing"
+                  pButton
+                  pRipple
+                  pTooltip="Elimina Partecipante"
+                  tooltipPosition="top"
+                  class="p-button-rounded p-button-text"
+                  style="margin-left: -1rem"
+                  type="button"
+                  icon="pi pi-trash"
+                  (click)="eliminaPartecipante(gruppo.componentiList, ri)"
+                ></button>
 
-              <!-- aggiunto un'icona per salvare la modifica -->
-              <button
-                *ngIf="editing"
-                pButton
-                pRipple
-                pSaveEditableRow
-                pTooltip="Conferma Raggruppamento"
-                tooltipPosition="top"
-                class="p-button-rounded p-button-text p-button-success p-mr-2"
-                style="margin-left: 0.2rem"
-                type="button"
-                icon="pi pi-check"
-                (click)="salvaPartecipante(rowData)"
-              ></button>
+                <!-- aggiunto un'icona per salvare la modifica -->
+                <button
+                  *ngIf="editing"
+                  pButton
+                  pRipple
+                  pSaveEditableRow
+                  pTooltip="Conferma Raggruppamento"
+                  tooltipPosition="top"
+                  class="p-button-rounded p-button-text p-button-success p-mr-2"
+                  style="margin-left: 0.2rem"
+                  type="button"
+                  icon="pi pi-check"
+                  (click)="salvaPartecipante(rowData)"
+                  [disabled]="
+                    !rowData.codiceFiscale ||
+                    !rowData.ragioneSociale ||
+                    !rowData.idRuolo
+                  "
+                ></button>
 
-              <!-- aggiunto un'icona per cancellare la modifica -->
-              <button
-                *ngIf="editing"
-                pButton
-                pRipple
-                pCancelEditableRow
-                icon="pi pi-times"
-                pTooltip="Annulla modifiche"
-                tooltipPosition="top"
-                class="p-button-rounded p-button-text p-button-danger"
-                style="margin-left: -1rem"
-                type="button"
-                (click)="onRowEditCancel(gruppo.componentiList, rowData, ri)"
-              ></button>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </p-fieldset>
+                <!-- aggiunto un'icona per cancellare la modifica -->
+                <button
+                  *ngIf="editing"
+                  pButton
+                  pRipple
+                  pCancelEditableRow
+                  icon="pi pi-times"
+                  pTooltip="Annulla modifiche"
+                  tooltipPosition="top"
+                  class="p-button-rounded p-button-text p-button-danger"
+                  style="margin-left: -1rem"
+                  type="button"
+                  (click)="onRowEditCancel(gruppo.componentiList, rowData, ri)"
+                ></button>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-fieldset>
     </div>
   </p-accordionTab>
 </p-accordion>
@@ -246,11 +270,11 @@
           <div class="gruppo-part-btn">
             <div>
               <label for="ricerca-contatto">Cerca in rubrica:</label>
-              <p-autoComplete 
+              <p-autoComplete
                 #autoComplete
                 id="ricerca-contatto"
                 styleClass="autocomplete-contatto"
-                placeholder="Digita una ragione sociale..."
+                placeholder="Cerca per ragione sociale.."
                 [dropdown]="true"
                 [(ngModel)]="contattoSingoloSelezionato"
                 field="contattoSingoloSelezionato.ragioneSociale"
@@ -260,7 +284,16 @@
               >
                 <ng-template let-contatto pTemplate="item">
                   <div class="contatto-item">
-                    <div>{{ contatto.ragioneSociale + ' (' + contatto.codiceFiscale + ')'}}</div>
+                    <div>
+                      {{
+                        contatto.ragioneSociale +
+                          " (" +
+                          (contatto.partitaIva ||
+                            contatto.codiceFiscale ||
+                            "piva/cf mancante") +
+                          ")"
+                      }}
+                    </div>
                   </div>
                 </ng-template>
               </p-autoComplete>
@@ -283,7 +316,7 @@
         </ng-template>
         <ng-template pTemplate="header">
           <tr>
-            <th class="cf-column">Codice Fiscale</th>
+            <th class="cf-column">P.IVA / Codice Fiscale</th>
             <th class="rs-column">Ragione Sociale</th>
             <th class="action-column"></th>
           </tr>
@@ -432,7 +465,7 @@
         <div class="gruppo-agg-btn">
           <div>
             <label for="ricerca-contatto">Cerca in rubrica:</label>
-            <p-autoComplete 
+            <p-autoComplete
               #autoComplete
               id="ricerca-contatto"
               styleClass="autocomplete-contatto"
@@ -442,11 +475,22 @@
               field="contattoSelezionato[i].ragioneSociale"
               [suggestions]="filteredContatto"
               (completeMethod)="filterContatto($event)"
-              (onSelect)="onContattoSelect($event, dt, gruppo.componentiList, i)"
+              (onSelect)="
+                onContattoSelect($event, dt, gruppo.componentiList, i)
+              "
             >
               <ng-template let-contatto pTemplate="item">
                 <div class="contatto-item">
-                  <div>{{ contatto.ragioneSociale + ' (' + contatto.codiceFiscale + ')'}}</div>
+                  <div>
+                    {{
+                      contatto.ragioneSociale +
+                        " (" +
+                        (contatto.partitaIva ||
+                          contatto.codiceFiscale ||
+                          "piva/cf mancante") +
+                        ")"
+                    }}
+                  </div>
                 </div>
               </ng-template>
             </p-autoComplete>
@@ -461,7 +505,7 @@
               pTooltip="Aggiunti aggiudicatario"
               tooltipPosition="top"
               class="mr-2 btn-partecipanti"
-              style="width: 10rem;"
+              style="width: 10rem"
               label="Aggiudicatario"
               (click)="nuovoAggiudicatario(dt, gruppo.componentiList)"
             ></button>
@@ -470,7 +514,7 @@
       </ng-template>
       <ng-template pTemplate="header">
         <tr>
-          <th class="cf-column">Codice Fiscale</th>
+          <th class="cf-column">P.IVA / Codice Fiscale</th>
           <th class="rs-column">Ragione Sociale</th>
           <th class="r-column">Ruolo</th>
           <th class="action-column"></th>
@@ -497,6 +541,7 @@
                   [(ngModel)]="rowData.codiceFiscale"
                   type="text"
                   pInputText
+                  required
                 />
               </ng-template>
               <ng-template pTemplate="output">
@@ -518,6 +563,7 @@
                   [(ngModel)]="rowData.ragioneSociale"
                   type="text"
                   pInputText
+                  required
                 />
               </ng-template>
               <ng-template pTemplate="output">
@@ -536,6 +582,9 @@
                 [showClear]="true"
                 appendTo="body"
                 [disabled]="!editing || gruppo.componentiList.length === 1"
+                (onShow)="onShow(gruppo.componentiList)"
+                optionDisabled="inactive"
+                [required]="true"
               ></p-dropdown>
             </div>
           </td>
@@ -582,6 +631,11 @@
               type="button"
               icon="pi pi-check"
               (click)="salvaAggiudicatario(rowData)"
+              [disabled]="
+                (gruppo.componentiList.length > 1 && !rowData.codiceFiscale) ||
+                !rowData.ragioneSociale ||
+                !rowData.idRuolo
+              "
             ></button>
 
             <!-- aggiunto un'icona per cancellare la modifica -->

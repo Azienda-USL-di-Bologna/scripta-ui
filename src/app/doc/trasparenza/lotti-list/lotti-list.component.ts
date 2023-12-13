@@ -270,7 +270,6 @@ export class LottiListComponent implements OnInit {
     return <FormArray>this.lottoForm.get('gruppiAggiudicatari');
   }
   public saveDialog() {
-    this.dialogDisplay = false;
     const projection = "LottoWithAll";
     if (this.editLottoRow.id && this.editLottoRow.id > 0) {
       const campiModificatiDelLotto: Lotto = new Lotto();
@@ -300,7 +299,29 @@ export class LottiListComponent implements OnInit {
       } 
       if (this.lottoForm.controls.dataCompletamento.dirty && this.lottoForm.controls.dataCompletamento.value !== this.editLottoRow.dataCompletamento){
         campiModificatiDelLotto.dataCompletamento = this.dataPipe.transform(this.lottoForm.controls.dataCompletamento.value, 'yyyy-MM-dd') as any;        
-      } 
+      }
+      let partecipantiGruppi: GruppoLotto[] = [...this.lottoForm.controls.partecipantiGruppi.value];
+      let isAtleastOneComponenteIncomplete = partecipantiGruppi.some(g =>  g.componentiList.some(c => !c.codiceFiscale || !c.ragioneSociale || !c.idRuolo) );
+      let aggiudicatarioGruppi: GruppoLotto[] = [...this.lottoForm.controls.gruppiAggiudicatari.value];
+      let isAtLeastOneAggiudicatarioIncomplete = aggiudicatarioGruppi.some(g => g.componentiList.length > 1 && g.componentiList.some(c => !c.codiceFiscale || !c.ragioneSociale || !c.idRuolo));
+       
+      if(isAtleastOneComponenteIncomplete ){
+        this.messageService.add({
+          severity: "warn",
+          summary: "Lotto",
+          detail: "Inserire correttamente tutti i campi dei partecipanti."
+        });
+        return;
+      }
+      if(isAtLeastOneAggiudicatarioIncomplete ){
+        this.messageService.add({
+          severity: "warn",
+          summary: "Lotto",
+          detail: "Inserire correttamente tutti i campi dei aggiudicatari."
+        });
+        return;
+      }
+
       campiModificatiDelLotto.gruppiList = [
         ...this.lottoForm.controls.partecipantiGruppi.value,
         ...this.lottoForm.controls.partecipantiSingoli.value,
@@ -308,7 +329,8 @@ export class LottiListComponent implements OnInit {
       ]
       campiModificatiDelLotto.version = this.editLottoRow.version;
       delete campiModificatiDelLotto.nextSdrDateInformation;
-      console.log(campiModificatiDelLotto);
+      // console.log(campiModificatiDelLotto);
+      this.dialogDisplay = false;
       this.loading = true;
       this.lottoService.patchHttpCall(campiModificatiDelLotto, this.editLottoRow.id, projection).subscribe(
         (res: Lotto ) => {
@@ -349,7 +371,8 @@ export class LottiListComponent implements OnInit {
         ...this.lottoForm.controls.gruppiAggiudicatari.value
       ];
       delete newLotto.nextSdrDateInformation;
-      console.log(newLotto);
+      // console.log(newLotto);
+      this.dialogDisplay = false;
       this.loading = true;
       this.lottoService.postHttpCall(newLotto, projection).subscribe(
         (result) => {
