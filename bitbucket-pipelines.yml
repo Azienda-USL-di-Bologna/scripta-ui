@@ -58,7 +58,7 @@ definitions:
           - node
         script:
           - npm install
-          - npm run build -- --base-href /scripta/
+          - npm run build -- --configuration=stage --base-href /scripta/
         artifacts:
           - "dist/**"
     - step: &codeartifact_login
@@ -77,7 +77,7 @@ definitions:
         # oidc: true
         image: public.ecr.aws/aws-cli/aws-cli:2.11.21
         script:
-          - aws s3 sync dist/scripta s3://babel-cloud-dev-spa-scripta/scripta
+          - aws s3 sync dist/scripta s3://babel-cloud-dev-scripta-spa/scripta
           # - pipe: atlassian/aws-s3-deploy:1.2.0
           #   variables:
           #     S3_BUCKET: "babel-cloud-dev-spa-scripta/scripta"
