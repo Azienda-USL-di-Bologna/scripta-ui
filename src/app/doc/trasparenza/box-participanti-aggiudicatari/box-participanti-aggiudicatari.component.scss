@@ -38,7 +38,9 @@
     }
   } 
   .rs-column{
-    // max-width: 52.6rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     p-celleditor{
       width: 100%;
     }
@@ -50,15 +52,12 @@
     }
   }
   .action-column{
-    // min-width: 7rem;
-    // width: 7rem;
     max-width: 8.1rem;
     display: flex;
     justify-content: space-around;
     flex-wrap: nowrap;
     padding: 0 !important;
     .p-button-rounded {
-      // background-color: transparent !important;
       border: none !important;
       color: #ffffff !important;
       &:hover {
@@ -115,7 +114,6 @@
     }
   } 
   .rs-column{
-    // max-width: 67.4rem;
     p-celleditor{
       width: 100%;
     }
@@ -154,13 +152,6 @@
     }
   }
 }
-
-// .gruppo-aggdBtn{
-//   display: flex;
-//   flex-direction: row;
-//   align-items: center;
-//   max-width: 20rem;
-// }
 
 .dropdown-ruolo{
   width: 100%;
