@@ -1023,7 +1023,7 @@ export class ArchiviListComponent
      * Voglio che l'odinamento sia per recentezza
      * Vengono poi modificati tutti i campi di filtro aggiungendo all'inizio "idArchivio." perché partiamo dalla tabella archvi_recenti
      */
-    if (this.archiviListMode === ArchiviListMode.RECENTI) {
+    if (this.archiviListMode === ArchiviListMode.RECENTI || this.archiviListMode === ArchiviListMode.PREFERITI) {
       this.fromTabTutti = false;
       lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(
         (f) => !["dataCreazione", "idAzienda.id", "livello"].includes(f.field)
