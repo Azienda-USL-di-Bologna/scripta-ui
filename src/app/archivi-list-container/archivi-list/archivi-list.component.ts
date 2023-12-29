@@ -1314,13 +1314,31 @@ export class ArchiviListComponent
         }
 
         // Uso la vista che fa join con i permessi. E cerco solo archivi in cui io sono presente
-        filterAndSort.addFilter(
-          new FilterDefinition(
-            "idPersona.id",
-            FILTER_TYPES.not_string.equals,
-            this.utenteUtilitiesLogin.getUtente().idPersona.id
-          )
-        );
+        //lo faccio solo se o sono nel tab visibili oppure se lo sto aprendo da un archivio padre se non ho particolari ruoli
+        if (
+          !this.utenteUtilitiesLogin.isSD() &&
+          !this.utenteUtilitiesLogin.isCA() &&
+          !this.utenteUtilitiesLogin.isAG() &&
+          !this.utenteUtilitiesLogin.isOS() &&
+          this.archivioPadre
+        ) {
+          filterAndSort.addFilter(
+            new FilterDefinition(
+              "idPersona.id",
+              FILTER_TYPES.not_string.equals,
+              this.utenteUtilitiesLogin.getUtente().idPersona.id
+            )
+          );
+        } else if (!this.archivioPadre) {
+          filterAndSort.addFilter(
+            new FilterDefinition(
+              "idPersona.id",
+              FILTER_TYPES.not_string.equals,
+              this.utenteUtilitiesLogin.getUtente().idPersona.id
+            )
+          );
+        }
+
         filterAndSort.addSort(
           new SortDefinition(
             "numero",
