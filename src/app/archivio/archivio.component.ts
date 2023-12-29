@@ -166,14 +166,23 @@ export class ArchivioComponent
               DecimalePredicato.VISUALIZZA
             );
             if (this.utenteUtilitiesLogin.getUtente()) {
-              if (this.utenteUtilitiesLogin.getUtente().utenteReale)
-                this.ragazzoDelNovantaNove =
-                  (this.utenteUtilitiesLogin.getUtente().utenteReale
-                    .idInquadramento as unknown as String) === "99";
-              else
-                this.ragazzoDelNovantaNove =
-                  (this.utenteUtilitiesLogin.getUtente()
-                    .idInquadramento as unknown as String) === "99";
+              if (
+                this.utenteUtilitiesLogin.isAG() ||
+                this.utenteUtilitiesLogin.isCA() ||
+                this.utenteUtilitiesLogin.isOS() ||
+                this.utenteUtilitiesLogin.isSD()
+              ) {
+                this.loggedUserCanVisualizeArchive = true;
+                this.loggeduserCanAccess = true;
+              }
+              // if (this.utenteUtilitiesLogin.getUtente().utenteReale)
+              //   // this.ragazzoDelNovantaNove =
+              //   //   (this.utenteUtilitiesLogin.getUtente().utenteReale
+              //   //     .idInquadramento as unknown as String) === "99";
+              // else
+              //   this.ragazzoDelNovantaNove =
+              //     (this.utenteUtilitiesLogin.getUtente()
+              //       .idInquadramento as unknown as String) === "99";
             }
           }
           console.log("Archivio nell'archivio component: ", this._archivio);
@@ -192,6 +201,16 @@ export class ArchivioComponent
               this.loggedUserIsResponsbaileOrVicario = this.hasPermessoMinimo(
                 DecimalePredicato.VICARIO
               );
+              if (
+                this.utenteUtilitiesLogin.isAG() ||
+                this.utenteUtilitiesLogin.isCA() ||
+                this.utenteUtilitiesLogin.isAG() ||
+                this.utenteUtilitiesLogin.isOS() ||
+                this.utenteUtilitiesLogin.isSD()
+              ) {
+                this.loggedUserCanVisualizeArchive = true;
+                this.loggeduserCanAccess = true;
+              }
               this.inizializeAll();
             }
             this.rightContentProgressSpinner = false;
@@ -298,6 +317,15 @@ export class ArchivioComponent
             this.loggedUserIsResponsbaileOrVicario = this.hasPermessoMinimo(
               DecimalePredicato.VICARIO
             );
+            if (
+              this.utenteUtilitiesLogin.isAG() ||
+              this.utenteUtilitiesLogin.isCA() ||
+              this.utenteUtilitiesLogin.isOS() ||
+              this.utenteUtilitiesLogin.isSD()
+            ) {
+              this.loggedUserCanVisualizeArchive = true;
+              this.loggeduserCanAccess = true;
+            }
             this.inizializeAll();
           }
         })
