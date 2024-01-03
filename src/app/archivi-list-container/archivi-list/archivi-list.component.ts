@@ -1023,7 +1023,7 @@ export class ArchiviListComponent
      * Voglio che l'odinamento sia per recentezza
      * Vengono poi modificati tutti i campi di filtro aggiungendo all'inizio "idArchivio." perché partiamo dalla tabella archvi_recenti
      */
-    if (this.archiviListMode === ArchiviListMode.RECENTI || this.archiviListMode === ArchiviListMode.PREFERITI) {
+    if (this.archiviListMode === ArchiviListMode.RECENTI) {
       this.fromTabTutti = false;
       lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(
         (f) => !["dataCreazione", "idAzienda.id", "livello"].includes(f.field)
@@ -1036,7 +1036,10 @@ export class ArchiviListComponent
       );
     }
 
-    if (this.archiviListMode === ArchiviListMode.ANOMALI) {
+    if (
+      this.archiviListMode === ArchiviListMode.ANOMALI ||
+      this.archiviListMode === ArchiviListMode.PREFERITI
+    ) {
       lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(
         (f) => f.field !== "dataCreazione"
       );
@@ -1071,7 +1074,7 @@ export class ArchiviListComponent
       ) {
         // Nella ricerca globale si sta cercando una numerazione gerarchica, allora tolgo il filtro sul livello e sulla data
         this.setFilterTuttiLivelli();
-        this.removeFilterFromDataCreazione();
+        this.removeFilterFromDataCreazione(lazyFiltersAndSorts);
       } else if (
         this.storedLazyLoadEvent.filters?.numerazioneGerarchica?.value &&
         this.regexNumerazioneGerarchica.test(
@@ -1079,7 +1082,8 @@ export class ArchiviListComponent
         )
       ) {
         // Nella ricerca per numerazioneGerarhica si sta cercando.. allora tolgo il filtro sulla data creazione
-        this.removeFilterFromDataCreazione();
+        this.removeFilterFromDataCreazione(lazyFiltersAndSorts);
+
         // In questo caso il filtro sul livello lo lascio com'è a meno che: vedi if seguente:
         if (
           this.storedLazyLoadEvent.filters?.numerazioneGerarchica.value.includes(
@@ -1096,7 +1100,7 @@ export class ArchiviListComponent
         }
       } else if (this.storedLazyLoadEvent.filters?.numero?.value) {
         // Nella ricerca per numerazione gerarhica sto cercando un numero. Tolgo il filtro sulla data creazione
-        this.removeFilterFromDataCreazione();
+        this.removeFilterFromDataCreazione(lazyFiltersAndSorts);
       } else if (this.fromTabTutti && this.cacheFiltroLivelloTabVisbili) {
         // Se provengo dal tab Tutti e avevo settato un filtro sul livello mentre ero nel tab Visibile reimposto il filtro
         lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters?.filter(
@@ -1993,7 +1997,13 @@ export class ArchiviListComponent
    * setto a null il filtro sulla data creazione.
    * questo metodo è utile quando si vuole permettere all'utente di cercare in lungo e in largo tra gli archivi.
    */
-  private removeFilterFromDataCreazione() {
+  private removeFilterFromDataCreazione(lazyFiltersAndSorts?: FiltersAndSorts) {
+    if (lazyFiltersAndSorts) {
+      lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters?.filter(
+        (f) => f.field != "dataCreazione"
+      );
+    }
+
     this.calendarcreazione.writeValue(null);
     this.lastDataCreazioneFilterValue = null;
     this.dataTable.filters["dataCreazione"] = { value: null, matchMode: "is" };
