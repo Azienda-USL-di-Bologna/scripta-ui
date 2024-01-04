@@ -1333,6 +1333,9 @@ export class ArchiviListComponent
               this.utenteUtilitiesLogin.getUtente().idPersona.id
             )
           );
+          this.serviceToGetData = this.archivioDetailViewService;
+          this.projectionToGetData =
+            ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewExtended;
         } else if (!this.archivioPadre) {
           filterAndSort.addFilter(
             new FilterDefinition(
@@ -1341,6 +1344,9 @@ export class ArchiviListComponent
               this.utenteUtilitiesLogin.getUtente().idPersona.id
             )
           );
+          this.serviceToGetData = this.archivioDetailViewService;
+          this.projectionToGetData =
+            ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewExtended;
         }
 
         filterAndSort.addSort(
@@ -1349,9 +1355,7 @@ export class ArchiviListComponent
             this.dataTable.sortOrder === -1 ? SORT_MODES.desc : SORT_MODES.asc
           )
         );
-        this.serviceToGetData = this.archivioDetailViewService;
-        this.projectionToGetData =
-          ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewExtended;
+
         break;
       case ArchiviListMode.TUTTI:
         this.messageIfNull = "Non sono stati trovati fascicoli.";

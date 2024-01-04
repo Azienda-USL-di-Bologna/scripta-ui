@@ -4,6 +4,7 @@ import { ExtendedArchivioService } from "../extended-archivio.service";
 import {
   Archivio,
   ArchivioDetail,
+  ArchivioDetailService,
   ArchivioDetailViewService,
   ConfigurazioneService,
   ENTITIES_STRUCTURE,
@@ -20,6 +21,7 @@ import {
   PagingConf,
   SortDefinition,
   SORT_MODES,
+  NextSDREntityProvider,
 } from "@bds/next-sdr";
 import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
 import {
@@ -43,12 +45,16 @@ export class ArchivioTreeComponent implements OnInit {
   private ARCHIVIO_DETAIL_PROJECTION =
     ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections
       .CustomArchivioDetailViewExtended;
-
+  private ARCHIVIO_DETAIL_PROJECTION_NO_VIEW =
+    ENTITIES_STRUCTURE.scripta.archiviodetail.customProjections
+      .CustomArchivioDetailExtended;
   public troppiSottoFascicoli: boolean = false;
   public troppiInserti: boolean = false;
   public numeroMaxSottoarchiviCaricabili: number;
   private utenteUtilitiesLogin: UtenteUtilities;
   public subscriptions: Subscription[] = [];
+  private serviceToGetData: NextSDREntityProvider = null;
+  private projectionToGetData: string = null;
 
   public pageConfNoLimit: PagingConf = {
     conf: {
@@ -85,7 +91,8 @@ export class ArchivioTreeComponent implements OnInit {
     private loginService: JwtLoginService,
     private navigationTabsService: NavigationTabsService,
     private appService: AppService,
-    private archivioUtilsService: ArchivioUtilsService
+    private archivioUtilsService: ArchivioUtilsService,
+    private archivioDetailService: ArchivioDetailService
   ) {}
 
   ngOnInit(): void {
@@ -157,6 +164,18 @@ export class ArchivioTreeComponent implements OnInit {
     // this.bricioleArchivi.push({
     //   label: this.archivio.idAzienda.nome,
     // } as any);
+    if (
+      !this.utenteUtilitiesLogin.isCA() &&
+      !this.utenteUtilitiesLogin.isSD() &&
+      !this.utenteUtilitiesLogin.isOS() &&
+      !this.utenteUtilitiesLogin.isAG()
+    ) {
+      this.serviceToGetData = this.achivioDetailViewService;
+      this.projectionToGetData = this.ARCHIVIO_DETAIL_PROJECTION;
+    } else {
+      this.serviceToGetData = this.archivioDetailService;
+      this.projectionToGetData = this.ARCHIVIO_DETAIL_PROJECTION_NO_VIEW;
+    }
     switch (this.archivio.livello) {
       case 1:
         /**this.archivi.push(this.buildTreeNode(this.archivio));
@@ -169,9 +188,9 @@ export class ArchivioTreeComponent implements OnInit {
         ) {
           const filtersAndSorts =
             this.buildFilterToLoadChildren(archivioRadice);
-          this.achivioDetailViewService
+          this.serviceToGetData
             .getData(
-              this.ARCHIVIO_DETAIL_PROJECTION,
+              this.projectionToGetData,
               filtersAndSorts,
               null,
               this.pageConfNoLimit
@@ -202,9 +221,9 @@ export class ArchivioTreeComponent implements OnInit {
             ) {
               const filtersAndSorts =
                 this.buildFilterToLoadChildren(archivioPadre);
-              this.achivioDetailViewService
+              this.serviceToGetData
                 .getData(
-                  this.ARCHIVIO_DETAIL_PROJECTION,
+                  this.projectionToGetData,
                   filtersAndSorts,
                   null,
                   this.pageConfNoLimit
@@ -257,9 +276,9 @@ export class ArchivioTreeComponent implements OnInit {
             this.archivi.push(nonnoNodo);
             const filtersAndSorts =
               this.buildFilterToLoadChildren(archivioNonno);
-            this.achivioDetailViewService
+            this.serviceToGetData
               .getData(
-                this.ARCHIVIO_DETAIL_PROJECTION,
+                this.projectionToGetData,
                 filtersAndSorts,
                 null,
                 this.pageConfNoLimit
@@ -275,9 +294,9 @@ export class ArchivioTreeComponent implements OnInit {
                   if (uncles[i].id == archivioPadre.id) {
                     const filtersAndSorts =
                       this.buildFilterToLoadChildren(archivioPadre);
-                    this.achivioDetailViewService
+                    this.serviceToGetData
                       .getData(
-                        this.ARCHIVIO_DETAIL_PROJECTION,
+                        this.projectionToGetData,
                         filtersAndSorts,
                         null,
                         this.pageConfNoLimit
@@ -305,9 +324,9 @@ export class ArchivioTreeComponent implements OnInit {
               this.buildFilterToLoadChildren(archivioNonno);
             const nonnoNodo = this.buildTreeNode(archivioNonno);
             this.archivi.push(nonnoNodo);
-            this.achivioDetailViewService
+            this.serviceToGetData
               .getData(
-                this.ARCHIVIO_DETAIL_PROJECTION,
+                this.projectionToGetData,
                 filtersAndSorts,
                 null,
                 this.pageConfNoLimit
@@ -338,9 +357,9 @@ export class ArchivioTreeComponent implements OnInit {
             this.archivi.push(nonnoNodo);
             const filtersAndSorts =
               this.buildFilterToLoadChildren(archivioPadre);
-            this.achivioDetailViewService
+            this.serviceToGetData
               .getData(
-                this.ARCHIVIO_DETAIL_PROJECTION,
+                this.projectionToGetData,
                 filtersAndSorts,
                 null,
                 this.pageConfNoLimit
@@ -519,9 +538,21 @@ export class ArchivioTreeComponent implements OnInit {
       archivio.numeroSottoarchivi <= this.numeroMaxSottoarchiviCaricabili
     ) {
       const filtersAndSorts = this.buildFilterToLoadChildren(archivio);
-      this.achivioDetailViewService
+      if (
+        !this.utenteUtilitiesLogin.isCA() &&
+        !this.utenteUtilitiesLogin.isSD() &&
+        !this.utenteUtilitiesLogin.isOS() &&
+        !this.utenteUtilitiesLogin.isAG()
+      ) {
+        this.serviceToGetData = this.achivioDetailViewService;
+        this.projectionToGetData = this.ARCHIVIO_DETAIL_PROJECTION;
+      } else {
+        this.serviceToGetData = this.archivioDetailService;
+        this.projectionToGetData = this.ARCHIVIO_DETAIL_PROJECTION_NO_VIEW;
+      }
+      this.serviceToGetData
         .getData(
-          this.ARCHIVIO_DETAIL_PROJECTION,
+          this.projectionToGetData,
           filtersAndSorts,
           null,
           this.pageConfNoLimit
