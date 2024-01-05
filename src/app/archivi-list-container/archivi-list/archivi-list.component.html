@@ -177,7 +177,12 @@
             type="date" 
             matchMode="is"
             [showMenu]="false"
-            [ngStyle]="{'visibility': archiviListMode !== 'RECENTI' && archiviListMode !== 'ANOMALI' ? 'visible' : 'hidden'}">
+            [ngStyle]="{
+              visibility:
+                archiviListMode !== 'RECENTI' && archiviListMode !== 'ANOMALI' && archiviListMode !== 'PREFERITI'
+                  ? 'visible'
+                  : 'hidden'
+            }">
             <!--            *ngIf="archiviListMode !== 'RECENTI'"-->
             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
               <p-calendar #calendarcreazione 
