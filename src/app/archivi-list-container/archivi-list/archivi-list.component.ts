@@ -213,6 +213,7 @@ export class ArchiviListComponent
   public loggedUserCanDeleteArchivio: boolean = false;
   public archivesSelected: ExtendedArchiviView[] = [];
   public showAdditionalRow: boolean = false;
+  public idAziendaLastLogin: number;
 
   public allRowsAreSelected: boolean = false;
   public allRowsWasSelected: boolean = false;
@@ -511,6 +512,10 @@ export class ArchiviListComponent
             );
           }
         });
+        if (settings["scripta.archiviList"].lastIdAziendaLogin) {
+          this.idAziendaLastLogin =
+            settings["scripta.archiviList"].lastIdAziendaLogin;
+        }
       }
     }
     // Configurazione non presente o errata. Uso quella di default.
@@ -569,17 +574,26 @@ export class ArchiviListComponent
     }
     this.storedLazyLoadEvent.first = 0;
     this.storedLazyLoadEvent.rows = this.rowsNumber * 2;
-
+    this.loadConfiguration();
     if (this.dropdownAzienda) {
-      const value =
-        this.aziendeFiltrabili.find(
-          (a) =>
-            a.value[0] ===
-            this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault
-              .id
-        )?.value || this.aziendeFiltrabili[0].value;
-      this.dropdownAzienda.writeValue(value);
-      this.lastAziendaFilterValue = value;
+      if (this.idAziendaLastLogin) {
+        const value =
+          this.aziendeFiltrabili.find(
+            (a) => a.value[0] === this.idAziendaLastLogin
+          )?.value || this.aziendeFiltrabili[0].value;
+        this.dropdownAzienda.writeValue(value);
+        this.lastAziendaFilterValue = value;
+      } else {
+        const value =
+          this.aziendeFiltrabili.find(
+            (a) =>
+              a.value[0] ===
+              this.utenteUtilitiesLogin.getUtente().idPersona
+                .fk_idAziendaDefault.id
+          )?.value || this.aziendeFiltrabili[0].value;
+        this.dropdownAzienda.writeValue(value);
+        this.lastAziendaFilterValue = value;
+      }
       this.dataTable.filters["idAzienda.id"] = {
         value: this.dropdownAzienda.value,
         matchMode: "in",
@@ -729,6 +743,10 @@ export class ArchiviListComponent
     }
     impostazioniVisualizzazioneObj["scripta.archiviList"].selectedColumn =
       this.selectedColumns.map((c) => c.field);
+    if (this.lastAziendaFilterValue.length === 1) {
+      impostazioniVisualizzazioneObj["scripta.archiviList"].lastIdAziendaLogin =
+        this.lastAziendaFilterValue[0];
+    }
     this.utenteUtilitiesLogin.setImpostazioniApplicazione(
       this.loginService,
       impostazioniVisualizzazioneObj
@@ -899,21 +917,32 @@ export class ArchiviListComponent
     if (this.filtriPuliti) {
       this.filtriPuliti = false;
       this.resetCalendarToInitialValues();
+      this.loadConfiguration();
       this.dataTable.filters["dataCreazione"] = {
         value: this.calendarcreazione?.value,
         matchMode: "is",
       };
 
       if (this.dropdownAzienda) {
-        const value =
-          this.aziendeFiltrabili.find(
-            (a) =>
-              a.value[0] ===
-              this.utenteUtilitiesLogin.getUtente().idPersona
-                .fk_idAziendaDefault.id
-          )?.value || this.aziendeFiltrabili[0].value;
-        this.dropdownAzienda.writeValue(value);
-        this.lastAziendaFilterValue = value;
+        if (this.idAziendaLastLogin) {
+          const value =
+            this.aziendeFiltrabili.find(
+              (a) => a.value[0] === this.idAziendaLastLogin
+            )?.value || this.aziendeFiltrabili[0].value;
+          this.dropdownAzienda.writeValue(value);
+          this.lastAziendaFilterValue = value;
+        } else {
+          const value =
+            this.aziendeFiltrabili.find(
+              (a) =>
+                a.value[0] ===
+                this.utenteUtilitiesLogin.getUtente().idPersona
+                  .fk_idAziendaDefault.id
+            )?.value || this.aziendeFiltrabili[0].value;
+          this.dropdownAzienda.writeValue(value);
+          this.lastAziendaFilterValue = value;
+        }
+
         this.dataTable.filters["idAzienda.id"] = {
           value: this.dropdownAzienda.value,
           matchMode: "in",
@@ -1436,6 +1465,7 @@ export class ArchiviListComponent
       //this.selectedAllAziende = false;
       // L'utente ha scelto un unica azienda. Faccio quindi partire il filtro.
       this.lastAziendaFilterValue = value;
+      this.saveConfiguration();
       console.log("Filtro: ", value);
       filterCallback(value);
     } else {
@@ -1450,8 +1480,8 @@ export class ArchiviListComponent
             // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
             this.dropdownAzienda.writeValue(value);
             //this.selectedAllAziende = true;
-            this.lastAziendaFilterValue = value;
-            filterCallback(value);
+
+            if (value.length === 1) filterCallback(value);
           },
           reject: () => {
             // L'utente ha cambaito idea. Non faccio nulla
