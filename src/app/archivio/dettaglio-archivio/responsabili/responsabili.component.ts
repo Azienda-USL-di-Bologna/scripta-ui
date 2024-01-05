@@ -30,7 +30,7 @@ export class ResponsabiliComponent implements OnInit {
   public isArchivioClosed : boolean = false;
   public ruoloAttoreLoggedUser: RuoloAttoreArchivio;
   public responsabilePropostoGiaPresente: boolean = false;
-  public loggedUserIsResponsabile: boolean = false;
+  public isLoggedUserResponsabile: boolean = false;
   
   @ViewChild("tableResponsabiliArchivi", {}) private dt: Table;
   
@@ -85,7 +85,7 @@ export class ResponsabiliComponent implements OnInit {
         { value: RuoloAttoreArchivio.VICARIO, label: "Vicario"}, 
         { value: RuoloAttoreArchivio.RESPONSABILE_PROPOSTO, label: "Responsabile proposto"}
       ];
-        this.loggedUserIsResponsabile = true;
+        this.isLoggedUserResponsabile = true;
     } else {
       this.ruoliList = [{ value: RuoloAttoreArchivio.VICARIO, label: "Vicario"}];
     }
@@ -97,10 +97,8 @@ export class ResponsabiliComponent implements OnInit {
     if (this.responsabiliArchivi.some(a => a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO)) {
       this.responsabilePropostoGiaPresente = true;  
     }
-    if (this.archivio.stato == StatoArchivio.CHIUSO || this.archivio.stato == StatoArchivio.PRECHIUSO)
-      this.isArchivioClosed = true;
-    else
-      this.isArchivioClosed = false;
+    
+    this.isArchivioClosed = this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO;
   }
 
 
@@ -108,7 +106,7 @@ export class ResponsabiliComponent implements OnInit {
    * Metodo chiamato dall'html per l'insertimento di un responsabile proposto o di un vicario
    */
   public addResponsabile(ruolo: RuoloAttoreArchivio): void {
-    console.log(this.loggedUserIsResponsabile || this.sonoResponsabile);
+    console.log(this.isLoggedUserResponsabile || this.sonoResponsabile);
     this.struttureAttoreInEditing = [];
     const newAttore = new AttoreArchivio();
     newAttore.ruolo = ruolo;

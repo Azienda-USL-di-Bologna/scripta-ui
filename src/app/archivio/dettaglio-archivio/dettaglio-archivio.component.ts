@@ -127,12 +127,13 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     { name: "60", value: 60 },
     { name: "Illimitata", value: 999 },
   ];
-  public anniTenutaSelezionabili: any[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
   public loggedUserCanEditDetails = false;
-  public showLogs: boolean = false;
   public isArchivioChiuso = false;
   public loggedUserIsResponsbaileProposto = false;
+  public sonoResponsabile = false;
+  public anniTenutaSelezionabili: any[] = [];
+  public showLogs: boolean = false;
   public fascicoliParlanti: boolean = false;
   public labelLivelloArchivio: string = null;
   private ARCHIVIO_PROJECTION: string =
@@ -142,7 +143,6 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     ENTITIES_STRUCTURE.scripta.attorearchivio.standardProjections
       .AttoreArchivioWithIdPersonaAndIdStruttura;
   public saving: any = {};
-  public sonoResponsabile: Boolean = false;
 
   @ViewChild("autocompleteCategoria")
   public autocompleteCategoria: AutoComplete;
@@ -195,6 +195,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         (a) => a.value !== TipoArchivio.SPECIALE
       );
     }
+
     this.loggedUserIsResponsbaileProposto = (
       this.archivio["attoriList"] as AttoreArchivio[]
     ).some(
