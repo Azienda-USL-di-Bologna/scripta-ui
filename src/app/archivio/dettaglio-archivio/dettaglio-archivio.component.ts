@@ -1013,26 +1013,31 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     this.attivitaService
       .getData("AttivitaWithPlainFields", filterAndsorts, null, null)
       .subscribe((res) => {
-        if (res.results.length != 1) {
+        if (res.results.length < 1) {
           this.messageService.add({
             severity: "error",
             summary: "Errore nell'accettazione della responsabilità",
             detail: "Qualcosa è andato storto, contattare babelcare",
           });
         } else {
-          const attivitaDaMandare = new Attivita();
-          attivitaDaMandare.id = res.results[0].id;
-          attivitaDaMandare.version = res.results[0].version;
-          batchOperations.push({
-            operation: BatchOperationTypes.DELETE,
-            entityPath:
-              BaseUrls.get(BaseUrlType.Scrivania) +
-              "/" +
-              ENTITIES_STRUCTURE.scrivania.attivita.path,
-            id: attivitaDaMandare.id,
-            entityBody: attivitaDaMandare as NextSdrEntity,
-            returnProjection: "AttivitaWithPlainFields",
-          } as BatchOperation);
+          //possono essercene più di una.
+
+          const attivitaDaMandare = res.results;
+          attivitaDaMandare.forEach((a: Attivita) => {
+            attivitaDaMandare.id = a.id;
+            attivitaDaMandare.version = a.version;
+            batchOperations.push({
+              operation: BatchOperationTypes.DELETE,
+              entityPath:
+                BaseUrls.get(BaseUrlType.Scrivania) +
+                "/" +
+                ENTITIES_STRUCTURE.scrivania.attivita.path,
+              id: attivitaDaMandare.id,
+              entityBody: attivitaDaMandare as NextSdrEntity,
+              returnProjection: "AttivitaWithPlainFields",
+            } as BatchOperation);
+          });
+
           this.subscriptions.push(
             this.attoreArchivioService
               .batchHttpCall(batchOperations)
