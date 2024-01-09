@@ -901,24 +901,58 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       returnProjection: this.attoreArchivioProjection,
     } as BatchOperation);
 
+    //se il nuovo responsabile era vicario lo tolgo
+
+    if (
+      this.archivio.attoriList.some(
+        (a) =>
+          a.idPersona.id == responsabilePropostoVecchio.idPersona.id &&
+          a.ruolo === "VICARIO"
+      )
+    ) {
+      const vicarioVecchio = this.archivio.attoriList.find(
+        (a: AttoreArchivio) =>
+          a.ruolo === "VICARIO" &&
+          a.idPersona.id == responsabilePropostoVecchio.idPersona.id
+      );
+      batchOperations.push({
+        operation: BatchOperationTypes.DELETE,
+        entityPath:
+          BaseUrls.get(BaseUrlType.Scripta) +
+          "/" +
+          ENTITIES_STRUCTURE.scripta.attorearchivio.path,
+        id: vicarioVecchio.id,
+        entityBody: vicarioVecchio as NextSdrEntity,
+        returnProjection: this.attoreArchivioProjection,
+      } as BatchOperation);
+    }
+
     // aggiorno i vicari dell'archivio
     const responsabileVecchio = this.archivio.attoriList.find(
       (a: AttoreArchivio) => a.ruolo === "RESPONSABILE"
     );
-    const nuovoVicario = new AttoreArchivio();
-    nuovoVicario.id = responsabileVecchio.id;
-    nuovoVicario.ruolo = RuoloAttoreArchivio.VICARIO;
-    nuovoVicario.version = responsabileVecchio.version;
-    batchOperations.push({
-      operation: BatchOperationTypes.UPDATE,
-      entityPath:
-        BaseUrls.get(BaseUrlType.Scripta) +
-        "/" +
-        ENTITIES_STRUCTURE.scripta.attorearchivio.path,
-      id: nuovoVicario.id,
-      entityBody: nuovoVicario as NextSdrEntity,
-      returnProjection: this.attoreArchivioProjection,
-    } as BatchOperation);
+    if (
+      !this.archivio.attoriList.some(
+        (a) =>
+          a.idPersona.id == responsabileVecchio.idPersona.id &&
+          a.ruolo === "VICARIO"
+      )
+    ) {
+      const nuovoVicario = new AttoreArchivio();
+      nuovoVicario.id = responsabileVecchio.id;
+      nuovoVicario.ruolo = RuoloAttoreArchivio.VICARIO;
+      nuovoVicario.version = responsabileVecchio.version;
+      batchOperations.push({
+        operation: BatchOperationTypes.UPDATE,
+        entityPath:
+          BaseUrls.get(BaseUrlType.Scripta) +
+          "/" +
+          ENTITIES_STRUCTURE.scripta.attorearchivio.path,
+        id: nuovoVicario.id,
+        entityBody: nuovoVicario as NextSdrEntity,
+        returnProjection: this.attoreArchivioProjection,
+      } as BatchOperation);
+    }
 
     //genero l'attivita da mettere in scrivania
     const attivita = new Attivita();
