@@ -1681,9 +1681,7 @@ export class ArchiviListComponent
   }
 
   public isArchivioChiuso(archivio: ExtendedArchiviView): boolean {
-    if (archivio.stato == "CHIUSO" || archivio.stato == "PRECHIUSO")
-      return true;
-    else return false;
+    return archivio.stato === "CHIUSO" || archivio.stato === "PRECHIUSO";
   }
 
   public isArchivioSpeciale(archivio: ExtendedArchiviView): boolean {

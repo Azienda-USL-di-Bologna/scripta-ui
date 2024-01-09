@@ -131,7 +131,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public loggedUserCanEditDetails = false;
   public isArchivioChiuso = false;
   public loggedUserIsResponsbaileProposto = false;
-  public sonoResponsabile = false;
+  public isLoggedUserResponsabile = false;
   public anniTenutaSelezionabili: any[] = [];
   public showLogs: boolean = false;
   public fascicoliParlanti: boolean = false;
@@ -180,15 +180,13 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     //this.updateAnniTenuta();
     // this.getResponsabili();
     this.isArchivioClosed();
+    this.isLoggedUserResponsabile = this.hasLoggedUserThisRoles([RuoloAttoreArchivio.RESPONSABILE]);
     this.loggedUserCanEditDetails =
-      (this.archivio["attoriList"] as AttoreArchivio[]).some(
-        (a) =>
-          a.idPersona.id ===
-            this.utenteUtilitiesLogin.getUtente().idPersona.id &&
-          (a.ruolo === RuoloAttoreArchivio.RESPONSABILE ||
-            a.ruolo === RuoloAttoreArchivio.VICARIO ||
-            a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO)
-      ) && !this.archivio.pregresso;
+      this.hasLoggedUserThisRoles([
+        RuoloAttoreArchivio.RESPONSABILE, 
+        RuoloAttoreArchivio.VICARIO, 
+        RuoloAttoreArchivio.RESPONSABILE_PROPOSTO
+      ]) && !this.archivio.pregresso;
     // this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
     if (this.archivio.tipo !== TipoArchivio.SPECIALE) {
       this.tipiArchivioObj = this.tipiArchivioObj.filter(
@@ -204,6 +202,14 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO
     );
     this.loadParametroAziendaleFascicoliParlanti();
+  }
+
+  private hasLoggedUserThisRoles(roles: any[]) {
+    return  (this.archivio["attoriList"] as AttoreArchivio[]).some(
+      (a) =>
+        a.idPersona.id ===
+          this.utenteUtilitiesLogin.getUtente().idPersona.id &&
+        (roles.some(r => r === a.ruolo)));
   }
 
   private loadConfigurations() {
@@ -1009,7 +1015,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
                   summary: "Proposta responsabilità",
                   detail: "Hai accettato la responsabilità del fascicolo",
                 });
-                this.sonoResponsabile = true;
+                this.isLoggedUserResponsabile = true;
                 this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(
                   this.archivio,
                   true,
