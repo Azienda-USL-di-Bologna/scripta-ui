@@ -7,6 +7,7 @@ import { BoxParticipantiAggiudicatariComponent } from '../box-participanti-aggiu
 import { ScriptaCommonModule } from 'src/app/scripta-common.module';
 import { ComponenteService, GruppoLottoService, LottoService } from "@bds/internauta-model";
 import { ReactiveFormsModule } from '@angular/forms';
+import { ImportaOrdiniInEconomiaComponent } from '../importa-ordini-in-economia/importa-ordini-in-economia.component';
 
 @NgModule({
   imports: [
@@ -18,7 +19,8 @@ import { ReactiveFormsModule } from '@angular/forms';
   declarations: [
     LottiListComponent,
     LottiDetailComponent,
-    BoxParticipantiAggiudicatariComponent
+    BoxParticipantiAggiudicatariComponent,
+    ImportaOrdiniInEconomiaComponent
   ],
   providers: [
     LottoService,
