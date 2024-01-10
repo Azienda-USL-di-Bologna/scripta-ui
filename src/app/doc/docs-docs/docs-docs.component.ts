@@ -174,8 +174,6 @@ export class DocsDocsComponent implements OnInit {
               summary: "Attenzione",
               detail: `Documento aggiunto con successo`
             });
-            //svuoto il menù a tendina di selezione
-            this.docDaCollegare = null;
           },
           error: () => {
             this.messageService.add({
@@ -383,10 +381,10 @@ export class DocsDocsComponent implements OnInit {
    * sennò deve essere un utente che può agire
    */
   public isSolaLettura() {
-    if ((this.utenteUtilitiesLogin.isCA() || this.utenteUtilitiesLogin.isCI() || this.utenteUtilitiesLogin.isRV()) && !this.docSorgente.pregresso) {
+    if (this.utenteUtilitiesLogin.isCA() || this.utenteUtilitiesLogin.isCI() || this.utenteUtilitiesLogin.isRV()) {
       this.solaLettura = false;
     } else {
-      if(this.docSorgente.sullaScrivaniaDi?.some(a => a.idPersona = this.utenteUtilitiesLogin.getUtente().idPersona.id) && !this.docSorgente.pregresso) {
+      if(this.docSorgente.sullaScrivaniaDi.some(a => a.idPersona = this.utenteUtilitiesLogin.getUtente().idPersona.id)) {
         this.solaLettura = false; 
       } else {
         this.solaLettura = true;

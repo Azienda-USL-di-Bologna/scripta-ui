@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { Azienda, CODICI_RUOLO, ConfigurazioneService, ENTITIES_STRUCTURE, ParametroAziende, Persona, Struttura, Utente, UtenteStruttura, UtenteStrutturaService } from '@bds/internauta-model';
+import { Azienda, CODICI_RUOLO, ENTITIES_STRUCTURE, Persona, Struttura, Utente, UtenteStruttura, UtenteStrutturaService } from '@bds/internauta-model';
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { FilterDefinition, FiltersAndSorts, FILTER_TYPES } from '@bds/next-sdr';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -29,8 +29,6 @@ export class CopiaTrasferisciAbilitazioniComponent {
 	private personaSorgente: Persona;
 	private personaDestinazione: Persona;
 	private strutturaDestinazione: Struttura;
-	public escludiArchiviChiusiFromAbilitazioniMassive: boolean = false;
-
 	
   private subscriptions: Subscription[] = [];
   
@@ -39,7 +37,6 @@ export class CopiaTrasferisciAbilitazioniComponent {
 		private messageService: MessageService,
 		private archiviListService: ArchiviListService,
 		private confirmationService: ConfirmationService,
-		private configurazioneService: ConfigurazioneService,
 		private utenteStrutturaService: UtenteStrutturaService
 	) {
 		this.subscriptions.push(this.loginService.loggedUser$.pipe(first()).subscribe(
@@ -54,26 +51,11 @@ export class CopiaTrasferisciAbilitazioniComponent {
 						}
 					});
 					this.aziendaDiRiferimento = this.aziendeDoveLoggedUserIsAg[0];
-					this.configurazioneService.getParametriAziende("escludiArchiviChiusiFromAbilitazioniMassiveGedi", null, null).pipe(first()).subscribe(
-						(param : ParametroAziende[] ) => {
-							if (param) {
-								param.forEach(parametro => {
-									if (JSON.parse(parametro.valore || false) && parametro.idAziende.find(a => a == this.aziendaDiRiferimento.id)) {
-										this.escludiArchiviChiusiFromAbilitazioniMassive = true;
-									}
-								})
-							}
-						}
-					)
 				}
       }
     ));
   }
 
-
-  ngOnInit(): void {
-	
-}
 	public onChangeAzienda(azienda: Azienda): void {
 		this.aziendaDiRiferimento = azienda;
 		this.svuotaCampi();
@@ -102,7 +84,6 @@ export class CopiaTrasferisciAbilitazioniComponent {
 						}
 						this.struttureSelezionabili.push(us.idStruttura) 
 					});
-					
 				}
 			}
 		));

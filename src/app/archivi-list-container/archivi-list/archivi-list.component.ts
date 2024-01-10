@@ -127,7 +127,6 @@ export class ArchiviListComponent
   public columnFilterDataCreazione: ColumnFilter;
   @ViewChild("multiselectBitAnomalie")
   public multiselectBitAnomalie: MultiSelect;
-
   //public sortOrder = -1;
   public archiviListModeEnum = ArchiviListMode;
   public archivi: ExtendedArchiviView[] = [];
@@ -213,6 +212,7 @@ export class ArchiviListComponent
   public loggedUserCanDeleteArchivio: boolean = false;
   public archivesSelected: ExtendedArchiviView[] = [];
   public showAdditionalRow: boolean = false;
+  public isArchivioPadreClosed = false;
   public idAziendaLastLogin: number;
 
   public allRowsAreSelected: boolean = false;
@@ -231,7 +231,10 @@ export class ArchiviListComponent
     return this._archivioPadre;
   }
   @Input() set archivioPadre(archivioPadre: Archivio) {
-    this._archivioPadre = archivioPadre;
+    if (archivioPadre) {
+      this._archivioPadre = archivioPadre;
+      this.isArchivioPadreClosed = archivioPadre.stato === 'CHIUSO' || archivioPadre.stato === 'PRECHIUSO';
+    }
     if (this.firstLoadDone) {
       this.resetPaginationAndLoadData();
     }
@@ -1708,12 +1711,6 @@ export class ArchiviListComponent
         archivio.idAzienda.aoo +
         "]"
     );
-  }
-
-  public isArchivioChiuso(archivio: ExtendedArchiviView): boolean {
-    if (archivio.stato == "CHIUSO" || archivio.stato == "PRECHIUSO")
-      return true;
-    else return false;
   }
 
   public isArchivioSpeciale(archivio: ExtendedArchiviView): boolean {
