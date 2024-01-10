@@ -901,24 +901,58 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       returnProjection: this.attoreArchivioProjection,
     } as BatchOperation);
 
+    //se il nuovo responsabile era vicario lo tolgo
+
+    if (
+      this.archivio.attoriList.some(
+        (a) =>
+          a.idPersona.id == responsabilePropostoVecchio.idPersona.id &&
+          a.ruolo === "VICARIO"
+      )
+    ) {
+      const vicarioVecchio = this.archivio.attoriList.find(
+        (a: AttoreArchivio) =>
+          a.ruolo === "VICARIO" &&
+          a.idPersona.id == responsabilePropostoVecchio.idPersona.id
+      );
+      batchOperations.push({
+        operation: BatchOperationTypes.DELETE,
+        entityPath:
+          BaseUrls.get(BaseUrlType.Scripta) +
+          "/" +
+          ENTITIES_STRUCTURE.scripta.attorearchivio.path,
+        id: vicarioVecchio.id,
+        entityBody: vicarioVecchio as NextSdrEntity,
+        returnProjection: this.attoreArchivioProjection,
+      } as BatchOperation);
+    }
+
     // aggiorno i vicari dell'archivio
     const responsabileVecchio = this.archivio.attoriList.find(
       (a: AttoreArchivio) => a.ruolo === "RESPONSABILE"
     );
-    const nuovoVicario = new AttoreArchivio();
-    nuovoVicario.id = responsabileVecchio.id;
-    nuovoVicario.ruolo = RuoloAttoreArchivio.VICARIO;
-    nuovoVicario.version = responsabileVecchio.version;
-    batchOperations.push({
-      operation: BatchOperationTypes.UPDATE,
-      entityPath:
-        BaseUrls.get(BaseUrlType.Scripta) +
-        "/" +
-        ENTITIES_STRUCTURE.scripta.attorearchivio.path,
-      id: nuovoVicario.id,
-      entityBody: nuovoVicario as NextSdrEntity,
-      returnProjection: this.attoreArchivioProjection,
-    } as BatchOperation);
+    if (
+      !this.archivio.attoriList.some(
+        (a) =>
+          a.idPersona.id == responsabileVecchio.idPersona.id &&
+          a.ruolo === "VICARIO"
+      )
+    ) {
+      const nuovoVicario = new AttoreArchivio();
+      nuovoVicario.id = responsabileVecchio.id;
+      nuovoVicario.ruolo = RuoloAttoreArchivio.VICARIO;
+      nuovoVicario.version = responsabileVecchio.version;
+      batchOperations.push({
+        operation: BatchOperationTypes.UPDATE,
+        entityPath:
+          BaseUrls.get(BaseUrlType.Scripta) +
+          "/" +
+          ENTITIES_STRUCTURE.scripta.attorearchivio.path,
+        id: nuovoVicario.id,
+        entityBody: nuovoVicario as NextSdrEntity,
+        returnProjection: this.attoreArchivioProjection,
+      } as BatchOperation);
+    }
 
     //genero l'attivita da mettere in scrivania
     const attivita = new Attivita();
@@ -979,26 +1013,31 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     this.attivitaService
       .getData("AttivitaWithPlainFields", filterAndsorts, null, null)
       .subscribe((res) => {
-        if (res.results.length != 1) {
+        if (res.results.length < 1) {
           this.messageService.add({
             severity: "error",
             summary: "Errore nell'accettazione della responsabilità",
             detail: "Qualcosa è andato storto, contattare babelcare",
           });
         } else {
-          const attivitaDaMandare = new Attivita();
-          attivitaDaMandare.id = res.results[0].id;
-          attivitaDaMandare.version = res.results[0].version;
-          batchOperations.push({
-            operation: BatchOperationTypes.DELETE,
-            entityPath:
-              BaseUrls.get(BaseUrlType.Scrivania) +
-              "/" +
-              ENTITIES_STRUCTURE.scrivania.attivita.path,
-            id: attivitaDaMandare.id,
-            entityBody: attivitaDaMandare as NextSdrEntity,
-            returnProjection: "AttivitaWithPlainFields",
-          } as BatchOperation);
+          //possono essercene più di una.
+
+          const attivitaDaMandare = res.results;
+          attivitaDaMandare.forEach((a: Attivita) => {
+            attivitaDaMandare.id = a.id;
+            attivitaDaMandare.version = a.version;
+            batchOperations.push({
+              operation: BatchOperationTypes.DELETE,
+              entityPath:
+                BaseUrls.get(BaseUrlType.Scrivania) +
+                "/" +
+                ENTITIES_STRUCTURE.scrivania.attivita.path,
+              id: attivitaDaMandare.id,
+              entityBody: attivitaDaMandare as NextSdrEntity,
+              returnProjection: "AttivitaWithPlainFields",
+            } as BatchOperation);
+          });
+
           this.subscriptions.push(
             this.attoreArchivioService
               .batchHttpCall(batchOperations)
