@@ -33,8 +33,8 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
   private _archivio: Archivio;
   //private lazyLoadFiltersAndSorts: FiltersAndSorts = new FiltersAndSorts();
   public livello: number;
-  public isArchivioClosed : boolean = false;
-
+  public isArchivioClosed = false;
+  
   @ViewChild("dt", {}) private dt: Table;
   get archivio(): Archivio { return this._archivio; }
   @Input() set archivio(archivio: Archivio) {
@@ -42,10 +42,16 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
     this.livello = archivio.livello;
     this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
   }
-  public _loggedUserIsResponsbaileOrVicario: Boolean;
+  private _loggedUserIsResponsbaileOrVicario: Boolean;
   get loggedUserIsResponsbaileOrVicario(): Boolean { return this._loggedUserIsResponsbaileOrVicario; }
   @Input() set loggedUserIsResponsbaileOrVicario(loggedUserIsResponsbaileOrVicario: Boolean) {
     this._loggedUserIsResponsbaileOrVicario = loggedUserIsResponsbaileOrVicario;
+  }
+  private _isLoggedUserResponsabile: Boolean;
+  get isLoggedUserResponsabile(): Boolean { return this._isLoggedUserResponsabile; }
+  @Input() set isLoggedUserResponsabile(isLoggedUserResponsabile: Boolean) {
+    this._isLoggedUserResponsabile = isLoggedUserResponsabile;
+    console.log("isLoggedUserResponsabile: " + this.isLoggedUserResponsabile);
   }
 
   constructor(
@@ -78,10 +84,8 @@ export class PermessiPersonaComponent implements OnInit, OnDestroy {
         this.perms = this.permessiDettaglioArchivioService.buildPermessoPerTabella(this.archivio, "persone");
       }
      }));
-    if(this._archivio.stato == StatoArchivio.CHIUSO || this._archivio.stato == StatoArchivio.PRECHIUSO)
-      this.isArchivioClosed = true;
-    else
-      this.isArchivioClosed = false; 
+
+     this.isArchivioClosed = this._archivio.stato === StatoArchivio.CHIUSO || this._archivio.stato === StatoArchivio.PRECHIUSO;
   }
 
   ngOnDestroy() {

@@ -127,12 +127,13 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     { name: "60", value: 60 },
     { name: "Illimitata", value: 999 },
   ];
-  public anniTenutaSelezionabili: any[] = [];
   private utenteUtilitiesLogin: UtenteUtilities;
   public loggedUserCanEditDetails = false;
-  public showLogs: boolean = false;
   public isArchivioChiuso = false;
   public loggedUserIsResponsbaileProposto = false;
+  public isLoggedUserResponsabile = false;
+  public anniTenutaSelezionabili: any[] = [];
+  public showLogs: boolean = false;
   public fascicoliParlanti: boolean = false;
   public labelLivelloArchivio: string = null;
   private ARCHIVIO_PROJECTION: string =
@@ -142,7 +143,6 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     ENTITIES_STRUCTURE.scripta.attorearchivio.standardProjections
       .AttoreArchivioWithIdPersonaAndIdStruttura;
   public saving: any = {};
-  public sonoResponsabile: Boolean = false;
 
   @ViewChild("autocompleteCategoria")
   public autocompleteCategoria: AutoComplete;
@@ -180,21 +180,20 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     //this.updateAnniTenuta();
     // this.getResponsabili();
     this.isArchivioClosed();
+    this.isLoggedUserResponsabile = this.hasLoggedUserThisRoles([RuoloAttoreArchivio.RESPONSABILE]);
     this.loggedUserCanEditDetails =
-      (this.archivio["attoriList"] as AttoreArchivio[]).some(
-        (a) =>
-          a.idPersona.id ===
-            this.utenteUtilitiesLogin.getUtente().idPersona.id &&
-          (a.ruolo === RuoloAttoreArchivio.RESPONSABILE ||
-            a.ruolo === RuoloAttoreArchivio.VICARIO ||
-            a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO)
-      ) && !this.archivio.pregresso;
+      this.hasLoggedUserThisRoles([
+        RuoloAttoreArchivio.RESPONSABILE, 
+        RuoloAttoreArchivio.VICARIO, 
+        RuoloAttoreArchivio.RESPONSABILE_PROPOSTO
+      ]) && !this.archivio.pregresso;
     // this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
     if (this.archivio.tipo !== TipoArchivio.SPECIALE) {
       this.tipiArchivioObj = this.tipiArchivioObj.filter(
         (a) => a.value !== TipoArchivio.SPECIALE
       );
     }
+
     this.loggedUserIsResponsbaileProposto = (
       this.archivio["attoriList"] as AttoreArchivio[]
     ).some(
@@ -203,6 +202,14 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO
     );
     this.loadParametroAziendaleFascicoliParlanti();
+  }
+
+  private hasLoggedUserThisRoles(roles: any[]) {
+    return  (this.archivio["attoriList"] as AttoreArchivio[]).some(
+      (a) =>
+        a.idPersona.id ===
+          this.utenteUtilitiesLogin.getUtente().idPersona.id &&
+        (roles.some(r => r === a.ruolo)));
   }
 
   private loadConfigurations() {
@@ -1047,7 +1054,7 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
                   summary: "Proposta responsabilità",
                   detail: "Hai accettato la responsabilità del fascicolo",
                 });
-                this.sonoResponsabile = true;
+                this.isLoggedUserResponsabile = true;
                 this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(
                   this.archivio,
                   true,
