@@ -106,7 +106,7 @@
           </p-overlayPanel>
         </span>
       </th>
-      <th *ngIf="loggedUserCanDeleteArchivio && !isArchivioChiuso"
+      <th *ngIf="loggedUserCanDeleteArchivio && !isArchivioPadreClosed"
         class="delete-archive-column"
         alignFrozen="right" 
         pFrozenColumn 
@@ -453,7 +453,7 @@
           </button>
         </div>
       </th>
-      <th *ngIf="loggedUserCanDeleteArchivio && !isArchivioChiuso"
+      <th *ngIf="loggedUserCanDeleteArchivio && !isArchivioPadreClosed"
         class="delete-archive-column"
         alignFrozen="right" 
         pFrozenColumn 
@@ -613,7 +613,7 @@
           {{rowData.idMassimarioVisualizzazione}}
         </div>
       </td>
-      <td *ngIf="loggedUserCanDeleteArchivio && !isArchivioChiuso"
+      <td *ngIf="loggedUserCanDeleteArchivio && !isArchivioPadreClosed"
         class="delete-archive-column"
         alignFrozen="right"  
         pFrozenColumn 
