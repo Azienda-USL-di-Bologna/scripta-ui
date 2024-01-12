@@ -235,6 +235,7 @@ export class DocsListComponent
   public sonoPersonaVedenteSuDocSelezionato: boolean = false;
   public docPerVedereLeNote: number;
   public functionButton: FunctionButton;
+  public idAziendaLastLogin: number;
   public versamentoMassivoPopupInfo: {
     title?: string;
     show?: boolean;
@@ -806,6 +807,10 @@ export class DocsListComponent
             this._selectedColumns.push(this.cols.find((c) => c.field === mc));
           }
         });
+        if (settings["scripta.docList"].lastIdAziendaLogin) {
+          this.idAziendaLastLogin =
+            settings["scripta.docList"].lastIdAziendaLogin;
+        }
       }
     }
     // Configurazione non presente o errata. Uso quella di default.
@@ -870,6 +875,11 @@ export class DocsListComponent
       this.mieiDocumenti;
     impostazioniVisualizzazioneObj["scripta.docList"].selectedColumn =
       this.selectedColumns.map((c) => c.field);
+
+    if (this.lastAziendaFilterValue.length === 1) {
+      impostazioniVisualizzazioneObj["scripta.docList"].lastIdAziendaLogin =
+        this.lastAziendaFilterValue[0];
+    }
 
     this.utenteUtilitiesLogin.setImpostazioniApplicazione(
       this.loginService,
@@ -995,12 +1005,20 @@ export class DocsListComponent
       }
 
       if (this.dropdownAzienda) {
-        const aziendaFiltrabileDefault = this.aziendeFiltrabili.find(
-          (a) =>
-            a.value[0] ===
-            this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault
-              .id
-        );
+        let aziendaFiltrabileDefault;
+        if (this.idAziendaLastLogin) {
+          aziendaFiltrabileDefault = this.aziendeFiltrabili.find(
+            (a) => a.value[0] === this.idAziendaLastLogin
+          );
+        } else {
+          aziendaFiltrabileDefault = this.aziendeFiltrabili.find(
+            (a) =>
+              a.value[0] ===
+              this.utenteUtilitiesLogin.getUtente().idPersona
+                .fk_idAziendaDefault.id
+          );
+        }
+
         let aziendaValue;
         if (aziendaFiltrabileDefault) {
           aziendaValue = aziendaFiltrabileDefault.value;
@@ -1866,6 +1884,7 @@ export class DocsListComponent
     if (value.length === 1) {
       // L'utente ha scelto un unica azienda. Faccio quindi partire il filtro.
       this.lastAziendaFilterValue = value;
+      this.saveConfiguration();
       filterCallback(value);
     } else {
       setTimeout(() => {

@@ -1,7 +1,20 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
-import { AttivitaService, StatoArchivio } from '@bds/internauta-model';
-import { Applicazione, ApplicazioneService, Archivio, Attivita, AttoreArchivio, AttoreArchivioService, Azienda, BaseUrls, BaseUrlType, ENTITIES_STRUCTURE, Persona, RuoloAttoreArchivio, Struttura, UtenteStruttura } from '@bds/internauta-model';
+import { StatoArchivio } from '@bds/internauta-model';
+import {
+  Applicazione,
+  Archivio,
+  Attivita,
+  AttoreArchivio,
+  AttoreArchivioService,
+  Azienda,
+  BaseUrls,
+  BaseUrlType,
+  ENTITIES_STRUCTURE,
+  Persona,
+  RuoloAttoreArchivio,
+  Struttura,
+  UtenteStruttura,
+} from "@bds/internauta-model";
 import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
 import { BatchOperation, BatchOperationTypes, NextSdrEntity } from '@bds/next-sdr';
 import { MessageService } from 'primeng/api';
@@ -30,15 +43,10 @@ export class ResponsabiliComponent implements OnInit {
   public isArchivioClosed : boolean = false;
   public ruoloAttoreLoggedUser: RuoloAttoreArchivio;
   public responsabilePropostoGiaPresente: boolean = false;
-  public loggedUserIsResponsabile: boolean = false;
   
   @ViewChild("tableResponsabiliArchivi", {}) private dt: Table;
-  
-
-
   // private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
-
-
+  
   get archivio(): Archivio { return this._archivio; }
   @Input() set archivio(archivio: Archivio) {
     this._archivio = archivio;
@@ -50,21 +58,17 @@ export class ResponsabiliComponent implements OnInit {
     this._loggedUserIsResponsbaileOrVicario = loggedUserIsResponsbaileOrVicario;
   }
 
-  public _sonoResponsabile: boolean = false;
-  get sonoResponsabile(): boolean { return this._sonoResponsabile;}
-  @Input() set sonoResponsabile(sonoResponsabile: boolean) {
-    this._sonoResponsabile = sonoResponsabile;
+  private _isLoggedUserResponsabile: boolean = false;
+  get isLoggedUserResponsabile(): boolean { return this._isLoggedUserResponsabile;}
+  @Input() set isLoggedUserResponsabile(isLoggedUserResponsabile: boolean) {
+    this._isLoggedUserResponsabile = isLoggedUserResponsabile;
     this.responsabilePropostoGiaPresente = false; 
-    
   }
   constructor(
     private attoreArchivioService: AttoreArchivioService,
     private loginService: JwtLoginService,
     private messageService: MessageService,
-    public permessiDettaglioArchivioService: PermessiDettaglioArchivioService,
-    private applicazioneService: ApplicazioneService,
-    private router: Router,
-    private attivitaService: AttivitaService) {
+    public permessiDettaglioArchivioService: PermessiDettaglioArchivioService) {
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -85,7 +89,7 @@ export class ResponsabiliComponent implements OnInit {
         { value: RuoloAttoreArchivio.VICARIO, label: "Vicario"}, 
         { value: RuoloAttoreArchivio.RESPONSABILE_PROPOSTO, label: "Responsabile proposto"}
       ];
-        this.loggedUserIsResponsabile = true;
+        this.isLoggedUserResponsabile = true;
     } else {
       this.ruoliList = [{ value: RuoloAttoreArchivio.VICARIO, label: "Vicario"}];
     }
@@ -97,10 +101,8 @@ export class ResponsabiliComponent implements OnInit {
     if (this.responsabiliArchivi.some(a => a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO)) {
       this.responsabilePropostoGiaPresente = true;  
     }
-    if (this.archivio.stato == StatoArchivio.CHIUSO || this.archivio.stato == StatoArchivio.PRECHIUSO)
-      this.isArchivioClosed = true;
-    else
-      this.isArchivioClosed = false;
+
+    this.isArchivioClosed = this.archivio.stato === StatoArchivio.CHIUSO || this.archivio.stato === StatoArchivio.PRECHIUSO;
   }
 
 
@@ -108,7 +110,6 @@ export class ResponsabiliComponent implements OnInit {
    * Metodo chiamato dall'html per l'insertimento di un responsabile proposto o di un vicario
    */
   public addResponsabile(ruolo: RuoloAttoreArchivio): void {
-    console.log(this.loggedUserIsResponsabile || this.sonoResponsabile);
     this.struttureAttoreInEditing = [];
     const newAttore = new AttoreArchivio();
     newAttore.ruolo = ruolo;
@@ -293,7 +294,7 @@ export class ResponsabiliComponent implements OnInit {
             returnProjection: this.attoreArchivioProjection
           } as BatchOperation);
           this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
-            (res: BatchOperation[]) => {
+            () => {
               this.responsabiliArchivi.splice(index, 1);
               this.messageService.add({
                 severity: "warn", 

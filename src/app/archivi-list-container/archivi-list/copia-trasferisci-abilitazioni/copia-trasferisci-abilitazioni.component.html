@@ -1,17 +1,10 @@
-<span
-  class="warning-no-chiusi"
-  *ngIf="escludiArchiviChiusiFromAbilitazioniMassive"
-  >Attenzione: Le modifiche non verranno applicate ad eventuali fascicoli
-  chiusi/prechiusi.</span
->
+<span class="warning-no-chiusi">Attenzione: Le modifiche non verranno applicate ad eventuali fascicoli chiusi/prechiusi.</span>
 
-<div
-  class="box"
-  *ngIf="idAziendeDoveLoggedUserIsAG?.length > 1">
+<div class="box" *ngIf="idAziendeDoveLoggedUserIsAG?.length > 1">
   <label>Azienda:</label>
-  <lib-aziende-autocomplete
-    [(azienda)]="aziendaDiRiferimento"
-    (aziendaChange)="onChangeAzienda($event)"
+  <lib-aziende-autocomplete 
+    [(azienda)]="aziendaDiRiferimento" 
+    (aziendaChange)="onChangeAzienda($event)" 
     [idAziendeSceglibili]="idAziendeDoveLoggedUserIsAG">
   </lib-aziende-autocomplete>
 </div>
@@ -20,15 +13,15 @@
   <h3>Scegli una operazione:</h3>
   <div class="target-button-container">
     <p-radioButton
-      value="COPIA_ABILITAZIONI"
-      label="Copia abilitazioni (vicariati e permessi)"
+      value="COPIA_ABILITAZIONI" 
+      label="Copia abilitazioni (vicariati e permessi)" 
       [(ngModel)]="operationType">
     </p-radioButton>
   </div>
   <div class="target-button-container">
     <p-radioButton
-      value="TRASFERISCI_ABILITAZIONI"
-      label="Trasferisci abilitazioni (responsabilità, vicariati e permessi)"
+      value="TRASFERISCI_ABILITAZIONI" 
+      label="Trasferisci abilitazioni (responsabilità, vicariati e permessi)" 
       [(ngModel)]="operationType">
     </p-radioButton>
     <span class="target-button-descrizione">
@@ -39,73 +32,63 @@
 
 <div class="box box-scelta-persona-sorgente">
   <label for="ricerca-persona-sorgente">Scegli utente sorgente:</label>
-  <lib-users-autocomplete
-    id="ricerca-persona-sorgente"
-    class="autocomplete-utenti"
+  <lib-users-autocomplete id="ricerca-persona-sorgente"
+    class="autocomplete-utenti" 
     [azienda]="aziendaDiRiferimento"
     [utenteIniziale]="utenteStrutturaSorgente"
     [showPool]="false"
     [showOnlyUser]="true"
-    (utenteStrutturaSelezionatoEmit)="onSelectedPersonaSorgente($event)">
+    (utenteStrutturaSelezionatoEmit)="onSelectedPersonaSorgente($event)"
+  >
   </lib-users-autocomplete>
 </div>
 
 <div class="box box-scelta-persona-destinazione">
   <label for="ricerca-persona-destinazione">Scegli utente destinazione:</label>
-  <lib-users-autocomplete
-    id="ricerca-persona-destinazione"
-    class="autocomplete-utenti"
+  <lib-users-autocomplete id="ricerca-persona-destinazione"
+    class="autocomplete-utenti" 
     [azienda]="aziendaDiRiferimento"
     [utenteIniziale]="utenteStrutturaDestinazione"
     [showPool]="false"
     [showOnlyUser]="true"
-    (utenteStrutturaSelezionatoEmit)="onSelectedPersonaDestinazione($event)">
+    (utenteStrutturaSelezionatoEmit)="onSelectedPersonaDestinazione($event)"
+  >
   </lib-users-autocomplete>
 </div>
 
 <div class="box box-scelta-struttura">
   <label>Struttura utente destinazione: </label>
   <span class="scelta-struttura-descrizione">
-    (è la struttura veicolante dei permessi e la struttura del responsabile nel
-    caso di trasferimento)
+    (è la struttura veicolante dei permessi e la struttura del responsabile nel caso di trasferimento)
   </span>
-  <p-dropdown
+  <p-dropdown 
     [disabled]="!personaDestinazione"
     [options]="struttureSelezionabili"
     [(ngModel)]="strutturaDestinazione"
     (onChange)="onChangeStruttura($event.value)"
     appendTo="body">
-    <ng-template
-      let-struttura
-      pTemplate="selectedItem">
-      <div>{{ struttura.nome }}</div>
+    <ng-template let-struttura pTemplate="selectedItem">
+      <div>{{struttura.nome}}</div>
     </ng-template>
-    <ng-template
-      let-struttura
-      pTemplate="item">
-      <div>{{ struttura.nome }}</div>
+    <ng-template let-struttura pTemplate="item">
+      <div>{{struttura.nome}}</div>
     </ng-template>
   </p-dropdown>
 </div>
 
 <div class="box footer">
-  <p-button
+  <p-button 
     class="bottoni-footer"
-    label="Conferma"
-    (click)="confermaCopiaTrasferisciPermessi($event)"
-    [disabled]="
-      !strutturaDestinazione ||
-      !personaSorgente ||
-      !personaDestinazione ||
-      !operationType
-    "></p-button>
-
-  <p-button
-    *ngIf="showSvuotaButton"
+    label="Conferma" 
+    (click)="confermaCopiaTrasferisciPermessi($event)" 
+    [disabled]="!strutturaDestinazione || !personaSorgente || !personaDestinazione || !operationType"
+  ></p-button>
+  
+  <p-button *ngIf="showSvuotaButton"
     class="bottone-footer"
-    label="Svuota campi"
-    (click)="svuotaCampi()"></p-button>
+    label="Svuota campi" 
+    (click)="svuotaCampi()" 
+  ></p-button>   
 </div>
 
-<p-confirmPopup
-  key="conferma-copia-trasferisci-abilitazioni-popup"></p-confirmPopup>
+<p-confirmPopup key="conferma-copia-trasferisci-abilitazioni-popup"></p-confirmPopup>

@@ -1,0 +1,46 @@
+.scegli-periodo {
+  margin: 1rem;
+  display: flex;
+  justify-content: space-between;
+
+  .date {
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+.table {
+  height: 53vh;
+  overflow-y: auto;
+}
+
+button {
+  margin-right: 5px;
+  display: inline-flex;
+  cursor: pointer;
+  user-select: none;
+  align-items: center;
+  vertical-align: bottom;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+  &:hover {
+    color: #333333;
+    background-color: #993366 !important;
+    border-color: #993366 !important;
+  }
+}
+
+::ng-deep .p-button:hover {
+  color: #333333;
+  background-color: #993366 !important;
+  border-color: #993366 !important;
+}
+
+::ng-deep .p-datatable .p-datatable-tbody > tr > td,
+::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  border-bottom: none ;
+  border-top: 0.5px solid #ccc; 
+  border-left: none; 
+  border-right: none;
+}

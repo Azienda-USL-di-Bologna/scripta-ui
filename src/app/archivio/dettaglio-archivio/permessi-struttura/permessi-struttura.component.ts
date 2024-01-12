@@ -25,6 +25,14 @@ export class PermessiStrutturaComponent implements OnInit {
   public predicati: EnumPredicatoPermessoArchivio[] = [];
   private permClone: { [s: number]: PermessoTabella; } = {};
   public additionalData: AdditionalDataDefinition[] = [];
+
+  private _isLoggedUserResponsabile: Boolean
+  get isLoggedUserResponsabile(): Boolean { return this._isLoggedUserResponsabile; }
+  @Input() set isLoggedUserResponsabile(isLoggedUserResponsabile: Boolean) {
+    this._isLoggedUserResponsabile = isLoggedUserResponsabile;
+    console.log("isLoggedUserResponsabile: " + this.isLoggedUserResponsabile);
+  }
+
   @ViewChild("dt", {}) private dt: Table;
 
   get archivio(): Archivio | ArchivioDetail { return this._archivio; }
@@ -42,7 +50,7 @@ export class PermessiStrutturaComponent implements OnInit {
     } */
   }
 
-  public _loggedUserIsResponsbaileOrVicario: Boolean;
+  private _loggedUserIsResponsbaileOrVicario: Boolean;
   get loggedUserIsResponsbaileOrVicario(): Boolean { return this._loggedUserIsResponsbaileOrVicario; }
   @Input() set loggedUserIsResponsbaileOrVicario(loggedUserIsResponsbaileOrVicario: Boolean) {
     this._loggedUserIsResponsbaileOrVicario = loggedUserIsResponsbaileOrVicario;

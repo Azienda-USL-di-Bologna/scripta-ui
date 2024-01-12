@@ -34,6 +34,7 @@ import { AppService } from 'src/app/app.service';
 })
 export class LottiListComponent implements OnInit {
   public dialogDisplay: boolean = false;
+  public importaDialogDisplay: boolean = false;
   public idEsterno: string = "";
   listaLotti: Lotto[] = [];
   public data: any[] = [];
@@ -238,8 +239,16 @@ export class LottiListComponent implements OnInit {
     this.lottoForm = this.createLottoFormGroup(newLotto);
   }
 
+  importaOrdini(): void {
+    this.importaDialogDisplay = true;
+  }
+
   public cancelDialog() {
     this.dialogDisplay = false;
+  }
+
+  public cancelImportaDialog() {
+    this.importaDialogDisplay = false;
   }
 
   public isReallyChangedAnything(): boolean {
