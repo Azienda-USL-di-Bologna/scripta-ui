@@ -365,7 +365,7 @@ export class ResponsabiliComponent implements OnInit {
         attore.idStruttura = utenteStruttura.idStruttura;
         this.loadStruttureAttore(attore);
       } else {
-        switch(attore.ruolo){
+        switch (attore.ruolo){
           case RuoloAttoreArchivio.VICARIO:
             // Prima controllo che questo vicario non ci sia già.
             if (this.archivio.attoriList.some((a: AttoreArchivio) => a.fk_idPersona.id === attore.idPersona.id && a.ruolo === RuoloAttoreArchivio.VICARIO)) {
@@ -451,15 +451,17 @@ export class ResponsabiliComponent implements OnInit {
               }
               this.struttureAttoreInEditing = [];
               this.struttureAttoreInEditing.push(attore.idStruttura);
-            } else if ( attore.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO){
-              // Qui nel caso si tratti di un reposnsabile proposto, se ha una sola afferenza allora il responsabile proposto viene subito salvato e si esce dall'editing
-              if (utentiStruttura.length === 1){
+            } else if (attore.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO){
+              if (utentiStruttura.length === 1) {
                 attore.idStruttura = utentiStruttura[0].idStruttura;
                 this.inEditing = false; 
-                this.onRowEditSave(attore, rowIndex, "INSERT");
-                this.struttureAttoreInEditing = [];
+                if (!attore.id) {
+                  // Qui nel caso si tratti di un reposnsabile proposto, se ha una sola afferenza allora il responsabile proposto viene subito salvato e si esce dall'editing
+                  this.onRowEditSave(attore, rowIndex, "INSERT");
+                  this.struttureAttoreInEditing = [];
+                }
                 this.struttureAttoreInEditing.push(attore.idStruttura);
-              }else{
+              } else {
                 this.messageService.add({
                   severity: "warn",
                   summary: "Attenzione",

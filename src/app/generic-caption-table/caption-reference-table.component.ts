@@ -7,7 +7,7 @@ import { Table } from "primeng/table";
  */
 export interface CaptionReferenceTableComponent {
   removeSort: () => void;
-  applyFilterGlobal: (event: Event, matchMode: string) => void;
+  applyFilterGlobal: (stringa: string, matchMode: string) => void;
   resetPaginationAndLoadData: (x?: number[]) => void;
   clear: () => void;
   rightContentProgressSpinner: boolean;

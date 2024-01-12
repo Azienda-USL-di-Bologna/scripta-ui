@@ -46,6 +46,24 @@
     [(selected)]="accordionSelected[1]"
     *ngIf = "isResponsabileVersamento === true"
     [ngClass]="accordionSelected[1] ? 'tab-accordion-selected' : ''">
+    <i class="pi pi-info-circle info-versamenti" 
+      (click)="op.toggle($event)"
+      pTooltip="Scopri alcune caratteristiche degli errori versamento">
+    </i>
+    <p-overlayPanel #op 
+      appendTo="body"
+      styleClass="overlaypanel-info-versamenti"
+      [showCloseIcon]="true">
+      <ng-template pTemplate>
+        <p>Gli errori di versamento possono essere di tre tipi</p>
+        <ul>
+          <li>Errori forzabili: sono documenti che presentano dei problemi nella verifica della validità della firma di un allegato o più. Il responsabile di versamento li può forzare in autonomia.</li>
+          <li>Errori crittografici: sono documenti che presentano dei problemi strutturali nella firma di un allegato o più. Il responsabile di versamento li può forzare, ma in sessioni concordate con il polo archivistico</li>
+          <li>Errori non forzabili: sono documenti che presentano errori nella composizione del documento inviato al polo archivistico, errori nel processo di invio, etc.. Il responsabile di versamento può solo ritentare il versamento. </li>
+        </ul>
+        Ricorda: La differenza tra ritentare e forzare un versamento è che il "ritenta versamento" riverserà lo stesso xml, mentre il "forza versamento" abiliterà il parametro chiamato "forza accettazione" nell'xml che permette di mandare in conservazione i documenti nonostante gli errori forzabili
+      </ng-template>
+    </p-overlayPanel>
     <versamenti [idDoc]="doc.id"></versamenti>
   </p-accordionTab>
 </p-accordion>

@@ -81,7 +81,7 @@ export class DocDetailAndPreviewComponent implements OnInit {
         (utenteUtilities: UtenteUtilities) => {
           if (utenteUtilities) {
             this.utenteUtilitiesLogin = utenteUtilities;
-            this.isResponsabileVersamento = this.utenteUtilitiesLogin.isRV();
+            this.isResponsabileVersamento = this.utenteUtilitiesLogin.isRV() || this.utenteUtilitiesLogin.isSD();
             this.utente = this.utenteUtilitiesLogin.getUtente();
             this.idPersona = this.utente.idPersona;
             this.accordionSelected[0] = this.accordionSelected[0] && this.canVisualizeAllegati();
@@ -113,8 +113,8 @@ export class DocDetailAndPreviewComponent implements OnInit {
         // controllo se siamo un attore del documento
         if (this.sonoPersonaVedenteSuDocSelezionato) {
           return true;
-        // nel caso in cui si tratti di un documento con visibilità limitata controllo se abbiamo il ruolo di osservatore o di Super Demiurgo
-        } else if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD) || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.OS) || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.MOS)){
+        // nel caso in cui si tratti di un documento con visibilità limitata controllo se abbiamo il ruolo di osservatore o di Super Demiurgo o di responsabile versamenti (da rm 76521 )
+        } else if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD) || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.OS) || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.MOS) || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.RV)){
           return true;
         }else{
           return false;
@@ -125,8 +125,8 @@ export class DocDetailAndPreviewComponent implements OnInit {
         // controllo se siamo un attore del documento
         if (this.sonoPersonaVedenteSuDocSelezionato) {
           return true;
-        // nel caso in cui si tratti di un documento con visibilità limitata controllo se abbiamo il ruolo di osservatore o di Super Demiurgo
-        } else if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.OS) || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD)){
+        // nel caso in cui si tratti di un documento con visibilità limitata controllo se abbiamo il ruolo di osservatore o di Super Demiurgo o di responsabile versamenti
+        } else if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.OS) || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD) || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.RV)){
           return true;
         }else{
           return false;
@@ -134,10 +134,10 @@ export class DocDetailAndPreviewComponent implements OnInit {
       }
       // controllo se si tratta di un documento riservato
       if (this.doc.riservato){
-        // nel caso in cui si tratti di un documento riservato o sono un attore o ho il ruolo SD
+        // nel caso in cui si tratti di un documento riservato o sono un attore o ho il ruolo SD o di responsabile versamenti
         if (this.sonoPersonaVedenteSuDocSelezionato) {
           return true;
-        } else if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD)){
+        } else if (this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.SD) || this.utenteUtilitiesLogin.hasRole(CODICI_RUOLO.RV)){
           return true;
         } else {
           return false;

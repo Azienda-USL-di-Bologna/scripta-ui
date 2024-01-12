@@ -1,0 +1,53 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+  .warning-no-chiusi {
+    display: block;
+    font-size: 0.9rem;
+  }
+  .radiobutton-container {
+    display: flex;
+    flex-direction: column;
+    h1, h2{
+      text-align: center;
+    }
+    div.target-button-container {
+      display: flex; 
+      flex-direction: column; 
+      justify-content: flex-start;
+      margin-left: 1rem;
+      margin-bottom: 1rem;
+      label {
+        font-weight: normal;
+      }
+      .p-checkbox-label, .p-radiobutton-label {
+        font-size: 1.1rem;
+      }
+      .target-button-descrizione {
+        margin-left: 1.8rem;
+        font-size: 13px;
+      }
+    }
+  }
+  .box {
+    margin-top: 1rem;
+    lib-users-autocomplete, lib-aziende-autocomplete {
+      padding: 0 !important;
+    }
+    &.box-scelta-struttura {
+      .scelta-struttura-descrizione {
+        display: block;
+        font-size: 13px;
+      }
+    }
+  }
+  .footer {
+    justify-content: center; 
+    display: flex; 
+  }
+  .bottone-footer {
+    margin-left: 1.5rem;
+  }
+}

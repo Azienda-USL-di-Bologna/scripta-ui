@@ -1,0 +1,43 @@
+.first-div{
+  margin: 0.7rem; 
+}
+.box-ricerca {
+  width: 10rem;
+  padding-bottom: 5px;
+  justify-content: space-between;
+  align-items: center;
+}
+p-table {
+  button  {
+    height: 30px;
+    padding: 5px;
+    align-items: center;
+    vertical-align: bottom;
+    text-align: center;
+    position: relative;
+  }
+}
+button {
+  margin-right: 5px;
+  display: inline-flex;
+  cursor: pointer;
+  user-select: none;
+  align-items: center;
+  vertical-align: bottom;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+  &:hover {
+    color: #333333;
+    background-color: #993366 !important;
+    border-color: #993366 !important;
+  }
+}
+.top-footer-buttons {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  justify-content: space-between;
+  align-items: center;
+}

@@ -1,0 +1,146 @@
+<div class="form-lotti-detail">
+  <form [formGroup]="lottoForm">
+  <div class="input-lotto-CIG">
+    <div class="p-grid">
+      <div class="p-col-12 p-md-3">
+        <label>CIG*</label>
+        <input 
+          class="input-CIG"
+          type="text" 
+          pInputText 
+          name="add CIG" 
+          placeholder="CIG"
+          formControlName="cig"
+          ariaRequired="true"
+        >
+      </div>
+
+      <div class="p-col-12 p-md-3">
+        <label>Lotto*</label>
+        <input 
+          class="input-lotto"
+          type="text" 
+          pInputText 
+          name="add lotto" 
+          placeholder="Lotto" 
+          formControlName="lotto"
+          ariaRequired="true"
+        >
+      </div>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="dropdown-container">
+      <div class="dropdown-tipologia">
+        <label>Tipologia*</label>
+        <p-dropdown 
+          [options]="tipologia" 
+          formControlName="idTipologia"
+          placeholder="Scelta tipologia" 
+          optionLabel="nome"
+          [showClear]="false"
+          ariaRequired="true"
+        ></p-dropdown>
+      </div>
+    
+      <div class="dropdown-scelta-contraente">
+        <label>Scelta Contraente*</label>
+        <p-dropdown 
+          [options]="contraente" 
+          formControlName="idContraente"
+          placeholder="Scelta contraente" 
+          optionLabel="nome"
+          [showClear]="false"
+          ariaRequired="true"
+        ></p-dropdown>
+      </div>
+    </div>
+    
+    <div class="input-oggetto">
+      <label>Oggetto*</label>
+      <input 
+        class="input-lotto"
+        formControlName="oggetto"
+        type="text" 
+        pInputText 
+      >
+    </div>
+
+    <div class="card">
+      <p-divider align="left" type="dashed">
+        <!-- <b>Partecipanti</b> -->
+      </p-divider>
+    
+     <box-participanti-aggiudicatari  
+      [modalita]="'partecipanti'"
+      [gruppoList]="lottoForm.controls.partecipantiGruppi.value"
+      [singoliList]="lottoForm.controls.partecipantiSingoli.value">
+     </box-participanti-aggiudicatari>
+    </div>
+
+    <div class="card">
+      <p-divider align="left" type="dashed">
+        <!-- <b>Aggiudicatari</b> -->
+      </p-divider>
+      <box-participanti-aggiudicatari [modalita]="'aggiudicatari'" [gruppoList]="lottoForm.controls.gruppiAggiudicatari.value"></box-participanti-aggiudicatari>
+    </div>
+
+    <div class="p-grid p-fluid" style="margin-top: 5px;">
+      <div class="p-field p-col-12 p-md-3">
+        <label>Importo Totale*</label>
+        <p-inputNumber 
+          mode="decimal"
+          formControlName="importoTotale"
+          inputId="importoTotale" 
+          [min]="0"
+          placeholder="Importo Totale" 
+          aria-required="true"
+          [minFractionDigits] = 2
+          >
+        </p-inputNumber>
+      </div>
+      
+      <div class="p-field p-col-12 p-md-3">
+        <label>Importo Liquidato*</label>
+        <p-inputNumber 
+          mode="decimal" 
+          formControlName="importoLiquidato"
+          inputId="importoLiquidato" 
+          [min]="0"
+          placeholder="Importo Liquidato"
+          aria-required="true"
+          [minFractionDigits] = 2
+        >
+        </p-inputNumber>
+      </div>
+    </div>
+
+    <div class="p-fluid p-grid p-formgrid">
+      <div class="p-field p-col-12 p-md-3">
+        <label for="icon">Data Inizio*</label>
+        <p-calendar 
+          [maxDate]="lottoForm.value['dataCompletamento']"
+          formControlName="dataInizio"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          inputId="icon"
+          aria-required="true"
+        ></p-calendar>
+      </div>
+
+      <div class="p-field p-col-12 p-md-3">
+        <label for="icon">Data Completamento*</label>
+        <p-calendar 
+          [minDate]="lottoForm.value['dataInizio']"
+          formControlName="dataCompletamento"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          inputId="icon"
+          aria-required="true"
+        ></p-calendar>
+      </div>
+    </div>
+  </div>
+  </form>
+</div>
