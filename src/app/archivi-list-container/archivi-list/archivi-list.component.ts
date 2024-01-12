@@ -233,7 +233,8 @@ export class ArchiviListComponent
   @Input() set archivioPadre(archivioPadre: Archivio) {
     if (archivioPadre) {
       this._archivioPadre = archivioPadre;
-      this.isArchivioPadreClosed = archivioPadre.stato === 'CHIUSO' || archivioPadre.stato === 'PRECHIUSO';
+      this.isArchivioPadreClosed =
+        archivioPadre.stato === "CHIUSO" || archivioPadre.stato === "PRECHIUSO";
     }
     if (this.firstLoadDone) {
       this.resetPaginationAndLoadData();
@@ -1075,6 +1076,7 @@ export class ArchiviListComponent
       lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(
         (f) => f.field !== "dataCreazione"
       );
+      this.removeFilterFromDataCreazione(lazyFiltersAndSorts);
     }
 
     /**
@@ -1088,6 +1090,7 @@ export class ArchiviListComponent
       lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(
         (f) => f.field != "livello"
       );
+
       filtersAndSorts.addFilter(
         new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1)
       );
