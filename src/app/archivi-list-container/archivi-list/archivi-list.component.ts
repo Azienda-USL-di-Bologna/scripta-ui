@@ -127,7 +127,6 @@ export class ArchiviListComponent
   public columnFilterDataCreazione: ColumnFilter;
   @ViewChild("multiselectBitAnomalie")
   public multiselectBitAnomalie: MultiSelect;
-
   //public sortOrder = -1;
   public archiviListModeEnum = ArchiviListMode;
   public archivi: ExtendedArchiviView[] = [];
@@ -213,6 +212,8 @@ export class ArchiviListComponent
   public loggedUserCanDeleteArchivio: boolean = false;
   public archivesSelected: ExtendedArchiviView[] = [];
   public showAdditionalRow: boolean = false;
+  public isArchivioPadreClosed = false;
+  public idAziendaLastLogin: number;
 
   public allRowsAreSelected: boolean = false;
   public allRowsWasSelected: boolean = false;
@@ -230,7 +231,11 @@ export class ArchiviListComponent
     return this._archivioPadre;
   }
   @Input() set archivioPadre(archivioPadre: Archivio) {
-    this._archivioPadre = archivioPadre;
+    if (archivioPadre) {
+      this._archivioPadre = archivioPadre;
+      this.isArchivioPadreClosed =
+        archivioPadre.stato === "CHIUSO" || archivioPadre.stato === "PRECHIUSO";
+    }
     if (this.firstLoadDone) {
       this.resetPaginationAndLoadData();
     }
@@ -511,6 +516,10 @@ export class ArchiviListComponent
             );
           }
         });
+        if (settings["scripta.archiviList"].lastIdAziendaLogin) {
+          this.idAziendaLastLogin =
+            settings["scripta.archiviList"].lastIdAziendaLogin;
+        }
       }
     }
     // Configurazione non presente o errata. Uso quella di default.
@@ -569,17 +578,26 @@ export class ArchiviListComponent
     }
     this.storedLazyLoadEvent.first = 0;
     this.storedLazyLoadEvent.rows = this.rowsNumber * 2;
-
+    this.loadConfiguration();
     if (this.dropdownAzienda) {
-      const value =
-        this.aziendeFiltrabili.find(
-          (a) =>
-            a.value[0] ===
-            this.utenteUtilitiesLogin.getUtente().idPersona.fk_idAziendaDefault
-              .id
-        )?.value || this.aziendeFiltrabili[0].value;
-      this.dropdownAzienda.writeValue(value);
-      this.lastAziendaFilterValue = value;
+      if (this.idAziendaLastLogin) {
+        const value =
+          this.aziendeFiltrabili.find(
+            (a) => a.value[0] === this.idAziendaLastLogin
+          )?.value || this.aziendeFiltrabili[0].value;
+        this.dropdownAzienda.writeValue(value);
+        this.lastAziendaFilterValue = value;
+      } else {
+        const value =
+          this.aziendeFiltrabili.find(
+            (a) =>
+              a.value[0] ===
+              this.utenteUtilitiesLogin.getUtente().idPersona
+                .fk_idAziendaDefault.id
+          )?.value || this.aziendeFiltrabili[0].value;
+        this.dropdownAzienda.writeValue(value);
+        this.lastAziendaFilterValue = value;
+      }
       this.dataTable.filters["idAzienda.id"] = {
         value: this.dropdownAzienda.value,
         matchMode: "in",
@@ -729,6 +747,10 @@ export class ArchiviListComponent
     }
     impostazioniVisualizzazioneObj["scripta.archiviList"].selectedColumn =
       this.selectedColumns.map((c) => c.field);
+    if (this.lastAziendaFilterValue.length === 1) {
+      impostazioniVisualizzazioneObj["scripta.archiviList"].lastIdAziendaLogin =
+        this.lastAziendaFilterValue[0];
+    }
     this.utenteUtilitiesLogin.setImpostazioniApplicazione(
       this.loginService,
       impostazioniVisualizzazioneObj
@@ -899,21 +921,32 @@ export class ArchiviListComponent
     if (this.filtriPuliti) {
       this.filtriPuliti = false;
       this.resetCalendarToInitialValues();
+      this.loadConfiguration();
       this.dataTable.filters["dataCreazione"] = {
         value: this.calendarcreazione?.value,
         matchMode: "is",
       };
 
       if (this.dropdownAzienda) {
-        const value =
-          this.aziendeFiltrabili.find(
-            (a) =>
-              a.value[0] ===
-              this.utenteUtilitiesLogin.getUtente().idPersona
-                .fk_idAziendaDefault.id
-          )?.value || this.aziendeFiltrabili[0].value;
-        this.dropdownAzienda.writeValue(value);
-        this.lastAziendaFilterValue = value;
+        if (this.idAziendaLastLogin) {
+          const value =
+            this.aziendeFiltrabili.find(
+              (a) => a.value[0] === this.idAziendaLastLogin
+            )?.value || this.aziendeFiltrabili[0].value;
+          this.dropdownAzienda.writeValue(value);
+          this.lastAziendaFilterValue = value;
+        } else {
+          const value =
+            this.aziendeFiltrabili.find(
+              (a) =>
+                a.value[0] ===
+                this.utenteUtilitiesLogin.getUtente().idPersona
+                  .fk_idAziendaDefault.id
+            )?.value || this.aziendeFiltrabili[0].value;
+          this.dropdownAzienda.writeValue(value);
+          this.lastAziendaFilterValue = value;
+        }
+
         this.dataTable.filters["idAzienda.id"] = {
           value: this.dropdownAzienda.value,
           matchMode: "in",
@@ -1036,10 +1069,14 @@ export class ArchiviListComponent
       );
     }
 
-    if (this.archiviListMode === ArchiviListMode.ANOMALI) {
+    if (
+      this.archiviListMode === ArchiviListMode.ANOMALI ||
+      this.archiviListMode === ArchiviListMode.PREFERITI
+    ) {
       lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(
         (f) => f.field !== "dataCreazione"
       );
+      this.removeFilterFromDataCreazione(lazyFiltersAndSorts);
     }
 
     /**
@@ -1053,6 +1090,7 @@ export class ArchiviListComponent
       lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters.filter(
         (f) => f.field != "livello"
       );
+
       filtersAndSorts.addFilter(
         new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1)
       );
@@ -1071,7 +1109,7 @@ export class ArchiviListComponent
       ) {
         // Nella ricerca globale si sta cercando una numerazione gerarchica, allora tolgo il filtro sul livello e sulla data
         this.setFilterTuttiLivelli();
-        this.removeFilterFromDataCreazione();
+        this.removeFilterFromDataCreazione(lazyFiltersAndSorts);
       } else if (
         this.storedLazyLoadEvent.filters?.numerazioneGerarchica?.value &&
         this.regexNumerazioneGerarchica.test(
@@ -1079,7 +1117,8 @@ export class ArchiviListComponent
         )
       ) {
         // Nella ricerca per numerazioneGerarhica si sta cercando.. allora tolgo il filtro sulla data creazione
-        this.removeFilterFromDataCreazione();
+        this.removeFilterFromDataCreazione(lazyFiltersAndSorts);
+
         // In questo caso il filtro sul livello lo lascio com'è a meno che: vedi if seguente:
         if (
           this.storedLazyLoadEvent.filters?.numerazioneGerarchica.value.includes(
@@ -1096,7 +1135,7 @@ export class ArchiviListComponent
         }
       } else if (this.storedLazyLoadEvent.filters?.numero?.value) {
         // Nella ricerca per numerazione gerarhica sto cercando un numero. Tolgo il filtro sulla data creazione
-        this.removeFilterFromDataCreazione();
+        this.removeFilterFromDataCreazione(lazyFiltersAndSorts);
       } else if (this.fromTabTutti && this.cacheFiltroLivelloTabVisbili) {
         // Se provengo dal tab Tutti e avevo settato un filtro sul livello mentre ero nel tab Visibile reimposto il filtro
         lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters?.filter(
@@ -1314,22 +1353,44 @@ export class ArchiviListComponent
         }
 
         // Uso la vista che fa join con i permessi. E cerco solo archivi in cui io sono presente
-        filterAndSort.addFilter(
-          new FilterDefinition(
-            "idPersona.id",
-            FILTER_TYPES.not_string.equals,
-            this.utenteUtilitiesLogin.getUtente().idPersona.id
-          )
-        );
+        //lo faccio solo se o sono nel tab visibili oppure se lo sto aprendo da un archivio padre se non ho particolari ruoli
+        if (
+          !this.utenteUtilitiesLogin.isSD() &&
+          !this.utenteUtilitiesLogin.isCA() &&
+          !this.utenteUtilitiesLogin.isAG() &&
+          !this.utenteUtilitiesLogin.isOS() &&
+          this.archivioPadre
+        ) {
+          filterAndSort.addFilter(
+            new FilterDefinition(
+              "idPersona.id",
+              FILTER_TYPES.not_string.equals,
+              this.utenteUtilitiesLogin.getUtente().idPersona.id
+            )
+          );
+          this.serviceToGetData = this.archivioDetailViewService;
+          this.projectionToGetData =
+            ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewExtended;
+        } else if (!this.archivioPadre) {
+          filterAndSort.addFilter(
+            new FilterDefinition(
+              "idPersona.id",
+              FILTER_TYPES.not_string.equals,
+              this.utenteUtilitiesLogin.getUtente().idPersona.id
+            )
+          );
+          this.serviceToGetData = this.archivioDetailViewService;
+          this.projectionToGetData =
+            ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewExtended;
+        }
+
         filterAndSort.addSort(
           new SortDefinition(
             "numero",
             this.dataTable.sortOrder === -1 ? SORT_MODES.desc : SORT_MODES.asc
           )
         );
-        this.serviceToGetData = this.archivioDetailViewService;
-        this.projectionToGetData =
-          ENTITIES_STRUCTURE.scripta.archiviodetailview.customProjections.CustomArchivioDetailViewExtended;
+
         break;
       case ArchiviListMode.TUTTI:
         this.messageIfNull = "Non sono stati trovati fascicoli.";
@@ -1410,6 +1471,7 @@ export class ArchiviListComponent
       //this.selectedAllAziende = false;
       // L'utente ha scelto un unica azienda. Faccio quindi partire il filtro.
       this.lastAziendaFilterValue = value;
+      this.saveConfiguration();
       console.log("Filtro: ", value);
       filterCallback(value);
     } else {
@@ -1424,8 +1486,8 @@ export class ArchiviListComponent
             // L'utente conferma di voler cercare su tutte le sue aziende. faccio quindi partire il filtro
             this.dropdownAzienda.writeValue(value);
             //this.selectedAllAziende = true;
-            this.lastAziendaFilterValue = value;
-            filterCallback(value);
+
+            if (value.length === 1) filterCallback(value);
           },
           reject: () => {
             // L'utente ha cambaito idea. Non faccio nulla
@@ -1652,12 +1714,6 @@ export class ArchiviListComponent
         archivio.idAzienda.aoo +
         "]"
     );
-  }
-
-  public isArchivioChiuso(archivio: ExtendedArchiviView): boolean {
-    if (archivio.stato == "CHIUSO" || archivio.stato == "PRECHIUSO")
-      return true;
-    else return false;
   }
 
   public isArchivioSpeciale(archivio: ExtendedArchiviView): boolean {
@@ -1975,7 +2031,13 @@ export class ArchiviListComponent
    * setto a null il filtro sulla data creazione.
    * questo metodo è utile quando si vuole permettere all'utente di cercare in lungo e in largo tra gli archivi.
    */
-  private removeFilterFromDataCreazione() {
+  private removeFilterFromDataCreazione(lazyFiltersAndSorts?: FiltersAndSorts) {
+    if (lazyFiltersAndSorts) {
+      lazyFiltersAndSorts.filters = lazyFiltersAndSorts.filters?.filter(
+        (f) => f.field != "dataCreazione"
+      );
+    }
+
     this.calendarcreazione.writeValue(null);
     this.lastDataCreazioneFilterValue = null;
     this.dataTable.filters["dataCreazione"] = { value: null, matchMode: "is" };

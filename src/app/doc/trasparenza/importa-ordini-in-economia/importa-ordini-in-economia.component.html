@@ -1,0 +1,99 @@
+<div>
+    <div class="scegli-periodo">
+      <label>Estrai dati nel seguente periodo temporale:</label>
+      <div class="date">
+        <label>Dal</label>
+        <p-calendar
+          [(ngModel)]="dataDal"
+          [maxDate]="dataAl"
+          [showIcon]="true"
+          appendTo="body"
+          dateFormat="dd/mm/yy">
+        </p-calendar>
+        <p-divider layout="vertical"></p-divider>
+        <label>Al</label>
+        <p-calendar
+          [(ngModel)]="dataAl"
+          [minDate]="dataDal"
+          [showIcon]="true"
+          appendTo="body"
+          dateFormat="dd/mm/yy">
+        </p-calendar>
+        <p-divider layout="vertical"></p-divider>
+        <p-button
+          icon="pi pi-search"
+          severity="success"
+          (click)="cerca()"
+          class="search-button"></p-button>
+      </div>
+    </div>
+    <p-divider></p-divider>
+    <div class="table">
+      <p-table
+        [value]="dati"
+        [scrollable]="true"
+        scrollHeight="53vh"
+        appendTo="body"
+        dataKey="id">
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="max-width: 3.5%; overflow-wrap: anywhere"></th>
+            <th style="max-width: 10%; overflow-wrap: anywhere">Codice</th>
+            <th>Descrizione</th>
+          </tr>
+        </ng-template>
+        <ng-template
+          pTemplate="body"
+          let-dati>
+          <tr>
+            <td style="max-width: 3.5%; overflow-wrap: anywhere">
+              <p-checkbox
+                [(ngModel)]="dati.selected"
+                [binary]="true"
+                inputId="binary"></p-checkbox>
+            </td>
+            <td style="max-width: 10%; overflow-wrap: anywhere">
+              {{ dati.codice }}
+            </td>
+            <td>{{ dati.descrizione }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+    <p-divider></p-divider>
+    <div class="scegli-periodo">
+      <div>
+        <button
+          pButton
+          pRipple
+          type="button"
+          label="Seleziona Tutto"
+          (click)="selezionaTutto()"></button>
+        <button
+          button
+          pButton
+          pRipple
+          type="button"
+          label="Deseleziona Tutto"
+          (click)="deselezionaTutto()"></button>
+      </div>
+      <div>
+        <button
+          button
+          pButton
+          pRipple
+          type="button"
+          label="Importa"
+          (click)="importa()"
+          [disabled]="!isAlmenoUnaCheckBoxSelezionata()"></button>
+        <button
+          button
+          pButton
+          pRipple
+          type="button"
+          label="Annulla"
+          (click)="annulla()"></button>
+      </div>
+    </div>
+</div>
+<app-ricerca-babel></app-ricerca-babel>

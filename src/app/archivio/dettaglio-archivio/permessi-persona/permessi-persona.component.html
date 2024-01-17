@@ -17,7 +17,7 @@
 				(click)="inEditing = true; addPermesso()" 
 				class="mr-2" 
 				label="Aggiungi permesso"
-				[disabled]="inEditing || permessiDettaglioArchivioService.loading || !loggedUserIsResponsbaileOrVicario || (archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')">
+				[disabled]="inEditing || permessiDettaglioArchivioService.loading || !loggedUserIsResponsbaileOrVicario || isArchivioClosed && !isLoggedUserResponsabile">
 			</button>
 		</div>
 	</ng-template>
@@ -130,7 +130,7 @@
 				alignFrozen="right" 
 				pFrozenColumn 
 				[frozen]="true">
-				<button *ngIf="!editing && !permesso.barrato && !permesso.ereditato && !(archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')" 
+				<button *ngIf="!editing && !permesso.barrato && !permesso.ereditato && (!isArchivioClosed || isLoggedUserResponsabile)"
 					pButton 
 					pRipple 
 					pInitEditableRow 
@@ -140,7 +140,7 @@
 					icon="pi pi-pencil" 
 					(click)="inEditing = true; onRowEditInit(permesso)">
 				</button>
-				<button *ngIf="!editing && !permesso.barrato && !permesso.ereditato && !(archivio.stato ==='PRECHIUSO' || archivio.stato ==='CHIUSO')" 
+				<button *ngIf="!editing && !permesso.barrato && !permesso.ereditato && (!isArchivioClosed || isLoggedUserResponsabile)" 
 					pButton 
 					pRipple 
 					pTooltip="Elimina permesso"

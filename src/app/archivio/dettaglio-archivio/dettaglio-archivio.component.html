@@ -47,10 +47,10 @@
             <label for="riservato">Riservato</label>
             <i id="riservato" #riservato
               type="button" 
-              (click)="archivio.livello === 1 ? changeVisibilita() : null" 
-              class="pi icona-riservato" 
+              (click)="(archivio.livello === 1 && !isArchivioChiuso)? changeVisibilita() : null" 
+              class="pi" 
               title="Riservato"
-              [ngClass]="{'pi-eye': !archivio.riservato, 'pi-ban': archivio.riservato}"
+              [ngClass]="{'pi-eye': !archivio.riservato, 'pi-ban': archivio.riservato, 'icona-riservato': !isArchivioChiuso}"
               [pTooltip]="archivio.livello === 1 ? archivio.riservato ? 'Rendi visibile il fascicolo' : 'Rendi riservato il fascicolo' : 
                 'Puoi modificare la riservatezza sul fascicolo radice'">
             </i>
@@ -201,7 +201,7 @@
           <!-- <label>Note</label> -->
           <textarea #noteArea
             pInputTextarea
-            [disabled]="!loggedUserCanEditDetails"  
+            [disabled]="!loggedUserCanEditDetails || isArchivioChiuso"
             rows="5" 
             cols="22" 
             [(ngModel)]="archivio.note"
@@ -217,14 +217,14 @@
     <p-accordion class="accodion-box-permessi">
       <p-accordionTab header="Responsabili e Vicari" [selected]="true">
       <app-responsabili
-        [archivio]="archivio" [loggedUserIsResponsbaileOrVicario]="loggedUserCanEditDetails" [sonoResponsabile]="sonoResponsabile">
+        [archivio]="archivio" [loggedUserIsResponsbaileOrVicario]="loggedUserCanEditDetails" [isLoggedUserResponsabile]="isLoggedUserResponsabile">
       </app-responsabili>
       </p-accordionTab>
       <p-accordionTab header="Permessi Struttura">
-        <app-permessi-struttura [archivio]="archivio" [loggedUserIsResponsbaileOrVicario]="loggedUserCanEditDetails"></app-permessi-struttura>
+        <app-permessi-struttura [archivio]="archivio" [loggedUserIsResponsbaileOrVicario]="loggedUserCanEditDetails" [isLoggedUserResponsabile]="isLoggedUserResponsabile"></app-permessi-struttura>
       </p-accordionTab>
       <p-accordionTab header="Permessi Persona">
-        <app-permessi-persona [archivio]="archivio" [loggedUserIsResponsbaileOrVicario]="loggedUserCanEditDetails"></app-permessi-persona>
+        <app-permessi-persona [archivio]="archivio" [loggedUserIsResponsbaileOrVicario]="loggedUserCanEditDetails" [isLoggedUserResponsabile]="isLoggedUserResponsabile"></app-permessi-persona>
       </p-accordionTab>
     </p-accordion>
   </ng-template>

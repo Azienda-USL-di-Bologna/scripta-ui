@@ -1,44 +1,100 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, Output, ViewChild, EventEmitter } from '@angular/core';
-import { Archivio, AttoreArchivio, AttoreArchivioService, ENTITIES_STRUCTURE, Massimario, RuoloAttoreArchivio, Titolo, TitoloService, MassimarioService, ConfigurazioneService, ParametroAziende, TipoArchivio, BaseUrls, BaseUrlType, Attivita, Applicazione, Persona, Azienda, AttivitaService, StatoArchivio, KrintFilterOptions } from '@bds/internauta-model';
-import { JwtLoginService, UtenteUtilities } from '@bds/jwt-login';
-import { FilterDefinition, FiltersAndSorts, FILTER_TYPES, PagingConf, SortDefinition, SORT_MODES , BatchOperation, NextSdrEntity, BatchOperationTypes, AdditionalDataDefinition} from '@bds/next-sdr';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { TreeNode } from 'primeng/api/treenode';
-import { AutoComplete } from 'primeng/autocomplete';
-import { TreeSelect } from 'primeng/treeselect';
-import { Subscription } from 'rxjs/internal/Subscription';
-import { AppService } from 'src/app/app.service';
-import { TipoArchivioTraduzioneVisualizzazione } from 'src/app/archivi-list-container/archivi-list/archivi-list-constants';
-import { NavigationTabsService } from 'src/app/navigation-tabs/navigation-tabs.service';
-import { ArchivioFieldUpdating, ArchivioUtilsService } from '../archivio-utils.service';
-import { ExtendedArchivioService } from '../extended-archivio.service';
-import { PermessiDettaglioArchivioService } from './permessi-dettaglio-archivio.service';
+import {
+  Component,
+  ElementRef,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+  EventEmitter,
+} from "@angular/core";
+import {
+  Archivio,
+  AttoreArchivio,
+  AttoreArchivioService,
+  ENTITIES_STRUCTURE,
+  Massimario,
+  RuoloAttoreArchivio,
+  Titolo,
+  TitoloService,
+  MassimarioService,
+  ConfigurazioneService,
+  ParametroAziende,
+  TipoArchivio,
+  BaseUrls,
+  BaseUrlType,
+  Attivita,
+  Applicazione,
+  Persona,
+  Azienda,
+  AttivitaService,
+  StatoArchivio,
+  KrintFilterOptions,
+} from "@bds/internauta-model";
+import { JwtLoginService, UtenteUtilities } from "@bds/jwt-login";
+import {
+  FilterDefinition,
+  FiltersAndSorts,
+  FILTER_TYPES,
+  PagingConf,
+  SortDefinition,
+  SORT_MODES,
+  BatchOperation,
+  NextSdrEntity,
+  BatchOperationTypes,
+  AdditionalDataDefinition,
+} from "@bds/next-sdr";
+import { ConfirmationService, MessageService } from "primeng/api";
+import { TreeNode } from "primeng/api/treenode";
+import { AutoComplete } from "primeng/autocomplete";
+import { TreeSelect } from "primeng/treeselect";
+import { Subscription } from "rxjs/internal/Subscription";
+import { AppService } from "src/app/app.service";
+import { TipoArchivioTraduzioneVisualizzazione } from "src/app/archivi-list-container/archivi-list/archivi-list-constants";
+import { NavigationTabsService } from "src/app/navigation-tabs/navigation-tabs.service";
+import {
+  ArchivioFieldUpdating,
+  ArchivioUtilsService,
+} from "../archivio-utils.service";
+import { ExtendedArchivioService } from "../extended-archivio.service";
+import { PermessiDettaglioArchivioService } from "./permessi-dettaglio-archivio.service";
 
 @Component({
-  selector: 'dettaglio-archivio',
-  templateUrl: './dettaglio-archivio.component.html',
-  styleUrls: ['./dettaglio-archivio.component.scss']
+  selector: "dettaglio-archivio",
+  templateUrl: "./dettaglio-archivio.component.html",
+  styleUrls: ["./dettaglio-archivio.component.scss"],
 })
 export class DettaglioArchivioComponent implements OnInit, OnDestroy {
-
   private _archivio: Archivio;
-  get archivio(): Archivio { return this._archivio; }
+  get archivio(): Archivio {
+    return this._archivio;
+  }
   @Input() set archivio(archivio: Archivio) {
     this._archivio = archivio;
     this.setAnniTenutaSelezionabili();
-    this.labelLivelloArchivio = this.getLabelLivelloByIdLivello(archivio.livello);
+    this.labelLivelloArchivio = this.getLabelLivelloByIdLivello(
+      archivio.livello
+    );
     if (this.archivio.idTitolo) {
-      this.selectedTitolo = this.buildNodeTitolo(this.archivio.idTitolo as Titolo);
+      this.selectedTitolo = this.buildNodeTitolo(
+        this.archivio.idTitolo as Titolo
+      );
     } else {
       this.selectedTitolo = null;
     }
     this.loadConfigurations();
     if (this.showLogs) this.loadLogs();
   }
-  public panelSize:number[]=[85,15];
+  public panelSize: number[] = [85, 15];
   public krintFilterOptions: KrintFilterOptions;
-  private pageConfNoCountNoLimit: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 9999, offset: 0 } };
-  private pageConfNoCountLimit20: PagingConf = { mode: "LIMIT_OFFSET_NO_COUNT", conf: { limit: 20, offset: 0 } };
+  private pageConfNoCountNoLimit: PagingConf = {
+    mode: "LIMIT_OFFSET_NO_COUNT",
+    conf: { limit: 9999, offset: 0 },
+  };
+  private pageConfNoCountLimit20: PagingConf = {
+    mode: "LIMIT_OFFSET_NO_COUNT",
+    conf: { limit: 20, offset: 0 },
+  };
   public responsabiliArchivi: AttoreArchivio[] = [];
   public subscriptions: Subscription[] = [];
   public colsResponsabili: any[];
@@ -53,25 +109,44 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   public filteredTitoli: Titolo[] = [];
   public tipiArchivioObj: any[] = TipoArchivioTraduzioneVisualizzazione;
   private classificazioneAllaFoglia: boolean = false;
-  public possibleAnniTenuta: any[] = [{name: "1", value: 1 },{name: "2", value: 2 },{name: "3", value: 3 },{name: "4", value: 4 },
-    {name: "5", value: 5 },{name: "6", value: 6 },{name: "7", value: 7 },{name: "8", value: 8 },{name: "9", value: 9 },
-    {name: "10", value: 10 },{name: "20", value: 20 },{name: "30", value: 30 },{name: "40", value: 40 },
-    {name: "50", value: 50 }, {name: "60", value: 60 }, {name: "Illimitata", value: 999}];
-  public anniTenutaSelezionabili: any[] = [];
+  public possibleAnniTenuta: any[] = [
+    { name: "1", value: 1 },
+    { name: "2", value: 2 },
+    { name: "3", value: 3 },
+    { name: "4", value: 4 },
+    { name: "5", value: 5 },
+    { name: "6", value: 6 },
+    { name: "7", value: 7 },
+    { name: "8", value: 8 },
+    { name: "9", value: 9 },
+    { name: "10", value: 10 },
+    { name: "20", value: 20 },
+    { name: "30", value: 30 },
+    { name: "40", value: 40 },
+    { name: "50", value: 50 },
+    { name: "60", value: 60 },
+    { name: "Illimitata", value: 999 },
+  ];
   private utenteUtilitiesLogin: UtenteUtilities;
   public loggedUserCanEditDetails = false;
-  public showLogs: boolean = false;
   public isArchivioChiuso = false;
   public loggedUserIsResponsbaileProposto = false;
+  public isLoggedUserResponsabile = false;
+  public anniTenutaSelezionabili: any[] = [];
+  public showLogs: boolean = false;
   public fascicoliParlanti: boolean = false;
   public labelLivelloArchivio: string = null;
-  private ARCHIVIO_PROJECTION: string = ENTITIES_STRUCTURE.scripta.archivio.customProjections.CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
-  private attoreArchivioProjection = ENTITIES_STRUCTURE.scripta.attorearchivio.standardProjections.AttoreArchivioWithIdPersonaAndIdStruttura;
+  private ARCHIVIO_PROJECTION: string =
+    ENTITIES_STRUCTURE.scripta.archivio.customProjections
+      .CustomArchivioWithIdAziendaAndIdMassimarioAndIdTitolo;
+  private attoreArchivioProjection =
+    ENTITIES_STRUCTURE.scripta.attorearchivio.standardProjections
+      .AttoreArchivioWithIdPersonaAndIdStruttura;
   public saving: any = {};
-  public sonoResponsabile: Boolean = false;
 
-  @ViewChild("autocompleteCategoria") public autocompleteCategoria: AutoComplete;
-  
+  @ViewChild("autocompleteCategoria")
+  public autocompleteCategoria: AutoComplete;
+
   @ViewChild("noteArea") public noteArea: ElementRef;
   @ViewChild("titoliTreeSelect") public titoliTreeSelect: TreeSelect;
   @Output() public updateArchivio = new EventEmitter<Archivio>();
@@ -89,8 +164,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     private archivioUtilsService: ArchivioUtilsService,
     private permessiDettaglioArchivioService: PermessiDettaglioArchivioService,
     private attoreArchivioService: AttoreArchivioService,
-    private attivitaService: AttivitaService) 
-  {
+    private attivitaService: AttivitaService
+  ) {
     this.subscriptions.push(
       this.loginService.loggedUser$.subscribe(
         (utenteUtilities: UtenteUtilities) => {
@@ -105,38 +180,59 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     //this.updateAnniTenuta();
     // this.getResponsabili();
     this.isArchivioClosed();
-    this.loggedUserCanEditDetails = (this.archivio["attoriList"] as AttoreArchivio[])
-      .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id 
-        && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE 
-          || a.ruolo === RuoloAttoreArchivio.VICARIO 
-          || a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO))
-          && !this.archivio.pregresso;
-      // this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
+    this.isLoggedUserResponsabile = this.hasLoggedUserThisRoles([RuoloAttoreArchivio.RESPONSABILE]);
+    this.loggedUserCanEditDetails =
+      this.hasLoggedUserThisRoles([
+        RuoloAttoreArchivio.RESPONSABILE, 
+        RuoloAttoreArchivio.VICARIO, 
+        RuoloAttoreArchivio.RESPONSABILE_PROPOSTO
+      ]) && !this.archivio.pregresso;
+    // this.tipiArchivioObj.find(t => t.value === TipoArchivio.SPECIALE).disabled = true;
     if (this.archivio.tipo !== TipoArchivio.SPECIALE) {
-      this.tipiArchivioObj = this.tipiArchivioObj.filter(a => a.value !== TipoArchivio.SPECIALE);
+      this.tipiArchivioObj = this.tipiArchivioObj.filter(
+        (a) => a.value !== TipoArchivio.SPECIALE
+      );
     }
-    this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[])
-      .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id  && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
+
+    this.loggedUserIsResponsbaileProposto = (
+      this.archivio["attoriList"] as AttoreArchivio[]
+    ).some(
+      (a) =>
+        a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id &&
+        a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO
+    );
     this.loadParametroAziendaleFascicoliParlanti();
+  }
+
+  private hasLoggedUserThisRoles(roles: any[]) {
+    return  (this.archivio["attoriList"] as AttoreArchivio[]).some(
+      (a) =>
+        a.idPersona.id ===
+          this.utenteUtilitiesLogin.getUtente().idPersona.id &&
+        (roles.some(r => r === a.ruolo)));
   }
 
   private loadConfigurations() {
     this.subscriptions.push(
-      this.configurazioneService.getParametriAziende("classificazioneAllaFoglia", null, [this.archivio.fk_idAzienda.id]).subscribe(
-        (parametriAziende: ParametroAziende[]) => {
+      this.configurazioneService
+        .getParametriAziende("classificazioneAllaFoglia", null, [
+          this.archivio.fk_idAzienda.id,
+        ])
+        .subscribe((parametriAziende: ParametroAziende[]) => {
           if (parametriAziende && parametriAziende[0]) {
-            this.classificazioneAllaFoglia = JSON.parse(parametriAziende[0].valore || false);
+            this.classificazioneAllaFoglia = JSON.parse(
+              parametriAziende[0].valore || false
+            );
           }
-        }
-      )
+        })
     );
   }
 
   /**
    * Funzione che si occupa della prechiusura/chiusura e apertura dell'archivio radice e quindi dei vari figli
-   * @param archivio 
-   * @param event 
-   * @returns 
+   * @param archivio
+   * @param event
+   * @returns
    */
   public chiudiRiapriArchivio(event: Event): void {
     if (!this.archivio.idMassimario) {
@@ -144,14 +240,19 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         severity: "error",
         key: "dettaglioArchivioToast",
         summary: "Attenzione",
-        detail: `Non è possibile chiudere un archivio senza aver prima assegnato una tipologia documentale`
+        detail: `Non è possibile chiudere un archivio senza aver prima assegnato una tipologia documentale`,
       });
       return;
     }
 
     const archivioUpdate = new Archivio();
     archivioUpdate.version = this.archivio.version;
-    const additionalData = [new AdditionalDataDefinition("OperationRequested", "CloseOrReopenArchive")];
+    const additionalData = [
+      new AdditionalDataDefinition(
+        "OperationRequested",
+        "CloseOrReopenArchive"
+      ),
+    ];
 
     if (this.archivio.stato == StatoArchivio.PRECHIUSO) {
       archivioUpdate.stato = StatoArchivio.APERTO;
@@ -159,24 +260,34 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
       this.patchArchivio(
         archivioUpdate,
         additionalData,
-        "Archivio " + this.archivio.numerazioneGerarchica + " riaperto correttamente",
+        "Archivio " +
+          this.archivio.numerazioneGerarchica +
+          " riaperto correttamente",
         `Si è verificato un errore nella riapertura dell'archivio, contattare Babelcare`,
-        () => {this.updateArchivio.emit(this.archivio)}
+        () => {
+          this.updateArchivio.emit(this.archivio);
+        }
       );
     } else {
       this.subscriptions.push(
-        this.configurazioneService.getParametriAziende("chiusuraArchivio", ["scripta"], [this.archivio.idAzienda.id]).subscribe(
-          (parametriAziende: ParametroAziende[]) => {
+        this.configurazioneService
+          .getParametriAziende(
+            "chiusuraArchivio",
+            ["scripta"],
+            [this.archivio.idAzienda.id]
+          )
+          .subscribe((parametriAziende: ParametroAziende[]) => {
             let chiusuraArchivio: boolean = false;
             if (parametriAziende && parametriAziende[0]) {
-              chiusuraArchivio = JSON.parse(parametriAziende[0].valore)
+              chiusuraArchivio = JSON.parse(parametriAziende[0].valore);
             }
             if (chiusuraArchivio) {
               this.confirmationService.confirm({
                 key: "confirm-popup",
                 target: event.target,
-                message: "Eventuali bozze di sottofascicoli o inserti saranno eliminate. Inoltre il fascicolo non potrà essere riaperto. Si vuole procedere?",
-                icon: 'pi pi-exclamation-triangle',
+                message:
+                  "Eventuali bozze di sottofascicoli o inserti saranno eliminate. Inoltre il fascicolo non potrà essere riaperto. Si vuole procedere?",
+                icon: "pi pi-exclamation-triangle",
                 accept: () => {
                   // L'utente conferma di voler chiudere definitivamente il fascicolo, faccio partire la chiusura
                   archivioUpdate.stato = StatoArchivio.CHIUSO;
@@ -184,21 +295,26 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
                   this.patchArchivio(
                     archivioUpdate,
                     additionalData,
-                    "Archivio " + this.archivio.numerazioneGerarchica + " chiuso correttamente",
+                    "Archivio " +
+                      this.archivio.numerazioneGerarchica +
+                      " chiuso correttamente",
                     `Si è verificato un errore nella chiusura dell'archivio, contattare Babelcare`,
-                    () => {this.updateArchivio.emit(this.archivio)}
+                    () => {
+                      this.updateArchivio.emit(this.archivio);
+                    }
                   );
                 },
                 reject: () => {
                   // L'utente ha cambaito idea. Non faccio nulla
-                }
+                },
               });
             } else {
               this.confirmationService.confirm({
                 key: "confirm-popup",
                 target: event.target,
-                message: "Eventuali bozze di sottofascicoli o inserti saranno eliminate. Si vuole procedere?",
-                icon: 'pi pi-exclamation-triangle',
+                message:
+                  "Eventuali bozze di sottofascicoli o inserti saranno eliminate. Si vuole procedere?",
+                icon: "pi pi-exclamation-triangle",
                 accept: () => {
                   // L'utente conferma di voler chiudere definitivamente il fascicolo, faccio partire la chiusura
                   archivioUpdate.stato = StatoArchivio.PRECHIUSO;
@@ -206,55 +322,73 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
                   this.patchArchivio(
                     archivioUpdate,
                     additionalData,
-                    "Archivio " + this.archivio.numerazioneGerarchica + " chiuso correttamente",
+                    "Archivio " +
+                      this.archivio.numerazioneGerarchica +
+                      " chiuso correttamente",
                     `Si è verificato un errore nella chiusura dell'archivio, contattare Babelcare`,
-                    () => {this.updateArchivio.emit(this.archivio)}
+                    () => {
+                      this.updateArchivio.emit(this.archivio);
+                    }
                   );
                 },
                 reject: () => {
                   // L'utente ha cambaito idea. Non faccio nulla
-                }
+                },
               });
             }
-          }));
-        }   
+          })
+      );
+    }
   }
-
 
   /**
    * Un semplice update dell'archivio così come passato. Viene aggiornato poi il version
    * Mostra gli eventuali messaggi passati in caso di successo o fallimento dell'update.
-   * @param archivioToUpdate 
+   * @param archivioToUpdate
    */
-   public patchArchivio(archivioToUpdate: Archivio, additionalData?: AdditionalDataDefinition[], messageSuccess?: string, messageError?: string, exe?: () => void): void {
-    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id,  null/* this.ARCHIVIO_PROJECTION */, additionalData)
-      .subscribe(
-        res => {
-          console.log("Update archivio: ", res);
-          this.archivio.version = res.version;
-          if (messageSuccess) {
-            this.messageService.add({
-              severity: "success",
-              key: "dettaglioArchivioToast",
-              summary: "OK",
-              detail: messageSuccess
-            });
+  public patchArchivio(
+    archivioToUpdate: Archivio,
+    additionalData?: AdditionalDataDefinition[],
+    messageSuccess?: string,
+    messageError?: string,
+    exe?: () => void
+  ): void {
+    this.subscriptions.push(
+      this.extendedArchivioService
+        .patchHttpCall(
+          archivioToUpdate,
+          this.archivio.id,
+          null /* this.ARCHIVIO_PROJECTION */,
+          additionalData
+        )
+        .subscribe(
+          (res) => {
+            console.log("Update archivio: ", res);
+            this.archivio.version = res.version;
+            if (messageSuccess) {
+              this.messageService.add({
+                severity: "success",
+                key: "dettaglioArchivioToast",
+                summary: "OK",
+                detail: messageSuccess,
+              });
+            }
+            if (exe) {
+              exe();
+            }
+          },
+          (err) => {
+            if (messageError) {
+              this.messageService.add({
+                severity: "error",
+                key: "dettaglioArchivioToast",
+                summary: "Attenzione",
+                detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`,
+              });
+            }
           }
-          if (exe) {
-            exe();
-          }
-        },
-        err => {
-          if (messageError) {
-            this.messageService.add({
-              severity: "error",
-              key: "dettaglioArchivioToast",
-              summary: "Attenzione",
-              detail: `Si è verificato un errore nella chiusura/riapertura dell'archivio, contattare Babelcare`
-            });
-          }
-        }
-      ));
+        )
+    );
   }
 
   /**
@@ -264,96 +398,103 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
    */
   private setAnniTenutaSelezionabili() {
     if (this.archivio.idMassimario) {
-      this.anniTenutaSelezionabili = this.possibleAnniTenuta.filter(a => a.value >= this.archivio.idMassimario.anniTenuta);
+      this.anniTenutaSelezionabili = this.possibleAnniTenuta.filter(
+        (a) => a.value >= this.archivio.idMassimario.anniTenuta
+      );
     }
   }
 
-
   private loadParametroAziendaleFascicoliParlanti() {
-    this.subscriptions.push(this.configurazioneService.getParametriAziende("fascicoliParlanti", null, null).subscribe((parametriAziende: ParametroAziende[]) => {
-      //parte relativa al parametro aziendale
-      if (parametriAziende) {
-        parametriAziende.forEach(parametro => {
-          this.fascicoliParlanti = JSON.parse(parametro.valore || false);
-          if (this.fascicoliParlanti) {
-            if (parametro.idAziende.includes(this.archivio.idAzienda.id)) {
-              this.isParlante = true;
-            }
+    this.subscriptions.push(
+      this.configurazioneService
+        .getParametriAziende("fascicoliParlanti", null, null)
+        .subscribe((parametriAziende: ParametroAziende[]) => {
+          //parte relativa al parametro aziendale
+          if (parametriAziende) {
+            parametriAziende.forEach((parametro) => {
+              this.fascicoliParlanti = JSON.parse(parametro.valore || false);
+              if (this.fascicoliParlanti) {
+                if (parametro.idAziende.includes(this.archivio.idAzienda.id)) {
+                  this.isParlante = true;
+                }
+              }
+            });
           }
         })
-      }   
-    }));
+    );
   }
 
-
   public changeVisibilita(): void {
-    if (this.loggedUserCanEditDetails /* && !this.aziendeConFascicoliParlanti?.includes(this.archivio.idAzienda.id) */) {
-      this.archivio.riservato = !(this.archivio.riservato);
+    if (
+      this
+        .loggedUserCanEditDetails /* && !this.aziendeConFascicoliParlanti?.includes(this.archivio.idAzienda.id) */
+    ) {
+      this.archivio.riservato = !this.archivio.riservato;
       const archivioToUpdate: Archivio = new Archivio();
-      archivioToUpdate.riservato = this.archivio.riservato
+      archivioToUpdate.riservato = this.archivio.riservato;
       archivioToUpdate.version = this.archivio.version;
-      this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
-        .subscribe(
-          res => {
-            console.log("Update archivio: ", res);
-            this.archivio.version = res.version;
-            let message: string;
-            if (this.archivio.riservato == true) {
-              message = `Impostato come Riservato correttamente`
-            } else {
-              message = `Impostato come Non-Riservato correttamente`
+      this.subscriptions.push(
+        this.extendedArchivioService
+          .patchHttpCall(archivioToUpdate, this.archivio.id, null, null)
+          .subscribe(
+            (res) => {
+              console.log("Update archivio: ", res);
+              this.archivio.version = res.version;
+              let message: string;
+              if (this.archivio.riservato == true) {
+                message = `Impostato come Riservato correttamente`;
+              } else {
+                message = `Impostato come Non-Riservato correttamente`;
+              }
+              this.messageService.add({
+                severity: "success",
+                key: "dettaglioArchivioToast",
+                summary: "OK",
+                detail: message,
+              });
+            },
+            (err) => {
+              this.messageService.add({
+                severity: "error",
+                key: "dettaglioArchivioToast",
+                summary: "Attenzione",
+                detail: `Si è verificato un errore nella modifica del campo riservato, contattare Babelcare`,
+              });
             }
-            this.messageService.add({
-              severity: "success",
-              key: "dettaglioArchivioToast",
-              summary: "OK",
-              detail: message
-            });
-          },
-          err => {
-            this.messageService.add({
-              severity: "error",
-              key: "dettaglioArchivioToast",
-              summary: "Attenzione",
-              detail: `Si è verificato un errore nella modifica del campo riservato, contattare Babelcare`
-            });
-          }
-        ))
+          )
+      );
     }
   }
 
   private isArchivioClosed() {
-    if(this.archivio.stato == StatoArchivio.PRECHIUSO || this.archivio.stato == StatoArchivio.CHIUSO)
+    if (
+      this.archivio.stato == StatoArchivio.PRECHIUSO ||
+      this.archivio.stato == StatoArchivio.CHIUSO
+    )
       this.isArchivioChiuso = true;
-    else
-      this.isArchivioChiuso = false;
+    else this.isArchivioChiuso = false;
   }
 
   public loadLogs() {
-    
-		this.krintFilterOptions = {
-			codiciOperazioni: null,
-			idOggetto: this.archivio.id,
-			tipoOggetto: null,
-			idUtente: null,
-			idOggettoContenitore: null,
-			tipoOggettoContenitore: null,
-			dataDa: null,
-			dataA: null
-		} as KrintFilterOptions;
-		this.showLogs = true;
-    
-
-
-	}
+    this.krintFilterOptions = {
+      codiciOperazioni: null,
+      idOggetto: this.archivio.id,
+      tipoOggetto: null,
+      idUtente: null,
+      idOggettoContenitore: null,
+      tipoOggettoContenitore: null,
+      dataDa: null,
+      dataA: null,
+    } as KrintFilterOptions;
+    this.showLogs = true;
+  }
 
   public removeZoneFromTime(date: string): string {
-		return date.replace(/\[\w+\/\w+\]$/, "");
-	}
-
+    return date.replace(/\[\w+\/\w+\]$/, "");
+  }
 
   /**
-   * Questa funzione carica i responsabili dell'archivio 
+   * Questa funzione carica i responsabili dell'archivio
    * ordinati per ruolo
    */
   /* private getResponsabili(): void {
@@ -377,25 +518,28 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
   } */
 
   /**
-  * Parte un timeout al termine del quale viene salvato il campo della firma specificato
-  * @param doc
-  * @param field
-  */
+   * Parte un timeout al termine del quale viene salvato il campo della firma specificato
+   * @param doc
+   * @param field
+   */
   public timeOutAndSaveArchivio(archivio: Archivio, field: keyof Archivio) {
     if (this.savingTimeout) {
       clearTimeout(this.savingTimeout);
     }
     this.savingTimeout = setTimeout(() => {
       this.subscriptions.push(
-        this.extendedArchivioService.updateArchivio(archivio, [field], this.ARCHIVIO_PROJECTION).subscribe(
-          (resArchivio: Archivio) => {
+        this.extendedArchivioService
+          .updateArchivio(archivio, [field], this.ARCHIVIO_PROJECTION)
+          .subscribe((resArchivio: Archivio) => {
             this.archivio.version = resArchivio.version;
             if (field === "oggetto") {
-              this.archivioUtilsService.updateArchivioFieldSelection({field: field, archivio: this.archivio} as ArchivioFieldUpdating);
+              this.archivioUtilsService.updateArchivioFieldSelection({
+                field: field,
+                archivio: this.archivio,
+              } as ArchivioFieldUpdating);
             }
             this.saving = {};
-          }
-        )
+          })
       );
     }, 350);
   }
@@ -412,47 +556,73 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
     if (node) {
       if (node.children) return; // Figli già caricati per questo nodo, non serve fare altro
-      filterAndsorts.addFilter(new FilterDefinition("idTitoloPadre", FILTER_TYPES.not_string.equals, (node.data as Titolo).id));
-      filterAndsorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, (node.data as Titolo).livello + 1));
+      filterAndsorts.addFilter(
+        new FilterDefinition(
+          "idTitoloPadre",
+          FILTER_TYPES.not_string.equals,
+          (node.data as Titolo).id
+        )
+      );
+      filterAndsorts.addFilter(
+        new FilterDefinition(
+          "livello",
+          FILTER_TYPES.not_string.equals,
+          (node.data as Titolo).livello + 1
+        )
+      );
     } else {
       if (this.titoli && this.titoli.length > 0) return; // Titoli livello 1 già caricati. Non serve ricaricarli
-      filterAndsorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1));
+      filterAndsorts.addFilter(
+        new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 1)
+      );
     }
 
-    filterAndsorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, this.archivio.fk_idAzienda.id));
-    filterAndsorts.addFilter(new FilterDefinition("chiuso", FILTER_TYPES.not_string.equals, false));
-    filterAndsorts.addSort(new SortDefinition("classificazione", SORT_MODES.asc));
+    filterAndsorts.addFilter(
+      new FilterDefinition(
+        "idAzienda.id",
+        FILTER_TYPES.not_string.equals,
+        this.archivio.fk_idAzienda.id
+      )
+    );
+    filterAndsorts.addFilter(
+      new FilterDefinition("chiuso", FILTER_TYPES.not_string.equals, false)
+    );
+    filterAndsorts.addSort(
+      new SortDefinition("classificazione", SORT_MODES.asc)
+    );
 
-    this.subscriptions.push(this.titoloService.getData(null, filterAndsorts, null, this.pageConfNoCountNoLimit).subscribe(
-      res => {
-        if (res && res.results) {
-          const nodes: TreeNode[] = [];
-          res.results.forEach((t: Titolo) => {
-            nodes.push(this.buildNodeTitolo(t));
-          });
-          if (node) {
-            node.children = nodes;
-            this.titoliTreeSelect.nodeExpand(event); // Di fatto ritriggero questo metodo per espadnere bene il nodo. Ma se non faccio così non funziona
-          } else {
-            this.titoli = nodes;
+    this.subscriptions.push(
+      this.titoloService
+        .getData(null, filterAndsorts, null, this.pageConfNoCountNoLimit)
+        .subscribe((res) => {
+          if (res && res.results) {
+            const nodes: TreeNode[] = [];
+            res.results.forEach((t: Titolo) => {
+              nodes.push(this.buildNodeTitolo(t));
+            });
+            if (node) {
+              node.children = nodes;
+              this.titoliTreeSelect.nodeExpand(event); // Di fatto ritriggero questo metodo per espadnere bene il nodo. Ma se non faccio così non funziona
+            } else {
+              this.titoli = nodes;
+            }
+          } else if (node) {
+            // non ho trovato figli del nodo allora lo metto non espandibile
+            node.leaf = false;
+            node.selectable = true;
           }
-        } else if (node) {
-          // non ho trovato figli del nodo allora lo metto non espandibile
-          node.leaf = false;
-          node.selectable = true;
-        }
 
-        this.titoliTreeSelect.expandedNodes.forEach(element => {
-          console.log(element.label)
-        });
-      }
-    ));
+          this.titoliTreeSelect.expandedNodes.forEach((element) => {
+            console.log(element.label);
+          });
+        })
+    );
   }
 
   /**
    * Dato un titolo creo il corretto nodo che lo rappresenta
-   * @param titolo 
-   * @returns 
+   * @param titolo
+   * @returns
    */
   private buildNodeTitolo(titolo: Titolo): TreeNode {
     const node: TreeNode = {};
@@ -474,7 +644,8 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
         node.selectable = true;
         break;
     }
-    node.label = inizioLabel + " " + titolo.classificazione + ": " + titolo.nome;
+    node.label =
+      inizioLabel + " " + titolo.classificazione + ": " + titolo.nome;
     node.data = titolo;
     node.key = titolo.id.toString();
     node.expandedIcon = "pi pi-tag";
@@ -485,70 +656,128 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
   public filterTitoli(event: any): void {
     const filterAndsorts: FiltersAndSorts = new FiltersAndSorts();
-    filterAndsorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, this.archivio.fk_idAzienda.id));
-    filterAndsorts.addFilter(new FilterDefinition("chiuso", FILTER_TYPES.not_string.equals, false));
+    filterAndsorts.addFilter(
+      new FilterDefinition(
+        "idAzienda.id",
+        FILTER_TYPES.not_string.equals,
+        this.archivio.fk_idAzienda.id
+      )
+    );
+    filterAndsorts.addFilter(
+      new FilterDefinition("chiuso", FILTER_TYPES.not_string.equals, false)
+    );
     if (this.classificazioneAllaFoglia) {
-      filterAndsorts.addFilter(new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 3));
+      filterAndsorts.addFilter(
+        new FilterDefinition("livello", FILTER_TYPES.not_string.equals, 3)
+      );
     }
-    filterAndsorts.addFilter(new FilterDefinition("nome", FILTER_TYPES.string.containsIgnoreCase, event.query));
-    filterAndsorts.addSort(new SortDefinition("classificazione", SORT_MODES.asc));
-    this.subscriptions.push(this.titoloService.getData(null, filterAndsorts, null, this.pageConfNoCountNoLimit).subscribe(
-      res => {
-        if (res && res.results) {
-          this.filteredTitoli = res.results;
-        }
-      }
-    ));
+    filterAndsorts.addFilter(
+      new FilterDefinition(
+        "nome",
+        FILTER_TYPES.string.containsIgnoreCase,
+        event.query
+      )
+    );
+    filterAndsorts.addSort(
+      new SortDefinition("classificazione", SORT_MODES.asc)
+    );
+    this.subscriptions.push(
+      this.titoloService
+        .getData(null, filterAndsorts, null, this.pageConfNoCountNoLimit)
+        .subscribe((res) => {
+          if (res && res.results) {
+            this.filteredTitoli = res.results;
+          }
+        })
+    );
   }
 
   public onSelectTitolo(titolo: Titolo) {
     const archivioToUpdate: Archivio = new Archivio();
     archivioToUpdate.idTitolo = {
-      id: titolo.id
+      id: titolo.id,
     } as Titolo;
     archivioToUpdate.version = this.archivio.version;
-    this.subscriptions.push(this.extendedArchivioService.patchHttpCall(archivioToUpdate, this.archivio.id, this.ARCHIVIO_PROJECTION, null)
-      .subscribe(
-        res => {
+    this.subscriptions.push(
+      this.extendedArchivioService
+        .patchHttpCall(
+          archivioToUpdate,
+          this.archivio.id,
+          this.ARCHIVIO_PROJECTION,
+          null
+        )
+        .subscribe((res) => {
           console.log("Update archivio: ", res);
           this.archivio.version = res.version;
           this.archivio.idTitolo = titolo;
           this.selectedTitolo = this.buildNodeTitolo(titolo);
           this.archivio.idMassimario = res.idMassimario;
-        }
-      ))
+        })
+    );
   }
-  
+
   /**
    * Metodo che serve per filtrare le categorie.
    * Riempie la proprietà filteredMassimari
    */
   public filterMassimario(event: any): void {
-    console.log("event", event)
+    console.log("event", event);
     const filterAndsorts: FiltersAndSorts = new FiltersAndSorts();
-    filterAndsorts.addFilter(new FilterDefinition("idAzienda.id", FILTER_TYPES.not_string.equals, this.archivio.fk_idAzienda.id));
-    filterAndsorts.addFilter(new FilterDefinition("nome", FILTER_TYPES.string.containsIgnoreCase, event.query));
-    filterAndsorts.addFilter(new FilterDefinition("titoli.id", FILTER_TYPES.not_string.equals, this.archivio.idTitolo.id));
-    this.subscriptions.push(this.massimarioService.getData(null, filterAndsorts, null, this.pageConfNoCountLimit20)
-      .subscribe(
-        res => {
+    filterAndsorts.addFilter(
+      new FilterDefinition(
+        "idAzienda.id",
+        FILTER_TYPES.not_string.equals,
+        this.archivio.fk_idAzienda.id
+      )
+    );
+    filterAndsorts.addFilter(
+      new FilterDefinition(
+        "nome",
+        FILTER_TYPES.string.containsIgnoreCase,
+        event.query
+      )
+    );
+    if (this.archivio.idTitolo.livello == 3) {
+      filterAndsorts.addFilter(
+        new FilterDefinition(
+          "titoli.id",
+          FILTER_TYPES.not_string.equals,
+          this.archivio.idTitolo.fk_idTitoloPadre.id
+        )
+      );
+    } else {
+      filterAndsorts.addFilter(
+        new FilterDefinition(
+          "titoli.id",
+          FILTER_TYPES.not_string.equals,
+          this.archivio.idTitolo.id
+        )
+      );
+    }
+
+    //filterAndsorts.addFilter(new FilterDefinition("titoli.id", FILTER_TYPES.not_string.equals, this.archivio.idTitolo.id));
+
+    this.subscriptions.push(
+      this.massimarioService
+        .getData(null, filterAndsorts, null, this.pageConfNoCountLimit20)
+        .subscribe((res) => {
           console.log("res", res);
           this.filteredMassimari = res.results;
-        }
-      ));
+        })
+    );
   }
 
   /**
    * Salvo la tipologia documentale scelta dall'utente.
    * Salvo anche gli anni tenuta che dipendono dal massimario selezionato.
    * Oltre questo vado anche ad impostare la variabile anniTenutaSelezionabili
-   * @param massimario 
+   * @param massimario
    */
   public onSelectMassimario(massimario: Massimario): void {
     //console.log("onSelectMassimario: ", event);
     const archivioToUpdate: Archivio = new Archivio();
     archivioToUpdate.idMassimario = {
-      id: massimario.id
+      id: massimario.id,
     } as Massimario;
     archivioToUpdate.anniTenuta = massimario.anniTenuta;
     archivioToUpdate.version = this.archivio.version;
@@ -558,16 +787,15 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
   /**
    * Salvo gli anni di conservazione selezionati dall'utente
-   * @param anni 
+   * @param anni
    */
   public saveAnniTenuta(anni: any): void {
-    console.log("selezionata anni tenuta fascicolo ", anni)
+    console.log("selezionata anni tenuta fascicolo ", anni);
     const archivioToUpdate: Archivio = new Archivio();
     archivioToUpdate.anniTenuta = anni;
     archivioToUpdate.version = this.archivio.version;
     this.patchArchivio(archivioToUpdate);
   }
-
 
   public onChangeTipo(): void {
     const archivioToUpdate: Archivio = new Archivio();
@@ -576,119 +804,179 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     this.patchArchivio(archivioToUpdate);
   }
 
-  
-
   /**
    * Funzione che si occupa della numerazione di un archivio
-   * @param event 
+   * @param event
    */
   public numeraFasicoloClicked(event: Event): void {
-    if( this.archivio.attoriList.some(a => a.ruolo === RuoloAttoreArchivio.VICARIO)){
+    if (
+      this.archivio.attoriList.some(
+        (a) => a.ruolo === RuoloAttoreArchivio.VICARIO
+      )
+    ) {
       let messaggio = "";
       if (this.labelLivelloArchivio === "Inserto") {
-        messaggio = "Stai per numerare l'" + this.labelLivelloArchivio.toLowerCase() + ": confermi?";
+        messaggio =
+          "Stai per numerare l'" +
+          this.labelLivelloArchivio.toLowerCase() +
+          ": confermi?";
       } else {
-        messaggio = "Stai per numerare il " + this.labelLivelloArchivio.toLowerCase() + ": confermi?";
-      };
+        messaggio =
+          "Stai per numerare il " +
+          this.labelLivelloArchivio.toLowerCase() +
+          ": confermi?";
+      }
       this.confirmationService.confirm({
         key: "confirm-popup",
         target: event.target,
         message: messaggio,
         accept: () => {
           this.subscriptions.push(
-            this.extendedArchivioService.numeraArchivio(
-              this.archivio,
-              this.ARCHIVIO_PROJECTION)
+            this.extendedArchivioService
+              .numeraArchivio(this.archivio, this.ARCHIVIO_PROJECTION)
               .subscribe({
-                  next: (resArchivio: Archivio) => {
-                    console.log("Archivio aggiornato", resArchivio);
-                    this.archivio.version = resArchivio.version;
-                    this.archivio.numerazioneGerarchica = resArchivio.numerazioneGerarchica;
-                    this.archivio.stato = resArchivio.stato;
-                    this.navigationTabsService.addTabArchivio(resArchivio, true, true);
-                    this.updateArchivio.emit(resArchivio);
-                    this.appService.appNameSelection(`Fascicolo ${resArchivio.numerazioneGerarchica} [${resArchivio.idAzienda.aoo}]`);
-                    this.messageService.add({
-                      severity: "success",
-                      key: "dettaglioArchivioToast",
-                      summary: "OK",
-                      detail: `${resArchivio.numerazioneGerarchica}: Numerazione avvenuta con successo`
-                    });
-                  },
-                  error: (e) => {
-                    console.error(e);
-                    this.messageService.add({
-                      severity: "error",
-                      key: "dettaglioArchivioToast",
-                      summary: "Attenzione",
-                      detail: `Si è verificato un errore nella numerazione dell'archivio, contattare Babelcare`
-                    });
-                  }
-                }
-              )
+                next: (resArchivio: Archivio) => {
+                  console.log("Archivio aggiornato", resArchivio);
+                  this.archivio.version = resArchivio.version;
+                  this.archivio.numerazioneGerarchica =
+                    resArchivio.numerazioneGerarchica;
+                  this.archivio.stato = resArchivio.stato;
+                  this.navigationTabsService.addTabArchivio(
+                    resArchivio,
+                    true,
+                    true
+                  );
+                  this.updateArchivio.emit(resArchivio);
+                  this.appService.appNameSelection(
+                    `Fascicolo ${resArchivio.numerazioneGerarchica} [${resArchivio.idAzienda.aoo}]`
+                  );
+                  this.messageService.add({
+                    severity: "success",
+                    key: "dettaglioArchivioToast",
+                    summary: "OK",
+                    detail: `${resArchivio.numerazioneGerarchica}: Numerazione avvenuta con successo`,
+                  });
+                },
+                error: (e) => {
+                  console.error(e);
+                  this.messageService.add({
+                    severity: "error",
+                    key: "dettaglioArchivioToast",
+                    summary: "Attenzione",
+                    detail: `Si è verificato un errore nella numerazione dell'archivio, contattare Babelcare`,
+                  });
+                },
+              })
           );
-        }
+        },
       });
     } else {
       this.messageService.add({
         severity: "warn",
         key: "dettaglioArchivioToast",
         summary: "Attenzione",
-        detail: `Inserire almeno un vicario per poter numerare il fascicolo`
+        detail: `Inserire almeno un vicario per poter numerare il fascicolo`,
       });
     }
-    
   }
 
   /**
    * Funzione che viene chiamata quando si vuole accettare la responsabilità di un archivio
-   * 
-   * 
+   *
+   *
    */
   public accettaResponsabilita() {
-  
     const batchOperations: BatchOperation[] = [];
 
     //aggiorno il responsabile col responsabile proposto
-    const responsabilePropostoVecchio = this.archivio.attoriList.find((a: AttoreArchivio) => a.ruolo === "RESPONSABILE_PROPOSTO" );
+    const responsabilePropostoVecchio = this.archivio.attoriList.find(
+      (a: AttoreArchivio) => a.ruolo === "RESPONSABILE_PROPOSTO"
+    );
     const attoreArchivioBody = new AttoreArchivio();
     attoreArchivioBody.id = responsabilePropostoVecchio.id;
     attoreArchivioBody.ruolo = RuoloAttoreArchivio.RESPONSABILE;
     attoreArchivioBody.version = responsabilePropostoVecchio.version;
-        
+
     batchOperations.push({
       operation: BatchOperationTypes.UPDATE,
-      entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.attorearchivio.path,
+      entityPath:
+        BaseUrls.get(BaseUrlType.Scripta) +
+        "/" +
+        ENTITIES_STRUCTURE.scripta.attorearchivio.path,
       id: attoreArchivioBody.id,
       entityBody: attoreArchivioBody as NextSdrEntity,
-      returnProjection: this.attoreArchivioProjection
+      returnProjection: this.attoreArchivioProjection,
     } as BatchOperation);
-   
+
+    //se il nuovo responsabile era vicario lo tolgo
+
+    if (
+      this.archivio.attoriList.some(
+        (a) =>
+          a.idPersona.id == responsabilePropostoVecchio.idPersona.id &&
+          a.ruolo === "VICARIO"
+      )
+    ) {
+      const vicarioVecchio = this.archivio.attoriList.find(
+        (a: AttoreArchivio) =>
+          a.ruolo === "VICARIO" &&
+          a.idPersona.id == responsabilePropostoVecchio.idPersona.id
+      );
+      batchOperations.push({
+        operation: BatchOperationTypes.DELETE,
+        entityPath:
+          BaseUrls.get(BaseUrlType.Scripta) +
+          "/" +
+          ENTITIES_STRUCTURE.scripta.attorearchivio.path,
+        id: vicarioVecchio.id,
+        entityBody: vicarioVecchio as NextSdrEntity,
+        returnProjection: this.attoreArchivioProjection,
+      } as BatchOperation);
+    }
+
     // aggiorno i vicari dell'archivio
-    const responsabileVecchio =  this.archivio.attoriList.find((a: AttoreArchivio) => a.ruolo === "RESPONSABILE");
-    const nuovoVicario =  new AttoreArchivio();
-    nuovoVicario.id = responsabileVecchio.id;
-    nuovoVicario.ruolo = RuoloAttoreArchivio.VICARIO;
-    nuovoVicario.version = responsabileVecchio.version;
-    batchOperations.push({
-      operation: BatchOperationTypes.UPDATE,
-      entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.attorearchivio.path,
-      id: nuovoVicario.id,
-      entityBody: nuovoVicario as NextSdrEntity,
-      returnProjection: this.attoreArchivioProjection
-    } as BatchOperation);
+    const responsabileVecchio = this.archivio.attoriList.find(
+      (a: AttoreArchivio) => a.ruolo === "RESPONSABILE"
+    );
+    if (
+      !this.archivio.attoriList.some(
+        (a) =>
+          a.idPersona.id == responsabileVecchio.idPersona.id &&
+          a.ruolo === "VICARIO"
+      )
+    ) {
+      const nuovoVicario = new AttoreArchivio();
+      nuovoVicario.id = responsabileVecchio.id;
+      nuovoVicario.ruolo = RuoloAttoreArchivio.VICARIO;
+      nuovoVicario.version = responsabileVecchio.version;
+      batchOperations.push({
+        operation: BatchOperationTypes.UPDATE,
+        entityPath:
+          BaseUrls.get(BaseUrlType.Scripta) +
+          "/" +
+          ENTITIES_STRUCTURE.scripta.attorearchivio.path,
+        id: nuovoVicario.id,
+        entityBody: nuovoVicario as NextSdrEntity,
+        returnProjection: this.attoreArchivioProjection,
+      } as BatchOperation);
+    }
 
     //genero l'attivita da mettere in scrivania
     const attivita = new Attivita();
-    attivita.idApplicazione = {id: "gediInt"} as Applicazione;
-    attivita.idAzienda = {id: this.archivio.idAzienda.id} as Azienda;
-    attivita.idPersona = {id: responsabileVecchio.idPersona.id} as Persona;
+    attivita.idApplicazione = { id: "gediInt" } as Applicazione;
+    attivita.idAzienda = { id: this.archivio.idAzienda.id } as Azienda;
+    attivita.idPersona = { id: responsabileVecchio.idPersona.id } as Persona;
     attivita.tipo = "notifica";
-    attivita.oggetto = "Fascicolo: " + this.archivio.oggetto + " - " + this.archivio.numerazioneGerarchica;
+    attivita.oggetto =
+      "Fascicolo: " +
+      this.archivio.oggetto +
+      " - " +
+      this.archivio.numerazioneGerarchica;
     attivita.descrizione = "Accettata responsabilità";
     attivita.urls = [];
     attivita.aperta = false;
-    attivita.provenienza = this.utenteUtilitiesLogin.getUtente().idPersona.descrizione;
+    attivita.provenienza =
+      this.utenteUtilitiesLogin.getUtente().idPersona.descrizione;
     attivita.priorita = 3;
     attivita.oggettoEsterno = this.archivio.id.toString();
     attivita.tipoOggettoEsterno = "ArchivioInternauta";
@@ -698,87 +986,151 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
     batchOperations.push({
       operation: BatchOperationTypes.INSERT,
-      entityPath: BaseUrls.get(BaseUrlType.Scrivania) + "/" + ENTITIES_STRUCTURE.scrivania.attivita.path,
+      entityPath:
+        BaseUrls.get(BaseUrlType.Scrivania) +
+        "/" +
+        ENTITIES_STRUCTURE.scrivania.attivita.path,
       entityBody: attivita as NextSdrEntity,
-      returnProjection: "AttivitaWithPlainFields"
+      returnProjection: "AttivitaWithPlainFields",
     } as BatchOperation);
 
     //cerco l'attivita che bisogna togliere dalla scrivania
     const filterAndsorts: FiltersAndSorts = new FiltersAndSorts();
-      filterAndsorts.addFilter(new FilterDefinition("idPersona.id", FILTER_TYPES.not_string.equals, responsabilePropostoVecchio.idPersona.id));
-      filterAndsorts.addFilter(new FilterDefinition("oggettoEsterno", FILTER_TYPES.string.equals, this.archivio.id));
-      filterAndsorts.addFilter(new FilterDefinition('tipoOggettoEsterno', FILTER_TYPES.string.equals, 'ArchivioInternauta'));
-    this.attivitaService.getData("AttivitaWithPlainFields", filterAndsorts, null,null).subscribe(
-      (res) => {
-        if (res.results.length != 1) {
+    filterAndsorts.addFilter(
+      new FilterDefinition(
+        "idPersona.id",
+        FILTER_TYPES.not_string.equals,
+        responsabilePropostoVecchio.idPersona.id
+      )
+    );
+    filterAndsorts.addFilter(
+      new FilterDefinition(
+        "oggettoEsterno",
+        FILTER_TYPES.string.equals,
+        this.archivio.id
+      )
+    );
+    filterAndsorts.addFilter(
+      new FilterDefinition(
+        "tipoOggettoEsterno",
+        FILTER_TYPES.string.equals,
+        "ArchivioInternauta"
+      )
+    );
+    this.attivitaService
+      .getData("AttivitaWithPlainFields", filterAndsorts, null, null)
+      .subscribe((res) => {
+        if (res.results.length < 1) {
           this.messageService.add({
             severity: "error",
             summary: "Errore nell'accettazione della responsabilità",
-            detail: "Qualcosa è andato storto, contattare babelcare"
+            detail: "Qualcosa è andato storto, contattare babelcare",
           });
         } else {
-          const attivitaDaMandare = new Attivita();
-          attivitaDaMandare.id = res.results[0].id;
-          attivitaDaMandare.version = res.results[0].version;
-          batchOperations.push({
-            operation: BatchOperationTypes.DELETE,
-            entityPath: BaseUrls.get(BaseUrlType.Scrivania) + "/" + ENTITIES_STRUCTURE.scrivania.attivita.path,
-            id: attivitaDaMandare.id,
-            entityBody: attivitaDaMandare as NextSdrEntity,
-            returnProjection: "AttivitaWithPlainFields"
-          } as BatchOperation);
+          //possono essercene più di una.
+
+          const attivitaDaMandare = res.results;
+          attivitaDaMandare.forEach((a: Attivita) => {
+            attivitaDaMandare.id = a.id;
+            attivitaDaMandare.version = a.version;
+            batchOperations.push({
+              operation: BatchOperationTypes.DELETE,
+              entityPath:
+                BaseUrls.get(BaseUrlType.Scrivania) +
+                "/" +
+                ENTITIES_STRUCTURE.scrivania.attivita.path,
+              id: attivitaDaMandare.id,
+              entityBody: attivitaDaMandare as NextSdrEntity,
+              returnProjection: "AttivitaWithPlainFields",
+            } as BatchOperation);
+          });
+
           this.subscriptions.push(
-            this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
-              (res: BatchOperation[]) => {
+            this.attoreArchivioService
+              .batchHttpCall(batchOperations)
+              .subscribe((res: BatchOperation[]) => {
                 this.messageService.add({
-                  severity: "success", 
-                  summary: "Proposta responsabilità", 
-                  detail: "Hai accettato la responsabilità del fascicolo"
+                  severity: "success",
+                  summary: "Proposta responsabilità",
+                  detail: "Hai accettato la responsabilità del fascicolo",
                 });
-                this.sonoResponsabile = true;
-                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
-                responsabilePropostoVecchio.ruolo = RuoloAttoreArchivio.RESPONSABILE;
-                responsabilePropostoVecchio.version = (res.find(bo => (bo.entityBody as any).id === responsabilePropostoVecchio.id).entityBody as AttoreArchivio).version;
+                this.isLoggedUserResponsabile = true;
+                this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(
+                  this.archivio,
+                  true,
+                  false
+                );
+                responsabilePropostoVecchio.ruolo =
+                  RuoloAttoreArchivio.RESPONSABILE;
+                responsabilePropostoVecchio.version = (
+                  res.find(
+                    (bo) =>
+                      (bo.entityBody as any).id ===
+                      responsabilePropostoVecchio.id
+                  ).entityBody as AttoreArchivio
+                ).version;
                 responsabileVecchio.ruolo = RuoloAttoreArchivio.VICARIO;
-                responsabileVecchio.version =  (res.find(bo => (bo.entityBody as any).id === responsabileVecchio.id).entityBody as AttoreArchivio).version;
-                this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);    
-                this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[])
-                  .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
-              }
-            )
-          )
+                responsabileVecchio.version = (
+                  res.find(
+                    (bo) => (bo.entityBody as any).id === responsabileVecchio.id
+                  ).entityBody as AttoreArchivio
+                ).version;
+                this.permessiDettaglioArchivioService.reloadPermessiArchivio(
+                  this.archivio
+                );
+                this.loggedUserIsResponsbaileProposto = (
+                  this.archivio["attoriList"] as AttoreArchivio[]
+                ).some(
+                  (a) =>
+                    a.idPersona.id ===
+                      this.utenteUtilitiesLogin.getUtente().idPersona.id &&
+                    a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO
+                );
+              })
+          );
         }
-      }
-    );
+      });
   }
 
   /**
    * Funzione che si occupa di rifiutare la responsabilita di un archivio
-   * 
+   *
    */
-  public rifiutaResponsabilita(){
+  public rifiutaResponsabilita() {
     const batchOperations: BatchOperation[] = [];
-    const attoreToDelete = this.archivio.attoriList.find((a:AttoreArchivio)  => a.ruolo === 'RESPONSABILE_PROPOSTO');
-    
+    const attoreToDelete = this.archivio.attoriList.find(
+      (a: AttoreArchivio) => a.ruolo === "RESPONSABILE_PROPOSTO"
+    );
+
     batchOperations.push({
       operation: BatchOperationTypes.DELETE,
-      entityPath: BaseUrls.get(BaseUrlType.Scripta) + "/" + ENTITIES_STRUCTURE.scripta.attorearchivio.path,
+      entityPath:
+        BaseUrls.get(BaseUrlType.Scripta) +
+        "/" +
+        ENTITIES_STRUCTURE.scripta.attorearchivio.path,
       id: attoreToDelete.id,
       entityBody: attoreToDelete as NextSdrEntity,
-      returnProjection: this.attoreArchivioProjection
+      returnProjection: this.attoreArchivioProjection,
     } as BatchOperation);
 
-    const responsabile = this.archivio.attoriList.find((a:AttoreArchivio) => a.ruolo === 'RESPONSABILE');
+    const responsabile = this.archivio.attoriList.find(
+      (a: AttoreArchivio) => a.ruolo === "RESPONSABILE"
+    );
     const attivita = new Attivita();
-    attivita.idApplicazione = {id: "gediInt"} as Applicazione;
-    attivita.idAzienda = {id: this.archivio.idAzienda.id} as Azienda;
-    attivita.idPersona = {id: responsabile.idPersona.id} as Persona;
+    attivita.idApplicazione = { id: "gediInt" } as Applicazione;
+    attivita.idAzienda = { id: this.archivio.idAzienda.id } as Azienda;
+    attivita.idPersona = { id: responsabile.idPersona.id } as Persona;
     attivita.tipo = "notifica";
-    attivita.oggetto = "Fascicolo: " + this.archivio.oggetto + " - " + this.archivio.numerazioneGerarchica;
+    attivita.oggetto =
+      "Fascicolo: " +
+      this.archivio.oggetto +
+      " - " +
+      this.archivio.numerazioneGerarchica;
     attivita.descrizione = "Rifiutata responsabilità";
-    attivita.urls =[];
+    attivita.urls = [];
     attivita.aperta = false;
-    attivita.provenienza = this.utenteUtilitiesLogin.getUtente().idPersona.descrizione;
+    attivita.provenienza =
+      this.utenteUtilitiesLogin.getUtente().idPersona.descrizione;
     attivita.priorita = 3;
     attivita.oggettoEsterno = this.archivio.id.toString();
     attivita.tipoOggettoEsterno = "ArchivioInternauta";
@@ -788,33 +1140,50 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
 
     batchOperations.push({
       operation: BatchOperationTypes.INSERT,
-      entityPath: BaseUrls.get(BaseUrlType.Scrivania) + "/" + ENTITIES_STRUCTURE.scrivania.attivita.path,
+      entityPath:
+        BaseUrls.get(BaseUrlType.Scrivania) +
+        "/" +
+        ENTITIES_STRUCTURE.scrivania.attivita.path,
       entityBody: attivita as NextSdrEntity,
-      returnProjection: "AttivitaWithPlainFields"
+      returnProjection: "AttivitaWithPlainFields",
     } as BatchOperation);
 
-          
     this.subscriptions.push(
-      this.attoreArchivioService.batchHttpCall(batchOperations).subscribe(
-        (res: BatchOperation[]) => {
+      this.attoreArchivioService
+        .batchHttpCall(batchOperations)
+        .subscribe((res: BatchOperation[]) => {
           this.messageService.add({
-            severity: "warn", 
-            summary: "Rifiutata responsabilità", 
-            detail: "Hai rifiutato la responsabilità del fascicolo"
+            severity: "warn",
+            summary: "Rifiutata responsabilità",
+            detail: "Hai rifiutato la responsabilità del fascicolo",
           });
-          this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(this.archivio, true, false);
-          
-          attoreToDelete.version = (res.find(bo => (bo.entityBody as any).id === attoreToDelete.id).entityBody as AttoreArchivio).version;
-          this.permessiDettaglioArchivioService.reloadPermessiArchivio(this.archivio);
-          this.loggedUserIsResponsbaileProposto = (this.archivio["attoriList"] as AttoreArchivio[])
-            .some(a => a.idPersona.id === this.utenteUtilitiesLogin.getUtente().idPersona.id && (a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO));
-        }
-      )
+          this.permessiDettaglioArchivioService.calcolaPermessiEspliciti(
+            this.archivio,
+            true,
+            false
+          );
+
+          attoreToDelete.version = (
+            res.find((bo) => (bo.entityBody as any).id === attoreToDelete.id)
+              .entityBody as AttoreArchivio
+          ).version;
+          this.permessiDettaglioArchivioService.reloadPermessiArchivio(
+            this.archivio
+          );
+          this.loggedUserIsResponsbaileProposto = (
+            this.archivio["attoriList"] as AttoreArchivio[]
+          ).some(
+            (a) =>
+              a.idPersona.id ===
+                this.utenteUtilitiesLogin.getUtente().idPersona.id &&
+              a.ruolo === RuoloAttoreArchivio.RESPONSABILE_PROPOSTO
+          );
+        })
     );
   }
 
-  public getLabelLivelloByIdLivello(livello: number): string{
-    switch(livello){
+  public getLabelLivelloByIdLivello(livello: number): string {
+    switch (livello) {
       case 1:
         return "Fascicolo";
       case 2:
@@ -825,16 +1194,10 @@ export class DettaglioArchivioComponent implements OnInit, OnDestroy {
     return null;
   }
 
- 
-
   public ngOnDestroy(): void {
     if (this.subscriptions) {
-      this.subscriptions.forEach(
-        s => s.unsubscribe()
-      );
+      this.subscriptions.forEach((s) => s.unsubscribe());
     }
     this.subscriptions = [];
   }
-
-
 }

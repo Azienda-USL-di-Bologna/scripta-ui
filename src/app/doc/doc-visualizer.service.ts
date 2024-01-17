@@ -59,7 +59,6 @@ export class DocVisualizerService {
   private _visibilitaLimitata: boolean = false;
   private _annullato: boolean = false;
   private _normale: boolean = false;
-  private _docsCollegati: boolean = false;
   
   
 
@@ -165,7 +164,6 @@ export class DocVisualizerService {
    this.riservato = this.doc.visibilita === VisibilitaDoc.RISERVATO;
    this.visibilitaLimitata = this.doc.visibilita === VisibilitaDoc.LIMITATA;
    this.annullato = this.doc.annullato;
-   this.docsCollegati = this.doc.docsCollegati.length > 0;
                        
   }
   public get editing(): boolean {
@@ -371,11 +369,5 @@ export class DocVisualizerService {
   }
   public set datiDoc(value: boolean) {
     this._datiDoc = value;
-  }
-  public get docsCollegati(): boolean {
-    return this._docsCollegati;
-  }
-  public set docsCollegati(value: boolean) {
-    this._docsCollegati = value;
   }
 }

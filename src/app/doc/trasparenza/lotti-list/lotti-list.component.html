@@ -102,3 +102,15 @@
     </div>
   </p-footer>
 </p-dialog>
+<p-dialog
+  *ngIf="importaDialogDisplay"
+  header="Dettaglio Lotto" 
+  [(visible)]="importaDialogDisplay" 
+  [style]="{width: '70vw', height: '83vh'}" 
+  appendTo="body" 
+  [modal]="true">
+  <p-header style="position: center;">
+      Import da Contabilità
+  </p-header>
+  <app-importa-ordini-in-economia (closeModal)="cancelImportaDialog()"></app-importa-ordini-in-economia>
+</p-dialog>

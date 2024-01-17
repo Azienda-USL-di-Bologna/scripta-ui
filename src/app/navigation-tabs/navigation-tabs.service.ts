@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { TipComponent } from '@bds/common-components';
-import { Archivio, ArchivioDetail, Doc } from '@bds/internauta-model';
+import { Archivio, ArchivioDetail } from '@bds/internauta-model';
 import { UtenteUtilities } from '@bds/jwt-login';
 import { ArchiviListContainerComponent } from '../archivi-list-container/archivi-list-container.component';
 import { ExtendedArchiviView } from '../archivi-list-container/archivi-list/extendend-archivi-view';
@@ -9,7 +9,6 @@ import { DocComponent } from '../doc/doc.component';
 import { DocsListContainerComponent } from '../docs-list-container/docs-list-container.component';
 import { ExtendedDocDetailView } from '../docs-list-container/docs-list/extended-doc-detail-view';
 import { TabItem, TabType } from './tab-item';
-import { DocsDocsComponent } from '../doc/docs-docs/docs-docs.component';
 
 @Injectable()
 export class NavigationTabsService {
