@@ -23,14 +23,15 @@
   <p-accordionTab
     [(selected)]="accordionSelected[0]"
     [ngClass]="accordionSelected[0] ? 'tab-accordion-selected' : ''"
-    [disabled]="!canVisualizeAllegati()">
+    [disabled]="!showAllegati">
     <ng-template pTemplate="header">
-      <span class="vertical-align-middle">{{ canVisualizeAllegati() ? 'Allegati' : 'Non puoi visualizzare gli allegati di questo documento' }}</span>
+      <span class="vertical-align-middle">{{ showAllegati ? 'Allegati' : 'Non puoi visualizzare gli allegati di questo documento' }}</span>
     </ng-template>
     <ng-template pTemplate="content">
       <attachments-box 
-        *ngIf="canVisualizeAllegati()"
+        *ngIf="showAllegati"
         [idDoc]="doc.id"
+        [infoDoc]="infoDoc"
         [config]="attachmentsBoxConfig">
       </attachments-box>
       <h4>
