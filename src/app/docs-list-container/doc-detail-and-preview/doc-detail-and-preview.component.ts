@@ -26,6 +26,8 @@ export class DocDetailAndPreviewComponent implements OnInit {
   public accordionSelected: boolean[] = [true, false];
   public utente: Utente;
   public hasPienaVisibilita: boolean = false;
+  public showAllegati: boolean = false;
+  public infoDoc: any;
 
   @Output('closeRightPanel') closeRightPanel = new EventEmitter();
   _doc: ExtendedDocDetailView;
@@ -35,8 +37,13 @@ export class DocDetailAndPreviewComponent implements OnInit {
   }
   @Input() set doc(doc: ExtendedDocDetailView) {
     this._doc = doc;
+     this.infoDoc = {
+      propostaVisualizzazione: doc.propostaVisualizzazione,
+      registrazioneVisualizzazione: doc.registrazioneVisualizzazione
+    };
     if (this.utenteUtilitiesLogin){
-      this.accordionSelected[0] = this.accordionSelected[0] && this.canVisualizeAllegati();
+      this.showAllegati = this.canVisualizeAllegati();
+      this.accordionSelected[0] = this.accordionSelected[0] && this.showAllegati;
     }
   }
 
@@ -84,7 +91,8 @@ export class DocDetailAndPreviewComponent implements OnInit {
             this.isResponsabileVersamento = this.utenteUtilitiesLogin.isRV() || this.utenteUtilitiesLogin.isSD();
             this.utente = this.utenteUtilitiesLogin.getUtente();
             this.idPersona = this.utente.idPersona;
-            this.accordionSelected[0] = this.accordionSelected[0] && this.canVisualizeAllegati();
+            this.showAllegati = this.canVisualizeAllegati();
+            this.accordionSelected[0] = this.accordionSelected[0] && this.showAllegati;
           }
         }
       )
